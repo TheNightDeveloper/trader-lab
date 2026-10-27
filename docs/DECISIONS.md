@@ -55,3 +55,16 @@ Consequence: old versions stay readable after corrections; re-importing identica
 ## ADR-013 Fixed scale 8 for prices and quantities
 Decision: every price, quantity and coin amount is stored at scale 8 (Binance's precision for all v1 pairs); tick and lot sizes are expressed at the same scale. TOMAN display rates use scale 2.
 Consequence: archive values are exact; USDT amounts cap near 92e9 per value (int64), far above research needs.
+
+## ADR-014 Exact leg arithmetic, rounding against the trader
+Decision: every leg is integer math at scale 8 with fixed rounding directions (costs and fees up, proceeds down). Gross is the difference of rounded leg ref values; slippage and fees are sums of rounded leg values; net is cash out minus cash in. The identity net = gross − slippage − fees is algebraic, not approximate.
+Consequence: gross can differ by a unit from `qty × (exit − entry)` computed in one step; METRICS.md defines gross the way the ledger computes it.
+
+## ADR-015 Simultaneous signals settle in symbol order from free cash
+Context: plan M2.3 mentions reservations. With one goroutine and batch phases, fills at the same instant already happen in a fixed order (symbol), and each buy can only spend free cash (balance minus coins backing positions).
+Decision: no reservation system; deterministic sequential settlement. A BTCUSDT position's BTC never funds ETHBTC; trading ETHBTC needs free BTC (e.g. `Config.Holdings`).
+Consequence: earlier symbols get priority when cash is short; visible in the golden `simultaneous-two-pairs`.
+
+## ADR-016 Decision records live in the run result until runs are persisted
+Decision: every intent and its outcome (filled, rejected, expired, superseded, no_change, unfilled) with the input bar reference and model/recipe IDs is part of `sim.Result`. The `decisions` table is written together with run results when reports and the attempt registry arrive (M3/M4).
+Consequence: M2 has no DB writes; the golden files are the record of decisions for now.

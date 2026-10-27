@@ -47,3 +47,59 @@ Source of truth for every number the engine reports. Start from IMPLEMENTATION_P
 
 Tests: `data/TestCleanDetectsPlantedProblems`, `data/TestZeroVolumeRuns`, `data/TestGapPolicies`,
 `data/TestCorrectionCreatesNewVersionOldStaysReadable`.
+
+## Simulator fill model and P&L (M2) — `sim`
+
+All values are int64 at scale 8; rates (fee, slippage, target) are parts per million
+(`money.Ratio`, 1 bps = 100). Rounding is always against the trader.
+
+### Fill reference and timing
+- A decision is made when its input bar becomes available (`AvailableAt`).
+- It fills at the open of the bar `LatencyBars` (default 1) after the decision bar of the
+  same instrument; a bar that had already closed at decision time is skipped (late,
+  backfilled data never fills in the past). Unfilled after `IntentTTL` (default 10 m) → expired.
+- Bars available at the same instant are processed in three phases: fills and exits
+  (valued with earlier closes only), then closes are recorded, then strategies decide.
+
+### One leg (quote asset)
+| | buy | sell |
+|---|---|---|
+| fill price | `ceil(ref × (1 + slip))` | `floor(ref × (1 − slip))` |
+| ref value | `ceil(qty × ref)` | `floor(qty × ref)` |
+| value | `ceil(qty × price)` | `floor(qty × price)` |
+| slippage | `value − ref value` | `ref value − value` |
+| fee | `ceil(fee_rate × value)` | `ceil(fee_rate × value)` |
+| cash | `−(value + fee)` | `value − fee` |
+
+Each leg is also stored in USDT: `ref value`, `slippage` and `fee` are each converted at the
+quote→USDT cross rate available at fill time (half-even). For USDT pairs the rate is 1.
+
+### Trade (round trip, flat → flat), USDT
+- `entry cost = Σ buys (ref + slippage + fee)`, `exit proceeds = Σ sells (ref − slippage − fee)`
+- `gross = Σ exit ref − Σ entry ref` (difference of the rounded leg ref values)
+- `slippage = Σ leg slippage`, `fees = Σ leg fees`, `net = exit proceeds − entry cost`
+- `net = gross − slippage − fees` holds exactly by construction and is checked on every close.
+- Open at the end: the open quantity is marked at the last close with no exit costs
+  (`mark_value`); gross and net are unrealized and obey the same identity.
+- Tests: `sim/TestRoundTripFillsAtNextOpen` (hand-checked), `sim/TestLedgerReconcilesProperty`
+  (1,000 random runs), golden `round-trip-fees`.
+
+### Sizing
+- Target exposure `t ∈ [0, 1]`; base = current equity (default, compounding) or `fixed_usdt`.
+- `delta = t × base − position value at the fill reference` (USDT).
+- Buy quantity = `floor_lot(delta / price)`, capped by free cash of the quote asset
+  (`balance − coins backing open positions`) including the fee; must meet min notional.
+- Sell quantity = `floor_lot(|delta| / ref)`, capped at the position; `t = 0` sells everything.
+  Min notional is enforced on entries, increases and partial reductions, not on full exits.
+
+### Stop / take
+- Levels from the entry fill price: `stop = floor(fill × (1 − stop_loss))`,
+  `take = ceil(fill × (1 + take_profit))`; exits sell the whole position.
+- Exit reference: stop `min(stop, open)`, take `max(take, open)` (a gap through the level
+  fills at the open). Both inside one bar → stop assumed, `ambiguous` flagged on fill and trade.
+
+### Equity
+- Marked at every batch close: cash in each asset via `<ASSET>USDT`, positions via their own
+  pair then quote → USDT, all with prices available at that moment (Floor).
+- Points are skipped while some held asset has no rate yet; the run fails only if the final
+  equity cannot be valued.
