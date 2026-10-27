@@ -26,6 +26,6 @@ const Money$json = {
 };
 
 /// Descriptor for `Money`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List moneyDescriptor =
-    $convert.base64Decode('CgVNb25leRIUCgV1bml0cxgBIAEoCVIFdW5pdHMSFAoFc2NhbGUYAiABKAVSBXNjYWxlEhQKBW'
-        'Fzc2V0GAMgASgJUgVhc3NldA==');
+final $typed_data.Uint8List moneyDescriptor = $convert.base64Decode(
+    'CgVNb25leRIUCgV1bml0cxgBIAEoCVIFdW5pdHMSFAoFc2NhbGUYAiABKAVSBXNjYWxlEhQKBW'
+    'Fzc2V0GAMgASgJUgVhc3NldA==');

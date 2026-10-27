@@ -23,7 +23,8 @@ type Dataset struct {
 	Filled   int
 }
 
-type manifest struct {
+// Manifest is the JSON stored with each dataset version.
+type Manifest struct {
 	Symbol    string    `json:"symbol"`
 	Timeframe Timeframe `json:"timeframe"`
 	From      time.Time `json:"from"`
@@ -35,9 +36,15 @@ type manifest struct {
 	Filled    int       `json:"filled"`
 }
 
-// CreateDataset snapshots spec as of knownAt. The same bars give the same ID, so
-// creating it again returns the existing version; a correction gives a new ID.
-func CreateDataset(ctx context.Context, s *store.Store, spec DatasetSpec, knownAt time.Time) (Dataset, []Bar, error) {
+// CreateDataset snapshots spec with every bar ingested so far (known_at is the
+// database clock, the same clock that stamps ingested_at). The same bars give the
+// same ID, so creating it again returns the existing version; a correction gives
+// a new ID.
+func CreateDataset(ctx context.Context, s *store.Store, spec DatasetSpec) (Dataset, []Bar, error) {
+	knownAt, err := s.DBNow(ctx)
+	if err != nil {
+		return Dataset{}, nil, err
+	}
 	bars, gaps, err := datasetBars(ctx, s.Queries, spec, knownAt)
 	if err != nil {
 		return Dataset{}, nil, err
@@ -48,7 +55,7 @@ func CreateDataset(ctx context.Context, s *store.Store, spec DatasetSpec, knownA
 			ds.Filled++
 		}
 	}
-	m, err := json.Marshal(manifest{spec.Symbol, spec.Timeframe, spec.From.UTC(), spec.To.UTC(), spec.GapPolicy, ds.KnownAt, ds.BarCount, ds.Gaps, ds.Filled})
+	m, err := json.Marshal(Manifest{spec.Symbol, spec.Timeframe, spec.From.UTC(), spec.To.UTC(), spec.GapPolicy, ds.KnownAt, ds.BarCount, ds.Gaps, ds.Filled})
 	if err != nil {
 		return Dataset{}, nil, err
 	}
@@ -99,9 +106,9 @@ func datasetFromRow(row db.Dataset) (Dataset, error) {
 	if err != nil {
 		return Dataset{}, err
 	}
-	var m manifest
-	if err := json.Unmarshal(row.Manifest, &m); err != nil {
-		return Dataset{}, fmt.Errorf("dataset %s manifest: %w", row.ID, err)
+	m, err := ParseManifest(row.Manifest)
+	if err != nil {
+		return Dataset{}, fmt.Errorf("dataset %s: %w", row.ID, err)
 	}
 	return Dataset{
 		ID: row.ID, Spec: DatasetSpec{row.Symbol, tf, row.RangeFrom.UTC(), row.RangeTo.UTC(), gp},
@@ -123,4 +130,12 @@ func datasetBars(ctx context.Context, q *db.Queries, spec DatasetSpec, knownAt t
 		delay = bars[0].AvailableAt.Sub(bars[0].CloseTime)
 	}
 	return ApplyGapPolicy(bars, spec.Timeframe, spec.From, spec.To, spec.GapPolicy, delay)
+}
+
+func ParseManifest(b []byte) (Manifest, error) {
+	var m Manifest
+	if err := json.Unmarshal(b, &m); err != nil {
+		return Manifest{}, fmt.Errorf("manifest: %w", err)
+	}
+	return m, nil
 }

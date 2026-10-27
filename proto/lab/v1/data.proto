@@ -1,0 +1,113 @@
+syntax = "proto3";
+
+package lab.v1;
+
+// DataService: datasets, coverage, quality issues, live feed, archive import.
+service DataService {
+  rpc GetOverview(GetOverviewRequest) returns (GetOverviewResponse);
+  rpc ListDatasets(ListDatasetsRequest) returns (ListDatasetsResponse);
+  rpc GetCoverage(GetCoverageRequest) returns (GetCoverageResponse);
+  rpc ListQualityIssues(ListQualityIssuesRequest) returns (ListQualityIssuesResponse);
+  // Imports archive files for each symbol, then creates one dataset version per
+  // symbol. Streams progress; the stream ends after the last dataset.
+  rpc Import(ImportRequest) returns (stream ImportResponse);
+}
+
+message GetOverviewRequest {}
+
+message GetOverviewResponse {
+  int32 live_symbols = 1;
+  string live_source = 2; // e.g. "REST (data-api.binance.vision)"
+  int32 outages_today = 3;
+  int64 outage_seconds_today = 4;
+  int64 storage_bytes = 5;
+  repeated string symbols = 6; // instruments the engine knows
+}
+
+message Dataset {
+  string id = 1; // content hash
+  string symbol = 2;
+  string timeframe = 3;
+  int64 from_unix_ms = 4;
+  int64 to_unix_ms = 5;
+  string gap_policy = 6; // flag | stop | ffill
+  int32 bar_count = 7;
+  int32 gaps = 8;
+  int32 filled = 9;
+  int64 created_unix_ms = 10;
+  int32 experiments = 11; // experiments that reference it (M4)
+}
+
+message ListDatasetsRequest {
+  int32 page_size = 1;
+  int32 offset = 2;
+}
+
+message ListDatasetsResponse {
+  repeated Dataset datasets = 1;
+}
+
+message GetCoverageRequest {}
+
+message Coverage {
+  string symbol = 1;
+  int64 first_open_unix_ms = 2;
+  int64 last_open_unix_ms = 3;
+  int64 bars = 4;
+  repeated TimeRange problems = 5; // gaps and bad data
+}
+
+message TimeRange {
+  int64 from_unix_ms = 1;
+  int64 until_unix_ms = 2;
+}
+
+message GetCoverageResponse {
+  repeated Coverage coverage = 1;
+}
+
+message QualityIssue {
+  int64 id = 1;
+  string symbol = 2;
+  string kind = 3; // gap | out_of_order | duplicate | bad_price | zero_volume | correction | outage
+  int64 at_unix_ms = 4;
+  int64 until_unix_ms = 5; // 0 when not a range
+  string detail = 6;
+}
+
+message ListQualityIssuesRequest {
+  string symbol = 1; // empty = all
+  int32 page_size = 2;
+  int32 offset = 3;
+}
+
+message ListQualityIssuesResponse {
+  repeated QualityIssue issues = 1;
+  int64 total = 2;
+}
+
+message ImportRequest {
+  repeated string symbols = 1;
+  string from_date = 2; // YYYY-MM-DD, UTC, inclusive
+  string to_date = 3; // YYYY-MM-DD, UTC, inclusive
+  string timeframe = 4; // dataset timeframe: 1m | 15m | 1h | 4h | 1d
+  string gap_policy = 5; // flag | stop | ffill
+}
+
+message ImportResponse {
+  oneof event {
+    ImportProgress progress = 1;
+    Dataset dataset = 2;
+  }
+}
+
+message ImportProgress {
+  string symbol = 1;
+  string file = 2;
+  int32 files_done = 3;
+  int32 files_total = 4;
+  int32 rows = 5;
+  int32 inserted = 6;
+  int32 corrections = 7;
+  int32 missing = 8;
+}

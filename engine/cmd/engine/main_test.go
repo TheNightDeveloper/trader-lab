@@ -59,7 +59,7 @@ func testServer(t *testing.T) *httptest.Server {
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "main.dart.js"), []byte("JS"), 0o644))
 	cfg := defaultConfig()
 	cfg.WebDir = dir
-	srv := httptest.NewServer(newServer(cfg, api.NewHealth(clock.Wall{}, "test", 2, 10*time.Millisecond, nil)))
+	srv := httptest.NewServer(newServer(cfg, route(labv1connect.NewHealthServiceHandler(&api.Health{Clock: clock.Wall{}, Version: "test", Workers: 2, Every: 10 * time.Millisecond}))))
 	t.Cleanup(srv.Close)
 	return srv
 }

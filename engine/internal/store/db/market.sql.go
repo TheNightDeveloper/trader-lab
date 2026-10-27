@@ -130,6 +130,30 @@ func (q *Queries) Coverage(ctx context.Context) ([]CoverageRow, error) {
 	return items, nil
 }
 
+const dBNow = `-- name: DBNow :one
+SELECT now()::timestamptz
+`
+
+// DBNow is the database clock; known_at cutoffs compare against ingested_at,
+// which the database stamps, so both must come from the same clock.
+func (q *Queries) DBNow(ctx context.Context) (time.Time, error) {
+	row := q.db.QueryRow(ctx, dBNow)
+	var column_1 time.Time
+	err := row.Scan(&column_1)
+	return column_1, err
+}
+
+const databaseSize = `-- name: DatabaseSize :one
+SELECT pg_database_size(current_database())::bigint
+`
+
+func (q *Queries) DatabaseSize(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, databaseSize)
+	var column_1 int64
+	err := row.Scan(&column_1)
+	return column_1, err
+}
+
 const ensureCandlePartition = `-- name: EnsureCandlePartition :exec
 SELECT ensure_candle_partition($1::timestamptz)
 `
@@ -438,6 +462,57 @@ func (q *Queries) ListQualityIssues(ctx context.Context, arg ListQualityIssuesPa
 			&i.Detail,
 			&i.DetectedAt,
 		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const outagesSince = `-- name: OutagesSince :one
+SELECT count(*)::int AS outages,
+       COALESCE(sum(extract(epoch FROM until - at)), 0)::bigint AS seconds
+FROM (SELECT DISTINCT at, until FROM quality_issues WHERE kind = 'outage' AND at >= $1) o
+`
+
+type OutagesSinceRow struct {
+	Outages int32
+	Seconds int64
+}
+
+// Outages are stored once per symbol; count each (at, until) once.
+func (q *Queries) OutagesSince(ctx context.Context, since time.Time) (OutagesSinceRow, error) {
+	row := q.db.QueryRow(ctx, outagesSince, since)
+	var i OutagesSinceRow
+	err := row.Scan(&i.Outages, &i.Seconds)
+	return i, err
+}
+
+const problemRanges = `-- name: ProblemRanges :many
+SELECT symbol, at, until FROM quality_issues
+WHERE kind IN ('gap', 'bad_price')
+ORDER BY symbol, at
+`
+
+type ProblemRangesRow struct {
+	Symbol string
+	At     time.Time
+	Until  *time.Time
+}
+
+func (q *Queries) ProblemRanges(ctx context.Context) ([]ProblemRangesRow, error) {
+	rows, err := q.db.Query(ctx, problemRanges)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ProblemRangesRow
+	for rows.Next() {
+		var i ProblemRangesRow
+		if err := rows.Scan(&i.Symbol, &i.At, &i.Until); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

@@ -110,3 +110,22 @@ SELECT * FROM fx_rates ORDER BY rate_date DESC, id DESC LIMIT 1;
 
 -- name: LastCandleOpen :one
 SELECT open_time FROM candles WHERE symbol = $1 ORDER BY open_time DESC LIMIT 1;
+
+-- Outages are stored once per symbol; count each (at, until) once.
+-- name: OutagesSince :one
+SELECT count(*)::int AS outages,
+       COALESCE(sum(extract(epoch FROM until - at)), 0)::bigint AS seconds
+FROM (SELECT DISTINCT at, until FROM quality_issues WHERE kind = 'outage' AND at >= @since) o;
+
+-- name: DatabaseSize :one
+SELECT pg_database_size(current_database())::bigint;
+
+-- name: ProblemRanges :many
+SELECT symbol, at, until FROM quality_issues
+WHERE kind IN ('gap', 'bad_price')
+ORDER BY symbol, at;
+
+-- DBNow is the database clock; known_at cutoffs compare against ingested_at,
+-- which the database stamps, so both must come from the same clock.
+-- name: DBNow :one
+SELECT now()::timestamptz;

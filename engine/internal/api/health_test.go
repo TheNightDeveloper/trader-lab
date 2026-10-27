@@ -19,7 +19,7 @@ import (
 func TestHealthWatchStreams(t *testing.T) {
 	t0 := time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC)
 	mux := http.NewServeMux()
-	mux.Handle(labv1connect.NewHealthServiceHandler(NewHealth(clock.NewVirtual(t0), "test", 8, 10*time.Millisecond, fakeLive{data.LiveStatus{State: data.LiveFresh, LastClose: t0.Add(-4 * time.Second)}})))
+	mux.Handle(labv1connect.NewHealthServiceHandler(&Health{Clock: clock.NewVirtual(t0), Version: "test", Workers: 8, Every: 10 * time.Millisecond, Live: fakeLive{data.LiveStatus{State: data.LiveFresh, LastClose: t0.Add(-4 * time.Second)}}}))
 	srv := httptest.NewServer(mux)
 	defer srv.Close()
 

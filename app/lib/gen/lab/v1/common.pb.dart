@@ -36,11 +36,14 @@ class Money extends $pb.GeneratedMessage {
   factory Money.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       Money()..mergeFromBuffer(data, registry);
-  factory Money.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory Money.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       Money()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Money',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'), createEmptyInstance: Money.$_createMessage)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'Money',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: Money.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'units')
     ..aI(2, _omitFieldNames ? '' : 'scale')
     ..aOS(3, _omitFieldNames ? '' : 'asset')
@@ -49,7 +52,8 @@ class Money extends $pb.GeneratedMessage {
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Money clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Money copyWith(void Function(Money) updates) => super.copyWith((message) => updates(message as Money)) as Money;
+  Money copyWith(void Function(Money) updates) =>
+      super.copyWith((message) => updates(message as Money)) as Money;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -61,7 +65,8 @@ class Money extends $pb.GeneratedMessage {
   @$core.override
   Money createEmptyInstance() => Money._();
   @$core.pragma('dart2js:noInline')
-  static Money getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Money>(Money.$_createMessage);
+  static Money getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<Money>(Money.$_createMessage);
   static Money? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -92,5 +97,7 @@ class Money extends $pb.GeneratedMessage {
   void clearAsset() => $_clearField(3);
 }
 
-const $core.bool _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
-const $core.bool _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');
+const $core.bool _omitFieldNames =
+    $core.bool.fromEnvironment('protobuf.omit_field_names');
+const $core.bool _omitMessageNames =
+    $core.bool.fromEnvironment('protobuf.omit_message_names');

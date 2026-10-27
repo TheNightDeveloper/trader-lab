@@ -31,10 +31,12 @@ class WatchRequest extends $pb.GeneratedMessage {
   factory WatchRequest.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       WatchRequest()..mergeFromBuffer(data, registry);
-  factory WatchRequest.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory WatchRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       WatchRequest()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'WatchRequest',
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'WatchRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: WatchRequest.$_createMessage)
     ..hasRequiredFields = false;
@@ -43,7 +45,8 @@ class WatchRequest extends $pb.GeneratedMessage {
   WatchRequest clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   WatchRequest copyWith(void Function(WatchRequest) updates) =>
-      super.copyWith((message) => updates(message as WatchRequest)) as WatchRequest;
+      super.copyWith((message) => updates(message as WatchRequest))
+          as WatchRequest;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -56,7 +59,8 @@ class WatchRequest extends $pb.GeneratedMessage {
   WatchRequest createEmptyInstance() => WatchRequest._();
   @$core.pragma('dart2js:noInline')
   static WatchRequest getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<WatchRequest>(WatchRequest.$_createMessage);
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<WatchRequest>(
+          WatchRequest.$_createMessage);
   static WatchRequest? _defaultInstance;
 }
 
@@ -74,20 +78,24 @@ class WatchResponse extends $pb.GeneratedMessage {
   factory WatchResponse.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       WatchResponse()..mergeFromBuffer(data, registry);
-  factory WatchResponse.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory WatchResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       WatchResponse()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'WatchResponse',
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'WatchResponse',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: WatchResponse.$_createMessage)
-    ..aOM<EngineStatus>(1, _omitFieldNames ? '' : 'status', subBuilder: EngineStatus.$_createMessage)
+    ..aOM<EngineStatus>(1, _omitFieldNames ? '' : 'status',
+        subBuilder: EngineStatus.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   WatchResponse clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   WatchResponse copyWith(void Function(WatchResponse) updates) =>
-      super.copyWith((message) => updates(message as WatchResponse)) as WatchResponse;
+      super.copyWith((message) => updates(message as WatchResponse))
+          as WatchResponse;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -100,7 +108,8 @@ class WatchResponse extends $pb.GeneratedMessage {
   WatchResponse createEmptyInstance() => WatchResponse._();
   @$core.pragma('dart2js:noInline')
   static WatchResponse getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<WatchResponse>(WatchResponse.$_createMessage);
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<WatchResponse>(
+          WatchResponse.$_createMessage);
   static WatchResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -141,18 +150,23 @@ class EngineStatus extends $pb.GeneratedMessage {
   factory EngineStatus.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       EngineStatus()..mergeFromBuffer(data, registry);
-  factory EngineStatus.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory EngineStatus.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       EngineStatus()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'EngineStatus',
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'EngineStatus',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: EngineStatus.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'version')
     ..aE<RunMode>(2, _omitFieldNames ? '' : 'mode', enumValues: RunMode.values)
     ..aOS(3, _omitFieldNames ? '' : 'accountingAsset')
-    ..aOM<LiveData>(4, _omitFieldNames ? '' : 'live', subBuilder: LiveData.$_createMessage)
-    ..aOM<Workers>(5, _omitFieldNames ? '' : 'workers', subBuilder: Workers.$_createMessage)
-    ..aOM<DisplayRate>(6, _omitFieldNames ? '' : 'displayRate', subBuilder: DisplayRate.$_createMessage)
+    ..aOM<LiveData>(4, _omitFieldNames ? '' : 'live',
+        subBuilder: LiveData.$_createMessage)
+    ..aOM<Workers>(5, _omitFieldNames ? '' : 'workers',
+        subBuilder: Workers.$_createMessage)
+    ..aOM<DisplayRate>(6, _omitFieldNames ? '' : 'displayRate',
+        subBuilder: DisplayRate.$_createMessage)
     ..aInt64(7, _omitFieldNames ? '' : 'serverTimeUnixMs')
     ..hasRequiredFields = false;
 
@@ -160,7 +174,8 @@ class EngineStatus extends $pb.GeneratedMessage {
   EngineStatus clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   EngineStatus copyWith(void Function(EngineStatus) updates) =>
-      super.copyWith((message) => updates(message as EngineStatus)) as EngineStatus;
+      super.copyWith((message) => updates(message as EngineStatus))
+          as EngineStatus;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -173,7 +188,8 @@ class EngineStatus extends $pb.GeneratedMessage {
   EngineStatus createEmptyInstance() => EngineStatus._();
   @$core.pragma('dart2js:noInline')
   static EngineStatus getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<EngineStatus>(EngineStatus.$_createMessage);
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<EngineStatus>(
+          EngineStatus.$_createMessage);
   static EngineStatus? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -262,12 +278,16 @@ class LiveData extends $pb.GeneratedMessage {
   factory LiveData.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       LiveData()..mergeFromBuffer(data, registry);
-  factory LiveData.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory LiveData.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       LiveData()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'LiveData',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'), createEmptyInstance: LiveData.$_createMessage)
-    ..aE<LiveState>(1, _omitFieldNames ? '' : 'state', enumValues: LiveState.values)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'LiveData',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: LiveData.$_createMessage)
+    ..aE<LiveState>(1, _omitFieldNames ? '' : 'state',
+        enumValues: LiveState.values)
     ..aInt64(2, _omitFieldNames ? '' : 'lastBarAgeSeconds')
     ..hasRequiredFields = false;
 
@@ -287,8 +307,8 @@ class LiveData extends $pb.GeneratedMessage {
   @$core.override
   LiveData createEmptyInstance() => LiveData._();
   @$core.pragma('dart2js:noInline')
-  static LiveData getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<LiveData>(LiveData.$_createMessage);
+  static LiveData getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<LiveData>(LiveData.$_createMessage);
   static LiveData? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -328,12 +348,16 @@ class Workers extends $pb.GeneratedMessage {
   factory Workers.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       Workers()..mergeFromBuffer(data, registry);
-  factory Workers.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory Workers.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       Workers()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Workers',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'), createEmptyInstance: Workers.$_createMessage)
-    ..aE<WorkerState>(1, _omitFieldNames ? '' : 'state', enumValues: WorkerState.values)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'Workers',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: Workers.$_createMessage)
+    ..aE<WorkerState>(1, _omitFieldNames ? '' : 'state',
+        enumValues: WorkerState.values)
     ..aI(2, _omitFieldNames ? '' : 'count')
     ..aI(3, _omitFieldNames ? '' : 'busy')
     ..hasRequiredFields = false;
@@ -354,8 +378,8 @@ class Workers extends $pb.GeneratedMessage {
   @$core.override
   Workers createEmptyInstance() => Workers._();
   @$core.pragma('dart2js:noInline')
-  static Workers getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Workers>(Workers.$_createMessage);
+  static Workers getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<Workers>(Workers.$_createMessage);
   static Workers? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -406,14 +430,17 @@ class DisplayRate extends $pb.GeneratedMessage {
   factory DisplayRate.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       DisplayRate()..mergeFromBuffer(data, registry);
-  factory DisplayRate.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory DisplayRate.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       DisplayRate()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'DisplayRate',
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'DisplayRate',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: DisplayRate.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'rateId')
-    ..aOM<$0.Money>(2, _omitFieldNames ? '' : 'tomanPerUsdt', subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Money>(2, _omitFieldNames ? '' : 'tomanPerUsdt',
+        subBuilder: $0.Money.$_createMessage)
     ..aOS(3, _omitFieldNames ? '' : 'asOfDate')
     ..aOS(4, _omitFieldNames ? '' : 'source')
     ..hasRequiredFields = false;
@@ -422,7 +449,8 @@ class DisplayRate extends $pb.GeneratedMessage {
   DisplayRate clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   DisplayRate copyWith(void Function(DisplayRate) updates) =>
-      super.copyWith((message) => updates(message as DisplayRate)) as DisplayRate;
+      super.copyWith((message) => updates(message as DisplayRate))
+          as DisplayRate;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -435,7 +463,8 @@ class DisplayRate extends $pb.GeneratedMessage {
   DisplayRate createEmptyInstance() => DisplayRate._();
   @$core.pragma('dart2js:noInline')
   static DisplayRate getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<DisplayRate>(DisplayRate.$_createMessage);
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<DisplayRate>(
+          DisplayRate.$_createMessage);
   static DisplayRate? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -484,9 +513,13 @@ class HealthServiceApi {
   HealthServiceApi(this._client);
 
   /// Sends the current status immediately, then on every change or heartbeat.
-  $async.Future<WatchResponse> watch($pb.ClientContext? ctx, WatchRequest request) =>
-      _client.invoke<WatchResponse>(ctx, 'HealthService', 'Watch', request, WatchResponse());
+  $async.Future<WatchResponse> watch(
+          $pb.ClientContext? ctx, WatchRequest request) =>
+      _client.invoke<WatchResponse>(
+          ctx, 'HealthService', 'Watch', request, WatchResponse());
 }
 
-const $core.bool _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
-const $core.bool _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');
+const $core.bool _omitFieldNames =
+    $core.bool.fromEnvironment('protobuf.omit_field_names');
+const $core.bool _omitMessageNames =
+    $core.bool.fromEnvironment('protobuf.omit_message_names');

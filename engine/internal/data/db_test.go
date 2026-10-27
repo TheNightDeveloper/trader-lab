@@ -58,7 +58,7 @@ func TestImportIdempotentSameDatasetHash(t *testing.T) {
 	require.Equal(t, 1, p.Missing, "Feb 2 not published")
 
 	spec := DatasetSpec{"BTCUSDT", TF1h, from, to, GapFlag}
-	ds1, bars1, err := CreateDataset(ctx, s, spec, time.Now())
+	ds1, bars1, err := CreateDataset(ctx, s, spec)
 	require.NoError(t, err)
 
 	// Re-import: nothing inserted, nothing corrected, same dataset hash.
@@ -66,7 +66,7 @@ func TestImportIdempotentSameDatasetHash(t *testing.T) {
 	require.NoError(t, err)
 	require.Zero(t, p2.Inserted)
 	require.Zero(t, p2.Corrections)
-	ds2, bars2, err := CreateDataset(ctx, s, spec, time.Now())
+	ds2, bars2, err := CreateDataset(ctx, s, spec)
 	require.NoError(t, err)
 	require.Equal(t, ds1.ID, ds2.ID)
 	require.Equal(t, ds1.KnownAt, ds2.KnownAt, "first creation wins")
@@ -98,7 +98,7 @@ func TestCorrectionCreatesNewVersionOldStaysReadable(t *testing.T) {
 	_, err := UpsertBars(ctx, s, "BTCUSDT", "archive", "v1", bars)
 	require.NoError(t, err)
 	spec := DatasetSpec{"BTCUSDT", TF1m, t0, t0.Add(120 * time.Minute), GapFlag}
-	v1, _, err := CreateDataset(ctx, s, spec, time.Now())
+	v1, _, err := CreateDataset(ctx, s, spec)
 	require.NoError(t, err)
 
 	time.Sleep(10 * time.Millisecond) // ingested_at strictly after v1.KnownAt
@@ -109,7 +109,7 @@ func TestCorrectionCreatesNewVersionOldStaysReadable(t *testing.T) {
 	require.Equal(t, 1, up.Inserted)
 	require.Equal(t, []time.Time{t0.Add(50 * time.Minute)}, utc(up.Corrections))
 
-	v2, bars2, err := CreateDataset(ctx, s, spec, time.Now())
+	v2, bars2, err := CreateDataset(ctx, s, spec)
 	require.NoError(t, err)
 	require.NotEqual(t, v1.ID, v2.ID, "correction makes a new version")
 	require.Equal(t, fixed[50].C, bars2[50].C)

@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package lab.v1;
+
+import "lab/v1/common.proto";
+
+// FxService: USDT/TOMAN display rates. Append-only; display and export only.
+service FxService {
+  rpc ListRates(ListRatesRequest) returns (ListRatesResponse);
+  rpc AddRate(AddRateRequest) returns (AddRateResponse);
+}
+
+message FxRate {
+  int64 id = 1;
+  string date = 2; // YYYY-MM-DD
+  Money toman_per_usdt = 3;
+  string source = 4;
+  int64 entered_unix_ms = 5;
+  int32 reports = 6; // reports that used this rate (M3)
+}
+
+message ListRatesRequest {
+  int32 limit = 1;
+}
+
+message ListRatesResponse {
+  repeated FxRate rates = 1;
+}
+
+message AddRateRequest {
+  string date = 1; // YYYY-MM-DD; not in the future
+  string toman_per_usdt = 2; // decimal string, up to 2 decimals, > 0
+  string source = 3; // free text; "manual" if empty
+}
+
+message AddRateResponse {
+  FxRate rate = 1;
+}

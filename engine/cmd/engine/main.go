@@ -68,7 +68,12 @@ func run() error {
 		go live.Run(ctx)
 	}
 
-	health := api.NewHealth(clock.Wall{}, version, cfg.Workers, time.Second, liveSource(live))
+	fxSvc := &api.Fx{Store: st, Clock: clock.Wall{}}
+	health := &api.Health{Clock: clock.Wall{}, Version: version, Workers: int32(cfg.Workers), Every: time.Second, Live: liveSource(live), Rates: fxSvc}
+	dataSvc := &api.Data{
+		Store: st, Live: live, Clock: clock.Wall{},
+		Importer: data.Importer{Store: st, HTTP: http.DefaultClient, BaseURL: data.ArchiveBaseURL, Delay: cfg.ingestDelay(), Clock: clock.Wall{}},
+	}
 	sc := echo.StartConfig{
 		Address:         cfg.Listen,
 		HideBanner:      true,
@@ -82,13 +87,25 @@ func run() error {
 			return nil
 		},
 	}
-	if err := sc.Start(ctx, newServer(cfg, health)); err != nil {
+	if err := sc.Start(ctx, newServer(cfg,
+		route(labv1connect.NewHealthServiceHandler(health)),
+		route(labv1connect.NewDataServiceHandler(dataSvc)),
+		route(labv1connect.NewFxServiceHandler(fxSvc)),
+	)); err != nil {
 		return fmt.Errorf("serve: %w", err)
 	}
 	return nil
 }
 
-func newServer(cfg Config, health labv1connect.HealthServiceHandler) *echo.Echo {
+// apiRoute is a Connect service: its path prefix and handler.
+type apiRoute struct {
+	path string
+	h    http.Handler
+}
+
+func route(path string, h http.Handler) apiRoute { return apiRoute{path, h} }
+
+func newServer(cfg Config, routes ...apiRoute) *echo.Echo {
 	e := echo.New()
 	e.Use(middleware.Recover())
 	// A dev server on another loopback port (flutter run) may call the API.
@@ -102,8 +119,9 @@ func newServer(cfg Config, health labv1connect.HealthServiceHandler) *echo.Echo 
 		ExposeHeaders: []string{"Connect-Content-Encoding", "Grpc-Status", "Grpc-Message"},
 	}))
 
-	path, h := labv1connect.NewHealthServiceHandler(health)
-	e.Any(path+"*", echo.WrapHandler(h))
+	for _, r := range routes {
+		e.Any(r.path+"*", echo.WrapHandler(r.h))
+	}
 
 	if cfg.WebDir != "" {
 		// HTML5 mode serves index.html for unknown paths so go_router routes deep-link.
