@@ -102,3 +102,7 @@ func (p SplitPlan) Make(from, to time.Time, step time.Duration) (Split, error) {
 	s.Holdout = Window{holdStart, to}
 	return s, nil
 }
+
+// WithDefaults fills unset fields with the defaults Make uses, so a stored plan
+// says exactly what ran.
+func (p SplitPlan) WithDefaults() SplitPlan { return p.withDefaults() }

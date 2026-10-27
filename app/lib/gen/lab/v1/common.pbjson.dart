@@ -26,9 +26,9 @@ const Money$json = {
 };
 
 /// Descriptor for `Money`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List moneyDescriptor =
-    $convert.base64Decode('CgVNb25leRIUCgV1bml0cxgBIAEoCVIFdW5pdHMSFAoFc2NhbGUYAiABKAVSBXNjYWxlEhQKBW'
-        'Fzc2V0GAMgASgJUgVhc3NldA==');
+final $typed_data.Uint8List moneyDescriptor = $convert.base64Decode(
+    'CgVNb25leRIUCgV1bml0cxgBIAEoCVIFdW5pdHMSFAoFc2NhbGUYAiABKAVSBXNjYWxlEhQKBW'
+    'Fzc2V0GAMgASgJUgVhc3NldA==');
 
 @$core.Deprecated('Use decimalDescriptor instead')
 const Decimal$json = {
@@ -40,8 +40,8 @@ const Decimal$json = {
 };
 
 /// Descriptor for `Decimal`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List decimalDescriptor =
-    $convert.base64Decode('CgdEZWNpbWFsEhQKBXVuaXRzGAEgASgJUgV1bml0cxIUCgVzY2FsZRgCIAEoBVIFc2NhbGU=');
+final $typed_data.Uint8List decimalDescriptor = $convert.base64Decode(
+    'CgdEZWNpbWFsEhQKBXVuaXRzGAEgASgJUgV1bml0cxIUCgVzY2FsZRgCIAEoBVIFc2NhbGU=');
 
 @$core.Deprecated('Use metricDescriptor instead')
 const Metric$json = {
@@ -49,7 +49,14 @@ const Metric$json = {
   '2': [
     {'1': 'key', '3': 1, '4': 1, '5': 9, '10': 'key'},
     {'1': 'group', '3': 2, '4': 1, '5': 9, '10': 'group'},
-    {'1': 'value', '3': 3, '4': 1, '5': 11, '6': '.lab.v1.Decimal', '10': 'value'},
+    {
+      '1': 'value',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.Decimal',
+      '10': 'value'
+    },
     {'1': 'unit', '3': 4, '4': 1, '5': 9, '10': 'unit'},
     {'1': 'valid', '3': 5, '4': 1, '5': 8, '10': 'valid'},
     {'1': 'invalid', '3': 6, '4': 1, '5': 9, '10': 'invalid'},
@@ -59,22 +66,29 @@ const Metric$json = {
 };
 
 /// Descriptor for `Metric`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List metricDescriptor =
-    $convert.base64Decode('CgZNZXRyaWMSEAoDa2V5GAEgASgJUgNrZXkSFAoFZ3JvdXAYAiABKAlSBWdyb3VwEiUKBXZhbH'
-        'VlGAMgASgLMg8ubGFiLnYxLkRlY2ltYWxSBXZhbHVlEhIKBHVuaXQYBCABKAlSBHVuaXQSFAoF'
-        'dmFsaWQYBSABKAhSBXZhbGlkEhgKB2ludmFsaWQYBiABKAlSB2ludmFsaWQSFAoFbGFiZWwYBy'
-        'ABKAlSBWxhYmVsEh4KCmRlZmluaXRpb24YCCABKAlSCmRlZmluaXRpb24=');
+final $typed_data.Uint8List metricDescriptor = $convert.base64Decode(
+    'CgZNZXRyaWMSEAoDa2V5GAEgASgJUgNrZXkSFAoFZ3JvdXAYAiABKAlSBWdyb3VwEiUKBXZhbH'
+    'VlGAMgASgLMg8ubGFiLnYxLkRlY2ltYWxSBXZhbHVlEhIKBHVuaXQYBCABKAlSBHVuaXQSFAoF'
+    'dmFsaWQYBSABKAhSBXZhbGlkEhgKB2ludmFsaWQYBiABKAlSB2ludmFsaWQSFAoFbGFiZWwYBy'
+    'ABKAlSBWxhYmVsEh4KCmRlZmluaXRpb24YCCABKAlSCmRlZmluaXRpb24=');
 
 @$core.Deprecated('Use equityPointDescriptor instead')
 const EquityPoint$json = {
   '1': 'EquityPoint',
   '2': [
     {'1': 't_unix_ms', '3': 1, '4': 1, '5': 3, '10': 'tUnixMs'},
-    {'1': 'equity', '3': 2, '4': 1, '5': 11, '6': '.lab.v1.Money', '10': 'equity'},
+    {
+      '1': 'equity',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.Money',
+      '10': 'equity'
+    },
   ],
 };
 
 /// Descriptor for `EquityPoint`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List equityPointDescriptor =
-    $convert.base64Decode('CgtFcXVpdHlQb2ludBIaCgl0X3VuaXhfbXMYASABKANSB3RVbml4TXMSJQoGZXF1aXR5GAIgAS'
-        'gLMg0ubGFiLnYxLk1vbmV5UgZlcXVpdHk=');
+final $typed_data.Uint8List equityPointDescriptor = $convert.base64Decode(
+    'CgtFcXVpdHlQb2ludBIaCgl0X3VuaXhfbXMYASABKANSB3RVbml4TXMSJQoGZXF1aXR5GAIgAS'
+    'gLMg0ubGFiLnYxLk1vbmV5UgZlcXVpdHk=');

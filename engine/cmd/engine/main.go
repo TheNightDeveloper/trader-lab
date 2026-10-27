@@ -4,14 +4,18 @@ package main
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"flag"
 	"fmt"
+	"io"
 	"log/slog"
 	"net"
 	"net/http"
 	"net/url"
 	"os"
 	"os/signal"
+	"runtime"
 	"strings"
 	"time"
 
@@ -21,8 +25,11 @@ import (
 	"tradinglab/engine/internal/api"
 	"tradinglab/engine/internal/clock"
 	"tradinglab/engine/internal/data"
+	"tradinglab/engine/internal/experiment"
 	"tradinglab/engine/internal/gen/lab/v1/labv1connect"
+	"tradinglab/engine/internal/jobs"
 	"tradinglab/engine/internal/report"
+	"tradinglab/engine/internal/search"
 	"tradinglab/engine/internal/store"
 )
 
@@ -59,6 +66,15 @@ func run() error {
 	if err := data.SeedInstruments(ctx, st.Queries); err != nil {
 		return err
 	}
+	if err := experiment.SeedLibrary(ctx, st); err != nil {
+		return err
+	}
+	build, err := buildHash()
+	if err != nil {
+		return err
+	}
+	limiter := jobs.NewLimiter(jobs.ResearchSlots(runtime.NumCPU(), cfg.ResearchShare))
+	slog.Info("research share", "slots", limiter.Size(), "cpus", runtime.NumCPU())
 
 	var live *data.Live
 	if len(cfg.LiveSymbols) > 0 {
@@ -88,13 +104,21 @@ func run() error {
 			return nil
 		},
 	}
-	reports := report.Service{Store: st, Version: version}
+	reports := report.Service{Store: st, Version: version, Parallel: limiter.Size()}
+	sched := &search.Scheduler{Store: st, Reports: reports, Limiter: limiter, Build: build}
+	go func() {
+		if err := sched.Run(ctx); err != nil {
+			slog.Error("research queue stopped", "err", err)
+		}
+	}()
 	if err := sc.Start(ctx, newServer(cfg,
 		route(labv1connect.NewHealthServiceHandler(health)),
 		route(labv1connect.NewDataServiceHandler(dataSvc)),
 		route(labv1connect.NewFxServiceHandler(fxSvc)),
-		route(labv1connect.NewReportServiceHandler(&api.Report{Svc: reports})),
-		route(labv1connect.NewPnlServiceHandler(&api.Pnl{Svc: reports})),
+		route(labv1connect.NewReportServiceHandler(&api.Report{Svc: reports, Limiter: limiter})),
+		route(labv1connect.NewPnlServiceHandler(&api.Pnl{Svc: reports, Limiter: limiter})),
+		route(labv1connect.NewExperimentServiceHandler(&api.Experiment{Store: st, Scheduler: sched, Limiter: limiter})),
+		route(labv1connect.NewLibraryServiceHandler(&api.Library{Store: st})),
 	)); err != nil {
 		return fmt.Errorf("serve: %w", err)
 	}
@@ -159,4 +183,23 @@ func liveSource(l *data.Live) api.LiveSource {
 		return nil
 	}
 	return l
+}
+
+// buildHash identifies the running code: the SHA-256 of the engine binary. It is
+// part of every run-cache key, so any code change invalidates cached results.
+func buildHash() (string, error) {
+	exe, err := os.Executable()
+	if err != nil {
+		return "", fmt.Errorf("build hash: %w", err)
+	}
+	f, err := os.Open(exe)
+	if err != nil {
+		return "", fmt.Errorf("build hash: %w", err)
+	}
+	defer func() { _ = f.Close() }()
+	h := sha256.New()
+	if _, err := io.Copy(h, f); err != nil {
+		return "", fmt.Errorf("build hash: %w", err)
+	}
+	return hex.EncodeToString(h.Sum(nil)), nil
 }

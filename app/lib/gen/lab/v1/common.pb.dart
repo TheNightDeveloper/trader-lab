@@ -37,11 +37,14 @@ class Money extends $pb.GeneratedMessage {
   factory Money.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       Money()..mergeFromBuffer(data, registry);
-  factory Money.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory Money.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       Money()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Money',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'), createEmptyInstance: Money.$_createMessage)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'Money',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: Money.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'units')
     ..aI(2, _omitFieldNames ? '' : 'scale')
     ..aOS(3, _omitFieldNames ? '' : 'asset')
@@ -50,7 +53,8 @@ class Money extends $pb.GeneratedMessage {
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Money clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Money copyWith(void Function(Money) updates) => super.copyWith((message) => updates(message as Money)) as Money;
+  Money copyWith(void Function(Money) updates) =>
+      super.copyWith((message) => updates(message as Money)) as Money;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -62,7 +66,8 @@ class Money extends $pb.GeneratedMessage {
   @$core.override
   Money createEmptyInstance() => Money._();
   @$core.pragma('dart2js:noInline')
-  static Money getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Money>(Money.$_createMessage);
+  static Money getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<Money>(Money.$_createMessage);
   static Money? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -110,11 +115,14 @@ class Decimal extends $pb.GeneratedMessage {
   factory Decimal.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       Decimal()..mergeFromBuffer(data, registry);
-  factory Decimal.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory Decimal.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       Decimal()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Decimal',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'), createEmptyInstance: Decimal.$_createMessage)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'Decimal',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: Decimal.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'units')
     ..aI(2, _omitFieldNames ? '' : 'scale')
     ..hasRequiredFields = false;
@@ -135,8 +143,8 @@ class Decimal extends $pb.GeneratedMessage {
   @$core.override
   Decimal createEmptyInstance() => Decimal._();
   @$core.pragma('dart2js:noInline')
-  static Decimal getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Decimal>(Decimal.$_createMessage);
+  static Decimal getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<Decimal>(Decimal.$_createMessage);
   static Decimal? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -187,14 +195,18 @@ class Metric extends $pb.GeneratedMessage {
   factory Metric.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       Metric()..mergeFromBuffer(data, registry);
-  factory Metric.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory Metric.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       Metric()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Metric',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'), createEmptyInstance: Metric.$_createMessage)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'Metric',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: Metric.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'key')
     ..aOS(2, _omitFieldNames ? '' : 'group')
-    ..aOM<Decimal>(3, _omitFieldNames ? '' : 'value', subBuilder: Decimal.$_createMessage)
+    ..aOM<Decimal>(3, _omitFieldNames ? '' : 'value',
+        subBuilder: Decimal.$_createMessage)
     ..aOS(4, _omitFieldNames ? '' : 'unit')
     ..aOB(5, _omitFieldNames ? '' : 'valid')
     ..aOS(6, _omitFieldNames ? '' : 'invalid')
@@ -205,7 +217,8 @@ class Metric extends $pb.GeneratedMessage {
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   Metric clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Metric copyWith(void Function(Metric) updates) => super.copyWith((message) => updates(message as Metric)) as Metric;
+  Metric copyWith(void Function(Metric) updates) =>
+      super.copyWith((message) => updates(message as Metric)) as Metric;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -217,7 +230,8 @@ class Metric extends $pb.GeneratedMessage {
   @$core.override
   Metric createEmptyInstance() => Metric._();
   @$core.pragma('dart2js:noInline')
-  static Metric getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Metric>(Metric.$_createMessage);
+  static Metric getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<Metric>(Metric.$_createMessage);
   static Metric? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -311,21 +325,25 @@ class EquityPoint extends $pb.GeneratedMessage {
   factory EquityPoint.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       EquityPoint()..mergeFromBuffer(data, registry);
-  factory EquityPoint.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory EquityPoint.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       EquityPoint()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'EquityPoint',
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'EquityPoint',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: EquityPoint.$_createMessage)
     ..aInt64(1, _omitFieldNames ? '' : 'tUnixMs')
-    ..aOM<Money>(2, _omitFieldNames ? '' : 'equity', subBuilder: Money.$_createMessage)
+    ..aOM<Money>(2, _omitFieldNames ? '' : 'equity',
+        subBuilder: Money.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   EquityPoint clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   EquityPoint copyWith(void Function(EquityPoint) updates) =>
-      super.copyWith((message) => updates(message as EquityPoint)) as EquityPoint;
+      super.copyWith((message) => updates(message as EquityPoint))
+          as EquityPoint;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -338,7 +356,8 @@ class EquityPoint extends $pb.GeneratedMessage {
   EquityPoint createEmptyInstance() => EquityPoint._();
   @$core.pragma('dart2js:noInline')
   static EquityPoint getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<EquityPoint>(EquityPoint.$_createMessage);
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<EquityPoint>(
+          EquityPoint.$_createMessage);
   static EquityPoint? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -362,5 +381,7 @@ class EquityPoint extends $pb.GeneratedMessage {
   Money ensureEquity() => $_ensure(1);
 }
 
-const $core.bool _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
-const $core.bool _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');
+const $core.bool _omitFieldNames =
+    $core.bool.fromEnvironment('protobuf.omit_field_names');
+const $core.bool _omitMessageNames =
+    $core.bool.fromEnvironment('protobuf.omit_message_names');

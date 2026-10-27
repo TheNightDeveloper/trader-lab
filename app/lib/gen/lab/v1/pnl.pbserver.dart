@@ -21,8 +21,10 @@ import 'pnl.pbjson.dart';
 export 'pnl.pb.dart';
 
 abstract class PnlServiceBase extends $pb.GeneratedService {
-  $async.Future<$2.RecalculateResponse> recalculate($pb.ServerContext ctx, $2.RecalculateRequest request);
-  $async.Future<$2.CalculateTradeResponse> calculateTrade($pb.ServerContext ctx, $2.CalculateTradeRequest request);
+  $async.Future<$2.RecalculateResponse> recalculate(
+      $pb.ServerContext ctx, $2.RecalculateRequest request);
+  $async.Future<$2.CalculateTradeResponse> calculateTrade(
+      $pb.ServerContext ctx, $2.CalculateTradeRequest request);
 
   $pb.GeneratedMessage createRequest($core.String methodName) {
     switch (methodName) {
@@ -35,8 +37,8 @@ abstract class PnlServiceBase extends $pb.GeneratedService {
     }
   }
 
-  $async.Future<$pb.GeneratedMessage> handleCall(
-      $pb.ServerContext ctx, $core.String methodName, $pb.GeneratedMessage request) {
+  $async.Future<$pb.GeneratedMessage> handleCall($pb.ServerContext ctx,
+      $core.String methodName, $pb.GeneratedMessage request) {
     switch (methodName) {
       case 'Recalculate':
         return recalculate(ctx, request as $2.RecalculateRequest);
@@ -48,5 +50,6 @@ abstract class PnlServiceBase extends $pb.GeneratedService {
   }
 
   $core.Map<$core.String, $core.dynamic> get $json => PnlServiceBase$json;
-  $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> get $messageJson => PnlServiceBase$messageJson;
+  $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
+      get $messageJson => PnlServiceBase$messageJson;
 }

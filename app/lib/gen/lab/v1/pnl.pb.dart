@@ -49,14 +49,19 @@ class RecalculateRequest extends $pb.GeneratedMessage {
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       RecalculateRequest()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'RecalculateRequest',
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'RecalculateRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: RecalculateRequest.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'reportId')
-    ..aOM<$0.Money>(2, _omitFieldNames ? '' : 'capital', subBuilder: $0.Money.$_createMessage)
-    ..aOM<$0.Decimal>(3, _omitFieldNames ? '' : 'positionSize', subBuilder: $0.Decimal.$_createMessage)
-    ..aOM<$0.Decimal>(4, _omitFieldNames ? '' : 'fee', subBuilder: $0.Decimal.$_createMessage)
-    ..aOM<$0.Decimal>(5, _omitFieldNames ? '' : 'slippage', subBuilder: $0.Decimal.$_createMessage)
+    ..aOM<$0.Money>(2, _omitFieldNames ? '' : 'capital',
+        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Decimal>(3, _omitFieldNames ? '' : 'positionSize',
+        subBuilder: $0.Decimal.$_createMessage)
+    ..aOM<$0.Decimal>(4, _omitFieldNames ? '' : 'fee',
+        subBuilder: $0.Decimal.$_createMessage)
+    ..aOM<$0.Decimal>(5, _omitFieldNames ? '' : 'slippage',
+        subBuilder: $0.Decimal.$_createMessage)
     ..aInt64(6, _omitFieldNames ? '' : 'fxRateId')
     ..hasRequiredFields = false;
 
@@ -64,7 +69,8 @@ class RecalculateRequest extends $pb.GeneratedMessage {
   RecalculateRequest clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   RecalculateRequest copyWith(void Function(RecalculateRequest) updates) =>
-      super.copyWith((message) => updates(message as RecalculateRequest)) as RecalculateRequest;
+      super.copyWith((message) => updates(message as RecalculateRequest))
+          as RecalculateRequest;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -76,8 +82,9 @@ class RecalculateRequest extends $pb.GeneratedMessage {
   @$core.override
   RecalculateRequest createEmptyInstance() => RecalculateRequest._();
   @$core.pragma('dart2js:noInline')
-  static RecalculateRequest getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RecalculateRequest>(RecalculateRequest.$_createMessage);
+  static RecalculateRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<RecalculateRequest>(
+          RecalculateRequest.$_createMessage);
   static RecalculateRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -164,15 +171,22 @@ class Waterfall extends $pb.GeneratedMessage {
   factory Waterfall.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       Waterfall()..mergeFromBuffer(data, registry);
-  factory Waterfall.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory Waterfall.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       Waterfall()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Waterfall',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'), createEmptyInstance: Waterfall.$_createMessage)
-    ..aOM<$0.Money>(1, _omitFieldNames ? '' : 'gross', subBuilder: $0.Money.$_createMessage)
-    ..aOM<$0.Money>(2, _omitFieldNames ? '' : 'fees', subBuilder: $0.Money.$_createMessage)
-    ..aOM<$0.Money>(3, _omitFieldNames ? '' : 'slippage', subBuilder: $0.Money.$_createMessage)
-    ..aOM<$0.Money>(4, _omitFieldNames ? '' : 'net', subBuilder: $0.Money.$_createMessage)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'Waterfall',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: Waterfall.$_createMessage)
+    ..aOM<$0.Money>(1, _omitFieldNames ? '' : 'gross',
+        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Money>(2, _omitFieldNames ? '' : 'fees',
+        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Money>(3, _omitFieldNames ? '' : 'slippage',
+        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Money>(4, _omitFieldNames ? '' : 'net',
+        subBuilder: $0.Money.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -191,8 +205,8 @@ class Waterfall extends $pb.GeneratedMessage {
   @$core.override
   Waterfall createEmptyInstance() => Waterfall._();
   @$core.pragma('dart2js:noInline')
-  static Waterfall getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Waterfall>(Waterfall.$_createMessage);
+  static Waterfall getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<Waterfall>(Waterfall.$_createMessage);
   static Waterfall? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -286,44 +300,60 @@ class RecalculateResponse extends $pb.GeneratedMessage {
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       RecalculateResponse()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'RecalculateResponse',
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'RecalculateResponse',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: RecalculateResponse.$_createMessage)
-    ..aOM<$0.Money>(1, _omitFieldNames ? '' : 'capital', subBuilder: $0.Money.$_createMessage)
-    ..aOM<$0.Decimal>(2, _omitFieldNames ? '' : 'positionSize', subBuilder: $0.Decimal.$_createMessage)
-    ..aOM<$0.Decimal>(3, _omitFieldNames ? '' : 'fee', subBuilder: $0.Decimal.$_createMessage)
-    ..aOM<$0.Decimal>(4, _omitFieldNames ? '' : 'slippage', subBuilder: $0.Decimal.$_createMessage)
-    ..aOM<Waterfall>(5, _omitFieldNames ? '' : 'waterfall', subBuilder: Waterfall.$_createMessage)
-    ..pPM<$0.Metric>(6, _omitFieldNames ? '' : 'metrics', subBuilder: $0.Metric.$_createMessage)
-    ..pPM<$0.EquityPoint>(7, _omitFieldNames ? '' : 'equity', subBuilder: $0.EquityPoint.$_createMessage)
-    ..pPM<$1.TradeRow>(8, _omitFieldNames ? '' : 'trades', subBuilder: $1.TradeRow.$_createMessage)
-    ..aOM<$0.Decimal>(9, _omitFieldNames ? '' : 'breakEvenFee', subBuilder: $0.Decimal.$_createMessage)
+    ..aOM<$0.Money>(1, _omitFieldNames ? '' : 'capital',
+        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Decimal>(2, _omitFieldNames ? '' : 'positionSize',
+        subBuilder: $0.Decimal.$_createMessage)
+    ..aOM<$0.Decimal>(3, _omitFieldNames ? '' : 'fee',
+        subBuilder: $0.Decimal.$_createMessage)
+    ..aOM<$0.Decimal>(4, _omitFieldNames ? '' : 'slippage',
+        subBuilder: $0.Decimal.$_createMessage)
+    ..aOM<Waterfall>(5, _omitFieldNames ? '' : 'waterfall',
+        subBuilder: Waterfall.$_createMessage)
+    ..pPM<$0.Metric>(6, _omitFieldNames ? '' : 'metrics',
+        subBuilder: $0.Metric.$_createMessage)
+    ..pPM<$0.EquityPoint>(7, _omitFieldNames ? '' : 'equity',
+        subBuilder: $0.EquityPoint.$_createMessage)
+    ..pPM<$1.TradeRow>(8, _omitFieldNames ? '' : 'trades',
+        subBuilder: $1.TradeRow.$_createMessage)
+    ..aOM<$0.Decimal>(9, _omitFieldNames ? '' : 'breakEvenFee',
+        subBuilder: $0.Decimal.$_createMessage)
     ..aOS(10, _omitFieldNames ? '' : 'verdict')
     ..aOS(11, _omitFieldNames ? '' : 'tone')
     ..aOS(12, _omitFieldNames ? '' : 'sentence')
-    ..aOM<$0.Money>(13, _omitFieldNames ? '' : 'originalNet', subBuilder: $0.Money.$_createMessage)
-    ..aOM<$0.Money>(14, _omitFieldNames ? '' : 'netToman', subBuilder: $0.Money.$_createMessage)
-    ..aOM<$0.Money>(15, _omitFieldNames ? '' : 'finalEquityToman', subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Money>(13, _omitFieldNames ? '' : 'originalNet',
+        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Money>(14, _omitFieldNames ? '' : 'netToman',
+        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Money>(15, _omitFieldNames ? '' : 'finalEquityToman',
+        subBuilder: $0.Money.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   RecalculateResponse clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   RecalculateResponse copyWith(void Function(RecalculateResponse) updates) =>
-      super.copyWith((message) => updates(message as RecalculateResponse)) as RecalculateResponse;
+      super.copyWith((message) => updates(message as RecalculateResponse))
+          as RecalculateResponse;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  @$core.Deprecated('Use RecalculateResponse() / RecalculateResponse.new instead')
+  @$core
+      .Deprecated('Use RecalculateResponse() / RecalculateResponse.new instead')
   static RecalculateResponse create() => RecalculateResponse._();
   static $pb.GeneratedMessage $_createMessage() => RecalculateResponse._();
   @$core.override
   RecalculateResponse createEmptyInstance() => RecalculateResponse._();
   @$core.pragma('dart2js:noInline')
-  static RecalculateResponse getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RecalculateResponse>(RecalculateResponse.$_createMessage);
+  static RecalculateResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<RecalculateResponse>(
+          RecalculateResponse.$_createMessage);
   static RecalculateResponse? _defaultInstance;
 
   /// Settings actually used (defaults filled in), so the UI can reset to them.
@@ -491,35 +521,45 @@ class CalculateTradeRequest extends $pb.GeneratedMessage {
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       CalculateTradeRequest()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'CalculateTradeRequest',
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'CalculateTradeRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: CalculateTradeRequest.$_createMessage)
-    ..aOM<$0.Money>(1, _omitFieldNames ? '' : 'entry', subBuilder: $0.Money.$_createMessage)
-    ..aOM<$0.Money>(2, _omitFieldNames ? '' : 'exit', subBuilder: $0.Money.$_createMessage)
-    ..aOM<$0.Money>(3, _omitFieldNames ? '' : 'amount', subBuilder: $0.Money.$_createMessage)
-    ..aOM<$0.Decimal>(4, _omitFieldNames ? '' : 'fee', subBuilder: $0.Decimal.$_createMessage)
-    ..aOM<$0.Decimal>(5, _omitFieldNames ? '' : 'slippage', subBuilder: $0.Decimal.$_createMessage)
+    ..aOM<$0.Money>(1, _omitFieldNames ? '' : 'entry',
+        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Money>(2, _omitFieldNames ? '' : 'exit',
+        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Money>(3, _omitFieldNames ? '' : 'amount',
+        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Decimal>(4, _omitFieldNames ? '' : 'fee',
+        subBuilder: $0.Decimal.$_createMessage)
+    ..aOM<$0.Decimal>(5, _omitFieldNames ? '' : 'slippage',
+        subBuilder: $0.Decimal.$_createMessage)
     ..aInt64(6, _omitFieldNames ? '' : 'fxRateId')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   CalculateTradeRequest clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  CalculateTradeRequest copyWith(void Function(CalculateTradeRequest) updates) =>
-      super.copyWith((message) => updates(message as CalculateTradeRequest)) as CalculateTradeRequest;
+  CalculateTradeRequest copyWith(
+          void Function(CalculateTradeRequest) updates) =>
+      super.copyWith((message) => updates(message as CalculateTradeRequest))
+          as CalculateTradeRequest;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  @$core.Deprecated('Use CalculateTradeRequest() / CalculateTradeRequest.new instead')
+  @$core.Deprecated(
+      'Use CalculateTradeRequest() / CalculateTradeRequest.new instead')
   static CalculateTradeRequest create() => CalculateTradeRequest._();
   static $pb.GeneratedMessage $_createMessage() => CalculateTradeRequest._();
   @$core.override
   CalculateTradeRequest createEmptyInstance() => CalculateTradeRequest._();
   @$core.pragma('dart2js:noInline')
   static CalculateTradeRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<CalculateTradeRequest>(CalculateTradeRequest.$_createMessage);
+      $pb.GeneratedMessage.$_defaultFor<CalculateTradeRequest>(
+          CalculateTradeRequest.$_createMessage);
   static CalculateTradeRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -611,17 +651,26 @@ class TradeLeg extends $pb.GeneratedMessage {
   factory TradeLeg.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       TradeLeg()..mergeFromBuffer(data, registry);
-  factory TradeLeg.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory TradeLeg.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       TradeLeg()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'TradeLeg',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'), createEmptyInstance: TradeLeg.$_createMessage)
-    ..aOM<$0.Money>(1, _omitFieldNames ? '' : 'refPrice', subBuilder: $0.Money.$_createMessage)
-    ..aOM<$0.Money>(2, _omitFieldNames ? '' : 'price', subBuilder: $0.Money.$_createMessage)
-    ..aOM<$0.Money>(3, _omitFieldNames ? '' : 'refValue', subBuilder: $0.Money.$_createMessage)
-    ..aOM<$0.Money>(4, _omitFieldNames ? '' : 'value', subBuilder: $0.Money.$_createMessage)
-    ..aOM<$0.Money>(5, _omitFieldNames ? '' : 'slippage', subBuilder: $0.Money.$_createMessage)
-    ..aOM<$0.Money>(6, _omitFieldNames ? '' : 'fee', subBuilder: $0.Money.$_createMessage)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'TradeLeg',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: TradeLeg.$_createMessage)
+    ..aOM<$0.Money>(1, _omitFieldNames ? '' : 'refPrice',
+        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Money>(2, _omitFieldNames ? '' : 'price',
+        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Money>(3, _omitFieldNames ? '' : 'refValue',
+        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Money>(4, _omitFieldNames ? '' : 'value',
+        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Money>(5, _omitFieldNames ? '' : 'slippage',
+        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Money>(6, _omitFieldNames ? '' : 'fee',
+        subBuilder: $0.Money.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -640,8 +689,8 @@ class TradeLeg extends $pb.GeneratedMessage {
   @$core.override
   TradeLeg createEmptyInstance() => TradeLeg._();
   @$core.pragma('dart2js:noInline')
-  static TradeLeg getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<TradeLeg>(TradeLeg.$_createMessage);
+  static TradeLeg getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<TradeLeg>(TradeLeg.$_createMessage);
   static TradeLeg? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -749,40 +798,53 @@ class CalculateTradeResponse extends $pb.GeneratedMessage {
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       CalculateTradeResponse()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'CalculateTradeResponse',
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'CalculateTradeResponse',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: CalculateTradeResponse.$_createMessage)
-    ..aOM<$0.Decimal>(1, _omitFieldNames ? '' : 'qty', subBuilder: $0.Decimal.$_createMessage)
-    ..aOM<TradeLeg>(2, _omitFieldNames ? '' : 'buy', subBuilder: TradeLeg.$_createMessage)
-    ..aOM<TradeLeg>(3, _omitFieldNames ? '' : 'sell', subBuilder: TradeLeg.$_createMessage)
-    ..aOM<Waterfall>(4, _omitFieldNames ? '' : 'waterfall', subBuilder: Waterfall.$_createMessage)
-    ..aOM<$0.Money>(5, _omitFieldNames ? '' : 'cost', subBuilder: $0.Money.$_createMessage)
-    ..aOM<$0.Decimal>(6, _omitFieldNames ? '' : 'return', subBuilder: $0.Decimal.$_createMessage)
-    ..aOM<$0.Money>(7, _omitFieldNames ? '' : 'breakEvenExit', subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Decimal>(1, _omitFieldNames ? '' : 'qty',
+        subBuilder: $0.Decimal.$_createMessage)
+    ..aOM<TradeLeg>(2, _omitFieldNames ? '' : 'buy',
+        subBuilder: TradeLeg.$_createMessage)
+    ..aOM<TradeLeg>(3, _omitFieldNames ? '' : 'sell',
+        subBuilder: TradeLeg.$_createMessage)
+    ..aOM<Waterfall>(4, _omitFieldNames ? '' : 'waterfall',
+        subBuilder: Waterfall.$_createMessage)
+    ..aOM<$0.Money>(5, _omitFieldNames ? '' : 'cost',
+        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Decimal>(6, _omitFieldNames ? '' : 'return',
+        subBuilder: $0.Decimal.$_createMessage)
+    ..aOM<$0.Money>(7, _omitFieldNames ? '' : 'breakEvenExit',
+        subBuilder: $0.Money.$_createMessage)
     ..aOS(8, _omitFieldNames ? '' : 'verdict')
     ..aOS(9, _omitFieldNames ? '' : 'tone')
     ..aOS(10, _omitFieldNames ? '' : 'sentence')
-    ..aOM<$0.Money>(11, _omitFieldNames ? '' : 'netToman', subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Money>(11, _omitFieldNames ? '' : 'netToman',
+        subBuilder: $0.Money.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   CalculateTradeResponse clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  CalculateTradeResponse copyWith(void Function(CalculateTradeResponse) updates) =>
-      super.copyWith((message) => updates(message as CalculateTradeResponse)) as CalculateTradeResponse;
+  CalculateTradeResponse copyWith(
+          void Function(CalculateTradeResponse) updates) =>
+      super.copyWith((message) => updates(message as CalculateTradeResponse))
+          as CalculateTradeResponse;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  @$core.Deprecated('Use CalculateTradeResponse() / CalculateTradeResponse.new instead')
+  @$core.Deprecated(
+      'Use CalculateTradeResponse() / CalculateTradeResponse.new instead')
   static CalculateTradeResponse create() => CalculateTradeResponse._();
   static $pb.GeneratedMessage $_createMessage() => CalculateTradeResponse._();
   @$core.override
   CalculateTradeResponse createEmptyInstance() => CalculateTradeResponse._();
   @$core.pragma('dart2js:noInline')
   static CalculateTradeResponse getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<CalculateTradeResponse>(CalculateTradeResponse.$_createMessage);
+      $pb.GeneratedMessage.$_defaultFor<CalculateTradeResponse>(
+          CalculateTradeResponse.$_createMessage);
   static CalculateTradeResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -908,11 +970,17 @@ class PnlServiceApi {
 
   PnlServiceApi(this._client);
 
-  $async.Future<RecalculateResponse> recalculate($pb.ClientContext? ctx, RecalculateRequest request) =>
-      _client.invoke<RecalculateResponse>(ctx, 'PnlService', 'Recalculate', request, RecalculateResponse());
-  $async.Future<CalculateTradeResponse> calculateTrade($pb.ClientContext? ctx, CalculateTradeRequest request) =>
-      _client.invoke<CalculateTradeResponse>(ctx, 'PnlService', 'CalculateTrade', request, CalculateTradeResponse());
+  $async.Future<RecalculateResponse> recalculate(
+          $pb.ClientContext? ctx, RecalculateRequest request) =>
+      _client.invoke<RecalculateResponse>(
+          ctx, 'PnlService', 'Recalculate', request, RecalculateResponse());
+  $async.Future<CalculateTradeResponse> calculateTrade(
+          $pb.ClientContext? ctx, CalculateTradeRequest request) =>
+      _client.invoke<CalculateTradeResponse>(ctx, 'PnlService',
+          'CalculateTrade', request, CalculateTradeResponse());
 }
 
-const $core.bool _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
-const $core.bool _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');
+const $core.bool _omitFieldNames =
+    $core.bool.fromEnvironment('protobuf.omit_field_names');
+const $core.bool _omitMessageNames =
+    $core.bool.fromEnvironment('protobuf.omit_message_names');

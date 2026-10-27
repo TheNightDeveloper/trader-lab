@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package lab.v1;
+
+import "lab/v1/common.proto";
+import "lab/v1/report.proto";
+
+// LibraryService: algorithms, their versions and lifecycle. Only a user action
+// moves a version to active.
+service LibraryService {
+  rpc ListAlgorithms(ListAlgorithmsRequest) returns (ListAlgorithmsResponse);
+  rpc SetVersionState(SetVersionStateRequest) returns (SetVersionStateResponse);
+  rpc ListLifecycleEvents(ListLifecycleEventsRequest) returns (ListLifecycleEventsResponse);
+}
+
+message AlgorithmVersion {
+  string id = 1; // <algorithm>@v<n>
+  int32 version = 2;
+  string state = 3; // research | validation | forward_test | active | stopped | retired
+  string content_hash = 4;
+  repeated ParamSpec params = 5;
+  int64 created_unix_ms = 6;
+  repeated string next_states = 7;
+}
+
+message LatestReport {
+  string report_id = 1;
+  Decimal total_return = 2;
+  int64 created_unix_ms = 3;
+}
+
+message Algorithm {
+  string id = 1;
+  string family = 2; // trend | mean_reversion | learning | hybrid | benchmark
+  string description = 3; // Persian
+  repeated AlgorithmVersion versions = 4; // newest first
+  LatestReport latest_report = 5;
+}
+
+message ListAlgorithmsRequest {}
+
+message ListAlgorithmsResponse {
+  repeated Algorithm algorithms = 1;
+}
+
+message SetVersionStateRequest {
+  string version_id = 1;
+  string state = 2;
+  string note = 3;
+}
+
+message SetVersionStateResponse {}
+
+message LifecycleEvent {
+  string from_state = 1;
+  string to_state = 2;
+  string note = 3;
+  string actor = 4; // user | system
+  int64 at_unix_ms = 5;
+}
+
+message ListLifecycleEventsRequest {
+  string version_id = 1;
+}
+
+message ListLifecycleEventsResponse {
+  repeated LifecycleEvent events = 1;
+}

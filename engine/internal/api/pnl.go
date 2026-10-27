@@ -9,6 +9,7 @@ import (
 	"tradinglab/engine/internal/eval"
 	labv1 "tradinglab/engine/internal/gen/lab/v1"
 	"tradinglab/engine/internal/instrument"
+	"tradinglab/engine/internal/jobs"
 	"tradinglab/engine/internal/metrics"
 	"tradinglab/engine/internal/money"
 	"tradinglab/engine/internal/report"
@@ -16,7 +17,8 @@ import (
 )
 
 type Pnl struct {
-	Svc report.Service
+	Svc     report.Service
+	Limiter *jobs.Limiter // one research slot per recalculation; nil in tests
 }
 
 // Recalculate replays a report's recorded intents with overridden capital,
@@ -50,6 +52,12 @@ func (h *Pnl) Recalculate(ctx context.Context, req *connect.Request[labv1.Recalc
 		size = v
 	}
 
+	if h.Limiter != nil {
+		if err := h.Limiter.Acquire(ctx); err != nil {
+			return nil, err
+		}
+		defer h.Limiter.Release()
+	}
 	view, res, err := h.Svc.Recalculate(ctx, m.GetReportId(), cfg, size)
 	if err != nil {
 		return nil, reportErr(err)

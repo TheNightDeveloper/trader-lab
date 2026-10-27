@@ -21,7 +21,8 @@ import 'health.pbjson.dart';
 export 'health.pb.dart';
 
 abstract class HealthServiceBase extends $pb.GeneratedService {
-  $async.Future<$1.WatchResponse> watch($pb.ServerContext ctx, $1.WatchRequest request);
+  $async.Future<$1.WatchResponse> watch(
+      $pb.ServerContext ctx, $1.WatchRequest request);
 
   $pb.GeneratedMessage createRequest($core.String methodName) {
     switch (methodName) {
@@ -32,8 +33,8 @@ abstract class HealthServiceBase extends $pb.GeneratedService {
     }
   }
 
-  $async.Future<$pb.GeneratedMessage> handleCall(
-      $pb.ServerContext ctx, $core.String methodName, $pb.GeneratedMessage request) {
+  $async.Future<$pb.GeneratedMessage> handleCall($pb.ServerContext ctx,
+      $core.String methodName, $pb.GeneratedMessage request) {
     switch (methodName) {
       case 'Watch':
         return watch(ctx, request as $1.WatchRequest);
@@ -43,5 +44,6 @@ abstract class HealthServiceBase extends $pb.GeneratedService {
   }
 
   $core.Map<$core.String, $core.dynamic> get $json => HealthServiceBase$json;
-  $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> get $messageJson => HealthServiceBase$messageJson;
+  $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
+      get $messageJson => HealthServiceBase$messageJson;
 }

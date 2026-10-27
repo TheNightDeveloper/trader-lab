@@ -21,8 +21,10 @@ import 'fx.pbjson.dart';
 export 'fx.pb.dart';
 
 abstract class FxServiceBase extends $pb.GeneratedService {
-  $async.Future<$1.ListRatesResponse> listRates($pb.ServerContext ctx, $1.ListRatesRequest request);
-  $async.Future<$1.AddRateResponse> addRate($pb.ServerContext ctx, $1.AddRateRequest request);
+  $async.Future<$1.ListRatesResponse> listRates(
+      $pb.ServerContext ctx, $1.ListRatesRequest request);
+  $async.Future<$1.AddRateResponse> addRate(
+      $pb.ServerContext ctx, $1.AddRateRequest request);
 
   $pb.GeneratedMessage createRequest($core.String methodName) {
     switch (methodName) {
@@ -35,8 +37,8 @@ abstract class FxServiceBase extends $pb.GeneratedService {
     }
   }
 
-  $async.Future<$pb.GeneratedMessage> handleCall(
-      $pb.ServerContext ctx, $core.String methodName, $pb.GeneratedMessage request) {
+  $async.Future<$pb.GeneratedMessage> handleCall($pb.ServerContext ctx,
+      $core.String methodName, $pb.GeneratedMessage request) {
     switch (methodName) {
       case 'ListRates':
         return listRates(ctx, request as $1.ListRatesRequest);
@@ -48,5 +50,6 @@ abstract class FxServiceBase extends $pb.GeneratedService {
   }
 
   $core.Map<$core.String, $core.dynamic> get $json => FxServiceBase$json;
-  $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> get $messageJson => FxServiceBase$messageJson;
+  $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
+      get $messageJson => FxServiceBase$messageJson;
 }

@@ -336,6 +336,25 @@ func (q *Queries) InsertReport(ctx context.Context, arg InsertReportParams) erro
 	return err
 }
 
+const latestReportForStrategy = `-- name: LatestReportForStrategy :one
+SELECT id, oos_return, created_at FROM reports
+WHERE spec->>'strategy' = $1::text
+ORDER BY created_at DESC LIMIT 1
+`
+
+type LatestReportForStrategyRow struct {
+	ID        string
+	OosReturn int64
+	CreatedAt time.Time
+}
+
+func (q *Queries) LatestReportForStrategy(ctx context.Context, strategy string) (LatestReportForStrategyRow, error) {
+	row := q.db.QueryRow(ctx, latestReportForStrategy, strategy)
+	var i LatestReportForStrategyRow
+	err := row.Scan(&i.ID, &i.OosReturn, &i.CreatedAt)
+	return i, err
+}
+
 const listDecisions = `-- name: ListDecisions :many
 SELECT report_id, run, id, at, input_symbol, input_bar_open, instrument, target, stop_loss, take_profit, reason, model_id, recipe_version, outcome, detail FROM decisions WHERE report_id = $1 AND run = $2 ORDER BY id LIMIT $3 OFFSET $4
 `

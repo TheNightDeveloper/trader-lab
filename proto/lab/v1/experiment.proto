@@ -1,0 +1,201 @@
+syntax = "proto3";
+
+package lab.v1;
+
+import "lab/v1/common.proto";
+
+// ExperimentService: pre-registered experiments, the attempt registry and the
+// research queue. Every attempt is recorded, failed and cancelled ones too.
+service ExperimentService {
+  // Validates a definition and counts its attempts without starting anything.
+  rpc Estimate(EstimateRequest) returns (EstimateResponse);
+  // Locks the definition and queues every attempt.
+  rpc CreateExperiment(CreateExperimentRequest) returns (CreateExperimentResponse);
+  rpc ListExperiments(ListExperimentsRequest) returns (ListExperimentsResponse);
+  rpc GetExperiment(GetExperimentRequest) returns (GetExperimentResponse);
+  // Progress now, then every second until the experiment ends.
+  rpc WatchExperiment(WatchExperimentRequest) returns (stream WatchExperimentResponse);
+  rpc ListAttempts(ListAttemptsRequest) returns (ListAttemptsResponse);
+  rpc PauseExperiment(PauseExperimentRequest) returns (PauseExperimentResponse);
+  rpc ResumeExperiment(ResumeExperimentRequest) returns (ResumeExperimentResponse);
+  rpc CancelExperiment(CancelExperimentRequest) returns (CancelExperimentResponse);
+}
+
+message Objective {
+  string metric = 1; // a metric key, e.g. total_return
+  bool maximize = 2;
+}
+
+message Constraint {
+  string metric = 1;
+  string op = 2; // >= | <=
+  string value = 3; // decimal in the metric unit; ratios as fractions
+}
+
+message ParamRange {
+  repeated double values = 1; // strategy parameters (model math), not money
+  double min = 2;
+  double max = 3;
+  double step = 4;
+}
+
+message SearchPlan {
+  string mode = 1; // grid | random
+  uint64 seed = 2;
+  int32 max_attempts = 3;
+  int32 max_wall_seconds = 4;
+}
+
+message ExperimentDefinition {
+  string name = 1;
+  string hypothesis = 2;
+  string falsifier = 3;
+  Objective objective = 4;
+  repeated Constraint constraints = 5;
+  repeated string dataset_ids = 6;
+  string algorithm_version = 7;
+  map<string, ParamRange> space = 8;
+  SearchPlan search = 9;
+  Money capital = 10;
+  Decimal fee = 11;
+  Decimal slippage = 12;
+  int32 latency_bars = 13;
+  int32 folds = 14;
+  bool rolling = 15;
+  Decimal holdout = 16;
+}
+
+message EstimateRequest {
+  ExperimentDefinition definition = 1;
+}
+
+message EstimateResponse {
+  int32 candidates = 1;
+  int32 attempts = 2;
+  int64 estimated_seconds = 3; // rough: bars × attempts / research slots
+  string error = 4; // Persian-ready validation message; empty when valid
+}
+
+message CreateExperimentRequest {
+  ExperimentDefinition definition = 1;
+}
+
+message CreateExperimentResponse {
+  string experiment_id = 1;
+  bool already_existed = 2; // the same definition was started before
+}
+
+message AttemptCounts {
+  int32 queued = 1;
+  int32 running = 2;
+  int32 done = 3;
+  int32 failed = 4;
+  int32 cancelled = 5;
+  int32 total = 6;
+}
+
+message ExperimentResult {
+  int32 chosen = 1; // candidate number; 0 = no eligible candidate
+  map<string, double> params = 2;
+  Metric objective = 3;
+  int32 candidates = 4;
+  int32 eligible_candidates = 5;
+  int32 attempts = 6;
+  repeated string report_ids = 7;
+  string reason = 8;
+}
+
+message ExperimentSummary {
+  string id = 1;
+  string name = 2;
+  string status = 3; // running | paused | finalizing | done | cancelled | failed
+  int64 created_unix_ms = 4;
+  int64 finished_unix_ms = 5;
+  string algorithm_version = 6;
+  AttemptCounts counts = 7;
+}
+
+message ListExperimentsRequest {
+  int32 page_size = 1;
+  int32 offset = 2;
+}
+
+message ListExperimentsResponse {
+  repeated ExperimentSummary experiments = 1;
+  int64 total = 2;
+}
+
+message GetExperimentRequest {
+  string experiment_id = 1;
+}
+
+message GetExperimentResponse {
+  ExperimentSummary summary = 1;
+  ExperimentDefinition definition = 2;
+  ExperimentResult result = 3; // set when done
+  string error = 4;
+}
+
+message WatchExperimentRequest {
+  string experiment_id = 1;
+}
+
+message WatchExperimentResponse {
+  string status = 1;
+  AttemptCounts counts = 2;
+  int64 elapsed_seconds = 3;
+  int64 wall_budget_seconds = 4;
+  int32 attempt_budget = 5;
+  int32 cache_hits = 6;
+  int32 cache_looked = 7;
+  int32 research_slots_in_use = 8;
+  int32 research_slots = 9;
+  Metric best_objective = 10; // best eligible attempt so far
+}
+
+message AttemptRow {
+  int32 seq = 1;
+  int32 candidate = 2;
+  map<string, double> params = 3;
+  string symbol = 4;
+  string status = 5;
+  string failure = 6;
+  Metric total_return = 7;
+  Metric max_drawdown = 8;
+  Metric trades = 9;
+  bool has_eligibility = 10;
+  bool eligible = 11;
+  repeated string violations = 12;
+  string cache = 13; // hit | miss | empty
+  int32 runs = 14;
+}
+
+message ListAttemptsRequest {
+  string experiment_id = 1;
+  string status = 2; // empty = all
+  int32 page_size = 3;
+  int32 offset = 4;
+}
+
+message ListAttemptsResponse {
+  repeated AttemptRow attempts = 1;
+  int64 total = 2;
+}
+
+message PauseExperimentRequest {
+  string experiment_id = 1;
+}
+
+message PauseExperimentResponse {}
+
+message ResumeExperimentRequest {
+  string experiment_id = 1;
+}
+
+message ResumeExperimentResponse {}
+
+message CancelExperimentRequest {
+  string experiment_id = 1;
+}
+
+message CancelExperimentResponse {}

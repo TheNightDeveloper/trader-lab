@@ -8,7 +8,7 @@ import "report.pb.dart" as labv1report;
 import "report.connect.spec.dart" as specs;
 
 /// ReportService: evaluate a configuration, read reports, compare, export.
-extension type ReportServiceClient(connect.Transport _transport) {
+extension type ReportServiceClient (connect.Transport _transport) {
   Future<labv1report.ListStrategiesResponse> listStrategies(
     labv1report.ListStrategiesRequest input, {
     connect.Headers? headers,

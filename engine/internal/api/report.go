@@ -17,6 +17,7 @@ import (
 	"tradinglab/engine/internal/fx"
 	labv1 "tradinglab/engine/internal/gen/lab/v1"
 	"tradinglab/engine/internal/instrument"
+	"tradinglab/engine/internal/jobs"
 	"tradinglab/engine/internal/metrics"
 	"tradinglab/engine/internal/money"
 	"tradinglab/engine/internal/report"
@@ -26,7 +27,8 @@ import (
 )
 
 type Report struct {
-	Svc report.Service
+	Svc     report.Service
+	Limiter *jobs.Limiter // research share; nil in tests that do not need it
 }
 
 func (h *Report) ListStrategies(context.Context, *connect.Request[labv1.ListStrategiesRequest]) (*connect.Response[labv1.ListStrategiesResponse], error) {
@@ -115,6 +117,14 @@ func (h *Report) CreateReport(ctx context.Context, req *connect.Request[labv1.Cr
 	spec, err := specIn(req.Msg.GetSpec())
 	if err != nil {
 		return nil, invalid(err.Error())
+	}
+	// A quick run is research: it waits for the whole research share, so it never
+	// competes with queued attempts for CPU beyond the cap.
+	if h.Limiter != nil {
+		if err := h.Limiter.AcquireAll(ctx); err != nil {
+			return nil, err
+		}
+		defer h.Limiter.ReleaseN(h.Limiter.Size())
 	}
 	id, err := h.Svc.Create(ctx, spec)
 	if err != nil {
@@ -304,7 +314,11 @@ func (h *Report) Compare(ctx context.Context, req *connect.Request[labv1.Compare
 			return nil, reportErr(err)
 		}
 		stored = append(stored, st)
-		cs = append(cs, eval.Comparable{ID: id, Spec: st.Spec, Split: st.Split, Metrics: st.Evaluation.OOS.Metrics, Attempts: 1})
+		attempts := 1
+		if st.Spec.Origin != nil {
+			attempts = st.Spec.Origin.Attempts
+		}
+		cs = append(cs, eval.Comparable{ID: id, Spec: st.Spec, Split: st.Split, Metrics: st.Evaluation.OOS.Metrics, Attempts: attempts})
 	}
 	c := eval.Compare(cs)
 	res := &labv1.CompareResponse{Conclusion: c.Conclusion}

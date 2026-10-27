@@ -56,3 +56,8 @@ INSERT INTO holdout_views (report_id) VALUES ($1);
 
 -- name: CountHoldoutViews :one
 SELECT count(*) FROM holdout_views WHERE report_id = $1;
+
+-- name: LatestReportForStrategy :one
+SELECT id, oos_return, created_at FROM reports
+WHERE spec->>'strategy' = @strategy::text
+ORDER BY created_at DESC LIMIT 1;

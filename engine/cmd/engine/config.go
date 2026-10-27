@@ -20,14 +20,18 @@ type Config struct {
 	IngestDelay string `json:"ingest_delay"`
 	// LiveSymbols are kept current from the REST mirror; [] turns live data off.
 	LiveSymbols []string `json:"live_symbols"`
+	// ResearchShare is the percent of CPUs research may use (backtests, search);
+	// at least one core always stays free for control work.
+	ResearchShare int `json:"research_share"`
 }
 
 func defaultConfig() Config {
 	return Config{
 		Listen: "127.0.0.1:8080", WebDir: "../app/build/web", Workers: 4, LogLevel: "info",
-		DatabaseURL: "postgres://lab:lab@127.0.0.1:5432/lab?sslmode=disable",
-		IngestDelay: "2s",
-		LiveSymbols: []string{"BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT", "ETHBTC"},
+		DatabaseURL:   "postgres://lab:lab@127.0.0.1:5432/lab?sslmode=disable",
+		IngestDelay:   "2s",
+		LiveSymbols:   []string{"BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT", "ETHBTC"},
+		ResearchShare: 75,
 	}
 }
 
@@ -58,6 +62,9 @@ func (c Config) validate() error {
 	}
 	if d, err := time.ParseDuration(c.IngestDelay); err != nil || d < 0 {
 		return fmt.Errorf("ingest_delay %q: want a non-negative duration like \"2s\"", c.IngestDelay)
+	}
+	if c.ResearchShare < 1 || c.ResearchShare > 100 {
+		return fmt.Errorf("research_share must be 1..100 (percent), got %d", c.ResearchShare)
 	}
 	if c.Workers < 1 {
 		return fmt.Errorf("workers must be >= 1, got %d", c.Workers)
