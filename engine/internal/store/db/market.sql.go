@@ -252,6 +252,17 @@ func (q *Queries) InsertQualityIssue(ctx context.Context, arg InsertQualityIssue
 	return err
 }
 
+const lastCandleOpen = `-- name: LastCandleOpen :one
+SELECT open_time FROM candles WHERE symbol = $1 ORDER BY open_time DESC LIMIT 1
+`
+
+func (q *Queries) LastCandleOpen(ctx context.Context, symbol string) (time.Time, error) {
+	row := q.db.QueryRow(ctx, lastCandleOpen, symbol)
+	var open_time time.Time
+	err := row.Scan(&open_time)
+	return open_time, err
+}
+
 const lastCloseAsOf = `-- name: LastCloseAsOf :one
 SELECT c FROM candles
 WHERE symbol = $1 AND available_at <= $2

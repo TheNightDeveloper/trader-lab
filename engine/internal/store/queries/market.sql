@@ -107,3 +107,6 @@ SELECT * FROM fx_rates ORDER BY rate_date DESC, id DESC LIMIT $1;
 
 -- name: LatestFxRate :one
 SELECT * FROM fx_rates ORDER BY rate_date DESC, id DESC LIMIT 1;
+
+-- name: LastCandleOpen :one
+SELECT open_time FROM candles WHERE symbol = $1 ORDER BY open_time DESC LIMIT 1;

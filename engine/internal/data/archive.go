@@ -130,26 +130,38 @@ func ParseKlinesCSV(r io.Reader, symbol string, delay time.Duration) ([]Bar, err
 		if err != nil {
 			return nil, fmt.Errorf("csv line %d: %w", line, err)
 		}
-		if len(rec) < 6 {
-			return nil, fmt.Errorf("csv line %d: %d fields, want >= 6", line, len(rec))
+		b, err := parseKline(rec, symbol, delay)
+		var hdr headerError
+		if errors.As(err, &hdr) && line == 1 {
+			continue // header row
 		}
-		ts, err := strconv.ParseInt(rec[0], 10, 64)
 		if err != nil {
-			if line == 1 {
-				continue // header row
-			}
-			return nil, fmt.Errorf("csv line %d: open_time %q: %w", line, rec[0], err)
+			return nil, fmt.Errorf("csv line %d: %w", line, err)
 		}
-		open := epoch(ts)
-		b := Bar{Instrument: symbol, OpenTime: open, CloseTime: open.Add(time.Minute), AvailableAt: open.Add(time.Minute + delay)}
-		for i, dst := range []*int64{&b.O.V, &b.H.V, &b.L.V, &b.C.V, &b.Volume.V} {
-			if *dst, err = money.Parse(rec[i+1], instrument.Scale); err != nil {
-				return nil, fmt.Errorf("csv line %d field %d: %w", line, i+2, err)
-			}
-		}
-		b.O.Scale, b.H.Scale, b.L.Scale, b.C.Scale, b.Volume.Scale = instrument.Scale, instrument.Scale, instrument.Scale, instrument.Scale, instrument.Scale
 		bars = append(bars, b)
 	}
+}
+
+type headerError struct{ error }
+
+// parseKline turns one Binance kline record (archive CSV or REST) into a Bar.
+func parseKline(rec []string, symbol string, delay time.Duration) (Bar, error) {
+	if len(rec) < 6 {
+		return Bar{}, fmt.Errorf("%d fields, want >= 6", len(rec))
+	}
+	ts, err := strconv.ParseInt(rec[0], 10, 64)
+	if err != nil {
+		return Bar{}, headerError{fmt.Errorf("open_time %q: %w", rec[0], err)}
+	}
+	open := epoch(ts)
+	b := Bar{Instrument: symbol, OpenTime: open, CloseTime: open.Add(time.Minute), AvailableAt: open.Add(time.Minute + delay)}
+	for i, dst := range []*int64{&b.O.V, &b.H.V, &b.L.V, &b.C.V, &b.Volume.V} {
+		if *dst, err = money.Parse(rec[i+1], instrument.Scale); err != nil {
+			return Bar{}, fmt.Errorf("field %d: %w", i+2, err)
+		}
+	}
+	b.O.Scale, b.H.Scale, b.L.Scale, b.C.Scale, b.Volume.Scale = instrument.Scale, instrument.Scale, instrument.Scale, instrument.Scale, instrument.Scale
+	return b, nil
 }
 
 // epoch reads a Binance timestamp in ms or µs. ms values stay below 1e14 until year 5138.

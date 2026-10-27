@@ -59,7 +59,16 @@ func run() error {
 		return err
 	}
 
-	health := api.NewHealth(clock.Wall{}, version, cfg.Workers, time.Second)
+	var live *data.Live
+	if len(cfg.LiveSymbols) > 0 {
+		live = &data.Live{
+			Store: st, HTTP: http.DefaultClient, BaseURL: data.LiveBaseURL, Clock: clock.Wall{},
+			Delay: cfg.ingestDelay(), Symbols: cfg.LiveSymbols, Backfill: time.Hour,
+		}
+		go live.Run(ctx)
+	}
+
+	health := api.NewHealth(clock.Wall{}, version, cfg.Workers, time.Second, liveSource(live))
 	sc := echo.StartConfig{
 		Address:         cfg.Listen,
 		HideBanner:      true,
@@ -120,4 +129,12 @@ func redact(dsn string) string {
 		return "(unparseable url)"
 	}
 	return u.Redacted()
+}
+
+// liveSource avoids handing Health a typed-nil *data.Live.
+func liveSource(l *data.Live) api.LiveSource {
+	if l == nil {
+		return nil
+	}
+	return l
 }

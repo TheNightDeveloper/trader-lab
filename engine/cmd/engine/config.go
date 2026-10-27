@@ -18,6 +18,8 @@ type Config struct {
 	DatabaseURL string `json:"database_url"`
 	// IngestDelay is added to a bar's close to get AvailableAt (Go duration, e.g. "2s").
 	IngestDelay string `json:"ingest_delay"`
+	// LiveSymbols are kept current from the REST mirror; [] turns live data off.
+	LiveSymbols []string `json:"live_symbols"`
 }
 
 func defaultConfig() Config {
@@ -25,6 +27,7 @@ func defaultConfig() Config {
 		Listen: "127.0.0.1:8080", WebDir: "../app/build/web", Workers: 4, LogLevel: "info",
 		DatabaseURL: "postgres://lab:lab@127.0.0.1:5432/lab?sslmode=disable",
 		IngestDelay: "2s",
+		LiveSymbols: []string{"BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT", "ETHBTC"},
 	}
 }
 
@@ -60,4 +63,9 @@ func (c Config) validate() error {
 		return fmt.Errorf("workers must be >= 1, got %d", c.Workers)
 	}
 	return nil
+}
+
+func (c Config) ingestDelay() time.Duration {
+	d, _ := time.ParseDuration(c.IngestDelay) // validated
+	return d
 }

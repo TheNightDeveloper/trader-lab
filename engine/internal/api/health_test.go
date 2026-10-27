@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"tradinglab/engine/internal/clock"
+	"tradinglab/engine/internal/data"
 	labv1 "tradinglab/engine/internal/gen/lab/v1"
 	"tradinglab/engine/internal/gen/lab/v1/labv1connect"
 )
@@ -18,7 +19,7 @@ import (
 func TestHealthWatchStreams(t *testing.T) {
 	t0 := time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC)
 	mux := http.NewServeMux()
-	mux.Handle(labv1connect.NewHealthServiceHandler(NewHealth(clock.NewVirtual(t0), "test", 8, 10*time.Millisecond)))
+	mux.Handle(labv1connect.NewHealthServiceHandler(NewHealth(clock.NewVirtual(t0), "test", 8, 10*time.Millisecond, fakeLive{data.LiveStatus{State: data.LiveFresh, LastClose: t0.Add(-4 * time.Second)}})))
 	srv := httptest.NewServer(mux)
 	defer srv.Close()
 
@@ -38,5 +39,11 @@ func TestHealthWatchStreams(t *testing.T) {
 		require.EqualValues(t, 8, st.GetWorkers().GetCount())
 		require.Equal(t, t0.UnixMilli(), st.GetServerTimeUnixMs())
 		require.Nil(t, st.GetDisplayRate(), "no rate entered yet")
+		require.Equal(t, labv1.LiveState_LIVE_STATE_FRESH, st.GetLive().GetState())
+		require.EqualValues(t, 4, st.GetLive().GetLastBarAgeSeconds())
 	}
 }
+
+type fakeLive struct{ st data.LiveStatus }
+
+func (f fakeLive) Status() data.LiveStatus { return f.st }
