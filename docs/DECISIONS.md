@@ -38,3 +38,20 @@ Consequence: one more dependency in the engine; the loopback-only bind is still 
 ## ADR-009 Frontend motion and responsive layout
 Decision: user's request for a smooth, polished UI. Packages: `flutter_animate` (entrances, status pulse), `flutter_staggered_animations` (sidebar list), `animations` (fade-through page transitions), `skeletonizer` (loading skeletons per UI_SPEC), `responsive_framework` (MOBILE <600, TABLET 600–1199, DESKTOP ≥1200 from UI_SPEC §4).
 Rules: durations come from `AppMotion` in tokens; `AppMotion.of(context, d)` returns zero when the OS asks for reduced motion. Motion never carries meaning on its own.
+
+## ADR-010 Live data over REST polling, not WebSocket
+Context: plan M1.6 says WebSocket; Go's stdlib has no WebSocket client and api.binance.com answers 451 from this network. The public mirror data-api.binance.vision works through the local proxy.
+Decision: poll /api/v3/klines on the mirror ~2 s after every minute close; closed bars only; page through backfills; resume from the last stored bar after failures. No new dependency.
+Consequence: 6–8 s steady latency (fine for 1m research). Switching to the kline WebSocket stream is a contained change in `data.Live` if sub-second latency is ever needed (would add `coder/websocket`).
+
+## ADR-011 Availability of live and backfilled bars
+Decision: a live bar's AvailableAt is when the engine actually received it, never earlier than close + ingest_delay. Bars backfilled after an outage are therefore late, and as-of reads during the outage do not see them. Outages are stored as `outage` quality issues.
+Consequence: backtests over live-ingested periods reflect what the live system really knew. Archive re-imports of the same bars with identical values do not change their stored AvailableAt (no new revision).
+
+## ADR-012 Bitemporal candles and content-addressed datasets
+Decision: candle rows are never updated. A source correction inserts revision+1. Reads filter by AvailableAt (as-of, virtual time) and ingested_at (known-at, knowledge time). A dataset version pins known_at and its id is the SHA-256 of spec + bars; loading re-verifies the hash. known_at comes from the database clock, the same clock that stamps ingested_at.
+Consequence: old versions stay readable after corrections; re-importing identical data gives the same id.
+
+## ADR-013 Fixed scale 8 for prices and quantities
+Decision: every price, quantity and coin amount is stored at scale 8 (Binance's precision for all v1 pairs); tick and lot sizes are expressed at the same scale. TOMAN display rates use scale 2.
+Consequence: archive values are exact; USDT amounts cap near 92e9 per value (int64), far above research needs.

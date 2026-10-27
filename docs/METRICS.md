@@ -24,9 +24,26 @@ Source of truth for every number the engine reports. Start from IMPLEMENTATION_P
   metrics or comparisons.
 - Test: `fx/TestToToman`.
 
-### Bar availability — `data.ParseKlinesCSV`, `data.Resample`
-- 1m bar: `AvailableAt = CloseTime + ingest_delay` (CloseTime exclusive = open + 1m).
+### Bar availability — `data.ParseKlinesCSV`, `data.Live`, `data.Resample`
+- 1m bar from the archive: `AvailableAt = CloseTime + ingest_delay` (CloseTime exclusive = open + 1m).
+- 1m bar from the live feed: `AvailableAt = max(CloseTime + ingest_delay, received_at)`; backfilled
+  bars after an outage are late on purpose (ADR-011). Test: `data/TestLiveCatchUpOutageAndBackfill`.
 - Resampled bar: `max(last member AvailableAt, bucket close + ingest_delay)`; only closed
   buckets are emitted, missing members set `FlagPartial`.
 - Forward-filled bar (gap policy `ffill`): `O=H=L=C = previous close`, volume 0,
   `AvailableAt = CloseTime + ingest_delay`.
+
+## Data quality rules (M1) — `data.Clean`, `data.Gaps`
+
+| Issue | Rule | Effect |
+|---|---|---|
+| gap | expected 1m open time missing inside the data or at the requested range edges | reported; gap policy decides (flag / stop / ffill) |
+| out_of_order | a row earlier than the row before it in the source | sorted, reported |
+| duplicate | same open time twice in one source | first kept, reported |
+| bad_price | any OHLC <= 0, or high/low not containing open/close, or negative volume | bar dropped (then also a gap), reported |
+| zero_volume | run of >= 5 consecutive zero-volume bars | kept, reported once per run; shorter runs are normal on quiet pairs |
+| correction | stored bar's values differ from a re-imported source | new revision, reported |
+| outage | live feed failed and recovered | reported once per outage; bars backfilled with late availability |
+
+Tests: `data/TestCleanDetectsPlantedProblems`, `data/TestZeroVolumeRuns`, `data/TestGapPolicies`,
+`data/TestCorrectionCreatesNewVersionOldStaysReadable`.
