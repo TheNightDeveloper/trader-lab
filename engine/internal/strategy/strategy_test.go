@@ -50,6 +50,19 @@ func TestRegistryAndParams(t *testing.T) {
 	}
 }
 
+func TestParamSpecsMatchRegistry(t *testing.T) {
+	for _, name := range Names() {
+		specs, ok := ParamSpecs[name]
+		require.True(t, ok, name)
+		_, err := New(name, WithDefaults(name, nil)) // every declared param is accepted
+		require.NoError(t, err, name)
+		for _, s := range specs {
+			_, err := New(name, Params{s.Name: s.Default})
+			require.NoError(t, err, "%s.%s", name, s.Name)
+		}
+	}
+}
+
 func TestTrendEMACrosses(t *testing.T) {
 	s, err := New("trend-ema", Params{"fast": 2, "slow": 4})
 	require.NoError(t, err)

@@ -336,3 +336,39 @@ func BenchmarkMillionBars(b *testing.B) {
 		b.ReportMetric(float64(len(res.Fills)), "fills")
 	}
 }
+
+func TestCalcTradeMatchesRunAndBreakEven(t *testing.T) {
+	c, err := CalcTrade(px(101e8), px(109e8), money.Qty{V: 988_615_000, Scale: 8}, 1000, 500, instrument.USDT)
+	require.NoError(t, err)
+	// Same numbers as the golden round-trip-fees scenario.
+	require.Equal(t, "75.97510227 USDT", c.Net.String())
+	require.Equal(t, "79.08920000 USDT", c.Gross.String())
+	require.Equal(t, c.Gross.V-c.Slippage.V-c.Fees.V, c.Net.V)
+
+	be, err := BreakEvenExit(px(100e8), 1000, 500)
+	require.NoError(t, err)
+	at, err := CalcTrade(px(100e8), be, money.Qty{V: 1e8, Scale: 8}, 1000, 500, instrument.USDT)
+	require.NoError(t, err)
+	require.InDelta(t, 0, at.Net.V, 3, "break-even exit nets ~0 (per-leg rounding)")
+	below, err := CalcTrade(px(100e8), money.Price{V: be.V - 1e6, Scale: 8}, money.Qty{V: 1e8, Scale: 8}, 1000, 500, instrument.USDT)
+	require.NoError(t, err)
+	require.Negative(t, below.Net.V)
+
+	_, err = CalcTrade(px(0), px(1), money.Qty{V: 1, Scale: 8}, 0, 0, instrument.USDT)
+	require.ErrorIs(t, err, ErrInput)
+}
+
+func TestBreakEvenFee(t *testing.T) {
+	bars := []data.Bar{
+		bar("BTCUSDT", 0, 100, 100, 100, 100), bar("BTCUSDT", 1, 100, 100, 100, 100),
+		bar("BTCUSDT", 2, 110, 110, 110, 110), bar("BTCUSDT", 3, 110, 110, 110, 110),
+	}
+	res := run(t, cfg(), map[string][]data.Bar{"BTCUSDT": bars}, step(0, "BTCUSDT", money.RatioOne), step(1, "BTCUSDT", 0))
+	f, ok := BreakEvenFee(res)
+	require.True(t, ok)
+	c := cfg()
+	c.FeeRate = f
+	at := run(t, c, map[string][]data.Bar{"BTCUSDT": bars}, step(0, "BTCUSDT", money.RatioOne), step(1, "BTCUSDT", 0))
+	require.InDelta(t, 0, at.Trades[0].Net.V, 1e6, "within 0.01 USDT of zero at the break-even fee")
+	require.Greater(t, int64(f), int64(40_000), "~+10% gross covers ~4.7% per side")
+}

@@ -1,6 +1,7 @@
 package money
 
 import (
+	"encoding/json"
 	"errors"
 	"flag"
 	"math"
@@ -239,4 +240,30 @@ func TestNotionalRounding(t *testing.T) {
 	v, err := MulScaled(3, 0, 2, 0, 4, Floor)
 	require.NoError(t, err)
 	require.Equal(t, int64(60_000), v)
+}
+
+func TestJSONRoundTrip(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		scale := int32(rapid.IntRange(0, 12).Draw(t, "scale"))
+		a := Amount{V: rapid.Int64().Draw(t, "v"), Asset: Asset{"USDT", scale}}
+		r := Ratio(rapid.Int64Range(-2_000_000, 2_000_000).Draw(t, "r"))
+		in := struct {
+			A Amount
+			P Price
+			R Ratio
+		}{a, Price{a.V, scale}, r}
+		b, err := json.Marshal(in)
+		require.NoError(t, err)
+		var out struct {
+			A Amount
+			P Price
+			R Ratio
+		}
+		require.NoError(t, json.Unmarshal(b, &out))
+		require.Equal(t, in.A, out.A)
+		require.Equal(t, in.P, out.P)
+		require.Equal(t, in.R, out.R)
+	})
+	var a Amount
+	require.Error(t, json.Unmarshal([]byte(`"12.5"`), &a), "asset required")
 }

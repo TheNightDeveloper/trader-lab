@@ -73,6 +73,34 @@ var registry = map[string]func(Params) (Strategy, error){
 	"mean-rev-bands": newMeanRevBands,
 }
 
+// ParamSpec describes one tunable parameter: defaults for the UI and the
+// neighbourhood stability check (M3) and search space bounds (M4).
+type ParamSpec struct {
+	Name    string  `json:"name"`
+	Default float64 `json:"default"`
+	Integer bool    `json:"integer"`
+}
+
+// ParamSpecs lists a strategy's parameters in their natural order.
+var ParamSpecs = map[string][]ParamSpec{
+	"hold-cash":      nil,
+	"buy-and-hold":   {{"exposure", 1, false}},
+	"trend-ema":      {{"fast", 12, true}, {"slow", 26, true}, {"exposure", 1, false}},
+	"mean-rev-bands": {{"period", 20, true}, {"k", 2, false}, {"exposure", 1, false}},
+}
+
+// WithDefaults fills in every parameter of name that p does not set.
+func WithDefaults(name string, p Params) Params {
+	out := Params{}
+	for _, s := range ParamSpecs[name] {
+		out[s.Name] = s.Default
+	}
+	for k, v := range p {
+		out[k] = v
+	}
+	return out
+}
+
 // get returns p[key] or def; only() later rejects anything not read.
 func (p Params) only(keys ...string) error {
 	for k := range p {

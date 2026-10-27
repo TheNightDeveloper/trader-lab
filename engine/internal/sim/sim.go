@@ -33,19 +33,22 @@ const (
 )
 
 type Config struct {
-	Capital money.Amount // USDT
+	Capital money.Amount `json:"capital"` // USDT
 	// Holdings are optional starting balances in other assets (e.g. BTC to trade
 	// ETHBTC). They are cash, valued in USDT like everything else.
-	Holdings  []money.Amount
-	FeeRate   money.Ratio // per side
-	SlipRate  money.Ratio // per side
-	Sizing    Sizing
-	FixedUSDT money.Amount
+	Holdings  []money.Amount `json:"holdings,omitempty"`
+	FeeRate   money.Ratio    `json:"fee_rate"`  // per side
+	SlipRate  money.Ratio    `json:"slip_rate"` // per side
+	Sizing    Sizing         `json:"sizing"`
+	FixedUSDT money.Amount   `json:"fixed_usdt,omitzero"`
 	// LatencyBars: a decision on bar i fills at the open of bar i+LatencyBars (default 1).
-	LatencyBars int
+	LatencyBars int `json:"latency_bars"`
 	// IntentTTL: an intent not filled within this time expires (default 10m).
-	IntentTTL time.Duration
+	IntentTTL time.Duration `json:"intent_ttl"`
 }
+
+// Normalized validates c and fills in defaults.
+func (c Config) Normalized() (Config, error) { return c.normalized() }
 
 func (c Config) normalized() (Config, error) {
 	bad := func(f string, a ...any) (Config, error) {
