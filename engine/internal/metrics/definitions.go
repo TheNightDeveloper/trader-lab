@@ -37,3 +37,21 @@ var GroupLabels = []struct{ Key, Label string }{
 	{GroupRisk, "ریسک"},
 	{GroupTrades, "معامله‌ها"},
 }
+
+// UnitOf is each metric's unit and scale, known before any run (validating
+// experiment objectives and constraints).
+func UnitOf(key string) (Unit, int32, bool) {
+	switch key {
+	case "net_pnl", "gross_pnl", "fees", "slippage", "unrealized_pnl", "final_equity", "avg_win", "avg_loss", "best_trade", "worst_trade":
+		return USDT, 8, true
+	case "total_return", "max_drawdown", "exposure", "win_rate", "profit_factor":
+		return Ratio, 6, true
+	case "trades", "closed_trades":
+		return Count, 0, true
+	case "max_drawdown_duration", "avg_holding":
+		return Seconds, 0, true
+	case "sharpe":
+		return Number, 2, true
+	}
+	return "", 0, false
+}

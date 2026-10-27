@@ -30,6 +30,16 @@ type Spec struct {
 	Split      SplitPlan       `json:"split"`
 	// EngineVersion of the code that produced the report (reproducibility badge).
 	EngineVersion string `json:"engine_version"`
+	// Origin is set when the report is the chosen candidate of an experiment: the
+	// attempt count travels with it so every reader can discount for search.
+	Origin *Origin `json:"origin,omitempty"`
+}
+
+// Origin links a report to the search that produced it.
+type Origin struct {
+	ExperimentID string `json:"experiment_id"`
+	Attempts     int    `json:"attempts"` // every attempt of the experiment, failed and cancelled included
+	Candidates   int    `json:"candidates"`
 }
 
 // EquityPoint for charts (downsampled).
@@ -121,6 +131,50 @@ func (g gated) OnBar(ctx strategy.RunContext, b data.Bar) ([]strategy.Intent, er
 // one is single-threaded and deterministic, so the result does not depend on
 // scheduling.
 func Evaluate(ctx context.Context, spec Spec, bars map[string][]data.Bar, specs map[string]instrument.Spec) (*Evaluation, error) {
+	return EvaluateWith(ctx, spec, bars, specs, runtime.NumCPU())
+}
+
+// EvaluateOOS is the light evaluation used by search attempts: only the gated
+// out-of-sample run, no holdout, stress, neighbourhood or benchmarks. The
+// holdout is never looked at while choosing a candidate.
+func EvaluateOOS(ctx context.Context, spec Spec, bars map[string][]data.Bar, specs map[string]instrument.Spec) ([]metrics.Metric, error) {
+	s, err := strategy.New(spec.Strategy, spec.Params)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %w", ErrSpec, err)
+	}
+	cfg, err := spec.Sim.Normalized()
+	if err != nil {
+		return nil, fmt.Errorf("%w: %w", ErrSpec, err)
+	}
+	tfDur, err := tfDuration(spec.Timeframe)
+	if err != nil {
+		return nil, err
+	}
+	from, to, err := span(bars)
+	if err != nil {
+		return nil, err
+	}
+	split, err := spec.Split.withDefaults().Make(from, to, tfDur)
+	if err != nil {
+		return nil, err
+	}
+	oos := map[string][]data.Bar{}
+	for sym, bs := range bars {
+		i, _ := slices.BinarySearchFunc(bs, split.OOS.To, func(b data.Bar, t time.Time) int { return b.OpenTime.Compare(t) })
+		if i > 0 {
+			oos[sym] = bs[:i:i]
+		}
+	}
+	res, err := sim.Run(ctx, cfg, specs, oos, gated{s, split.OOS.From})
+	if err != nil {
+		return nil, err
+	}
+	return window(res, split.OOS, cfg.Capital.V), nil
+}
+
+// EvaluateWith is Evaluate with at most parallel simulator runs at once (the
+// research CPU share when called from the job queue).
+func EvaluateWith(ctx context.Context, spec Spec, bars map[string][]data.Bar, specs map[string]instrument.Spec, parallel int) (*Evaluation, error) {
 	if _, err := strategy.New(spec.Strategy, spec.Params); err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrSpec, err)
 	}
@@ -193,7 +247,7 @@ func Evaluate(ctx context.Context, spec Spec, bars map[string][]data.Bar, specs 
 	results := make([]*sim.Result, len(jobs))
 	errs := make([]error, len(jobs))
 	var wg sync.WaitGroup
-	sem := make(chan struct{}, runtime.NumCPU())
+	sem := make(chan struct{}, max(1, parallel))
 	for i, j := range jobs {
 		if j.params == nil {
 			errs[i] = errInvalidCell

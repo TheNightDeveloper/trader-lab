@@ -9,6 +9,44 @@ import (
 	"context"
 )
 
+// iteratorForCopyAttempts implements pgx.CopyFromSource.
+type iteratorForCopyAttempts struct {
+	rows                 []CopyAttemptsParams
+	skippedFirstNextCall bool
+}
+
+func (r *iteratorForCopyAttempts) Next() bool {
+	if len(r.rows) == 0 {
+		return false
+	}
+	if !r.skippedFirstNextCall {
+		r.skippedFirstNextCall = true
+		return true
+	}
+	r.rows = r.rows[1:]
+	return len(r.rows) > 0
+}
+
+func (r iteratorForCopyAttempts) Values() ([]interface{}, error) {
+	return []interface{}{
+		r.rows[0].ExperimentID,
+		r.rows[0].Seq,
+		r.rows[0].Candidate,
+		r.rows[0].Params,
+		r.rows[0].DatasetID,
+		r.rows[0].Symbol,
+		r.rows[0].Status,
+	}, nil
+}
+
+func (r iteratorForCopyAttempts) Err() error {
+	return nil
+}
+
+func (q *Queries) CopyAttempts(ctx context.Context, arg []CopyAttemptsParams) (int64, error) {
+	return q.db.CopyFrom(ctx, []string{"attempts"}, []string{"experiment_id", "seq", "candidate", "params", "dataset_id", "symbol", "status"}, &iteratorForCopyAttempts{rows: arg})
+}
+
 // iteratorForCopyDecisions implements pgx.CopyFromSource.
 type iteratorForCopyDecisions struct {
 	rows                 []CopyDecisionsParams

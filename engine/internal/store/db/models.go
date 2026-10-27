@@ -8,6 +8,41 @@ import (
 	"time"
 )
 
+type Algorithm struct {
+	ID          string
+	Family      string
+	Description string
+}
+
+type AlgorithmVersion struct {
+	ID          string
+	AlgorithmID string
+	Version     int32
+	ContentHash string
+	Definition  []byte
+	State       string
+	CreatedAt   time.Time
+}
+
+type Attempt struct {
+	ExperimentID string
+	Seq          int32
+	Candidate    int32
+	Params       []byte
+	DatasetID    string
+	Symbol       string
+	Status       string
+	Failure      string
+	Cache        string
+	CacheKey     string
+	Metrics      []byte
+	Eligible     *bool
+	Violations   []byte
+	Runs         int32
+	StartedAt    *time.Time
+	FinishedAt   *time.Time
+}
+
 type Candle struct {
 	Symbol      string
 	OpenTime    time.Time
@@ -53,6 +88,17 @@ type Decision struct {
 	RecipeVersion string
 	Outcome       string
 	Detail        string
+}
+
+type Experiment struct {
+	ID         string
+	Name       string
+	Definition []byte
+	Status     string
+	CreatedAt  time.Time
+	FinishedAt *time.Time
+	Result     []byte
+	Error      string
 }
 
 type Fill struct {
@@ -114,6 +160,16 @@ type Instrument struct {
 	MinNotional int64
 }
 
+type LifecycleEvent struct {
+	ID        int64
+	VersionID string
+	FromState string
+	ToState   string
+	Note      string
+	Actor     string
+	At        time.Time
+}
+
 type QualityIssue struct {
 	ID         int64
 	Symbol     string
@@ -137,6 +193,12 @@ type Report struct {
 	ClosedTrades int32
 	Verdict      string
 	Tone         string
+}
+
+type RunCache struct {
+	Key       string
+	Metrics   []byte
+	CreatedAt time.Time
 }
 
 type Setting struct {

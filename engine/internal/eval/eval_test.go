@@ -139,6 +139,15 @@ func TestEvaluateDeterministicDespiteParallelRuns(t *testing.T) {
 	require.Equal(t, string(ha), string(hb))
 }
 
+func TestEvaluateOOSMatchesFullEvaluation(t *testing.T) {
+	bars := map[string][]data.Bar{"BTCUSDT": walk("BTCUSDT", 8_000, 4)}
+	ev, err := Evaluate(context.Background(), testSpec(), bars, specs())
+	require.NoError(t, err)
+	light, err := EvaluateOOS(context.Background(), testSpec(), bars, specs())
+	require.NoError(t, err)
+	require.Equal(t, ev.OOS.Metrics, light, "the light run is the same OOS run")
+}
+
 func TestEvaluateRejectsBadSpecs(t *testing.T) {
 	bars := map[string][]data.Bar{"BTCUSDT": walk("BTCUSDT", 2_000, 1)}
 	s := testSpec()

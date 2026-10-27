@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"maps"
+	"runtime"
 	"slices"
 	"strings"
 
@@ -37,8 +38,9 @@ const (
 )
 
 type Service struct {
-	Store   *store.Store
-	Version string // engine version recorded in every report
+	Store    *store.Store
+	Version  string // engine version recorded in every report
+	Parallel int    // simulator runs at once per report; 0 = all CPUs
 }
 
 // Stored is a report as read back.
@@ -108,6 +110,21 @@ func (s Service) Create(ctx context.Context, spec eval.Spec) (string, error) {
 	return id, s.persist(ctx, id, bars, ev)
 }
 
+// CreateWithID is Create under a caller-chosen id, idempotent: if the report
+// already exists it is left as is (a finalization re-run after a crash must not
+// create a second report).
+func (s Service) CreateWithID(ctx context.Context, id string, spec eval.Spec) error {
+	if ok, err := s.Store.ReportExists(ctx, id); err != nil || ok {
+		return err
+	}
+	spec.EngineVersion = s.Version
+	ev, bars, err := s.evaluate(ctx, spec)
+	if err != nil {
+		return err
+	}
+	return s.persist(ctx, id, bars, ev)
+}
+
 // evaluate loads the datasets, evaluates spec and adds the data-quality badge.
 func (s Service) evaluate(ctx context.Context, spec eval.Spec) (*eval.Evaluation, map[string][]data.Bar, error) {
 	bars, tf, gaps, err := s.bars(ctx, spec.DatasetIDs)
@@ -115,7 +132,11 @@ func (s Service) evaluate(ctx context.Context, spec eval.Spec) (*eval.Evaluation
 		return nil, nil, err
 	}
 	spec.Timeframe = tf
-	ev, err := eval.Evaluate(ctx, spec, bars, Specs())
+	parallel := s.Parallel
+	if parallel <= 0 {
+		parallel = runtime.NumCPU()
+	}
+	ev, err := eval.EvaluateWith(ctx, spec, bars, Specs(), parallel)
 	if err != nil {
 		return nil, nil, err
 	}

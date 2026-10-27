@@ -113,3 +113,13 @@ func TestSharpeMatchesReference(t *testing.T) {
 	flat := Compute(Input{Start: t0, End: t0.Add(40 * 24 * time.Hour), Initial: 1000e8})
 	require.Contains(t, get(t, flat, "sharpe").Invalid, "نوسان")
 }
+
+func TestUnitOfMatchesCompute(t *testing.T) {
+	ms := Compute(Input{Start: t0, End: t0.Add(time.Hour), Initial: 1})
+	for _, m := range ms {
+		u, s, ok := UnitOf(m.Key)
+		require.True(t, ok, m.Key)
+		require.Equal(t, m.Unit, u, m.Key)
+		require.Equal(t, m.Scale, s, m.Key)
+	}
+}
