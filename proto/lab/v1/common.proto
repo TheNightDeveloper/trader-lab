@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package lab.v1;
+
+// Fixed-point money. value = units × 10^-scale. Clients must parse units as an exact
+// decimal (Dart: package:decimal), never as a float or a web int.
+message Money {
+  string units = 1; // signed base-10 integer, e.g. "-125000000"
+  int32 scale = 2;
+  string asset = 3; // "USDT", "BTC", "TOMAN", ...
+}

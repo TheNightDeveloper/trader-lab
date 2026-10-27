@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package lab.v1;
+
+import "lab/v1/common.proto";
+
+// HealthService feeds the sidebar status block.
+service HealthService {
+  // Sends the current status immediately, then on every change or heartbeat.
+  rpc Watch(WatchRequest) returns (stream WatchResponse);
+}
+
+message WatchRequest {}
+
+message WatchResponse {
+  EngineStatus status = 1;
+}
+
+message EngineStatus {
+  string version = 1;
+  RunMode mode = 2;
+  string accounting_asset = 3; // always "USDT" in v1
+  LiveData live = 4;
+  Workers workers = 5;
+  DisplayRate display_rate = 6; // unset when no USDT/TOMAN rate has been entered
+  int64 server_time_unix_ms = 7;
+}
+
+enum RunMode {
+  RUN_MODE_UNSPECIFIED = 0;
+  RUN_MODE_RESEARCH = 1; // no real orders can be sent
+}
+
+message LiveData {
+  LiveState state = 1;
+  int64 last_bar_age_seconds = 2; // 0 when state is OFF
+}
+
+enum LiveState {
+  LIVE_STATE_UNSPECIFIED = 0;
+  LIVE_STATE_OFF = 1;
+  LIVE_STATE_FRESH = 2;
+  LIVE_STATE_STALE = 3;
+  LIVE_STATE_RECONNECTING = 4;
+}
+
+message Workers {
+  WorkerState state = 1;
+  int32 count = 2;
+  int32 busy = 3;
+}
+
+enum WorkerState {
+  WORKER_STATE_UNSPECIFIED = 0;
+  WORKER_STATE_RUNNING = 1;
+  WORKER_STATE_PAUSED = 2;
+}
+
+message DisplayRate {
+  string rate_id = 1;
+  Money toman_per_usdt = 2;
+  string as_of_date = 3; // YYYY-MM-DD
+  string source = 4;     // "manual" in v1
+}

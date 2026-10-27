@@ -1,0 +1,20 @@
+version: v2
+clean: true
+managed:
+  enabled: true
+  override:
+    - file_option: go_package_prefix
+      value: tradinglab/engine/internal/gen
+plugins:
+  - local: protoc-gen-go
+    out: engine/internal/gen
+    opt: paths=source_relative
+  - local: protoc-gen-connect-go
+    out: engine/internal/gen
+    opt: paths=source_relative
+  # Dart plugins: `dart pub global activate protoc_plugin` and `... connectrpc`.
+  # Versions must match app/pubspec.yaml (protobuf ^6, connectrpc ^2).
+  - local: protoc-gen-dart
+    out: app/lib/gen
+  - local: protoc-gen-connect-dart
+    out: app/lib/gen
