@@ -37,7 +37,7 @@ type Summary struct {
 
 // ltr isolates a number inside RTL text (U+2066 … U+2069) so signs and digits
 // keep their order.
-func ltr(s string) string { return "⁦" + s + "⁩" }
+func ltr(s string) string { return "\u2066" + s + "\u2069" }
 
 // Pct formats a ppm ratio as a signed percent with two decimals: "+3.21%".
 func Pct(v int64) string {
