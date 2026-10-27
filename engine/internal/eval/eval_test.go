@@ -107,6 +107,10 @@ func TestEvaluateIdentitiesAndIsolation(t *testing.T) {
 	require.True(t, ev.Grid.Cells[1][1].Center)
 	require.Equal(t, get(t, ev.OOS.Metrics, "total_return"), ev.Grid.Cells[1][1].Return)
 
+	require.Len(t, ev.Benchmarks, 2)
+	require.Equal(t, "hold_cash", ev.Benchmarks[1].Key)
+	require.Zero(t, ev.Benchmarks[1].Return.V, "cash earns nothing")
+	require.Equal(t, Window{t0, t0.Add(20_000 * time.Minute)}, ev.Range)
 	require.Len(t, ev.Stress, 3)
 	for _, s := range ev.Stress {
 		require.Empty(t, s.Error, s.Key)
@@ -159,6 +163,7 @@ func TestCompareEligibility(t *testing.T) {
 		}
 	}
 	require.True(t, fee.Differs)
+	require.Contains(t, c.Conclusion, "رتبه‌بندی قطعی ممکن نیست", "no trades: no ranking")
 	require.Equal(t, []string{"+0.10%", "+0.10%", "+0.20%"}, fee.Values)
 }
 
@@ -173,7 +178,7 @@ func TestReplayReproducesNetExactly(t *testing.T) {
 	bars := map[string][]data.Bar{"BTCUSDT": walk("BTCUSDT", 12_000, 5)}
 	ev, err := Evaluate(context.Background(), testSpec(), bars, specs())
 	require.NoError(t, err)
-	v, res, err := Replay(context.Background(), ev.Split, ev.Main.Decisions, ev.Spec.Sim, bars, specs())
+	v, res, err := Replay(context.Background(), ev.Split, ev.Main.Decisions, ev.Spec.Sim, money.RatioOne, bars, specs())
 	require.NoError(t, err)
 	require.Equal(t, get(t, ev.OOS.Metrics, "net_pnl").V, get(t, v.Metrics, "net_pnl").V)
 	require.Equal(t, ev.Main.Fills, res.Fills, "identical fills, not just the same total")
@@ -181,7 +186,14 @@ func TestReplayReproducesNetExactly(t *testing.T) {
 	// Overrides change the numbers: double capital roughly doubles the sizes.
 	c := ev.Spec.Sim
 	c.Capital.V *= 2
-	v2, _, err := Replay(context.Background(), ev.Split, ev.Main.Decisions, c, bars, specs())
+	v2, _, err := Replay(context.Background(), ev.Split, ev.Main.Decisions, c, money.RatioOne, bars, specs())
 	require.NoError(t, err)
 	require.NotEqual(t, get(t, v.Metrics, "net_pnl").V, get(t, v2.Metrics, "net_pnl").V)
+
+	// Half the position size: smaller, different fills.
+	_, half, err := Replay(context.Background(), ev.Split, ev.Main.Decisions, ev.Spec.Sim, money.RatioOne/2, bars, specs())
+	require.NoError(t, err)
+	require.Less(t, half.Fills[0].Qty.V, res.Fills[0].Qty.V)
+	_, _, err = Replay(context.Background(), ev.Split, ev.Main.Decisions, ev.Spec.Sim, 0, bars, specs())
+	require.ErrorIs(t, err, ErrSpec)
 }

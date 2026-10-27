@@ -28,6 +28,8 @@ type Spec struct {
 	Params     strategy.Params `json:"params"` // complete: defaults filled in
 	Sim        sim.Config      `json:"sim"`
 	Split      SplitPlan       `json:"split"`
+	// EngineVersion of the code that produced the report (reproducibility badge).
+	EngineVersion string `json:"engine_version"`
 }
 
 // EquityPoint for charts (downsampled).
@@ -71,17 +73,29 @@ type GridCell struct {
 	Invalid string         `json:"invalid,omitempty"`
 }
 
+// Benchmark is a reference curve over the same out-of-sample window and costs.
+type Benchmark struct {
+	Key    string         `json:"key"` // buy_and_hold | hold_cash
+	Equity []EquityPoint  `json:"equity"`
+	Return metrics.Metric `json:"return"`
+}
+
 // Evaluation is a complete report's numbers. Main and HoldoutRun carry the full
 // simulator records for persistence; the holdout view is hidden by the API.
 type Evaluation struct {
-	Spec    Spec         `json:"spec"`
-	Split   Split        `json:"split"`
-	OOS     RunView      `json:"oos"`
-	Folds   []FoldView   `json:"folds"`
-	Stress  []StressView `json:"stress"`
-	Grid    *Grid        `json:"grid,omitempty"`
-	Summary Summary      `json:"summary"`
-	Holdout RunView      `json:"-"`
+	Spec  Spec    `json:"spec"`
+	Range Window  `json:"range"` // all bars, for chart regions: in-sample | OOS | holdout
+	Split Split   `json:"split"`
+	OOS   RunView `json:"oos"`
+	// BreakEvenFee: per-side fee at which the OOS net would be zero, holding its
+	// trades and slippage fixed. Nil when no fee makes it profitable.
+	BreakEvenFee *money.Ratio `json:"break_even_fee,omitempty"`
+	Benchmarks   []Benchmark  `json:"benchmarks"`
+	Folds        []FoldView   `json:"folds"`
+	Stress       []StressView `json:"stress"`
+	Grid         *Grid        `json:"grid,omitempty"`
+	Summary      Summary      `json:"summary"`
+	Holdout      RunView      `json:"-"`
 
 	Main       *sim.Result `json:"-"`
 	HoldoutRun *sim.Result `json:"-"`
@@ -127,7 +141,7 @@ func Evaluate(ctx context.Context, spec Spec, bars map[string][]data.Bar, specs 
 	if err != nil {
 		return nil, err
 	}
-	ev := &Evaluation{Spec: spec, Split: split}
+	ev := &Evaluation{Spec: spec, Range: Window{from, to}, Split: split}
 
 	upTo := func(end time.Time) map[string][]data.Bar {
 		out := map[string][]data.Bar{}
@@ -142,21 +156,28 @@ func Evaluate(ctx context.Context, spec Spec, bars map[string][]data.Bar, specs 
 	oosBars, allBars := upTo(split.OOS.To), bars
 
 	type job struct {
-		cfg    sim.Config
-		params strategy.Params
-		bars   map[string][]data.Bar
-		from   time.Time
+		cfg      sim.Config
+		params   strategy.Params
+		bars     map[string][]data.Bar
+		from     time.Time
+		strategy string // empty: spec.Strategy
 	}
 	jobs := []job{
-		{cfg, spec.Params, oosBars, split.OOS.From},                  // 0: main (out of sample)
-		{cfg, spec.Params, allBars, split.Holdout.From},              // 1: holdout
-		{stress(cfg, 2, 1, 0), spec.Params, oosBars, split.OOS.From}, // 2..4: stress
-		{stress(cfg, 1, 3, 0), spec.Params, oosBars, split.OOS.From},
-		{stress(cfg, 1, 1, 1), spec.Params, oosBars, split.OOS.From},
+		{cfg, spec.Params, oosBars, split.OOS.From, ""},                  // 0: main (out of sample)
+		{cfg, spec.Params, allBars, split.Holdout.From, ""},              // 1: holdout
+		{stress(cfg, 2, 1, 0), spec.Params, oosBars, split.OOS.From, ""}, // 2..4: stress
+		{stress(cfg, 1, 3, 0), spec.Params, oosBars, split.OOS.From, ""},
+		{stress(cfg, 1, 1, 1), spec.Params, oosBars, split.OOS.From, ""},
 	}
+	// 5, 6: benchmarks — buy and hold (equal split across symbols) and cash.
+	bhParams := strategy.Params{"exposure": float64(int64(money.RatioOne)/int64(len(oosBars))) / float64(money.RatioOne)}
+	jobs = append(jobs,
+		job{cfg, bhParams, oosBars, split.OOS.From, "buy-and-hold"},
+		job{cfg, strategy.Params{}, oosBars, split.OOS.From, "hold-cash"},
+	)
 	grid, gridParams := neighbourhood(spec.Strategy, spec.Params)
 	for _, p := range gridParams {
-		jobs = append(jobs, job{cfg, p, oosBars, split.OOS.From})
+		jobs = append(jobs, job{cfg, p, oosBars, split.OOS.From, ""})
 	}
 
 	results := make([]*sim.Result, len(jobs))
@@ -173,7 +194,11 @@ func Evaluate(ctx context.Context, spec Spec, bars map[string][]data.Bar, specs 
 			defer wg.Done()
 			sem <- struct{}{}
 			defer func() { <-sem }()
-			s, err := strategy.New(spec.Strategy, j.params)
+			name := spec.Strategy
+			if j.strategy != "" {
+				name = j.strategy
+			}
+			s, err := strategy.New(name, j.params)
 			if err != nil {
 				errs[i] = err
 				return
@@ -210,7 +235,7 @@ func Evaluate(ctx context.Context, spec Spec, bars map[string][]data.Bar, specs 
 	if grid != nil {
 		for y := range grid.Cells {
 			for x := range grid.Cells[y] {
-				i := 5 + y*len(grid.Xs) + x
+				i := 7 + y*len(grid.Xs) + x
 				c := &grid.Cells[y][x]
 				switch {
 				case errors.Is(errs[i], errInvalidCell):
@@ -223,6 +248,17 @@ func Evaluate(ctx context.Context, spec Spec, bars map[string][]data.Bar, specs 
 			}
 		}
 		ev.Grid = grid
+	}
+	for k, key := range []string{"buy_and_hold", "hold_cash"} {
+		if errs[5+k] != nil {
+			continue // a benchmark that cannot run (e.g. no rate yet) is simply not drawn
+		}
+		bv := view(results[5+k], split.OOS, cfg.Capital.V)
+		ret, _ := metrics.Get(bv.Metrics, "total_return")
+		ev.Benchmarks = append(ev.Benchmarks, Benchmark{Key: key, Equity: bv.Equity, Return: ret})
+	}
+	if f, ok := sim.BreakEvenFee(results[0]); ok {
+		ev.BreakEvenFee = &f
 	}
 	ev.Summary = summarize(ev)
 	return ev, nil
@@ -387,7 +423,10 @@ func StepsFrom(ds []sim.Decision) []strategy.Step {
 // Replay re-runs a report's recorded out-of-sample intents with cfg (capital,
 // sizing, costs may differ). With the report's own config it reproduces the
 // original run exactly; it is what the P&L calculator recomputes.
-func Replay(ctx context.Context, split Split, ds []sim.Decision, cfg sim.Config, bars map[string][]data.Bar, specs map[string]instrument.Spec) (RunView, *sim.Result, error) {
+//
+// scale multiplies every non-zero target exposure (RatioOne = as recorded), capped
+// at 100%: "enter with X% of equity" in the calculator.
+func Replay(ctx context.Context, split Split, ds []sim.Decision, cfg sim.Config, scale money.Ratio, bars map[string][]data.Bar, specs map[string]instrument.Spec) (RunView, *sim.Result, error) {
 	cfg, err := cfg.Normalized()
 	if err != nil {
 		return RunView{}, nil, fmt.Errorf("%w: %w", ErrSpec, err)
@@ -399,7 +438,18 @@ func Replay(ctx context.Context, split Split, ds []sim.Decision, cfg sim.Config,
 			oos[s] = bs[:i:i]
 		}
 	}
-	res, err := sim.Run(ctx, cfg, specs, oos, strategy.NewScripted(StepsFrom(ds)))
+	if scale <= 0 || scale > money.RatioOne {
+		return RunView{}, nil, fmt.Errorf("%w: position size must be in (0%%, 100%%]", ErrSpec)
+	}
+	steps := StepsFrom(ds)
+	for i := range steps {
+		t := &steps[i].Intent.Target
+		if *t > 0 {
+			v, _ := scale.Apply(int64(*t), money.Floor)
+			*t = money.Ratio(min(v, int64(money.RatioOne)))
+		}
+	}
+	res, err := sim.Run(ctx, cfg, specs, oos, strategy.NewScripted(steps))
 	if err != nil {
 		return RunView{}, nil, err
 	}

@@ -37,7 +37,8 @@ const (
 )
 
 type Service struct {
-	Store *store.Store
+	Store   *store.Store
+	Version string // engine version recorded in every report
 }
 
 // Stored is a report as read back.
@@ -60,39 +61,43 @@ func Specs() map[string]instrument.Spec {
 // Bars loads and verifies every dataset of spec (content hash checked) and
 // returns bars per symbol at the datasets' common timeframe.
 func (s Service) Bars(ctx context.Context, ids []string) (map[string][]data.Bar, data.Timeframe, error) {
+	bars, tf, _, err := s.bars(ctx, ids)
+	return bars, tf, err
+}
+
+// bars also returns the datasets' total gap count (data-quality badge).
+func (s Service) bars(ctx context.Context, ids []string) (map[string][]data.Bar, data.Timeframe, int, error) {
 	if len(ids) == 0 {
-		return nil, "", fmt.Errorf("%w: choose at least one dataset", ErrInput)
+		return nil, "", 0, fmt.Errorf("%w: choose at least one dataset", ErrInput)
 	}
+	gaps := 0
 	bars := map[string][]data.Bar{}
 	var tf data.Timeframe
 	for _, id := range ids {
 		ds, bs, err := data.LoadDataset(ctx, s.Store, id)
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, "", fmt.Errorf("%w: dataset %s not found", ErrInput, id)
+			return nil, "", 0, fmt.Errorf("%w: dataset %s not found", ErrInput, id)
 		}
 		if err != nil {
-			return nil, "", err
+			return nil, "", 0, err
 		}
 		if tf != "" && ds.Spec.Timeframe != tf {
-			return nil, "", fmt.Errorf("%w: datasets must share one timeframe (%s vs %s)", ErrInput, tf, ds.Spec.Timeframe)
+			return nil, "", 0, fmt.Errorf("%w: datasets must share one timeframe (%s vs %s)", ErrInput, tf, ds.Spec.Timeframe)
 		}
 		tf = ds.Spec.Timeframe
 		if _, dup := bars[ds.Spec.Symbol]; dup {
-			return nil, "", fmt.Errorf("%w: two datasets for %s", ErrInput, ds.Spec.Symbol)
+			return nil, "", 0, fmt.Errorf("%w: two datasets for %s", ErrInput, ds.Spec.Symbol)
 		}
 		bars[ds.Spec.Symbol] = bs
+		gaps += ds.Gaps
 	}
-	return bars, tf, nil
+	return bars, tf, gaps, nil
 }
 
 // Create evaluates spec over its datasets and stores the report.
 func (s Service) Create(ctx context.Context, spec eval.Spec) (string, error) {
-	bars, tf, err := s.Bars(ctx, spec.DatasetIDs)
-	if err != nil {
-		return "", err
-	}
-	spec.Timeframe = tf
-	ev, err := eval.Evaluate(ctx, spec, bars, Specs())
+	spec.EngineVersion = s.Version
+	ev, bars, err := s.evaluate(ctx, spec)
 	if err != nil {
 		return "", err
 	}
@@ -101,6 +106,64 @@ func (s Service) Create(ctx context.Context, spec eval.Spec) (string, error) {
 		return "", err
 	}
 	return id, s.persist(ctx, id, bars, ev)
+}
+
+// evaluate loads the datasets, evaluates spec and adds the data-quality badge.
+func (s Service) evaluate(ctx context.Context, spec eval.Spec) (*eval.Evaluation, map[string][]data.Bar, error) {
+	bars, tf, gaps, err := s.bars(ctx, spec.DatasetIDs)
+	if err != nil {
+		return nil, nil, err
+	}
+	spec.Timeframe = tf
+	ev, err := eval.Evaluate(ctx, spec, bars, Specs())
+	if err != nil {
+		return nil, nil, err
+	}
+	if gaps > 0 {
+		ev.Summary.Badges = append(ev.Summary.Badges, eval.Badge{Kind: "data_gaps", Text: fmt.Sprintf("هشدار کیفیت داده: %d شکاف", gaps), Tone: eval.Warning})
+	}
+	return ev, bars, nil
+}
+
+// Reproduce re-evaluates a stored report from its recorded inputs and reports
+// whether every number came out identical (invariant 1).
+func (s Service) Reproduce(ctx context.Context, id string) (bool, error) {
+	row, err := s.Store.GetReport(ctx, id)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return false, fmt.Errorf("%w: %s", ErrNotFound, id)
+	}
+	if err != nil {
+		return false, err
+	}
+	var spec eval.Spec
+	if err := json.Unmarshal(row.Spec, &spec); err != nil {
+		return false, err
+	}
+	ev, _, err := s.evaluate(ctx, spec)
+	if err != nil {
+		return false, err
+	}
+	evJ, err := json.Marshal(ev)
+	if err != nil {
+		return false, err
+	}
+	holdJ, err := json.Marshal(ev.Holdout)
+	if err != nil {
+		return false, err
+	}
+	return jsonEqual(evJ, row.Evaluation) && jsonEqual(holdJ, row.Holdout), nil
+}
+
+// jsonEqual compares JSON by value: PostgreSQL jsonb normalizes key order and
+// whitespace, so stored bytes differ from freshly marshalled ones.
+func jsonEqual(a, b []byte) bool {
+	var x, y any
+	if json.Unmarshal(a, &x) != nil || json.Unmarshal(b, &y) != nil {
+		return false
+	}
+	ja, _ := json.Marshal(x)
+	jb, _ := json.Marshal(y)
+	return string(ja) == string(jb)
 }
 
 func newID() (string, error) {
@@ -258,7 +321,7 @@ func (s Service) Decisions(ctx context.Context, id, run string) ([]sim.Decision,
 }
 
 // Recalculate replays a report's recorded out-of-sample intents with cfg.
-func (s Service) Recalculate(ctx context.Context, id string, cfg sim.Config) (eval.RunView, *sim.Result, error) {
+func (s Service) Recalculate(ctx context.Context, id string, cfg sim.Config, scale money.Ratio) (eval.RunView, *sim.Result, error) {
 	st, err := s.Load(ctx, id)
 	if err != nil {
 		return eval.RunView{}, nil, err
@@ -271,5 +334,5 @@ func (s Service) Recalculate(ctx context.Context, id string, cfg sim.Config) (ev
 	if err != nil {
 		return eval.RunView{}, nil, err
 	}
-	return eval.Replay(ctx, st.Split, ds, cfg, bars, Specs())
+	return eval.Replay(ctx, st.Split, ds, cfg, scale, bars, Specs())
 }

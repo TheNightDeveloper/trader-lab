@@ -70,7 +70,7 @@ func spec(ds string) eval.Spec {
 func TestCreateLoadViewRecalculate(t *testing.T) {
 	st, ds := setup(t)
 	ctx := context.Background()
-	svc := Service{Store: st}
+	svc := Service{Store: st, Version: "test-1"}
 
 	id, err := svc.Create(ctx, spec(ds))
 	require.NoError(t, err)
@@ -79,6 +79,7 @@ func TestCreateLoadViewRecalculate(t *testing.T) {
 	require.Equal(t, data.TF1m, got.Spec.Timeframe)
 	require.Equal(t, "trend-ema · BTCUSDT · 1m", got.Row.Title)
 	require.Len(t, got.Evaluation.Folds, 3)
+	require.Equal(t, "test-1", got.Spec.EngineVersion)
 	require.Zero(t, got.Views)
 
 	net, _ := metrics.Get(got.Evaluation.OOS.Metrics, "net_pnl")
@@ -103,10 +104,14 @@ func TestCreateLoadViewRecalculate(t *testing.T) {
 	require.EqualValues(t, 2, views)
 
 	// Plan M3 acceptance: the calculator with default inputs reproduces the net exactly.
-	v, _, err := svc.Recalculate(ctx, id, got.Spec.Sim)
+	v, _, err := svc.Recalculate(ctx, id, got.Spec.Sim, money.RatioOne)
 	require.NoError(t, err)
 	re, _ := metrics.Get(v.Metrics, "net_pnl")
 	require.Equal(t, net.V, re.V)
+
+	same, err := svc.Reproduce(ctx, id)
+	require.NoError(t, err)
+	require.True(t, same, "re-evaluation from stored inputs is identical")
 
 	_, err = svc.Load(ctx, "rp_missing")
 	require.ErrorIs(t, err, ErrNotFound)
