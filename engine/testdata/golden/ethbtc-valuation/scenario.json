@@ -1,0 +1,22 @@
+{
+  "description": "start with 1000 USDT + 0.02 BTC; buy ETH with BTC on ETHBTC (flat). BTCUSDT rises 2% a bar, so equity in USDT rises with it: ETH via ETHBTC \u00d7 BTCUSDT, BTC via BTCUSDT.",
+  "config": {
+    "capital": "1000",
+    "fee": "0.001",
+    "slippage": "0.0005",
+    "holdings": {
+      "BTC": "0.02"
+    }
+  },
+  "strategy": {
+    "name": "scripted"
+  },
+  "steps": [
+    {
+      "at": "2024-01-01T00:00:00Z",
+      "instrument": "ETHBTC",
+      "target": "0.3",
+      "reason": "rotate some BTC into ETH"
+    }
+  ]
+}

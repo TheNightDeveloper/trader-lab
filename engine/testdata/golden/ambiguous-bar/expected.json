@@ -1,0 +1,100 @@
+{
+  "decisions": [
+    {
+      "id": 1,
+      "at": "2024-01-01T00:01:02Z",
+      "input_symbol": "BTCUSDT",
+      "input_bar_open": "2024-01-01T00:00:00Z",
+      "instrument": "BTCUSDT",
+      "target": "1.000000",
+      "stop_loss": "0.020000",
+      "take_profit": "0.020000",
+      "reason": "enter with stop and take",
+      "outcome": "filled"
+    }
+  ],
+  "fills": [
+    {
+      "decision_id": 1,
+      "time": "2024-01-01T00:01:00Z",
+      "instrument": "BTCUSDT",
+      "side": "buy",
+      "kind": "signal",
+      "qty": "9.98501000",
+      "ref_price": "100.00000000",
+      "price": "100.05000000",
+      "ref_value": "998.50100000 USDT",
+      "value": "999.00025050 USDT",
+      "slippage": "0.49925050 USDT",
+      "fee": "0.99900026 USDT",
+      "ref_value_usdt": "998.50100000 USDT",
+      "slippage_usdt": "0.49925050 USDT",
+      "fee_usdt": "0.99900026 USDT"
+    },
+    {
+      "time": "2024-01-01T00:02:00Z",
+      "instrument": "BTCUSDT",
+      "side": "sell",
+      "kind": "stop",
+      "qty": "9.98501000",
+      "ref_price": "98.04900000",
+      "price": "97.99997550",
+      "ref_value": "979.02024549 USDT",
+      "value": "978.53073536 USDT",
+      "slippage": "0.48951013 USDT",
+      "fee": "0.97853074 USDT",
+      "ref_value_usdt": "979.02024549 USDT",
+      "slippage_usdt": "0.48951013 USDT",
+      "fee_usdt": "0.97853074 USDT",
+      "ambiguous": true
+    }
+  ],
+  "trades": [
+    {
+      "instrument": "BTCUSDT",
+      "opened_at": "2024-01-01T00:01:00Z",
+      "closed_at": "2024-01-01T00:02:00Z",
+      "qty": "9.98501000",
+      "entry_ref": "998.50100000 USDT",
+      "exit_ref": "979.02024549 USDT",
+      "gross": "-19.48075451 USDT",
+      "slippage": "0.98876063 USDT",
+      "fees": "1.97753100 USDT",
+      "net": "-22.44704614 USDT",
+      "exit_reason": "stop loss",
+      "ambiguous_bars": 1,
+      "open_qty": "0.00000000"
+    }
+  ],
+  "equity": [
+    {
+      "time": "2024-01-01T00:01:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:02:00Z",
+      "equity": "998.50174924 USDT"
+    },
+    {
+      "time": "2024-01-01T00:03:00Z",
+      "equity": "977.55295386 USDT"
+    },
+    {
+      "time": "2024-01-01T00:04:00Z",
+      "equity": "977.55295386 USDT"
+    }
+  ],
+  "balances": [
+    {
+      "asset": "BTC",
+      "amount": "0.00000000 BTC"
+    },
+    {
+      "asset": "USDT",
+      "amount": "977.55295386 USDT"
+    }
+  ],
+  "final_equity": "977.55295386 USDT",
+  "ambiguous_bars": 1,
+  "bars": 4
+}

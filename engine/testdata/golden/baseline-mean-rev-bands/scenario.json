@@ -1,0 +1,16 @@
+{
+  "description": "mean-rev-bands period 20, k 2 over a choppy series with sharp dips",
+  "config": {
+    "capital": "1000",
+    "fee": "0.001",
+    "slippage": "0.0005"
+  },
+  "strategy": {
+    "name": "mean-rev-bands",
+    "params": {
+      "period": 20,
+      "k": 2
+    }
+  },
+  "steps": []
+}

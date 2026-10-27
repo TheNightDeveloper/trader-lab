@@ -1,0 +1,882 @@
+{
+  "decisions": [
+    {
+      "id": 1,
+      "at": "2024-01-01T00:33:02Z",
+      "input_symbol": "BTCUSDT",
+      "input_bar_open": "2024-01-01T00:32:00Z",
+      "instrument": "BTCUSDT",
+      "target": "1.000000",
+      "stop_loss": "0.000000",
+      "take_profit": "0.000000",
+      "reason": "close re-entered the lower band",
+      "outcome": "filled"
+    },
+    {
+      "id": 2,
+      "at": "2024-01-01T00:38:02Z",
+      "input_symbol": "BTCUSDT",
+      "input_bar_open": "2024-01-01T00:37:00Z",
+      "instrument": "BTCUSDT",
+      "target": "0.000000",
+      "stop_loss": "0.000000",
+      "take_profit": "0.000000",
+      "reason": "close reached the middle band",
+      "outcome": "filled"
+    },
+    {
+      "id": 3,
+      "at": "2024-01-01T01:10:02Z",
+      "input_symbol": "BTCUSDT",
+      "input_bar_open": "2024-01-01T01:09:00Z",
+      "instrument": "BTCUSDT",
+      "target": "1.000000",
+      "stop_loss": "0.000000",
+      "take_profit": "0.000000",
+      "reason": "close re-entered the lower band",
+      "outcome": "filled"
+    },
+    {
+      "id": 4,
+      "at": "2024-01-01T01:16:02Z",
+      "input_symbol": "BTCUSDT",
+      "input_bar_open": "2024-01-01T01:15:00Z",
+      "instrument": "BTCUSDT",
+      "target": "0.000000",
+      "stop_loss": "0.000000",
+      "take_profit": "0.000000",
+      "reason": "close reached the middle band",
+      "outcome": "filled"
+    },
+    {
+      "id": 5,
+      "at": "2024-01-01T01:47:02Z",
+      "input_symbol": "BTCUSDT",
+      "input_bar_open": "2024-01-01T01:46:00Z",
+      "instrument": "BTCUSDT",
+      "target": "1.000000",
+      "stop_loss": "0.000000",
+      "take_profit": "0.000000",
+      "reason": "close re-entered the lower band",
+      "outcome": "filled"
+    },
+    {
+      "id": 6,
+      "at": "2024-01-01T01:53:02Z",
+      "input_symbol": "BTCUSDT",
+      "input_bar_open": "2024-01-01T01:52:00Z",
+      "instrument": "BTCUSDT",
+      "target": "0.000000",
+      "stop_loss": "0.000000",
+      "take_profit": "0.000000",
+      "reason": "close reached the middle band",
+      "outcome": "filled"
+    },
+    {
+      "id": 7,
+      "at": "2024-01-01T02:24:02Z",
+      "input_symbol": "BTCUSDT",
+      "input_bar_open": "2024-01-01T02:23:00Z",
+      "instrument": "BTCUSDT",
+      "target": "1.000000",
+      "stop_loss": "0.000000",
+      "take_profit": "0.000000",
+      "reason": "close re-entered the lower band",
+      "outcome": "filled"
+    }
+  ],
+  "fills": [
+    {
+      "decision_id": 1,
+      "time": "2024-01-01T00:33:00Z",
+      "instrument": "BTCUSDT",
+      "side": "buy",
+      "kind": "signal",
+      "qty": "10.12884000",
+      "ref_price": "98.58000000",
+      "price": "98.62929000",
+      "ref_value": "998.50104720 USDT",
+      "value": "999.00029773 USDT",
+      "slippage": "0.49925053 USDT",
+      "fee": "0.99900030 USDT",
+      "ref_value_usdt": "998.50104720 USDT",
+      "slippage_usdt": "0.49925053 USDT",
+      "fee_usdt": "0.99900030 USDT"
+    },
+    {
+      "decision_id": 2,
+      "time": "2024-01-01T00:38:00Z",
+      "instrument": "BTCUSDT",
+      "side": "sell",
+      "kind": "signal",
+      "qty": "10.12884000",
+      "ref_price": "99.65000000",
+      "price": "99.60017500",
+      "ref_value": "1009.33890600 USDT",
+      "value": "1008.83423654 USDT",
+      "slippage": "0.50466946 USDT",
+      "fee": "1.00883424 USDT",
+      "ref_value_usdt": "1009.33890600 USDT",
+      "slippage_usdt": "0.50466946 USDT",
+      "fee_usdt": "1.00883424 USDT"
+    },
+    {
+      "decision_id": 3,
+      "time": "2024-01-01T01:10:00Z",
+      "instrument": "BTCUSDT",
+      "side": "buy",
+      "kind": "signal",
+      "qty": "10.19260000",
+      "ref_price": "98.73000000",
+      "price": "98.77936500",
+      "ref_value": "1006.31539800 USDT",
+      "value": "1006.81855570 USDT",
+      "slippage": "0.50315770 USDT",
+      "fee": "1.00681856 USDT",
+      "ref_value_usdt": "1006.31539800 USDT",
+      "slippage_usdt": "0.50315770 USDT",
+      "fee_usdt": "1.00681856 USDT"
+    },
+    {
+      "decision_id": 4,
+      "time": "2024-01-01T01:16:00Z",
+      "instrument": "BTCUSDT",
+      "side": "sell",
+      "kind": "signal",
+      "qty": "10.19260000",
+      "ref_price": "99.80000000",
+      "price": "99.75010000",
+      "ref_value": "1017.22148000 USDT",
+      "value": "1016.71286926 USDT",
+      "slippage": "0.50861074 USDT",
+      "fee": "1.01671287 USDT",
+      "ref_value_usdt": "1017.22148000 USDT",
+      "slippage_usdt": "0.50861074 USDT",
+      "fee_usdt": "1.01671287 USDT"
+    },
+    {
+      "decision_id": 5,
+      "time": "2024-01-01T01:47:00Z",
+      "instrument": "BTCUSDT",
+      "side": "buy",
+      "kind": "signal",
+      "qty": "10.24936000",
+      "ref_price": "98.95000000",
+      "price": "98.99947500",
+      "ref_value": "1014.17417200 USDT",
+      "value": "1014.68125909 USDT",
+      "slippage": "0.50708709 USDT",
+      "fee": "1.01468126 USDT",
+      "ref_value_usdt": "1014.17417200 USDT",
+      "slippage_usdt": "0.50708709 USDT",
+      "fee_usdt": "1.01468126 USDT"
+    },
+    {
+      "decision_id": 6,
+      "time": "2024-01-01T01:53:00Z",
+      "instrument": "BTCUSDT",
+      "side": "sell",
+      "kind": "signal",
+      "qty": "10.24936000",
+      "ref_price": "99.46000000",
+      "price": "99.41027000",
+      "ref_value": "1019.40134560 USDT",
+      "value": "1018.89164492 USDT",
+      "slippage": "0.50970068 USDT",
+      "fee": "1.01889165 USDT",
+      "ref_value_usdt": "1019.40134560 USDT",
+      "slippage_usdt": "0.50970068 USDT",
+      "fee_usdt": "1.01889165 USDT"
+    },
+    {
+      "decision_id": 7,
+      "time": "2024-01-01T02:24:00Z",
+      "instrument": "BTCUSDT",
+      "side": "buy",
+      "kind": "signal",
+      "qty": "10.24235000",
+      "ref_price": "99.23000000",
+      "price": "99.27961500",
+      "ref_value": "1016.34839050 USDT",
+      "value": "1016.85656470 USDT",
+      "slippage": "0.50817420 USDT",
+      "fee": "1.01685657 USDT",
+      "ref_value_usdt": "1016.34839050 USDT",
+      "slippage_usdt": "0.50817420 USDT",
+      "fee_usdt": "1.01685657 USDT"
+    }
+  ],
+  "trades": [
+    {
+      "instrument": "BTCUSDT",
+      "opened_at": "2024-01-01T00:33:00Z",
+      "closed_at": "2024-01-01T00:38:00Z",
+      "qty": "10.12884000",
+      "entry_ref": "998.50104720 USDT",
+      "exit_ref": "1009.33890600 USDT",
+      "gross": "10.83785880 USDT",
+      "slippage": "1.00391999 USDT",
+      "fees": "2.00783454 USDT",
+      "net": "7.82610427 USDT",
+      "exit_reason": "close reached the middle band",
+      "open_qty": "0.00000000"
+    },
+    {
+      "instrument": "BTCUSDT",
+      "opened_at": "2024-01-01T01:10:00Z",
+      "closed_at": "2024-01-01T01:16:00Z",
+      "qty": "10.19260000",
+      "entry_ref": "1006.31539800 USDT",
+      "exit_ref": "1017.22148000 USDT",
+      "gross": "10.90608200 USDT",
+      "slippage": "1.01176844 USDT",
+      "fees": "2.02353143 USDT",
+      "net": "7.87078213 USDT",
+      "exit_reason": "close reached the middle band",
+      "open_qty": "0.00000000"
+    },
+    {
+      "instrument": "BTCUSDT",
+      "opened_at": "2024-01-01T01:47:00Z",
+      "closed_at": "2024-01-01T01:53:00Z",
+      "qty": "10.24936000",
+      "entry_ref": "1014.17417200 USDT",
+      "exit_ref": "1019.40134560 USDT",
+      "gross": "5.22717360 USDT",
+      "slippage": "1.01678777 USDT",
+      "fees": "2.03357291 USDT",
+      "net": "2.17681292 USDT",
+      "exit_reason": "close reached the middle band",
+      "open_qty": "0.00000000"
+    },
+    {
+      "instrument": "BTCUSDT",
+      "opened_at": "2024-01-01T02:24:00Z",
+      "closed_at": null,
+      "qty": "10.24235000",
+      "entry_ref": "1016.34839050 USDT",
+      "exit_ref": "0.00000000 USDT",
+      "gross": "-0.81938800 USDT",
+      "slippage": "0.50817420 USDT",
+      "fees": "1.01685657 USDT",
+      "net": "-2.34441877 USDT",
+      "open_qty": "10.24235000",
+      "mark_value": "1015.52900250 USDT"
+    }
+  ],
+  "equity": [
+    {
+      "time": "2024-01-01T00:01:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:02:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:03:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:04:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:05:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:06:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:07:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:08:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:09:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:10:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:11:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:12:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:13:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:14:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:15:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:16:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:17:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:18:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:19:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:20:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:21:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:22:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:23:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:24:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:25:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:26:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:27:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:28:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:29:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:30:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:31:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:32:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:33:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:34:00Z",
+      "equity": "997.69144197 USDT"
+    },
+    {
+      "time": "2024-01-01T00:35:00Z",
+      "equity": "998.50174917 USDT"
+    },
+    {
+      "time": "2024-01-01T00:36:00Z",
+      "equity": "1001.03395917 USDT"
+    },
+    {
+      "time": "2024-01-01T00:37:00Z",
+      "equity": "1004.78162997 USDT"
+    },
+    {
+      "time": "2024-01-01T00:38:00Z",
+      "equity": "1009.33960797 USDT"
+    },
+    {
+      "time": "2024-01-01T00:39:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T00:40:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T00:41:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T00:42:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T00:43:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T00:44:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T00:45:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T00:46:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T00:47:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T00:48:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T00:49:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T00:50:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T00:51:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T00:52:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T00:53:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T00:54:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T00:55:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T00:56:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T00:57:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T00:58:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T00:59:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T01:00:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T01:01:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T01:02:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T01:03:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T01:04:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T01:05:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T01:06:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T01:07:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T01:08:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T01:09:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T01:10:00Z",
+      "equity": "1007.82610427 USDT"
+    },
+    {
+      "time": "2024-01-01T01:11:00Z",
+      "equity": "1004.37953401 USDT"
+    },
+    {
+      "time": "2024-01-01T01:12:00Z",
+      "equity": "1004.07375601 USDT"
+    },
+    {
+      "time": "2024-01-01T01:13:00Z",
+      "equity": "1005.39879401 USDT"
+    },
+    {
+      "time": "2024-01-01T01:14:00Z",
+      "equity": "1008.25272201 USDT"
+    },
+    {
+      "time": "2024-01-01T01:15:00Z",
+      "equity": "1012.43168801 USDT"
+    },
+    {
+      "time": "2024-01-01T01:16:00Z",
+      "equity": "1017.22221001 USDT"
+    },
+    {
+      "time": "2024-01-01T01:17:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:18:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:19:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:20:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:21:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:22:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:23:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:24:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:25:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:26:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:27:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:28:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:29:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:30:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:31:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:32:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:33:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:34:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:35:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:36:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:37:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:38:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:39:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:40:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:41:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:42:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:43:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:44:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:45:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:46:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:47:00Z",
+      "equity": "1015.69688640 USDT"
+    },
+    {
+      "time": "2024-01-01T01:48:00Z",
+      "equity": "1011.20280365 USDT"
+    },
+    {
+      "time": "2024-01-01T01:49:00Z",
+      "equity": "1009.66539965 USDT"
+    },
+    {
+      "time": "2024-01-01T01:50:00Z",
+      "equity": "1009.87038685 USDT"
+    },
+    {
+      "time": "2024-01-01T01:51:00Z",
+      "equity": "1011.71527165 USDT"
+    },
+    {
+      "time": "2024-01-01T01:52:00Z",
+      "equity": "1014.99506685 USDT"
+    },
+    {
+      "time": "2024-01-01T01:53:00Z",
+      "equity": "1019.40229165 USDT"
+    },
+    {
+      "time": "2024-01-01T01:54:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T01:55:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T01:56:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T01:57:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T01:58:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T01:59:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T02:00:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T02:01:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T02:02:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T02:03:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T02:04:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T02:05:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T02:06:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T02:07:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T02:08:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T02:09:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T02:10:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T02:11:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T02:12:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T02:13:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T02:14:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T02:15:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T02:16:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T02:17:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T02:18:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T02:19:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T02:20:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T02:21:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T02:22:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T02:23:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T02:24:00Z",
+      "equity": "1017.87369932 USDT"
+    },
+    {
+      "time": "2024-01-01T02:25:00Z",
+      "equity": "1012.45657555 USDT"
+    },
+    {
+      "time": "2024-01-01T02:26:00Z",
+      "equity": "1009.89598805 USDT"
+    },
+    {
+      "time": "2024-01-01T02:27:00Z",
+      "equity": "1008.87175305 USDT"
+    },
+    {
+      "time": "2024-01-01T02:28:00Z",
+      "equity": "1009.58871755 USDT"
+    },
+    {
+      "time": "2024-01-01T02:29:00Z",
+      "equity": "1011.94445805 USDT"
+    },
+    {
+      "time": "2024-01-01T02:30:00Z",
+      "equity": "1015.52928055 USDT"
+    }
+  ],
+  "balances": [
+    {
+      "asset": "BTC",
+      "amount": "10.24235000 BTC"
+    },
+    {
+      "asset": "USDT",
+      "amount": "0.00027805 USDT"
+    }
+  ],
+  "final_equity": "1015.52928055 USDT",
+  "ambiguous_bars": 0,
+  "bars": 150
+}

@@ -1,0 +1,12 @@
+{
+  "description": "hold-cash over 10 bars: no fills, flat equity",
+  "config": {
+    "capital": "1000",
+    "fee": "0.001",
+    "slippage": "0.0005"
+  },
+  "strategy": {
+    "name": "hold-cash"
+  },
+  "steps": []
+}

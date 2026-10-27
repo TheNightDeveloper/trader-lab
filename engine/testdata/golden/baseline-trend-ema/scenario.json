@@ -1,0 +1,16 @@
+{
+  "description": "trend-ema fast 5 / slow 15 over a slow wave: long on up-crosses, flat on down-crosses",
+  "config": {
+    "capital": "1000",
+    "fee": "0.001",
+    "slippage": "0.0005"
+  },
+  "strategy": {
+    "name": "trend-ema",
+    "params": {
+      "fast": 5,
+      "slow": 15
+    }
+  },
+  "steps": []
+}

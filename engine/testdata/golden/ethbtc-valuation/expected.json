@@ -1,0 +1,94 @@
+{
+  "decisions": [
+    {
+      "id": 1,
+      "at": "2024-01-01T00:01:02Z",
+      "input_symbol": "ETHBTC",
+      "input_bar_open": "2024-01-01T00:00:00Z",
+      "instrument": "ETHBTC",
+      "target": "0.300000",
+      "stop_loss": "0.000000",
+      "take_profit": "0.000000",
+      "reason": "rotate some BTC into ETH",
+      "outcome": "filled"
+    }
+  ],
+  "fills": [
+    {
+      "decision_id": 1,
+      "time": "2024-01-01T00:01:00Z",
+      "instrument": "ETHBTC",
+      "side": "buy",
+      "kind": "signal",
+      "qty": "0.23980000",
+      "ref_price": "0.05000000",
+      "price": "0.05002500",
+      "ref_value": "0.01199000 BTC",
+      "value": "0.01199600 BTC",
+      "slippage": "0.00000600 BTC",
+      "fee": "0.00001200 BTC",
+      "ref_value_usdt": "599.50000000 USDT",
+      "slippage_usdt": "0.30000000 USDT",
+      "fee_usdt": "0.60000000 USDT"
+    }
+  ],
+  "trades": [
+    {
+      "instrument": "ETHBTC",
+      "opened_at": "2024-01-01T00:01:00Z",
+      "closed_at": null,
+      "qty": "0.23980000",
+      "entry_ref": "599.50000000 USDT",
+      "exit_ref": "0.00000000 USDT",
+      "gross": "59.95000000 USDT",
+      "slippage": "0.30000000 USDT",
+      "fees": "0.60000000 USDT",
+      "net": "59.05000000 USDT",
+      "open_qty": "0.23980000",
+      "mark_value": "659.45000000 USDT"
+    }
+  ],
+  "equity": [
+    {
+      "time": "2024-01-01T00:01:00Z",
+      "equity": "2000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:02:00Z",
+      "equity": "2019.08200000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:03:00Z",
+      "equity": "2039.06400000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:04:00Z",
+      "equity": "2059.04600000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:05:00Z",
+      "equity": "2079.02800000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:06:00Z",
+      "equity": "2099.01000000 USDT"
+    }
+  ],
+  "balances": [
+    {
+      "asset": "BTC",
+      "amount": "0.00799200 BTC"
+    },
+    {
+      "asset": "ETH",
+      "amount": "0.23980000 ETH"
+    },
+    {
+      "asset": "USDT",
+      "amount": "1000.00000000 USDT"
+    }
+  ],
+  "final_equity": "2099.01000000 USDT",
+  "ambiguous_bars": 0,
+  "bars": 12
+}

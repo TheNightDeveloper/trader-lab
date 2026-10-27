@@ -1,0 +1,25 @@
+{
+  "description": "BTCUSDT and ETHUSDT both ask for 80% at the same bar. Fills settle in symbol order: BTC gets 80%, ETH only what free cash allows.",
+  "config": {
+    "capital": "1000",
+    "fee": "0.001",
+    "slippage": "0.0005"
+  },
+  "strategy": {
+    "name": "scripted"
+  },
+  "steps": [
+    {
+      "at": "2024-01-01T00:00:00Z",
+      "instrument": "BTCUSDT",
+      "target": "0.8",
+      "reason": "both"
+    },
+    {
+      "at": "2024-01-01T00:00:00Z",
+      "instrument": "ETHUSDT",
+      "target": "0.8",
+      "reason": "both"
+    }
+  ]
+}

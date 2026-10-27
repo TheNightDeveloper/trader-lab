@@ -1,0 +1,152 @@
+{
+  "decisions": [
+    {
+      "id": 1,
+      "at": "2024-01-01T00:01:02Z",
+      "input_symbol": "SOLUSDT",
+      "input_bar_open": "2024-01-01T00:00:00Z",
+      "instrument": "SOLUSDT",
+      "target": "0.500000",
+      "stop_loss": "0.000000",
+      "take_profit": "0.000000",
+      "reason": "half",
+      "outcome": "filled"
+    },
+    {
+      "id": 2,
+      "at": "2024-01-01T00:03:02Z",
+      "input_symbol": "SOLUSDT",
+      "input_bar_open": "2024-01-01T00:02:00Z",
+      "instrument": "SOLUSDT",
+      "target": "0.200000",
+      "stop_loss": "0.000000",
+      "take_profit": "0.000000",
+      "reason": "reduce",
+      "outcome": "filled"
+    },
+    {
+      "id": 3,
+      "at": "2024-01-01T00:05:02Z",
+      "input_symbol": "SOLUSDT",
+      "input_bar_open": "2024-01-01T00:04:00Z",
+      "instrument": "SOLUSDT",
+      "target": "0.000000",
+      "stop_loss": "0.000000",
+      "take_profit": "0.000000",
+      "reason": "exit",
+      "outcome": "filled"
+    }
+  ],
+  "fills": [
+    {
+      "decision_id": 1,
+      "time": "2024-01-01T00:01:00Z",
+      "instrument": "SOLUSDT",
+      "side": "buy",
+      "kind": "signal",
+      "qty": "5.13500000",
+      "ref_price": "97.31000000",
+      "price": "97.35865500",
+      "ref_value": "499.68685000 USDT",
+      "value": "499.93669343 USDT",
+      "slippage": "0.24984343 USDT",
+      "fee": "0.49993670 USDT",
+      "ref_value_usdt": "499.68685000 USDT",
+      "slippage_usdt": "0.24984343 USDT",
+      "fee_usdt": "0.49993670 USDT"
+    },
+    {
+      "decision_id": 2,
+      "time": "2024-01-01T00:03:00Z",
+      "instrument": "SOLUSDT",
+      "side": "sell",
+      "kind": "signal",
+      "qty": "3.08100000",
+      "ref_price": "97.31000000",
+      "price": "97.26134500",
+      "ref_value": "299.81211000 USDT",
+      "value": "299.66220394 USDT",
+      "slippage": "0.14990606 USDT",
+      "fee": "0.29966221 USDT",
+      "ref_value_usdt": "299.81211000 USDT",
+      "slippage_usdt": "0.14990606 USDT",
+      "fee_usdt": "0.29966221 USDT"
+    },
+    {
+      "decision_id": 3,
+      "time": "2024-01-01T00:05:00Z",
+      "instrument": "SOLUSDT",
+      "side": "sell",
+      "kind": "signal",
+      "qty": "2.05400000",
+      "ref_price": "97.31000000",
+      "price": "97.26134500",
+      "ref_value": "199.87474000 USDT",
+      "value": "199.77480263 USDT",
+      "slippage": "0.09993737 USDT",
+      "fee": "0.19977481 USDT",
+      "ref_value_usdt": "199.87474000 USDT",
+      "slippage_usdt": "0.09993737 USDT",
+      "fee_usdt": "0.19977481 USDT"
+    }
+  ],
+  "trades": [
+    {
+      "instrument": "SOLUSDT",
+      "opened_at": "2024-01-01T00:01:00Z",
+      "closed_at": "2024-01-01T00:05:00Z",
+      "qty": "5.13500000",
+      "entry_ref": "499.68685000 USDT",
+      "exit_ref": "499.68685000 USDT",
+      "gross": "0.00000000 USDT",
+      "slippage": "0.49968686 USDT",
+      "fees": "0.99937372 USDT",
+      "net": "-1.49906058 USDT",
+      "exit_reason": "exit",
+      "open_qty": "0.00000000"
+    }
+  ],
+  "equity": [
+    {
+      "time": "2024-01-01T00:01:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:02:00Z",
+      "equity": "999.25021987 USDT"
+    },
+    {
+      "time": "2024-01-01T00:03:00Z",
+      "equity": "999.25021987 USDT"
+    },
+    {
+      "time": "2024-01-01T00:04:00Z",
+      "equity": "998.80065160 USDT"
+    },
+    {
+      "time": "2024-01-01T00:05:00Z",
+      "equity": "998.80065160 USDT"
+    },
+    {
+      "time": "2024-01-01T00:06:00Z",
+      "equity": "998.50093942 USDT"
+    },
+    {
+      "time": "2024-01-01T00:07:00Z",
+      "equity": "998.50093942 USDT"
+    }
+  ],
+  "balances": [
+    {
+      "asset": "SOL",
+      "amount": "0.00000000 SOL"
+    },
+    {
+      "asset": "USDT",
+      "amount": "998.50093942 USDT"
+    }
+  ],
+  "final_equity": "998.50093942 USDT",
+  "ambiguous_bars": 0,
+  "bars": 7
+}

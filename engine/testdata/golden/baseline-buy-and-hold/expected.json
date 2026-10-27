@@ -1,0 +1,161 @@
+{
+  "decisions": [
+    {
+      "id": 1,
+      "at": "2024-01-01T00:01:02Z",
+      "input_symbol": "BTCUSDT",
+      "input_bar_open": "2024-01-01T00:00:00Z",
+      "instrument": "BTCUSDT",
+      "target": "0.500000",
+      "stop_loss": "0.000000",
+      "take_profit": "0.000000",
+      "reason": "buy and hold: first bar",
+      "outcome": "filled"
+    },
+    {
+      "id": 2,
+      "at": "2024-01-01T00:01:02Z",
+      "input_symbol": "ETHUSDT",
+      "input_bar_open": "2024-01-01T00:00:00Z",
+      "instrument": "ETHUSDT",
+      "target": "0.500000",
+      "stop_loss": "0.000000",
+      "take_profit": "0.000000",
+      "reason": "buy and hold: first bar",
+      "outcome": "filled"
+    }
+  ],
+  "fills": [
+    {
+      "decision_id": 1,
+      "time": "2024-01-01T00:01:00Z",
+      "instrument": "BTCUSDT",
+      "side": "buy",
+      "kind": "signal",
+      "qty": "0.00997000",
+      "ref_price": "50100.00000000",
+      "price": "50125.05000000",
+      "ref_value": "499.49700000 USDT",
+      "value": "499.74674850 USDT",
+      "slippage": "0.24974850 USDT",
+      "fee": "0.49974675 USDT",
+      "ref_value_usdt": "499.49700000 USDT",
+      "slippage_usdt": "0.24974850 USDT",
+      "fee_usdt": "0.49974675 USDT"
+    },
+    {
+      "decision_id": 2,
+      "time": "2024-01-01T00:01:00Z",
+      "instrument": "ETHUSDT",
+      "side": "buy",
+      "kind": "signal",
+      "qty": "0.20000000",
+      "ref_price": "2495.00000000",
+      "price": "2496.24750000",
+      "ref_value": "499.00000000 USDT",
+      "value": "499.24950000 USDT",
+      "slippage": "0.24950000 USDT",
+      "fee": "0.49924950 USDT",
+      "ref_value_usdt": "499.00000000 USDT",
+      "slippage_usdt": "0.24950000 USDT",
+      "fee_usdt": "0.49924950 USDT"
+    }
+  ],
+  "trades": [
+    {
+      "instrument": "BTCUSDT",
+      "opened_at": "2024-01-01T00:01:00Z",
+      "closed_at": null,
+      "qty": "0.00997000",
+      "entry_ref": "499.49700000 USDT",
+      "exit_ref": "0.00000000 USDT",
+      "gross": "10.96700000 USDT",
+      "slippage": "0.24974850 USDT",
+      "fees": "0.49974675 USDT",
+      "net": "10.21750475 USDT",
+      "open_qty": "0.00997000",
+      "mark_value": "510.46400000 USDT"
+    },
+    {
+      "instrument": "ETHUSDT",
+      "opened_at": "2024-01-01T00:01:00Z",
+      "closed_at": null,
+      "qty": "0.20000000",
+      "entry_ref": "499.00000000 USDT",
+      "exit_ref": "0.00000000 USDT",
+      "gross": "-11.00000000 USDT",
+      "slippage": "0.24950000 USDT",
+      "fees": "0.49924950 USDT",
+      "net": "-11.74874950 USDT",
+      "open_qty": "0.20000000",
+      "mark_value": "488.00000000 USDT"
+    }
+  ],
+  "equity": [
+    {
+      "time": "2024-01-01T00:01:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:02:00Z",
+      "equity": "998.49875525 USDT"
+    },
+    {
+      "time": "2024-01-01T00:03:00Z",
+      "equity": "998.49575525 USDT"
+    },
+    {
+      "time": "2024-01-01T00:04:00Z",
+      "equity": "998.49275525 USDT"
+    },
+    {
+      "time": "2024-01-01T00:05:00Z",
+      "equity": "998.48975525 USDT"
+    },
+    {
+      "time": "2024-01-01T00:06:00Z",
+      "equity": "998.48675525 USDT"
+    },
+    {
+      "time": "2024-01-01T00:07:00Z",
+      "equity": "998.48375525 USDT"
+    },
+    {
+      "time": "2024-01-01T00:08:00Z",
+      "equity": "998.48075525 USDT"
+    },
+    {
+      "time": "2024-01-01T00:09:00Z",
+      "equity": "998.47775525 USDT"
+    },
+    {
+      "time": "2024-01-01T00:10:00Z",
+      "equity": "998.47475525 USDT"
+    },
+    {
+      "time": "2024-01-01T00:11:00Z",
+      "equity": "998.47175525 USDT"
+    },
+    {
+      "time": "2024-01-01T00:12:00Z",
+      "equity": "998.46875525 USDT"
+    }
+  ],
+  "balances": [
+    {
+      "asset": "BTC",
+      "amount": "0.00997000 BTC"
+    },
+    {
+      "asset": "ETH",
+      "amount": "0.20000000 ETH"
+    },
+    {
+      "asset": "USDT",
+      "amount": "0.00475525 USDT"
+    }
+  ],
+  "final_equity": "998.46875525 USDT",
+  "ambiguous_bars": 0,
+  "bars": 24
+}

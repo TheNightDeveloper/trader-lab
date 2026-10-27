@@ -1,0 +1,119 @@
+{
+  "decisions": [
+    {
+      "id": 1,
+      "at": "2024-01-01T00:01:02Z",
+      "input_symbol": "BTCUSDT",
+      "input_bar_open": "2024-01-01T00:00:00Z",
+      "instrument": "BTCUSDT",
+      "target": "1.000000",
+      "stop_loss": "0.020000",
+      "take_profit": "0.000000",
+      "reason": "enter",
+      "outcome": "filled"
+    },
+    {
+      "id": 2,
+      "at": "2024-01-01T00:04:02Z",
+      "input_symbol": "BTCUSDT",
+      "input_bar_open": "2024-01-01T00:03:00Z",
+      "instrument": "BTCUSDT",
+      "target": "0.500000",
+      "stop_loss": "0.000000",
+      "take_profit": "0.000000",
+      "reason": "trim before the gap",
+      "outcome": "expired",
+      "detail": "no fill by 2024-01-01T00:14:02Z (next bar opened 2024-01-01T00:30:00Z)"
+    }
+  ],
+  "fills": [
+    {
+      "decision_id": 1,
+      "time": "2024-01-01T00:01:00Z",
+      "instrument": "BTCUSDT",
+      "side": "buy",
+      "kind": "signal",
+      "qty": "9.98501000",
+      "ref_price": "100.00000000",
+      "price": "100.05000000",
+      "ref_value": "998.50100000 USDT",
+      "value": "999.00025050 USDT",
+      "slippage": "0.49925050 USDT",
+      "fee": "0.99900026 USDT",
+      "ref_value_usdt": "998.50100000 USDT",
+      "slippage_usdt": "0.49925050 USDT",
+      "fee_usdt": "0.99900026 USDT"
+    },
+    {
+      "time": "2024-01-01T00:30:00Z",
+      "instrument": "BTCUSDT",
+      "side": "sell",
+      "kind": "stop",
+      "qty": "9.98501000",
+      "ref_price": "90.00000000",
+      "price": "89.95500000",
+      "ref_value": "898.65090000 USDT",
+      "value": "898.20157455 USDT",
+      "slippage": "0.44932545 USDT",
+      "fee": "0.89820158 USDT",
+      "ref_value_usdt": "898.65090000 USDT",
+      "slippage_usdt": "0.44932545 USDT",
+      "fee_usdt": "0.89820158 USDT"
+    }
+  ],
+  "trades": [
+    {
+      "instrument": "BTCUSDT",
+      "opened_at": "2024-01-01T00:01:00Z",
+      "closed_at": "2024-01-01T00:30:00Z",
+      "qty": "9.98501000",
+      "entry_ref": "998.50100000 USDT",
+      "exit_ref": "898.65090000 USDT",
+      "gross": "-99.85010000 USDT",
+      "slippage": "0.94857595 USDT",
+      "fees": "1.89720184 USDT",
+      "net": "-102.69587779 USDT",
+      "exit_reason": "stop loss",
+      "open_qty": "0.00000000"
+    }
+  ],
+  "equity": [
+    {
+      "time": "2024-01-01T00:01:00Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:02:00Z",
+      "equity": "998.50174924 USDT"
+    },
+    {
+      "time": "2024-01-01T00:03:00Z",
+      "equity": "998.50174924 USDT"
+    },
+    {
+      "time": "2024-01-01T00:04:00Z",
+      "equity": "998.50174924 USDT"
+    },
+    {
+      "time": "2024-01-01T00:31:00Z",
+      "equity": "897.30412221 USDT"
+    },
+    {
+      "time": "2024-01-01T00:32:00Z",
+      "equity": "897.30412221 USDT"
+    }
+  ],
+  "balances": [
+    {
+      "asset": "BTC",
+      "amount": "0.00000000 BTC"
+    },
+    {
+      "asset": "USDT",
+      "amount": "897.30412221 USDT"
+    }
+  ],
+  "final_equity": "897.30412221 USDT",
+  "ambiguous_bars": 0,
+  "bars": 6
+}

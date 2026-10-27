@@ -1,0 +1,26 @@
+{
+  "description": "position with a 2% stop; 26 minutes of missing bars; the next bar opens below the stop, so the stop fills at that open. An intent made before the gap expires (10m TTL).",
+  "config": {
+    "capital": "1000",
+    "fee": "0.001",
+    "slippage": "0.0005"
+  },
+  "strategy": {
+    "name": "scripted"
+  },
+  "steps": [
+    {
+      "at": "2024-01-01T00:00:00Z",
+      "instrument": "BTCUSDT",
+      "target": "1",
+      "reason": "enter",
+      "stop_loss": "0.02"
+    },
+    {
+      "at": "2024-01-01T00:03:00Z",
+      "instrument": "BTCUSDT",
+      "target": "0.5",
+      "reason": "trim before the gap"
+    }
+  ]
+}

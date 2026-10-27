@@ -1,0 +1,31 @@
+{
+  "description": "SOLUSDT at 97.31: 50% \u2192 20% \u2192 0%; quantities floor to the 0.001 lot",
+  "config": {
+    "capital": "1000",
+    "fee": "0.001",
+    "slippage": "0.0005"
+  },
+  "strategy": {
+    "name": "scripted"
+  },
+  "steps": [
+    {
+      "at": "2024-01-01T00:00:00Z",
+      "instrument": "SOLUSDT",
+      "target": "0.5",
+      "reason": "half"
+    },
+    {
+      "at": "2024-01-01T00:02:00Z",
+      "instrument": "SOLUSDT",
+      "target": "0.2",
+      "reason": "reduce"
+    },
+    {
+      "at": "2024-01-01T00:04:00Z",
+      "instrument": "SOLUSDT",
+      "target": "0",
+      "reason": "exit"
+    }
+  ]
+}

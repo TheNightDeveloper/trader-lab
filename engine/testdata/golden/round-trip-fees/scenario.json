@@ -1,0 +1,25 @@
+{
+  "description": "buy all-in at the next open after 00:00, sell at the next open after 00:03; 10 bps fee, 5 bps slippage per side",
+  "config": {
+    "capital": "1000",
+    "fee": "0.001",
+    "slippage": "0.0005"
+  },
+  "strategy": {
+    "name": "scripted"
+  },
+  "steps": [
+    {
+      "at": "2024-01-01T00:00:00Z",
+      "instrument": "BTCUSDT",
+      "target": "1",
+      "reason": "enter"
+    },
+    {
+      "at": "2024-01-01T00:03:00Z",
+      "instrument": "BTCUSDT",
+      "target": "0",
+      "reason": "exit"
+    }
+  ]
+}

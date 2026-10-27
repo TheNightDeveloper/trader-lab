@@ -1,0 +1,15 @@
+{
+  "description": "buy-and-hold 50% in each of BTCUSDT and ETHUSDT on their first bar",
+  "config": {
+    "capital": "1000",
+    "fee": "0.001",
+    "slippage": "0.0005"
+  },
+  "strategy": {
+    "name": "buy-and-hold",
+    "params": {
+      "exposure": 0.5
+    }
+  },
+  "steps": []
+}

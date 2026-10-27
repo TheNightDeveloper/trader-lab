@@ -1,0 +1,26 @@
+{
+  "description": "run ends at 00:05:02: bar 00:05 is not closed yet and never seen. The 00:04 decision stays unfilled; the open trade is marked at the last close.",
+  "config": {
+    "capital": "1000",
+    "fee": "0.001",
+    "slippage": "0.0005"
+  },
+  "strategy": {
+    "name": "scripted"
+  },
+  "steps": [
+    {
+      "at": "2024-01-01T00:00:00Z",
+      "instrument": "BTCUSDT",
+      "target": "0.5",
+      "reason": "half in"
+    },
+    {
+      "at": "2024-01-01T00:04:00Z",
+      "instrument": "BTCUSDT",
+      "target": "1",
+      "reason": "all in"
+    }
+  ],
+  "until": "2024-01-01T00:05:02Z"
+}
