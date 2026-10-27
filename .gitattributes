@@ -1,0 +1,5 @@
+# LF everywhere: shell scripts must run, golden files must be byte-identical on every OS.
+* text=auto eol=lf
+*.ttf binary
+*.png binary
+*.zip binary
