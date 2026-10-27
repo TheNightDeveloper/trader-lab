@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>نوار کناری</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<nav dir="rtl" aria-label="ناوبری اصلی" style="width: 100%; height: 100%; min-height: 1000px; box-sizing: border-box; background: #10141A; border-inline-end: 1px solid #222A35; color: #E7EBF1; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 14px; padding: 22px 14px; display: flex; flex-direction: column; gap: 22px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 8px">
+<svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#6FA8FF" stroke-width="2" aria-hidden="true"><path d="M4 20 L10 13 L15 17 L24 7"></path><path d="M18 7 H24 V13"></path></svg>
+<div style="display: flex; flex-direction: column">
+<span style="font-weight: 700; font-size: 15px">آزمایشگاه الگوریتم</span>
+<span style="color: #9AA3B1; font-size: 11px; font-family: 'JetBrains Mono', monospace">Trading Research Lab</span>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 2px">
+<sc-for list="{{items}}" as="it" hint-placeholder-count="12">
+<sc-if value="{{it.header}}" hint-placeholder-val="{{false}}">
+<span style="color: #9AA3B1; font-size: 12px; padding: 14px 10px 6px">{{it.label}}</span>
+</sc-if>
+<sc-if value="{{it.link}}" hint-placeholder-val="{{true}}">
+<a href="{{it.href}}" style="{{it.style}}">{{it.label}}</a>
+</sc-if>
+<sc-if value="{{it.soon}}" hint-placeholder-val="{{false}}">
+<span style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; color: #9AA3B1; min-height: 40px; box-sizing: border-box">{{it.label}}<span style="font-size: 11px; border: 1px solid #2C3542; border-radius: 6px; padding: 1px 6px">فاز ۲</span></span>
+</sc-if>
+</sc-for>
+</div>
+
+<div style="margin-top: auto; background: #151A22; border: 1px solid #222A35; border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 9px; font-size: 12px">
+<div style="display: flex; justify-content: space-between"><span style="color: #9AA3B1">حالت اجرا</span><span style="font-weight: 700">پژوهش · بدون سفارش واقعی</span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: #9AA3B1">ارز مبنا</span><span style="font-family: 'JetBrains Mono', monospace">USDT</span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: #9AA3B1">داده زنده</span><span style="color: #3ECFAE">تازه · <span style="font-family: 'JetBrains Mono', monospace">4s</span></span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: #9AA3B1">موتور Go</span><span style="color: #3ECFAE">فعال · <span style="font-family: 'JetBrains Mono', monospace">8</span> کارگر</span></div>
+<div style="display: flex; flex-direction: column; gap: 3px; border-top: 1px solid #222A35; padding-top: 9px"><span style="color: #9AA3B1">نرخ تبدیل نمایشی</span><span>۱ USDT = [نرخ روز] تومان · دستی</span></div>
+</div>
+</nav>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"active":{"editor":"enum","options":["home","library","builder","queue","report","compare","calc","learning","chart","data","settings"],"default":"home"},"$preview":{"width":240,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const active = this.props.active ?? 'home';
+    const base = 'display: flex; align-items: center; min-height: 40px; box-sizing: border-box; padding: 10px 12px; border-radius: 8px; text-decoration: none; ';
+    const on = base + 'background: #1F2836; color: #FFFFFF; font-weight: 700';
+    const off = base + 'color: #C9D0DA';
+    const L = (key, label, href) => ({ link: true, key, label, href, style: key === active ? on : off });
+    const H = (label) => ({ header: true, label });
+    const S = (label) => ({ soon: true, label });
+    return {
+      items: [
+        L('home', 'خانه', 'Main.dc.html'),
+        H('پژوهش'),
+        L('library', 'کتابخانه الگوریتم', 'Library.dc.html'),
+        L('builder', 'ساخت آزمایش', 'Builder.dc.html'),
+        L('queue', 'صف اجرا و جست‌وجو', 'Queue.dc.html'),
+        L('report', 'گزارش‌ها', 'Report.dc.html'),
+        L('compare', 'مقایسه', 'Compare.dc.html'),
+        L('calc', 'ماشین‌حساب سود و زیان', 'Calculator.dc.html'),
+        H('یادگیری و تحلیل'),
+        L('learning', 'چرخه یادگیری', 'Learning.dc.html'),
+        L('chart', 'نمودار', 'Chart.dc.html'),
+        L('data', 'داده', 'Data.dc.html'),
+        H('بعداً'),
+        S('حساب مجازی و سفارش'),
+        S('ریسک و انضباط'),
+        S('ژورنال'),
+        S('بازار و رویداد'),
+        H('سیستم'),
+        L('settings', 'تنظیمات', 'Settings.dc.html')
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

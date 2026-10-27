@@ -1,0 +1,10 @@
+/engine/engine
+/engine/engine.exe
+/engine/engine.json
+*.test
+# Original design export and its duplicates; the canonical copies live in
+# design/screens, design/png, design/tokens.json, docs/UI_SPEC.md, app/lib/core/theme.
+/design/trading-lab/
+/design/trading-lab.zip
+/design/UI_SPEC.md
+/design/tokens.dart

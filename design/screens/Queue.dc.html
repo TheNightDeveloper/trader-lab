@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>صف اجرا و جست‌وجو</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#0D1015}
+a{color:#8DB8FF}a:hover{color:#B5D0FF}
+.num{font-family:'JetBrains Mono',ui-monospace,monospace;direction:ltr;unicode-bidi:isolate}
+</style>
+</helmet>
+<div dir="rtl" style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #0D1015; color: #E7EBF1; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 14px">
+<div style="flex: 1 1 232px; max-width: 100%">
+<dc-import name="Sidebar" active="queue" hint-size="100%,1000px"></dc-import>
+</div>
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box">
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; justify-content: space-between">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 26px">صف اجرا و جست‌وجو</h1>
+<p style="margin: 0; color: #9AA3B1"><span class="num">EXP-118</span> · mean-rev-bands · جست‌وجوی شبکه‌ای · بذر <span class="num">20261025</span></p>
+</div>
+<div style="display: flex; gap: 10px; flex-wrap: wrap">
+<button style="font: inherit; color: #E7EBF1; background: #1A2029; border: 1px solid #2C3542; border-radius: 8px; padding: 11px 16px; min-height: 44px">توقف موقت</button>
+<button style="font: inherit; color: #FFB08A; background: #1A2029; border: 1px solid #5A3424; border-radius: 8px; padding: 11px 16px; min-height: 44px">لغو آزمایش</button>
+</div>
+</div>
+
+<section style="background: #141922; border: 1px solid #262E3A; border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 13px">
+<span>پیشرفت: <span class="num">312 / 500</span> تلاش</span>
+<span style="color: #9AA3B1">زمان باقی‌مانده تخمینی <span class="num">~14 min</span></span>
+</div>
+<div role="progressbar" aria-valuenow="62" aria-valuemin="0" aria-valuemax="100" aria-label="پیشرفت جست‌وجو" style="height: 10px; background: #0F1318; border-radius: 6px; overflow: hidden; display: flex">
+<div style="width: 58%; background: #3ECFAE"></div>
+<div style="width: 3%; background: #FF8F5E"></div>
+<div style="width: 1%; background: #9AA3B1"></div>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 16px; font-size: 12px; color: #9AA3B1">
+<span><span style="display: inline-block; width: 10px; height: 10px; background: #3ECFAE; border-radius: 2px"></span> کامل <span class="num">290</span></span>
+<span><span style="display: inline-block; width: 10px; height: 10px; background: #FF8F5E; border-radius: 2px"></span> شکست <span class="num">15</span></span>
+<span><span style="display: inline-block; width: 10px; height: 10px; background: #9AA3B1; border-radius: 2px"></span> لغو <span class="num">7</span></span>
+</div>
+</section>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px">
+<sc-for list="{{budget}}" as="b" hint-placeholder-count="4">
+<div style="background: #141922; border: 1px solid #262E3A; border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 8px">
+<span style="color: #9AA3B1; font-size: 13px">{{b.k}}</span>
+<span class="num" style="font-size: 17px; text-align: right">{{b.v}}</span>
+<div style="height: 6px; background: #0F1318; border-radius: 4px; overflow: hidden"><div style="height: 100%; width: {{b.pct}}; background: {{b.c}}"></div></div>
+</div>
+</sc-for>
+</div>
+
+<section style="background: #141922; border: 1px solid #262E3A; border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center">
+<div role="tablist" style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="4">
+<button role="tab" onClick="{{t.pick}}" style="{{t.style}}">{{t.label}}</button>
+</sc-for>
+</div>
+<span style="font-size: 12px; color: #9AA3B1">همه تلاش‌ها، حتی شکست‌خورده و لغوشده، ثبت و شمرده می‌شوند.</span>
+</div>
+<div style="overflow-x: auto">
+<table style="width: 100%; border-collapse: collapse; font-size: 13px; min-width: 820px">
+<thead><tr style="color: #9AA3B1; text-align: right">
+<th style="padding: 8px; font-weight: 500">#</th><th style="padding: 8px; font-weight: 500">پارامترها</th><th style="padding: 8px; font-weight: 500">جفت</th><th style="padding: 8px; font-weight: 500">وضعیت</th><th style="padding: 8px; font-weight: 500">بازده خالص</th><th style="padding: 8px; font-weight: 500">بیشینه افت</th><th style="padding: 8px; font-weight: 500">معاملات</th><th style="padding: 8px; font-weight: 500">محدودیت‌ها</th><th style="padding: 8px; font-weight: 500">کش</th>
+</tr></thead>
+<tbody>
+<sc-for list="{{rows}}" as="r" hint-placeholder-count="10">
+<tr style="border-top: 1px solid #262E3A">
+<td style="padding: 9px 8px"><span class="num" style="color: #9AA3B1">{{r.i}}</span></td>
+<td style="padding: 9px 8px"><span class="num">{{r.p}}</span></td>
+<td style="padding: 9px 8px"><span class="num">{{r.pair}}</span></td>
+<td style="padding: 9px 8px"><span style="color: {{r.sc}}">{{r.s}}</span></td>
+<td style="padding: 9px 8px"><span class="num" style="color: {{r.rc}}">{{r.ret}}</span></td>
+<td style="padding: 9px 8px"><span class="num">{{r.dd}}</span></td>
+<td style="padding: 9px 8px"><span class="num">{{r.tr}}</span></td>
+<td style="padding: 9px 8px"><span style="color: {{r.cc}}">{{r.con}}</span></td>
+<td style="padding: 9px 8px"><span style="color: #9AA3B1">{{r.cache}}</span></td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+<div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #9AA3B1; flex-wrap: wrap; gap: 8px">
+<span>نمایش <span class="num">1–10</span> از <span class="num">{{count}}</span> · صفحه‌بندی سمت سرور</span>
+<div style="display: flex; gap: 6px"><button aria-label="صفحه قبل" style="font: inherit; color: #E7EBF1; background: #1A2029; border: 1px solid #2C3542; border-radius: 8px; min-width: 44px; min-height: 44px">›</button><button aria-label="صفحه بعد" style="font: inherit; color: #E7EBF1; background: #1A2029; border: 1px solid #2C3542; border-radius: 8px; min-width: 44px; min-height: 44px">‹</button></div>
+</div>
+</section>
+
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1150}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { tab: 'all' }; }
+  renderVals() {
+    const ok = '#3ECFAE', bad = '#FF8F5E', mute = '#9AA3B1', run = '#6FA8FF', warn = '#F0C24B';
+    const all = [
+      { i: '313', p: 'bb=20 k=2.0 hold=12', pair: 'BTCUSDT', st: 'run', s: 'در حال اجرا', sc: run, ret: '—', rc: mute, dd: '—', tr: '—', con: '—', cc: mute, cache: 'ویژگی: hit' },
+      { i: '312', p: 'bb=20 k=2.5 hold=12', pair: 'ETHUSDT', st: 'done', s: 'کامل', sc: ok, ret: '+6.2%', rc: ok, dd: '−9.8%', tr: '142', con: 'واجد شرایط', cc: ok, cache: 'ویژگی: hit' },
+      { i: '311', p: 'bb=30 k=1.5 hold=6', pair: 'BTCUSDT', st: 'done', s: 'کامل', sc: ok, ret: '+11.7%', rc: ok, dd: '−24.1%', tr: '311', con: 'رد: افت > 20%', cc: bad, cache: 'miss' },
+      { i: '310', p: 'bb=30 k=2.0 hold=24', pair: 'ETHUSDT', st: 'done', s: 'کامل', sc: ok, ret: '+1.9%', rc: ok, dd: '−7.3%', tr: '41', con: 'رد: معاملات < 60', cc: bad, cache: 'ویژگی: hit' },
+      { i: '309', p: 'bb=10 k=2.5 hold=6', pair: 'BTCUSDT', st: 'fail', s: 'شکست: شکاف داده', sc: bad, ret: '—', rc: mute, dd: '—', tr: '—', con: '—', cc: mute, cache: '—' },
+      { i: '308', p: 'bb=20 k=1.5 hold=24', pair: 'BTCUSDT', st: 'done', s: 'کامل', sc: ok, ret: '−2.4%', rc: bad, dd: '−13.0%', tr: '188', con: 'واجد شرایط', cc: ok, cache: 'ویژگی: hit' },
+      { i: '307', p: 'bb=10 k=2.0 hold=12', pair: 'ETHUSDT', st: 'cancel', s: 'لغو شد', sc: mute, ret: '—', rc: mute, dd: '—', tr: '—', con: '—', cc: mute, cache: '—' },
+      { i: '306', p: 'bb=30 k=2.5 hold=12', pair: 'BTCUSDT', st: 'done', s: 'کامل', sc: ok, ret: '+4.0%', rc: ok, dd: '−8.6%', tr: '97', con: 'واجد شرایط', cc: ok, cache: 'اجرای تکراری: hit' },
+      { i: '305', p: 'bb=20 k=2.0 hold=6', pair: 'ETHUSDT', st: 'done', s: 'کامل', sc: ok, ret: '+0.7%', rc: ok, dd: '−11.9%', tr: '204', con: 'واجد شرایط', cc: ok, cache: 'ویژگی: hit' },
+      { i: '304', p: 'bb=10 k=1.5 hold=24', pair: 'BTCUSDT', st: 'fail', s: 'شکست: خطای الگوریتم', sc: bad, ret: '—', rc: mute, dd: '—', tr: '—', con: '—', cc: mute, cache: '—' }
+    ];
+    const tabDefs = [['all', 'همه · 313'], ['run', 'در حال اجرا · 6'], ['done', 'کامل · 290'], ['fail', 'شکست · 15'], ['cancel', 'لغو · 7']];
+    const tabStyle = (on) => 'font: inherit; font-size: 13px; min-height: 44px; padding: 8px 14px; border-radius: 8px; cursor: pointer; border: 1px solid ' + (on ? '#6FA8FF' : '#2C3542') + '; background: ' + (on ? '#1B2A40' : '#141922') + '; color: ' + (on ? '#FFFFFF' : '#C9D0DA');
+    const rows = all.filter(r => this.state.tab === 'all' || r.st === this.state.tab);
+    return {
+      tabs: tabDefs.map(([k, label]) => ({ label, style: tabStyle(this.state.tab === k), pick: () => this.setState({ tab: k }) })),
+      rows,
+      count: rows.length,
+      budget: [
+        { k: 'تلاش‌ها از بودجه', v: '312 / 500', pct: '62%', c: run },
+        { k: 'زمان مصرف‌شده', v: '1h 12m / 2h', pct: '60%', c: run },
+        { k: 'سهم CPU پژوهش', v: '6 / 8 cores', pct: '75%', c: warn },
+        { k: 'نرخ استفاده از کش', v: '41%', pct: '41%', c: ok }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

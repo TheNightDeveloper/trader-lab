@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>تنظیمات</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#0D1015}
+a{color:#8DB8FF}a:hover{color:#B5D0FF}
+.num{font-family:'JetBrains Mono',ui-monospace,monospace;direction:ltr;unicode-bidi:isolate}
+</style>
+</helmet>
+<div dir="rtl" style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #0D1015; color: #E7EBF1; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 14px">
+<div style="flex: 1 1 232px; max-width: 100%">
+<dc-import name="Sidebar" active="settings" hint-size="100%,1000px"></dc-import>
+</div>
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box">
+
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 26px">تنظیمات</h1>
+<p style="margin: 0; color: #9AA3B1">ارز و تبدیل، منابع موتور، پیش‌فرض‌های یادگیری و نگهداری</p>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start">
+<section style="flex: 3 1 560px; min-width: 0; background: #141922; border: 1px solid #262E3A; border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-size: 16px">ارز مبنا و تبدیل به تومان</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px">
+<div style="background: #1A2029; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 4px">
+<span style="color: #9AA3B1; font-size: 13px">ارز مبنای محاسبات</span>
+<span class="num" style="font-size: 17px; text-align: right">USDT</span>
+<span style="color: #9AA3B1; font-size: 12px">ثابت؛ همه سود و زیان، ریسک و مقایسه‌ها</span>
+</div>
+<div style="background: #1A2029; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 4px">
+<span style="color: #9AA3B1; font-size: 13px">نرخ نمایشی</span>
+<span class="num" style="font-size: 17px; text-align: right">USDT / TOMAN</span>
+<span style="color: #9AA3B1; font-size: 12px">فقط در نمایش و خروجی؛ وارد محاسبه نمی‌شود</span>
+</div>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end">
+<label style="flex: 2 1 220px; display: flex; flex-direction: column; gap: 6px; color: #9AA3B1; font-size: 13px">نرخ امروز (تومان به ازای ۱ USDT)
+<input placeholder="[نرخ روز]" inputmode="decimal" class="num" style="font-size: 15px; color: #E7EBF1; background: #0F1318; border: 1px solid #2C3542; border-radius: 8px; padding: 10px 12px; min-height: 44px; box-sizing: border-box; text-align: left">
+</label>
+<label style="flex: 1 1 150px; display: flex; flex-direction: column; gap: 6px; color: #9AA3B1; font-size: 13px">تاریخ اعمال
+<input value="2026-10-25" class="num" style="font-size: 14px; color: #E7EBF1; background: #0F1318; border: 1px solid #2C3542; border-radius: 8px; padding: 10px 12px; min-height: 44px; box-sizing: border-box; text-align: left">
+</label>
+<label style="flex: 2 1 200px; display: flex; flex-direction: column; gap: 6px; color: #9AA3B1; font-size: 13px">منبع / یادداشت
+<input value="دستی" style="font: inherit; font-size: 14px; color: #E7EBF1; background: #0F1318; border: 1px solid #2C3542; border-radius: 8px; padding: 10px 12px; min-height: 44px; box-sizing: border-box">
+</label>
+<button style="font: inherit; font-weight: 700; color: #0D1015; background: #6FA8FF; border: none; border-radius: 8px; padding: 11px 18px; min-height: 44px">ثبت نرخ</button>
+</div>
+<p style="margin: 0; font-size: 12px; color: #9AA3B1; line-height: 1.8">واحد نمایش «تومان» است (۱ تومان = ۱۰ ریال). هر گزارش نرخی را که با آن تبدیل شده نگه می‌دارد؛ ثبت نرخ تازه، گزارش‌های قبلی را تغییر نمی‌دهد.</p>
+<h3 style="margin: 4px 0 0; font-size: 14px">تاریخچه نرخ‌ها</h3>
+<div style="overflow-x: auto">
+<table style="width: 100%; border-collapse: collapse; font-size: 13px; min-width: 520px">
+<thead><tr style="color: #9AA3B1; text-align: right"><th style="padding: 8px; font-weight: 500">تاریخ</th><th style="padding: 8px; font-weight: 500">نرخ</th><th style="padding: 8px; font-weight: 500">منبع</th><th style="padding: 8px; font-weight: 500">ثبت</th><th style="padding: 8px; font-weight: 500">گزارش‌های وابسته</th></tr></thead>
+<tbody>
+<sc-for list="{{rates}}" as="r" hint-placeholder-count="3">
+<tr style="border-top: 1px solid #262E3A"><td style="padding: 9px 8px"><span class="num">{{r.d}}</span></td><td style="padding: 9px 8px">{{r.v}}</td><td style="padding: 9px 8px">{{r.s}}</td><td style="padding: 9px 8px"><span class="num" style="color: #9AA3B1">{{r.at}}</span></td><td style="padding: 9px 8px"><span class="num">{{r.n}}</span></td></tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+</section>
+
+<div style="flex: 2 1 360px; min-width: 0; display: flex; flex-direction: column; gap: 18px">
+<sc-for list="{{groups}}" as="g" hint-placeholder-count="3">
+<section style="background: #141922; border: 1px solid #262E3A; border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 16px">{{g.title}}</h2>
+<sc-for list="{{g.fields}}" as="f" hint-placeholder-count="4">
+<label style="display: flex; justify-content: space-between; align-items: center; gap: 10px; color: #9AA3B1; font-size: 13px">{{f.label}}
+<input value="{{f.value}}" class="num" style="width: 150px; font-size: 13px; color: #E7EBF1; background: #0F1318; border: 1px solid #2C3542; border-radius: 8px; padding: 8px 10px; min-height: 44px; box-sizing: border-box; text-align: left">
+</label>
+</sc-for>
+<span style="font-size: 12px; color: #9AA3B1; line-height: 1.7">{{g.note}}</span>
+</section>
+</sc-for>
+</div>
+</div>
+
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1150}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      rates: [
+        { d: '2026-10-25', v: '[نرخ]', s: 'دستی', at: '09:12', n: '3' },
+        { d: '2026-10-24', v: '[نرخ]', s: 'دستی', at: '10:40', n: '5' },
+        { d: '2026-10-22', v: '[نرخ]', s: 'دستی', at: '08:55', n: '2' }
+      ],
+      groups: [
+        { title: 'منابع موتور', note: 'کارگرهای پژوهش هرگز سهم پایش و کنترل را نمی‌گیرند.', fields: [
+          { label: 'کل کارگرها', value: '8' }, { label: 'سقف سهم پژوهش', value: '75%' }, { label: 'حافظه هر کارگر', value: '2 GB' }, { label: 'مسیر API', value: '127.0.0.1:8080' } ] },
+        { title: 'پیش‌فرض‌های یادگیری', note: 'تغییر این مقادیر برای چرخه‌های بعدی اعمال می‌شود و در هر چرخه ثبت می‌گردد.', fields: [
+          { label: 'زمان بازآموزی', value: '03:00 UTC daily' }, { label: 'حداقل داده تازه', value: '1,440 bars' }, { label: 'سقف نامزد هر چرخه', value: '30' }, { label: 'مدت آزمون پیشرو', value: '14d' } ] },
+        { title: 'نگهداری و پشتیبان', note: 'فراداده آزمایش‌ها و سیاست‌ها هرگز خودکار حذف نمی‌شوند.', fields: [
+          { label: 'پشتیبان پایگاه داده', value: 'daily 04:00' }, { label: 'نگهداری کندل 1m', value: 'forever' }, { label: 'نگهداری کش ویژگی', value: '30d' } ] }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

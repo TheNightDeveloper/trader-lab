@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>گزارش آزمایش</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#0D1015}
+a{color:#8DB8FF}a:hover{color:#B5D0FF}
+.num{font-family:'JetBrains Mono',ui-monospace,monospace;direction:ltr;unicode-bidi:isolate}
+</style>
+</helmet>
+<div dir="rtl" style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #0D1015; color: #E7EBF1; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 14px">
+<div style="flex: 1 1 232px; max-width: 100%">
+<dc-import name="Sidebar" active="report" hint-size="100%,1000px"></dc-import>
+</div>
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box">
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; justify-content: space-between">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 26px">گزارش <span class="num">EXP-117</span></h1>
+<p style="margin: 0; color: #9AA3B1">ridge-h4 + vol filter · نامزد برگزیده: <span class="num">vol_filter_pct=80, α=1.0, stop=2.0</span></p>
+</div>
+<div style="display: flex; gap: 10px; flex-wrap: wrap">
+<button style="font: inherit; color: #E7EBF1; background: #1A2029; border: 1px solid #2C3542; border-radius: 8px; padding: 11px 16px; min-height: 44px">خروجی CSV</button>
+<button style="font: inherit; color: #E7EBF1; background: #1A2029; border: 1px solid #2C3542; border-radius: 8px; padding: 11px 16px; min-height: 44px">تعریف JSON</button>
+<button style="font: inherit; color: #E7EBF1; background: #1A2029; border: 1px solid #2C3542; border-radius: 8px; padding: 11px 16px; min-height: 44px">اجرای مجدد (بازتولید)</button>
+<a href="Compare.dc.html" style="text-decoration: none; color: #0D1015; background: #6FA8FF; border-radius: 8px; padding: 11px 18px; min-height: 44px; box-sizing: border-box; font-weight: 700; display: inline-flex; align-items: center">افزودن به مقایسه</a>
+</div>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 12px">
+<sc-for list="{{badges}}" as="b" hint-placeholder-count="6">
+<span style="background: #141922; border: 1px solid {{b.bc}}; color: {{b.c}}; border-radius: 6px; padding: 6px 10px">{{b.t}}</span>
+</sc-for>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 18px">
+<section style="flex: 3 1 520px; min-width: 0; background: #141922; border: 1px solid #2A4A43; border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between">
+<h2 style="margin: 0; font-size: 16px">خلاصه به زبان ساده</h2>
+<span style="font-size: 13px; color: #0D1015; background: #3ECFAE; border-radius: 6px; padding: 3px 10px">واجد شرایط · با احتیاط</span>
+</div>
+<p style="margin: 0; font-size: 16px; line-height: 2">در دوره‌های خارج از نمونه، با <span class="num">10,000 USDT</span> این نامزد <span class="num" style="color: #3ECFAE">+842.17 USDT</span> سود خالص ساخت (<span class="num">+8.4%</span>). بدترین افت حساب <span class="num">11.2%</span> بود و نتیجه در <span class="num">3</span> دوره از <span class="num">4</span> مثبت شد.</p>
+<p style="margin: 0; font-size: 14px; line-height: 1.9; color: #C9D0DA">از هر <span class="num">100</span> USDT سود ناخالص، حدود <span class="num">20</span> USDT صرف کارمزد و لغزش شد. این نامزد از میان <span class="num">96</span> تلاش انتخاب شده؛ بخشی از برتری آن ممکن است شانسی باشد.</p>
+<div style="display: flex; flex-wrap: wrap; gap: 10px">
+<a href="Calculator.dc.html" style="text-decoration: none; color: #0D1015; background: #6FA8FF; border-radius: 8px; padding: 10px 16px; min-height: 44px; box-sizing: border-box; font-weight: 700; display: inline-flex; align-items: center">آزمودن سرمایه و کارمزد دیگر در ماشین‌حساب</a>
+<a href="Chart.dc.html" style="text-decoration: none; color: #E7EBF1; background: #1A2029; border: 1px solid #2C3542; border-radius: 8px; padding: 10px 16px; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center">دیدن معاملات روی نمودار</a>
+</div>
+</section>
+
+<section style="flex: 2 1 340px; min-width: 0; background: #141922; border: 1px solid #262E3A; border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 16px">از سود ناخالص تا سود خالص <span style="font-size: 12px; color: #9AA3B1">USDT</span></h2>
+<sc-for list="{{fall}}" as="w" hint-placeholder-count="4">
+<div style="display: grid; grid-template-columns: 96px minmax(0, 1fr) 96px; gap: 10px; align-items: center; font-size: 13px">
+<span style="color: #C9D0DA">{{w.k}}</span>
+<div style="height: 18px; background: #0F1318; border-radius: 4px; overflow: hidden"><div style="height: 100%; width: {{w.w}}; background: {{w.c}}; border-radius: 4px"></div></div>
+<span class="num" style="text-align: left; color: {{w.tc}}">{{w.v}}</span>
+</div>
+</sc-for>
+<div style="border-top: 1px solid #262E3A; padding-top: 10px; display: flex; flex-direction: column; gap: 6px; font-size: 13px">
+<div style="display: flex; justify-content: space-between"><span style="color: #9AA3B1">ارزش نهایی حساب</span><span class="num">10,842.17 USDT</span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: #9AA3B1">معادل تومانی</span><span>[ارزش × نرخ] تومان</span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: #9AA3B1">کارمزد سر‌به‌سر</span><span class="num">≈ 66 bps</span></div>
+</div>
+</section>
+</div>
+
+<section style="background: #141922; border: 1px solid #262E3A; border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: center">
+<h2 style="margin: 0; font-size: 16px">منحنی ارزش حساب (USDT)</h2>
+<div style="display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: #C9D0DA">
+<span><span style="display: inline-block; width: 14px; height: 3px; background: #6FA8FF; vertical-align: middle"></span> نامزد</span>
+<span><span style="display: inline-block; width: 14px; height: 3px; background: #F0C24B; vertical-align: middle"></span> خرید و نگهداری</span>
+<span><span style="display: inline-block; width: 14px; height: 3px; background: #9AA3B1; vertical-align: middle"></span> نگهداری نقد</span>
+</div>
+</div>
+<div dir="ltr" style="overflow-x: auto">
+<svg viewBox="0 0 900 260" style="width: 100%; min-width: 600px; height: auto; display: block" role="img" aria-label="منحنی ارزش حساب نامزد در برابر دو مبنا؛ بخش توسعه و خارج از نمونه جدا شده‌اند">
+<rect x="0" y="0" width="900" height="260" fill="#10141A"></rect>
+<rect x="430" y="0" width="330" height="260" fill="#16221F"></rect>
+<rect x="770" y="0" width="130" height="260" fill="#221E14"></rect>
+<text x="10" y="18" fill="#9AA3B1" font-size="11" font-family="JetBrains Mono, monospace">dev / tune (in-sample)</text>
+<text x="440" y="18" fill="#9AA3B1" font-size="11" font-family="JetBrains Mono, monospace">walk-forward (out-of-sample)</text>
+<text x="778" y="18" fill="#9AA3B1" font-size="11" font-family="JetBrains Mono, monospace">holdout</text>
+<line x1="0" y1="170" x2="900" y2="170" stroke="#262E3A" stroke-dasharray="4 4"></line>
+<polyline fill="none" stroke="#9AA3B1" stroke-width="1.5" points="0,170 900,170"></polyline>
+<polyline fill="none" stroke="#F0C24B" stroke-width="1.5" points="0,170 60,150 120,110 180,130 240,90 300,160 360,200 420,190 480,150 540,170 600,120 660,140 720,100 780,130 840,150 900,135"></polyline>
+<polyline fill="none" stroke="#6FA8FF" stroke-width="2.2" points="0,170 60,160 120,138 180,142 240,118 300,128 360,140 420,124 480,118 540,124 600,108 660,112 720,100 780,104 840,98 900,96"></polyline>
+</svg>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; color: #9AA3B1; justify-content: space-between">
+<span>ارزش نهایی: <span class="num" style="color: #E7EBF1">10,842.17 USDT</span></span>
+<span>معادل نمایشی: <span style="color: #E7EBF1">[ارزش × نرخ] تومان</span> · نرخ ثبت‌شده: دستی، <span class="num">2026-10-25</span></span>
+</div>
+</section>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px">
+<sc-for list="{{groups}}" as="g" hint-placeholder-count="4">
+<section style="background: #141922; border: 1px solid #262E3A; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+<h3 style="margin: 0 0 4px; font-size: 14px">{{g.title}}</h3>
+<sc-for list="{{g.items}}" as="m" hint-placeholder-count="4">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; border-bottom: 1px solid #1F2630; padding-bottom: 6px">
+<span style="color: #9AA3B1">{{m.k}} <button aria-label="تعریف معیار" title="{{m.def}}" style="font: inherit; font-size: 11px; color: #8DB8FF; background: none; border: 1px solid #2C3542; border-radius: 50%; width: 20px; height: 20px; padding: 0; cursor: help">؟</button></span>
+<span class="num" style="color: {{m.c}}">{{m.v}}</span>
+</div>
+</sc-for>
+</section>
+</sc-for>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 18px">
+<section style="flex: 3 1 520px; min-width: 0; background: #141922; border: 1px solid #262E3A; border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 16px">گام‌های ارزیابی گام‌به‌گام</h2>
+<div style="overflow-x: auto">
+<table style="width: 100%; border-collapse: collapse; font-size: 13px; min-width: 560px">
+<thead><tr style="color: #9AA3B1; text-align: right"><th style="padding: 8px; font-weight: 500">گام</th><th style="padding: 8px; font-weight: 500">آموزش تا</th><th style="padding: 8px; font-weight: 500">آزمون</th><th style="padding: 8px; font-weight: 500">بازده خالص</th><th style="padding: 8px; font-weight: 500">افت</th><th style="padding: 8px; font-weight: 500">معاملات</th><th style="padding: 8px; font-weight: 500">خطای پیش‌بینی</th></tr></thead>
+<tbody>
+<sc-for list="{{folds}}" as="f" hint-placeholder-count="4">
+<tr style="border-top: 1px solid #262E3A"><td style="padding: 9px 8px"><span class="num">{{f.n}}</span></td><td style="padding: 9px 8px"><span class="num">{{f.tr}}</span></td><td style="padding: 9px 8px"><span class="num">{{f.te}}</span></td><td style="padding: 9px 8px"><span class="num" style="color: {{f.c}}">{{f.ret}}</span></td><td style="padding: 9px 8px"><span class="num">{{f.dd}}</span></td><td style="padding: 9px 8px"><span class="num">{{f.t}}</span></td><td style="padding: 9px 8px"><span class="num">{{f.rmse}}</span></td></tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+<h3 style="margin: 8px 0 0; font-size: 14px">سناریوهای تنش</h3>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px">
+<sc-for list="{{stress}}" as="s" hint-placeholder-count="4">
+<div style="background: #1A2029; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 4px; font-size: 13px">
+<span style="color: #9AA3B1">{{s.k}}</span><span class="num" style="color: {{s.c}}">{{s.v}}</span>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section style="flex: 2 1 340px; min-width: 0; background: #141922; border: 1px solid #262E3A; border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 16px">حساسیت پارامتر</h2>
+<p style="margin: 0; font-size: 12px; color: #9AA3B1">بازده خالص خارج از نمونه · محور افقی <span class="num">ridge_alpha</span>، عمودی <span class="num">vol_filter_pct</span> · نقطه برگزیده با کادر</p>
+<div dir="ltr" style="display: flex; flex-direction: column; gap: 4px">
+<sc-for list="{{heat}}" as="row" hint-placeholder-count="4">
+<div style="display: grid; grid-template-columns: 44px repeat(5, minmax(0, 1fr)); gap: 4px">
+<span class="num" style="font-size: 11px; color: #9AA3B1; align-self: center">{{row.label}}</span>
+<sc-for list="{{row.cells}}" as="c" hint-placeholder-count="5">
+<span class="num" style="{{c.style}}">{{c.v}}</span>
+</sc-for>
+</div>
+</sc-for>
+<div style="display: grid; grid-template-columns: 44px repeat(5, minmax(0, 1fr)); gap: 4px; font-size: 11px; color: #9AA3B1; text-align: center; font-family: 'JetBrains Mono', monospace">
+<span></span><span>0.1</span><span>0.3</span><span>1.0</span><span>3.2</span><span>10</span>
+</div>
+</div>
+<p style="margin: 0; font-size: 12px; color: #C9D0DA; line-height: 1.8">نتیجه در همسایگی نقطه برگزیده پایدار است؛ با <span class="num">vol_filter_pct=60</span> افت می‌کند.</p>
+</section>
+</div>
+
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1550}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const ok = '#3ECFAE', bad = '#FF8F5E', warn = '#F0C24B', txt = '#E7EBF1', mute = '#9AA3B1';
+    const grid = [[2.1, 3.4, 4.0, 3.1, 1.2], [3.0, 5.9, 8.4, 6.6, 2.4], [2.8, 5.2, 6.1, 5.0, 3.0], [-0.8, 1.1, 2.0, 1.4, -1.9]];
+    const labels = ['90', '80', '70', '60'];
+    const cell = (v, sel) => {
+      const a = Math.min(Math.abs(v) / 9, 1);
+      const bg = v >= 0 ? 'rgba(62,207,174,' + (0.12 + a * 0.55).toFixed(2) + ')' : 'rgba(255,143,94,' + (0.15 + a * 0.6).toFixed(2) + ')';
+      return 'font-size: 12px; text-align: center; padding: 10px 0; border-radius: 4px; color: #FFFFFF; background: ' + bg + '; outline: ' + (sel ? '2px solid #FFFFFF' : 'none');
+    };
+    const fall = [['سود ناخالص', 1054.92, 'rgba(62,207,174,0.8)'], ['کارمزد', -151.30, 'rgba(255,143,94,0.85)'], ['لغزش', -61.45, 'rgba(255,143,94,0.6)'], ['سود خالص', 842.17, '#6FA8FF']].map(([k, v, c]) => ({ k, c, v: (v > 0 ? '+' : '−') + Math.abs(v).toFixed(2), w: (Math.abs(v) / 1054.92 * 100).toFixed(1) + '%', tc: v >= 0 ? txt : '#FFB08A' }));
+    return {
+      fall,
+      badges: [
+        { t: 'داده ds:7f3a…c1', c: txt, bc: '#2C3542' },
+        { t: 'کد engine@3e91d0a', c: txt, bc: '#2C3542' },
+        { t: 'بذر 20261025', c: txt, bc: '#2C3542' },
+        { t: '96 تلاش در جست‌وجو', c: warn, bc: '#5A4A22' },
+        { t: 'آزمون نهایی: 1 بار مشاهده', c: warn, bc: '#5A4A22' },
+        { t: 'هشدار کیفیت: 1 شکاف', c: warn, bc: '#5A4A22' }
+      ],
+      groups: [
+        { title: 'نتیجه مالی', items: [
+          { k: 'بازده خالص (OOS)', v: '+8.4%', c: ok, def: 'تغییر ارزش حساب در دوره‌های خارج از نمونه، پس از کارمزد و لغزش' },
+          { k: 'سود و زیان محقق‌شده', v: '+861.40', c: ok, def: 'مجموع نتیجه معاملات بسته‌شده، USDT' },
+          { k: 'کارمزد و لغزش', v: '−212.75', c: bad, def: 'کل هزینه اجرا، USDT' },
+          { k: 'شارپ (سالانه)', v: '1.12', c: txt, def: 'نرخ بدون ریسک 0، بسامد ساعتی، 8760 ساعت در سال' } ] },
+        { title: 'ریسک', items: [
+          { k: 'بیشینه افت', v: '−11.2%', c: txt, def: 'بیشترین افت از اوج ارزش حساب' },
+          { k: 'طولانی‌ترین افت', v: '23d', c: txt, def: 'مدت از اوج تا بازگشت به اوج' },
+          { k: 'مواجهه میانگین', v: '38%', c: txt, def: 'سهم زمانی که سرمایه درگیر بازار بوده' } ] },
+        { title: 'معاملات', items: [
+          { k: 'تعداد', v: '214', c: txt, def: 'معاملات بسته‌شده در دوره‌های خارج از نمونه' },
+          { k: 'درصد موفقیت', v: '52.3%', c: txt, def: 'سهم معاملات با نتیجه خالص مثبت' },
+          { k: 'میانگین سود / ضرر', v: '1.21', c: txt, def: 'نسبت میانگین سود به میانگین ضرر' },
+          { k: 'مدت نگهداری', v: '4h 10m', c: txt, def: 'میانه مدت باز بودن موقعیت' } ] },
+        { title: 'پایداری', items: [
+          { k: 'گام‌های مثبت', v: '3 / 4', c: txt, def: 'تعداد گام‌های گام‌به‌گام با بازده خالص مثبت' },
+          { k: 'دارایی‌های مثبت', v: '2 / 2', c: txt, def: 'BTCUSDT و ETHUSDT جداگانه' },
+          { k: 'همسایگی پارامتر', v: 'پایدار', c: ok, def: 'آستانه ازپیش‌ثبت‌شده: افت کمتر از 50% در همسایه‌ها' } ] }
+      ],
+      folds: [
+        { n: 'WF1', tr: '2025-12-31', te: '2026-01 → 02', ret: '+3.2%', c: ok, dd: '−4.1%', t: '58', rmse: '0.0091' },
+        { n: 'WF2', tr: '2026-01-31', te: '2026-02 → 03', ret: '−1.1%', c: bad, dd: '−6.3%', t: '49', rmse: '0.0104' },
+        { n: 'WF3', tr: '2026-02-28', te: '2026-03 → 04', ret: '+4.0%', c: ok, dd: '−3.2%', t: '55', rmse: '0.0088' },
+        { n: 'WF4', tr: '2026-03-31', te: '2026-04 → 05', ret: '+2.1%', c: ok, dd: '−5.0%', t: '52', rmse: '0.0095' }
+      ],
+      stress: [
+        { k: 'کارمزد × 2', v: '+4.9%', c: ok },
+        { k: 'لغزش × 3', v: '+1.8%', c: ok },
+        { k: 'تأخیر +1 کندل', v: '+5.6%', c: ok },
+        { k: 'بازار رنج 2026-Q2', v: '−2.7%', c: bad }
+      ],
+      heat: grid.map((r, i) => ({ label: labels[i], cells: r.map((v, j) => ({ v: (v > 0 ? '+' : '') + v.toFixed(1), style: cell(v, i === 1 && j === 2) })) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

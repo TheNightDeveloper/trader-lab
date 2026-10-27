@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>داده</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#0D1015}
+a{color:#8DB8FF}a:hover{color:#B5D0FF}
+.num{font-family:'JetBrains Mono',ui-monospace,monospace;direction:ltr;unicode-bidi:isolate}
+</style>
+</helmet>
+<div dir="rtl" style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #0D1015; color: #E7EBF1; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 14px">
+<div style="flex: 1 1 232px; max-width: 100%">
+<dc-import name="Sidebar" active="data" hint-size="100%,1000px"></dc-import>
+</div>
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box">
+
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 26px">داده</h1>
+<p style="margin: 0; color: #9AA3B1">مجموعه‌های نسخه‌بندی‌شده، کیفیت، پوشش زمانی و دریافت زنده. اصلاح منبع همیشه نسخه تازه می‌سازد.</p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px">
+<sc-for list="{{live}}" as="l" hint-placeholder-count="4">
+<div style="background: #141922; border: 1px solid #262E3A; border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 6px">
+<span style="color: #9AA3B1; font-size: 13px">{{l.k}}</span>
+<span style="font-size: 17px; color: {{l.c}}">{{l.v}}</span>
+</div>
+</sc-for>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start">
+<div style="flex: 3 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 18px">
+
+<section style="background: #141922; border: 1px solid #262E3A; border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 16px">مجموعه‌های داده</h2>
+<div style="overflow-x: auto">
+<table style="width: 100%; border-collapse: collapse; font-size: 13px; min-width: 700px">
+<thead><tr style="color: #9AA3B1; text-align: right"><th style="padding: 8px; font-weight: 500">نسخه</th><th style="padding: 8px; font-weight: 500">جفت‌ها</th><th style="padding: 8px; font-weight: 500">تایم‌فریم</th><th style="padding: 8px; font-weight: 500">بازه</th><th style="padding: 8px; font-weight: 500">کیفیت</th><th style="padding: 8px; font-weight: 500">آزمایش‌های وابسته</th></tr></thead>
+<tbody>
+<sc-for list="{{sets}}" as="d" hint-placeholder-count="4">
+<tr style="border-top: 1px solid #262E3A">
+<td style="padding: 9px 8px"><span class="num">{{d.v}}</span></td>
+<td style="padding: 9px 8px"><span class="num">{{d.pairs}}</span></td>
+<td style="padding: 9px 8px"><span class="num">{{d.tf}}</span></td>
+<td style="padding: 9px 8px"><span class="num">{{d.range}}</span></td>
+<td style="padding: 9px 8px; color: {{d.qc}}">{{d.q}}</td>
+<td style="padding: 9px 8px"><span class="num">{{d.deps}}</span></td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+</section>
+
+<section style="background: #141922; border: 1px solid #262E3A; border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px">
+<h2 style="margin: 0; font-size: 16px">پوشش زمانی <span class="num" style="font-size: 13px; color: #9AA3B1">1m</span></h2>
+<span style="font-size: 12px; color: #9AA3B1">نوار نارنجی = شکاف یا داده نامعتبر</span>
+</div>
+<div dir="ltr" style="display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{coverage}}" as="c" hint-placeholder-count="5">
+<div style="display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 10px; align-items: center">
+<span class="num" style="font-size: 12px">{{c.pair}}</span>
+<div style="position: relative; height: 14px; background: #0F1318; border-radius: 4px">
+<div style="position: absolute; top: 0; bottom: 0; left: {{c.start}}; right: 0; background: #2A4A43; border-radius: 4px"></div>
+<sc-for list="{{c.gaps}}" as="g" hint-placeholder-count="1">
+<div style="position: absolute; top: -2px; bottom: -2px; left: {{g}}; width: 3px; background: #FF8F5E"></div>
+</sc-for>
+</div>
+</div>
+</sc-for>
+<div style="display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 10px; font-size: 11px; color: #9AA3B1; font-family: 'JetBrains Mono', monospace">
+<span></span><span style="display: flex; justify-content: space-between"><span>2017</span><span>2019</span><span>2021</span><span>2023</span><span>2026</span></span>
+</div>
+</div>
+</section>
+
+<section style="background: #141922; border: 1px solid #262E3A; border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 16px">مشکلات کیفیت</h2>
+<sc-for list="{{issues}}" as="i" hint-placeholder-count="4">
+<div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; background: #1A2029; border-radius: 8px; padding: 10px 12px; font-size: 13px">
+<span><span style="color: {{i.c}}">{{i.kind}}</span> · <span class="num">{{i.where}}</span></span>
+<span style="color: #9AA3B1">{{i.policy}}</span>
+</div>
+</sc-for>
+</section>
+</div>
+
+<aside style="flex: 1 1 300px; min-width: 0; background: #141922; border: 1px solid #262E3A; border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 16px">واردسازی تاریخچه</h2>
+<label style="display: flex; flex-direction: column; gap: 6px; color: #9AA3B1; font-size: 13px">منبع
+<select style="font: inherit; font-size: 14px; color: #E7EBF1; background: #0F1318; border: 1px solid #2C3542; border-radius: 8px; padding: 10px 12px; min-height: 44px"><option>Binance public archive (klines)</option><option>فایل CSV محلی</option></select>
+</label>
+<label style="display: flex; flex-direction: column; gap: 6px; color: #9AA3B1; font-size: 13px">جفت‌ها
+<input value="BTCUSDT, ETHUSDT, SOLUSDT" class="num" style="font-size: 14px; color: #E7EBF1; background: #0F1318; border: 1px solid #2C3542; border-radius: 8px; padding: 10px 12px; min-height: 44px; box-sizing: border-box; text-align: left">
+</label>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<label style="display: flex; flex-direction: column; gap: 6px; color: #9AA3B1; font-size: 13px">از
+<input value="2020-01-01" class="num" style="font-size: 14px; color: #E7EBF1; background: #0F1318; border: 1px solid #2C3542; border-radius: 8px; padding: 10px 12px; min-height: 44px; box-sizing: border-box; text-align: left">
+</label>
+<label style="display: flex; flex-direction: column; gap: 6px; color: #9AA3B1; font-size: 13px">تا
+<input value="2026-10-24" class="num" style="font-size: 14px; color: #E7EBF1; background: #0F1318; border: 1px solid #2C3542; border-radius: 8px; padding: 10px 12px; min-height: 44px; box-sizing: border-box; text-align: left">
+</label>
+</div>
+<label style="display: flex; flex-direction: column; gap: 6px; color: #9AA3B1; font-size: 13px">سیاست شکاف
+<select style="font: inherit; font-size: 14px; color: #E7EBF1; background: #0F1318; border: 1px solid #2C3542; border-radius: 8px; padding: 10px 12px; min-height: 44px"><option>علامت‌گذاری، بدون پرکردن</option><option>توقف آزمایش</option><option>پرکردن با آخرین قیمت معلوم (بدون داده آینده)</option></select>
+</label>
+<button style="font: inherit; font-weight: 700; color: #0D1015; background: #6FA8FF; border: none; border-radius: 8px; padding: 12px; min-height: 44px">واردسازی و ساخت نسخه</button>
+<p style="margin: 0; font-size: 12px; color: #9AA3B1; line-height: 1.8">واردسازی مجدد همان بازه رکورد تکراری نمی‌سازد. هر نسخه شناسه محتوا دارد و آزمایش‌های قبلی تغییر نمی‌کنند.</p>
+</aside>
+</div>
+
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1150}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const ok = '#3ECFAE', warn = '#F0C24B', bad = '#FF8F5E', txt = '#E7EBF1';
+    return {
+      live: [
+        { k: 'جریان زنده', v: '9 جفت · WebSocket', c: ok },
+        { k: 'سن آخرین کندل', v: '4 ثانیه', c: ok },
+        { k: 'قطعی‌های امروز', v: '2 · مجموع 6 دقیقه', c: warn },
+        { k: 'فضای ذخیره', v: '38.2 GB', c: txt }
+      ],
+      sets: [
+        { v: 'ds:7f3a…c1', pairs: 'BTC, ETH', tf: '1m→1h', range: '2017-08 → 2026-10-20', q: '1 شکاف', qc: warn, deps: '14' },
+        { v: 'ds:5b20…9e', pairs: 'BTC, ETH', tf: '1m→1h', range: '2017-08 → 2026-09-30', q: 'سالم', qc: ok, deps: '31' },
+        { v: 'ds:c418…02', pairs: 'SOL, BNB, XRP', tf: '1m', range: '2020-08 → 2026-10-20', q: 'سالم', qc: ok, deps: '0' },
+        { v: 'ds:91e7…4d', pairs: 'ETHBTC', tf: '1m', range: '2017-08 → 2026-10-20', q: 'اصلاح منبع', qc: bad, deps: '2' }
+      ],
+      coverage: [
+        { pair: 'BTCUSDT', start: '6%', gaps: ['72%', '97%'] },
+        { pair: 'ETHUSDT', start: '6%', gaps: ['99%'] },
+        { pair: 'SOLUSDT', start: '37%', gaps: [] },
+        { pair: 'BNBUSDT', start: '8%', gaps: ['21%'] },
+        { pair: 'ETHBTC', start: '6%', gaps: ['54%'] }
+      ],
+      issues: [
+        { kind: 'شکاف', c: warn, where: 'ETHUSDT 1m · 2026-10-24 13:05–13:22', policy: 'علامت‌گذاری · ورود در شکاف متوقف' },
+        { kind: 'اصلاح منبع', c: bad, where: 'ETHBTC · 2023-03-12', policy: 'نسخه تازه ds:91e7 ساخته شد' },
+        { kind: 'حجم صفر', c: warn, where: 'BNBUSDT · 2018-06-02 (41 کندل)', policy: 'علامت‌گذاری' },
+        { kind: 'کندل ناتمام', c: txt, where: 'live · 9 جفت', policy: 'تا بسته‌شدن در تصمیم استفاده نمی‌شود' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

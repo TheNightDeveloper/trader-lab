@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>نمودار</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#0D1015}
+a{color:#8DB8FF}a:hover{color:#B5D0FF}
+.num{font-family:'JetBrains Mono',ui-monospace,monospace;direction:ltr;unicode-bidi:isolate}
+</style>
+</helmet>
+<div dir="rtl" style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #0D1015; color: #E7EBF1; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 14px">
+<div style="flex: 1 1 232px; max-width: 100%">
+<dc-import name="Sidebar" active="chart" hint-size="100%,1000px"></dc-import>
+</div>
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 16px; box-sizing: border-box">
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; justify-content: space-between">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 26px">نمودار</h1>
+<p style="margin: 0; color: #9AA3B1">اجرای <span class="num">EXP-117 #84</span> روی <span class="num">BTCUSDT 1h</span> · اندیکاتورها از موتور Go</p>
+</div>
+<label style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #9AA3B1">لایه اجرا
+<select class="num" style="font-size: 13px; color: #E7EBF1; background: #141922; border: 1px solid #2C3542; border-radius: 8px; padding: 9px 12px; min-height: 44px"><option>EXP-117 #84</option><option>none</option></select>
+</label>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: #141922; border: 1px solid #262E3A; border-radius: 10px; padding: 8px">
+<select class="num" aria-label="جفت‌ارز" style="font-size: 13px; color: #E7EBF1; background: #0F1318; border: 1px solid #2C3542; border-radius: 8px; padding: 8px 10px; min-height: 44px"><option>BTCUSDT</option><option>ETHUSDT</option></select>
+<div style="display: flex; gap: 4px; flex-wrap: wrap">
+<sc-for list="{{tfs}}" as="t" hint-placeholder-count="6">
+<button onClick="{{t.pick}}" style="{{t.style}}">{{t.label}}</button>
+</sc-for>
+</div>
+<span style="width: 1px; height: 28px; background: #2C3542"></span>
+<div style="display: flex; gap: 4px; flex-wrap: wrap">
+<sc-for list="{{inds}}" as="i" hint-placeholder-count="5">
+<button onClick="{{i.toggle}}" style="{{i.style}}">{{i.label}}</button>
+</sc-for>
+</div>
+<span style="width: 1px; height: 28px; background: #2C3542"></span>
+<div style="display: flex; gap: 4px">
+<button aria-label="خط افقی" title="خط افقی" style="font: inherit; color: #C9D0DA; background: #0F1318; border: 1px solid #2C3542; border-radius: 8px; width: 44px; height: 44px"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 9 H16"></path></svg></button>
+<button aria-label="خط روند" title="خط روند" style="font: inherit; color: #C9D0DA; background: #0F1318; border: 1px solid #2C3542; border-radius: 8px; width: 44px; height: 44px"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 15 L16 3"></path></svg></button>
+<button aria-label="کانال" title="کانال" style="font: inherit; color: #C9D0DA; background: #0F1318; border: 1px solid #2C3542; border-radius: 8px; width: 44px; height: 44px"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 12 L16 4"></path><path d="M2 16 L16 8"></path></svg></button>
+<button aria-label="فیبوناچی" title="فیبوناچی" style="font: inherit; color: #C9D0DA; background: #0F1318; border: 1px solid #2C3542; border-radius: 8px; width: 44px; height: 44px"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 3 H16 M2 7 H16 M2 11 H16 M2 15 H16"></path></svg></button>
+</div>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+<div dir="ltr" style="flex: 3 1 560px; min-width: 0; background: #10141A; border: 1px solid #262E3A; border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; gap: 14px; font-size: 12px; font-family: 'JetBrains Mono', monospace; color: #9AA3B1; flex-wrap: wrap">
+<span>BTCUSDT · 1h</span><span style="color: #6FA8FF">EMA 48</span><span>O 67,412.5  H 67,880.0  L 67,120.3  C 67,744.1</span>
+</div>
+<div style="display: flex; gap: 6px">
+<div style="flex: 1; min-width: 0; position: relative; height: 380px; display: flex; gap: 2px; align-items: stretch; border-bottom: 1px solid #262E3A">
+<sc-for list="{{candles}}" as="c" hint-placeholder-count="60">
+<div style="flex: 1; position: relative">
+<div style="position: absolute; left: 50%; width: 1px; transform: translateX(-50%); top: {{c.wt}}; height: {{c.wh}}; background: {{c.col}}"></div>
+<div style="position: absolute; left: 12%; right: 12%; top: {{c.bt}}; height: {{c.bh}}; background: {{c.col}}; border-radius: 1px"></div>
+<sc-if value="{{c.mark}}" hint-placeholder-val="{{false}}">
+<button onClick="{{c.pick}}" aria-label="{{c.aria}}" style="{{c.mstyle}}">{{c.ml}}</button>
+</sc-if>
+</div>
+</sc-for>
+</div>
+<div style="width: 64px; display: flex; flex-direction: column; justify-content: space-between; font-size: 11px; color: #9AA3B1; font-family: 'JetBrains Mono', monospace; height: 380px">
+<sc-for list="{{axis}}" as="a" hint-placeholder-count="5"><span>{{a}}</span></sc-for>
+</div>
+</div>
+<div style="display: flex; gap: 6px">
+<div style="flex: 1; min-width: 0; height: 70px; display: flex; gap: 2px; align-items: flex-end">
+<sc-for list="{{candles}}" as="c" hint-placeholder-count="60">
+<div style="flex: 1; height: {{c.vh}}; background: {{c.vcol}}"></div>
+</sc-for>
+</div>
+<div style="width: 64px; font-size: 11px; color: #9AA3B1; font-family: 'JetBrains Mono', monospace">Vol</div>
+</div>
+<div style="display: flex; justify-content: space-between; font-size: 11px; color: #9AA3B1; font-family: 'JetBrains Mono', monospace; padding-right: 70px">
+<span>10-22 00:00</span><span>10-22 20:00</span><span>10-23 16:00</span><span>10-24 12:00</span>
+</div>
+</div>
+
+<aside style="flex: 1 1 300px; min-width: 0; background: #141922; border: 1px solid #262E3A; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+<span style="color: #9AA3B1; font-size: 12px">تصمیم انتخاب‌شده</span>
+<span style="font-size: 17px; font-weight: 700; color: {{dec.c}}">{{dec.title}}</span>
+<sc-for list="{{dec.rows}}" as="r" hint-placeholder-count="7">
+<div style="display: flex; justify-content: space-between; gap: 10px; font-size: 13px; border-bottom: 1px solid #1F2630; padding-bottom: 6px"><span style="color: #9AA3B1">{{r.k}}</span><span class="num" style="text-align: left">{{r.v}}</span></div>
+</sc-for>
+<p style="margin: 0; font-size: 13px; line-height: 1.8">{{dec.reason}}</p>
+<button disabled aria-disabled="true" style="font: inherit; color: #9AA3B1; background: #1A2029; border: 1px dashed #2C3542; border-radius: 8px; padding: 10px; min-height: 44px">بازپخش کندل‌به‌کندل (فاز بعد)</button>
+<a href="Report.dc.html" style="font-size: 13px">بازگشت به گزارش</a>
+</aside>
+</div>
+
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { tf: '1h', sel: 22, ind: { EMA: true, MA: false, RSI: false, MACD: false, BB: false } }; }
+  renderVals() {
+    let s = 7, price = 67000;
+    const rnd = () => { s = (s * 16807) % 2147483647; return s / 2147483647; };
+    const raw = [];
+    for (let i = 0; i < 60; i++) {
+      const o = price, c = o + (rnd() - 0.48) * 380;
+      const h = Math.max(o, c) + rnd() * 160, l = Math.min(o, c) - rnd() * 160;
+      raw.push({ o, c, h, l, v: 0.3 + rnd() * 0.7 }); price = c;
+    }
+    const hi = Math.max(...raw.map(r => r.h)) + 120, lo = Math.min(...raw.map(r => r.l)) - 120, y = (p) => ((hi - p) / (hi - lo)) * 100;
+    const marks = { 8: ['B', 'entry'], 15: ['S', 'exit'], 22: ['B', 'entry'], 34: ['S', 'exit'], 41: ['×', 'rejected'], 47: ['B', 'entry'] };
+    const decisions = {
+      entry: { title: 'ورود خرید', c: '#3ECFAE', reason: 'پیش‌بینی بازده 4 ساعت بالاتر از آستانه و نوسان زیر صدک 80؛ هیچ سیاستی مانع نشد.' },
+      exit: { title: 'خروج', c: '#FF8F5E', reason: 'پایان افق 4 ساعت؛ حد ضرر لمس نشد.' },
+      rejected: { title: 'سیگنال ردشده', c: '#F0C24B', reason: 'سیگنال خرید صادر شد اما به علت شکاف داده در 30 دقیقه قبل، ورود متوقف شد.' }
+    };
+    const pick = (i) => () => this.setState({ sel: i });
+    const candles = raw.map((k, i) => {
+      const up = k.c >= k.o, col = up ? '#3ECFAE' : '#FF8F5E';
+      const m = marks[i];
+      const on = this.state.sel === i;
+      const mstyle = 'position: absolute; left: 50%; transform: translateX(-50%); width: 22px; height: 22px; padding: 0; border-radius: 50%; font: 700 11px JetBrains Mono, monospace; cursor: pointer; top: ' + (m && m[0] === 'S' ? (y(k.h) - 9).toFixed(1) + '%' : (y(k.l) + 2).toFixed(1) + '%') + '; color: #0D1015; background: ' + (m ? (m[1] === 'entry' ? '#6FA8FF' : m[1] === 'exit' ? '#E7EBF1' : '#F0C24B') : '#fff') + '; border: ' + (on ? '2px solid #FFFFFF; box-shadow: 0 0 0 2px #6FA8FF' : '1px solid #0D1015');
+      return {
+        col, vcol: up ? 'rgba(62,207,174,0.35)' : 'rgba(255,143,94,0.35)',
+        wt: y(k.h).toFixed(2) + '%', wh: (y(k.l) - y(k.h)).toFixed(2) + '%',
+        bt: y(Math.max(k.o, k.c)).toFixed(2) + '%', bh: Math.max(0.4, Math.abs(y(k.o) - y(k.c))).toFixed(2) + '%',
+        vh: (k.v * 100).toFixed(0) + '%',
+        mark: !!m, ml: m ? m[0] : '', aria: m ? 'نشانگر ' + m[1] : '', mstyle, pick: pick(i)
+      };
+    });
+    const selM = marks[this.state.sel] || marks[22];
+    const d = decisions[selM[1]];
+    const k = raw[this.state.sel] || raw[22];
+    const tfStyle = (on) => 'font: 500 12px JetBrains Mono, monospace; min-width: 44px; min-height: 44px; border-radius: 8px; cursor: pointer; border: 1px solid ' + (on ? '#6FA8FF' : '#2C3542') + '; background: ' + (on ? '#1B2A40' : '#0F1318') + '; color: ' + (on ? '#FFFFFF' : '#C9D0DA');
+    return {
+      tfs: ['1m', '15m', '1h', '4h', '1d'].map(t => ({ label: t, style: tfStyle(this.state.tf === t), pick: () => this.setState({ tf: t }) })),
+      inds: ['MA', 'EMA', 'BB', 'RSI', 'MACD'].map(n => ({ label: n, style: tfStyle(!!this.state.ind[n]), toggle: () => this.setState({ ind: { ...this.state.ind, [n]: !this.state.ind[n] } }) })),
+      candles,
+      axis: [0, 0.25, 0.5, 0.75, 1].map(f => Math.round(hi - f * (hi - lo)).toLocaleString('en-US')),
+      dec: { title: d.title, c: d.c, reason: d.reason, rows: [
+        { k: 'زمان تصمیم', v: '2026-10-23 ' + String(this.state.sel % 24).padStart(2, '0') + ':00 UTC' },
+        { k: 'قیمت مرجع', v: k.c.toFixed(1) },
+        { k: 'پیش‌بینی r_4h', v: '+0.42%' },
+        { k: 'vol_24 صدک', v: '0.63' },
+        { k: 'مدل', v: 'm-7c21 (v7)' },
+        { k: 'سیاست', v: 'policy v3' },
+        { k: 'اعتبار سیگنال', v: '1 bar' }
+      ] }
+    };
+  }
+}
+</script>
+</body>
+</html>

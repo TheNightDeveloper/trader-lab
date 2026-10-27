@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>ماشین‌حساب سود و زیان</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#0D1015}
+a{color:#8DB8FF}a:hover{color:#B5D0FF}
+.num{font-family:'JetBrains Mono',ui-monospace,monospace;direction:ltr;unicode-bidi:isolate}
+</style>
+</helmet>
+<div dir="rtl" style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #0D1015; color: #E7EBF1; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 14px">
+<div style="flex: 1 1 232px; max-width: 100%">
+<dc-import name="Sidebar" active="calc" hint-size="100%,1000px"></dc-import>
+</div>
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box">
+
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 26px">ماشین‌حساب سود و زیان</h1>
+<p style="margin: 0; color: #9AA3B1">ببینید یک الگوریتم یا یک معامله، پس از کارمزد و لغزش، دقیقاً چقدر سود یا زیان می‌سازد — و اگر شرایط عوض شود چه می‌شود.</p>
+</div>
+
+<div role="tablist" aria-label="نوع محاسبه" style="display: flex; gap: 8px; flex-wrap: wrap">
+<button role="tab" onClick="{{toRun}}" style="{{tabRun}}">نتیجه یک الگوریتم (از اجرای ثبت‌شده)</button>
+<button role="tab" onClick="{{toTrade}}" style="{{tabTrade}}">یک معامله</button>
+</div>
+
+<sc-if value="{{isRun}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start">
+
+<section style="flex: 1 1 300px; min-width: 0; background: #141922; border: 1px solid #262E3A; border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-size: 16px">ورودی‌ها</h2>
+<label style="display: flex; flex-direction: column; gap: 6px; color: #9AA3B1; font-size: 13px">اجرای ثبت‌شده
+<select class="num" style="font-size: 14px; color: #E7EBF1; background: #0F1318; border: 1px solid #2C3542; border-radius: 8px; padding: 10px 12px; min-height: 44px"><option>EXP-117 #84 · ridge-h4 · 12 trades (OOS)</option></select>
+</label>
+<sc-for list="{{runFields}}" as="f" hint-placeholder-count="5">
+<label style="display: flex; flex-direction: column; gap: 6px; color: #C9D0DA; font-size: 13px">
+<span style="display: flex; justify-content: space-between; gap: 8px"><span>{{f.label}}</span><span style="color: #9AA3B1">{{f.unit}}</span></span>
+<input value="{{f.value}}" onChange="{{f.set}}" inputmode="decimal" class="num" style="font-size: 15px; color: #E7EBF1; background: #0F1318; border: 1px solid #2C3542; border-radius: 8px; padding: 10px 12px; min-height: 44px; box-sizing: border-box; text-align: left">
+<span style="color: #9AA3B1; font-size: 12px; line-height: 1.7">{{f.help}}</span>
+</label>
+</sc-for>
+<button onClick="{{resetRun}}" style="font: inherit; color: #E7EBF1; background: #1A2029; border: 1px solid #2C3542; border-radius: 8px; padding: 10px; min-height: 44px">بازگشت به تنظیمات اجرای اصلی</button>
+</section>
+
+<div style="flex: 2 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+<section style="background: #141922; border: 1px solid {{r.verdictBorder}}; border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 13px; color: {{r.verdictColor}}">{{r.verdict}}</span>
+<p style="margin: 0; font-size: 16px; line-height: 2">{{r.sentence}}</p>
+</section>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px">
+<sc-for list="{{r.cards}}" as="c" hint-placeholder-count="6">
+<div style="background: #141922; border: 1px solid #262E3A; border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 6px">
+<span style="color: #9AA3B1; font-size: 13px">{{c.k}}</span>
+<span class="num" style="font-size: 19px; text-align: right; color: {{c.c}}">{{c.v}}</span>
+<span style="color: #9AA3B1; font-size: 12px">{{c.sub}}</span>
+</div>
+</sc-for>
+</div>
+
+<section style="background: #141922; border: 1px solid #262E3A; border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 16px">از سود ناخالص تا سود خالص</h2>
+<sc-for list="{{r.fall}}" as="w" hint-placeholder-count="4">
+<div style="display: grid; grid-template-columns: 130px minmax(0, 1fr) 120px; gap: 10px; align-items: center; font-size: 13px">
+<span style="color: #C9D0DA">{{w.k}}</span>
+<div style="height: 18px; background: #0F1318; border-radius: 4px; overflow: hidden"><div style="height: 100%; width: {{w.w}}; background: {{w.c}}; border-radius: 4px"></div></div>
+<span class="num" style="text-align: left; color: {{w.tc}}">{{w.v}}</span>
+</div>
+</sc-for>
+<p style="margin: 0; font-size: 12px; color: #9AA3B1; line-height: 1.8">نقطه سر‌به‌سر کارمزد: اگر کارمزد هر طرف به <span class="num" style="color: #E7EBF1">{{r.beFee}}</span> برسد، سود خالص صفر می‌شود.</p>
+</section>
+
+<section style="background: #141922; border: 1px solid #262E3A; border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px">
+<h2 style="margin: 0; font-size: 16px">ارزش حساب پس از هر معامله</h2>
+<span style="font-size: 12px; color: #9AA3B1">میله نارنجی = معامله زیان‌ده</span>
+</div>
+<div dir="ltr" role="img" aria-label="ارزش حساب پس از هر معامله" style="display: flex; gap: 4px; align-items: flex-end; height: 120px; border-bottom: 1px solid #262E3A">
+<sc-for list="{{r.trades}}" as="t" hint-placeholder-count="12">
+<div style="flex: 1; height: {{t.h}}; background: {{t.bar}}; border-radius: 3px 3px 0 0"></div>
+</sc-for>
+</div>
+<div style="overflow-x: auto">
+<table style="width: 100%; border-collapse: collapse; font-size: 13px; min-width: 640px">
+<thead><tr style="color: #9AA3B1; text-align: right"><th style="padding: 8px; font-weight: 500">#</th><th style="padding: 8px; font-weight: 500">جفت</th><th style="padding: 8px; font-weight: 500">ورود → خروج</th><th style="padding: 8px; font-weight: 500">حجم (USDT)</th><th style="padding: 8px; font-weight: 500">ناخالص</th><th style="padding: 8px; font-weight: 500">هزینه</th><th style="padding: 8px; font-weight: 500">خالص</th></tr></thead>
+<tbody>
+<sc-for list="{{r.trades}}" as="t" hint-placeholder-count="12">
+<tr style="border-top: 1px solid #262E3A">
+<td style="padding: 8px"><span class="num" style="color: #9AA3B1">{{t.i}}</span></td>
+<td style="padding: 8px"><span class="num">{{t.pair}}</span></td>
+<td style="padding: 8px"><span class="num">{{t.px}}</span></td>
+<td style="padding: 8px"><span class="num">{{t.size}}</span></td>
+<td style="padding: 8px"><span class="num">{{t.gross}}</span></td>
+<td style="padding: 8px"><span class="num" style="color: #FFB08A">{{t.cost}}</span></td>
+<td style="padding: 8px"><span class="num" style="color: {{t.nc}}">{{t.net}}</span></td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isTrade}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start">
+<section style="flex: 1 1 300px; min-width: 0; background: #141922; border: 1px solid #262E3A; border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-size: 16px">ورودی‌های معامله</h2>
+<span style="font-size: 12px; color: #9AA3B1">بازار اسپات: خرید و سپس فروش. فروش استقراضی ممکن نیست.</span>
+<sc-for list="{{tradeFields}}" as="f" hint-placeholder-count="6">
+<label style="display: flex; flex-direction: column; gap: 6px; color: #C9D0DA; font-size: 13px">
+<span style="display: flex; justify-content: space-between; gap: 8px"><span>{{f.label}}</span><span style="color: #9AA3B1">{{f.unit}}</span></span>
+<input value="{{f.value}}" onChange="{{f.set}}" inputmode="decimal" class="num" style="font-size: 15px; color: #E7EBF1; background: #0F1318; border: 1px solid #2C3542; border-radius: 8px; padding: 10px 12px; min-height: 44px; box-sizing: border-box; text-align: left">
+</label>
+</sc-for>
+</section>
+
+<div style="flex: 2 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+<section style="background: #141922; border: 1px solid {{t.verdictBorder}}; border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 13px; color: {{t.verdictColor}}">{{t.verdict}}</span>
+<p style="margin: 0; font-size: 16px; line-height: 2">{{t.sentence}}</p>
+</section>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px">
+<sc-for list="{{t.cards}}" as="c" hint-placeholder-count="6">
+<div style="background: #141922; border: 1px solid #262E3A; border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 6px">
+<span style="color: #9AA3B1; font-size: 13px">{{c.k}}</span>
+<span class="num" style="font-size: 19px; text-align: right; color: {{c.c}}">{{c.v}}</span>
+<span style="color: #9AA3B1; font-size: 12px">{{c.sub}}</span>
+</div>
+</sc-for>
+</div>
+<section style="background: #141922; border: 1px solid #262E3A; border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 16px">از سود ناخالص تا سود خالص</h2>
+<sc-for list="{{t.fall}}" as="w" hint-placeholder-count="4">
+<div style="display: grid; grid-template-columns: 130px minmax(0, 1fr) 120px; gap: 10px; align-items: center; font-size: 13px">
+<span style="color: #C9D0DA">{{w.k}}</span>
+<div style="height: 18px; background: #0F1318; border-radius: 4px; overflow: hidden"><div style="height: 100%; width: {{w.w}}; background: {{w.c}}; border-radius: 4px"></div></div>
+<span class="num" style="text-align: left; color: {{w.tc}}">{{w.v}}</span>
+</div>
+</sc-for>
+</section>
+</div>
+</div>
+</sc-if>
+
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    this.defaults = { capital: '10000', pct: '50', fee: '10', slip: '5', rate: '' };
+    this.state = { mode: 'run', ...this.defaults, entry: '67400', exit: '68900', amount: '2000', tfee: '10', tslip: '5', trate: '' };
+  }
+  renderVals() {
+    const ok = '#3ECFAE', bad = '#FF8F5E', txt = '#E7EBF1', blue = '#6FA8FF';
+    const n = (v, d) => { const x = parseFloat(String(v).replace(/,/g, '')); return isFinite(x) ? x : d; };
+    const f2 = (x) => x.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const sg = (x) => (x > 0 ? '+' : x < 0 ? '−' : '') + f2(Math.abs(x));
+    const pc = (x) => (x > 0 ? '+' : x < 0 ? '−' : '') + Math.abs(x).toFixed(2) + '%';
+    const toman = (x, rate) => rate > 0 ? sg(Math.round(x * rate)).replace('.00', '') + ' تومان' : 'نرخ وارد نشده';
+    const set = (k) => (e) => this.setState({ [k]: e.target.value });
+    const tab = (on) => 'font: inherit; min-height: 44px; padding: 10px 16px; border-radius: 8px; cursor: pointer; border: 1px solid ' + (on ? '#6FA8FF' : '#2C3542') + '; background: ' + (on ? '#1B2A40' : '#141922') + '; color: ' + (on ? '#FFFFFF' : '#C9D0DA') + '; font-weight: ' + (on ? '700' : '400');
+    const st = this.state;
+
+    // ---- run what-if ----
+    const T = [['BTCUSDT','01-03',62110,63480],['ETHUSDT','01-06',3310,3262],['BTCUSDT','01-11',63900,65210],['BTCUSDT','01-19',66020,65380],['ETHUSDT','01-27',3405,3528],['BTCUSDT','02-04',64870,66120],['ETHUSDT','02-12',3290,3214],['BTCUSDT','02-20',67250,68840],['BTCUSDT','03-02',69100,68320],['ETHUSDT','03-09',3510,3655],['BTCUSDT','03-18',66400,67710],['ETHUSDT','03-27',3380,3349]];
+    const cap = Math.max(0, n(st.capital, 10000)), frac = Math.min(100, Math.max(0, n(st.pct, 50))) / 100;
+    const fee = Math.max(0, n(st.fee, 10)) / 10000, slip = Math.max(0, n(st.slip, 5)) / 10000, rate = n(st.rate, 0);
+    let eq = cap, peak = cap, mdd = 0, G = 0, F = 0, S = 0, notional = 0, wins = 0;
+    const rows = T.map(([pair, d, en, ex], i) => {
+      const size = eq * frac, exitN = size * ex / en;
+      const g = exitN - size, fc = (size + exitN) * fee, sc = (size + exitN) * slip, net = g - fc - sc;
+      G += g; F += fc; S += sc; notional += size + exitN; if (net > 0) wins++;
+      eq += net; peak = Math.max(peak, eq); mdd = Math.max(mdd, (peak - eq) / peak);
+      return { i: String(i + 1), pair, px: en.toLocaleString('en-US') + ' → ' + ex.toLocaleString('en-US'), size: f2(size), gross: sg(g), cost: sg(-(fc + sc)), net: sg(net), nc: net >= 0 ? ok : bad, eq, up: net >= 0 };
+    });
+    const NET = G - F - S, minEq = Math.min(cap, ...rows.map(r => r.eq)), maxEq = Math.max(cap, ...rows.map(r => r.eq));
+    rows.forEach(r => { r.h = (20 + 80 * (r.eq - minEq) / Math.max(1e-9, maxEq - minEq)).toFixed(0) + '%'; r.bar = r.up ? 'rgba(62,207,174,0.75)' : 'rgba(255,143,94,0.85)'; });
+    const beFeeBps = notional > 0 ? ((G - S) / notional) * 10000 : 0;
+    const mx = Math.max(Math.abs(G), F, S, Math.abs(NET), 1e-9);
+    const bar = (k, v, c) => ({ k, v: sg(v), w: (Math.abs(v) / mx * 100).toFixed(1) + '%', c, tc: v >= 0 ? txt : '#FFB08A' });
+    const runPositive = NET > 0;
+    const r = {
+      verdict: runPositive ? 'سودده پس از هزینه‌ها' : 'زیان‌ده پس از هزینه‌ها',
+      verdictColor: runPositive ? ok : bad, verdictBorder: runPositive ? '#2A4A43' : '#5A3424',
+      sentence: 'با سرمایه ' + f2(cap) + ' USDT و ورود با ' + (frac * 100).toFixed(0) + '٪ سرمایه در هر معامله، این الگوریتم در ' + T.length + ' معامله ' + (NET >= 0 ? 'سود خالص ' : 'زیان خالص ') + f2(Math.abs(NET)) + ' USDT ساخت؛ ' + f2(F + S) + ' USDT از سود ناخالص صرف کارمزد و لغزش شد.',
+      cards: [
+        { k: 'سود و زیان خالص', v: sg(NET), sub: 'USDT · پس از همه هزینه‌ها', c: NET >= 0 ? ok : bad },
+        { k: 'بازده خالص', v: pc(NET / Math.max(cap, 1e-9) * 100), sub: 'نسبت به سرمایه اولیه', c: NET >= 0 ? ok : bad },
+        { k: 'معادل تومانی', v: toman(NET, rate), sub: rate > 0 ? 'نرخ دستی امروز' : 'نرخ را در ورودی‌ها بنویسید', c: txt },
+        { k: 'بیشترین افت', v: '−' + (mdd * 100).toFixed(2) + '%', sub: 'از اوج ارزش حساب', c: txt },
+        { k: 'معاملات سودده', v: wins + ' / ' + T.length, sub: ((wins / T.length) * 100).toFixed(0) + '٪ موفقیت', c: txt },
+        { k: 'ارزش نهایی حساب', v: f2(cap + NET), sub: 'USDT', c: txt }
+      ],
+      fall: [bar('سود ناخالص', G, 'rgba(62,207,174,0.8)'), bar('کارمزد', -F, 'rgba(255,143,94,0.85)'), bar('لغزش', -S, 'rgba(255,143,94,0.6)'), bar('سود خالص', NET, blue)],
+      beFee: beFeeBps > 0 ? beFeeBps.toFixed(1) + ' bps' : 'حتی بدون کارمزد سودده نیست',
+      trades: rows
+    };
+
+    // ---- single trade ----
+    const en = Math.max(1e-9, n(st.entry, 1)), ex = Math.max(0, n(st.exit, 0)), A = Math.max(0, n(st.amount, 0));
+    const tf = Math.max(0, n(st.tfee, 0)) / 10000, ts = Math.max(0, n(st.tslip, 0)) / 10000, tr = n(st.trate, 0);
+    const qty = A / (en * (1 + ts)) * (1 - tf);
+    const proceeds = qty * ex * (1 - ts) * (1 - tf);
+    const tNet = proceeds - A, tGross = A * (ex / en - 1);
+    const qtyNoSlip = A / en * (1 - tf), netNoSlip = qtyNoSlip * ex * (1 - tf) - A;
+    const tFee = tGross - netNoSlip, tSlip = netNoSlip - tNet;
+    const be = en * (1 + ts) / ((1 - tf) * (1 - tf) * (1 - ts));
+    const mx2 = Math.max(Math.abs(tGross), Math.abs(tFee), Math.abs(tSlip), Math.abs(tNet), 1e-9);
+    const bar2 = (k, v, c) => ({ k, v: sg(v), w: (Math.abs(v) / mx2 * 100).toFixed(1) + '%', c, tc: v >= 0 ? txt : '#FFB08A' });
+    const tPos = tNet > 0;
+    const t = {
+      verdict: tPos ? 'سودده پس از هزینه‌ها' : 'زیان‌ده پس از هزینه‌ها',
+      verdictColor: tPos ? ok : bad, verdictBorder: tPos ? '#2A4A43' : '#5A3424',
+      sentence: 'خرید با ' + f2(A) + ' USDT در قیمت ' + en.toLocaleString('en-US') + ' و فروش در ' + ex.toLocaleString('en-US') + ' پس از کارمزد و لغزش ' + (tNet >= 0 ? 'سود ' : 'زیان ') + f2(Math.abs(tNet)) + ' USDT می‌دهد. برای سر‌به‌سر شدن باید دست‌کم در ' + be.toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' بفروشید.',
+      cards: [
+        { k: 'سود و زیان خالص', v: sg(tNet), sub: 'USDT', c: tNet >= 0 ? ok : bad },
+        { k: 'بازده خالص', v: pc(A > 0 ? tNet / A * 100 : 0), sub: 'نسبت به مبلغ خرید', c: tNet >= 0 ? ok : bad },
+        { k: 'قیمت سر‌به‌سر', v: be.toLocaleString('en-US', { maximumFractionDigits: 2 }), sub: 'حداقل قیمت فروش بدون زیان', c: txt },
+        { k: 'مقدار خریدشده', v: qty.toFixed(6), sub: 'واحد دارایی پس از کارمزد', c: txt },
+        { k: 'هزینه کل', v: sg(-(tFee + tSlip)), sub: 'کارمزد + لغزش، USDT', c: '#FFB08A' },
+        { k: 'معادل تومانی', v: toman(tNet, tr), sub: tr > 0 ? 'نرخ دستی' : 'نرخ را بنویسید', c: txt }
+      ],
+      fall: [bar2('سود ناخالص', tGross, tGross >= 0 ? 'rgba(62,207,174,0.8)' : 'rgba(255,143,94,0.85)'), bar2('کارمزد', -tFee, 'rgba(255,143,94,0.85)'), bar2('لغزش', -tSlip, 'rgba(255,143,94,0.6)'), bar2('سود خالص', tNet, blue)]
+    };
+
+    return {
+      isRun: st.mode === 'run', isTrade: st.mode === 'trade',
+      tabRun: tab(st.mode === 'run'), tabTrade: tab(st.mode === 'trade'),
+      toRun: () => this.setState({ mode: 'run' }), toTrade: () => this.setState({ mode: 'trade' }),
+      resetRun: () => this.setState({ ...this.defaults }),
+      runFields: [
+        { label: 'سرمایه اولیه', unit: 'USDT', value: st.capital, set: set('capital'), help: 'با چه مبلغی شروع می‌کنید.' },
+        { label: 'سهم سرمایه در هر معامله', unit: '٪', value: st.pct, set: set('pct'), help: 'هر معامله چند درصد از ارزش فعلی حساب را درگیر کند.' },
+        { label: 'کارمزد هر طرف', unit: 'bps', value: st.fee, set: set('fee'), help: '10 bps یعنی 0.1٪ در خرید و 0.1٪ در فروش.' },
+        { label: 'لغزش هر طرف', unit: 'bps', value: st.slip, set: set('slip'), help: 'تفاوت قیمت مورد انتظار با قیمت انجام.' },
+        { label: 'نرخ USDT به تومان', unit: 'اختیاری', value: st.rate, set: set('rate'), help: 'فقط برای نمایش معادل تومانی؛ در محاسبه اثری ندارد.' }
+      ],
+      tradeFields: [
+        { label: 'قیمت خرید', unit: 'USDT', value: st.entry, set: set('entry') },
+        { label: 'قیمت فروش', unit: 'USDT', value: st.exit, set: set('exit') },
+        { label: 'مبلغ خرید', unit: 'USDT', value: st.amount, set: set('amount') },
+        { label: 'کارمزد هر طرف', unit: 'bps', value: st.tfee, set: set('tfee') },
+        { label: 'لغزش هر طرف', unit: 'bps', value: st.tslip, set: set('tslip') },
+        { label: 'نرخ USDT به تومان', unit: 'اختیاری', value: st.trate, set: set('trate') }
+      ],
+      r, t
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{"v":3,"createdOnFiles":{"v":1,"at":"2026-10-25T12:00:00Z"},"title":"Trading Research Platform UI","launch":{"view":"canvas"},"pages":[],
+"boards":{
+"Main.dc.html":{"x":0,"y":0,"w":1440,"h":1150,"title":"خانه — Home","expand":"fill","is_interactive":true},
+"Sidebar.dc.html":{"x":-400,"y":0,"w":240,"h":1000,"title":"Component — Sidebar"},
+"Library.dc.html":{"x":1520,"y":0,"w":1440,"h":1150,"title":"کتابخانه الگوریتم — Library","expand":"fill","is_interactive":true},
+"Builder.dc.html":{"x":3040,"y":0,"w":1440,"h":1450,"title":"ساخت آزمایش — Experiment builder","expand":"fill","is_interactive":true},
+"Queue.dc.html":{"x":4560,"y":0,"w":1440,"h":1150,"title":"صف اجرا و جست‌وجو — Run queue","expand":"fill","is_interactive":true},
+"Report.dc.html":{"x":0,"y":1870,"w":1440,"h":1550,"title":"گزارش آزمایش — Report","expand":"fill","is_interactive":true},
+"Compare.dc.html":{"x":1520,"y":1870,"w":1440,"h":1250,"title":"مقایسه — Compare","expand":"fill","is_interactive":true},
+"Learning.dc.html":{"x":3040,"y":1870,"w":1440,"h":1450,"title":"یادگیری — Learning loop","expand":"fill","is_interactive":true},
+"Calculator.dc.html":{"x":4560,"y":1870,"w":1440,"h":1500,"title":"ماشین‌حساب سود و زیان — P&L calculator","expand":"fill","is_interactive":true},
+"Chart.dc.html":{"x":0,"y":3840,"w":1440,"h":1100,"title":"نمودار — Chart","expand":"fill","is_interactive":true},
+"Data.dc.html":{"x":1520,"y":3840,"w":1440,"h":1150,"title":"داده — Data","expand":"fill","is_interactive":true},
+"Settings.dc.html":{"x":3040,"y":3840,"w":1440,"h":1150,"title":"تنظیمات — Settings","expand":"fill","is_interactive":true}
+},
+"order":["Main.dc.html","Sidebar.dc.html","Library.dc.html","Builder.dc.html","Queue.dc.html","Report.dc.html","Compare.dc.html","Learning.dc.html","Calculator.dc.html","Chart.dc.html","Data.dc.html","Settings.dc.html"],
+"notes":{
+"row1":{"x":0,"y":-300,"text":"پژوهش — Research","kind":"title1","maxW":6000},
+"row2":{"x":0,"y":1570,"text":"نتایج، یادگیری و سود و زیان — Results, learning & P&L","kind":"title1","maxW":6000},
+"row3":{"x":0,"y":3540,"text":"نمودار، داده و تنظیمات — Chart, data & settings","kind":"title1","maxW":4480},
+"later":{"x":6080,"y":1870,"w":420,"text":"Phase 2 (after engine): Paper accounts & orders, Risk & behavior policy, Journal, Market & events. Shown disabled in the sidebar so the IA is visible now.","fill":"gray","size":"m"}
+},
+"designSystems":[]}

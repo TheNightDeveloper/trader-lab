@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>ساخت آزمایش</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#0D1015}
+a{color:#8DB8FF}a:hover{color:#B5D0FF}
+.num{font-family:'JetBrains Mono',ui-monospace,monospace;direction:ltr;unicode-bidi:isolate}
+</style>
+</helmet>
+<div dir="rtl" style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #0D1015; color: #E7EBF1; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 14px">
+<div style="flex: 1 1 232px; max-width: 100%">
+<dc-import name="Sidebar" active="builder" hint-size="100%,1000px"></dc-import>
+</div>
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box">
+
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 26px">ساخت آزمایش</h1>
+<p style="margin: 0; color: #9AA3B1">در چند قدم ساده. مقدارهای پیش‌فرض امن‌اند؛ فقط آنچه برایتان مهم است را تغییر دهید.</p>
+</div>
+
+<nav aria-label="مراحل" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px">
+<sc-for list="{{steps}}" as="s" hint-placeholder-count="6">
+<button onClick="{{s.go}}" aria-current="{{s.current}}" style="{{s.style}}">
+<span style="{{s.dot}}">{{s.n}}</span>
+<span style="font-size: 13px; text-align: right">{{s.label}}</span>
+</button>
+</sc-for>
+</nav>
+
+<div style="display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start">
+<section style="flex: 3 1 560px; min-width: 0; background: #141922; border: 1px solid #262E3A; border-radius: 10px; padding: 22px; display: flex; flex-direction: column; gap: 18px">
+
+<sc-if value="{{s0}}" hint-placeholder-val="{{true}}">
+<h2 style="margin: 0; font-size: 18px">چه کاری می‌خواهید انجام دهید؟</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px">
+<sc-for list="{{templates}}" as="t" hint-placeholder-count="3">
+<button onClick="{{t.pick}}" style="{{t.style}}">
+<span style="font-size: 15px; font-weight: 700">{{t.title}}</span>
+<span style="color: #C9D0DA; line-height: 1.8">{{t.desc}}</span>
+<span style="color: #9AA3B1; font-size: 12px">{{t.meta}}</span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{s1}}" hint-placeholder-val="{{false}}">
+<h2 style="margin: 0; font-size: 18px">چه چیزی را می‌خواهید بسنجید؟</h2>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px">ایده شما در یک جمله
+<textarea rows="2" style="font: inherit; color: #E7EBF1; background: #0F1318; border: 1px solid #2C3542; border-radius: 8px; padding: 10px 12px; resize: vertical">افزودن فیلتر نوسان به ridge-h4، افت سرمایه را کم می‌کند بدون اینکه سود خالص زیاد کم شود.</textarea>
+<span style="color: #9AA3B1; font-size: 12px">مثال: «اگر فقط در بازار کم‌نوسان معامله کنیم، زیان‌های بزرگ کمتر می‌شود.»</span>
+</label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px">چه نتیجه‌ای یعنی ایده درست نبود؟
+<textarea rows="2" style="font: inherit; color: #E7EBF1; background: #0F1318; border: 1px solid #2C3542; border-radius: 8px; padding: 10px 12px; resize: vertical">افت سرمایه کمتر از 2 واحد درصد بهتر شود، یا سود خالص بیش از 3 واحد درصد کم شود.</textarea>
+<span style="color: #9AA3B1; font-size: 12px">این را قبل از دیدن نتیجه بنویسید تا بعداً خودتان را قانع نکنید.</span>
+</label>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span>مهم‌ترین هدف</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{goals}}" as="g" hint-placeholder-count="3">
+<button onClick="{{g.pick}}" style="{{g.style}}">{{g.label}}</button>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{s2}}" hint-placeholder-val="{{false}}">
+<h2 style="margin: 0; font-size: 18px">روی چه بازار و دوره‌ای؟</h2>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span>جفت‌ارزها</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{pairs}}" as="p" hint-placeholder-count="6">
+<button onClick="{{p.toggle}}" aria-pressed="{{p.on}}" style="{{p.style}}"><span class="num">{{p.name}}</span><span style="font-size: 11px; color: #9AA3B1">{{p.note}}</span></button>
+</sc-for>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span>بازه زمانی هر کندل</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{tfs}}" as="t" hint-placeholder-count="5">
+<button onClick="{{t.pick}}" style="{{t.style}}">{{t.label}}</button>
+</sc-for>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span>دوره داده</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{periods}}" as="t" hint-placeholder-count="4">
+<button onClick="{{t.pick}}" style="{{t.style}}">{{t.label}}</button>
+</sc-for>
+</div>
+</div>
+<div style="background: #1A2029; border-radius: 8px; padding: 12px; font-size: 13px; line-height: 1.8">
+<span style="color: #3ECFAE">داده آماده است.</span> یک شکاف کوتاه در ETHUSDT پیدا شد؛ موتور در آن بازه معامله نمی‌کند.
+</div>
+</sc-if>
+
+<sc-if value="{{s3}}" hint-placeholder-val="{{false}}">
+<h2 style="margin: 0; font-size: 18px">کدام الگوریتم؟</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px">
+<sc-for list="{{algos}}" as="a" hint-placeholder-count="3">
+<button onClick="{{a.pick}}" style="{{a.style}}">
+<span class="num" style="font-size: 15px; text-align: right">{{a.id}}</span>
+<span style="color: #C9D0DA; line-height: 1.8">{{a.desc}}</span>
+</button>
+</sc-for>
+</div>
+<sc-if value="{{isSearch}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span>کدام تنظیمات امتحان شوند؟</span>
+<div style="overflow-x: auto">
+<table style="width: 100%; border-collapse: collapse; font-size: 13px; min-width: 480px">
+<thead><tr style="color: #9AA3B1; text-align: right"><th style="padding: 8px; font-weight: 500">تنظیم</th><th style="padding: 8px; font-weight: 500">معنی</th><th style="padding: 8px; font-weight: 500">مقدارها</th></tr></thead>
+<tbody>
+<sc-for list="{{params}}" as="p" hint-placeholder-count="3">
+<tr style="border-top: 1px solid #262E3A"><td style="padding: 9px 8px"><span class="num">{{p.n}}</span></td><td style="padding: 9px 8px; color: #C9D0DA">{{p.mean}}</td><td style="padding: 9px 8px"><span class="num">{{p.vals}}</span></td></tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{isQuick}}" hint-placeholder-val="{{false}}">
+<p style="margin: 0; color: #C9D0DA">تنظیمات نسخه فعال (<span class="num">v7</span>) بدون تغییر استفاده می‌شود.</p>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{s4}}" hint-placeholder-val="{{false}}">
+<h2 style="margin: 0; font-size: 18px">پول و هزینه‌ها</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px">
+<sc-for list="{{money}}" as="f" hint-placeholder-count="4">
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px">
+<span style="display: flex; justify-content: space-between"><span>{{f.label}}</span><span style="color: #9AA3B1; font-size: 12px">{{f.unit}}</span></span>
+<input value="{{f.value}}" inputmode="decimal" class="num" style="font-size: 15px; color: #E7EBF1; background: #0F1318; border: 1px solid #2C3542; border-radius: 8px; padding: 10px 12px; min-height: 44px; box-sizing: border-box; text-align: left">
+<span style="color: #9AA3B1; font-size: 12px; line-height: 1.7">{{f.help}}</span>
+</label>
+</sc-for>
+</div>
+<div style="background: #1A2029; border-radius: 8px; padding: 12px; font-size: 13px; line-height: 1.8">هر معامله کامل (خرید و فروش) با این تنظیمات حدود <span class="num" style="color: #FFB08A">0.30%</span> هزینه دارد؛ الگوریتم باید در هر معامله بیش از این سود ناخالص بسازد.</div>
+</sc-if>
+
+<sc-if value="{{s5}}" hint-placeholder-val="{{false}}">
+<h2 style="margin: 0; font-size: 18px">بررسی نهایی</h2>
+<div style="display: flex; flex-direction: column; gap: 0">
+<sc-for list="{{review}}" as="r" hint-placeholder-count="7">
+<div style="display: flex; justify-content: space-between; gap: 12px; padding: 11px 0; border-bottom: 1px solid #262E3A">
+<span style="color: #9AA3B1">{{r.k}}</span><span style="text-align: left">{{r.v}}</span>
+</div>
+</sc-for>
+</div>
+<button onClick="{{toggleAdv}}" aria-expanded="{{advOpen}}" style="font: inherit; align-self: flex-start; color: #8DB8FF; background: none; border: 1px solid #2C3542; border-radius: 8px; padding: 10px 14px; min-height: 44px; cursor: pointer">{{advLabel}}</button>
+<sc-if value="{{adv}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 12px; background: #10141A; border: 1px solid #262E3A; border-radius: 8px; padding: 14px">
+<span style="font-size: 13px; color: #9AA3B1">این‌ها پیش‌فرض‌های امن هستند و معمولاً نیازی به تغییر ندارند.</span>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px">
+<sc-for list="{{advanced}}" as="f" hint-placeholder-count="6">
+<label style="display: flex; flex-direction: column; gap: 6px; color: #9AA3B1; font-size: 13px">{{f.label}}
+<input value="{{f.value}}" class="num" style="font-size: 14px; color: #E7EBF1; background: #0F1318; border: 1px solid #2C3542; border-radius: 8px; padding: 10px 12px; min-height: 44px; box-sizing: border-box; text-align: left">
+</label>
+</sc-for>
+</div>
+</div>
+</sc-if>
+</sc-if>
+
+<div style="display: flex; justify-content: space-between; gap: 10px; border-top: 1px solid #262E3A; padding-top: 16px; flex-wrap: wrap">
+<button onClick="{{back}}" style="{{backStyle}}">قبلی</button>
+<sc-if value="{{notLast}}" hint-placeholder-val="{{true}}">
+<button onClick="{{next}}" style="font: inherit; font-weight: 700; color: #0D1015; background: #6FA8FF; border: none; border-radius: 8px; padding: 11px 24px; min-height: 44px; cursor: pointer">بعدی</button>
+</sc-if>
+<sc-if value="{{isLast}}" hint-placeholder-val="{{false}}">
+<a href="Queue.dc.html" style="text-decoration: none; font-weight: 700; color: #0D1015; background: #3ECFAE; border-radius: 8px; padding: 11px 24px; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center">ثبت و اجرا</a>
+</sc-if>
+</div>
+</section>
+
+<aside style="flex: 1 1 280px; min-width: 0; background: #141922; border: 1px solid #262E3A; border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 15px">آنچه تا الان انتخاب کرده‌اید</h2>
+<sc-for list="{{summary}}" as="s" hint-placeholder-count="6">
+<div style="display: flex; justify-content: space-between; gap: 10px; font-size: 13px; border-bottom: 1px solid #1F2630; padding-bottom: 8px">
+<span style="color: #9AA3B1">{{s.k}}</span><span style="text-align: left">{{s.v}}</span>
+</div>
+</sc-for>
+<div style="background: #1A2029; border-radius: 8px; padding: 12px; font-size: 13px; line-height: 1.8">
+<span style="font-weight: 700">{{runs}}</span> اجرا · حدود <span class="num">{{eta}}</span>
+</div>
+<p style="margin: 0; font-size: 12px; color: #9AA3B1; line-height: 1.8">پس از شروع، این تعریف قفل می‌شود. اگر بعداً چیزی را عوض کنید، آزمایش تازه‌ای با ارجاع به همین ساخته می‌شود.</p>
+</aside>
+</div>
+
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { step: 0, tpl: 'search', goal: 'net', tf: '1h', period: '3y', algo: 'ridge-h4', adv: false, on: { BTCUSDT: true, ETHUSDT: true } }; }
+  renderVals() {
+    const st = this.state;
+    const chip = (on) => 'font: inherit; display: inline-flex; gap: 8px; align-items: center; min-height: 44px; padding: 8px 14px; border-radius: 8px; cursor: pointer; color: ' + (on ? '#FFFFFF' : '#C9D0DA') + '; background: ' + (on ? '#1B2A40' : '#0F1318') + '; border: 1px solid ' + (on ? '#6FA8FF' : '#2C3542') + '; font-weight: ' + (on ? '700' : '400');
+    const card = (on) => 'font: inherit; color: #E7EBF1; text-align: right; cursor: pointer; display: flex; flex-direction: column; gap: 8px; padding: 16px; border-radius: 10px; background: ' + (on ? '#16223A' : '#0F1318') + '; border: 2px solid ' + (on ? '#6FA8FF' : '#262E3A');
+    const labels = ['شروع', 'ایده', 'داده', 'الگوریتم', 'پول و هزینه', 'بررسی و اجرا'];
+    const go = (i) => () => this.setState({ step: i });
+    const tpls = [
+      ['quick', 'آزمون سریع یک الگوریتم', 'یک الگوریتم را با تنظیمات فعلی‌اش روی داده تازه امتحان کنید.', '1 اجرا · چند دقیقه'],
+      ['search', 'یافتن بهترین تنظیمات', 'چند ترکیب از تنظیمات را امتحان کنید و ببینید کدام پایدارتر است.', 'ده‌ها اجرا · همه ثبت می‌شوند'],
+      ['idea', 'سنجش یک ایده تازه', 'یک ویژگی یا فیلتر را اضافه یا حذف کنید و با نسخه فعلی مقایسه کنید.', '2 اجرا · مقایسه کنار هم']
+    ];
+    const pairDefs = [['BTCUSDT', 'از 2017'], ['ETHUSDT', 'از 2017'], ['SOLUSDT', 'از 2020'], ['BNBUSDT', 'از 2017'], ['XRPUSDT', 'از 2018'], ['ETHBTC', 'به USDT تبدیل می‌شود']];
+    const nPairs = Object.values(st.on).filter(Boolean).length;
+    const params = [
+      { n: 'vol_filter_pct', mean: 'فقط وقتی نوسان زیر این صدک است معامله کن', vals: '60, 70, 80, 90', c: 4 },
+      { n: 'ridge_alpha', mean: 'میزان ساده‌سازی مدل (بیشتر = محتاط‌تر)', vals: '0.1, 0.3, 1, 3, 10', c: 5 },
+      { n: 'stop_atr_mult', mean: 'فاصله حد ضرر بر حسب نوسان', vals: '1.5, 2, 2.5, 3', c: 4 }
+    ];
+    const combos = st.tpl === 'search' ? params.reduce((a, p) => a * p.c, 1) : st.tpl === 'idea' ? 2 : 1;
+    const runs = combos * Math.max(nPairs, 1);
+    const tplName = tpls.find(t => t[0] === st.tpl)[1];
+    const goalDefs = [['net', 'بیشترین سود خالص با سقف افت سرمایه'], ['dd', 'کمترین افت با حداقل سود'], ['stable', 'پایدارترین نتیجه بین دوره‌ها']];
+    const tfDefs = [['15m', '15 دقیقه'], ['1h', '1 ساعت'], ['4h', '4 ساعت'], ['1d', '1 روز']];
+    const perDefs = [['1y', '1 سال اخیر'], ['3y', '3 سال اخیر'], ['all', 'همه داده موجود']];
+    const algoDefs = [['ridge-h4', 'پیش‌بینی بازده 4 ساعت آینده با مدل ساده یادگیرنده'], ['trend-ema', 'دنبال‌کردن روند با دو میانگین متحرک'], ['mean-rev-bands', 'خرید در افت شدید و فروش در بازگشت به میانگین']];
+    const last = 5;
+    return {
+      steps: labels.map((label, i) => ({
+        n: i < st.step ? '✓' : String(i + 1), label, go: go(i), current: i === st.step ? 'step' : 'false',
+        style: 'font: inherit; color: ' + (i === st.step ? '#FFFFFF' : '#C9D0DA') + '; display: flex; align-items: center; gap: 8px; padding: 10px; min-height: 48px; border-radius: 8px; cursor: pointer; background: ' + (i === st.step ? '#16223A' : '#141922') + '; border: 1px solid ' + (i === st.step ? '#6FA8FF' : '#262E3A'),
+        dot: 'flex: none; width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; background: ' + (i < st.step ? '#3ECFAE' : i === st.step ? '#6FA8FF' : '#262E3A') + '; color: ' + (i <= st.step ? '#0D1015' : '#C9D0DA')
+      })),
+      s0: st.step === 0, s1: st.step === 1, s2: st.step === 2, s3: st.step === 3, s4: st.step === 4, s5: st.step === 5,
+      notLast: st.step < last, isLast: st.step === last,
+      next: () => this.setState({ step: Math.min(last, st.step + 1) }),
+      back: () => this.setState({ step: Math.max(0, st.step - 1) }),
+      backStyle: 'font: inherit; color: #E7EBF1; background: #1A2029; border: 1px solid #2C3542; border-radius: 8px; padding: 11px 20px; min-height: 44px; cursor: pointer; visibility: ' + (st.step === 0 ? 'hidden' : 'visible'),
+      templates: tpls.map(([k, title, desc, meta]) => ({ title, desc, meta, style: card(st.tpl === k), pick: () => this.setState({ tpl: k, step: 1 }) })),
+      goals: goalDefs.map(([k, label]) => ({ label, style: chip(st.goal === k), pick: () => this.setState({ goal: k }) })),
+      pairs: pairDefs.map(([name, note]) => { const on = !!st.on[name]; return { name, note, on: on ? 'true' : 'false', style: chip(on), toggle: () => this.setState({ on: { ...st.on, [name]: !on } }) }; }),
+      tfs: tfDefs.map(([k, label]) => ({ label, style: chip(st.tf === k), pick: () => this.setState({ tf: k }) })),
+      periods: perDefs.map(([k, label]) => ({ label, style: chip(st.period === k), pick: () => this.setState({ period: k }) })),
+      algos: algoDefs.map(([id, desc]) => ({ id, desc, style: card(st.algo === id), pick: () => this.setState({ algo: id }) })),
+      isSearch: st.tpl === 'search', isQuick: st.tpl !== 'search',
+      params,
+      money: [
+        { label: 'سرمایه اولیه', unit: 'USDT', value: '10,000', help: 'برای مقایسه منصفانه، همه اجراها با همین مبلغ شروع می‌کنند.' },
+        { label: 'سهم سرمایه در هر معامله', unit: '٪', value: '50', help: 'چند درصد از ارزش حساب در هر معامله درگیر شود.' },
+        { label: 'کارمزد هر طرف', unit: 'bps', value: '10', help: '10 یعنی 0.1٪ در خرید و 0.1٪ در فروش.' },
+        { label: 'لغزش هر طرف', unit: 'bps', value: '5', help: 'اختلاف قیمت انتظاری با قیمت انجام‌شده.' }
+      ],
+      review: [
+        { k: 'نوع', v: tplName },
+        { k: 'هدف', v: goalDefs.find(g => g[0] === st.goal)[1] },
+        { k: 'جفت‌ارزها', v: Object.keys(st.on).filter(k => st.on[k]).join('، ') || '—' },
+        { k: 'کندل و دوره', v: tfDefs.find(t => t[0] === st.tf)[1] + ' · ' + perDefs.find(p => p[0] === st.period)[1] },
+        { k: 'الگوریتم', v: st.algo },
+        { k: 'سرمایه و هزینه', v: '10,000 USDT · کارمزد 0.1٪ · لغزش 0.05٪' },
+        { k: 'ارزیابی', v: 'آموزش روی گذشته، آزمون روی 4 دوره بعدی، دوره پایانی دست‌نخورده' },
+        { k: 'محدودیت سخت', v: 'افت سرمایه بیش از 20٪ = رد' }
+      ],
+      adv: st.adv, advOpen: st.adv ? 'true' : 'false',
+      advLabel: st.adv ? 'بستن تنظیمات پیشرفته' : 'تنظیمات پیشرفته (اختیاری)',
+      toggleAdv: () => this.setState({ adv: !st.adv }),
+      advanced: [
+        { label: 'پنجره آموزش', value: '180d expanding' }, { label: 'دوره آزمون هر گام', value: '30d' },
+        { label: 'فاصله ایمنی (embargo)', value: '4h' }, { label: 'آزمون نهایی', value: 'last 20%' },
+        { label: 'بذر تصادفی', value: '20261025' }, { label: 'هم‌زمانی', value: '6 workers' },
+        { label: 'کندل مبهم', value: 'conservative' }, { label: 'حداقل معاملات', value: '60' }
+      ],
+      summary: [
+        { k: 'نوع', v: tplName },
+        { k: 'جفت‌ارزها', v: String(nPairs) },
+        { k: 'کندل', v: tfDefs.find(t => t[0] === st.tf)[1] },
+        { k: 'دوره', v: perDefs.find(p => p[0] === st.period)[1] },
+        { k: 'الگوریتم', v: st.algo },
+        { k: 'سرمایه', v: '10,000 USDT' }
+      ],
+      runs: runs + '',
+      eta: runs <= 2 ? '~3 min' : '~' + Math.ceil(runs * 0.45) + ' min'
+    };
+  }
+}
+</script>
+</body>
+</html>
