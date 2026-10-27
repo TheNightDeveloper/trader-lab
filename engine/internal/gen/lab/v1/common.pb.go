@@ -83,6 +83,212 @@ func (x *Money) GetAsset() string {
 	return ""
 }
 
+// Exact fixed-point number that is not money (ratios, Sharpe): units × 10^-scale.
+type Decimal struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Units         string                 `protobuf:"bytes,1,opt,name=units,proto3" json:"units,omitempty"`
+	Scale         int32                  `protobuf:"varint,2,opt,name=scale,proto3" json:"scale,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Decimal) Reset() {
+	*x = Decimal{}
+	mi := &file_lab_v1_common_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Decimal) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Decimal) ProtoMessage() {}
+
+func (x *Decimal) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_common_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Decimal.ProtoReflect.Descriptor instead.
+func (*Decimal) Descriptor() ([]byte, []int) {
+	return file_lab_v1_common_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *Decimal) GetUnits() string {
+	if x != nil {
+		return x.Units
+	}
+	return ""
+}
+
+func (x *Decimal) GetScale() int32 {
+	if x != nil {
+		return x.Scale
+	}
+	return 0
+}
+
+// A reported number with its validity: invalid metrics carry a reason, not a value.
+type Metric struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Key           string                 `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	Group         string                 `protobuf:"bytes,2,opt,name=group,proto3" json:"group,omitempty"`
+	Value         *Decimal               `protobuf:"bytes,3,opt,name=value,proto3" json:"value,omitempty"`
+	Unit          string                 `protobuf:"bytes,4,opt,name=unit,proto3" json:"unit,omitempty"` // USDT | ratio | count | seconds | number
+	Valid         bool                   `protobuf:"varint,5,opt,name=valid,proto3" json:"valid,omitempty"`
+	Invalid       string                 `protobuf:"bytes,6,opt,name=invalid,proto3" json:"invalid,omitempty"`       // Persian reason when not valid
+	Label         string                 `protobuf:"bytes,7,opt,name=label,proto3" json:"label,omitempty"`           // Persian
+	Definition    string                 `protobuf:"bytes,8,opt,name=definition,proto3" json:"definition,omitempty"` // Persian
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Metric) Reset() {
+	*x = Metric{}
+	mi := &file_lab_v1_common_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Metric) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Metric) ProtoMessage() {}
+
+func (x *Metric) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_common_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Metric.ProtoReflect.Descriptor instead.
+func (*Metric) Descriptor() ([]byte, []int) {
+	return file_lab_v1_common_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *Metric) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+func (x *Metric) GetGroup() string {
+	if x != nil {
+		return x.Group
+	}
+	return ""
+}
+
+func (x *Metric) GetValue() *Decimal {
+	if x != nil {
+		return x.Value
+	}
+	return nil
+}
+
+func (x *Metric) GetUnit() string {
+	if x != nil {
+		return x.Unit
+	}
+	return ""
+}
+
+func (x *Metric) GetValid() bool {
+	if x != nil {
+		return x.Valid
+	}
+	return false
+}
+
+func (x *Metric) GetInvalid() string {
+	if x != nil {
+		return x.Invalid
+	}
+	return ""
+}
+
+func (x *Metric) GetLabel() string {
+	if x != nil {
+		return x.Label
+	}
+	return ""
+}
+
+func (x *Metric) GetDefinition() string {
+	if x != nil {
+		return x.Definition
+	}
+	return ""
+}
+
+type EquityPoint struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TUnixMs       int64                  `protobuf:"varint,1,opt,name=t_unix_ms,json=tUnixMs,proto3" json:"t_unix_ms,omitempty"`
+	Equity        *Money                 `protobuf:"bytes,2,opt,name=equity,proto3" json:"equity,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EquityPoint) Reset() {
+	*x = EquityPoint{}
+	mi := &file_lab_v1_common_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EquityPoint) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EquityPoint) ProtoMessage() {}
+
+func (x *EquityPoint) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_common_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EquityPoint.ProtoReflect.Descriptor instead.
+func (*EquityPoint) Descriptor() ([]byte, []int) {
+	return file_lab_v1_common_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *EquityPoint) GetTUnixMs() int64 {
+	if x != nil {
+		return x.TUnixMs
+	}
+	return 0
+}
+
+func (x *EquityPoint) GetEquity() *Money {
+	if x != nil {
+		return x.Equity
+	}
+	return nil
+}
+
 var File_lab_v1_common_proto protoreflect.FileDescriptor
 
 const file_lab_v1_common_proto_rawDesc = "" +
@@ -91,7 +297,24 @@ const file_lab_v1_common_proto_rawDesc = "" +
 	"\x05Money\x12\x14\n" +
 	"\x05units\x18\x01 \x01(\tR\x05units\x12\x14\n" +
 	"\x05scale\x18\x02 \x01(\x05R\x05scale\x12\x14\n" +
-	"\x05asset\x18\x03 \x01(\tR\x05assetB\x7f\n" +
+	"\x05asset\x18\x03 \x01(\tR\x05asset\"5\n" +
+	"\aDecimal\x12\x14\n" +
+	"\x05units\x18\x01 \x01(\tR\x05units\x12\x14\n" +
+	"\x05scale\x18\x02 \x01(\x05R\x05scale\"\xd1\x01\n" +
+	"\x06Metric\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05group\x18\x02 \x01(\tR\x05group\x12%\n" +
+	"\x05value\x18\x03 \x01(\v2\x0f.lab.v1.DecimalR\x05value\x12\x12\n" +
+	"\x04unit\x18\x04 \x01(\tR\x04unit\x12\x14\n" +
+	"\x05valid\x18\x05 \x01(\bR\x05valid\x12\x18\n" +
+	"\ainvalid\x18\x06 \x01(\tR\ainvalid\x12\x14\n" +
+	"\x05label\x18\a \x01(\tR\x05label\x12\x1e\n" +
+	"\n" +
+	"definition\x18\b \x01(\tR\n" +
+	"definition\"P\n" +
+	"\vEquityPoint\x12\x1a\n" +
+	"\tt_unix_ms\x18\x01 \x01(\x03R\atUnixMs\x12%\n" +
+	"\x06equity\x18\x02 \x01(\v2\r.lab.v1.MoneyR\x06equityB\x7f\n" +
 	"\n" +
 	"com.lab.v1B\vCommonProtoP\x01Z+tradinglab/engine/internal/gen/lab/v1;labv1\xa2\x02\x03LXX\xaa\x02\x06Lab.V1\xca\x02\x06Lab\\V1\xe2\x02\x12Lab\\V1\\GPBMetadata\xea\x02\aLab::V1b\x06proto3"
 
@@ -107,16 +330,21 @@ func file_lab_v1_common_proto_rawDescGZIP() []byte {
 	return file_lab_v1_common_proto_rawDescData
 }
 
-var file_lab_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_lab_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_lab_v1_common_proto_goTypes = []any{
-	(*Money)(nil), // 0: lab.v1.Money
+	(*Money)(nil),       // 0: lab.v1.Money
+	(*Decimal)(nil),     // 1: lab.v1.Decimal
+	(*Metric)(nil),      // 2: lab.v1.Metric
+	(*EquityPoint)(nil), // 3: lab.v1.EquityPoint
 }
 var file_lab_v1_common_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	1, // 0: lab.v1.Metric.value:type_name -> lab.v1.Decimal
+	0, // 1: lab.v1.EquityPoint.equity:type_name -> lab.v1.Money
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_lab_v1_common_proto_init() }
@@ -130,7 +358,7 @@ func file_lab_v1_common_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_lab_v1_common_proto_rawDesc), len(file_lab_v1_common_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

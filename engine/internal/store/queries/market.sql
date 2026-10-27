@@ -138,3 +138,6 @@ ORDER BY symbol, at;
 -- which the database stamps, so both must come from the same clock.
 -- name: DBNow :one
 SELECT now()::timestamptz;
+
+-- name: GetFxRate :one
+SELECT * FROM fx_rates WHERE id = $1;

@@ -44,14 +44,18 @@ class FxRate extends $pb.GeneratedMessage {
   factory FxRate.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       FxRate()..mergeFromBuffer(data, registry);
-  factory FxRate.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory FxRate.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       FxRate()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'FxRate',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'), createEmptyInstance: FxRate.$_createMessage)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'FxRate',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: FxRate.$_createMessage)
     ..aInt64(1, _omitFieldNames ? '' : 'id')
     ..aOS(2, _omitFieldNames ? '' : 'date')
-    ..aOM<$0.Money>(3, _omitFieldNames ? '' : 'tomanPerUsdt', subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Money>(3, _omitFieldNames ? '' : 'tomanPerUsdt',
+        subBuilder: $0.Money.$_createMessage)
     ..aOS(4, _omitFieldNames ? '' : 'source')
     ..aInt64(5, _omitFieldNames ? '' : 'enteredUnixMs')
     ..aI(6, _omitFieldNames ? '' : 'reports')
@@ -60,7 +64,8 @@ class FxRate extends $pb.GeneratedMessage {
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   FxRate clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  FxRate copyWith(void Function(FxRate) updates) => super.copyWith((message) => updates(message as FxRate)) as FxRate;
+  FxRate copyWith(void Function(FxRate) updates) =>
+      super.copyWith((message) => updates(message as FxRate)) as FxRate;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -72,7 +77,8 @@ class FxRate extends $pb.GeneratedMessage {
   @$core.override
   FxRate createEmptyInstance() => FxRate._();
   @$core.pragma('dart2js:noInline')
-  static FxRate getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<FxRate>(FxRate.$_createMessage);
+  static FxRate getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<FxRate>(FxRate.$_createMessage);
   static FxRate? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -150,7 +156,8 @@ class ListRatesRequest extends $pb.GeneratedMessage {
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       ListRatesRequest()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ListRatesRequest',
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ListRatesRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: ListRatesRequest.$_createMessage)
     ..aI(1, _omitFieldNames ? '' : 'limit')
@@ -160,7 +167,8 @@ class ListRatesRequest extends $pb.GeneratedMessage {
   ListRatesRequest clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   ListRatesRequest copyWith(void Function(ListRatesRequest) updates) =>
-      super.copyWith((message) => updates(message as ListRatesRequest)) as ListRatesRequest;
+      super.copyWith((message) => updates(message as ListRatesRequest))
+          as ListRatesRequest;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -173,7 +181,8 @@ class ListRatesRequest extends $pb.GeneratedMessage {
   ListRatesRequest createEmptyInstance() => ListRatesRequest._();
   @$core.pragma('dart2js:noInline')
   static ListRatesRequest getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ListRatesRequest>(ListRatesRequest.$_createMessage);
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ListRatesRequest>(
+          ListRatesRequest.$_createMessage);
   static ListRatesRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -204,17 +213,20 @@ class ListRatesResponse extends $pb.GeneratedMessage {
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       ListRatesResponse()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ListRatesResponse',
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ListRatesResponse',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: ListRatesResponse.$_createMessage)
-    ..pPM<FxRate>(1, _omitFieldNames ? '' : 'rates', subBuilder: FxRate.$_createMessage)
+    ..pPM<FxRate>(1, _omitFieldNames ? '' : 'rates',
+        subBuilder: FxRate.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   ListRatesResponse clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   ListRatesResponse copyWith(void Function(ListRatesResponse) updates) =>
-      super.copyWith((message) => updates(message as ListRatesResponse)) as ListRatesResponse;
+      super.copyWith((message) => updates(message as ListRatesResponse))
+          as ListRatesResponse;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -227,7 +239,8 @@ class ListRatesResponse extends $pb.GeneratedMessage {
   ListRatesResponse createEmptyInstance() => ListRatesResponse._();
   @$core.pragma('dart2js:noInline')
   static ListRatesResponse getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ListRatesResponse>(ListRatesResponse.$_createMessage);
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ListRatesResponse>(
+          ListRatesResponse.$_createMessage);
   static ListRatesResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -252,10 +265,12 @@ class AddRateRequest extends $pb.GeneratedMessage {
   factory AddRateRequest.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       AddRateRequest()..mergeFromBuffer(data, registry);
-  factory AddRateRequest.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory AddRateRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       AddRateRequest()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'AddRateRequest',
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'AddRateRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: AddRateRequest.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'date')
@@ -267,7 +282,8 @@ class AddRateRequest extends $pb.GeneratedMessage {
   AddRateRequest clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   AddRateRequest copyWith(void Function(AddRateRequest) updates) =>
-      super.copyWith((message) => updates(message as AddRateRequest)) as AddRateRequest;
+      super.copyWith((message) => updates(message as AddRateRequest))
+          as AddRateRequest;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -280,7 +296,8 @@ class AddRateRequest extends $pb.GeneratedMessage {
   AddRateRequest createEmptyInstance() => AddRateRequest._();
   @$core.pragma('dart2js:noInline')
   static AddRateRequest getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AddRateRequest>(AddRateRequest.$_createMessage);
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AddRateRequest>(
+          AddRateRequest.$_createMessage);
   static AddRateRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -325,20 +342,24 @@ class AddRateResponse extends $pb.GeneratedMessage {
   factory AddRateResponse.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       AddRateResponse()..mergeFromBuffer(data, registry);
-  factory AddRateResponse.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory AddRateResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       AddRateResponse()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'AddRateResponse',
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'AddRateResponse',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: AddRateResponse.$_createMessage)
-    ..aOM<FxRate>(1, _omitFieldNames ? '' : 'rate', subBuilder: FxRate.$_createMessage)
+    ..aOM<FxRate>(1, _omitFieldNames ? '' : 'rate',
+        subBuilder: FxRate.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   AddRateResponse clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   AddRateResponse copyWith(void Function(AddRateResponse) updates) =>
-      super.copyWith((message) => updates(message as AddRateResponse)) as AddRateResponse;
+      super.copyWith((message) => updates(message as AddRateResponse))
+          as AddRateResponse;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -351,7 +372,8 @@ class AddRateResponse extends $pb.GeneratedMessage {
   AddRateResponse createEmptyInstance() => AddRateResponse._();
   @$core.pragma('dart2js:noInline')
   static AddRateResponse getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AddRateResponse>(AddRateResponse.$_createMessage);
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AddRateResponse>(
+          AddRateResponse.$_createMessage);
   static AddRateResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -372,11 +394,17 @@ class FxServiceApi {
 
   FxServiceApi(this._client);
 
-  $async.Future<ListRatesResponse> listRates($pb.ClientContext? ctx, ListRatesRequest request) =>
-      _client.invoke<ListRatesResponse>(ctx, 'FxService', 'ListRates', request, ListRatesResponse());
-  $async.Future<AddRateResponse> addRate($pb.ClientContext? ctx, AddRateRequest request) =>
-      _client.invoke<AddRateResponse>(ctx, 'FxService', 'AddRate', request, AddRateResponse());
+  $async.Future<ListRatesResponse> listRates(
+          $pb.ClientContext? ctx, ListRatesRequest request) =>
+      _client.invoke<ListRatesResponse>(
+          ctx, 'FxService', 'ListRates', request, ListRatesResponse());
+  $async.Future<AddRateResponse> addRate(
+          $pb.ClientContext? ctx, AddRateRequest request) =>
+      _client.invoke<AddRateResponse>(
+          ctx, 'FxService', 'AddRate', request, AddRateResponse());
 }
 
-const $core.bool _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
-const $core.bool _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');
+const $core.bool _omitFieldNames =
+    $core.bool.fromEnvironment('protobuf.omit_field_names');
+const $core.bool _omitMessageNames =
+    $core.bool.fromEnvironment('protobuf.omit_message_names');

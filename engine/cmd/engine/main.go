@@ -22,6 +22,7 @@ import (
 	"tradinglab/engine/internal/clock"
 	"tradinglab/engine/internal/data"
 	"tradinglab/engine/internal/gen/lab/v1/labv1connect"
+	"tradinglab/engine/internal/report"
 	"tradinglab/engine/internal/store"
 )
 
@@ -87,10 +88,13 @@ func run() error {
 			return nil
 		},
 	}
+	reports := report.Service{Store: st, Version: version}
 	if err := sc.Start(ctx, newServer(cfg,
 		route(labv1connect.NewHealthServiceHandler(health)),
 		route(labv1connect.NewDataServiceHandler(dataSvc)),
 		route(labv1connect.NewFxServiceHandler(fxSvc)),
+		route(labv1connect.NewReportServiceHandler(&api.Report{Svc: reports})),
+		route(labv1connect.NewPnlServiceHandler(&api.Pnl{Svc: reports})),
 	)); err != nil {
 		return fmt.Errorf("serve: %w", err)
 	}

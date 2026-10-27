@@ -6,6 +6,7 @@ import (
 
 	"tradinglab/engine/internal/metrics"
 	"tradinglab/engine/internal/money"
+	"tradinglab/engine/internal/sim"
 )
 
 // MinReliableTrades: fewer closed out-of-sample trades and the verdict is "not yet
@@ -130,5 +131,31 @@ func summarize(ev *Evaluation) Summary {
 		}
 		s.Badges = append(s.Badges, Badge{"stability", fmt.Sprintf("پایداری پارامتر: %s از %s ترکیب همسایه سودده", ltr(fmt.Sprint(pos)), ltr(fmt.Sprint(n))), tone})
 	}
+	return s
+}
+
+// RecalcSummary is the calculator's plain-language result for a replayed run.
+func RecalcSummary(capital int64, size money.Ratio, ms []metrics.Metric) Summary {
+	net, fees, slip := m(ms, "net_pnl"), m(ms, "fees"), m(ms, "slippage")
+	trades := m(ms, "trades")
+	s := Summary{Verdict: "سودده پس از هزینه‌ها", Tone: Positive}
+	word := "سود خالص"
+	if net.V <= 0 {
+		s.Verdict, s.Tone, word = "زیان‌ده پس از هزینه‌ها", Negative, "زیان خالص"
+	}
+	s.Sentence = fmt.Sprintf("با سرمایه %s USDT و %s اندازه ثبت‌شده هر موقعیت، این الگوریتم در %s معامله %s %s USDT ساخت؛ %s USDT صرف کارمزد و لغزش شد.",
+		ltr(strings.TrimPrefix(USDTText(capital), "+")), ltr(strings.TrimPrefix(Pct(int64(size)), "+")), ltr(fmt.Sprint(trades.V)),
+		word, ltr(strings.TrimPrefix(strings.TrimPrefix(USDTText(net.V), "+"), "−")), ltr(strings.TrimPrefix(USDTText(fees.V+slip.V), "+")))
+	return s
+}
+
+// TradeSummary is the single-trade calculator's plain-language result.
+func TradeSummary(c sim.TradeCalc) Summary {
+	s := Summary{Verdict: "سودده پس از هزینه‌ها", Tone: Positive}
+	if c.Net.V <= 0 {
+		s.Verdict, s.Tone = "زیان‌ده پس از هزینه‌ها", Negative
+	}
+	s.Sentence = fmt.Sprintf("خرید در %s و فروش در %s پس از کارمزد و لغزش %s USDT (%s از هزینه) می‌سازد؛ برای سر‌به‌سر شدن، قیمت فروش باید دست‌کم %s باشد.",
+		ltr(c.Buy.RefPrice.String()), ltr(c.Sell.RefPrice.String()), ltr(USDTText(c.Net.V)), ltr(Pct(int64(c.Return))), ltr(c.BreakEvenExit.String()))
 	return s
 }

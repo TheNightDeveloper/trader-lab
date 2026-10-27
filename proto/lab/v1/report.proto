@@ -1,0 +1,297 @@
+syntax = "proto3";
+
+package lab.v1;
+
+import "lab/v1/common.proto";
+
+// ReportService: evaluate a configuration, read reports, compare, export.
+service ReportService {
+  rpc ListStrategies(ListStrategiesRequest) returns (ListStrategiesResponse);
+  // Runs the walk-forward evaluation synchronously (M4 moves this to the queue).
+  rpc CreateReport(CreateReportRequest) returns (CreateReportResponse);
+  rpc ListReports(ListReportsRequest) returns (ListReportsResponse);
+  rpc GetReport(GetReportRequest) returns (GetReportResponse);
+  // Reveals the final holdout. Every call is logged and counted.
+  rpc ViewHoldout(ViewHoldoutRequest) returns (ViewHoldoutResponse);
+  rpc ListTrades(ListTradesRequest) returns (ListTradesResponse);
+  rpc ListDecisions(ListDecisionsRequest) returns (ListDecisionsResponse);
+  rpc Compare(CompareRequest) returns (CompareResponse);
+  rpc Export(ExportRequest) returns (ExportResponse);
+  // Re-evaluates from the stored inputs and checks every number is identical.
+  rpc Reproduce(ReproduceRequest) returns (ReproduceResponse);
+}
+
+message ParamSpec {
+  string name = 1;
+  double default = 2; // strategy parameter (model math), not money
+  bool integer = 3;
+}
+
+message StrategyInfo {
+  string name = 1;
+  repeated ParamSpec params = 2;
+}
+
+message ListStrategiesRequest {}
+
+message ListStrategiesResponse {
+  repeated StrategyInfo strategies = 1;
+}
+
+message ReportSpec {
+  repeated string dataset_ids = 1;
+  string timeframe = 2; // taken from the datasets; ignored on create
+  string strategy = 3;
+  map<string, double> params = 4;
+  Money capital = 5; // USDT
+  Decimal fee = 6; // per side, fraction (0.001 = 10 bps)
+  Decimal slippage = 7; // per side, fraction
+  string sizing = 8; // equity | fixed
+  Money fixed_usdt = 9;
+  int32 latency_bars = 10;
+  int32 folds = 11;
+  bool rolling = 12;
+  Decimal holdout = 13; // share of the range, fraction
+  int64 embargo_seconds = 14;
+  string engine_version = 15; // set by the engine
+}
+
+message CreateReportRequest {
+  ReportSpec spec = 1;
+}
+
+message CreateReportResponse {
+  string report_id = 1;
+}
+
+message ReportListItem {
+  string id = 1;
+  string title = 2;
+  int64 created_unix_ms = 3;
+  Money net = 4; // out of sample
+  Decimal total_return = 5;
+  int32 closed_trades = 6;
+  string verdict = 7;
+  string tone = 8;
+  int32 holdout_views = 9;
+}
+
+message ListReportsRequest {
+  int32 page_size = 1;
+  int32 offset = 2;
+}
+
+message ListReportsResponse {
+  repeated ReportListItem reports = 1;
+  int64 total = 2;
+}
+
+message Window {
+  int64 from_unix_ms = 1;
+  int64 to_unix_ms = 2; // exclusive
+}
+
+message RunView {
+  Window window = 1;
+  repeated Metric metrics = 2;
+  repeated EquityPoint equity = 3; // downsampled, at most 1000
+  int32 ambiguous_bars = 4;
+}
+
+message FoldView {
+  int32 index = 1;
+  Window train = 2;
+  Window test = 3;
+  repeated Metric metrics = 4;
+}
+
+message StressView {
+  string key = 1; // fee_x2 | slippage_x3 | latency_plus_1
+  repeated Metric metrics = 2;
+  string error = 3;
+}
+
+message GridCell {
+  Metric total_return = 1;
+  bool center = 2;
+  string invalid = 3;
+}
+
+message GridRow {
+  repeated GridCell cells = 1;
+}
+
+message Grid {
+  string x = 1;
+  string y = 2; // empty for one-parameter strategies
+  repeated double xs = 3;
+  repeated double ys = 4;
+  repeated GridRow rows = 5;
+}
+
+message Badge {
+  string kind = 1;
+  string text = 2; // Persian
+  string tone = 3; // positive | negative | warning | neutral
+}
+
+message Summary {
+  string verdict = 1;
+  string tone = 2;
+  string sentence = 3; // Persian, numbers in LTR isolates
+  repeated Badge badges = 4;
+}
+
+message Benchmark {
+  string key = 1; // buy_and_hold | hold_cash
+  repeated EquityPoint equity = 2;
+  Metric total_return = 3;
+}
+
+message MetricGroup {
+  string key = 1;
+  string label = 2;
+}
+
+message Report {
+  string id = 1;
+  string title = 2;
+  int64 created_unix_ms = 3;
+  ReportSpec spec = 4;
+  Window range = 5;
+  Window oos_window = 6;
+  Window holdout_window = 7;
+  Summary summary = 8;
+  RunView oos = 9;
+  repeated FoldView folds = 10;
+  repeated StressView stress = 11;
+  Grid grid = 12; // unset when the strategy has no signal parameters
+  repeated Benchmark benchmarks = 13;
+  Decimal break_even_fee = 14; // unset when no fee level makes it profitable
+  int32 holdout_views = 15;
+  repeated MetricGroup groups = 16;
+  // Display only, when GetReportRequest.fx_rate_id is set.
+  Money final_equity_toman = 17;
+  Money net_toman = 18;
+}
+
+message GetReportRequest {
+  string report_id = 1;
+  int64 fx_rate_id = 2; // optional: Toman equivalents
+}
+
+message GetReportResponse {
+  Report report = 1;
+}
+
+message ViewHoldoutRequest {
+  string report_id = 1;
+}
+
+message ViewHoldoutResponse {
+  RunView holdout = 1;
+  int32 views = 2;
+}
+
+message TradeRow {
+  int32 seq = 1;
+  string instrument = 2;
+  int64 opened_unix_ms = 3;
+  int64 closed_unix_ms = 4; // 0 while open
+  Decimal qty = 5;
+  Money entry_ref = 6;
+  Money exit_ref = 7;
+  Money gross = 8;
+  Money slippage = 9;
+  Money fees = 10;
+  Money net = 11;
+  string exit_reason = 12;
+  int32 ambiguous_bars = 13;
+  Decimal open_qty = 14;
+  Money mark_value = 15; // open trades only
+}
+
+message ListTradesRequest {
+  string report_id = 1;
+  int32 page_size = 2;
+  int32 offset = 3;
+}
+
+message ListTradesResponse {
+  repeated TradeRow trades = 1;
+  int64 total = 2;
+}
+
+message DecisionRow {
+  int32 id = 1;
+  int64 at_unix_ms = 2;
+  string input_symbol = 3;
+  int64 input_bar_open_unix_ms = 4;
+  string instrument = 5;
+  Decimal target = 6;
+  Decimal stop_loss = 7;
+  Decimal take_profit = 8;
+  string reason = 9;
+  string model_id = 10;
+  string recipe_version = 11;
+  string outcome = 12;
+  string detail = 13;
+}
+
+message ListDecisionsRequest {
+  string report_id = 1;
+  int32 page_size = 2;
+  int32 offset = 3;
+}
+
+message ListDecisionsResponse {
+  repeated DecisionRow decisions = 1;
+  int64 total = 2;
+}
+
+message Assumption {
+  string key = 1;
+  string label = 2;
+  repeated string values = 3;
+  bool differs = 4;
+  bool blocking = 5;
+}
+
+message CompareRequest {
+  repeated string report_ids = 1;
+}
+
+message CompareColumn {
+  string report_id = 1;
+  string title = 2;
+  bool eligible = 3;
+  repeated string reasons = 4;
+  repeated Metric metrics = 5;
+  repeated EquityPoint equity = 6; // out of sample
+}
+
+message CompareResponse {
+  repeated Assumption assumptions = 1;
+  repeated CompareColumn columns = 2;
+  string conclusion = 3;
+}
+
+message ExportRequest {
+  string report_id = 1;
+  string kind = 2; // trades_csv | metrics_csv | spec_json
+  int64 fx_rate_id = 3; // optional: adds Toman columns (display only)
+}
+
+message ExportResponse {
+  string filename = 1;
+  string mime = 2;
+  bytes content = 3;
+}
+
+message ReproduceRequest {
+  string report_id = 1;
+}
+
+message ReproduceResponse {
+  bool identical = 1;
+}

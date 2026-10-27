@@ -9,3 +9,26 @@ message Money {
   int32 scale = 2;
   string asset = 3; // "USDT", "BTC", "TOMAN", ...
 }
+
+// Exact fixed-point number that is not money (ratios, Sharpe): units × 10^-scale.
+message Decimal {
+  string units = 1;
+  int32 scale = 2;
+}
+
+// A reported number with its validity: invalid metrics carry a reason, not a value.
+message Metric {
+  string key = 1;
+  string group = 2;
+  Decimal value = 3;
+  string unit = 4; // USDT | ratio | count | seconds | number
+  bool valid = 5;
+  string invalid = 6; // Persian reason when not valid
+  string label = 7; // Persian
+  string definition = 8; // Persian
+}
+
+message EquityPoint {
+  int64 t_unix_ms = 1;
+  Money equity = 2;
+}

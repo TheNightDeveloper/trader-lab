@@ -204,6 +204,25 @@ func (q *Queries) GetDataset(ctx context.Context, id string) (Dataset, error) {
 	return i, err
 }
 
+const getFxRate = `-- name: GetFxRate :one
+SELECT id, pair, rate_date, rate, rate_scale, source, entered_at FROM fx_rates WHERE id = $1
+`
+
+func (q *Queries) GetFxRate(ctx context.Context, id int64) (FxRate, error) {
+	row := q.db.QueryRow(ctx, getFxRate, id)
+	var i FxRate
+	err := row.Scan(
+		&i.ID,
+		&i.Pair,
+		&i.RateDate,
+		&i.Rate,
+		&i.RateScale,
+		&i.Source,
+		&i.EnteredAt,
+	)
+	return i, err
+}
+
 const insertDataset = `-- name: InsertDataset :exec
 INSERT INTO datasets (id, symbol, timeframe, range_from, range_to, gap_policy, known_at, bar_count, manifest)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)

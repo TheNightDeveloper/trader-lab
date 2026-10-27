@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package lab.v1;
+
+import "lab/v1/common.proto";
+import "lab/v1/report.proto";
+
+// PnlService: what-if on a recorded run, and a single-trade calculator. Both use
+// the simulator math; the UI never computes P&L.
+service PnlService {
+  rpc Recalculate(RecalculateRequest) returns (RecalculateResponse);
+  rpc CalculateTrade(CalculateTradeRequest) returns (CalculateTradeResponse);
+}
+
+message RecalculateRequest {
+  string report_id = 1;
+  // Unset fields keep the setting of the report.
+  Money capital = 2;
+  Decimal position_size = 3; // multiplier on recorded target exposure (1 = as recorded)
+  Decimal fee = 4;
+  Decimal slippage = 5;
+  int64 fx_rate_id = 6; // optional: Toman equivalents
+}
+
+message Waterfall {
+  Money gross = 1;
+  Money fees = 2;
+  Money slippage = 3;
+  Money net = 4;
+}
+
+message RecalculateResponse {
+  // Settings actually used (defaults filled in), so the UI can reset to them.
+  Money capital = 1;
+  Decimal position_size = 2;
+  Decimal fee = 3;
+  Decimal slippage = 4;
+  Waterfall waterfall = 5;
+  repeated Metric metrics = 6;
+  repeated EquityPoint equity = 7;
+  repeated TradeRow trades = 8;
+  Decimal break_even_fee = 9;
+  string verdict = 10;
+  string tone = 11;
+  string sentence = 12;
+  Money original_net = 13; // the OOS net of the report, for comparison
+  Money net_toman = 14;
+  Money final_equity_toman = 15;
+}
+
+message CalculateTradeRequest {
+  Money entry = 1; // reference price, USDT per unit
+  Money exit = 2;
+  Money amount = 3; // USDT to spend on the buy (value before fee)
+  Decimal fee = 4;
+  Decimal slippage = 5;
+  int64 fx_rate_id = 6;
+}
+
+message TradeLeg {
+  Money ref_price = 1;
+  Money price = 2;
+  Money ref_value = 3;
+  Money value = 4;
+  Money slippage = 5;
+  Money fee = 6;
+}
+
+message CalculateTradeResponse {
+  Decimal qty = 1;
+  TradeLeg buy = 2;
+  TradeLeg sell = 3;
+  Waterfall waterfall = 4;
+  Money cost = 5;
+  Decimal return = 6; // net / cost
+  Money break_even_exit = 7;
+  string verdict = 8;
+  string tone = 9;
+  string sentence = 10;
+  Money net_toman = 11;
+}

@@ -8,7 +8,7 @@ import "fx.pb.dart" as labv1fx;
 import "fx.connect.spec.dart" as specs;
 
 /// FxService: USDT/TOMAN display rates. Append-only; display and export only.
-extension type FxServiceClient(connect.Transport _transport) {
+extension type FxServiceClient (connect.Transport _transport) {
   Future<labv1fx.ListRatesResponse> listRates(
     labv1fx.ListRatesRequest input, {
     connect.Headers? headers,
@@ -33,8 +33,13 @@ extension type FxServiceClient(connect.Transport _transport) {
     Function(connect.Headers)? onHeader,
     Function(connect.Headers)? onTrailer,
   }) {
-    return connect.Client(
-      _transport,
-    ).unary(specs.FxService.addRate, input, signal: signal, headers: headers, onHeader: onHeader, onTrailer: onTrailer);
+    return connect.Client(_transport).unary(
+      specs.FxService.addRate,
+      input,
+      signal: signal,
+      headers: headers,
+      onHeader: onHeader,
+      onTrailer: onTrailer,
+    );
   }
 }
