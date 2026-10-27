@@ -434,6 +434,498 @@ abstract class L10n {
   /// In fa, this message translates to:
   /// **'اشاره‌گر روی نمودار نیست'**
   String get chartCrosshairNone;
+
+  /// No description provided for @retry.
+  ///
+  /// In fa, this message translates to:
+  /// **'تلاش دوباره'**
+  String get retry;
+
+  /// No description provided for @loadFailed.
+  ///
+  /// In fa, this message translates to:
+  /// **'بارگیری ناموفق بود: {error}'**
+  String loadFailed(String error);
+
+  /// No description provided for @pagePrev.
+  ///
+  /// In fa, this message translates to:
+  /// **'قبلی'**
+  String get pagePrev;
+
+  /// No description provided for @pageNext.
+  ///
+  /// In fa, this message translates to:
+  /// **'بعدی'**
+  String get pageNext;
+
+  /// No description provided for @pageOf.
+  ///
+  /// In fa, this message translates to:
+  /// **'{from}–{to} از {total}'**
+  String pageOf(int from, int to, int total);
+
+  /// No description provided for @dataSubtitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'مجموعه‌های نسخه‌بندی‌شده، کیفیت، پوشش زمانی و دریافت زنده. اصلاح منبع همیشه نسخه تازه می‌سازد.'**
+  String get dataSubtitle;
+
+  /// No description provided for @dataLiveStream.
+  ///
+  /// In fa, this message translates to:
+  /// **'جریان زنده'**
+  String get dataLiveStream;
+
+  /// No description provided for @dataLiveStreamValue.
+  ///
+  /// In fa, this message translates to:
+  /// **'{count} جفت · {source}'**
+  String dataLiveStreamValue(int count, String source);
+
+  /// No description provided for @dataLiveOff.
+  ///
+  /// In fa, this message translates to:
+  /// **'خاموش'**
+  String get dataLiveOff;
+
+  /// No description provided for @dataLastBarAge.
+  ///
+  /// In fa, this message translates to:
+  /// **'سن آخرین کندل'**
+  String get dataLastBarAge;
+
+  /// No description provided for @dataSeconds.
+  ///
+  /// In fa, this message translates to:
+  /// **'{n} ثانیه'**
+  String dataSeconds(int n);
+
+  /// No description provided for @dataOutagesToday.
+  ///
+  /// In fa, this message translates to:
+  /// **'قطعی‌های امروز'**
+  String get dataOutagesToday;
+
+  /// No description provided for @dataOutagesValue.
+  ///
+  /// In fa, this message translates to:
+  /// **'{count} · مجموع {minutes} دقیقه'**
+  String dataOutagesValue(int count, int minutes);
+
+  /// No description provided for @dataStorage.
+  ///
+  /// In fa, this message translates to:
+  /// **'فضای ذخیره'**
+  String get dataStorage;
+
+  /// No description provided for @dataDatasets.
+  ///
+  /// In fa, this message translates to:
+  /// **'مجموعه‌های داده'**
+  String get dataDatasets;
+
+  /// No description provided for @dataColVersion.
+  ///
+  /// In fa, this message translates to:
+  /// **'نسخه'**
+  String get dataColVersion;
+
+  /// No description provided for @dataColPair.
+  ///
+  /// In fa, this message translates to:
+  /// **'جفت'**
+  String get dataColPair;
+
+  /// No description provided for @dataColTimeframe.
+  ///
+  /// In fa, this message translates to:
+  /// **'تایم‌فریم'**
+  String get dataColTimeframe;
+
+  /// No description provided for @dataColRange.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازه'**
+  String get dataColRange;
+
+  /// No description provided for @dataColQuality.
+  ///
+  /// In fa, this message translates to:
+  /// **'کیفیت'**
+  String get dataColQuality;
+
+  /// No description provided for @dataColExperiments.
+  ///
+  /// In fa, this message translates to:
+  /// **'آزمایش‌های وابسته'**
+  String get dataColExperiments;
+
+  /// No description provided for @dataQualityOk.
+  ///
+  /// In fa, this message translates to:
+  /// **'سالم'**
+  String get dataQualityOk;
+
+  /// No description provided for @dataQualityGaps.
+  ///
+  /// In fa, this message translates to:
+  /// **'{n} شکاف'**
+  String dataQualityGaps(int n);
+
+  /// No description provided for @dataQualityFilled.
+  ///
+  /// In fa, this message translates to:
+  /// **'{n} پرشده'**
+  String dataQualityFilled(int n);
+
+  /// No description provided for @dataDatasetsEmpty.
+  ///
+  /// In fa, this message translates to:
+  /// **'هنوز نسخه‌ای از داده ساخته نشده است. از فرم واردسازی، اولین بازه را وارد کنید.'**
+  String get dataDatasetsEmpty;
+
+  /// No description provided for @dataCoverage.
+  ///
+  /// In fa, this message translates to:
+  /// **'پوشش زمانی'**
+  String get dataCoverage;
+
+  /// No description provided for @dataCoverageLegend.
+  ///
+  /// In fa, this message translates to:
+  /// **'نوار نارنجی = شکاف یا داده نامعتبر'**
+  String get dataCoverageLegend;
+
+  /// No description provided for @dataCoverageEmpty.
+  ///
+  /// In fa, this message translates to:
+  /// **'هنوز کندلی ذخیره نشده است.'**
+  String get dataCoverageEmpty;
+
+  /// No description provided for @dataIssues.
+  ///
+  /// In fa, this message translates to:
+  /// **'مشکلات کیفیت'**
+  String get dataIssues;
+
+  /// No description provided for @dataIssuesEmpty.
+  ///
+  /// In fa, this message translates to:
+  /// **'مشکلی ثبت نشده است.'**
+  String get dataIssuesEmpty;
+
+  /// No description provided for @issueGap.
+  ///
+  /// In fa, this message translates to:
+  /// **'شکاف'**
+  String get issueGap;
+
+  /// No description provided for @issueOutOfOrder.
+  ///
+  /// In fa, this message translates to:
+  /// **'ترتیب نادرست'**
+  String get issueOutOfOrder;
+
+  /// No description provided for @issueDuplicate.
+  ///
+  /// In fa, this message translates to:
+  /// **'تکراری'**
+  String get issueDuplicate;
+
+  /// No description provided for @issueBadPrice.
+  ///
+  /// In fa, this message translates to:
+  /// **'قیمت نامعتبر'**
+  String get issueBadPrice;
+
+  /// No description provided for @issueZeroVolume.
+  ///
+  /// In fa, this message translates to:
+  /// **'حجم صفر'**
+  String get issueZeroVolume;
+
+  /// No description provided for @issueCorrection.
+  ///
+  /// In fa, this message translates to:
+  /// **'اصلاح منبع'**
+  String get issueCorrection;
+
+  /// No description provided for @issueOutage.
+  ///
+  /// In fa, this message translates to:
+  /// **'قطعی'**
+  String get issueOutage;
+
+  /// No description provided for @dataImport.
+  ///
+  /// In fa, this message translates to:
+  /// **'واردسازی تاریخچه'**
+  String get dataImport;
+
+  /// No description provided for @dataSource.
+  ///
+  /// In fa, this message translates to:
+  /// **'منبع'**
+  String get dataSource;
+
+  /// No description provided for @dataSourceArchive.
+  ///
+  /// In fa, this message translates to:
+  /// **'Binance public archive (klines)'**
+  String get dataSourceArchive;
+
+  /// No description provided for @dataPairs.
+  ///
+  /// In fa, this message translates to:
+  /// **'جفت‌ها'**
+  String get dataPairs;
+
+  /// No description provided for @dataFrom.
+  ///
+  /// In fa, this message translates to:
+  /// **'از'**
+  String get dataFrom;
+
+  /// No description provided for @dataTo.
+  ///
+  /// In fa, this message translates to:
+  /// **'تا'**
+  String get dataTo;
+
+  /// No description provided for @dataDateHelp.
+  ///
+  /// In fa, this message translates to:
+  /// **'تاریخ میلادی، UTC، به شکل 2024-01-31'**
+  String get dataDateHelp;
+
+  /// No description provided for @dataTimeframe.
+  ///
+  /// In fa, this message translates to:
+  /// **'تایم‌فریم نسخه'**
+  String get dataTimeframe;
+
+  /// No description provided for @dataGapPolicy.
+  ///
+  /// In fa, this message translates to:
+  /// **'سیاست شکاف'**
+  String get dataGapPolicy;
+
+  /// No description provided for @gapFlag.
+  ///
+  /// In fa, this message translates to:
+  /// **'علامت‌گذاری، بدون پرکردن'**
+  String get gapFlag;
+
+  /// No description provided for @gapStop.
+  ///
+  /// In fa, this message translates to:
+  /// **'توقف آزمایش'**
+  String get gapStop;
+
+  /// No description provided for @gapFfill.
+  ///
+  /// In fa, this message translates to:
+  /// **'پرکردن با آخرین قیمت معلوم (بدون داده آینده)'**
+  String get gapFfill;
+
+  /// No description provided for @dataImportButton.
+  ///
+  /// In fa, this message translates to:
+  /// **'واردسازی و ساخت نسخه'**
+  String get dataImportButton;
+
+  /// No description provided for @dataImportNote.
+  ///
+  /// In fa, this message translates to:
+  /// **'واردسازی مجدد همان بازه رکورد تکراری نمی‌سازد. هر نسخه شناسه محتوا دارد و آزمایش‌های قبلی تغییر نمی‌کنند.'**
+  String get dataImportNote;
+
+  /// No description provided for @dataImportRunning.
+  ///
+  /// In fa, this message translates to:
+  /// **'در حال واردسازی…'**
+  String get dataImportRunning;
+
+  /// No description provided for @dataImportProgress.
+  ///
+  /// In fa, this message translates to:
+  /// **'{symbol}: {done} از {total} فایل · {inserted} کندل تازه'**
+  String dataImportProgress(String symbol, int done, int total, int inserted);
+
+  /// No description provided for @dataImportDone.
+  ///
+  /// In fa, this message translates to:
+  /// **'نسخه ساخته شد'**
+  String get dataImportDone;
+
+  /// No description provided for @dataImportFailed.
+  ///
+  /// In fa, this message translates to:
+  /// **'واردسازی ناموفق بود'**
+  String get dataImportFailed;
+
+  /// No description provided for @errPickPair.
+  ///
+  /// In fa, this message translates to:
+  /// **'دست‌کم یک جفت انتخاب کنید.'**
+  String get errPickPair;
+
+  /// No description provided for @errDate.
+  ///
+  /// In fa, this message translates to:
+  /// **'تاریخ را به شکل 2024-01-31 وارد کنید.'**
+  String get errDate;
+
+  /// No description provided for @errRange.
+  ///
+  /// In fa, this message translates to:
+  /// **'«از» باید پیش از «تا» باشد و «تا» از امروز نگذرد.'**
+  String get errRange;
+
+  /// No description provided for @settingsCurrency.
+  ///
+  /// In fa, this message translates to:
+  /// **'ارز مبنا و تبدیل به تومان'**
+  String get settingsCurrency;
+
+  /// No description provided for @settingsAccounting.
+  ///
+  /// In fa, this message translates to:
+  /// **'ارز مبنای محاسبات'**
+  String get settingsAccounting;
+
+  /// No description provided for @settingsAccountingNote.
+  ///
+  /// In fa, this message translates to:
+  /// **'ثابت؛ همه سود و زیان، ریسک و مقایسه‌ها'**
+  String get settingsAccountingNote;
+
+  /// No description provided for @settingsDisplayRate.
+  ///
+  /// In fa, this message translates to:
+  /// **'نرخ نمایشی'**
+  String get settingsDisplayRate;
+
+  /// No description provided for @settingsDisplayRateNote.
+  ///
+  /// In fa, this message translates to:
+  /// **'فقط در نمایش و خروجی؛ وارد محاسبه نمی‌شود'**
+  String get settingsDisplayRateNote;
+
+  /// No description provided for @settingsRateField.
+  ///
+  /// In fa, this message translates to:
+  /// **'نرخ امروز (تومان به ازای ۱ USDT)'**
+  String get settingsRateField;
+
+  /// No description provided for @settingsRateHelp.
+  ///
+  /// In fa, this message translates to:
+  /// **'عدد مثبت، حداکثر دو رقم اعشار'**
+  String get settingsRateHelp;
+
+  /// No description provided for @settingsDateField.
+  ///
+  /// In fa, this message translates to:
+  /// **'تاریخ اعمال'**
+  String get settingsDateField;
+
+  /// No description provided for @settingsSourceField.
+  ///
+  /// In fa, this message translates to:
+  /// **'منبع / یادداشت'**
+  String get settingsSourceField;
+
+  /// No description provided for @settingsSourceHelp.
+  ///
+  /// In fa, this message translates to:
+  /// **'اختیاری؛ خالی یعنی «دستی»'**
+  String get settingsSourceHelp;
+
+  /// No description provided for @settingsSaveRate.
+  ///
+  /// In fa, this message translates to:
+  /// **'ثبت نرخ'**
+  String get settingsSaveRate;
+
+  /// No description provided for @settingsRateSaved.
+  ///
+  /// In fa, this message translates to:
+  /// **'نرخ ثبت شد'**
+  String get settingsRateSaved;
+
+  /// No description provided for @settingsRateNote.
+  ///
+  /// In fa, this message translates to:
+  /// **'واحد نمایش «تومان» است (۱ تومان = ۱۰ ریال). هر گزارش نرخی را که با آن تبدیل شده نگه می‌دارد؛ ثبت نرخ تازه، گزارش‌های قبلی را تغییر نمی‌دهد.'**
+  String get settingsRateNote;
+
+  /// No description provided for @settingsHistory.
+  ///
+  /// In fa, this message translates to:
+  /// **'تاریخچه نرخ‌ها'**
+  String get settingsHistory;
+
+  /// No description provided for @settingsColDate.
+  ///
+  /// In fa, this message translates to:
+  /// **'تاریخ'**
+  String get settingsColDate;
+
+  /// No description provided for @settingsColRate.
+  ///
+  /// In fa, this message translates to:
+  /// **'نرخ'**
+  String get settingsColRate;
+
+  /// No description provided for @settingsColSource.
+  ///
+  /// In fa, this message translates to:
+  /// **'منبع'**
+  String get settingsColSource;
+
+  /// No description provided for @settingsColEntered.
+  ///
+  /// In fa, this message translates to:
+  /// **'ثبت'**
+  String get settingsColEntered;
+
+  /// No description provided for @settingsColReports.
+  ///
+  /// In fa, this message translates to:
+  /// **'گزارش‌های وابسته'**
+  String get settingsColReports;
+
+  /// No description provided for @settingsHistoryEmpty.
+  ///
+  /// In fa, this message translates to:
+  /// **'هنوز نرخی ثبت نشده است. نرخ امروز را در فرم بالا وارد کنید.'**
+  String get settingsHistoryEmpty;
+
+  /// No description provided for @settingsOther.
+  ///
+  /// In fa, this message translates to:
+  /// **'منابع موتور، پیش‌فرض‌های یادگیری و نگهداری'**
+  String get settingsOther;
+
+  /// No description provided for @settingsOtherNote.
+  ///
+  /// In fa, this message translates to:
+  /// **'این بخش‌ها همراه صف اجرا (M4) و چرخه یادگیری (M5) فعال می‌شوند.'**
+  String get settingsOtherNote;
+
+  /// No description provided for @errRate.
+  ///
+  /// In fa, this message translates to:
+  /// **'نرخ باید عددی مثبت با حداکثر دو رقم اعشار باشد.'**
+  String get errRate;
+
+  /// No description provided for @errFutureDate.
+  ///
+  /// In fa, this message translates to:
+  /// **'تاریخ نمی‌تواند در آینده باشد.'**
+  String get errFutureDate;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

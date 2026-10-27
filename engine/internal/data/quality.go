@@ -35,7 +35,7 @@ type Issue struct {
 // Clean returns the usable bars sorted by open time, plus every problem found.
 // Out-of-order rows are sorted, duplicates keep the first row, and bars with an
 // impossible price are dropped (the hole then also shows up as a gap).
-// Consecutive zero-volume bars are reported as one issue and kept.
+// Runs of >= minZeroVolumeRun zero-volume bars are reported as one issue and kept.
 func Clean(in []Bar, tf Timeframe) ([]Bar, []Issue) {
 	var issues []Issue
 	for i := 1; i < len(in); i++ {
@@ -105,6 +105,10 @@ func Gaps(bars []Bar, tf Timeframe, from, to time.Time) []Issue {
 	return issues
 }
 
+// minZeroVolumeRun: shorter runs are normal on quiet pairs (ETHBTC has many
+// single zero-volume minutes) and are not reported.
+const minZeroVolumeRun = 5
+
 func zeroVolumeRuns(bars []Bar) []Issue {
 	var issues []Issue
 	for i := 0; i < len(bars); {
@@ -116,8 +120,9 @@ func zeroVolumeRuns(bars []Bar) []Issue {
 		for j+1 < len(bars) && bars[j+1].Volume.V == 0 && bars[j+1].OpenTime.Equal(bars[j].CloseTime) {
 			j++
 		}
-		issues = append(issues, Issue{IssueZeroVolume, bars[i].OpenTime, bars[j].CloseTime,
-			fmt.Sprintf("%d bars with zero volume", j-i+1)})
+		if n := j - i + 1; n >= minZeroVolumeRun {
+			issues = append(issues, Issue{IssueZeroVolume, bars[i].OpenTime, bars[j].CloseTime, fmt.Sprintf("%d bars with zero volume", n)})
+		}
 		i = j + 1
 	}
 	return issues

@@ -74,11 +74,11 @@ func TestCleanDetectsPlantedProblems(t *testing.T) {
 	bars[6].H = money.Price{V: 1, Scale: 8} // planted bad price at minute 7: high below open/close
 	bars[1], bars[2] = bars[2], bars[1]     // out of order
 	bars = append(bars, bars[0])            // duplicate of minute 0
-	bars[7].Volume.V = 0                    // zero volume at minute 8
+	bars[7].Volume.V = 0                    // single zero-volume bar: normal, not reported
 
 	clean, issues := Clean(bars, TF1m)
 
-	require.ElementsMatch(t, []IssueKind{IssueOutOfOrder, IssueOutOfOrder, IssueDuplicate, IssueBadPrice, IssueGap, IssueGap, IssueZeroVolume}, kinds(issues))
+	require.ElementsMatch(t, []IssueKind{IssueOutOfOrder, IssueOutOfOrder, IssueDuplicate, IssueBadPrice, IssueGap, IssueGap}, kinds(issues))
 	byKind := map[IssueKind][]Issue{}
 	for _, i := range issues {
 		byKind[i.Kind] = append(byKind[i.Kind], i)
@@ -92,6 +92,21 @@ func TestCleanDetectsPlantedProblems(t *testing.T) {
 	for i := 1; i < len(clean); i++ {
 		require.True(t, clean[i].OpenTime.After(clean[i-1].OpenTime), "sorted, unique")
 	}
+}
+
+func TestZeroVolumeRuns(t *testing.T) {
+	bars := series(20)
+	for i := 3; i < 8; i++ { // 5-bar run: reported
+		bars[i].Volume.V = 0
+	}
+	for i := 12; i < 16; i++ { // 4-bar run: normal
+		bars[i].Volume.V = 0
+	}
+	_, issues := Clean(bars, TF1m)
+	require.Len(t, issues, 1)
+	require.Equal(t, IssueZeroVolume, issues[0].Kind)
+	require.Equal(t, t0.Add(3*time.Minute), issues[0].At)
+	require.Equal(t, t0.Add(8*time.Minute), issues[0].Until)
 }
 
 func TestGapsAtEdges(t *testing.T) {

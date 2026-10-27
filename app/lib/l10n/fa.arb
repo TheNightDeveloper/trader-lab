@@ -2,7 +2,6 @@
   "@@locale": "fa",
   "appTitle": "آزمایشگاه الگوریتم",
   "appSubtitle": "Trading Research Lab",
-
   "navHome": "خانه",
   "navGroupResearch": "پژوهش",
   "navLibrary": "کتابخانه الگوریتم",
@@ -24,7 +23,6 @@
   "navSettings": "تنظیمات",
   "phase2": "فاز ۲",
   "openMenu": "باز کردن منو",
-
   "statusMode": "حالت اجرا",
   "statusModeResearch": "پژوهش · بدون سفارش واقعی",
   "statusAccounting": "ارز مبنا",
@@ -38,12 +36,17 @@
   "statusEnginePaused": "متوقف",
   "statusEngineDown": "قطع",
   "statusWorkers": "{count} کارگر",
-  "@statusWorkers": { "placeholders": { "count": { "type": "int" } } },
+  "@statusWorkers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "statusFx": "نرخ تبدیل نمایشی",
   "statusFxNone": "هنوز نرخی ثبت نشده",
   "statusFxManual": "دستی",
   "engineUnreachable": "موتور در دسترس نیست. آخرین وضعیت نمایش داده می‌شود؛ دوباره تلاش می‌کنیم…",
-
   "screenHomeSub": "وضعیت موتور، آخرین چرخه یادگیری و آزمایش‌های اخیر",
   "screenLibrarySub": "الگوریتم‌ها، نسخه‌ها و دستورالعمل‌ها",
   "screenBuilderSub": "فرضیه، داده، الگوریتم، هزینه‌ها و برنامه اعتبارسنجی در شش گام",
@@ -56,11 +59,175 @@
   "screenDataSub": "مجموعه‌داده‌ها، پوشش، مشکلات کیفیت و داده زنده",
   "screenSettingsSub": "نرخ تبدیل نمایشی و تنظیمات موتور",
   "comingIn": "این صفحه در مرحله {milestone} ساخته می‌شود.",
-  "@comingIn": { "placeholders": { "milestone": { "type": "String" } } },
+  "@comingIn": {
+    "placeholders": {
+      "milestone": {
+        "type": "String"
+      }
+    }
+  },
   "comingInHint": "تا آن زمان، ساختار و مسیر آن آماده است.",
-
   "chartSpikeTitle": "آزمون نمودار (M0)",
   "chartSpikeHint": "شمع‌های نمونه و ثابت. اشاره‌گر را روی نمودار حرکت دهید و اندازه پنجره را تغییر دهید.",
   "chartCrosshair": "زیر اشاره‌گر",
-  "chartCrosshairNone": "اشاره‌گر روی نمودار نیست"
+  "chartCrosshairNone": "اشاره‌گر روی نمودار نیست",
+  "retry": "تلاش دوباره",
+  "loadFailed": "بارگیری ناموفق بود: {error}",
+  "@loadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "pagePrev": "قبلی",
+  "pageNext": "بعدی",
+  "pageOf": "{from}–{to} از {total}",
+  "@pageOf": {
+    "placeholders": {
+      "from": {
+        "type": "int"
+      },
+      "to": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "dataSubtitle": "مجموعه‌های نسخه‌بندی‌شده، کیفیت، پوشش زمانی و دریافت زنده. اصلاح منبع همیشه نسخه تازه می‌سازد.",
+  "dataLiveStream": "جریان زنده",
+  "dataLiveStreamValue": "{count} جفت · {source}",
+  "@dataLiveStreamValue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "dataLiveOff": "خاموش",
+  "dataLastBarAge": "سن آخرین کندل",
+  "dataSeconds": "{n} ثانیه",
+  "@dataSeconds": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "dataOutagesToday": "قطعی‌های امروز",
+  "dataOutagesValue": "{count} · مجموع {minutes} دقیقه",
+  "@dataOutagesValue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "dataStorage": "فضای ذخیره",
+  "dataDatasets": "مجموعه‌های داده",
+  "dataColVersion": "نسخه",
+  "dataColPair": "جفت",
+  "dataColTimeframe": "تایم‌فریم",
+  "dataColRange": "بازه",
+  "dataColQuality": "کیفیت",
+  "dataColExperiments": "آزمایش‌های وابسته",
+  "dataQualityOk": "سالم",
+  "dataQualityGaps": "{n} شکاف",
+  "@dataQualityGaps": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "dataQualityFilled": "{n} پرشده",
+  "@dataQualityFilled": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "dataDatasetsEmpty": "هنوز نسخه‌ای از داده ساخته نشده است. از فرم واردسازی، اولین بازه را وارد کنید.",
+  "dataCoverage": "پوشش زمانی",
+  "dataCoverageLegend": "نوار نارنجی = شکاف یا داده نامعتبر",
+  "dataCoverageEmpty": "هنوز کندلی ذخیره نشده است.",
+  "dataIssues": "مشکلات کیفیت",
+  "dataIssuesEmpty": "مشکلی ثبت نشده است.",
+  "issueGap": "شکاف",
+  "issueOutOfOrder": "ترتیب نادرست",
+  "issueDuplicate": "تکراری",
+  "issueBadPrice": "قیمت نامعتبر",
+  "issueZeroVolume": "حجم صفر",
+  "issueCorrection": "اصلاح منبع",
+  "issueOutage": "قطعی",
+  "dataImport": "واردسازی تاریخچه",
+  "dataSource": "منبع",
+  "dataSourceArchive": "Binance public archive (klines)",
+  "dataPairs": "جفت‌ها",
+  "dataFrom": "از",
+  "dataTo": "تا",
+  "dataDateHelp": "تاریخ میلادی، UTC، به شکل 2024-01-31",
+  "dataTimeframe": "تایم‌فریم نسخه",
+  "dataGapPolicy": "سیاست شکاف",
+  "gapFlag": "علامت‌گذاری، بدون پرکردن",
+  "gapStop": "توقف آزمایش",
+  "gapFfill": "پرکردن با آخرین قیمت معلوم (بدون داده آینده)",
+  "dataImportButton": "واردسازی و ساخت نسخه",
+  "dataImportNote": "واردسازی مجدد همان بازه رکورد تکراری نمی‌سازد. هر نسخه شناسه محتوا دارد و آزمایش‌های قبلی تغییر نمی‌کنند.",
+  "dataImportRunning": "در حال واردسازی…",
+  "dataImportProgress": "{symbol}: {done} از {total} فایل · {inserted} کندل تازه",
+  "@dataImportProgress": {
+    "placeholders": {
+      "symbol": {
+        "type": "String"
+      },
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "inserted": {
+        "type": "int"
+      }
+    }
+  },
+  "dataImportDone": "نسخه ساخته شد",
+  "dataImportFailed": "واردسازی ناموفق بود",
+  "errPickPair": "دست‌کم یک جفت انتخاب کنید.",
+  "errDate": "تاریخ را به شکل 2024-01-31 وارد کنید.",
+  "errRange": "«از» باید پیش از «تا» باشد و «تا» از امروز نگذرد.",
+  "settingsCurrency": "ارز مبنا و تبدیل به تومان",
+  "settingsAccounting": "ارز مبنای محاسبات",
+  "settingsAccountingNote": "ثابت؛ همه سود و زیان، ریسک و مقایسه‌ها",
+  "settingsDisplayRate": "نرخ نمایشی",
+  "settingsDisplayRateNote": "فقط در نمایش و خروجی؛ وارد محاسبه نمی‌شود",
+  "settingsRateField": "نرخ امروز (تومان به ازای ۱ USDT)",
+  "settingsRateHelp": "عدد مثبت، حداکثر دو رقم اعشار",
+  "settingsDateField": "تاریخ اعمال",
+  "settingsSourceField": "منبع / یادداشت",
+  "settingsSourceHelp": "اختیاری؛ خالی یعنی «دستی»",
+  "settingsSaveRate": "ثبت نرخ",
+  "settingsRateSaved": "نرخ ثبت شد",
+  "settingsRateNote": "واحد نمایش «تومان» است (۱ تومان = ۱۰ ریال). هر گزارش نرخی را که با آن تبدیل شده نگه می‌دارد؛ ثبت نرخ تازه، گزارش‌های قبلی را تغییر نمی‌دهد.",
+  "settingsHistory": "تاریخچه نرخ‌ها",
+  "settingsColDate": "تاریخ",
+  "settingsColRate": "نرخ",
+  "settingsColSource": "منبع",
+  "settingsColEntered": "ثبت",
+  "settingsColReports": "گزارش‌های وابسته",
+  "settingsHistoryEmpty": "هنوز نرخی ثبت نشده است. نرخ امروز را در فرم بالا وارد کنید.",
+  "settingsOther": "منابع موتور، پیش‌فرض‌های یادگیری و نگهداری",
+  "settingsOtherNote": "این بخش‌ها همراه صف اجرا (M4) و چرخه یادگیری (M5) فعال می‌شوند.",
+  "errRate": "نرخ باید عددی مثبت با حداکثر دو رقم اعشار باشد.",
+  "errFutureDate": "تاریخ نمی‌تواند در آینده باشد."
 }

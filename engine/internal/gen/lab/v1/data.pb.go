@@ -320,6 +320,7 @@ func (x *ListDatasetsRequest) GetOffset() int32 {
 type ListDatasetsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Datasets      []*Dataset             `protobuf:"bytes,1,rep,name=datasets,proto3" json:"datasets,omitempty"`
+	Total         int64                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -359,6 +360,13 @@ func (x *ListDatasetsResponse) GetDatasets() []*Dataset {
 		return x.Datasets
 	}
 	return nil
+}
+
+func (x *ListDatasetsResponse) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
 }
 
 type GetCoverageRequest struct {
@@ -404,6 +412,7 @@ type Coverage struct {
 	LastOpenUnixMs  int64                  `protobuf:"varint,3,opt,name=last_open_unix_ms,json=lastOpenUnixMs,proto3" json:"last_open_unix_ms,omitempty"`
 	Bars            int64                  `protobuf:"varint,4,opt,name=bars,proto3" json:"bars,omitempty"`
 	Problems        []*TimeRange           `protobuf:"bytes,5,rep,name=problems,proto3" json:"problems,omitempty"` // gaps and bad data
+	Segments        []*TimeRange           `protobuf:"bytes,6,rep,name=segments,proto3" json:"segments,omitempty"` // stored data, merged by UTC day
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -469,6 +478,13 @@ func (x *Coverage) GetBars() int64 {
 func (x *Coverage) GetProblems() []*TimeRange {
 	if x != nil {
 		return x.Problems
+	}
+	return nil
+}
+
+func (x *Coverage) GetSegments() []*TimeRange {
+	if x != nil {
+		return x.Segments
 	}
 	return nil
 }
@@ -1055,16 +1071,18 @@ const file_lab_v1_data_proto_rawDesc = "" +
 	"\vexperiments\x18\v \x01(\x05R\vexperiments\"J\n" +
 	"\x13ListDatasetsRequest\x12\x1b\n" +
 	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x16\n" +
-	"\x06offset\x18\x02 \x01(\x05R\x06offset\"C\n" +
+	"\x06offset\x18\x02 \x01(\x05R\x06offset\"Y\n" +
 	"\x14ListDatasetsResponse\x12+\n" +
-	"\bdatasets\x18\x01 \x03(\v2\x0f.lab.v1.DatasetR\bdatasets\"\x14\n" +
-	"\x12GetCoverageRequest\"\xbd\x01\n" +
+	"\bdatasets\x18\x01 \x03(\v2\x0f.lab.v1.DatasetR\bdatasets\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x03R\x05total\"\x14\n" +
+	"\x12GetCoverageRequest\"\xec\x01\n" +
 	"\bCoverage\x12\x16\n" +
 	"\x06symbol\x18\x01 \x01(\tR\x06symbol\x12+\n" +
 	"\x12first_open_unix_ms\x18\x02 \x01(\x03R\x0ffirstOpenUnixMs\x12)\n" +
 	"\x11last_open_unix_ms\x18\x03 \x01(\x03R\x0elastOpenUnixMs\x12\x12\n" +
 	"\x04bars\x18\x04 \x01(\x03R\x04bars\x12-\n" +
-	"\bproblems\x18\x05 \x03(\v2\x11.lab.v1.TimeRangeR\bproblems\"Q\n" +
+	"\bproblems\x18\x05 \x03(\v2\x11.lab.v1.TimeRangeR\bproblems\x12-\n" +
+	"\bsegments\x18\x06 \x03(\v2\x11.lab.v1.TimeRangeR\bsegments\"Q\n" +
 	"\tTimeRange\x12 \n" +
 	"\ffrom_unix_ms\x18\x01 \x01(\x03R\n" +
 	"fromUnixMs\x12\"\n" +
@@ -1150,25 +1168,26 @@ var file_lab_v1_data_proto_goTypes = []any{
 var file_lab_v1_data_proto_depIdxs = []int32{
 	2,  // 0: lab.v1.ListDatasetsResponse.datasets:type_name -> lab.v1.Dataset
 	7,  // 1: lab.v1.Coverage.problems:type_name -> lab.v1.TimeRange
-	6,  // 2: lab.v1.GetCoverageResponse.coverage:type_name -> lab.v1.Coverage
-	9,  // 3: lab.v1.ListQualityIssuesResponse.issues:type_name -> lab.v1.QualityIssue
-	14, // 4: lab.v1.ImportResponse.progress:type_name -> lab.v1.ImportProgress
-	2,  // 5: lab.v1.ImportResponse.dataset:type_name -> lab.v1.Dataset
-	0,  // 6: lab.v1.DataService.GetOverview:input_type -> lab.v1.GetOverviewRequest
-	3,  // 7: lab.v1.DataService.ListDatasets:input_type -> lab.v1.ListDatasetsRequest
-	5,  // 8: lab.v1.DataService.GetCoverage:input_type -> lab.v1.GetCoverageRequest
-	10, // 9: lab.v1.DataService.ListQualityIssues:input_type -> lab.v1.ListQualityIssuesRequest
-	12, // 10: lab.v1.DataService.Import:input_type -> lab.v1.ImportRequest
-	1,  // 11: lab.v1.DataService.GetOverview:output_type -> lab.v1.GetOverviewResponse
-	4,  // 12: lab.v1.DataService.ListDatasets:output_type -> lab.v1.ListDatasetsResponse
-	8,  // 13: lab.v1.DataService.GetCoverage:output_type -> lab.v1.GetCoverageResponse
-	11, // 14: lab.v1.DataService.ListQualityIssues:output_type -> lab.v1.ListQualityIssuesResponse
-	13, // 15: lab.v1.DataService.Import:output_type -> lab.v1.ImportResponse
-	11, // [11:16] is the sub-list for method output_type
-	6,  // [6:11] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	7,  // 2: lab.v1.Coverage.segments:type_name -> lab.v1.TimeRange
+	6,  // 3: lab.v1.GetCoverageResponse.coverage:type_name -> lab.v1.Coverage
+	9,  // 4: lab.v1.ListQualityIssuesResponse.issues:type_name -> lab.v1.QualityIssue
+	14, // 5: lab.v1.ImportResponse.progress:type_name -> lab.v1.ImportProgress
+	2,  // 6: lab.v1.ImportResponse.dataset:type_name -> lab.v1.Dataset
+	0,  // 7: lab.v1.DataService.GetOverview:input_type -> lab.v1.GetOverviewRequest
+	3,  // 8: lab.v1.DataService.ListDatasets:input_type -> lab.v1.ListDatasetsRequest
+	5,  // 9: lab.v1.DataService.GetCoverage:input_type -> lab.v1.GetCoverageRequest
+	10, // 10: lab.v1.DataService.ListQualityIssues:input_type -> lab.v1.ListQualityIssuesRequest
+	12, // 11: lab.v1.DataService.Import:input_type -> lab.v1.ImportRequest
+	1,  // 12: lab.v1.DataService.GetOverview:output_type -> lab.v1.GetOverviewResponse
+	4,  // 13: lab.v1.DataService.ListDatasets:output_type -> lab.v1.ListDatasetsResponse
+	8,  // 14: lab.v1.DataService.GetCoverage:output_type -> lab.v1.GetCoverageResponse
+	11, // 15: lab.v1.DataService.ListQualityIssues:output_type -> lab.v1.ListQualityIssuesResponse
+	13, // 16: lab.v1.DataService.Import:output_type -> lab.v1.ImportResponse
+	12, // [12:17] is the sub-list for method output_type
+	7,  // [7:12] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_lab_v1_data_proto_init() }

@@ -20,6 +20,7 @@ import (
 	"tradinglab/engine/internal/data"
 	labv1 "tradinglab/engine/internal/gen/lab/v1"
 	"tradinglab/engine/internal/gen/lab/v1/labv1connect"
+	"tradinglab/engine/internal/money"
 	"tradinglab/engine/internal/store/storetest"
 )
 
@@ -175,6 +176,7 @@ func TestDataImportStreamAndViews(t *testing.T) {
 	list, err := c.ListDatasets(ctx, connect.NewRequest(&labv1.ListDatasetsRequest{}))
 	require.NoError(t, err)
 	require.Len(t, list.Msg.GetDatasets(), 1)
+	require.EqualValues(t, 1, list.Msg.GetTotal())
 
 	cov, err := c.GetCoverage(ctx, connect.NewRequest(&labv1.GetCoverageRequest{}))
 	require.NoError(t, err)
@@ -182,7 +184,21 @@ func TestDataImportStreamAndViews(t *testing.T) {
 	bc := cov.Msg.GetCoverage()[0]
 	require.Equal(t, int64(2*1440-5), bc.GetBars())
 	require.Len(t, bc.GetProblems(), 1)
+	require.Len(t, bc.GetSegments(), 1, "two consecutive days merge into one segment")
+	require.Equal(t, t0.Add(2*24*time.Hour).UnixMilli(), bc.GetSegments()[0].GetUntilUnixMs())
 	require.Equal(t, t0.Add(100*time.Minute).UnixMilli(), bc.GetProblems()[0].GetFromUnixMs())
+
+	// A bar 10 days later is a separate segment: holes must look like holes.
+	later := t0.Add(12 * 24 * time.Hour)
+	px := money.Price{V: 100e8, Scale: 8}
+	_, err = data.UpsertBars(ctx, st, "BTCUSDT", "archive", "x", []data.Bar{{
+		Instrument: "BTCUSDT", OpenTime: later, CloseTime: later.Add(time.Minute), AvailableAt: later.Add(time.Minute),
+		O: px, H: px, L: px, C: px, Volume: money.Qty{V: 1, Scale: 8},
+	}})
+	require.NoError(t, err)
+	cov, err = c.GetCoverage(ctx, connect.NewRequest(&labv1.GetCoverageRequest{}))
+	require.NoError(t, err)
+	require.Len(t, cov.Msg.GetCoverage()[0].GetSegments(), 2)
 
 	iss, err := c.ListQualityIssues(ctx, connect.NewRequest(&labv1.ListQualityIssuesRequest{Symbol: "BTCUSDT", PageSize: 10}))
 	require.NoError(t, err)

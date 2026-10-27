@@ -55,7 +55,11 @@ func (d *Data) ListDatasets(ctx context.Context, req *connect.Request[labv1.List
 	if err != nil {
 		return nil, err
 	}
-	res := &labv1.ListDatasetsResponse{}
+	total, err := d.Store.CountDatasets(ctx)
+	if err != nil {
+		return nil, err
+	}
+	res := &labv1.ListDatasetsResponse{Total: total}
 	for _, r := range rows {
 		ds, err := datasetProto(r)
 		if err != nil {
@@ -79,7 +83,7 @@ func datasetProto(r db.Dataset) (*labv1.Dataset, error) {
 }
 
 func (d *Data) GetCoverage(ctx context.Context, _ *connect.Request[labv1.GetCoverageRequest]) (*connect.Response[labv1.GetCoverageResponse], error) {
-	cov, err := d.Store.Coverage(ctx)
+	days, err := d.Store.CoverageDays(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -89,10 +93,21 @@ func (d *Data) GetCoverage(ctx context.Context, _ *connect.Request[labv1.GetCove
 	}
 	byID := map[string]*labv1.Coverage{}
 	res := &labv1.GetCoverageResponse{}
-	for _, c := range cov {
-		p := &labv1.Coverage{Symbol: c.Symbol, FirstOpenUnixMs: c.FirstOpen.UnixMilli(), LastOpenUnixMs: c.LastOpen.UnixMilli(), Bars: c.Bars}
-		byID[c.Symbol] = p
-		res.Coverage = append(res.Coverage, p)
+	for _, day := range days { // ordered by symbol, day
+		c, ok := byID[day.Symbol]
+		if !ok {
+			c = &labv1.Coverage{Symbol: day.Symbol, FirstOpenUnixMs: day.FirstOpen.UnixMilli()}
+			byID[day.Symbol] = c
+			res.Coverage = append(res.Coverage, c)
+		}
+		c.LastOpenUnixMs = day.LastOpen.UnixMilli()
+		c.Bars += day.Bars
+		until := day.LastOpen.Add(time.Minute).UnixMilli()
+		if n := len(c.Segments); n > 0 && c.Segments[n-1].UntilUnixMs >= day.Day.UnixMilli() {
+			c.Segments[n-1].UntilUnixMs = until // continues the previous day's segment
+		} else {
+			c.Segments = append(c.Segments, &labv1.TimeRange{FromUnixMs: day.FirstOpen.UnixMilli(), UntilUnixMs: until})
+		}
 	}
 	for _, p := range probs {
 		c, ok := byID[p.Symbol]

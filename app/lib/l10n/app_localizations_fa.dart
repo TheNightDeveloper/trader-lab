@@ -187,4 +187,273 @@ class L10nFa extends L10n {
 
   @override
   String get chartCrosshairNone => 'اشاره‌گر روی نمودار نیست';
+
+  @override
+  String get retry => 'تلاش دوباره';
+
+  @override
+  String loadFailed(String error) {
+    return 'بارگیری ناموفق بود: $error';
+  }
+
+  @override
+  String get pagePrev => 'قبلی';
+
+  @override
+  String get pageNext => 'بعدی';
+
+  @override
+  String pageOf(int from, int to, int total) {
+    return '$from–$to از $total';
+  }
+
+  @override
+  String get dataSubtitle =>
+      'مجموعه‌های نسخه‌بندی‌شده، کیفیت، پوشش زمانی و دریافت زنده. اصلاح منبع همیشه نسخه تازه می‌سازد.';
+
+  @override
+  String get dataLiveStream => 'جریان زنده';
+
+  @override
+  String dataLiveStreamValue(int count, String source) {
+    return '$count جفت · $source';
+  }
+
+  @override
+  String get dataLiveOff => 'خاموش';
+
+  @override
+  String get dataLastBarAge => 'سن آخرین کندل';
+
+  @override
+  String dataSeconds(int n) {
+    return '$n ثانیه';
+  }
+
+  @override
+  String get dataOutagesToday => 'قطعی‌های امروز';
+
+  @override
+  String dataOutagesValue(int count, int minutes) {
+    return '$count · مجموع $minutes دقیقه';
+  }
+
+  @override
+  String get dataStorage => 'فضای ذخیره';
+
+  @override
+  String get dataDatasets => 'مجموعه‌های داده';
+
+  @override
+  String get dataColVersion => 'نسخه';
+
+  @override
+  String get dataColPair => 'جفت';
+
+  @override
+  String get dataColTimeframe => 'تایم‌فریم';
+
+  @override
+  String get dataColRange => 'بازه';
+
+  @override
+  String get dataColQuality => 'کیفیت';
+
+  @override
+  String get dataColExperiments => 'آزمایش‌های وابسته';
+
+  @override
+  String get dataQualityOk => 'سالم';
+
+  @override
+  String dataQualityGaps(int n) {
+    return '$n شکاف';
+  }
+
+  @override
+  String dataQualityFilled(int n) {
+    return '$n پرشده';
+  }
+
+  @override
+  String get dataDatasetsEmpty =>
+      'هنوز نسخه‌ای از داده ساخته نشده است. از فرم واردسازی، اولین بازه را وارد کنید.';
+
+  @override
+  String get dataCoverage => 'پوشش زمانی';
+
+  @override
+  String get dataCoverageLegend => 'نوار نارنجی = شکاف یا داده نامعتبر';
+
+  @override
+  String get dataCoverageEmpty => 'هنوز کندلی ذخیره نشده است.';
+
+  @override
+  String get dataIssues => 'مشکلات کیفیت';
+
+  @override
+  String get dataIssuesEmpty => 'مشکلی ثبت نشده است.';
+
+  @override
+  String get issueGap => 'شکاف';
+
+  @override
+  String get issueOutOfOrder => 'ترتیب نادرست';
+
+  @override
+  String get issueDuplicate => 'تکراری';
+
+  @override
+  String get issueBadPrice => 'قیمت نامعتبر';
+
+  @override
+  String get issueZeroVolume => 'حجم صفر';
+
+  @override
+  String get issueCorrection => 'اصلاح منبع';
+
+  @override
+  String get issueOutage => 'قطعی';
+
+  @override
+  String get dataImport => 'واردسازی تاریخچه';
+
+  @override
+  String get dataSource => 'منبع';
+
+  @override
+  String get dataSourceArchive => 'Binance public archive (klines)';
+
+  @override
+  String get dataPairs => 'جفت‌ها';
+
+  @override
+  String get dataFrom => 'از';
+
+  @override
+  String get dataTo => 'تا';
+
+  @override
+  String get dataDateHelp => 'تاریخ میلادی، UTC، به شکل 2024-01-31';
+
+  @override
+  String get dataTimeframe => 'تایم‌فریم نسخه';
+
+  @override
+  String get dataGapPolicy => 'سیاست شکاف';
+
+  @override
+  String get gapFlag => 'علامت‌گذاری، بدون پرکردن';
+
+  @override
+  String get gapStop => 'توقف آزمایش';
+
+  @override
+  String get gapFfill => 'پرکردن با آخرین قیمت معلوم (بدون داده آینده)';
+
+  @override
+  String get dataImportButton => 'واردسازی و ساخت نسخه';
+
+  @override
+  String get dataImportNote =>
+      'واردسازی مجدد همان بازه رکورد تکراری نمی‌سازد. هر نسخه شناسه محتوا دارد و آزمایش‌های قبلی تغییر نمی‌کنند.';
+
+  @override
+  String get dataImportRunning => 'در حال واردسازی…';
+
+  @override
+  String dataImportProgress(String symbol, int done, int total, int inserted) {
+    return '$symbol: $done از $total فایل · $inserted کندل تازه';
+  }
+
+  @override
+  String get dataImportDone => 'نسخه ساخته شد';
+
+  @override
+  String get dataImportFailed => 'واردسازی ناموفق بود';
+
+  @override
+  String get errPickPair => 'دست‌کم یک جفت انتخاب کنید.';
+
+  @override
+  String get errDate => 'تاریخ را به شکل 2024-01-31 وارد کنید.';
+
+  @override
+  String get errRange => '«از» باید پیش از «تا» باشد و «تا» از امروز نگذرد.';
+
+  @override
+  String get settingsCurrency => 'ارز مبنا و تبدیل به تومان';
+
+  @override
+  String get settingsAccounting => 'ارز مبنای محاسبات';
+
+  @override
+  String get settingsAccountingNote => 'ثابت؛ همه سود و زیان، ریسک و مقایسه‌ها';
+
+  @override
+  String get settingsDisplayRate => 'نرخ نمایشی';
+
+  @override
+  String get settingsDisplayRateNote =>
+      'فقط در نمایش و خروجی؛ وارد محاسبه نمی‌شود';
+
+  @override
+  String get settingsRateField => 'نرخ امروز (تومان به ازای ۱ USDT)';
+
+  @override
+  String get settingsRateHelp => 'عدد مثبت، حداکثر دو رقم اعشار';
+
+  @override
+  String get settingsDateField => 'تاریخ اعمال';
+
+  @override
+  String get settingsSourceField => 'منبع / یادداشت';
+
+  @override
+  String get settingsSourceHelp => 'اختیاری؛ خالی یعنی «دستی»';
+
+  @override
+  String get settingsSaveRate => 'ثبت نرخ';
+
+  @override
+  String get settingsRateSaved => 'نرخ ثبت شد';
+
+  @override
+  String get settingsRateNote =>
+      'واحد نمایش «تومان» است (۱ تومان = ۱۰ ریال). هر گزارش نرخی را که با آن تبدیل شده نگه می‌دارد؛ ثبت نرخ تازه، گزارش‌های قبلی را تغییر نمی‌دهد.';
+
+  @override
+  String get settingsHistory => 'تاریخچه نرخ‌ها';
+
+  @override
+  String get settingsColDate => 'تاریخ';
+
+  @override
+  String get settingsColRate => 'نرخ';
+
+  @override
+  String get settingsColSource => 'منبع';
+
+  @override
+  String get settingsColEntered => 'ثبت';
+
+  @override
+  String get settingsColReports => 'گزارش‌های وابسته';
+
+  @override
+  String get settingsHistoryEmpty =>
+      'هنوز نرخی ثبت نشده است. نرخ امروز را در فرم بالا وارد کنید.';
+
+  @override
+  String get settingsOther => 'منابع موتور، پیش‌فرض‌های یادگیری و نگهداری';
+
+  @override
+  String get settingsOtherNote =>
+      'این بخش‌ها همراه صف اجرا (M4) و چرخه یادگیری (M5) فعال می‌شوند.';
+
+  @override
+  String get errRate => 'نرخ باید عددی مثبت با حداکثر دو رقم اعشار باشد.';
+
+  @override
+  String get errFutureDate => 'تاریخ نمی‌تواند در آینده باشد.';
 }

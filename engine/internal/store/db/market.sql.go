@@ -78,6 +78,17 @@ func (q *Queries) CandlesAsOf(ctx context.Context, arg CandlesAsOfParams) ([]Can
 	return items, nil
 }
 
+const countDatasets = `-- name: CountDatasets :one
+SELECT count(*) FROM datasets
+`
+
+func (q *Queries) CountDatasets(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countDatasets)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const countQualityIssues = `-- name: CountQualityIssues :one
 SELECT count(*) FROM quality_issues
 WHERE ($1::text IS NULL OR symbol = $1)
@@ -90,32 +101,40 @@ func (q *Queries) CountQualityIssues(ctx context.Context, symbol pgtype.Text) (i
 	return count, err
 }
 
-const coverage = `-- name: Coverage :many
-SELECT symbol, min(open_time)::timestamptz AS first_open, max(open_time)::timestamptz AS last_open,
+const coverageDays = `-- name: CoverageDays :many
+SELECT symbol,
+       (date_trunc('day', open_time AT TIME ZONE 'UTC') AT TIME ZONE 'UTC')::timestamptz AS day,
+       min(open_time)::timestamptz AS first_open,
+       max(open_time)::timestamptz AS last_open,
        count(DISTINCT open_time) AS bars
 FROM candles
-GROUP BY symbol
-ORDER BY symbol
+GROUP BY 1, 2
+ORDER BY 1, 2
 `
 
-type CoverageRow struct {
+type CoverageDaysRow struct {
 	Symbol    string
+	Day       time.Time
 	FirstOpen time.Time
 	LastOpen  time.Time
 	Bars      int64
 }
 
-func (q *Queries) Coverage(ctx context.Context) ([]CoverageRow, error) {
-	rows, err := q.db.Query(ctx, coverage)
+// CoverageDays: bars per symbol per UTC day; the API merges consecutive days into
+// segments so holes show as holes.
+// ponytail: full scan per call; materialize per-day counts if this gets slow.
+func (q *Queries) CoverageDays(ctx context.Context) ([]CoverageDaysRow, error) {
+	rows, err := q.db.Query(ctx, coverageDays)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []CoverageRow
+	var items []CoverageDaysRow
 	for rows.Next() {
-		var i CoverageRow
+		var i CoverageDaysRow
 		if err := rows.Scan(
 			&i.Symbol,
+			&i.Day,
 			&i.FirstOpen,
 			&i.LastOpen,
 			&i.Bars,

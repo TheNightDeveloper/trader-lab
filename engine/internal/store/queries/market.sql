@@ -60,12 +60,18 @@ WHERE symbol = @symbol AND available_at <= @as_of
 ORDER BY open_time DESC, revision DESC
 LIMIT 1;
 
--- name: Coverage :many
-SELECT symbol, min(open_time)::timestamptz AS first_open, max(open_time)::timestamptz AS last_open,
+-- CoverageDays: bars per symbol per UTC day; the API merges consecutive days into
+-- segments so holes show as holes.
+-- ponytail: full scan per call; materialize per-day counts if this gets slow.
+-- name: CoverageDays :many
+SELECT symbol,
+       (date_trunc('day', open_time AT TIME ZONE 'UTC') AT TIME ZONE 'UTC')::timestamptz AS day,
+       min(open_time)::timestamptz AS first_open,
+       max(open_time)::timestamptz AS last_open,
        count(DISTINCT open_time) AS bars
 FROM candles
-GROUP BY symbol
-ORDER BY symbol;
+GROUP BY 1, 2
+ORDER BY 1, 2;
 
 -- name: InsertQualityIssue :exec
 INSERT INTO quality_issues (symbol, kind, at, until, detail)
@@ -96,6 +102,9 @@ SELECT * FROM datasets WHERE id = $1;
 
 -- name: ListDatasets :many
 SELECT * FROM datasets ORDER BY created_at DESC, id LIMIT $1 OFFSET $2;
+
+-- name: CountDatasets :one
+SELECT count(*) FROM datasets;
 
 -- name: InsertFxRate :one
 INSERT INTO fx_rates (pair, rate_date, rate, rate_scale, source)

@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../core/theme/tokens.dart';
 import '../features/chart/chart_screen.dart';
+import '../features/data/data_screen.dart';
 import '../features/placeholder_screen.dart';
+import '../features/settings/settings_screen.dart';
 import '../shell/app_shell.dart';
 import 'nav.dart';
 
@@ -40,8 +42,11 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
         _placeholder(Dest.pnl),
         _placeholder(Dest.learning),
         GoRoute(path: Dest.chart.path, pageBuilder: (context, state) => _page(context, state, const ChartScreen())),
-        _placeholder(Dest.data),
-        _placeholder(Dest.settings),
+        GoRoute(path: Dest.data.path, pageBuilder: (context, state) => _page(context, state, const DataScreen())),
+        GoRoute(
+          path: Dest.settings.path,
+          pageBuilder: (context, state) => _page(context, state, const SettingsScreen()),
+        ),
       ],
     ),
   ],

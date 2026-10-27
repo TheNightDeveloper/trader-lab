@@ -6,12 +6,18 @@ import 'package:go_router/go_router.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import 'app/router.dart';
+import 'core/api/engine.dart';
 import 'core/theme/tokens.dart';
 import 'l10n/app_localizations.dart';
 
 void main() {
   usePathUrlStrategy(); // /reports/42, not /#/reports/42; the engine serves index.html for both
-  runApp(ProviderScope(child: LabApp(router: buildRouter())));
+  runApp(
+    ProviderScope(
+      retry: apiRetry,
+      child: LabApp(router: buildRouter()),
+    ),
+  );
 }
 
 /// docs/UI_SPEC.md §4: <600 mobile (drawer), 600–1199 tablet, ≥1200 desktop.

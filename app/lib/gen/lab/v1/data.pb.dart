@@ -30,8 +30,7 @@ class GetOverviewRequest extends $pb.GeneratedMessage {
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       GetOverviewRequest()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'GetOverviewRequest',
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'GetOverviewRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: GetOverviewRequest.$_createMessage)
     ..hasRequiredFields = false;
@@ -40,8 +39,7 @@ class GetOverviewRequest extends $pb.GeneratedMessage {
   GetOverviewRequest clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   GetOverviewRequest copyWith(void Function(GetOverviewRequest) updates) =>
-      super.copyWith((message) => updates(message as GetOverviewRequest))
-          as GetOverviewRequest;
+      super.copyWith((message) => updates(message as GetOverviewRequest)) as GetOverviewRequest;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -53,9 +51,8 @@ class GetOverviewRequest extends $pb.GeneratedMessage {
   @$core.override
   GetOverviewRequest createEmptyInstance() => GetOverviewRequest._();
   @$core.pragma('dart2js:noInline')
-  static GetOverviewRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<GetOverviewRequest>(
-          GetOverviewRequest.$_createMessage);
+  static GetOverviewRequest getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<GetOverviewRequest>(GetOverviewRequest.$_createMessage);
   static GetOverviewRequest? _defaultInstance;
 }
 
@@ -72,8 +69,7 @@ class GetOverviewResponse extends $pb.GeneratedMessage {
     if (liveSymbols != null) result.liveSymbols = liveSymbols;
     if (liveSource != null) result.liveSource = liveSource;
     if (outagesToday != null) result.outagesToday = outagesToday;
-    if (outageSecondsToday != null)
-      result.outageSecondsToday = outageSecondsToday;
+    if (outageSecondsToday != null) result.outageSecondsToday = outageSecondsToday;
     if (storageBytes != null) result.storageBytes = storageBytes;
     if (symbols != null) result.symbols.addAll(symbols);
     return result;
@@ -88,8 +84,7 @@ class GetOverviewResponse extends $pb.GeneratedMessage {
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       GetOverviewResponse()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'GetOverviewResponse',
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'GetOverviewResponse',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: GetOverviewResponse.$_createMessage)
     ..aI(1, _omitFieldNames ? '' : 'liveSymbols')
@@ -104,23 +99,20 @@ class GetOverviewResponse extends $pb.GeneratedMessage {
   GetOverviewResponse clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   GetOverviewResponse copyWith(void Function(GetOverviewResponse) updates) =>
-      super.copyWith((message) => updates(message as GetOverviewResponse))
-          as GetOverviewResponse;
+      super.copyWith((message) => updates(message as GetOverviewResponse)) as GetOverviewResponse;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  @$core
-      .Deprecated('Use GetOverviewResponse() / GetOverviewResponse.new instead')
+  @$core.Deprecated('Use GetOverviewResponse() / GetOverviewResponse.new instead')
   static GetOverviewResponse create() => GetOverviewResponse._();
   static $pb.GeneratedMessage $_createMessage() => GetOverviewResponse._();
   @$core.override
   GetOverviewResponse createEmptyInstance() => GetOverviewResponse._();
   @$core.pragma('dart2js:noInline')
-  static GetOverviewResponse getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<GetOverviewResponse>(
-          GetOverviewResponse.$_createMessage);
+  static GetOverviewResponse getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<GetOverviewResponse>(GetOverviewResponse.$_createMessage);
   static GetOverviewResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -206,14 +198,11 @@ class Dataset extends $pb.GeneratedMessage {
   factory Dataset.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       Dataset()..mergeFromBuffer(data, registry);
-  factory Dataset.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory Dataset.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       Dataset()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'Dataset',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
-      createEmptyInstance: Dataset.$_createMessage)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Dataset',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'), createEmptyInstance: Dataset.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'id')
     ..aOS(2, _omitFieldNames ? '' : 'symbol')
     ..aOS(3, _omitFieldNames ? '' : 'timeframe')
@@ -243,8 +232,8 @@ class Dataset extends $pb.GeneratedMessage {
   @$core.override
   Dataset createEmptyInstance() => Dataset._();
   @$core.pragma('dart2js:noInline')
-  static Dataset getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<Dataset>(Dataset.$_createMessage);
+  static Dataset getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Dataset>(Dataset.$_createMessage);
   static Dataset? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -367,8 +356,7 @@ class ListDatasetsRequest extends $pb.GeneratedMessage {
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       ListDatasetsRequest()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'ListDatasetsRequest',
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ListDatasetsRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: ListDatasetsRequest.$_createMessage)
     ..aI(1, _omitFieldNames ? '' : 'pageSize')
@@ -379,23 +367,20 @@ class ListDatasetsRequest extends $pb.GeneratedMessage {
   ListDatasetsRequest clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   ListDatasetsRequest copyWith(void Function(ListDatasetsRequest) updates) =>
-      super.copyWith((message) => updates(message as ListDatasetsRequest))
-          as ListDatasetsRequest;
+      super.copyWith((message) => updates(message as ListDatasetsRequest)) as ListDatasetsRequest;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  @$core
-      .Deprecated('Use ListDatasetsRequest() / ListDatasetsRequest.new instead')
+  @$core.Deprecated('Use ListDatasetsRequest() / ListDatasetsRequest.new instead')
   static ListDatasetsRequest create() => ListDatasetsRequest._();
   static $pb.GeneratedMessage $_createMessage() => ListDatasetsRequest._();
   @$core.override
   ListDatasetsRequest createEmptyInstance() => ListDatasetsRequest._();
   @$core.pragma('dart2js:noInline')
-  static ListDatasetsRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<ListDatasetsRequest>(
-          ListDatasetsRequest.$_createMessage);
+  static ListDatasetsRequest getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ListDatasetsRequest>(ListDatasetsRequest.$_createMessage);
   static ListDatasetsRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -420,9 +405,11 @@ class ListDatasetsRequest extends $pb.GeneratedMessage {
 class ListDatasetsResponse extends $pb.GeneratedMessage {
   factory ListDatasetsResponse({
     $core.Iterable<Dataset>? datasets,
+    $fixnum.Int64? total,
   }) {
     final result = ListDatasetsResponse._();
     if (datasets != null) result.datasets.addAll(datasets);
+    if (total != null) result.total = total;
     return result;
   }
 
@@ -435,39 +422,44 @@ class ListDatasetsResponse extends $pb.GeneratedMessage {
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       ListDatasetsResponse()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'ListDatasetsResponse',
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ListDatasetsResponse',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: ListDatasetsResponse.$_createMessage)
-    ..pPM<Dataset>(1, _omitFieldNames ? '' : 'datasets',
-        subBuilder: Dataset.$_createMessage)
+    ..pPM<Dataset>(1, _omitFieldNames ? '' : 'datasets', subBuilder: Dataset.$_createMessage)
+    ..aInt64(2, _omitFieldNames ? '' : 'total')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   ListDatasetsResponse clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   ListDatasetsResponse copyWith(void Function(ListDatasetsResponse) updates) =>
-      super.copyWith((message) => updates(message as ListDatasetsResponse))
-          as ListDatasetsResponse;
+      super.copyWith((message) => updates(message as ListDatasetsResponse)) as ListDatasetsResponse;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  @$core.Deprecated(
-      'Use ListDatasetsResponse() / ListDatasetsResponse.new instead')
+  @$core.Deprecated('Use ListDatasetsResponse() / ListDatasetsResponse.new instead')
   static ListDatasetsResponse create() => ListDatasetsResponse._();
   static $pb.GeneratedMessage $_createMessage() => ListDatasetsResponse._();
   @$core.override
   ListDatasetsResponse createEmptyInstance() => ListDatasetsResponse._();
   @$core.pragma('dart2js:noInline')
   static ListDatasetsResponse getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<ListDatasetsResponse>(
-          ListDatasetsResponse.$_createMessage);
+      $pb.GeneratedMessage.$_defaultFor<ListDatasetsResponse>(ListDatasetsResponse.$_createMessage);
   static ListDatasetsResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
   $pb.PbList<Dataset> get datasets => $_getList(0);
+
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get total => $_getI64(1);
+  @$pb.TagNumber(2)
+  set total($fixnum.Int64 value) => $_setInt64(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasTotal() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearTotal() => $_clearField(2);
 }
 
 class GetCoverageRequest extends $pb.GeneratedMessage {
@@ -482,8 +474,7 @@ class GetCoverageRequest extends $pb.GeneratedMessage {
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       GetCoverageRequest()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'GetCoverageRequest',
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'GetCoverageRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: GetCoverageRequest.$_createMessage)
     ..hasRequiredFields = false;
@@ -492,8 +483,7 @@ class GetCoverageRequest extends $pb.GeneratedMessage {
   GetCoverageRequest clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   GetCoverageRequest copyWith(void Function(GetCoverageRequest) updates) =>
-      super.copyWith((message) => updates(message as GetCoverageRequest))
-          as GetCoverageRequest;
+      super.copyWith((message) => updates(message as GetCoverageRequest)) as GetCoverageRequest;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -505,9 +495,8 @@ class GetCoverageRequest extends $pb.GeneratedMessage {
   @$core.override
   GetCoverageRequest createEmptyInstance() => GetCoverageRequest._();
   @$core.pragma('dart2js:noInline')
-  static GetCoverageRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<GetCoverageRequest>(
-          GetCoverageRequest.$_createMessage);
+  static GetCoverageRequest getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<GetCoverageRequest>(GetCoverageRequest.$_createMessage);
   static GetCoverageRequest? _defaultInstance;
 }
 
@@ -518,6 +507,7 @@ class Coverage extends $pb.GeneratedMessage {
     $fixnum.Int64? lastOpenUnixMs,
     $fixnum.Int64? bars,
     $core.Iterable<TimeRange>? problems,
+    $core.Iterable<TimeRange>? segments,
   }) {
     final result = Coverage._();
     if (symbol != null) result.symbol = symbol;
@@ -525,6 +515,7 @@ class Coverage extends $pb.GeneratedMessage {
     if (lastOpenUnixMs != null) result.lastOpenUnixMs = lastOpenUnixMs;
     if (bars != null) result.bars = bars;
     if (problems != null) result.problems.addAll(problems);
+    if (segments != null) result.segments.addAll(segments);
     return result;
   }
 
@@ -533,20 +524,17 @@ class Coverage extends $pb.GeneratedMessage {
   factory Coverage.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       Coverage()..mergeFromBuffer(data, registry);
-  factory Coverage.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory Coverage.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       Coverage()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'Coverage',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
-      createEmptyInstance: Coverage.$_createMessage)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Coverage',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'), createEmptyInstance: Coverage.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'symbol')
     ..aInt64(2, _omitFieldNames ? '' : 'firstOpenUnixMs')
     ..aInt64(3, _omitFieldNames ? '' : 'lastOpenUnixMs')
     ..aInt64(4, _omitFieldNames ? '' : 'bars')
-    ..pPM<TimeRange>(5, _omitFieldNames ? '' : 'problems',
-        subBuilder: TimeRange.$_createMessage)
+    ..pPM<TimeRange>(5, _omitFieldNames ? '' : 'problems', subBuilder: TimeRange.$_createMessage)
+    ..pPM<TimeRange>(6, _omitFieldNames ? '' : 'segments', subBuilder: TimeRange.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -565,8 +553,8 @@ class Coverage extends $pb.GeneratedMessage {
   @$core.override
   Coverage createEmptyInstance() => Coverage._();
   @$core.pragma('dart2js:noInline')
-  static Coverage getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<Coverage>(Coverage.$_createMessage);
+  static Coverage getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Coverage>(Coverage.$_createMessage);
   static Coverage? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -607,6 +595,9 @@ class Coverage extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(5)
   $pb.PbList<TimeRange> get problems => $_getList(4);
+
+  @$pb.TagNumber(6)
+  $pb.PbList<TimeRange> get segments => $_getList(5);
 }
 
 class TimeRange extends $pb.GeneratedMessage {
@@ -625,14 +616,11 @@ class TimeRange extends $pb.GeneratedMessage {
   factory TimeRange.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       TimeRange()..mergeFromBuffer(data, registry);
-  factory TimeRange.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory TimeRange.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       TimeRange()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'TimeRange',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
-      createEmptyInstance: TimeRange.$_createMessage)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'TimeRange',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'), createEmptyInstance: TimeRange.$_createMessage)
     ..aInt64(1, _omitFieldNames ? '' : 'fromUnixMs')
     ..aInt64(2, _omitFieldNames ? '' : 'untilUnixMs')
     ..hasRequiredFields = false;
@@ -653,8 +641,8 @@ class TimeRange extends $pb.GeneratedMessage {
   @$core.override
   TimeRange createEmptyInstance() => TimeRange._();
   @$core.pragma('dart2js:noInline')
-  static TimeRange getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<TimeRange>(TimeRange.$_createMessage);
+  static TimeRange getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<TimeRange>(TimeRange.$_createMessage);
   static TimeRange? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -694,35 +682,30 @@ class GetCoverageResponse extends $pb.GeneratedMessage {
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       GetCoverageResponse()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'GetCoverageResponse',
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'GetCoverageResponse',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: GetCoverageResponse.$_createMessage)
-    ..pPM<Coverage>(1, _omitFieldNames ? '' : 'coverage',
-        subBuilder: Coverage.$_createMessage)
+    ..pPM<Coverage>(1, _omitFieldNames ? '' : 'coverage', subBuilder: Coverage.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   GetCoverageResponse clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   GetCoverageResponse copyWith(void Function(GetCoverageResponse) updates) =>
-      super.copyWith((message) => updates(message as GetCoverageResponse))
-          as GetCoverageResponse;
+      super.copyWith((message) => updates(message as GetCoverageResponse)) as GetCoverageResponse;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  @$core
-      .Deprecated('Use GetCoverageResponse() / GetCoverageResponse.new instead')
+  @$core.Deprecated('Use GetCoverageResponse() / GetCoverageResponse.new instead')
   static GetCoverageResponse create() => GetCoverageResponse._();
   static $pb.GeneratedMessage $_createMessage() => GetCoverageResponse._();
   @$core.override
   GetCoverageResponse createEmptyInstance() => GetCoverageResponse._();
   @$core.pragma('dart2js:noInline')
-  static GetCoverageResponse getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<GetCoverageResponse>(
-          GetCoverageResponse.$_createMessage);
+  static GetCoverageResponse getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<GetCoverageResponse>(GetCoverageResponse.$_createMessage);
   static GetCoverageResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -753,12 +736,10 @@ class QualityIssue extends $pb.GeneratedMessage {
   factory QualityIssue.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       QualityIssue()..mergeFromBuffer(data, registry);
-  factory QualityIssue.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory QualityIssue.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       QualityIssue()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'QualityIssue',
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'QualityIssue',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: QualityIssue.$_createMessage)
     ..aInt64(1, _omitFieldNames ? '' : 'id')
@@ -773,8 +754,7 @@ class QualityIssue extends $pb.GeneratedMessage {
   QualityIssue clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   QualityIssue copyWith(void Function(QualityIssue) updates) =>
-      super.copyWith((message) => updates(message as QualityIssue))
-          as QualityIssue;
+      super.copyWith((message) => updates(message as QualityIssue)) as QualityIssue;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -787,8 +767,7 @@ class QualityIssue extends $pb.GeneratedMessage {
   QualityIssue createEmptyInstance() => QualityIssue._();
   @$core.pragma('dart2js:noInline')
   static QualityIssue getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<QualityIssue>(
-          QualityIssue.$_createMessage);
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<QualityIssue>(QualityIssue.$_createMessage);
   static QualityIssue? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -868,8 +847,7 @@ class ListQualityIssuesRequest extends $pb.GeneratedMessage {
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       ListQualityIssuesRequest()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'ListQualityIssuesRequest',
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ListQualityIssuesRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: ListQualityIssuesRequest.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'symbol')
@@ -880,26 +858,21 @@ class ListQualityIssuesRequest extends $pb.GeneratedMessage {
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   ListQualityIssuesRequest clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  ListQualityIssuesRequest copyWith(
-          void Function(ListQualityIssuesRequest) updates) =>
-      super.copyWith((message) => updates(message as ListQualityIssuesRequest))
-          as ListQualityIssuesRequest;
+  ListQualityIssuesRequest copyWith(void Function(ListQualityIssuesRequest) updates) =>
+      super.copyWith((message) => updates(message as ListQualityIssuesRequest)) as ListQualityIssuesRequest;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  @$core.Deprecated(
-      'Use ListQualityIssuesRequest() / ListQualityIssuesRequest.new instead')
+  @$core.Deprecated('Use ListQualityIssuesRequest() / ListQualityIssuesRequest.new instead')
   static ListQualityIssuesRequest create() => ListQualityIssuesRequest._();
   static $pb.GeneratedMessage $_createMessage() => ListQualityIssuesRequest._();
   @$core.override
-  ListQualityIssuesRequest createEmptyInstance() =>
-      ListQualityIssuesRequest._();
+  ListQualityIssuesRequest createEmptyInstance() => ListQualityIssuesRequest._();
   @$core.pragma('dart2js:noInline')
   static ListQualityIssuesRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<ListQualityIssuesRequest>(
-          ListQualityIssuesRequest.$_createMessage);
+      $pb.GeneratedMessage.$_defaultFor<ListQualityIssuesRequest>(ListQualityIssuesRequest.$_createMessage);
   static ListQualityIssuesRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -950,39 +923,31 @@ class ListQualityIssuesResponse extends $pb.GeneratedMessage {
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       ListQualityIssuesResponse()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'ListQualityIssuesResponse',
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ListQualityIssuesResponse',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: ListQualityIssuesResponse.$_createMessage)
-    ..pPM<QualityIssue>(1, _omitFieldNames ? '' : 'issues',
-        subBuilder: QualityIssue.$_createMessage)
+    ..pPM<QualityIssue>(1, _omitFieldNames ? '' : 'issues', subBuilder: QualityIssue.$_createMessage)
     ..aInt64(2, _omitFieldNames ? '' : 'total')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   ListQualityIssuesResponse clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  ListQualityIssuesResponse copyWith(
-          void Function(ListQualityIssuesResponse) updates) =>
-      super.copyWith((message) => updates(message as ListQualityIssuesResponse))
-          as ListQualityIssuesResponse;
+  ListQualityIssuesResponse copyWith(void Function(ListQualityIssuesResponse) updates) =>
+      super.copyWith((message) => updates(message as ListQualityIssuesResponse)) as ListQualityIssuesResponse;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  @$core.Deprecated(
-      'Use ListQualityIssuesResponse() / ListQualityIssuesResponse.new instead')
+  @$core.Deprecated('Use ListQualityIssuesResponse() / ListQualityIssuesResponse.new instead')
   static ListQualityIssuesResponse create() => ListQualityIssuesResponse._();
-  static $pb.GeneratedMessage $_createMessage() =>
-      ListQualityIssuesResponse._();
+  static $pb.GeneratedMessage $_createMessage() => ListQualityIssuesResponse._();
   @$core.override
-  ListQualityIssuesResponse createEmptyInstance() =>
-      ListQualityIssuesResponse._();
+  ListQualityIssuesResponse createEmptyInstance() => ListQualityIssuesResponse._();
   @$core.pragma('dart2js:noInline')
   static ListQualityIssuesResponse getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<ListQualityIssuesResponse>(
-          ListQualityIssuesResponse.$_createMessage);
+      $pb.GeneratedMessage.$_defaultFor<ListQualityIssuesResponse>(ListQualityIssuesResponse.$_createMessage);
   static ListQualityIssuesResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -1020,12 +985,10 @@ class ImportRequest extends $pb.GeneratedMessage {
   factory ImportRequest.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       ImportRequest()..mergeFromBuffer(data, registry);
-  factory ImportRequest.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory ImportRequest.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       ImportRequest()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'ImportRequest',
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ImportRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: ImportRequest.$_createMessage)
     ..pPS(1, _omitFieldNames ? '' : 'symbols')
@@ -1039,8 +1002,7 @@ class ImportRequest extends $pb.GeneratedMessage {
   ImportRequest clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   ImportRequest copyWith(void Function(ImportRequest) updates) =>
-      super.copyWith((message) => updates(message as ImportRequest))
-          as ImportRequest;
+      super.copyWith((message) => updates(message as ImportRequest)) as ImportRequest;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -1053,8 +1015,7 @@ class ImportRequest extends $pb.GeneratedMessage {
   ImportRequest createEmptyInstance() => ImportRequest._();
   @$core.pragma('dart2js:noInline')
   static ImportRequest getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ImportRequest>(
-          ImportRequest.$_createMessage);
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ImportRequest>(ImportRequest.$_createMessage);
   static ImportRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -1115,33 +1076,27 @@ class ImportResponse extends $pb.GeneratedMessage {
   factory ImportResponse.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       ImportResponse()..mergeFromBuffer(data, registry);
-  factory ImportResponse.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory ImportResponse.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       ImportResponse()..mergeFromJson(json, registry);
 
-  static const $core.Map<$core.int, ImportResponse_Event>
-      _ImportResponse_EventByTag = {
+  static const $core.Map<$core.int, ImportResponse_Event> _ImportResponse_EventByTag = {
     1: ImportResponse_Event.progress,
     2: ImportResponse_Event.dataset,
     0: ImportResponse_Event.notSet
   };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'ImportResponse',
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ImportResponse',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: ImportResponse.$_createMessage)
     ..oo(0, [1, 2])
-    ..aOM<ImportProgress>(1, _omitFieldNames ? '' : 'progress',
-        subBuilder: ImportProgress.$_createMessage)
-    ..aOM<Dataset>(2, _omitFieldNames ? '' : 'dataset',
-        subBuilder: Dataset.$_createMessage)
+    ..aOM<ImportProgress>(1, _omitFieldNames ? '' : 'progress', subBuilder: ImportProgress.$_createMessage)
+    ..aOM<Dataset>(2, _omitFieldNames ? '' : 'dataset', subBuilder: Dataset.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   ImportResponse clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   ImportResponse copyWith(void Function(ImportResponse) updates) =>
-      super.copyWith((message) => updates(message as ImportResponse))
-          as ImportResponse;
+      super.copyWith((message) => updates(message as ImportResponse)) as ImportResponse;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -1154,14 +1109,12 @@ class ImportResponse extends $pb.GeneratedMessage {
   ImportResponse createEmptyInstance() => ImportResponse._();
   @$core.pragma('dart2js:noInline')
   static ImportResponse getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ImportResponse>(
-          ImportResponse.$_createMessage);
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ImportResponse>(ImportResponse.$_createMessage);
   static ImportResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
   @$pb.TagNumber(2)
-  ImportResponse_Event whichEvent() =>
-      _ImportResponse_EventByTag[$_whichOneof(0)]!;
+  ImportResponse_Event whichEvent() => _ImportResponse_EventByTag[$_whichOneof(0)]!;
   @$pb.TagNumber(1)
   @$pb.TagNumber(2)
   void clearEvent() => $_clearField($_whichOneof(0));
@@ -1217,12 +1170,10 @@ class ImportProgress extends $pb.GeneratedMessage {
   factory ImportProgress.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       ImportProgress()..mergeFromBuffer(data, registry);
-  factory ImportProgress.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+  factory ImportProgress.fromJson($core.String json, [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       ImportProgress()..mergeFromJson(json, registry);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'ImportProgress',
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ImportProgress',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: ImportProgress.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'symbol')
@@ -1239,8 +1190,7 @@ class ImportProgress extends $pb.GeneratedMessage {
   ImportProgress clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
   ImportProgress copyWith(void Function(ImportProgress) updates) =>
-      super.copyWith((message) => updates(message as ImportProgress))
-          as ImportProgress;
+      super.copyWith((message) => updates(message as ImportProgress)) as ImportProgress;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
@@ -1253,8 +1203,7 @@ class ImportProgress extends $pb.GeneratedMessage {
   ImportProgress createEmptyInstance() => ImportProgress._();
   @$core.pragma('dart2js:noInline')
   static ImportProgress getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ImportProgress>(
-          ImportProgress.$_createMessage);
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ImportProgress>(ImportProgress.$_createMessage);
   static ImportProgress? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -1336,32 +1285,22 @@ class DataServiceApi {
 
   DataServiceApi(this._client);
 
-  $async.Future<GetOverviewResponse> getOverview(
-          $pb.ClientContext? ctx, GetOverviewRequest request) =>
-      _client.invoke<GetOverviewResponse>(
-          ctx, 'DataService', 'GetOverview', request, GetOverviewResponse());
-  $async.Future<ListDatasetsResponse> listDatasets(
-          $pb.ClientContext? ctx, ListDatasetsRequest request) =>
-      _client.invoke<ListDatasetsResponse>(
-          ctx, 'DataService', 'ListDatasets', request, ListDatasetsResponse());
-  $async.Future<GetCoverageResponse> getCoverage(
-          $pb.ClientContext? ctx, GetCoverageRequest request) =>
-      _client.invoke<GetCoverageResponse>(
-          ctx, 'DataService', 'GetCoverage', request, GetCoverageResponse());
+  $async.Future<GetOverviewResponse> getOverview($pb.ClientContext? ctx, GetOverviewRequest request) =>
+      _client.invoke<GetOverviewResponse>(ctx, 'DataService', 'GetOverview', request, GetOverviewResponse());
+  $async.Future<ListDatasetsResponse> listDatasets($pb.ClientContext? ctx, ListDatasetsRequest request) =>
+      _client.invoke<ListDatasetsResponse>(ctx, 'DataService', 'ListDatasets', request, ListDatasetsResponse());
+  $async.Future<GetCoverageResponse> getCoverage($pb.ClientContext? ctx, GetCoverageRequest request) =>
+      _client.invoke<GetCoverageResponse>(ctx, 'DataService', 'GetCoverage', request, GetCoverageResponse());
   $async.Future<ListQualityIssuesResponse> listQualityIssues(
           $pb.ClientContext? ctx, ListQualityIssuesRequest request) =>
-      _client.invoke<ListQualityIssuesResponse>(ctx, 'DataService',
-          'ListQualityIssues', request, ListQualityIssuesResponse());
+      _client.invoke<ListQualityIssuesResponse>(
+          ctx, 'DataService', 'ListQualityIssues', request, ListQualityIssuesResponse());
 
   /// Imports archive files for each symbol, then creates one dataset version per
   /// symbol. Streams progress; the stream ends after the last dataset.
-  $async.Future<ImportResponse> import(
-          $pb.ClientContext? ctx, ImportRequest request) =>
-      _client.invoke<ImportResponse>(
-          ctx, 'DataService', 'Import', request, ImportResponse());
+  $async.Future<ImportResponse> import($pb.ClientContext? ctx, ImportRequest request) =>
+      _client.invoke<ImportResponse>(ctx, 'DataService', 'Import', request, ImportResponse());
 }
 
-const $core.bool _omitFieldNames =
-    $core.bool.fromEnvironment('protobuf.omit_field_names');
-const $core.bool _omitMessageNames =
-    $core.bool.fromEnvironment('protobuf.omit_message_names');
+const $core.bool _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
+const $core.bool _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');

@@ -120,12 +120,13 @@ class StatusBlock extends ConsumerWidget {
     if (r == null || !r.hasTomanPerUsdt()) {
       return Text(l.statusFxNone, key: const ValueKey('none'), style: AppText.caption);
     }
-    return Wrap(
+    // One LTR line for the equation; LTR fragments inside an RTL Wrap get scrambled.
+    return Column(
       key: ValueKey(r.rateId),
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Num(moneyValue(r.tomanPerUsdt), fractionDigits: 0, unit: 'TOMAN', style: _mono),
-        Mono(' / 1 USDT', style: _mono.copyWith(color: AppColors.textMuted)),
-        Text(' · ${l.statusFxManual}', style: AppText.caption),
+        Mono('1 USDT = ${formatDecimal(moneyValue(r.tomanPerUsdt), fractionDigits: 0)} TOMAN', style: _mono),
+        Text('${r.source == 'manual' ? l.statusFxManual : r.source} · ${r.asOfDate}', style: AppText.caption),
       ],
     );
   }

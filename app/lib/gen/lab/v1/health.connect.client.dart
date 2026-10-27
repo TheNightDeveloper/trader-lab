@@ -8,7 +8,7 @@ import "health.pb.dart" as labv1health;
 import "health.connect.spec.dart" as specs;
 
 /// HealthService feeds the sidebar status block.
-extension type HealthServiceClient (connect.Transport _transport) {
+extension type HealthServiceClient(connect.Transport _transport) {
   /// Sends the current status immediately, then on every change or heartbeat.
   Stream<labv1health.WatchResponse> watch(
     labv1health.WatchRequest input, {

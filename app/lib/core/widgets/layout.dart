@@ -61,9 +61,14 @@ class SectionCard extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         if (title != null || trailing != null) ...[
-          Row(
+          // Wrap: a long trailing note drops below the title on narrow screens.
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: AppSpace.md,
+            runSpacing: AppSpace.xs,
             children: [
-              if (title != null) Expanded(child: Text(title!, style: AppText.sectionTitle)),
+              if (title != null) Text(title!, style: AppText.sectionTitle),
               ?trailing,
             ],
           ),

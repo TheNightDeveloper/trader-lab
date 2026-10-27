@@ -45,6 +45,7 @@ message ListDatasetsRequest {
 
 message ListDatasetsResponse {
   repeated Dataset datasets = 1;
+  int64 total = 2;
 }
 
 message GetCoverageRequest {}
@@ -55,6 +56,7 @@ message Coverage {
   int64 last_open_unix_ms = 3;
   int64 bars = 4;
   repeated TimeRange problems = 5; // gaps and bad data
+  repeated TimeRange segments = 6; // stored data, merged by UTC day
 }
 
 message TimeRange {
