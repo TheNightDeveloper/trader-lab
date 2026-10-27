@@ -73,3 +73,16 @@ func TestCheckNotional(t *testing.T) {
 	require.NoError(t, spec.CheckNotional(p, money.Qty{V: 10, Scale: 5}))                     // 5.00 USDT
 	require.ErrorIs(t, spec.CheckNotional(p, money.Qty{V: 9, Scale: 5}), ErrBelowMinNotional) // 4.50
 }
+
+func TestDefaultsValid(t *testing.T) {
+	seen := map[string]bool{}
+	for _, s := range Defaults() {
+		require.NoError(t, s.Validate(), s.Symbol)
+		require.False(t, seen[s.Symbol], "duplicate %s", s.Symbol)
+		seen[s.Symbol] = true
+		// Tick must be representable at the shared price scale.
+		_, err := s.RoundPrice(money.Price{V: 6_543_210_000_000, Scale: Scale}, money.Floor)
+		require.NoError(t, err, s.Symbol)
+	}
+	require.Len(t, seen, 6)
+}
