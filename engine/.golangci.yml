@@ -1,0 +1,33 @@
+version: "2"
+
+linters:
+  enable:
+    - depguard
+  settings:
+    depguard:
+      rules:
+        # Invariant 5: the judge never imports the optimizer.
+        judge-independence:
+          files:
+            - "**/internal/sim/**"
+            - "**/internal/eval/**"
+            - "**/internal/metrics/**"
+          deny:
+            - pkg: tradinglab/engine/internal/search
+              desc: sim/eval/metrics must not import the optimizer (CLAUDE.md invariant 5)
+            - pkg: tradinglab/engine/internal/loop
+              desc: sim/eval/metrics must not import the optimizer (CLAUDE.md invariant 5)
+            - pkg: tradinglab/engine/internal/model/train
+              desc: sim/eval/metrics must not import the optimizer (CLAUDE.md invariant 5)
+  exclusions:
+    paths:
+      - internal/gen
+      - internal/store/db
+
+formatters:
+  enable:
+    - gofmt
+  exclusions:
+    paths:
+      - internal/gen
+      - internal/store/db
