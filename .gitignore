@@ -8,3 +8,5 @@
 /design/trading-lab.zip
 /design/UI_SPEC.md
 /design/tokens.dart
+# rapid property-test failure replays (local only)
+testdata/rapid/
