@@ -43,7 +43,8 @@ type Config struct {
 	FixedUSDT money.Amount   `json:"fixed_usdt,omitzero"`
 	// LatencyBars: a decision on bar i fills at the open of bar i+LatencyBars (default 1).
 	LatencyBars int `json:"latency_bars"`
-	// IntentTTL: an intent not filled within this time expires (default 10m).
+	// IntentTTL: an intent not filled within this time expires. 0 = LatencyBars+9
+	// bars of the input timeframe (10 minutes on 1m bars, 10 hours on 1h bars).
 	IntentTTL time.Duration `json:"intent_ttl"`
 }
 
@@ -83,9 +84,6 @@ func (c Config) normalized() (Config, error) {
 	}
 	if c.LatencyBars < 1 {
 		return bad("latency must be >= 1 bar")
-	}
-	if c.IntentTTL == 0 {
-		c.IntentTTL = 10 * time.Minute
 	}
 	return c, nil
 }
@@ -142,7 +140,11 @@ func Run(ctx context.Context, cfg Config, specs map[string]instrument.Spec, bars
 	if len(events) == 0 {
 		return nil, fmt.Errorf("%w: no bars", ErrInput)
 	}
-	r.clk = clock.NewVirtual(bars[events[0].sym][events[0].i].AvailableAt)
+	first := bars[events[0].sym][events[0].i]
+	r.clk = clock.NewVirtual(first.AvailableAt)
+	if r.cfg.IntentTTL == 0 {
+		r.cfg.IntentTTL = time.Duration(r.cfg.LatencyBars+9) * first.CloseTime.Sub(first.OpenTime)
+	}
 
 	for start := 0; start < len(events); {
 		if err := ctx.Err(); err != nil {

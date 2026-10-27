@@ -80,9 +80,9 @@ void main() {
   });
 
   testWidgets('390 px: sidebar becomes a drawer', (tester) async {
-    await _pumpApp(tester, const Size(390, 844), at: '/reports/42');
+    await _pumpApp(tester, const Size(390, 844), at: '/experiments/abc/queue');
     expect(find.text('کتابخانه الگوریتم'), findsNothing);
-    expect(find.text('گزارش‌ها'), findsOneWidget, reason: 'deep link resolves to reports');
+    expect(find.text('صف اجرا و جست‌وجو'), findsOneWidget, reason: 'deep link resolves to the queue');
 
     await tester.tap(find.byTooltip('باز کردن منو'));
     await _settle(tester);

@@ -926,6 +926,822 @@ abstract class L10n {
   /// In fa, this message translates to:
   /// **'تاریخ نمی‌تواند در آینده باشد.'**
   String get errFutureDate;
+
+  /// No description provided for @invalid.
+  ///
+  /// In fa, this message translates to:
+  /// **'نامعتبر'**
+  String get invalid;
+
+  /// No description provided for @unitUsdt.
+  ///
+  /// In fa, this message translates to:
+  /// **'USDT'**
+  String get unitUsdt;
+
+  /// No description provided for @durationDays.
+  ///
+  /// In fa, this message translates to:
+  /// **'{d} روز'**
+  String durationDays(int d);
+
+  /// No description provided for @durationHours.
+  ///
+  /// In fa, this message translates to:
+  /// **'{h} ساعت'**
+  String durationHours(int h);
+
+  /// No description provided for @durationMinutes.
+  ///
+  /// In fa, this message translates to:
+  /// **'{m} دقیقه'**
+  String durationMinutes(int m);
+
+  /// No description provided for @reportsNew.
+  ///
+  /// In fa, this message translates to:
+  /// **'اجرای تازه'**
+  String get reportsNew;
+
+  /// No description provided for @reportsEmpty.
+  ///
+  /// In fa, this message translates to:
+  /// **'هنوز گزارشی ساخته نشده است. با «اجرای تازه» اولین آزمون را بسازید.'**
+  String get reportsEmpty;
+
+  /// No description provided for @reportsCompareSelected.
+  ///
+  /// In fa, this message translates to:
+  /// **'مقایسه {n} گزارش'**
+  String reportsCompareSelected(int n);
+
+  /// No description provided for @reportsColTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'گزارش'**
+  String get reportsColTitle;
+
+  /// No description provided for @reportsColCreated.
+  ///
+  /// In fa, this message translates to:
+  /// **'ساخته‌شده'**
+  String get reportsColCreated;
+
+  /// No description provided for @reportsColNet.
+  ///
+  /// In fa, this message translates to:
+  /// **'سود خالص (OOS)'**
+  String get reportsColNet;
+
+  /// No description provided for @reportsColReturn.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازده'**
+  String get reportsColReturn;
+
+  /// No description provided for @reportsColTrades.
+  ///
+  /// In fa, this message translates to:
+  /// **'معاملات'**
+  String get reportsColTrades;
+
+  /// No description provided for @reportsColVerdict.
+  ///
+  /// In fa, this message translates to:
+  /// **'نتیجه'**
+  String get reportsColVerdict;
+
+  /// No description provided for @reportsColHoldout.
+  ///
+  /// In fa, this message translates to:
+  /// **'آزمون نهایی'**
+  String get reportsColHoldout;
+
+  /// No description provided for @reportsSelect.
+  ///
+  /// In fa, this message translates to:
+  /// **'انتخاب برای مقایسه'**
+  String get reportsSelect;
+
+  /// No description provided for @newDatasets.
+  ///
+  /// In fa, this message translates to:
+  /// **'نسخه‌های داده'**
+  String get newDatasets;
+
+  /// No description provided for @newDatasetsHelp.
+  ///
+  /// In fa, this message translates to:
+  /// **'یک نسخه برای هر جفت؛ همه با یک تایم‌فریم'**
+  String get newDatasetsHelp;
+
+  /// No description provided for @newDatasetsEmpty.
+  ///
+  /// In fa, this message translates to:
+  /// **'نسخه‌ای نیست. ابتدا در صفحه داده یک بازه وارد کنید.'**
+  String get newDatasetsEmpty;
+
+  /// No description provided for @newStrategy.
+  ///
+  /// In fa, this message translates to:
+  /// **'راهبرد'**
+  String get newStrategy;
+
+  /// No description provided for @newParams.
+  ///
+  /// In fa, this message translates to:
+  /// **'پارامترها'**
+  String get newParams;
+
+  /// No description provided for @newCapital.
+  ///
+  /// In fa, this message translates to:
+  /// **'سرمایه اولیه'**
+  String get newCapital;
+
+  /// No description provided for @newFeeBps.
+  ///
+  /// In fa, this message translates to:
+  /// **'کارمزد هر سمت'**
+  String get newFeeBps;
+
+  /// No description provided for @newSlipBps.
+  ///
+  /// In fa, this message translates to:
+  /// **'لغزش هر سمت'**
+  String get newSlipBps;
+
+  /// No description provided for @bps.
+  ///
+  /// In fa, this message translates to:
+  /// **'bps'**
+  String get bps;
+
+  /// No description provided for @bpsHelp.
+  ///
+  /// In fa, this message translates to:
+  /// **'۱ bps = ۰٫۰۱٪؛ مثلاً ۱۰ یعنی ۰٫۱٪'**
+  String get bpsHelp;
+
+  /// No description provided for @newFolds.
+  ///
+  /// In fa, this message translates to:
+  /// **'تعداد گام‌های آزمون'**
+  String get newFolds;
+
+  /// No description provided for @newHoldout.
+  ///
+  /// In fa, this message translates to:
+  /// **'سهم آزمون نهایی'**
+  String get newHoldout;
+
+  /// No description provided for @newHoldoutHelp.
+  ///
+  /// In fa, this message translates to:
+  /// **'درصد پایانی داده که پنهان می‌ماند'**
+  String get newHoldoutHelp;
+
+  /// No description provided for @newRolling.
+  ///
+  /// In fa, this message translates to:
+  /// **'پنجره آموزش غلتان'**
+  String get newRolling;
+
+  /// No description provided for @newRun.
+  ///
+  /// In fa, this message translates to:
+  /// **'اجرا و ساخت گزارش'**
+  String get newRun;
+
+  /// No description provided for @newRunning.
+  ///
+  /// In fa, this message translates to:
+  /// **'در حال ارزیابی گام‌به‌گام…'**
+  String get newRunning;
+
+  /// No description provided for @errRequired.
+  ///
+  /// In fa, this message translates to:
+  /// **'این مقدار لازم است.'**
+  String get errRequired;
+
+  /// No description provided for @errPositive.
+  ///
+  /// In fa, this message translates to:
+  /// **'عددی مثبت وارد کنید.'**
+  String get errPositive;
+
+  /// No description provided for @errNumber.
+  ///
+  /// In fa, this message translates to:
+  /// **'عدد معتبر وارد کنید.'**
+  String get errNumber;
+
+  /// No description provided for @errBps.
+  ///
+  /// In fa, this message translates to:
+  /// **'عددی بین ۰ و ۱۰۰۰ با حداکثر دو رقم اعشار.'**
+  String get errBps;
+
+  /// No description provided for @errPickDataset.
+  ///
+  /// In fa, this message translates to:
+  /// **'دست‌کم یک نسخه داده انتخاب کنید.'**
+  String get errPickDataset;
+
+  /// No description provided for @reportTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'گزارش'**
+  String get reportTitle;
+
+  /// No description provided for @reportExportCsv.
+  ///
+  /// In fa, this message translates to:
+  /// **'خروجی CSV'**
+  String get reportExportCsv;
+
+  /// No description provided for @reportExportMetrics.
+  ///
+  /// In fa, this message translates to:
+  /// **'معیارها CSV'**
+  String get reportExportMetrics;
+
+  /// No description provided for @reportExportJson.
+  ///
+  /// In fa, this message translates to:
+  /// **'تعریف JSON'**
+  String get reportExportJson;
+
+  /// No description provided for @reportReproduce.
+  ///
+  /// In fa, this message translates to:
+  /// **'اجرای مجدد (بازتولید)'**
+  String get reportReproduce;
+
+  /// No description provided for @reportReproduceOk.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازتولید شد: همه اعداد دقیقاً یکسان‌اند.'**
+  String get reportReproduceOk;
+
+  /// No description provided for @reportReproduceFail.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازتولید متفاوت بود؛ گزارش را بررسی کنید.'**
+  String get reportReproduceFail;
+
+  /// No description provided for @reportAddCompare.
+  ///
+  /// In fa, this message translates to:
+  /// **'افزودن به مقایسه'**
+  String get reportAddCompare;
+
+  /// No description provided for @reportInCompare.
+  ///
+  /// In fa, this message translates to:
+  /// **'در فهرست مقایسه'**
+  String get reportInCompare;
+
+  /// No description provided for @reportOpenPnl.
+  ///
+  /// In fa, this message translates to:
+  /// **'آزمودن سرمایه و کارمزد دیگر در ماشین‌حساب'**
+  String get reportOpenPnl;
+
+  /// No description provided for @reportSummary.
+  ///
+  /// In fa, this message translates to:
+  /// **'خلاصه به زبان ساده'**
+  String get reportSummary;
+
+  /// No description provided for @reportWaterfall.
+  ///
+  /// In fa, this message translates to:
+  /// **'از سود ناخالص تا سود خالص'**
+  String get reportWaterfall;
+
+  /// No description provided for @reportFinalEquity.
+  ///
+  /// In fa, this message translates to:
+  /// **'ارزش نهایی حساب'**
+  String get reportFinalEquity;
+
+  /// No description provided for @reportToman.
+  ///
+  /// In fa, this message translates to:
+  /// **'معادل تومانی'**
+  String get reportToman;
+
+  /// No description provided for @reportTomanRate.
+  ///
+  /// In fa, this message translates to:
+  /// **'نرخ #{id} · {date}'**
+  String reportTomanRate(String id, String date);
+
+  /// No description provided for @reportTomanNone.
+  ///
+  /// In fa, this message translates to:
+  /// **'نرخی ثبت نشده'**
+  String get reportTomanNone;
+
+  /// No description provided for @reportBreakEven.
+  ///
+  /// In fa, this message translates to:
+  /// **'کارمزد سر‌به‌سر'**
+  String get reportBreakEven;
+
+  /// No description provided for @reportBreakEvenNone.
+  ///
+  /// In fa, this message translates to:
+  /// **'هیچ کارمزدی آن را سودده نمی‌کند'**
+  String get reportBreakEvenNone;
+
+  /// No description provided for @reportEquity.
+  ///
+  /// In fa, this message translates to:
+  /// **'منحنی ارزش حساب'**
+  String get reportEquity;
+
+  /// No description provided for @reportCandidate.
+  ///
+  /// In fa, this message translates to:
+  /// **'این راهبرد'**
+  String get reportCandidate;
+
+  /// No description provided for @benchBuyAndHold.
+  ///
+  /// In fa, this message translates to:
+  /// **'خرید و نگهداری'**
+  String get benchBuyAndHold;
+
+  /// No description provided for @benchHoldCash.
+  ///
+  /// In fa, this message translates to:
+  /// **'نگهداری نقد'**
+  String get benchHoldCash;
+
+  /// No description provided for @regionInSample.
+  ///
+  /// In fa, this message translates to:
+  /// **'داده آموزش'**
+  String get regionInSample;
+
+  /// No description provided for @regionOos.
+  ///
+  /// In fa, this message translates to:
+  /// **'خارج از نمونه'**
+  String get regionOos;
+
+  /// No description provided for @regionHoldout.
+  ///
+  /// In fa, this message translates to:
+  /// **'آزمون نهایی'**
+  String get regionHoldout;
+
+  /// No description provided for @reportFolds.
+  ///
+  /// In fa, this message translates to:
+  /// **'گام‌های ارزیابی گام‌به‌گام'**
+  String get reportFolds;
+
+  /// No description provided for @foldStep.
+  ///
+  /// In fa, this message translates to:
+  /// **'گام'**
+  String get foldStep;
+
+  /// No description provided for @foldTrainUntil.
+  ///
+  /// In fa, this message translates to:
+  /// **'آموزش تا'**
+  String get foldTrainUntil;
+
+  /// No description provided for @foldTest.
+  ///
+  /// In fa, this message translates to:
+  /// **'آزمون'**
+  String get foldTest;
+
+  /// No description provided for @foldReturn.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازده خالص'**
+  String get foldReturn;
+
+  /// No description provided for @foldDrawdown.
+  ///
+  /// In fa, this message translates to:
+  /// **'افت'**
+  String get foldDrawdown;
+
+  /// No description provided for @foldTrades.
+  ///
+  /// In fa, this message translates to:
+  /// **'معاملات'**
+  String get foldTrades;
+
+  /// No description provided for @reportStress.
+  ///
+  /// In fa, this message translates to:
+  /// **'سناریوهای تنش'**
+  String get reportStress;
+
+  /// No description provided for @stress_fee_x2.
+  ///
+  /// In fa, this message translates to:
+  /// **'کارمزد × ۲'**
+  String get stress_fee_x2;
+
+  /// No description provided for @stress_slippage_x3.
+  ///
+  /// In fa, this message translates to:
+  /// **'لغزش × ۳'**
+  String get stress_slippage_x3;
+
+  /// No description provided for @stress_latency_plus_1.
+  ///
+  /// In fa, this message translates to:
+  /// **'تأخیر +۱ کندل'**
+  String get stress_latency_plus_1;
+
+  /// No description provided for @reportSensitivity.
+  ///
+  /// In fa, this message translates to:
+  /// **'حساسیت پارامتر'**
+  String get reportSensitivity;
+
+  /// No description provided for @reportSensitivityHelp.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازده خالص خارج از نمونه · افقی {x}{y}'**
+  String reportSensitivityHelp(String x, String y);
+
+  /// No description provided for @reportSensitivityY.
+  ///
+  /// In fa, this message translates to:
+  /// **'، عمودی {y}'**
+  String reportSensitivityY(String y);
+
+  /// No description provided for @reportSensitivityNone.
+  ///
+  /// In fa, this message translates to:
+  /// **'این راهبرد پارامتر سیگنالی برای آزمون همسایگی ندارد.'**
+  String get reportSensitivityNone;
+
+  /// No description provided for @reportHoldout.
+  ///
+  /// In fa, this message translates to:
+  /// **'آزمون نهایی (holdout)'**
+  String get reportHoldout;
+
+  /// No description provided for @reportHoldoutHidden.
+  ///
+  /// In fa, this message translates to:
+  /// **'نتیجه آزمون نهایی پنهان است تا تصمیم‌ها روی آن تنظیم نشوند. هر بار دیدن ثبت می‌شود.'**
+  String get reportHoldoutHidden;
+
+  /// No description provided for @reportHoldoutShow.
+  ///
+  /// In fa, this message translates to:
+  /// **'نمایش آزمون نهایی'**
+  String get reportHoldoutShow;
+
+  /// No description provided for @reportHoldoutConfirm.
+  ///
+  /// In fa, this message translates to:
+  /// **'نمایش آزمون نهایی ثبت می‌شود و در گزارش به‌عنوان «دیده‌شده» نشان داده خواهد شد. پس از دیدن، تنظیم دوباره پارامترها روی این داده نتیجه را بی‌اعتبار می‌کند. ادامه می‌دهید؟'**
+  String get reportHoldoutConfirm;
+
+  /// No description provided for @reportHoldoutViews.
+  ///
+  /// In fa, this message translates to:
+  /// **'آزمون نهایی: {n} بار مشاهده'**
+  String reportHoldoutViews(int n);
+
+  /// No description provided for @reportTrades.
+  ///
+  /// In fa, this message translates to:
+  /// **'معاملات خارج از نمونه'**
+  String get reportTrades;
+
+  /// No description provided for @tradeEntryExit.
+  ///
+  /// In fa, this message translates to:
+  /// **'ورود → خروج'**
+  String get tradeEntryExit;
+
+  /// No description provided for @tradeGross.
+  ///
+  /// In fa, this message translates to:
+  /// **'ناخالص'**
+  String get tradeGross;
+
+  /// No description provided for @tradeCost.
+  ///
+  /// In fa, this message translates to:
+  /// **'هزینه'**
+  String get tradeCost;
+
+  /// No description provided for @tradeNet.
+  ///
+  /// In fa, this message translates to:
+  /// **'خالص'**
+  String get tradeNet;
+
+  /// No description provided for @tradeOpen.
+  ///
+  /// In fa, this message translates to:
+  /// **'باز'**
+  String get tradeOpen;
+
+  /// No description provided for @cancel.
+  ///
+  /// In fa, this message translates to:
+  /// **'انصراف'**
+  String get cancel;
+
+  /// No description provided for @confirm.
+  ///
+  /// In fa, this message translates to:
+  /// **'تأیید'**
+  String get confirm;
+
+  /// No description provided for @badgeEngine.
+  ///
+  /// In fa, this message translates to:
+  /// **'کد {v}'**
+  String badgeEngine(String v);
+
+  /// No description provided for @badgeDatasets.
+  ///
+  /// In fa, this message translates to:
+  /// **'داده {ids}'**
+  String badgeDatasets(String ids);
+
+  /// No description provided for @compareSubtitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'نتایج فقط وقتی کنار هم معنا دارند که فرض‌ها یکسان باشند؛ تفاوت‌ها پیش از معیارها نمایش داده می‌شوند.'**
+  String get compareSubtitle;
+
+  /// No description provided for @compareAssumptions.
+  ///
+  /// In fa, this message translates to:
+  /// **'هم‌ارزی فرض‌ها'**
+  String get compareAssumptions;
+
+  /// No description provided for @compareAssumption.
+  ///
+  /// In fa, this message translates to:
+  /// **'فرض'**
+  String get compareAssumption;
+
+  /// No description provided for @compareSame.
+  ///
+  /// In fa, this message translates to:
+  /// **'یکسان'**
+  String get compareSame;
+
+  /// No description provided for @compareDiffers.
+  ///
+  /// In fa, this message translates to:
+  /// **'متفاوت'**
+  String get compareDiffers;
+
+  /// No description provided for @compareNote.
+  ///
+  /// In fa, this message translates to:
+  /// **'در تفسیر لحاظ شود'**
+  String get compareNote;
+
+  /// No description provided for @compareMismatch.
+  ///
+  /// In fa, this message translates to:
+  /// **'{n} تفاوت در فرض‌ها: {what}'**
+  String compareMismatch(int n, String what);
+
+  /// No description provided for @compareEquity.
+  ///
+  /// In fa, this message translates to:
+  /// **'منحنی ارزش خارج از نمونه (USDT)'**
+  String get compareEquity;
+
+  /// No description provided for @compareEquityHelp.
+  ///
+  /// In fa, this message translates to:
+  /// **'هر اجرا رنگ و سبک خط جداگانه دارد.'**
+  String get compareEquityHelp;
+
+  /// No description provided for @compareMetrics.
+  ///
+  /// In fa, this message translates to:
+  /// **'معیارها'**
+  String get compareMetrics;
+
+  /// No description provided for @compareMetric.
+  ///
+  /// In fa, this message translates to:
+  /// **'معیار'**
+  String get compareMetric;
+
+  /// No description provided for @compareTotalCost.
+  ///
+  /// In fa, this message translates to:
+  /// **'هزینه کل'**
+  String get compareTotalCost;
+
+  /// No description provided for @compareEligible.
+  ///
+  /// In fa, this message translates to:
+  /// **'واجد شرایط'**
+  String get compareEligible;
+
+  /// No description provided for @compareYes.
+  ///
+  /// In fa, this message translates to:
+  /// **'بله'**
+  String get compareYes;
+
+  /// No description provided for @compareNo.
+  ///
+  /// In fa, this message translates to:
+  /// **'خیر'**
+  String get compareNo;
+
+  /// No description provided for @compareConclusion.
+  ///
+  /// In fa, this message translates to:
+  /// **'جمع‌بندی'**
+  String get compareConclusion;
+
+  /// No description provided for @compareEmpty.
+  ///
+  /// In fa, this message translates to:
+  /// **'دست‌کم دو گزارش را از فهرست گزارش‌ها برای مقایسه انتخاب کنید.'**
+  String get compareEmpty;
+
+  /// No description provided for @compareClear.
+  ///
+  /// In fa, this message translates to:
+  /// **'پاک کردن فهرست'**
+  String get compareClear;
+
+  /// No description provided for @pnlSubtitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'ببینید یک الگوریتم یا یک معامله، پس از کارمزد و لغزش، دقیقاً چقدر سود یا زیان می‌سازد — و اگر شرایط عوض شود چه می‌شود.'**
+  String get pnlSubtitle;
+
+  /// No description provided for @pnlTabRun.
+  ///
+  /// In fa, this message translates to:
+  /// **'نتیجه یک الگوریتم (از اجرای ثبت‌شده)'**
+  String get pnlTabRun;
+
+  /// No description provided for @pnlTabTrade.
+  ///
+  /// In fa, this message translates to:
+  /// **'یک معامله'**
+  String get pnlTabTrade;
+
+  /// No description provided for @pnlInputs.
+  ///
+  /// In fa, this message translates to:
+  /// **'ورودی‌ها'**
+  String get pnlInputs;
+
+  /// No description provided for @pnlReport.
+  ///
+  /// In fa, this message translates to:
+  /// **'اجرای ثبت‌شده'**
+  String get pnlReport;
+
+  /// No description provided for @pnlNoReports.
+  ///
+  /// In fa, this message translates to:
+  /// **'هنوز گزارشی نیست؛ ابتدا یک اجرای تازه بسازید.'**
+  String get pnlNoReports;
+
+  /// No description provided for @pnlSize.
+  ///
+  /// In fa, this message translates to:
+  /// **'اندازه موقعیت نسبت به اجرای اصلی'**
+  String get pnlSize;
+
+  /// No description provided for @pnlSizeHelp.
+  ///
+  /// In fa, this message translates to:
+  /// **'۱۰۰٪ یعنی همان اندازه ثبت‌شده'**
+  String get pnlSizeHelp;
+
+  /// No description provided for @pnlRate.
+  ///
+  /// In fa, this message translates to:
+  /// **'نرخ تبدیل نمایشی'**
+  String get pnlRate;
+
+  /// No description provided for @pnlRateNone.
+  ///
+  /// In fa, this message translates to:
+  /// **'بدون تومان'**
+  String get pnlRateNone;
+
+  /// No description provided for @pnlReset.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازگشت به تنظیمات اجرای اصلی'**
+  String get pnlReset;
+
+  /// No description provided for @pnlOriginalNet.
+  ///
+  /// In fa, this message translates to:
+  /// **'سود خالص اجرای اصلی'**
+  String get pnlOriginalNet;
+
+  /// No description provided for @pnlNet.
+  ///
+  /// In fa, this message translates to:
+  /// **'سود خالص'**
+  String get pnlNet;
+
+  /// No description provided for @pnlFinal.
+  ///
+  /// In fa, this message translates to:
+  /// **'ارزش نهایی'**
+  String get pnlFinal;
+
+  /// No description provided for @pnlBreakEvenFee.
+  ///
+  /// In fa, this message translates to:
+  /// **'کارمزد سر‌به‌سر'**
+  String get pnlBreakEvenFee;
+
+  /// No description provided for @pnlEquity.
+  ///
+  /// In fa, this message translates to:
+  /// **'ارزش حساب'**
+  String get pnlEquity;
+
+  /// No description provided for @pnlTradeInputs.
+  ///
+  /// In fa, this message translates to:
+  /// **'ورودی‌های معامله'**
+  String get pnlTradeInputs;
+
+  /// No description provided for @pnlSpotNote.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازار اسپات: خرید و سپس فروش. فروش استقراضی ممکن نیست.'**
+  String get pnlSpotNote;
+
+  /// No description provided for @pnlEntry.
+  ///
+  /// In fa, this message translates to:
+  /// **'قیمت ورود'**
+  String get pnlEntry;
+
+  /// No description provided for @pnlExit.
+  ///
+  /// In fa, this message translates to:
+  /// **'قیمت خروج'**
+  String get pnlExit;
+
+  /// No description provided for @pnlAmount.
+  ///
+  /// In fa, this message translates to:
+  /// **'مبلغ خرید'**
+  String get pnlAmount;
+
+  /// No description provided for @pnlQty.
+  ///
+  /// In fa, this message translates to:
+  /// **'مقدار'**
+  String get pnlQty;
+
+  /// No description provided for @pnlCost.
+  ///
+  /// In fa, this message translates to:
+  /// **'هزینه کل خرید'**
+  String get pnlCost;
+
+  /// No description provided for @pnlReturn.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازده روی هزینه'**
+  String get pnlReturn;
+
+  /// No description provided for @pnlBreakEvenExit.
+  ///
+  /// In fa, this message translates to:
+  /// **'قیمت فروش سر‌به‌سر'**
+  String get pnlBreakEvenExit;
+
+  /// No description provided for @pnlTomanNet.
+  ///
+  /// In fa, this message translates to:
+  /// **'سود خالص به تومان'**
+  String get pnlTomanNet;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

@@ -137,6 +137,7 @@ func Evaluate(ctx context.Context, spec Spec, bars map[string][]data.Bar, specs 
 	if err != nil {
 		return nil, err
 	}
+	spec.Split = spec.Split.withDefaults() // the stored spec shows the plan actually used
 	split, err := spec.Split.Make(from, to, tfDur)
 	if err != nil {
 		return nil, err
@@ -154,6 +155,15 @@ func Evaluate(ctx context.Context, spec Spec, bars map[string][]data.Bar, specs 
 		return out
 	}
 	oosBars, allBars := upTo(split.OOS.To), bars
+	// Benchmarks start at the OOS window: buy-and-hold buys on its first bar, which
+	// must not fall in the (gated) warm-up.
+	benchBars := map[string][]data.Bar{}
+	for s, bs := range oosBars {
+		i, _ := slices.BinarySearchFunc(bs, split.OOS.From, func(b data.Bar, t time.Time) int { return b.OpenTime.Compare(t) })
+		if i < len(bs) {
+			benchBars[s] = bs[i:]
+		}
+	}
 
 	type job struct {
 		cfg      sim.Config
@@ -172,8 +182,8 @@ func Evaluate(ctx context.Context, spec Spec, bars map[string][]data.Bar, specs 
 	// 5, 6: benchmarks — buy and hold (equal split across symbols) and cash.
 	bhParams := strategy.Params{"exposure": float64(int64(money.RatioOne)/int64(len(oosBars))) / float64(money.RatioOne)}
 	jobs = append(jobs,
-		job{cfg, bhParams, oosBars, split.OOS.From, "buy-and-hold"},
-		job{cfg, strategy.Params{}, oosBars, split.OOS.From, "hold-cash"},
+		job{cfg, bhParams, benchBars, split.OOS.From, "buy-and-hold"},
+		job{cfg, strategy.Params{}, benchBars, split.OOS.From, "hold-cash"},
 	)
 	grid, gridParams := neighbourhood(spec.Strategy, spec.Params)
 	for _, p := range gridParams {
@@ -228,7 +238,7 @@ func Evaluate(ctx context.Context, spec Spec, bars map[string][]data.Bar, specs 
 		if errs[2+k] != nil {
 			sv.Error = errs[2+k].Error()
 		} else {
-			sv.Metrics = pick(window(results[2+k], split.OOS, cfg.Capital.V), "net_pnl", "total_return", "max_drawdown")
+			sv.Metrics = pick(window(results[2+k], split.OOS, cfg.Capital.V), "net_pnl", "total_return", "max_drawdown", "trades")
 		}
 		ev.Stress = append(ev.Stress, sv)
 	}

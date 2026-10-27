@@ -119,7 +119,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       decoration: InputDecoration(
                         labelText: l.settingsRateField,
                         helperText: l.settingsRateHelp,
-                        suffixText: 'TOMAN',
+                        suffix: unitSuffix('TOMAN'),
                         errorText: _tried ? _rateError(l) : null,
                       ),
                     ),

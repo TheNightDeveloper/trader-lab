@@ -21,16 +21,12 @@ import 'data.pbjson.dart';
 export 'data.pb.dart';
 
 abstract class DataServiceBase extends $pb.GeneratedService {
-  $async.Future<$0.GetOverviewResponse> getOverview(
-      $pb.ServerContext ctx, $0.GetOverviewRequest request);
-  $async.Future<$0.ListDatasetsResponse> listDatasets(
-      $pb.ServerContext ctx, $0.ListDatasetsRequest request);
-  $async.Future<$0.GetCoverageResponse> getCoverage(
-      $pb.ServerContext ctx, $0.GetCoverageRequest request);
+  $async.Future<$0.GetOverviewResponse> getOverview($pb.ServerContext ctx, $0.GetOverviewRequest request);
+  $async.Future<$0.ListDatasetsResponse> listDatasets($pb.ServerContext ctx, $0.ListDatasetsRequest request);
+  $async.Future<$0.GetCoverageResponse> getCoverage($pb.ServerContext ctx, $0.GetCoverageRequest request);
   $async.Future<$0.ListQualityIssuesResponse> listQualityIssues(
       $pb.ServerContext ctx, $0.ListQualityIssuesRequest request);
-  $async.Future<$0.ImportResponse> import(
-      $pb.ServerContext ctx, $0.ImportRequest request);
+  $async.Future<$0.ImportResponse> import($pb.ServerContext ctx, $0.ImportRequest request);
 
   $pb.GeneratedMessage createRequest($core.String methodName) {
     switch (methodName) {
@@ -49,8 +45,8 @@ abstract class DataServiceBase extends $pb.GeneratedService {
     }
   }
 
-  $async.Future<$pb.GeneratedMessage> handleCall($pb.ServerContext ctx,
-      $core.String methodName, $pb.GeneratedMessage request) {
+  $async.Future<$pb.GeneratedMessage> handleCall(
+      $pb.ServerContext ctx, $core.String methodName, $pb.GeneratedMessage request) {
     switch (methodName) {
       case 'GetOverview':
         return getOverview(ctx, request as $0.GetOverviewRequest);
@@ -68,6 +64,5 @@ abstract class DataServiceBase extends $pb.GeneratedService {
   }
 
   $core.Map<$core.String, $core.dynamic> get $json => DataServiceBase$json;
-  $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
-      get $messageJson => DataServiceBase$messageJson;
+  $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> get $messageJson => DataServiceBase$messageJson;
 }

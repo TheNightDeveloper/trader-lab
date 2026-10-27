@@ -8,7 +8,7 @@ import "data.pb.dart" as labv1data;
 import "data.connect.spec.dart" as specs;
 
 /// DataService: datasets, coverage, quality issues, live feed, archive import.
-extension type DataServiceClient (connect.Transport _transport) {
+extension type DataServiceClient(connect.Transport _transport) {
   Future<labv1data.GetOverviewResponse> getOverview(
     labv1data.GetOverviewRequest input, {
     connect.Headers? headers,

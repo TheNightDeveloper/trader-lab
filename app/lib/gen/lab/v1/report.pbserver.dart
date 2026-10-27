@@ -21,26 +21,16 @@ import 'report.pbjson.dart';
 export 'report.pb.dart';
 
 abstract class ReportServiceBase extends $pb.GeneratedService {
-  $async.Future<$1.ListStrategiesResponse> listStrategies(
-      $pb.ServerContext ctx, $1.ListStrategiesRequest request);
-  $async.Future<$1.CreateReportResponse> createReport(
-      $pb.ServerContext ctx, $1.CreateReportRequest request);
-  $async.Future<$1.ListReportsResponse> listReports(
-      $pb.ServerContext ctx, $1.ListReportsRequest request);
-  $async.Future<$1.GetReportResponse> getReport(
-      $pb.ServerContext ctx, $1.GetReportRequest request);
-  $async.Future<$1.ViewHoldoutResponse> viewHoldout(
-      $pb.ServerContext ctx, $1.ViewHoldoutRequest request);
-  $async.Future<$1.ListTradesResponse> listTrades(
-      $pb.ServerContext ctx, $1.ListTradesRequest request);
-  $async.Future<$1.ListDecisionsResponse> listDecisions(
-      $pb.ServerContext ctx, $1.ListDecisionsRequest request);
-  $async.Future<$1.CompareResponse> compare(
-      $pb.ServerContext ctx, $1.CompareRequest request);
-  $async.Future<$1.ExportResponse> export(
-      $pb.ServerContext ctx, $1.ExportRequest request);
-  $async.Future<$1.ReproduceResponse> reproduce(
-      $pb.ServerContext ctx, $1.ReproduceRequest request);
+  $async.Future<$1.ListStrategiesResponse> listStrategies($pb.ServerContext ctx, $1.ListStrategiesRequest request);
+  $async.Future<$1.CreateReportResponse> createReport($pb.ServerContext ctx, $1.CreateReportRequest request);
+  $async.Future<$1.ListReportsResponse> listReports($pb.ServerContext ctx, $1.ListReportsRequest request);
+  $async.Future<$1.GetReportResponse> getReport($pb.ServerContext ctx, $1.GetReportRequest request);
+  $async.Future<$1.ViewHoldoutResponse> viewHoldout($pb.ServerContext ctx, $1.ViewHoldoutRequest request);
+  $async.Future<$1.ListTradesResponse> listTrades($pb.ServerContext ctx, $1.ListTradesRequest request);
+  $async.Future<$1.ListDecisionsResponse> listDecisions($pb.ServerContext ctx, $1.ListDecisionsRequest request);
+  $async.Future<$1.CompareResponse> compare($pb.ServerContext ctx, $1.CompareRequest request);
+  $async.Future<$1.ExportResponse> export($pb.ServerContext ctx, $1.ExportRequest request);
+  $async.Future<$1.ReproduceResponse> reproduce($pb.ServerContext ctx, $1.ReproduceRequest request);
 
   $pb.GeneratedMessage createRequest($core.String methodName) {
     switch (methodName) {
@@ -69,8 +59,8 @@ abstract class ReportServiceBase extends $pb.GeneratedService {
     }
   }
 
-  $async.Future<$pb.GeneratedMessage> handleCall($pb.ServerContext ctx,
-      $core.String methodName, $pb.GeneratedMessage request) {
+  $async.Future<$pb.GeneratedMessage> handleCall(
+      $pb.ServerContext ctx, $core.String methodName, $pb.GeneratedMessage request) {
     switch (methodName) {
       case 'ListStrategies':
         return listStrategies(ctx, request as $1.ListStrategiesRequest);
@@ -98,6 +88,5 @@ abstract class ReportServiceBase extends $pb.GeneratedService {
   }
 
   $core.Map<$core.String, $core.dynamic> get $json => ReportServiceBase$json;
-  $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
-      get $messageJson => ReportServiceBase$messageJson;
+  $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> get $messageJson => ReportServiceBase$messageJson;
 }

@@ -1,7 +1,7 @@
 import 'package:decimal/decimal.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:trading_lab/core/money.dart';
-import 'package:trading_lab/gen/lab/v1/common.pb.dart';
+import 'package:trading_lab/gen/lab/v1/common.pb.dart' show Money;
 
 void main() {
   test('moneyValue is exact beyond 2^53', () {

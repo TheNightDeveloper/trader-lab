@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../gen/lab/v1/data.connect.client.dart';
 import '../../gen/lab/v1/fx.connect.client.dart';
 import '../../gen/lab/v1/health.connect.client.dart';
+import '../../gen/lab/v1/pnl.connect.client.dart';
+import '../../gen/lab/v1/report.connect.client.dart';
 import '../../gen/lab/v1/health.pb.dart';
 import 'http_client_io.dart' if (dart.library.js_interop) 'http_client_web.dart';
 
@@ -49,3 +51,11 @@ Duration reconnectForever(int retryCount, Object _) =>
 
 final dataClientProvider = Provider((ref) => DataServiceClient(ref.watch(transportProvider)));
 final fxClientProvider = Provider((ref) => FxServiceClient(ref.watch(transportProvider)));
+final reportClientProvider = Provider((ref) => ReportServiceClient(ref.watch(transportProvider)));
+final pnlClientProvider = Provider((ref) => PnlServiceClient(ref.watch(transportProvider)));
+
+/// The latest USDT/TOMAN display rate id from the health stream (0 = none).
+final displayRateIdProvider = Provider<int>((ref) {
+  final r = ref.watch(engineStatusProvider.select((s) => s.value?.displayRate));
+  return r == null || r.rateId.isEmpty ? 0 : int.parse(r.rateId);
+});

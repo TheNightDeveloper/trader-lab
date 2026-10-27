@@ -456,4 +456,443 @@ class L10nFa extends L10n {
 
   @override
   String get errFutureDate => 'تاریخ نمی‌تواند در آینده باشد.';
+
+  @override
+  String get invalid => 'نامعتبر';
+
+  @override
+  String get unitUsdt => 'USDT';
+
+  @override
+  String durationDays(int d) {
+    return '$d روز';
+  }
+
+  @override
+  String durationHours(int h) {
+    return '$h ساعت';
+  }
+
+  @override
+  String durationMinutes(int m) {
+    return '$m دقیقه';
+  }
+
+  @override
+  String get reportsNew => 'اجرای تازه';
+
+  @override
+  String get reportsEmpty =>
+      'هنوز گزارشی ساخته نشده است. با «اجرای تازه» اولین آزمون را بسازید.';
+
+  @override
+  String reportsCompareSelected(int n) {
+    return 'مقایسه $n گزارش';
+  }
+
+  @override
+  String get reportsColTitle => 'گزارش';
+
+  @override
+  String get reportsColCreated => 'ساخته‌شده';
+
+  @override
+  String get reportsColNet => 'سود خالص (OOS)';
+
+  @override
+  String get reportsColReturn => 'بازده';
+
+  @override
+  String get reportsColTrades => 'معاملات';
+
+  @override
+  String get reportsColVerdict => 'نتیجه';
+
+  @override
+  String get reportsColHoldout => 'آزمون نهایی';
+
+  @override
+  String get reportsSelect => 'انتخاب برای مقایسه';
+
+  @override
+  String get newDatasets => 'نسخه‌های داده';
+
+  @override
+  String get newDatasetsHelp => 'یک نسخه برای هر جفت؛ همه با یک تایم‌فریم';
+
+  @override
+  String get newDatasetsEmpty =>
+      'نسخه‌ای نیست. ابتدا در صفحه داده یک بازه وارد کنید.';
+
+  @override
+  String get newStrategy => 'راهبرد';
+
+  @override
+  String get newParams => 'پارامترها';
+
+  @override
+  String get newCapital => 'سرمایه اولیه';
+
+  @override
+  String get newFeeBps => 'کارمزد هر سمت';
+
+  @override
+  String get newSlipBps => 'لغزش هر سمت';
+
+  @override
+  String get bps => 'bps';
+
+  @override
+  String get bpsHelp => '۱ bps = ۰٫۰۱٪؛ مثلاً ۱۰ یعنی ۰٫۱٪';
+
+  @override
+  String get newFolds => 'تعداد گام‌های آزمون';
+
+  @override
+  String get newHoldout => 'سهم آزمون نهایی';
+
+  @override
+  String get newHoldoutHelp => 'درصد پایانی داده که پنهان می‌ماند';
+
+  @override
+  String get newRolling => 'پنجره آموزش غلتان';
+
+  @override
+  String get newRun => 'اجرا و ساخت گزارش';
+
+  @override
+  String get newRunning => 'در حال ارزیابی گام‌به‌گام…';
+
+  @override
+  String get errRequired => 'این مقدار لازم است.';
+
+  @override
+  String get errPositive => 'عددی مثبت وارد کنید.';
+
+  @override
+  String get errNumber => 'عدد معتبر وارد کنید.';
+
+  @override
+  String get errBps => 'عددی بین ۰ و ۱۰۰۰ با حداکثر دو رقم اعشار.';
+
+  @override
+  String get errPickDataset => 'دست‌کم یک نسخه داده انتخاب کنید.';
+
+  @override
+  String get reportTitle => 'گزارش';
+
+  @override
+  String get reportExportCsv => 'خروجی CSV';
+
+  @override
+  String get reportExportMetrics => 'معیارها CSV';
+
+  @override
+  String get reportExportJson => 'تعریف JSON';
+
+  @override
+  String get reportReproduce => 'اجرای مجدد (بازتولید)';
+
+  @override
+  String get reportReproduceOk => 'بازتولید شد: همه اعداد دقیقاً یکسان‌اند.';
+
+  @override
+  String get reportReproduceFail => 'بازتولید متفاوت بود؛ گزارش را بررسی کنید.';
+
+  @override
+  String get reportAddCompare => 'افزودن به مقایسه';
+
+  @override
+  String get reportInCompare => 'در فهرست مقایسه';
+
+  @override
+  String get reportOpenPnl => 'آزمودن سرمایه و کارمزد دیگر در ماشین‌حساب';
+
+  @override
+  String get reportSummary => 'خلاصه به زبان ساده';
+
+  @override
+  String get reportWaterfall => 'از سود ناخالص تا سود خالص';
+
+  @override
+  String get reportFinalEquity => 'ارزش نهایی حساب';
+
+  @override
+  String get reportToman => 'معادل تومانی';
+
+  @override
+  String reportTomanRate(String id, String date) {
+    return 'نرخ #$id · $date';
+  }
+
+  @override
+  String get reportTomanNone => 'نرخی ثبت نشده';
+
+  @override
+  String get reportBreakEven => 'کارمزد سر‌به‌سر';
+
+  @override
+  String get reportBreakEvenNone => 'هیچ کارمزدی آن را سودده نمی‌کند';
+
+  @override
+  String get reportEquity => 'منحنی ارزش حساب';
+
+  @override
+  String get reportCandidate => 'این راهبرد';
+
+  @override
+  String get benchBuyAndHold => 'خرید و نگهداری';
+
+  @override
+  String get benchHoldCash => 'نگهداری نقد';
+
+  @override
+  String get regionInSample => 'داده آموزش';
+
+  @override
+  String get regionOos => 'خارج از نمونه';
+
+  @override
+  String get regionHoldout => 'آزمون نهایی';
+
+  @override
+  String get reportFolds => 'گام‌های ارزیابی گام‌به‌گام';
+
+  @override
+  String get foldStep => 'گام';
+
+  @override
+  String get foldTrainUntil => 'آموزش تا';
+
+  @override
+  String get foldTest => 'آزمون';
+
+  @override
+  String get foldReturn => 'بازده خالص';
+
+  @override
+  String get foldDrawdown => 'افت';
+
+  @override
+  String get foldTrades => 'معاملات';
+
+  @override
+  String get reportStress => 'سناریوهای تنش';
+
+  @override
+  String get stress_fee_x2 => 'کارمزد × ۲';
+
+  @override
+  String get stress_slippage_x3 => 'لغزش × ۳';
+
+  @override
+  String get stress_latency_plus_1 => 'تأخیر +۱ کندل';
+
+  @override
+  String get reportSensitivity => 'حساسیت پارامتر';
+
+  @override
+  String reportSensitivityHelp(String x, String y) {
+    return 'بازده خالص خارج از نمونه · افقی $x$y';
+  }
+
+  @override
+  String reportSensitivityY(String y) {
+    return '، عمودی $y';
+  }
+
+  @override
+  String get reportSensitivityNone =>
+      'این راهبرد پارامتر سیگنالی برای آزمون همسایگی ندارد.';
+
+  @override
+  String get reportHoldout => 'آزمون نهایی (holdout)';
+
+  @override
+  String get reportHoldoutHidden =>
+      'نتیجه آزمون نهایی پنهان است تا تصمیم‌ها روی آن تنظیم نشوند. هر بار دیدن ثبت می‌شود.';
+
+  @override
+  String get reportHoldoutShow => 'نمایش آزمون نهایی';
+
+  @override
+  String get reportHoldoutConfirm =>
+      'نمایش آزمون نهایی ثبت می‌شود و در گزارش به‌عنوان «دیده‌شده» نشان داده خواهد شد. پس از دیدن، تنظیم دوباره پارامترها روی این داده نتیجه را بی‌اعتبار می‌کند. ادامه می‌دهید؟';
+
+  @override
+  String reportHoldoutViews(int n) {
+    return 'آزمون نهایی: $n بار مشاهده';
+  }
+
+  @override
+  String get reportTrades => 'معاملات خارج از نمونه';
+
+  @override
+  String get tradeEntryExit => 'ورود → خروج';
+
+  @override
+  String get tradeGross => 'ناخالص';
+
+  @override
+  String get tradeCost => 'هزینه';
+
+  @override
+  String get tradeNet => 'خالص';
+
+  @override
+  String get tradeOpen => 'باز';
+
+  @override
+  String get cancel => 'انصراف';
+
+  @override
+  String get confirm => 'تأیید';
+
+  @override
+  String badgeEngine(String v) {
+    return 'کد $v';
+  }
+
+  @override
+  String badgeDatasets(String ids) {
+    return 'داده $ids';
+  }
+
+  @override
+  String get compareSubtitle =>
+      'نتایج فقط وقتی کنار هم معنا دارند که فرض‌ها یکسان باشند؛ تفاوت‌ها پیش از معیارها نمایش داده می‌شوند.';
+
+  @override
+  String get compareAssumptions => 'هم‌ارزی فرض‌ها';
+
+  @override
+  String get compareAssumption => 'فرض';
+
+  @override
+  String get compareSame => 'یکسان';
+
+  @override
+  String get compareDiffers => 'متفاوت';
+
+  @override
+  String get compareNote => 'در تفسیر لحاظ شود';
+
+  @override
+  String compareMismatch(int n, String what) {
+    return '$n تفاوت در فرض‌ها: $what';
+  }
+
+  @override
+  String get compareEquity => 'منحنی ارزش خارج از نمونه (USDT)';
+
+  @override
+  String get compareEquityHelp => 'هر اجرا رنگ و سبک خط جداگانه دارد.';
+
+  @override
+  String get compareMetrics => 'معیارها';
+
+  @override
+  String get compareMetric => 'معیار';
+
+  @override
+  String get compareTotalCost => 'هزینه کل';
+
+  @override
+  String get compareEligible => 'واجد شرایط';
+
+  @override
+  String get compareYes => 'بله';
+
+  @override
+  String get compareNo => 'خیر';
+
+  @override
+  String get compareConclusion => 'جمع‌بندی';
+
+  @override
+  String get compareEmpty =>
+      'دست‌کم دو گزارش را از فهرست گزارش‌ها برای مقایسه انتخاب کنید.';
+
+  @override
+  String get compareClear => 'پاک کردن فهرست';
+
+  @override
+  String get pnlSubtitle =>
+      'ببینید یک الگوریتم یا یک معامله، پس از کارمزد و لغزش، دقیقاً چقدر سود یا زیان می‌سازد — و اگر شرایط عوض شود چه می‌شود.';
+
+  @override
+  String get pnlTabRun => 'نتیجه یک الگوریتم (از اجرای ثبت‌شده)';
+
+  @override
+  String get pnlTabTrade => 'یک معامله';
+
+  @override
+  String get pnlInputs => 'ورودی‌ها';
+
+  @override
+  String get pnlReport => 'اجرای ثبت‌شده';
+
+  @override
+  String get pnlNoReports => 'هنوز گزارشی نیست؛ ابتدا یک اجرای تازه بسازید.';
+
+  @override
+  String get pnlSize => 'اندازه موقعیت نسبت به اجرای اصلی';
+
+  @override
+  String get pnlSizeHelp => '۱۰۰٪ یعنی همان اندازه ثبت‌شده';
+
+  @override
+  String get pnlRate => 'نرخ تبدیل نمایشی';
+
+  @override
+  String get pnlRateNone => 'بدون تومان';
+
+  @override
+  String get pnlReset => 'بازگشت به تنظیمات اجرای اصلی';
+
+  @override
+  String get pnlOriginalNet => 'سود خالص اجرای اصلی';
+
+  @override
+  String get pnlNet => 'سود خالص';
+
+  @override
+  String get pnlFinal => 'ارزش نهایی';
+
+  @override
+  String get pnlBreakEvenFee => 'کارمزد سر‌به‌سر';
+
+  @override
+  String get pnlEquity => 'ارزش حساب';
+
+  @override
+  String get pnlTradeInputs => 'ورودی‌های معامله';
+
+  @override
+  String get pnlSpotNote =>
+      'بازار اسپات: خرید و سپس فروش. فروش استقراضی ممکن نیست.';
+
+  @override
+  String get pnlEntry => 'قیمت ورود';
+
+  @override
+  String get pnlExit => 'قیمت خروج';
+
+  @override
+  String get pnlAmount => 'مبلغ خرید';
+
+  @override
+  String get pnlQty => 'مقدار';
+
+  @override
+  String get pnlCost => 'هزینه کل خرید';
+
+  @override
+  String get pnlReturn => 'بازده روی هزینه';
+
+  @override
+  String get pnlBreakEvenExit => 'قیمت فروش سر‌به‌سر';
+
+  @override
+  String get pnlTomanNet => 'سود خالص به تومان';
 }

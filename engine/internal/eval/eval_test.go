@@ -110,6 +110,12 @@ func TestEvaluateIdentitiesAndIsolation(t *testing.T) {
 	require.Len(t, ev.Benchmarks, 2)
 	require.Equal(t, "hold_cash", ev.Benchmarks[1].Key)
 	require.Zero(t, ev.Benchmarks[1].Return.V, "cash earns nothing")
+	require.NotZero(t, ev.Benchmarks[0].Return.V, "buy and hold is invested from the OOS start")
+	require.EqualValues(t, 200_000, ev.Spec.Split.Holdout, "defaults are recorded in the spec")
+	for _, s := range ev.Stress {
+		tr, _ := metrics.Get(s.Metrics, "trades")
+		require.Positive(t, tr.V, "%s still trades (TTL scales with the timeframe)", s.Key)
+	}
 	require.Equal(t, Window{t0, t0.Add(20_000 * time.Minute)}, ev.Range)
 	require.Len(t, ev.Stress, 3)
 	for _, s := range ev.Stress {

@@ -1,6 +1,6 @@
 import 'package:decimal/decimal.dart';
 
-import '../gen/lab/v1/common.pb.dart';
+import '../gen/lab/v1/common.pb.dart' show Money;
 
 /// Exact value of an engine [Money]. Never converts through double or web int.
 Decimal moneyValue(Money m) => Decimal.parse(m.units).shift(-m.scale);

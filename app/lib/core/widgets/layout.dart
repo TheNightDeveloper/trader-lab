@@ -31,6 +31,15 @@ class PageHeader extends StatelessWidget {
   );
 }
 
+/// Unit shown inside a numeric field with a gap from the value ("10000  USDT"),
+/// instead of suffixText, which RTL layout glues to the LTR number.
+Widget? unitSuffix(String? unit) => unit == null
+    ? null
+    : Padding(
+        padding: const EdgeInsets.only(right: AppSpace.sm),
+        child: Text(unit, style: AppText.label),
+      );
+
 enum CardTone { normal, positive, negative }
 
 class SectionCard extends StatelessWidget {

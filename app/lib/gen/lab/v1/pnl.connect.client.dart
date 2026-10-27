@@ -9,7 +9,7 @@ import "pnl.connect.spec.dart" as specs;
 
 /// PnlService: what-if on a recorded run, and a single-trade calculator. Both use
 /// the simulator math; the UI never computes P&L.
-extension type PnlServiceClient (connect.Transport _transport) {
+extension type PnlServiceClient(connect.Transport _transport) {
   Future<labv1pnl.RecalculateResponse> recalculate(
     labv1pnl.RecalculateRequest input, {
     connect.Headers? headers,

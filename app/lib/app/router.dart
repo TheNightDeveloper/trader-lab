@@ -6,6 +6,10 @@ import '../core/theme/tokens.dart';
 import '../features/chart/chart_screen.dart';
 import '../features/data/data_screen.dart';
 import '../features/placeholder_screen.dart';
+import '../features/pnl/pnl_screen.dart';
+import '../features/reports/compare_screen.dart';
+import '../features/reports/report_screen.dart';
+import '../features/reports/reports_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../shell/app_shell.dart';
 import 'nav.dart';
@@ -36,10 +40,24 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
         _placeholder(Dest.builder),
         _placeholder(Dest.queue),
         _placeholder(Dest.queue, path: '/experiments/:id/queue'),
-        _placeholder(Dest.reports),
-        _placeholder(Dest.reports, path: '/reports/:id'),
-        _placeholder(Dest.compare),
-        _placeholder(Dest.pnl),
+        GoRoute(path: Dest.reports.path, pageBuilder: (context, state) => _page(context, state, const ReportsScreen())),
+        GoRoute(
+          path: '/reports/:id',
+          pageBuilder: (context, state) => _page(context, state, ReportScreen(id: state.pathParameters['id']!)),
+        ),
+        GoRoute(
+          path: Dest.compare.path,
+          pageBuilder: (context, state) => _page(
+            context,
+            state,
+            CompareScreen(ids: (state.uri.queryParameters['ids'] ?? '').split(',').where((s) => s.isNotEmpty).toList()),
+          ),
+        ),
+        GoRoute(
+          path: Dest.pnl.path,
+          pageBuilder: (context, state) =>
+              _page(context, state, PnlScreen(reportId: state.uri.queryParameters['report'])),
+        ),
         _placeholder(Dest.learning),
         GoRoute(path: Dest.chart.path, pageBuilder: (context, state) => _page(context, state, const ChartScreen())),
         GoRoute(path: Dest.data.path, pageBuilder: (context, state) => _page(context, state, const DataScreen())),

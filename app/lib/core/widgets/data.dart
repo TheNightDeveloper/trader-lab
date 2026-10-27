@@ -152,7 +152,7 @@ class StatGrid extends StatelessWidget {
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, box) {
       const gap = 14.0;
-      final cols = max(2, ((box.maxWidth + gap) / (minWidth + gap)).floor()).clamp(1, children.length);
+      final cols = max(2, ((box.maxWidth + gap) / (minWidth + gap)).floor()).clamp(1, max(1, children.length));
       final w = (box.maxWidth - gap * (cols - 1)) / cols;
       return Wrap(
         spacing: gap,

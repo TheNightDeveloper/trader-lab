@@ -229,5 +229,227 @@
   "settingsOther": "منابع موتور، پیش‌فرض‌های یادگیری و نگهداری",
   "settingsOtherNote": "این بخش‌ها همراه صف اجرا (M4) و چرخه یادگیری (M5) فعال می‌شوند.",
   "errRate": "نرخ باید عددی مثبت با حداکثر دو رقم اعشار باشد.",
-  "errFutureDate": "تاریخ نمی‌تواند در آینده باشد."
+  "errFutureDate": "تاریخ نمی‌تواند در آینده باشد.",
+  "invalid": "نامعتبر",
+  "unitUsdt": "USDT",
+  "durationDays": "{d} روز",
+  "@durationDays": {
+    "placeholders": {
+      "d": {
+        "type": "int"
+      }
+    }
+  },
+  "durationHours": "{h} ساعت",
+  "@durationHours": {
+    "placeholders": {
+      "h": {
+        "type": "int"
+      }
+    }
+  },
+  "durationMinutes": "{m} دقیقه",
+  "@durationMinutes": {
+    "placeholders": {
+      "m": {
+        "type": "int"
+      }
+    }
+  },
+  "reportsNew": "اجرای تازه",
+  "reportsEmpty": "هنوز گزارشی ساخته نشده است. با «اجرای تازه» اولین آزمون را بسازید.",
+  "reportsCompareSelected": "مقایسه {n} گزارش",
+  "@reportsCompareSelected": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "reportsColTitle": "گزارش",
+  "reportsColCreated": "ساخته‌شده",
+  "reportsColNet": "سود خالص (OOS)",
+  "reportsColReturn": "بازده",
+  "reportsColTrades": "معاملات",
+  "reportsColVerdict": "نتیجه",
+  "reportsColHoldout": "آزمون نهایی",
+  "reportsSelect": "انتخاب برای مقایسه",
+  "newDatasets": "نسخه‌های داده",
+  "newDatasetsHelp": "یک نسخه برای هر جفت؛ همه با یک تایم‌فریم",
+  "newDatasetsEmpty": "نسخه‌ای نیست. ابتدا در صفحه داده یک بازه وارد کنید.",
+  "newStrategy": "راهبرد",
+  "newParams": "پارامترها",
+  "newCapital": "سرمایه اولیه",
+  "newFeeBps": "کارمزد هر سمت",
+  "newSlipBps": "لغزش هر سمت",
+  "bps": "bps",
+  "bpsHelp": "۱ bps = ۰٫۰۱٪؛ مثلاً ۱۰ یعنی ۰٫۱٪",
+  "newFolds": "تعداد گام‌های آزمون",
+  "newHoldout": "سهم آزمون نهایی",
+  "newHoldoutHelp": "درصد پایانی داده که پنهان می‌ماند",
+  "newRolling": "پنجره آموزش غلتان",
+  "newRun": "اجرا و ساخت گزارش",
+  "newRunning": "در حال ارزیابی گام‌به‌گام…",
+  "errRequired": "این مقدار لازم است.",
+  "errPositive": "عددی مثبت وارد کنید.",
+  "errNumber": "عدد معتبر وارد کنید.",
+  "errBps": "عددی بین ۰ و ۱۰۰۰ با حداکثر دو رقم اعشار.",
+  "errPickDataset": "دست‌کم یک نسخه داده انتخاب کنید.",
+  "reportTitle": "گزارش",
+  "reportExportCsv": "خروجی CSV",
+  "reportExportMetrics": "معیارها CSV",
+  "reportExportJson": "تعریف JSON",
+  "reportReproduce": "اجرای مجدد (بازتولید)",
+  "reportReproduceOk": "بازتولید شد: همه اعداد دقیقاً یکسان‌اند.",
+  "reportReproduceFail": "بازتولید متفاوت بود؛ گزارش را بررسی کنید.",
+  "reportAddCompare": "افزودن به مقایسه",
+  "reportInCompare": "در فهرست مقایسه",
+  "reportOpenPnl": "آزمودن سرمایه و کارمزد دیگر در ماشین‌حساب",
+  "reportSummary": "خلاصه به زبان ساده",
+  "reportWaterfall": "از سود ناخالص تا سود خالص",
+  "reportFinalEquity": "ارزش نهایی حساب",
+  "reportToman": "معادل تومانی",
+  "reportTomanRate": "نرخ #{id} · {date}",
+  "@reportTomanRate": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "reportTomanNone": "نرخی ثبت نشده",
+  "reportBreakEven": "کارمزد سر‌به‌سر",
+  "reportBreakEvenNone": "هیچ کارمزدی آن را سودده نمی‌کند",
+  "reportEquity": "منحنی ارزش حساب",
+  "reportCandidate": "این راهبرد",
+  "benchBuyAndHold": "خرید و نگهداری",
+  "benchHoldCash": "نگهداری نقد",
+  "regionInSample": "داده آموزش",
+  "regionOos": "خارج از نمونه",
+  "regionHoldout": "آزمون نهایی",
+  "reportFolds": "گام‌های ارزیابی گام‌به‌گام",
+  "foldStep": "گام",
+  "foldTrainUntil": "آموزش تا",
+  "foldTest": "آزمون",
+  "foldReturn": "بازده خالص",
+  "foldDrawdown": "افت",
+  "foldTrades": "معاملات",
+  "reportStress": "سناریوهای تنش",
+  "stress_fee_x2": "کارمزد × ۲",
+  "stress_slippage_x3": "لغزش × ۳",
+  "stress_latency_plus_1": "تأخیر +۱ کندل",
+  "reportSensitivity": "حساسیت پارامتر",
+  "reportSensitivityHelp": "بازده خالص خارج از نمونه · افقی {x}{y}",
+  "@reportSensitivityHelp": {
+    "placeholders": {
+      "x": {
+        "type": "String"
+      },
+      "y": {
+        "type": "String"
+      }
+    }
+  },
+  "reportSensitivityY": "، عمودی {y}",
+  "@reportSensitivityY": {
+    "placeholders": {
+      "y": {
+        "type": "String"
+      }
+    }
+  },
+  "reportSensitivityNone": "این راهبرد پارامتر سیگنالی برای آزمون همسایگی ندارد.",
+  "reportHoldout": "آزمون نهایی (holdout)",
+  "reportHoldoutHidden": "نتیجه آزمون نهایی پنهان است تا تصمیم‌ها روی آن تنظیم نشوند. هر بار دیدن ثبت می‌شود.",
+  "reportHoldoutShow": "نمایش آزمون نهایی",
+  "reportHoldoutConfirm": "نمایش آزمون نهایی ثبت می‌شود و در گزارش به‌عنوان «دیده‌شده» نشان داده خواهد شد. پس از دیدن، تنظیم دوباره پارامترها روی این داده نتیجه را بی‌اعتبار می‌کند. ادامه می‌دهید؟",
+  "reportHoldoutViews": "آزمون نهایی: {n} بار مشاهده",
+  "@reportHoldoutViews": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "reportTrades": "معاملات خارج از نمونه",
+  "tradeEntryExit": "ورود → خروج",
+  "tradeGross": "ناخالص",
+  "tradeCost": "هزینه",
+  "tradeNet": "خالص",
+  "tradeOpen": "باز",
+  "cancel": "انصراف",
+  "confirm": "تأیید",
+  "badgeEngine": "کد {v}",
+  "@badgeEngine": {
+    "placeholders": {
+      "v": {
+        "type": "String"
+      }
+    }
+  },
+  "badgeDatasets": "داده {ids}",
+  "@badgeDatasets": {
+    "placeholders": {
+      "ids": {
+        "type": "String"
+      }
+    }
+  },
+  "compareSubtitle": "نتایج فقط وقتی کنار هم معنا دارند که فرض‌ها یکسان باشند؛ تفاوت‌ها پیش از معیارها نمایش داده می‌شوند.",
+  "compareAssumptions": "هم‌ارزی فرض‌ها",
+  "compareAssumption": "فرض",
+  "compareSame": "یکسان",
+  "compareDiffers": "متفاوت",
+  "compareNote": "در تفسیر لحاظ شود",
+  "compareMismatch": "{n} تفاوت در فرض‌ها: {what}",
+  "@compareMismatch": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "what": {
+        "type": "String"
+      }
+    }
+  },
+  "compareEquity": "منحنی ارزش خارج از نمونه (USDT)",
+  "compareEquityHelp": "هر اجرا رنگ و سبک خط جداگانه دارد.",
+  "compareMetrics": "معیارها",
+  "compareMetric": "معیار",
+  "compareTotalCost": "هزینه کل",
+  "compareEligible": "واجد شرایط",
+  "compareYes": "بله",
+  "compareNo": "خیر",
+  "compareConclusion": "جمع‌بندی",
+  "compareEmpty": "دست‌کم دو گزارش را از فهرست گزارش‌ها برای مقایسه انتخاب کنید.",
+  "compareClear": "پاک کردن فهرست",
+  "pnlSubtitle": "ببینید یک الگوریتم یا یک معامله، پس از کارمزد و لغزش، دقیقاً چقدر سود یا زیان می‌سازد — و اگر شرایط عوض شود چه می‌شود.",
+  "pnlTabRun": "نتیجه یک الگوریتم (از اجرای ثبت‌شده)",
+  "pnlTabTrade": "یک معامله",
+  "pnlInputs": "ورودی‌ها",
+  "pnlReport": "اجرای ثبت‌شده",
+  "pnlNoReports": "هنوز گزارشی نیست؛ ابتدا یک اجرای تازه بسازید.",
+  "pnlSize": "اندازه موقعیت نسبت به اجرای اصلی",
+  "pnlSizeHelp": "۱۰۰٪ یعنی همان اندازه ثبت‌شده",
+  "pnlRate": "نرخ تبدیل نمایشی",
+  "pnlRateNone": "بدون تومان",
+  "pnlReset": "بازگشت به تنظیمات اجرای اصلی",
+  "pnlOriginalNet": "سود خالص اجرای اصلی",
+  "pnlNet": "سود خالص",
+  "pnlFinal": "ارزش نهایی",
+  "pnlBreakEvenFee": "کارمزد سر‌به‌سر",
+  "pnlEquity": "ارزش حساب",
+  "pnlTradeInputs": "ورودی‌های معامله",
+  "pnlSpotNote": "بازار اسپات: خرید و سپس فروش. فروش استقراضی ممکن نیست.",
+  "pnlEntry": "قیمت ورود",
+  "pnlExit": "قیمت خروج",
+  "pnlAmount": "مبلغ خرید",
+  "pnlQty": "مقدار",
+  "pnlCost": "هزینه کل خرید",
+  "pnlReturn": "بازده روی هزینه",
+  "pnlBreakEvenExit": "قیمت فروش سر‌به‌سر",
+  "pnlTomanNet": "سود خالص به تومان"
 }

@@ -127,6 +127,20 @@ func TestLatencyExpiryAndSupersede(t *testing.T) {
 	require.Equal(t, OutcomeFilled, res.Decisions[1].Outcome)
 }
 
+func TestIntentTTLScalesWithTimeframe(t *testing.T) {
+	hourly := make([]data.Bar, 5)
+	for i := range hourly {
+		open := t0.Add(time.Duration(i) * time.Hour)
+		hourly[i] = data.Bar{Instrument: "BTCUSDT", OpenTime: open, CloseTime: open.Add(time.Hour), AvailableAt: open.Add(time.Hour + delay),
+			O: px(100e8), H: px(100e8), L: px(100e8), C: px(100e8), Volume: money.Qty{V: 1e8, Scale: 8}}
+	}
+	c := cfg()
+	c.LatencyBars = 2
+	res := run(t, c, map[string][]data.Bar{"BTCUSDT": hourly}, strategy.Step{At: t0, Intent: strategy.Intent{Instrument: "BTCUSDT", Target: money.RatioOne}})
+	require.Equal(t, OutcomeFilled, res.Decisions[0].Outcome, "two hourly bars of latency must not expire the intent")
+	require.Equal(t, t0.Add(2*time.Hour), res.Fills[0].Time)
+}
+
 func TestLateBarNeverFillsInThePast(t *testing.T) {
 	// Bars 1..3 were backfilled and all became available at 00:05:00.
 	bs := flat("BTCUSDT", 6, 100)
