@@ -37,6 +37,47 @@ type Dataset struct {
 	CreatedAt time.Time
 }
 
+type Decision struct {
+	ReportID      string
+	Run           string
+	ID            int32
+	At            time.Time
+	InputSymbol   string
+	InputBarOpen  time.Time
+	Instrument    string
+	Target        int64
+	StopLoss      int64
+	TakeProfit    int64
+	Reason        string
+	ModelID       string
+	RecipeVersion string
+	Outcome       string
+	Detail        string
+}
+
+type Fill struct {
+	ReportID     string
+	Run          string
+	Seq          int32
+	DecisionID   int32
+	At           time.Time
+	Instrument   string
+	Side         string
+	Kind         string
+	Qty          int64
+	RefPrice     int64
+	Price        int64
+	Quote        string
+	RefValue     int64
+	Value        int64
+	Slippage     int64
+	Fee          int64
+	RefValueUsdt int64
+	SlippageUsdt int64
+	FeeUsdt      int64
+	Ambiguous    bool
+}
+
 type FxRate struct {
 	ID        int64
 	Pair      string
@@ -45,6 +86,12 @@ type FxRate struct {
 	RateScale int32
 	Source    string
 	EnteredAt time.Time
+}
+
+type HoldoutView struct {
+	ID       int64
+	ReportID string
+	ViewedAt time.Time
 }
 
 type ImportFile struct {
@@ -77,8 +124,43 @@ type QualityIssue struct {
 	DetectedAt time.Time
 }
 
+type Report struct {
+	ID           string
+	CreatedAt    time.Time
+	Title        string
+	Spec         []byte
+	Split        []byte
+	Evaluation   []byte
+	Holdout      []byte
+	OosNet       int64
+	OosReturn    int64
+	ClosedTrades int32
+	Verdict      string
+	Tone         string
+}
+
 type Setting struct {
 	Key       string
 	Value     []byte
 	UpdatedAt time.Time
+}
+
+type Trade struct {
+	ReportID      string
+	Run           string
+	Seq           int32
+	Instrument    string
+	OpenedAt      time.Time
+	ClosedAt      *time.Time
+	Qty           int64
+	EntryRef      int64
+	ExitRef       int64
+	Gross         int64
+	Slippage      int64
+	Fees          int64
+	Net           int64
+	ExitReason    string
+	AmbiguousBars int32
+	OpenQty       int64
+	MarkValue     *int64
 }
