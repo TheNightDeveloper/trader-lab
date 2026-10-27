@@ -1,27 +1,24 @@
 #!/bin/sh
-# Proves depguard is live: plants sim -> search import and expects lint to fail.
-# Only removes the files it created; directories are removed only if left empty.
+# Proves depguard is live: plants an import of the optimizer (search) in a fresh
+# package under internal/sim and expects lint to fail through depguard. A
+# sub-package is used because search itself imports sim: a probe in sim would be
+# an import cycle, not a depguard finding.
 set -eu
 cd "$(dirname "$0")/../engine"
 
-probe_sim=internal/sim/zz_depguard_probe.go
-probe_search=internal/search/zz_depguard_probe.go
-if [ -e "$probe_sim" ] || [ -e "$probe_search" ]; then
-  echo "probe file already exists; remove it first" >&2
+dir=internal/sim/zzdepguardprobe
+if [ -e "$dir" ]; then
+  echo "$dir already exists; remove it first" >&2
   exit 1
 fi
-cleanup() {
-  rm -f "$probe_sim" "$probe_search"
-  rmdir internal/sim internal/search 2>/dev/null || true
-}
+cleanup() { rm -rf "$dir"; }
 trap cleanup EXIT
 
-mkdir -p internal/sim internal/search
-printf 'package search\n\nconst Probe = 1\n' > "$probe_search"
-printf 'package sim\n\nimport "tradinglab/engine/internal/search"\n\nvar _ = search.Probe\n' > "$probe_sim"
+mkdir -p "$dir"
+printf 'package zzdepguardprobe\n\nimport "tradinglab/engine/internal/search"\n\nvar _ = search.MaxCandidates\n' > "$dir/probe.go"
 
-if out=$(golangci-lint run ./internal/sim/... 2>&1); then
-  echo "depguard did NOT reject sim -> search import" >&2
+if out=$(golangci-lint run "./$dir/..." 2>&1); then
+  echo "depguard did NOT reject an optimizer import under internal/sim" >&2
   exit 1
 fi
 echo "$out" | grep -q depguard || { echo "lint failed, but not via depguard:" >&2; echo "$out" >&2; exit 1; }
