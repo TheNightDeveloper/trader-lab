@@ -4,15 +4,16 @@ package fx
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
+	"tradinglab/engine/internal/data"
 	"tradinglab/engine/internal/instrument"
 	"tradinglab/engine/internal/money"
 )
 
-var ErrNoRate = errors.New("fx: no rate available")
+// ErrNoRate is data.ErrNoBar, so callers can match either name.
+var ErrNoRate = data.ErrNoBar
 
 // Toman is display-only. 1 TOMAN = 10 IRR; shown in whole units.
 var Toman = money.Asset{Code: "TOMAN", Scale: 0}

@@ -5,11 +5,80 @@
 package db
 
 import (
-	"github.com/jackc/pgx/v5/pgtype"
+	"time"
 )
+
+type Candle struct {
+	Symbol      string
+	OpenTime    time.Time
+	Revision    int32
+	CloseTime   time.Time
+	AvailableAt time.Time
+	O           int64
+	H           int64
+	L           int64
+	C           int64
+	Volume      int64
+	Source      string
+	SourceRef   string
+	IngestedAt  time.Time
+}
+
+type Dataset struct {
+	ID        string
+	Symbol    string
+	Timeframe string
+	RangeFrom time.Time
+	RangeTo   time.Time
+	GapPolicy string
+	KnownAt   time.Time
+	BarCount  int32
+	Manifest  []byte
+	CreatedAt time.Time
+}
+
+type FxRate struct {
+	ID        int64
+	Pair      string
+	RateDate  time.Time
+	Rate      int64
+	RateScale int32
+	Source    string
+	EnteredAt time.Time
+}
+
+type ImportFile struct {
+	Sha256     string
+	Symbol     string
+	Url        string
+	Rows       int32
+	ImportedAt time.Time
+}
+
+type Instrument struct {
+	Symbol      string
+	Base        string
+	Quote       string
+	BaseScale   int32
+	QuoteScale  int32
+	PriceScale  int32
+	Tick        int64
+	Lot         int64
+	MinNotional int64
+}
+
+type QualityIssue struct {
+	ID         int64
+	Symbol     string
+	Kind       string
+	At         time.Time
+	Until      *time.Time
+	Detail     string
+	DetectedAt time.Time
+}
 
 type Setting struct {
 	Key       string
 	Value     []byte
-	UpdatedAt pgtype.Timestamptz
+	UpdatedAt time.Time
 }

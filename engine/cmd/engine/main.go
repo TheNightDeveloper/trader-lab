@@ -20,7 +20,9 @@ import (
 
 	"tradinglab/engine/internal/api"
 	"tradinglab/engine/internal/clock"
+	"tradinglab/engine/internal/data"
 	"tradinglab/engine/internal/gen/lab/v1/labv1connect"
+	"tradinglab/engine/internal/store"
 )
 
 var version = "dev" // set with -ldflags "-X main.version=..."
@@ -47,6 +49,15 @@ func run() error {
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
+
+	st, err := store.Open(ctx, cfg.DatabaseURL)
+	if err != nil {
+		return fmt.Errorf("database (%s): %w", redact(cfg.DatabaseURL), err)
+	}
+	defer st.Close()
+	if err := data.SeedInstruments(ctx, st.Queries); err != nil {
+		return err
+	}
 
 	health := api.NewHealth(clock.Wall{}, version, cfg.Workers, time.Second)
 	sc := echo.StartConfig{
@@ -100,4 +111,13 @@ func isLoopbackOrigin(o string) bool {
 	h := u.Hostname()
 	ip := net.ParseIP(h)
 	return strings.EqualFold(h, "localhost") || ip != nil && ip.IsLoopback()
+}
+
+// redact hides the password in a database URL for logs and errors.
+func redact(dsn string) string {
+	u, err := url.Parse(dsn)
+	if err != nil {
+		return "(unparseable url)"
+	}
+	return u.Redacted()
 }

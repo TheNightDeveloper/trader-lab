@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"time"
 )
 
 type Config struct {
@@ -13,10 +14,18 @@ type Config struct {
 	WebDir   string `json:"web_dir"`   // built Flutter app; empty disables static serving
 	Workers  int    `json:"workers"`   // research worker count (pool arrives in M4)
 	LogLevel string `json:"log_level"` // debug | info | warn | error
+
+	DatabaseURL string `json:"database_url"`
+	// IngestDelay is added to a bar's close to get AvailableAt (Go duration, e.g. "2s").
+	IngestDelay string `json:"ingest_delay"`
 }
 
 func defaultConfig() Config {
-	return Config{Listen: "127.0.0.1:8080", WebDir: "../app/build/web", Workers: 4, LogLevel: "info"}
+	return Config{
+		Listen: "127.0.0.1:8080", WebDir: "../app/build/web", Workers: 4, LogLevel: "info",
+		DatabaseURL: "postgres://lab:lab@127.0.0.1:5432/lab?sslmode=disable",
+		IngestDelay: "2s",
+	}
 }
 
 // loadConfig reads path over the defaults. A missing file means defaults.
@@ -43,6 +52,9 @@ func (c Config) validate() error {
 	// Remote access needs auth and TLS first (plan §3.1), so only loopback is allowed.
 	if ip := net.ParseIP(host); ip == nil || !ip.IsLoopback() {
 		return fmt.Errorf("listen %q: only loopback IPs are allowed (e.g. 127.0.0.1)", c.Listen)
+	}
+	if d, err := time.ParseDuration(c.IngestDelay); err != nil || d < 0 {
+		return fmt.Errorf("ingest_delay %q: want a non-negative duration like \"2s\"", c.IngestDelay)
 	}
 	if c.Workers < 1 {
 		return fmt.Errorf("workers must be >= 1, got %d", c.Workers)
