@@ -55,9 +55,9 @@ void main() {
     expect(find.text('فعال · 8 کارگر'), findsOneWidget);
     expect(find.text('هنوز نرخی ثبت نشده'), findsOneWidget);
 
-    await tester.tap(find.text('کتابخانه الگوریتم').first);
+    await tester.tap(find.text('چرخه یادگیری').first);
     await _settle(tester);
-    expect(find.text('این صفحه در مرحله M4 ساخته می‌شود.'), findsOneWidget);
+    expect(find.text('این صفحه در مرحله M5 ساخته می‌شود.'), findsOneWidget);
   });
 
   testWidgets('engine down: banner shows and last status stays visible', (tester) async {

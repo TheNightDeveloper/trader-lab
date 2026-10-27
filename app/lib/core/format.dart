@@ -34,3 +34,9 @@ DateTime? parseDate(String s) {
   final d = DateTime.utc(int.parse(m[1]!), int.parse(m[2]!), int.parse(m[3]!));
   return fmtDate(d) == s.trim() ? d : null; // rejects 2024-02-31
 }
+
+/// A strategy parameter (model math, not money): 12 or 2.5, no trailing ".0".
+String fmtParam(double v) => v == v.roundToDouble() ? v.toInt().toString() : v.toString();
+
+/// fast=12 slow=26, keys sorted so the same candidate always reads the same.
+String fmtParams(Map<String, double> p) => ([...p.keys]..sort()).map((k) => '$k=${fmtParam(p[k]!)}').join(' ');

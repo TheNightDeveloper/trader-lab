@@ -57,7 +57,9 @@ func Check(cs []experiment.Constraint, ms []metrics.Metric) (bool, []string) {
 			continue
 		}
 		if (c.Op == ">=" && m.V < limit) || (c.Op == "<=" && m.V > limit) {
-			violations = append(violations, fmt.Sprintf("%s %s %s نیست", label, c.Op, c.Value))
+			// The operator and limit read left to right inside the Persian sentence;
+			// without the isolate, RTL layout mirrors "<=" and swaps it with the number.
+			violations = append(violations, fmt.Sprintf("%s \u2066%s %s\u2069 نیست", label, c.Op, c.Value))
 		}
 	}
 	return len(violations) == 0, violations

@@ -895,4 +895,448 @@ class L10nFa extends L10n {
 
   @override
   String get pnlTomanNet => 'سود خالص به تومان';
+
+  @override
+  String get st_running => 'در حال اجرا';
+
+  @override
+  String get st_paused => 'متوقف موقت';
+
+  @override
+  String get st_finalizing => 'در حال جمع‌بندی';
+
+  @override
+  String get st_done => 'کامل';
+
+  @override
+  String get st_cancelled => 'لغو شد';
+
+  @override
+  String get st_failed => 'شکست';
+
+  @override
+  String get st_queued => 'در صف';
+
+  @override
+  String get lc_research => 'پژوهش';
+
+  @override
+  String get lc_validation => 'اعتبارسنجی';
+
+  @override
+  String get lc_forward_test => 'آزمون پیشرو';
+
+  @override
+  String get lc_active => 'فعال';
+
+  @override
+  String get lc_stopped => 'متوقف';
+
+  @override
+  String get lc_retired => 'بازنشسته';
+
+  @override
+  String get fam_all => 'همه';
+
+  @override
+  String get fam_trend => 'روند';
+
+  @override
+  String get fam_mean_reversion => 'بازگشت به میانگین';
+
+  @override
+  String get fam_learning => 'یادگیرنده';
+
+  @override
+  String get fam_hybrid => 'ترکیبی';
+
+  @override
+  String get fam_benchmark => 'معیار مقایسه';
+
+  @override
+  String get bSubtitle =>
+      'در چند قدم ساده. مقدارهای پیش‌فرض امن‌اند؛ فقط آنچه برایتان مهم است را تغییر دهید.';
+
+  @override
+  String get bStep0 => 'شروع';
+
+  @override
+  String get bStep1 => 'ایده';
+
+  @override
+  String get bStep2 => 'داده';
+
+  @override
+  String get bStep3 => 'الگوریتم';
+
+  @override
+  String get bStep4 => 'پول و هزینه';
+
+  @override
+  String get bStep5 => 'بررسی و اجرا';
+
+  @override
+  String get bWhat => 'چه کاری می‌خواهید انجام دهید؟';
+
+  @override
+  String get tplQuick => 'آزمون سریع یک الگوریتم';
+
+  @override
+  String get tplQuickDesc =>
+      'یک الگوریتم را با تنظیمات فعلی‌اش روی داده تازه امتحان کنید.';
+
+  @override
+  String get tplQuickMeta => '۱ نامزد';
+
+  @override
+  String get tplSearch => 'یافتن بهترین تنظیمات';
+
+  @override
+  String get tplSearchDesc =>
+      'چند ترکیب از تنظیمات را امتحان کنید و ببینید کدام پایدارتر است.';
+
+  @override
+  String get tplSearchMeta => 'ده‌ها اجرا · همه ثبت می‌شوند';
+
+  @override
+  String get tplIdea => 'سنجش یک ایده تازه';
+
+  @override
+  String get tplIdeaDesc => 'یک تنظیم را عوض کنید و دو نسخه را کنار هم بسنجید.';
+
+  @override
+  String get tplIdeaMeta => '۲ نامزد · مقایسه کنار هم';
+
+  @override
+  String get bIdeaTitle => 'چه چیزی را می‌خواهید بسنجید؟';
+
+  @override
+  String get bName => 'نام آزمایش';
+
+  @override
+  String get bHypothesis => 'ایده شما در یک جمله';
+
+  @override
+  String get bHypothesisHelp =>
+      'مثال: «اگر فقط در بازار کم‌نوسان معامله کنیم، زیان‌های بزرگ کمتر می‌شود.»';
+
+  @override
+  String get bFalsifier => 'چه نتیجه‌ای یعنی ایده درست نبود؟';
+
+  @override
+  String get bFalsifierHelp =>
+      'این را قبل از دیدن نتیجه بنویسید تا بعداً خودتان را قانع نکنید.';
+
+  @override
+  String get bGoal => 'مهم‌ترین هدف';
+
+  @override
+  String get goalNet => 'بیشترین بازده با سقف افت سرمایه';
+
+  @override
+  String get goalDd => 'کمترین افت با حداقل سود';
+
+  @override
+  String get goalStable => 'بهترین نسبت شارپ';
+
+  @override
+  String get bDataTitle => 'روی چه بازار و دوره‌ای؟';
+
+  @override
+  String get bTimeframe => 'بازه زمانی هر کندل';
+
+  @override
+  String get bDatasets => 'نسخه‌های داده (یکی برای هر جفت)';
+
+  @override
+  String get bDatasetsEmpty =>
+      'برای این تایم‌فریم نسخه‌ای نیست؛ از صفحه داده وارد کنید.';
+
+  @override
+  String get bAlgoTitle => 'کدام الگوریتم؟';
+
+  @override
+  String get bParamsTitle => 'کدام تنظیمات امتحان شوند؟';
+
+  @override
+  String get bParam => 'تنظیم';
+
+  @override
+  String get bParamDefault => 'پیش‌فرض';
+
+  @override
+  String get bParamValues => 'مقدارها (با ویرگول)';
+
+  @override
+  String get bParamValuesHelp => 'خالی یعنی همان پیش‌فرض';
+
+  @override
+  String get bNoParams => 'این الگوریتم تنظیمی برای جست‌وجو ندارد.';
+
+  @override
+  String get bMoneyTitle => 'پول و هزینه‌ها';
+
+  @override
+  String bRoundTrip(String pct) {
+    return 'هر معامله کامل (خرید و فروش) با این تنظیمات حدود $pct هزینه دارد؛ الگوریتم باید در هر معامله بیش از این سود ناخالص بسازد.';
+  }
+
+  @override
+  String get bReviewTitle => 'بررسی نهایی';
+
+  @override
+  String get bAdvanced => 'تنظیمات پیشرفته';
+
+  @override
+  String get bAdvancedHelp =>
+      'این‌ها پیش‌فرض‌های امن هستند و معمولاً نیازی به تغییر ندارند.';
+
+  @override
+  String get bMaxDd => 'سقف افت سرمایه';
+
+  @override
+  String get bMinTrades => 'حداقل معامله بسته';
+
+  @override
+  String get bMinReturn => 'حداقل بازده';
+
+  @override
+  String get bSearchMode => 'روش جست‌وجو';
+
+  @override
+  String get modeGrid => 'شبکه‌ای (همه ترکیب‌ها)';
+
+  @override
+  String get modeRandom => 'تصادفی با بذر';
+
+  @override
+  String get bSeed => 'بذر';
+
+  @override
+  String get bMaxAttempts => 'سقف تلاش‌ها';
+
+  @override
+  String get bMaxMinutes => 'سقف زمان';
+
+  @override
+  String get minutes => 'دقیقه';
+
+  @override
+  String get bBack => 'قبلی';
+
+  @override
+  String get bNext => 'بعدی';
+
+  @override
+  String get bRun => 'ثبت و اجرا';
+
+  @override
+  String get bSummary => 'آنچه تا الان انتخاب کرده‌اید';
+
+  @override
+  String bRuns(int n, int c) {
+    return '$n اجرا · $c نامزد';
+  }
+
+  @override
+  String bEta(String t) {
+    return 'حدود $t';
+  }
+
+  @override
+  String get bLockNote =>
+      'پس از شروع، این تعریف قفل می‌شود. اگر بعداً چیزی را عوض کنید، آزمایش تازه‌ای با ارجاع به همین ساخته می‌شود.';
+
+  @override
+  String get bExisted =>
+      'این آزمایش با همین تعریف قبلاً اجرا شده بود؛ همان را باز کردیم.';
+
+  @override
+  String get bDraftRestored => 'پیش‌نویس قبلی بازیابی شد.';
+
+  @override
+  String get bDraftClear => 'شروع از نو';
+
+  @override
+  String get errHypothesis => 'ایده و نتیجه ردکننده را بنویسید.';
+
+  @override
+  String get errDatasetsPerPair => 'برای هر جفت فقط یک نسخه داده انتخاب کنید.';
+
+  @override
+  String get errValues =>
+      'عددهای مثبت با ویرگول؛ برای تنظیم‌های عدد صحیح فقط عدد صحیح.';
+
+  @override
+  String get qListEmpty => 'هنوز آزمایشی نیست. با «ساخت آزمایش» شروع کنید.';
+
+  @override
+  String get qNew => 'ساخت آزمایش';
+
+  @override
+  String get qColName => 'آزمایش';
+
+  @override
+  String get qColStatus => 'وضعیت';
+
+  @override
+  String get qColProgress => 'پیشرفت';
+
+  @override
+  String get qColCreated => 'شروع';
+
+  @override
+  String get qPause => 'توقف موقت';
+
+  @override
+  String get qResume => 'ادامه';
+
+  @override
+  String get qCancel => 'لغو آزمایش';
+
+  @override
+  String get qCancelConfirm =>
+      'تلاش‌های در صف لغو می‌شوند و آزمایش پایان می‌یابد. همه تلاش‌های انجام‌شده ثبت می‌مانند. ادامه می‌دهید؟';
+
+  @override
+  String get qPauseConfirm =>
+      'تلاش‌های در حال اجرا تمام می‌شوند ولی تلاش تازه‌ای شروع نمی‌شود تا ادامه دهید. ادامه می‌دهید؟';
+
+  @override
+  String get qProgress => 'پیشرفت';
+
+  @override
+  String get qAttempts => 'تلاش';
+
+  @override
+  String get qRemaining => 'زمان باقی‌مانده تخمینی';
+
+  @override
+  String get qAllRecorded =>
+      'همه تلاش‌ها، حتی شکست‌خورده و لغوشده، ثبت و شمرده می‌شوند.';
+
+  @override
+  String get qBudgetAttempts => 'تلاش‌ها از بودجه';
+
+  @override
+  String get qBudgetTime => 'زمان مصرف‌شده';
+
+  @override
+  String get qBudgetCpu => 'سهم CPU پژوهش';
+
+  @override
+  String get qCacheRate => 'نرخ استفاده از کش';
+
+  @override
+  String get qBest => 'بهترین نتیجه واجد شرایط تا اینجا';
+
+  @override
+  String get qTabAll => 'همه';
+
+  @override
+  String get qColParams => 'پارامترها';
+
+  @override
+  String get qColPair => 'جفت';
+
+  @override
+  String get qColReturn => 'بازده خالص';
+
+  @override
+  String get qColDd => 'بیشینه افت';
+
+  @override
+  String get qColTrades => 'معاملات';
+
+  @override
+  String get qColConstraints => 'محدودیت‌ها';
+
+  @override
+  String get qColCache => 'کش';
+
+  @override
+  String get qEligible => 'واجد شرایط';
+
+  @override
+  String qRejected(String why) {
+    return 'رد: $why';
+  }
+
+  @override
+  String qRuns(int n) {
+    return '$n بار اجرا';
+  }
+
+  @override
+  String get qResult => 'نتیجه';
+
+  @override
+  String qChosen(int n) {
+    return 'نامزد برگزیده #$n';
+  }
+
+  @override
+  String qChosenNote(int eligible, int cands, int attempts) {
+    return 'از $eligible نامزد واجد شرایط در میان $cands نامزد و $attempts تلاش انتخاب شد؛ بخشی از برتری آن ممکن است شانسی باشد.';
+  }
+
+  @override
+  String get qOpenReport => 'گزارش کامل نامزد برگزیده';
+
+  @override
+  String get qNone => 'نامزد واجد شرایطی نبود';
+
+  @override
+  String get qEmpty => 'تلاشی در این دسته نیست.';
+
+  @override
+  String get qNotFound => 'این آزمایش پیدا نشد.';
+
+  @override
+  String get libExperiment => 'آزمایش با نسخه انتخابی';
+
+  @override
+  String get libLatest => 'آخرین ارزیابی';
+
+  @override
+  String get libNone => '—';
+
+  @override
+  String get libSelected => 'الگوریتم انتخاب‌شده';
+
+  @override
+  String get libRecipe => 'دستور ساخت (نسخه جاری)';
+
+  @override
+  String get libVersions => 'تاریخچه نسخه‌ها';
+
+  @override
+  String get libLockNote =>
+      'قواعد و پارامترهای نسخه فعال قفل‌اند. هر تغییر در قواعد یا پارامترها نسخه تازه می‌سازد.';
+
+  @override
+  String libMoveTo(String state) {
+    return 'انتقال به «$state»';
+  }
+
+  @override
+  String libConfirm(String version, String from, String to) {
+    return 'وضعیت $version از «$from» به «$to» تغییر می‌کند و این تصمیم ثبت می‌شود.';
+  }
+
+  @override
+  String get libConfirmActive =>
+      ' اگر نسخه فعال دیگری از همین الگوریتم باشد، متوقف می‌شود.';
+
+  @override
+  String get libNote => 'یادداشت (چرا؟)';
+
+  @override
+  String get libHistory => 'رویدادها';
+
+  @override
+  String get actorUser => 'کاربر';
+
+  @override
+  String get actorSystem => 'سیستم';
 }

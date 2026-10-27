@@ -7,6 +7,7 @@ import '../../core/api/engine.dart';
 import '../../core/format.dart';
 import '../../core/metric.dart';
 import '../../core/theme/tokens.dart';
+import '../../core/validate.dart';
 import '../../core/widgets/layout.dart';
 import '../../core/widgets/data.dart';
 import '../../gen/lab/v1/report.pb.dart';
@@ -42,17 +43,6 @@ class _NewReportFormState extends ConsumerState<NewReportForm> {
     super.dispose();
   }
 
-  static final _num = RegExp(r'^\d+(\.\d{1,2})?$');
-
-  String? _positive(L10n l, String s) =>
-      _num.hasMatch(s.trim()) && Decimal.parse(s.trim()) > Decimal.zero ? null : l.errPositive;
-  String? _bps(L10n l, String s) =>
-      _num.hasMatch(s.trim()) && Decimal.parse(s.trim()) <= Decimal.fromInt(1000) ? null : l.errBps;
-  String? _int(L10n l, String s, int lo, int hi) {
-    final v = int.tryParse(s.trim());
-    return v != null && v >= lo && v <= hi ? null : l.errNumber;
-  }
-
   TextEditingController _param(ParamSpec p) => _params.putIfAbsent(
     '$_strategy.${p.name}',
     () => TextEditingController(text: p.integer ? p.default_2.toInt().toString() : p.default_2.toString()),
@@ -69,11 +59,11 @@ class _NewReportFormState extends ConsumerState<NewReportForm> {
     setState(() => _tried = true);
     final errs = [
       if (_datasets.isEmpty) l.errPickDataset,
-      _positive(l, _capital.text),
-      _bps(l, _fee.text),
-      _bps(l, _slip.text),
-      _int(l, _folds.text, 1, 12),
-      _int(l, _holdout.text, 5, 45),
+      vPositive(l, _capital.text),
+      vBps(l, _fee.text),
+      vBps(l, _slip.text),
+      vInt(l, _folds.text, 1, 12),
+      vInt(l, _holdout.text, 5, 45),
       for (final p in info?.params ?? <ParamSpec>[]) _paramError(l, p, _param(p).text),
     ];
     if (errs.any((e) => e != null)) return;
@@ -188,11 +178,11 @@ class _NewReportFormState extends ConsumerState<NewReportForm> {
           spacing: AppSpace.md,
           runSpacing: AppSpace.md,
           children: [
-            field(l.newCapital, _capital, (s) => _positive(l, s), suffix: 'USDT'),
-            field(l.newFeeBps, _fee, (s) => _bps(l, s), suffix: l.bps, help: l.bpsHelp),
-            field(l.newSlipBps, _slip, (s) => _bps(l, s), suffix: l.bps),
-            field(l.newFolds, _folds, (s) => _int(l, s, 1, 12)),
-            field(l.newHoldout, _holdout, (s) => _int(l, s, 5, 45), suffix: '%', help: l.newHoldoutHelp),
+            field(l.newCapital, _capital, (s) => vPositive(l, s), suffix: 'USDT'),
+            field(l.newFeeBps, _fee, (s) => vBps(l, s), suffix: l.bps, help: l.bpsHelp),
+            field(l.newSlipBps, _slip, (s) => vBps(l, s), suffix: l.bps),
+            field(l.newFolds, _folds, (s) => vInt(l, s, 1, 12)),
+            field(l.newHoldout, _holdout, (s) => vInt(l, s, 5, 45), suffix: '%', help: l.newHoldoutHelp),
           ],
         ),
         SwitchListTile(

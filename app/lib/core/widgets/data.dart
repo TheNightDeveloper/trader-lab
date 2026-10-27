@@ -306,19 +306,24 @@ class _Chip extends StatelessWidget {
           curve: AppMotion.curve,
           constraints: const BoxConstraints(minHeight: AppSize.minTouch, minWidth: AppSize.minTouch),
           padding: const EdgeInsets.symmetric(horizontal: AppSpace.md),
-          alignment: Alignment.center,
           decoration: BoxDecoration(
             color: selected ? AppColors.accentSoftBg : AppColors.inputBg,
             borderRadius: BorderRadius.circular(AppRadius.md),
             border: Border.all(color: selected ? AppColors.accent : AppColors.borderStrong),
           ),
-          child: Directionality(
-            textDirection: ltr ? TextDirection.ltr : Directionality.of(context),
-            child: Text(
-              label,
-              style: (ltr ? AppText.mono : AppText.body.copyWith(height: 1.4)).copyWith(
-                fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
-                color: selected ? AppColors.textPrimary : AppColors.textSecondary,
+          // Centered at its own size: `alignment` on the container would stretch the
+          // chip to the full row width inside a Wrap.
+          child: Align(
+            widthFactor: 1,
+            heightFactor: 1,
+            child: Directionality(
+              textDirection: ltr ? TextDirection.ltr : Directionality.of(context),
+              child: Text(
+                label,
+                style: (ltr ? AppText.mono : AppText.body.copyWith(height: 1.4)).copyWith(
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
+                  color: selected ? AppColors.textPrimary : AppColors.textSecondary,
+                ),
               ),
             ),
           ),

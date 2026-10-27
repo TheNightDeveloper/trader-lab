@@ -164,3 +164,32 @@ reason. Tests: `metrics/*` (Sharpe matches a float reference: 6.28 for the 40-da
   `report/TestCreateLoadViewRecalculate`, `api/TestReportAndPnlServices`).
 - Toman: only for an explicit stored rate id, `usdt × rate`, half-even to whole TOMAN; USDT
   values and stored reports are identical across rates (`api/TestReportAndPnlServices`).
+
+## Experiments and search (M4) — `search`
+
+- Candidates: grid = every combination of the listed values, parameters in the version's
+  declared order; random = seeded PCG draws without repeats, at most
+  `max_attempts / pairs` candidates. Parameters not in the space keep the version defaults.
+  At most 5,000 candidates; candidates × pairs must fit the attempt budget, checked before
+  anything is queued.
+- Attempt = one candidate on one pair (one dataset version). Statuses: queued, running,
+  done, failed, cancelled. Every attempt counts toward "attempts" shown with a winner.
+- Hard constraints (`Check`): each is `metric >= value` or `metric <= value`, compared as
+  integers at the metric's own scale (ratios as fractions: 0.25 = 25%). An invalid metric
+  (too few samples) fails its constraint: an unknown value never satisfies a hard limit.
+- Selection (`Select`): a candidate is eligible only if every one of its attempts is done
+  and passes every constraint. Among eligible candidates, the objective is the mean of the
+  objective metric over its pairs (integer, half-even); maximize or minimize as declared.
+  Ties go to the lower candidate number. No eligible candidate is a valid result with a
+  Persian reason. The winner carries `Origin{experiment, attempts, candidates}` into its
+  report, and Compare uses that attempt count.
+- Run cache key: SHA-256 of JSON `{v, engine build hash (SHA-256 of the binary), dataset
+  ids (content hashes), timeframe, strategy, every parameter, normalized sim config (capital,
+  fee, slippage, latency, TTL, sizing), split plan}`. A cached OOS result is reused only on
+  an exact key match (test `search/TestCacheKeyCoversEveryInput`, 17 single-input
+  variations, all distinct). Constraints and objective are not run inputs; they are
+  re-applied to cached metrics.
+- Estimate (Builder, display only): `max bars of the chosen datasets × attempts × 700 ns /
+  research slots`, at least 1 s. 700 ns/bar comes from the 1M-bar benchmark.
+- Research slots: `floor(cpus × share%)`, at most `cpus − 1` when there is more than one
+  CPU, at least 1. Default share 75%.

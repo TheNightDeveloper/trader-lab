@@ -138,7 +138,7 @@ func TestCheckConstraints(t *testing.T) {
 	require.Empty(t, v)
 	ok, v = Check(cs, []metrics.Metric{m("max_drawdown", 250_000, 6), m("closed_trades", 40, 0)})
 	require.False(t, ok)
-	require.Len(t, v, 1)
+	require.Equal(t, []string{"بیشترین افت سرمایه \u2066<= 0.2\u2069 نیست"}, v, "operator and limit isolated LTR")
 	ok, _ = Check(cs, []metrics.Metric{{Key: "max_drawdown", Scale: 6, Valid: false}, m("closed_trades", 40, 0)})
 	require.False(t, ok, "an invalid metric can never satisfy a hard limit")
 }

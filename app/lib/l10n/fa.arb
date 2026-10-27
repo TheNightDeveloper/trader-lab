@@ -451,5 +451,220 @@
   "pnlCost": "هزینه کل خرید",
   "pnlReturn": "بازده روی هزینه",
   "pnlBreakEvenExit": "قیمت فروش سر‌به‌سر",
-  "pnlTomanNet": "سود خالص به تومان"
+  "pnlTomanNet": "سود خالص به تومان",
+  "st_running": "در حال اجرا",
+  "st_paused": "متوقف موقت",
+  "st_finalizing": "در حال جمع‌بندی",
+  "st_done": "کامل",
+  "st_cancelled": "لغو شد",
+  "st_failed": "شکست",
+  "st_queued": "در صف",
+  "lc_research": "پژوهش",
+  "lc_validation": "اعتبارسنجی",
+  "lc_forward_test": "آزمون پیشرو",
+  "lc_active": "فعال",
+  "lc_stopped": "متوقف",
+  "lc_retired": "بازنشسته",
+  "fam_all": "همه",
+  "fam_trend": "روند",
+  "fam_mean_reversion": "بازگشت به میانگین",
+  "fam_learning": "یادگیرنده",
+  "fam_hybrid": "ترکیبی",
+  "fam_benchmark": "معیار مقایسه",
+  "bSubtitle": "در چند قدم ساده. مقدارهای پیش‌فرض امن‌اند؛ فقط آنچه برایتان مهم است را تغییر دهید.",
+  "bStep0": "شروع",
+  "bStep1": "ایده",
+  "bStep2": "داده",
+  "bStep3": "الگوریتم",
+  "bStep4": "پول و هزینه",
+  "bStep5": "بررسی و اجرا",
+  "bWhat": "چه کاری می‌خواهید انجام دهید؟",
+  "tplQuick": "آزمون سریع یک الگوریتم",
+  "tplQuickDesc": "یک الگوریتم را با تنظیمات فعلی‌اش روی داده تازه امتحان کنید.",
+  "tplQuickMeta": "۱ نامزد",
+  "tplSearch": "یافتن بهترین تنظیمات",
+  "tplSearchDesc": "چند ترکیب از تنظیمات را امتحان کنید و ببینید کدام پایدارتر است.",
+  "tplSearchMeta": "ده‌ها اجرا · همه ثبت می‌شوند",
+  "tplIdea": "سنجش یک ایده تازه",
+  "tplIdeaDesc": "یک تنظیم را عوض کنید و دو نسخه را کنار هم بسنجید.",
+  "tplIdeaMeta": "۲ نامزد · مقایسه کنار هم",
+  "bIdeaTitle": "چه چیزی را می‌خواهید بسنجید؟",
+  "bName": "نام آزمایش",
+  "bHypothesis": "ایده شما در یک جمله",
+  "bHypothesisHelp": "مثال: «اگر فقط در بازار کم‌نوسان معامله کنیم، زیان‌های بزرگ کمتر می‌شود.»",
+  "bFalsifier": "چه نتیجه‌ای یعنی ایده درست نبود؟",
+  "bFalsifierHelp": "این را قبل از دیدن نتیجه بنویسید تا بعداً خودتان را قانع نکنید.",
+  "bGoal": "مهم‌ترین هدف",
+  "goalNet": "بیشترین بازده با سقف افت سرمایه",
+  "goalDd": "کمترین افت با حداقل سود",
+  "goalStable": "بهترین نسبت شارپ",
+  "bDataTitle": "روی چه بازار و دوره‌ای؟",
+  "bTimeframe": "بازه زمانی هر کندل",
+  "bDatasets": "نسخه‌های داده (یکی برای هر جفت)",
+  "bDatasetsEmpty": "برای این تایم‌فریم نسخه‌ای نیست؛ از صفحه داده وارد کنید.",
+  "bAlgoTitle": "کدام الگوریتم؟",
+  "bParamsTitle": "کدام تنظیمات امتحان شوند؟",
+  "bParam": "تنظیم",
+  "bParamDefault": "پیش‌فرض",
+  "bParamValues": "مقدارها (با ویرگول)",
+  "bParamValuesHelp": "خالی یعنی همان پیش‌فرض",
+  "bNoParams": "این الگوریتم تنظیمی برای جست‌وجو ندارد.",
+  "bMoneyTitle": "پول و هزینه‌ها",
+  "bRoundTrip": "هر معامله کامل (خرید و فروش) با این تنظیمات حدود {pct} هزینه دارد؛ الگوریتم باید در هر معامله بیش از این سود ناخالص بسازد.",
+  "@bRoundTrip": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "bReviewTitle": "بررسی نهایی",
+  "bAdvanced": "تنظیمات پیشرفته",
+  "bAdvancedHelp": "این‌ها پیش‌فرض‌های امن هستند و معمولاً نیازی به تغییر ندارند.",
+  "bMaxDd": "سقف افت سرمایه",
+  "bMinTrades": "حداقل معامله بسته",
+  "bMinReturn": "حداقل بازده",
+  "bSearchMode": "روش جست‌وجو",
+  "modeGrid": "شبکه‌ای (همه ترکیب‌ها)",
+  "modeRandom": "تصادفی با بذر",
+  "bSeed": "بذر",
+  "bMaxAttempts": "سقف تلاش‌ها",
+  "bMaxMinutes": "سقف زمان",
+  "minutes": "دقیقه",
+  "bBack": "قبلی",
+  "bNext": "بعدی",
+  "bRun": "ثبت و اجرا",
+  "bSummary": "آنچه تا الان انتخاب کرده‌اید",
+  "bRuns": "{n} اجرا · {c} نامزد",
+  "@bRuns": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "c": {
+        "type": "int"
+      }
+    }
+  },
+  "bEta": "حدود {t}",
+  "@bEta": {
+    "placeholders": {
+      "t": {
+        "type": "String"
+      }
+    }
+  },
+  "bLockNote": "پس از شروع، این تعریف قفل می‌شود. اگر بعداً چیزی را عوض کنید، آزمایش تازه‌ای با ارجاع به همین ساخته می‌شود.",
+  "bExisted": "این آزمایش با همین تعریف قبلاً اجرا شده بود؛ همان را باز کردیم.",
+  "bDraftRestored": "پیش‌نویس قبلی بازیابی شد.",
+  "bDraftClear": "شروع از نو",
+  "errHypothesis": "ایده و نتیجه ردکننده را بنویسید.",
+  "errDatasetsPerPair": "برای هر جفت فقط یک نسخه داده انتخاب کنید.",
+  "errValues": "عددهای مثبت با ویرگول؛ برای تنظیم‌های عدد صحیح فقط عدد صحیح.",
+  "qListEmpty": "هنوز آزمایشی نیست. با «ساخت آزمایش» شروع کنید.",
+  "qNew": "ساخت آزمایش",
+  "qColName": "آزمایش",
+  "qColStatus": "وضعیت",
+  "qColProgress": "پیشرفت",
+  "qColCreated": "شروع",
+  "qPause": "توقف موقت",
+  "qResume": "ادامه",
+  "qCancel": "لغو آزمایش",
+  "qCancelConfirm": "تلاش‌های در صف لغو می‌شوند و آزمایش پایان می‌یابد. همه تلاش‌های انجام‌شده ثبت می‌مانند. ادامه می‌دهید؟",
+  "qPauseConfirm": "تلاش‌های در حال اجرا تمام می‌شوند ولی تلاش تازه‌ای شروع نمی‌شود تا ادامه دهید. ادامه می‌دهید؟",
+  "qProgress": "پیشرفت",
+  "qAttempts": "تلاش",
+  "qRemaining": "زمان باقی‌مانده تخمینی",
+  "qAllRecorded": "همه تلاش‌ها، حتی شکست‌خورده و لغوشده، ثبت و شمرده می‌شوند.",
+  "qBudgetAttempts": "تلاش‌ها از بودجه",
+  "qBudgetTime": "زمان مصرف‌شده",
+  "qBudgetCpu": "سهم CPU پژوهش",
+  "qCacheRate": "نرخ استفاده از کش",
+  "qBest": "بهترین نتیجه واجد شرایط تا اینجا",
+  "qTabAll": "همه",
+  "qColParams": "پارامترها",
+  "qColPair": "جفت",
+  "qColReturn": "بازده خالص",
+  "qColDd": "بیشینه افت",
+  "qColTrades": "معاملات",
+  "qColConstraints": "محدودیت‌ها",
+  "qColCache": "کش",
+  "qEligible": "واجد شرایط",
+  "qRejected": "رد: {why}",
+  "@qRejected": {
+    "placeholders": {
+      "why": {
+        "type": "String"
+      }
+    }
+  },
+  "qRuns": "{n} بار اجرا",
+  "@qRuns": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "qResult": "نتیجه",
+  "qChosen": "نامزد برگزیده #{n}",
+  "@qChosen": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "qChosenNote": "از {eligible} نامزد واجد شرایط در میان {cands} نامزد و {attempts} تلاش انتخاب شد؛ بخشی از برتری آن ممکن است شانسی باشد.",
+  "@qChosenNote": {
+    "placeholders": {
+      "eligible": {
+        "type": "int"
+      },
+      "cands": {
+        "type": "int"
+      },
+      "attempts": {
+        "type": "int"
+      }
+    }
+  },
+  "qOpenReport": "گزارش کامل نامزد برگزیده",
+  "qNone": "نامزد واجد شرایطی نبود",
+  "qEmpty": "تلاشی در این دسته نیست.",
+  "qNotFound": "این آزمایش پیدا نشد.",
+  "libExperiment": "آزمایش با نسخه انتخابی",
+  "libLatest": "آخرین ارزیابی",
+  "libNone": "—",
+  "libSelected": "الگوریتم انتخاب‌شده",
+  "libRecipe": "دستور ساخت (نسخه جاری)",
+  "libVersions": "تاریخچه نسخه‌ها",
+  "libLockNote": "قواعد و پارامترهای نسخه فعال قفل‌اند. هر تغییر در قواعد یا پارامترها نسخه تازه می‌سازد.",
+  "libMoveTo": "انتقال به «{state}»",
+  "@libMoveTo": {
+    "placeholders": {
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "libConfirm": "وضعیت {version} از «{from}» به «{to}» تغییر می‌کند و این تصمیم ثبت می‌شود.",
+  "@libConfirm": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "libConfirmActive": " اگر نسخه فعال دیگری از همین الگوریتم باشد، متوقف می‌شود.",
+  "libNote": "یادداشت (چرا؟)",
+  "libHistory": "رویدادها",
+  "actorUser": "کاربر",
+  "actorSystem": "سیستم"
 }

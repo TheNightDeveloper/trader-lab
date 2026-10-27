@@ -5,6 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../core/theme/tokens.dart';
 import '../features/chart/chart_screen.dart';
 import '../features/data/data_screen.dart';
+import '../features/experiments/builder_screen.dart';
+import '../features/experiments/queue_screen.dart';
+import '../features/library/library_screen.dart';
 import '../features/placeholder_screen.dart';
 import '../features/pnl/pnl_screen.dart';
 import '../features/reports/compare_screen.dart';
@@ -36,10 +39,18 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
       builder: (context, state, child) => AppShell(location: state.uri.path, child: child),
       routes: [
         _placeholder(Dest.home),
-        _placeholder(Dest.library),
-        _placeholder(Dest.builder),
-        _placeholder(Dest.queue),
-        _placeholder(Dest.queue, path: '/experiments/:id/queue'),
+        GoRoute(path: Dest.library.path, pageBuilder: (context, state) => _page(context, state, const LibraryScreen())),
+        GoRoute(
+          path: Dest.builder.path,
+          pageBuilder: (context, state) =>
+              _page(context, state, BuilderScreen(algo: state.uri.queryParameters['algo'])),
+        ),
+        GoRoute(path: Dest.queue.path, pageBuilder: (context, state) => _page(context, state, const QueueListScreen())),
+        GoRoute(
+          path: '/experiments/:id/queue',
+          pageBuilder: (context, state) =>
+              _page(context, state, ExperimentQueueScreen(id: state.pathParameters['id']!)),
+        ),
         GoRoute(path: Dest.reports.path, pageBuilder: (context, state) => _page(context, state, const ReportsScreen())),
         GoRoute(
           path: '/reports/:id',

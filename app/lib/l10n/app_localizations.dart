@@ -1742,6 +1742,828 @@ abstract class L10n {
   /// In fa, this message translates to:
   /// **'سود خالص به تومان'**
   String get pnlTomanNet;
+
+  /// No description provided for @st_running.
+  ///
+  /// In fa, this message translates to:
+  /// **'در حال اجرا'**
+  String get st_running;
+
+  /// No description provided for @st_paused.
+  ///
+  /// In fa, this message translates to:
+  /// **'متوقف موقت'**
+  String get st_paused;
+
+  /// No description provided for @st_finalizing.
+  ///
+  /// In fa, this message translates to:
+  /// **'در حال جمع‌بندی'**
+  String get st_finalizing;
+
+  /// No description provided for @st_done.
+  ///
+  /// In fa, this message translates to:
+  /// **'کامل'**
+  String get st_done;
+
+  /// No description provided for @st_cancelled.
+  ///
+  /// In fa, this message translates to:
+  /// **'لغو شد'**
+  String get st_cancelled;
+
+  /// No description provided for @st_failed.
+  ///
+  /// In fa, this message translates to:
+  /// **'شکست'**
+  String get st_failed;
+
+  /// No description provided for @st_queued.
+  ///
+  /// In fa, this message translates to:
+  /// **'در صف'**
+  String get st_queued;
+
+  /// No description provided for @lc_research.
+  ///
+  /// In fa, this message translates to:
+  /// **'پژوهش'**
+  String get lc_research;
+
+  /// No description provided for @lc_validation.
+  ///
+  /// In fa, this message translates to:
+  /// **'اعتبارسنجی'**
+  String get lc_validation;
+
+  /// No description provided for @lc_forward_test.
+  ///
+  /// In fa, this message translates to:
+  /// **'آزمون پیشرو'**
+  String get lc_forward_test;
+
+  /// No description provided for @lc_active.
+  ///
+  /// In fa, this message translates to:
+  /// **'فعال'**
+  String get lc_active;
+
+  /// No description provided for @lc_stopped.
+  ///
+  /// In fa, this message translates to:
+  /// **'متوقف'**
+  String get lc_stopped;
+
+  /// No description provided for @lc_retired.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازنشسته'**
+  String get lc_retired;
+
+  /// No description provided for @fam_all.
+  ///
+  /// In fa, this message translates to:
+  /// **'همه'**
+  String get fam_all;
+
+  /// No description provided for @fam_trend.
+  ///
+  /// In fa, this message translates to:
+  /// **'روند'**
+  String get fam_trend;
+
+  /// No description provided for @fam_mean_reversion.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازگشت به میانگین'**
+  String get fam_mean_reversion;
+
+  /// No description provided for @fam_learning.
+  ///
+  /// In fa, this message translates to:
+  /// **'یادگیرنده'**
+  String get fam_learning;
+
+  /// No description provided for @fam_hybrid.
+  ///
+  /// In fa, this message translates to:
+  /// **'ترکیبی'**
+  String get fam_hybrid;
+
+  /// No description provided for @fam_benchmark.
+  ///
+  /// In fa, this message translates to:
+  /// **'معیار مقایسه'**
+  String get fam_benchmark;
+
+  /// No description provided for @bSubtitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'در چند قدم ساده. مقدارهای پیش‌فرض امن‌اند؛ فقط آنچه برایتان مهم است را تغییر دهید.'**
+  String get bSubtitle;
+
+  /// No description provided for @bStep0.
+  ///
+  /// In fa, this message translates to:
+  /// **'شروع'**
+  String get bStep0;
+
+  /// No description provided for @bStep1.
+  ///
+  /// In fa, this message translates to:
+  /// **'ایده'**
+  String get bStep1;
+
+  /// No description provided for @bStep2.
+  ///
+  /// In fa, this message translates to:
+  /// **'داده'**
+  String get bStep2;
+
+  /// No description provided for @bStep3.
+  ///
+  /// In fa, this message translates to:
+  /// **'الگوریتم'**
+  String get bStep3;
+
+  /// No description provided for @bStep4.
+  ///
+  /// In fa, this message translates to:
+  /// **'پول و هزینه'**
+  String get bStep4;
+
+  /// No description provided for @bStep5.
+  ///
+  /// In fa, this message translates to:
+  /// **'بررسی و اجرا'**
+  String get bStep5;
+
+  /// No description provided for @bWhat.
+  ///
+  /// In fa, this message translates to:
+  /// **'چه کاری می‌خواهید انجام دهید؟'**
+  String get bWhat;
+
+  /// No description provided for @tplQuick.
+  ///
+  /// In fa, this message translates to:
+  /// **'آزمون سریع یک الگوریتم'**
+  String get tplQuick;
+
+  /// No description provided for @tplQuickDesc.
+  ///
+  /// In fa, this message translates to:
+  /// **'یک الگوریتم را با تنظیمات فعلی‌اش روی داده تازه امتحان کنید.'**
+  String get tplQuickDesc;
+
+  /// No description provided for @tplQuickMeta.
+  ///
+  /// In fa, this message translates to:
+  /// **'۱ نامزد'**
+  String get tplQuickMeta;
+
+  /// No description provided for @tplSearch.
+  ///
+  /// In fa, this message translates to:
+  /// **'یافتن بهترین تنظیمات'**
+  String get tplSearch;
+
+  /// No description provided for @tplSearchDesc.
+  ///
+  /// In fa, this message translates to:
+  /// **'چند ترکیب از تنظیمات را امتحان کنید و ببینید کدام پایدارتر است.'**
+  String get tplSearchDesc;
+
+  /// No description provided for @tplSearchMeta.
+  ///
+  /// In fa, this message translates to:
+  /// **'ده‌ها اجرا · همه ثبت می‌شوند'**
+  String get tplSearchMeta;
+
+  /// No description provided for @tplIdea.
+  ///
+  /// In fa, this message translates to:
+  /// **'سنجش یک ایده تازه'**
+  String get tplIdea;
+
+  /// No description provided for @tplIdeaDesc.
+  ///
+  /// In fa, this message translates to:
+  /// **'یک تنظیم را عوض کنید و دو نسخه را کنار هم بسنجید.'**
+  String get tplIdeaDesc;
+
+  /// No description provided for @tplIdeaMeta.
+  ///
+  /// In fa, this message translates to:
+  /// **'۲ نامزد · مقایسه کنار هم'**
+  String get tplIdeaMeta;
+
+  /// No description provided for @bIdeaTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'چه چیزی را می‌خواهید بسنجید؟'**
+  String get bIdeaTitle;
+
+  /// No description provided for @bName.
+  ///
+  /// In fa, this message translates to:
+  /// **'نام آزمایش'**
+  String get bName;
+
+  /// No description provided for @bHypothesis.
+  ///
+  /// In fa, this message translates to:
+  /// **'ایده شما در یک جمله'**
+  String get bHypothesis;
+
+  /// No description provided for @bHypothesisHelp.
+  ///
+  /// In fa, this message translates to:
+  /// **'مثال: «اگر فقط در بازار کم‌نوسان معامله کنیم، زیان‌های بزرگ کمتر می‌شود.»'**
+  String get bHypothesisHelp;
+
+  /// No description provided for @bFalsifier.
+  ///
+  /// In fa, this message translates to:
+  /// **'چه نتیجه‌ای یعنی ایده درست نبود؟'**
+  String get bFalsifier;
+
+  /// No description provided for @bFalsifierHelp.
+  ///
+  /// In fa, this message translates to:
+  /// **'این را قبل از دیدن نتیجه بنویسید تا بعداً خودتان را قانع نکنید.'**
+  String get bFalsifierHelp;
+
+  /// No description provided for @bGoal.
+  ///
+  /// In fa, this message translates to:
+  /// **'مهم‌ترین هدف'**
+  String get bGoal;
+
+  /// No description provided for @goalNet.
+  ///
+  /// In fa, this message translates to:
+  /// **'بیشترین بازده با سقف افت سرمایه'**
+  String get goalNet;
+
+  /// No description provided for @goalDd.
+  ///
+  /// In fa, this message translates to:
+  /// **'کمترین افت با حداقل سود'**
+  String get goalDd;
+
+  /// No description provided for @goalStable.
+  ///
+  /// In fa, this message translates to:
+  /// **'بهترین نسبت شارپ'**
+  String get goalStable;
+
+  /// No description provided for @bDataTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'روی چه بازار و دوره‌ای؟'**
+  String get bDataTitle;
+
+  /// No description provided for @bTimeframe.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازه زمانی هر کندل'**
+  String get bTimeframe;
+
+  /// No description provided for @bDatasets.
+  ///
+  /// In fa, this message translates to:
+  /// **'نسخه‌های داده (یکی برای هر جفت)'**
+  String get bDatasets;
+
+  /// No description provided for @bDatasetsEmpty.
+  ///
+  /// In fa, this message translates to:
+  /// **'برای این تایم‌فریم نسخه‌ای نیست؛ از صفحه داده وارد کنید.'**
+  String get bDatasetsEmpty;
+
+  /// No description provided for @bAlgoTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'کدام الگوریتم؟'**
+  String get bAlgoTitle;
+
+  /// No description provided for @bParamsTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'کدام تنظیمات امتحان شوند؟'**
+  String get bParamsTitle;
+
+  /// No description provided for @bParam.
+  ///
+  /// In fa, this message translates to:
+  /// **'تنظیم'**
+  String get bParam;
+
+  /// No description provided for @bParamDefault.
+  ///
+  /// In fa, this message translates to:
+  /// **'پیش‌فرض'**
+  String get bParamDefault;
+
+  /// No description provided for @bParamValues.
+  ///
+  /// In fa, this message translates to:
+  /// **'مقدارها (با ویرگول)'**
+  String get bParamValues;
+
+  /// No description provided for @bParamValuesHelp.
+  ///
+  /// In fa, this message translates to:
+  /// **'خالی یعنی همان پیش‌فرض'**
+  String get bParamValuesHelp;
+
+  /// No description provided for @bNoParams.
+  ///
+  /// In fa, this message translates to:
+  /// **'این الگوریتم تنظیمی برای جست‌وجو ندارد.'**
+  String get bNoParams;
+
+  /// No description provided for @bMoneyTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'پول و هزینه‌ها'**
+  String get bMoneyTitle;
+
+  /// No description provided for @bRoundTrip.
+  ///
+  /// In fa, this message translates to:
+  /// **'هر معامله کامل (خرید و فروش) با این تنظیمات حدود {pct} هزینه دارد؛ الگوریتم باید در هر معامله بیش از این سود ناخالص بسازد.'**
+  String bRoundTrip(String pct);
+
+  /// No description provided for @bReviewTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'بررسی نهایی'**
+  String get bReviewTitle;
+
+  /// No description provided for @bAdvanced.
+  ///
+  /// In fa, this message translates to:
+  /// **'تنظیمات پیشرفته'**
+  String get bAdvanced;
+
+  /// No description provided for @bAdvancedHelp.
+  ///
+  /// In fa, this message translates to:
+  /// **'این‌ها پیش‌فرض‌های امن هستند و معمولاً نیازی به تغییر ندارند.'**
+  String get bAdvancedHelp;
+
+  /// No description provided for @bMaxDd.
+  ///
+  /// In fa, this message translates to:
+  /// **'سقف افت سرمایه'**
+  String get bMaxDd;
+
+  /// No description provided for @bMinTrades.
+  ///
+  /// In fa, this message translates to:
+  /// **'حداقل معامله بسته'**
+  String get bMinTrades;
+
+  /// No description provided for @bMinReturn.
+  ///
+  /// In fa, this message translates to:
+  /// **'حداقل بازده'**
+  String get bMinReturn;
+
+  /// No description provided for @bSearchMode.
+  ///
+  /// In fa, this message translates to:
+  /// **'روش جست‌وجو'**
+  String get bSearchMode;
+
+  /// No description provided for @modeGrid.
+  ///
+  /// In fa, this message translates to:
+  /// **'شبکه‌ای (همه ترکیب‌ها)'**
+  String get modeGrid;
+
+  /// No description provided for @modeRandom.
+  ///
+  /// In fa, this message translates to:
+  /// **'تصادفی با بذر'**
+  String get modeRandom;
+
+  /// No description provided for @bSeed.
+  ///
+  /// In fa, this message translates to:
+  /// **'بذر'**
+  String get bSeed;
+
+  /// No description provided for @bMaxAttempts.
+  ///
+  /// In fa, this message translates to:
+  /// **'سقف تلاش‌ها'**
+  String get bMaxAttempts;
+
+  /// No description provided for @bMaxMinutes.
+  ///
+  /// In fa, this message translates to:
+  /// **'سقف زمان'**
+  String get bMaxMinutes;
+
+  /// No description provided for @minutes.
+  ///
+  /// In fa, this message translates to:
+  /// **'دقیقه'**
+  String get minutes;
+
+  /// No description provided for @bBack.
+  ///
+  /// In fa, this message translates to:
+  /// **'قبلی'**
+  String get bBack;
+
+  /// No description provided for @bNext.
+  ///
+  /// In fa, this message translates to:
+  /// **'بعدی'**
+  String get bNext;
+
+  /// No description provided for @bRun.
+  ///
+  /// In fa, this message translates to:
+  /// **'ثبت و اجرا'**
+  String get bRun;
+
+  /// No description provided for @bSummary.
+  ///
+  /// In fa, this message translates to:
+  /// **'آنچه تا الان انتخاب کرده‌اید'**
+  String get bSummary;
+
+  /// No description provided for @bRuns.
+  ///
+  /// In fa, this message translates to:
+  /// **'{n} اجرا · {c} نامزد'**
+  String bRuns(int n, int c);
+
+  /// No description provided for @bEta.
+  ///
+  /// In fa, this message translates to:
+  /// **'حدود {t}'**
+  String bEta(String t);
+
+  /// No description provided for @bLockNote.
+  ///
+  /// In fa, this message translates to:
+  /// **'پس از شروع، این تعریف قفل می‌شود. اگر بعداً چیزی را عوض کنید، آزمایش تازه‌ای با ارجاع به همین ساخته می‌شود.'**
+  String get bLockNote;
+
+  /// No description provided for @bExisted.
+  ///
+  /// In fa, this message translates to:
+  /// **'این آزمایش با همین تعریف قبلاً اجرا شده بود؛ همان را باز کردیم.'**
+  String get bExisted;
+
+  /// No description provided for @bDraftRestored.
+  ///
+  /// In fa, this message translates to:
+  /// **'پیش‌نویس قبلی بازیابی شد.'**
+  String get bDraftRestored;
+
+  /// No description provided for @bDraftClear.
+  ///
+  /// In fa, this message translates to:
+  /// **'شروع از نو'**
+  String get bDraftClear;
+
+  /// No description provided for @errHypothesis.
+  ///
+  /// In fa, this message translates to:
+  /// **'ایده و نتیجه ردکننده را بنویسید.'**
+  String get errHypothesis;
+
+  /// No description provided for @errDatasetsPerPair.
+  ///
+  /// In fa, this message translates to:
+  /// **'برای هر جفت فقط یک نسخه داده انتخاب کنید.'**
+  String get errDatasetsPerPair;
+
+  /// No description provided for @errValues.
+  ///
+  /// In fa, this message translates to:
+  /// **'عددهای مثبت با ویرگول؛ برای تنظیم‌های عدد صحیح فقط عدد صحیح.'**
+  String get errValues;
+
+  /// No description provided for @qListEmpty.
+  ///
+  /// In fa, this message translates to:
+  /// **'هنوز آزمایشی نیست. با «ساخت آزمایش» شروع کنید.'**
+  String get qListEmpty;
+
+  /// No description provided for @qNew.
+  ///
+  /// In fa, this message translates to:
+  /// **'ساخت آزمایش'**
+  String get qNew;
+
+  /// No description provided for @qColName.
+  ///
+  /// In fa, this message translates to:
+  /// **'آزمایش'**
+  String get qColName;
+
+  /// No description provided for @qColStatus.
+  ///
+  /// In fa, this message translates to:
+  /// **'وضعیت'**
+  String get qColStatus;
+
+  /// No description provided for @qColProgress.
+  ///
+  /// In fa, this message translates to:
+  /// **'پیشرفت'**
+  String get qColProgress;
+
+  /// No description provided for @qColCreated.
+  ///
+  /// In fa, this message translates to:
+  /// **'شروع'**
+  String get qColCreated;
+
+  /// No description provided for @qPause.
+  ///
+  /// In fa, this message translates to:
+  /// **'توقف موقت'**
+  String get qPause;
+
+  /// No description provided for @qResume.
+  ///
+  /// In fa, this message translates to:
+  /// **'ادامه'**
+  String get qResume;
+
+  /// No description provided for @qCancel.
+  ///
+  /// In fa, this message translates to:
+  /// **'لغو آزمایش'**
+  String get qCancel;
+
+  /// No description provided for @qCancelConfirm.
+  ///
+  /// In fa, this message translates to:
+  /// **'تلاش‌های در صف لغو می‌شوند و آزمایش پایان می‌یابد. همه تلاش‌های انجام‌شده ثبت می‌مانند. ادامه می‌دهید؟'**
+  String get qCancelConfirm;
+
+  /// No description provided for @qPauseConfirm.
+  ///
+  /// In fa, this message translates to:
+  /// **'تلاش‌های در حال اجرا تمام می‌شوند ولی تلاش تازه‌ای شروع نمی‌شود تا ادامه دهید. ادامه می‌دهید؟'**
+  String get qPauseConfirm;
+
+  /// No description provided for @qProgress.
+  ///
+  /// In fa, this message translates to:
+  /// **'پیشرفت'**
+  String get qProgress;
+
+  /// No description provided for @qAttempts.
+  ///
+  /// In fa, this message translates to:
+  /// **'تلاش'**
+  String get qAttempts;
+
+  /// No description provided for @qRemaining.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان باقی‌مانده تخمینی'**
+  String get qRemaining;
+
+  /// No description provided for @qAllRecorded.
+  ///
+  /// In fa, this message translates to:
+  /// **'همه تلاش‌ها، حتی شکست‌خورده و لغوشده، ثبت و شمرده می‌شوند.'**
+  String get qAllRecorded;
+
+  /// No description provided for @qBudgetAttempts.
+  ///
+  /// In fa, this message translates to:
+  /// **'تلاش‌ها از بودجه'**
+  String get qBudgetAttempts;
+
+  /// No description provided for @qBudgetTime.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان مصرف‌شده'**
+  String get qBudgetTime;
+
+  /// No description provided for @qBudgetCpu.
+  ///
+  /// In fa, this message translates to:
+  /// **'سهم CPU پژوهش'**
+  String get qBudgetCpu;
+
+  /// No description provided for @qCacheRate.
+  ///
+  /// In fa, this message translates to:
+  /// **'نرخ استفاده از کش'**
+  String get qCacheRate;
+
+  /// No description provided for @qBest.
+  ///
+  /// In fa, this message translates to:
+  /// **'بهترین نتیجه واجد شرایط تا اینجا'**
+  String get qBest;
+
+  /// No description provided for @qTabAll.
+  ///
+  /// In fa, this message translates to:
+  /// **'همه'**
+  String get qTabAll;
+
+  /// No description provided for @qColParams.
+  ///
+  /// In fa, this message translates to:
+  /// **'پارامترها'**
+  String get qColParams;
+
+  /// No description provided for @qColPair.
+  ///
+  /// In fa, this message translates to:
+  /// **'جفت'**
+  String get qColPair;
+
+  /// No description provided for @qColReturn.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازده خالص'**
+  String get qColReturn;
+
+  /// No description provided for @qColDd.
+  ///
+  /// In fa, this message translates to:
+  /// **'بیشینه افت'**
+  String get qColDd;
+
+  /// No description provided for @qColTrades.
+  ///
+  /// In fa, this message translates to:
+  /// **'معاملات'**
+  String get qColTrades;
+
+  /// No description provided for @qColConstraints.
+  ///
+  /// In fa, this message translates to:
+  /// **'محدودیت‌ها'**
+  String get qColConstraints;
+
+  /// No description provided for @qColCache.
+  ///
+  /// In fa, this message translates to:
+  /// **'کش'**
+  String get qColCache;
+
+  /// No description provided for @qEligible.
+  ///
+  /// In fa, this message translates to:
+  /// **'واجد شرایط'**
+  String get qEligible;
+
+  /// No description provided for @qRejected.
+  ///
+  /// In fa, this message translates to:
+  /// **'رد: {why}'**
+  String qRejected(String why);
+
+  /// No description provided for @qRuns.
+  ///
+  /// In fa, this message translates to:
+  /// **'{n} بار اجرا'**
+  String qRuns(int n);
+
+  /// No description provided for @qResult.
+  ///
+  /// In fa, this message translates to:
+  /// **'نتیجه'**
+  String get qResult;
+
+  /// No description provided for @qChosen.
+  ///
+  /// In fa, this message translates to:
+  /// **'نامزد برگزیده #{n}'**
+  String qChosen(int n);
+
+  /// No description provided for @qChosenNote.
+  ///
+  /// In fa, this message translates to:
+  /// **'از {eligible} نامزد واجد شرایط در میان {cands} نامزد و {attempts} تلاش انتخاب شد؛ بخشی از برتری آن ممکن است شانسی باشد.'**
+  String qChosenNote(int eligible, int cands, int attempts);
+
+  /// No description provided for @qOpenReport.
+  ///
+  /// In fa, this message translates to:
+  /// **'گزارش کامل نامزد برگزیده'**
+  String get qOpenReport;
+
+  /// No description provided for @qNone.
+  ///
+  /// In fa, this message translates to:
+  /// **'نامزد واجد شرایطی نبود'**
+  String get qNone;
+
+  /// No description provided for @qEmpty.
+  ///
+  /// In fa, this message translates to:
+  /// **'تلاشی در این دسته نیست.'**
+  String get qEmpty;
+
+  /// No description provided for @qNotFound.
+  ///
+  /// In fa, this message translates to:
+  /// **'این آزمایش پیدا نشد.'**
+  String get qNotFound;
+
+  /// No description provided for @libExperiment.
+  ///
+  /// In fa, this message translates to:
+  /// **'آزمایش با نسخه انتخابی'**
+  String get libExperiment;
+
+  /// No description provided for @libLatest.
+  ///
+  /// In fa, this message translates to:
+  /// **'آخرین ارزیابی'**
+  String get libLatest;
+
+  /// No description provided for @libNone.
+  ///
+  /// In fa, this message translates to:
+  /// **'—'**
+  String get libNone;
+
+  /// No description provided for @libSelected.
+  ///
+  /// In fa, this message translates to:
+  /// **'الگوریتم انتخاب‌شده'**
+  String get libSelected;
+
+  /// No description provided for @libRecipe.
+  ///
+  /// In fa, this message translates to:
+  /// **'دستور ساخت (نسخه جاری)'**
+  String get libRecipe;
+
+  /// No description provided for @libVersions.
+  ///
+  /// In fa, this message translates to:
+  /// **'تاریخچه نسخه‌ها'**
+  String get libVersions;
+
+  /// No description provided for @libLockNote.
+  ///
+  /// In fa, this message translates to:
+  /// **'قواعد و پارامترهای نسخه فعال قفل‌اند. هر تغییر در قواعد یا پارامترها نسخه تازه می‌سازد.'**
+  String get libLockNote;
+
+  /// No description provided for @libMoveTo.
+  ///
+  /// In fa, this message translates to:
+  /// **'انتقال به «{state}»'**
+  String libMoveTo(String state);
+
+  /// No description provided for @libConfirm.
+  ///
+  /// In fa, this message translates to:
+  /// **'وضعیت {version} از «{from}» به «{to}» تغییر می‌کند و این تصمیم ثبت می‌شود.'**
+  String libConfirm(String version, String from, String to);
+
+  /// No description provided for @libConfirmActive.
+  ///
+  /// In fa, this message translates to:
+  /// **' اگر نسخه فعال دیگری از همین الگوریتم باشد، متوقف می‌شود.'**
+  String get libConfirmActive;
+
+  /// No description provided for @libNote.
+  ///
+  /// In fa, this message translates to:
+  /// **'یادداشت (چرا؟)'**
+  String get libNote;
+
+  /// No description provided for @libHistory.
+  ///
+  /// In fa, this message translates to:
+  /// **'رویدادها'**
+  String get libHistory;
+
+  /// No description provided for @actorUser.
+  ///
+  /// In fa, this message translates to:
+  /// **'کاربر'**
+  String get actorUser;
+
+  /// No description provided for @actorSystem.
+  ///
+  /// In fa, this message translates to:
+  /// **'سیستم'**
+  String get actorSystem;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

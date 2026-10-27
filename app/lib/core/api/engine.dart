@@ -4,8 +4,10 @@ import 'package:connectrpc/protocol/connect.dart' as protocol;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../gen/lab/v1/data.connect.client.dart';
+import '../../gen/lab/v1/experiment.connect.client.dart';
 import '../../gen/lab/v1/fx.connect.client.dart';
 import '../../gen/lab/v1/health.connect.client.dart';
+import '../../gen/lab/v1/library.connect.client.dart';
 import '../../gen/lab/v1/pnl.connect.client.dart';
 import '../../gen/lab/v1/report.connect.client.dart';
 import '../../gen/lab/v1/health.pb.dart';
@@ -53,6 +55,8 @@ final dataClientProvider = Provider((ref) => DataServiceClient(ref.watch(transpo
 final fxClientProvider = Provider((ref) => FxServiceClient(ref.watch(transportProvider)));
 final reportClientProvider = Provider((ref) => ReportServiceClient(ref.watch(transportProvider)));
 final pnlClientProvider = Provider((ref) => PnlServiceClient(ref.watch(transportProvider)));
+final experimentClientProvider = Provider((ref) => ExperimentServiceClient(ref.watch(transportProvider)));
+final libraryClientProvider = Provider((ref) => LibraryServiceClient(ref.watch(transportProvider)));
 
 /// The latest USDT/TOMAN display rate id from the health stream (0 = none).
 final displayRateIdProvider = Provider<int>((ref) {

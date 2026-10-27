@@ -89,3 +89,25 @@ Consequence: very large 1m datasets can make the request slow in M3; no attempt 
 ## ADR-021 Intent TTL scales with the timeframe
 Decision: an unset TTL is (latency + 9) bars of the input timeframe (10 minutes on 1m bars, as before). A fixed 10 minutes expired every intent in the +1 latency stress on 1h bars.
 Consequence: golden scenarios unchanged; stored specs keep 0 = automatic, so reproduction is deterministic.
+
+## ADR-022 The research queue lives in PostgreSQL
+Context: a search must survive an engine kill without losing or repeating attempts.
+Decision: attempts are rows; the scheduler claims them with `FOR UPDATE SKIP LOCKED`, marks done/failed in the same transaction as the result, and re-queues `running` rows on start. No in-memory queue or message broker.
+Consequence: kill/resume is exact (`search/TestKillMidSearchResumesWithoutLossOrDuplicates`); throughput is bounded by DB round trips (fine at thousands of attempts, not millions).
+
+## ADR-023 One limiter for all research work
+Decision: `jobs.Limiter` holds the research share of CPUs (default 75%, always leaving one core). Search attempts take one slot each; a quick report (CreateReport) takes all slots; a P&L recalculation takes one. Health, data ingestion and the API never take a slot.
+Consequence: a quick report waits for running attempts; a 500-attempt search delays health updates by under 10 ms (`search/TestHealthStaysOnTimeDuringLargeSearch`). Supersedes the "synchronous" part of ADR-020 only in that reports now share the cap.
+
+## ADR-024 The display rate is cached in memory
+Context: the health stream read the latest FX rate from the DB every tick; under full research load that took up to 1.2 s.
+Decision: `api.Fx` keeps the latest display rate in memory, loaded once and invalidated by AddRate.
+Consequence: health ticks do no DB work; a rate added directly in SQL shows after restart only.
+
+## ADR-025 Attempts run a light evaluation; only the winner gets a full report
+Decision: each attempt runs the continuous OOS evaluation only (no holdout, stress, neighbourhood or benchmarks). After selection the winner, and only the winner, is evaluated fully and stored as a report with a deterministic id.
+Consequence: searches are fast and never peek at the holdout; the holdout of the chosen candidate is still behind the logged "show" action.
+
+## ADR-026 Builder maps goals onto objective + constraints
+Decision: the Builder offers three goals instead of raw metric pickers: highest return with a drawdown cap (total_return ↑, max_drawdown ≤ cap), smallest drawdown with a return floor (max_drawdown ↓, total_return ≥ floor), best Sharpe with a drawdown cap. Every goal adds `closed_trades ≥ N` (default 10). The caps live under "advanced".
+Consequence: fewer choices for the user; the engine definition stays general, so M5 or a later "custom" goal can use any metric.
