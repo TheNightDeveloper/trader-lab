@@ -103,3 +103,64 @@ quote→USDT cross rate available at fill time (half-even). For USDT pairs the r
   pair then quote → USDT, all with prices available at that moment (Floor).
 - Points are skipped while some held asset has no rate yet; the run fails only if the final
   equity cannot be valued.
+
+## Report metrics (M3) — `metrics.Compute`, all integer
+
+Evaluated over a window `[start, end)` from equity marks at bar closes inside it and the
+trades opened inside it. USDT at scale 8, ratios in ppm (scale 6), Sharpe at scale 2.
+
+| Key | Formula | Invalid when |
+|---|---|---|
+| net_pnl, gross_pnl, fees, slippage | Σ over trades (open trades: unrealized net) — exact sums | never |
+| unrealized_pnl | Σ net of trades still open at the end | never |
+| final_equity | last equity mark (or the initial equity if none) | never |
+| total_return | (final − initial) / initial, half-even | initial = 0 |
+| max_drawdown | max over marks of (running peak − equity) / peak | never (0 if none) |
+| max_drawdown_duration | longest time below a previous peak, to recovery or the end | never |
+| sharpe | mean / sample sd of period returns × √periods_per_year; risk-free 0; period 24 h, 365 per year; equity sampled at each period end (last mark at or before it); returns at scale 9; math/big with an integer square root (10⁶ extra precision), truncated | < 30 samples, zero variance, equity ≤ 0 |
+| exposure | length of the union of open-trade intervals ∩ window / window length | empty window |
+| trades | count, open and closed | never |
+| closed_trades | count closed inside the window | never |
+| win_rate | closed with net > 0 / closed | < 5 closed trades |
+| profit_factor | Σ winning nets / −Σ losing nets | < 5 closed trades, or no losing trade |
+| avg_win, avg_loss | mean net of winners / losers, half-even | < 5 closed trades, or none of that kind |
+| best_trade, worst_trade | max / min closed net | no closed trade |
+| avg_holding | mean (closed − opened) of closed trades, seconds | no closed trade |
+
+Invalid metrics carry a Persian reason and **no value**; the UI shows «نامعتبر» with the
+reason. Tests: `metrics/*` (Sharpe matches a float reference: 6.28 for the 40-day series).
+
+## Walk-forward evaluation (M3) — `eval`
+
+- Split: the range minus a final holdout share (default 20%) is cut into `folds + 1` equal
+  chunks at bar boundaries; chunk 0 is the first train window, chunks 1..n are test windows.
+  Train = everything before the test (expanding) or the previous chunk (rolling), minus the
+  embargo. Folds never touch the holdout (property test).
+- Main run: one continuous simulation from the first bar to the holdout start; intents before
+  the first test window are dropped (warm-up primes indicators, never trades). Report metrics
+  use the OOS window; fold metrics are slices of the same run (trades attributed to the fold in
+  which they opened), so folds sum exactly to the report.
+- Holdout run: separate simulation gated at the holdout start; stored, shown only through a
+  logged view.
+- Stress: fee × 2, slippage × 3, latency + 1 bar, same intents logic, same window.
+- Parameter neighbourhood: the first two signal parameters at −10%, 0, +10% (integers ±max(1,
+  round(10%))); total return per cell; stability = cells with positive return / valid cells.
+- Benchmarks: buy-and-hold (equal split across symbols, bought at the OOS start) and cash.
+- Verdict: «هنوز قابل اتکا نیست» below 30 closed OOS trades; otherwise by the sign of net.
+
+## Calculator (M3) — `sim.CalcTrade`, `sim.BreakEvenExit`, `sim.BreakEvenFee`
+
+- Single trade: buy quantity = floor(amount / ceil(entry × (1 + s))) at scale 8 (no lot
+  rounding); both legs by the simulator leg math; return = net / (buy value + buy fee).
+- Break-even exit: `entry × (1 + s)(1 + f) / ((1 − s)(1 − f))`, rounded up. This replaces the
+  plan's `entry × (1 + s) / ((1 − f)² × (1 − s))`, which assumes the buy fee is taken from the
+  coins; here the buy fee is charged on top in the quote asset (ADR-019). Per-leg rounding can
+  leave the net a few units from zero (test: within 3 units).
+- Break-even fee of a run: `(gross − slippage) / Σ leg values (USDT)`, floored; undefined when
+  gross − slippage ≤ 0. Holds trades and slippage fixed.
+- Recalculate: replays the recorded OOS intents with overridden capital, fee, slippage and a
+  position-size multiplier on non-zero targets (capped at 100%). With no overrides it
+  reproduces the report fill for fill (tests: `eval/TestReplayReproducesNetExactly`,
+  `report/TestCreateLoadViewRecalculate`, `api/TestReportAndPnlServices`).
+- Toman: only for an explicit stored rate id, `usdt × rate`, half-even to whole TOMAN; USDT
+  values and stored reports are identical across rates (`api/TestReportAndPnlServices`).

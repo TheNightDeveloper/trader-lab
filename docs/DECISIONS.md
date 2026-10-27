@@ -68,3 +68,24 @@ Consequence: earlier symbols get priority when cash is short; visible in the gol
 ## ADR-016 Decision records live in the run result until runs are persisted
 Decision: every intent and its outcome (filled, rejected, expired, superseded, no_change, unfilled) with the input bar reference and model/recipe IDs is part of `sim.Result`. The `decisions` table is written together with run results when reports and the attempt registry arrive (M3/M4).
 Consequence: M2 has no DB writes; the golden files are the record of decisions for now.
+
+## ADR-017 Walk-forward as one continuous run, sliced into folds
+Context: separate per-fold runs restart from flat with fresh capital, so folds do not add up to the report and positions are cut at artificial boundaries.
+Decision: one continuous out-of-sample run (warm-up gated), folds are windows of it; the holdout is its own run. In M5 the retrained model of each step feeds intents into the same continuous run.
+Consequence: report = Σ folds = Σ trades exactly; fold "train" windows matter only once models train (M5).
+
+## ADR-018 Integer statistics, including Sharpe
+Decision: no float anywhere in metrics; Sharpe uses math/big with integer square roots (10⁶ extra precision) and is truncated at 2 decimals. The no-float guard covers sim, money and metrics.
+Consequence: identical digits on every platform; Sharpe can differ from a float implementation in the last digit (documented test against a float reference).
+
+## ADR-019 Break-even exit follows the engine fee model
+Decision: break-even exit = entry × (1 + s)(1 + f) / ((1 − s)(1 − f)), not the plan formula with (1 − f)², because the engine charges the buy fee on top in the quote asset rather than from the bought coins.
+Consequence: the calculator and the simulator agree; METRICS.md records the difference.
+
+## ADR-020 Reports are synchronous until the job queue exists
+Decision: CreateReport evaluates inside the request (main, holdout, 3 stress, ≤9 neighbourhood cells, 2 benchmarks run in parallel; 0.4 s for 6 months of 1h bars). M4 moves this onto the research queue with progress events and attempt records.
+Consequence: very large 1m datasets can make the request slow in M3; no attempt registry yet.
+
+## ADR-021 Intent TTL scales with the timeframe
+Decision: an unset TTL is (latency + 9) bars of the input timeframe (10 minutes on 1m bars, as before). A fixed 10 minutes expired every intent in the +1 latency stress on 1h bars.
+Consequence: golden scenarios unchanged; stored specs keep 0 = automatic, so reproduction is deterministic.
