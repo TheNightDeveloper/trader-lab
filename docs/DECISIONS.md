@@ -111,3 +111,27 @@ Consequence: searches are fast and never peek at the holdout; the holdout of the
 ## ADR-026 Builder maps goals onto objective + constraints
 Decision: the Builder offers three goals instead of raw metric pickers: highest return with a drawdown cap (total_return ↑, max_drawdown ≤ cap), smallest drawdown with a return floor (max_drawdown ↓, total_return ≥ floor), best Sharpe with a drawdown cap. Every goal adds `closed_trades ≥ N` (default 10). The caps live under "advanced".
 Consequence: fewer choices for the user; the engine definition stays general, so M5 or a later "custom" goal can use any metric.
+
+## ADR-027 Training happens outside the judge; strategies only predict
+Decision: `model/train` fits one model per walk-forward step before a run; the recipe strategy receives the schedule of models and uses, for each bar, the latest model whose as-of is not after the bar's open. eval gains `RunSplit` for a prebuilt strategy and never trains.
+Consequence: invariant 5 holds (depguard probe for model/train passes); "train once on all history" cannot be expressed, because a step that trains past its serve time is rejected.
+
+## ADR-028 Features are windows of the past, shared by training and prediction
+Decision: every feature is a function of the bars up to and including the current one (bounded lookback), used both to build training rows and to predict in the simulator. RSI uses simple averages (not Wilder) to stay window-bounded.
+Consequence: appending future bars cannot change a past feature or prediction (`strategy/TestFutureRowsDoNotChangePastDecisions`); feature cost is O(lookback) per bar.
+
+## ADR-029 Only frozen models are stored
+Decision: model_artifacts holds the challenger and baseline frozen at each cycle (content-addressed). Per-fold models are deterministic from recipe, dataset and steps, so they are recomputed rather than stored.
+Consequence: the registry stays small; reproducing a cycle's walk-forward means retraining (seconds).
+
+## ADR-030 The forward test runs in real time on bars after the freeze
+Decision: a cycle freezes its challenger at the end of its data and waits (state `forward_test`, durable across restarts) until the configured number of days of new bars has arrived; the scheduler re-evaluates both contenders every tick and decides when complete. Forward data used in a decision marks `consumed_until`; later cycles may train on it but their test windows start after it.
+Consequence: a recommendation takes at least the forward length (default 14 days); one open cycle per algorithm, so a waiting recommendation blocks the next scheduled cycle (it is not recorded as skipped).
+
+## ADR-031 Promotion jumps straight to active, as a user decision
+Decision: approving a recommendation records the challenger's recipe as a version in state active (or re-activates an existing version with the same recipe), stops the previous active version and points the algorithm's active model at the challenger's frozen model, all in one transaction with lifecycle events by "user" and a promotions row. Rollback restores the pair the last promotion replaced, only if it is still active.
+Consequence: the library's one-step-at-a-time rule applies to manual moves; a learning promotion has passed walk-forward, forward test and the gate instead. Failed, interrupted or restarted cycles never touch the active pair (`loop/TestWorseChallengerAndInterruptionsLeaveTheChampion`).
+
+## ADR-032 Learning algorithms are not searched in experiments
+Decision: experiments reject algorithm versions with a recipe; the Builder hides them. Their candidates come from the cycle's bounded variants instead.
+Consequence: no grid search over recipes yet; parameter search stays for rule strategies.

@@ -3,7 +3,31 @@
 Update at the end of every session.
 
 ## Current milestone
-M4 — Experiments, search, queue: **done** (2026-10-27). Next: M5 — Self-learning loop.
+M5 — Self-learning loop: **done** (2026-10-28). Next: M6 — Chart, hardening, release.
+
+## M5 done (2026-10-28)
+- `feature`: seven window features, forward-return labels with ReadyAt, z-score scaler; fits reject anything not available at their as-of time.
+- `model`: recipe format v1 (features, transform, ridge/logistic, horizon, entry, filter, exits), content-addressed artifacts, save/load, predict. `model/train`: ridge and logistic (gonum Cholesky), walk-forward training per step.
+- `strategy`: recipe interpreter that only predicts (ADR-027). `eval.RunSplit` for prebuilt strategies.
+- Library: `ridge-h4` and `logit-dir-h1` as learning algorithms; versions match on any existing content hash (a restart no longer re-adds a superseded built-in).
+- `loop`: cycle state machine (collect → labels → generate → train → walk-forward → forward test → decision), bounded candidates recorded per cycle, budgets (CPU slot-minutes, bars, candidates), forward test on new bars, pre-registered gate, recommend/approve/reject/rollback, restart recovery, daily schedule.
+- API: LearningService; Library shows recipes and the active model.
+- UI: Learning screen (current cycle steps, champion vs challenger, gate checklist, approve/reject with confirms, all candidates, history, model registry with rollback, budgets, config dialog).
+- Fixed on the way: `flutter run` called the dev server instead of the engine (debug builds now default to 127.0.0.1:8080).
+
+## M5 acceptance
+- Leak tests: future rows change no past sample, model or decision (`model/train/TestFeaturesAndLabelsOnlySeeThePast`, `strategy/TestFutureRowsDoNotChangePastDecisions`); a scaler or model fit on all history fails with look-ahead (`model/train/TestFittingOnAllHistoryIsCaught`).
+- Saved models reproduce predictions within 1e−12, bit-identical in practice (`model/train/TestSavedModelReproducesPredictions`).
+- A challenger that cannot clear the pre-registered improvement ends "not better" and the champion is unchanged (`loop/TestWorseChallengerAndInterruptionsLeaveTheChampion`).
+- An interrupted training run, and a cycle cut off by a restart, end failed with the active version and model untouched (same test).
+- Only the user promotes: a recommendation changes nothing until Approve (`loop/TestCycleRecommendsAndOnlyTheUserPromotes`); UI approval only when the engine allows it and after a confirm (`app/test/learning_test.dart`).
+
+## Verified
+- Synthetic 1m data with hourly momentum: walk-forward challenger `+ret_1` +40.3% vs champion −3.4%. With a 2-day forward window noise won (+0.46% vs +1.46%, "not better"), so the test uses 4 days — an honest example of why the forward test exists.
+- Real database: a manual cycle on ridge-h4 skipped with "داده تازه ناکافی — 24 از 168 کندل لازم" (only live bars in the last 180 days; the archive is from 2024). Learning screen checked in headless Chrome against the running engine.
+
+## Next (M6)
+- Chart screen with engine indicators and decision markers, hardening, release.
 
 ## M4 done (2026-10-27)
 - `experiment`: pre-registered definitions (hypothesis and falsifier required), content id `exp_…`, locked on create; the same definition opens the existing experiment. Pause, resume, cancel.
@@ -50,6 +74,7 @@ M4 — Experiments, search, queue: **done** (2026-10-27). Next: M5 — Self-lear
 - Reports created before the TTL/benchmark fixes keep their old numbers (immutable); Reproduce on them now reports a difference, as it should.
 
 ## Open questions
+- Learning needs recent history: import recent months (Data screen) or lower the lookback/fresh-bar settings for ridge-h4 before the daily schedule is useful. Enable the schedule?
 - Builder defaults: drawdown cap 25%, at least 10 closed trades, 500 attempts, 60 minutes. Adjust?
 - Reference hardware: i3-12100F unless you prefer another.
 - Default timeframes and pairs for the first experiments.

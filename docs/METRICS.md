@@ -193,3 +193,66 @@ reason. Tests: `metrics/*` (Sharpe matches a float reference: 6.28 for the 40-da
   research slots`, at least 1 s. 700 ns/bar comes from the 1M-bar benchmark.
 - Research slots: `floor(cpus × share%)`, at most `cpus − 1` when there is more than one
   CPU, at least 1. Default share 75%.
+
+## Learning (M5) — `feature`, `model`, `model/train`, `loop`
+
+Floats are allowed here (model math); nothing in this section touches the ledger.
+
+### Features (of bar i, computed from bars[:i+1] only; available when bar i is)
+- `ret_k` (k = 1, 4, 24, 72): `close[i] / close[i−k] − 1`. k counts bars, not hours: with
+  gaps (gap policy "flag") the window spans more time.
+- `vol_24`: population standard deviation of the last 24 one-bar simple returns.
+- `rsi_14`: Σgains / (Σgains + Σlosses) over the last 14 close changes, as a fraction 0..1
+  (simple averages, not Wilder smoothing); 0.5 when flat.
+- `sma_gap_24`: `close / mean(last 24 closes) − 1`.
+- `range_24`: `(max high − min low) over 24 bars / close`.
+
+### Labels
+- Forward return over the recipe horizon h: `close[i+h] / close[i] − 1`, `ReadyAt` =
+  availability of bar i+h. A training row enters a fit only if its features and label were
+  available at the fit's as-of time; fits re-check this and fail otherwise (look-ahead).
+
+### Models
+- Transform: z-score per feature, fit on the training rows only (a constant feature gets
+  spread 1, i.e. stays 0).
+- Ridge: `(ZᵀZ + α·n·I) w = Zᵀ(y − ȳ)`, intercept ȳ (not penalized). Predicts the h-bar
+  forward return. Solved by Cholesky (gonum).
+- Logistic: P(y > 0), L2 `α·n` on the weights (not the intercept), Newton/IRLS, ≤ 50 steps,
+  stop when the largest step < 1e−10.
+- Train error (registry only): RMSE (ridge) or mean log loss (logistic), in sample.
+- Signal: long `exposure` when prediction > `entry`, and (if a filter is set) the
+  standardized filter feature ≤ `max`; flat otherwise. Intents only on change.
+- Minimum samples per fit: max(30, 10 × features).
+- Saved models reproduce predictions within 1e−12 (in practice exactly: JSON float64
+  round-trips). Artifact id = `m_` + first 16 hex of SHA-256 of its JSON without the id.
+
+### Walk-forward with retraining (learning cycle)
+- Range: `[now − lookback, end)`, end = `now − 1 bar`, truncated to the timeframe.
+- Test region starts after the first fifth of the range (minimum training), or after the
+  end of the last forward window used in a decision, whichever is later; it is cut into
+  `folds` equal windows (≥ 24 bars each). Training is expanding from the range start to each
+  test start minus an embargo of h bars. One model per fold, valid from its test start.
+- One continuous simulator run over the region (ADR-017); folds are windows of it.
+- Candidate eligible: walk-forward max drawdown ≤ gate cap, return valid and greater than the
+  champion's (retrained the same way on the same folds). Challenger = eligible candidate with
+  the highest walk-forward return (ties: lower number). Fold wins: folds where its net P&L
+  exceeds the champion's.
+
+### Candidates (bounded, one change each, fixed order)
+Add each missing feature; drop each feature (when more than two, never the filter feature);
+filter max ±0.5 or no filter (or add `vol_24 ≤ 1` when absent); α × 0.1 and × 10; entry × 0.5
+and × 2 (logistic: ± 0.02). Duplicates and the parent are left out; capped at the candidate
+budget.
+
+### Forward test and gate
+- Freeze: the challenger is trained once on everything ready at the end of the range; the
+  champion keeps its active model (or, without one, gets a baseline trained the same way).
+  Both run from the freeze on bars that become available later, with the cycle's costs.
+- Gate (copied into the cycle at its start): forward and walk-forward drawdown ≤ cap;
+  `forward return(challenger) − forward return(champion) ≥ min improvement`;
+  `forward drawdown(challenger) − forward drawdown(champion) ≤ max degradation`;
+  forward trades ≥ minimum; forward days ≥ test length; fold wins ≥ minimum. Trades and days
+  are "pending" until met; at the decision anything not passed fails. All pass → recommend.
+  Improvement failed → "not better"; otherwise the first failed item is the reason.
+- CPU budget = research-slot minutes (wall time while holding a slot), checked before each
+  candidate starts; candidates beyond it are recorded as cancelled.
