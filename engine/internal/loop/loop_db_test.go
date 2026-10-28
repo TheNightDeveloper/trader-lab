@@ -4,6 +4,7 @@ import (
 	"context"
 	"math"
 	"math/rand/v2"
+	"sync"
 	"testing"
 	"time"
 
@@ -215,4 +216,62 @@ func TestWorseChallengerAndInterruptionsLeaveTheChampion(t *testing.T) {
 	require.Equal(t, Failed, c.row.Outcome)
 	v, m = active(t, l)
 	require.Equal(t, [2]string{v0, m0}, [2]string{v, m})
+}
+
+// syncClock: the scheduler goroutine and the test both read it.
+type syncClock struct {
+	mu sync.Mutex
+	t  time.Time
+}
+
+func (c *syncClock) Now() time.Time {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.t
+}
+
+func (c *syncClock) add(d time.Duration) {
+	c.mu.Lock()
+	c.t = c.t.Add(d)
+	c.mu.Unlock()
+}
+
+// Release gate: with the schedule on, nobody calls anything — the scheduler
+// starts the day's cycle, runs it to the forward test, and decides when the
+// forward days have passed. The decision is recorded.
+func TestScheduledCycleRunsUnattendedAndRecordsItsDecision(t *testing.T) {
+	st, _, _ := setup(t)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	cfg := testConfig()
+	cfg.Enabled, cfg.HourUTC = true, 0
+	require.NoError(t, SaveConfig(ctx, st.Queries, cfg))
+	clk := &syncClock{t: day0.Add(21*24*time.Hour + 30*time.Minute)}
+	l := &Loop{Store: st, Clock: clk, Limiter: jobs.NewLimiter(2), Poll: 20 * time.Millisecond}
+	done := make(chan error, 1)
+	go func() { done <- l.Run(ctx) }()
+
+	var id int64
+	require.Eventually(t, func() bool {
+		open, err := st.OpenCycles(ctx)
+		require.NoError(t, err)
+		if len(open) == 1 && open[0].State == ForwardTest {
+			id = open[0].ID
+			return true
+		}
+		return false
+	}, 60*time.Second, 20*time.Millisecond, "the scheduler started and froze a cycle")
+
+	clk.add(time.Duration(cfg.Gate.ForwardDays)*24*time.Hour + 2*time.Hour)
+	var c cycle
+	require.Eventually(t, func() bool {
+		c = get(t, l, id)
+		return c.row.Outcome != ""
+	}, 60*time.Second, 20*time.Millisecond, "the scheduler decided after the forward test")
+	require.Equal(t, "schedule", c.row.Trigger)
+	require.NotNil(t, c.row.ConsumedUntil)
+	require.Len(t, c.doc.Gate, 6, "every gate condition recorded")
+	require.Contains(t, []string{Recommended, NotBetter, GateFailed}, c.row.Outcome, c.row.Reason)
+	cancel()
+	require.NoError(t, <-done)
 }
