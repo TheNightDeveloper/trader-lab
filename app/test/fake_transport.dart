@@ -37,7 +37,8 @@ class FakeTransport implements connect.Transport {
     final n = _name(spec);
     final req = await input.first;
     (calls[n] ??= []).add(req);
-    return connect.StreamResponse(spec, connect.Headers(), streams[n]!(req).cast<O>(), connect.Headers());
+    final h = streams[n];
+    return connect.StreamResponse(spec, connect.Headers(), h == null ? Stream<O>.empty() : h(req).cast<O>(), connect.Headers());
   }
 }
 

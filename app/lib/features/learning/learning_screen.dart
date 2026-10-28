@@ -830,8 +830,8 @@ class _ConfigDialogState extends ConsumerState<_ConfigDialog> {
   Widget build(BuildContext context) {
     final l = L10n.of(context);
     final rules = _rules(l);
-    Widget field(String k, String label, {String? unit}) => SizedBox(
-      width: 190,
+    Widget field(String k, String label, {String? unit, String? help}) => SizedBox(
+      width: 280,
       child: TextFormField(
         initialValue: f[k],
         textDirection: TextDirection.ltr,
@@ -840,6 +840,8 @@ class _ConfigDialogState extends ConsumerState<_ConfigDialog> {
         decoration: InputDecoration(
           labelText: label,
           suffix: unitSuffix(unit),
+          helperText: help,
+          helperMaxLines: 3,
           errorText: _tried ? rules[k]!(f[k]!) : null,
         ),
       ),
@@ -870,24 +872,24 @@ class _ConfigDialogState extends ConsumerState<_ConfigDialog> {
                 contentPadding: EdgeInsets.zero,
               ),
               group([
-                field('hour', l.lcHour),
-                field('lookback', l.lcLookback),
-                field('fresh', l.lcFresh),
-                field('folds', l.lcFolds),
-                field('cands', l.lcCands),
-                field('cpu', l.lcCpu, unit: l.minutes),
-                field('bars', l.lcBars),
+                field('hour', l.lcHour, help: l.lcHelpHour),
+                field('lookback', l.lcLookback, help: l.lcHelpLookback),
+                field('fresh', l.lcFresh, help: l.lcHelpFresh),
+                field('folds', l.lcFolds, help: l.lcHelpFolds),
+                field('cands', l.lcCands, help: l.lcHelpCands),
+                field('cpu', l.lcCpu, unit: l.minutes, help: l.lcHelpCpu),
+                field('bars', l.lcBars, help: l.lcHelpBars),
               ]),
               const SizedBox(height: AppSpace.lg),
               Text(l.lcGate, style: AppText.sectionTitle),
               const SizedBox(height: AppSpace.md),
               group([
-                field('maxDd', l.lcMaxDd, unit: '%'),
-                field('trades', l.lcTrades),
-                field('days', l.lcFwdDays),
-                field('improve', l.lcImprove, unit: l.lcPoints),
-                field('ddDeg', l.lcDdDeg, unit: l.lcPoints),
-                field('wins', l.lcWins),
+                field('maxDd', l.lcMaxDd, unit: '%', help: l.lcHelpMaxDd),
+                field('trades', l.lcTrades, help: l.lcHelpTrades),
+                field('days', l.lcFwdDays, help: l.lcHelpFwd),
+                field('improve', l.lcImprove, unit: l.lcPoints, help: l.lcHelpImprove),
+                field('ddDeg', l.lcDdDeg, unit: l.lcPoints, help: l.lcHelpDdDeg),
+                field('wins', l.lcWins, help: l.lcHelpWins),
               ]),
               if (_error != null) ...[
                 const SizedBox(height: AppSpace.md),

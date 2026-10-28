@@ -257,16 +257,7 @@ class IssueBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = L10n.of(context);
-    final (label, color) = switch (kind) {
-      'gap' => (l.issueGap, AppColors.warning),
-      'out_of_order' => (l.issueOutOfOrder, AppColors.warning),
-      'duplicate' => (l.issueDuplicate, AppColors.warning),
-      'bad_price' => (l.issueBadPrice, AppColors.negative),
-      'zero_volume' => (l.issueZeroVolume, AppColors.textMuted),
-      'correction' => (l.issueCorrection, AppColors.negative),
-      'outage' => (l.issueOutage, AppColors.warning),
-      _ => (kind, AppColors.textMuted),
-    };
+    final (label, color) = issueKind(l, kind);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -284,3 +275,15 @@ class IssueBadge extends StatelessWidget {
     );
   }
 }
+
+/// A quality issue kind → (Persian label, color).
+(String, Color) issueKind(L10n l, String kind) => switch (kind) {
+  'gap' => (l.issueGap, AppColors.warning),
+  'out_of_order' => (l.issueOutOfOrder, AppColors.warning),
+  'duplicate' => (l.issueDuplicate, AppColors.warning),
+  'bad_price' => (l.issueBadPrice, AppColors.negative),
+  'zero_volume' => (l.issueZeroVolume, AppColors.textMuted),
+  'correction' => (l.issueCorrection, AppColors.negative),
+  'outage' => (l.issueOutage, AppColors.warning),
+  _ => (kind, AppColors.textMuted),
+};

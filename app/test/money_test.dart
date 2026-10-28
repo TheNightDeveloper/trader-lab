@@ -4,6 +4,10 @@ import 'package:trading_lab/core/money.dart';
 import 'package:trading_lab/gen/lab/v1/common.pb.dart' show Money;
 
 void main() {
+  test('an unset Money reads as zero, like an unset Decimal', () {
+    expect(moneyValue(Money()), Decimal.zero);
+  });
+
   test('moneyValue is exact beyond 2^53', () {
     // 9007199254740993 cannot be represented as a double or a web int.
     final m = Money(units: '-9007199254740993', scale: 8, asset: 'USDT');

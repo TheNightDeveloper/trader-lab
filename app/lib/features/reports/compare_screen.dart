@@ -53,6 +53,13 @@ class CompareScreen extends ConsumerWidget {
     return AsyncSection(
       value: res,
       onRetry: () => ref.invalidate(compareProvider(ids.join(','))),
+      isEmpty: (c) => c.columns.isEmpty,
+      empty: PageFrame(
+        children: [
+          header,
+          SectionCard(child: EmptyState(l.compareEmpty, icon: Icons.compare_arrows_rounded)),
+        ],
+      ),
       skeleton: PageFrame(
         children: [
           header,

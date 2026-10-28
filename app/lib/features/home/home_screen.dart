@@ -18,6 +18,7 @@ import '../../gen/lab/v1/experiment.pb.dart' show ExperimentSummary;
 import '../../gen/lab/v1/health.pb.dart';
 import '../../l10n/app_localizations.dart';
 import '../data/data_providers.dart';
+import '../data/data_screen.dart' show issueKind;
 import '../experiments/experiment_providers.dart';
 import '../learning/learning_screen.dart';
 import '../page_frame.dart';
@@ -112,7 +113,11 @@ class HomeScreen extends ConsumerWidget {
 
     final alerts = <(String, Color, String)>[
       for (final i in issues.value?.issues ?? const <QualityIssue>[])
-        (l.alertData, AppColors.warning, '${i.symbol} · ${i.kind} · ${fmtDateTime(utcMs(i.atUnixMs))} — ${i.detail}'),
+        (
+          l.alertData,
+          AppColors.warning,
+          '${i.symbol} · ${issueKind(l, i.kind).$1} · ${fmtDateTime(utcMs(i.atUnixMs))} — ${i.detail}',
+        ),
       for (final r in reports.where((r) => r.holdoutViews > 0).take(2))
         (l.alertHoldout, AppColors.warning, l.alertHoldoutText(r.title, r.holdoutViews)),
       if (lr != null && lr.hasCurrent() && (lr.current.outcome == 'skipped' || lr.current.outcome == 'failed'))

@@ -1852,4 +1852,53 @@ class L10nFa extends L10n {
 
   @override
   String get alertEngine => 'موتور';
+
+  @override
+  String get lcHelpHour =>
+      'چرخه روزانه پس از این ساعت (به وقت UTC) شروع می‌شود.';
+
+  @override
+  String get lcHelpLookback =>
+      'بازه داده‌ای که هر چرخه برای آموزش و ارزیابی می‌خواند.';
+
+  @override
+  String get lcHelpFresh =>
+      'اگر پس از آخرین تصمیم این تعداد کندل تازه نیامده باشد، چرخه با دلیلِ ثبت‌شده رد می‌شود.';
+
+  @override
+  String get lcHelpFolds =>
+      'تعداد گام‌های ارزیابی گام‌به‌گام؛ هر گام با گذشته خودش آموزش می‌بیند.';
+
+  @override
+  String get lcHelpCands =>
+      'بیشینه نامزدهایی که هر چرخه می‌سازد؛ همه ثبت می‌شوند.';
+
+  @override
+  String get lcHelpCpu =>
+      'زمان پژوهش مجاز هر چرخه؛ نامزدهای بیرون از بودجه «لغو» ثبت می‌شوند.';
+
+  @override
+  String get lcHelpBars => 'سقف حافظه: بیشینه کندل‌هایی که یک چرخه بار می‌کند.';
+
+  @override
+  String get lcHelpMaxDd =>
+      'رقیبی که در ارزیابی یا آزمون پیشرو بیش از این افت کند، رد می‌شود.';
+
+  @override
+  String get lcHelpTrades => 'با معاملات کمتر، نتیجه پیشرو قابل اتکا نیست.';
+
+  @override
+  String get lcHelpFwd =>
+      'مدت آزمون رقیب روی داده تازه، کنار قهرمان، پیش از هر تصمیم.';
+
+  @override
+  String get lcHelpImprove =>
+      'رقیب باید در دوره پیشرو دست‌کم این مقدار بازده بیشتری از قهرمان بسازد.';
+
+  @override
+  String get lcHelpDdDeg => 'افت سرمایه رقیب حداکثر این مقدار بیشتر از قهرمان.';
+
+  @override
+  String get lcHelpWins =>
+      'در دست‌کم این تعداد گام ارزیابی، سود رقیب از قهرمان بیشتر باشد.';
 }

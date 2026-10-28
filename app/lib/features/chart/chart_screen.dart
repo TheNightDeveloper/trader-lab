@@ -141,22 +141,28 @@ class _ChartScreenState extends ConsumerState<ChartScreen> {
             children: [
               _labelled(
                 l.chartSource,
-                DropdownButton<String>(
-                  value: _report.isEmpty || reports.any((r) => r.id == _report) ? _report : null,
-                  hint: Mono(_report),
-                  dropdownColor: AppColors.surfaceRaised,
-                  items: [
-                    DropdownMenuItem(
-                      value: '',
-                      child: Text(l.chartNoSource, style: AppText.body),
-                    ),
-                    for (final r in reports)
+                // Bounded and expanded: long report titles shrink with ellipsis
+                // instead of pushing the row past a phone's width.
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 300),
+                  child: DropdownButton<String>(
+                    isExpanded: true,
+                    value: _report.isEmpty || reports.any((r) => r.id == _report) ? _report : null,
+                    hint: Mono(_report),
+                    dropdownColor: AppColors.surfaceRaised,
+                    items: [
                       DropdownMenuItem(
-                        value: r.id,
-                        child: Text(r.title, style: AppText.body),
+                        value: '',
+                        child: Text(l.chartNoSource, style: AppText.body),
                       ),
-                  ],
-                  onChanged: (v) => _set(() => _report = v ?? ''),
+                      for (final r in reports)
+                        DropdownMenuItem(
+                          value: r.id,
+                          child: Text(r.title, style: AppText.body, overflow: TextOverflow.ellipsis),
+                        ),
+                    ],
+                    onChanged: (v) => _set(() => _report = v ?? ''),
+                  ),
                 ),
               ),
               _labelled(

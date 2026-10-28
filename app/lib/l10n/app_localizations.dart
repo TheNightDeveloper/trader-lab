@@ -3494,6 +3494,84 @@ abstract class L10n {
   /// In fa, this message translates to:
   /// **'موتور'**
   String get alertEngine;
+
+  /// No description provided for @lcHelpHour.
+  ///
+  /// In fa, this message translates to:
+  /// **'چرخه روزانه پس از این ساعت (به وقت UTC) شروع می‌شود.'**
+  String get lcHelpHour;
+
+  /// No description provided for @lcHelpLookback.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازه داده‌ای که هر چرخه برای آموزش و ارزیابی می‌خواند.'**
+  String get lcHelpLookback;
+
+  /// No description provided for @lcHelpFresh.
+  ///
+  /// In fa, this message translates to:
+  /// **'اگر پس از آخرین تصمیم این تعداد کندل تازه نیامده باشد، چرخه با دلیلِ ثبت‌شده رد می‌شود.'**
+  String get lcHelpFresh;
+
+  /// No description provided for @lcHelpFolds.
+  ///
+  /// In fa, this message translates to:
+  /// **'تعداد گام‌های ارزیابی گام‌به‌گام؛ هر گام با گذشته خودش آموزش می‌بیند.'**
+  String get lcHelpFolds;
+
+  /// No description provided for @lcHelpCands.
+  ///
+  /// In fa, this message translates to:
+  /// **'بیشینه نامزدهایی که هر چرخه می‌سازد؛ همه ثبت می‌شوند.'**
+  String get lcHelpCands;
+
+  /// No description provided for @lcHelpCpu.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان پژوهش مجاز هر چرخه؛ نامزدهای بیرون از بودجه «لغو» ثبت می‌شوند.'**
+  String get lcHelpCpu;
+
+  /// No description provided for @lcHelpBars.
+  ///
+  /// In fa, this message translates to:
+  /// **'سقف حافظه: بیشینه کندل‌هایی که یک چرخه بار می‌کند.'**
+  String get lcHelpBars;
+
+  /// No description provided for @lcHelpMaxDd.
+  ///
+  /// In fa, this message translates to:
+  /// **'رقیبی که در ارزیابی یا آزمون پیشرو بیش از این افت کند، رد می‌شود.'**
+  String get lcHelpMaxDd;
+
+  /// No description provided for @lcHelpTrades.
+  ///
+  /// In fa, this message translates to:
+  /// **'با معاملات کمتر، نتیجه پیشرو قابل اتکا نیست.'**
+  String get lcHelpTrades;
+
+  /// No description provided for @lcHelpFwd.
+  ///
+  /// In fa, this message translates to:
+  /// **'مدت آزمون رقیب روی داده تازه، کنار قهرمان، پیش از هر تصمیم.'**
+  String get lcHelpFwd;
+
+  /// No description provided for @lcHelpImprove.
+  ///
+  /// In fa, this message translates to:
+  /// **'رقیب باید در دوره پیشرو دست‌کم این مقدار بازده بیشتری از قهرمان بسازد.'**
+  String get lcHelpImprove;
+
+  /// No description provided for @lcHelpDdDeg.
+  ///
+  /// In fa, this message translates to:
+  /// **'افت سرمایه رقیب حداکثر این مقدار بیشتر از قهرمان.'**
+  String get lcHelpDdDeg;
+
+  /// No description provided for @lcHelpWins.
+  ///
+  /// In fa, this message translates to:
+  /// **'در دست‌کم این تعداد گام ارزیابی، سود رقیب از قهرمان بیشتر باشد.'**
+  String get lcHelpWins;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

@@ -3,7 +3,8 @@ import 'package:decimal/decimal.dart';
 import '../gen/lab/v1/common.pb.dart' show Money;
 
 /// Exact value of an engine [Money]. Never converts through double or web int.
-Decimal moneyValue(Money m) => Decimal.parse(m.units).shift(-m.scale);
+/// An unset Money (no units) reads as zero, like [decValue] for Decimal.
+Decimal moneyValue(Money m) => Decimal.parse(m.units.isEmpty ? '0' : m.units).shift(-m.scale);
 
 /// U+2212, the typographic minus used for every negative number on screen.
 const minusSign = '−';
