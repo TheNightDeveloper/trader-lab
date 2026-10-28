@@ -6,10 +6,10 @@ import '../core/theme/tokens.dart';
 import '../features/chart/chart_screen.dart';
 import '../features/data/data_screen.dart';
 import '../features/experiments/builder_screen.dart';
+import '../features/home/home_screen.dart';
 import '../features/experiments/queue_screen.dart';
 import '../features/learning/learning_screen.dart';
 import '../features/library/library_screen.dart';
-import '../features/placeholder_screen.dart';
 import '../features/pnl/pnl_screen.dart';
 import '../features/reports/compare_screen.dart';
 import '../features/reports/report_screen.dart';
@@ -28,18 +28,13 @@ Page<void> _page(BuildContext context, GoRouterState state, Widget child) => Cus
   child: child,
 );
 
-GoRoute _placeholder(NavDest d, {String? path}) => GoRoute(
-  path: path ?? d.path,
-  pageBuilder: (context, state) => _page(context, state, PlaceholderScreen(dest: d)),
-);
-
 GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
   initialLocation: initialLocation,
   routes: [
     ShellRoute(
       builder: (context, state, child) => AppShell(location: state.uri.path, child: child),
       routes: [
-        _placeholder(Dest.home),
+        GoRoute(path: Dest.home.path, pageBuilder: (context, state) => _page(context, state, const HomeScreen())),
         GoRoute(path: Dest.library.path, pageBuilder: (context, state) => _page(context, state, const LibraryScreen())),
         GoRoute(
           path: Dest.builder.path,

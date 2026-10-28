@@ -399,18 +399,6 @@ abstract class L10n {
   /// **'نرخ تبدیل نمایشی و تنظیمات موتور'**
   String get screenSettingsSub;
 
-  /// No description provided for @comingIn.
-  ///
-  /// In fa, this message translates to:
-  /// **'این صفحه در مرحله {milestone} ساخته می‌شود.'**
-  String comingIn(String milestone);
-
-  /// No description provided for @comingInHint.
-  ///
-  /// In fa, this message translates to:
-  /// **'تا آن زمان، ساختار و مسیر آن آماده است.'**
-  String get comingInHint;
-
   /// No description provided for @chartCrosshair.
   ///
   /// In fa, this message translates to:
@@ -3326,6 +3314,186 @@ abstract class L10n {
   /// In fa, this message translates to:
   /// **'نمایش روی نمودار'**
   String get reportOnChart;
+
+  /// No description provided for @homeImport.
+  ///
+  /// In fa, this message translates to:
+  /// **'واردسازی داده'**
+  String get homeImport;
+
+  /// No description provided for @homeNewExperiment.
+  ///
+  /// In fa, this message translates to:
+  /// **'آزمایش تازه'**
+  String get homeNewExperiment;
+
+  /// No description provided for @homeChampion.
+  ///
+  /// In fa, this message translates to:
+  /// **'نسخه فعال (قهرمان)'**
+  String get homeChampion;
+
+  /// No description provided for @homeChampionNone.
+  ///
+  /// In fa, this message translates to:
+  /// **'هنوز نسخه فعالی نیست'**
+  String get homeChampionNone;
+
+  /// No description provided for @homeChampionModel.
+  ///
+  /// In fa, this message translates to:
+  /// **'مدل {id} · آموزش تا {date}'**
+  String homeChampionModel(String id, String date);
+
+  /// No description provided for @homeChampionNoModel.
+  ///
+  /// In fa, this message translates to:
+  /// **'مدل فعالی ثبت نشده'**
+  String get homeChampionNoModel;
+
+  /// No description provided for @homeNextCycle.
+  ///
+  /// In fa, this message translates to:
+  /// **'چرخه بعدی بازآموزی'**
+  String get homeNextCycle;
+
+  /// No description provided for @homeScheduleOff.
+  ///
+  /// In fa, this message translates to:
+  /// **'خاموش'**
+  String get homeScheduleOff;
+
+  /// No description provided for @homeFresh.
+  ///
+  /// In fa, this message translates to:
+  /// **'حداقل داده تازه: {n} کندل'**
+  String homeFresh(int n);
+
+  /// No description provided for @homeQueue.
+  ///
+  /// In fa, this message translates to:
+  /// **'صف اجرا'**
+  String get homeQueue;
+
+  /// No description provided for @homeQueueValue.
+  ///
+  /// In fa, this message translates to:
+  /// **'{running} در حال اجرا · {queued} در صف'**
+  String homeQueueValue(int running, int queued);
+
+  /// No description provided for @homeQueueSub.
+  ///
+  /// In fa, this message translates to:
+  /// **'{n} آزمایش باز'**
+  String homeQueueSub(int n);
+
+  /// No description provided for @homeData.
+  ///
+  /// In fa, this message translates to:
+  /// **'سلامت داده'**
+  String get homeData;
+
+  /// No description provided for @homeDataValue.
+  ///
+  /// In fa, this message translates to:
+  /// **'{pairs} جفت · {issues} هشدار'**
+  String homeDataValue(int pairs, int issues);
+
+  /// No description provided for @homeDataLive.
+  ///
+  /// In fa, this message translates to:
+  /// **'آخرین کندل زنده: {s} ثانیه پیش'**
+  String homeDataLive(int s);
+
+  /// No description provided for @homeDataOff.
+  ///
+  /// In fa, this message translates to:
+  /// **'داده زنده خاموش است'**
+  String get homeDataOff;
+
+  /// No description provided for @homeLastCycle.
+  ///
+  /// In fa, this message translates to:
+  /// **'آخرین چرخه یادگیری'**
+  String get homeLastCycle;
+
+  /// No description provided for @homeCycleMeta.
+  ///
+  /// In fa, this message translates to:
+  /// **'چرخه #{id} · محرک: {trigger} · {date}'**
+  String homeCycleMeta(int id, String trigger, String date);
+
+  /// No description provided for @homeCycleDetails.
+  ///
+  /// In fa, this message translates to:
+  /// **'جزئیات چرخه'**
+  String get homeCycleDetails;
+
+  /// No description provided for @homeCycleCands.
+  ///
+  /// In fa, this message translates to:
+  /// **'{n} نامزد'**
+  String homeCycleCands(int n);
+
+  /// No description provided for @homeNoCycle.
+  ///
+  /// In fa, this message translates to:
+  /// **'هنوز چرخه یادگیری اجرا نشده.'**
+  String get homeNoCycle;
+
+  /// No description provided for @homeRecent.
+  ///
+  /// In fa, this message translates to:
+  /// **'آزمایش‌های اخیر'**
+  String get homeRecent;
+
+  /// No description provided for @homeAllExperiments.
+  ///
+  /// In fa, this message translates to:
+  /// **'همه آزمایش‌ها'**
+  String get homeAllExperiments;
+
+  /// No description provided for @homeNoExperiments.
+  ///
+  /// In fa, this message translates to:
+  /// **'هنوز آزمایشی ندارید.'**
+  String get homeNoExperiments;
+
+  /// No description provided for @homeAlerts.
+  ///
+  /// In fa, this message translates to:
+  /// **'هشدارها'**
+  String get homeAlerts;
+
+  /// No description provided for @homeNoAlerts.
+  ///
+  /// In fa, this message translates to:
+  /// **'هشداری نیست.'**
+  String get homeNoAlerts;
+
+  /// No description provided for @alertData.
+  ///
+  /// In fa, this message translates to:
+  /// **'کیفیت داده'**
+  String get alertData;
+
+  /// No description provided for @alertHoldout.
+  ///
+  /// In fa, this message translates to:
+  /// **'اعتبار آزمایش'**
+  String get alertHoldout;
+
+  /// No description provided for @alertHoldoutText.
+  ///
+  /// In fa, this message translates to:
+  /// **'آزمون نهایی «{title}» {n} بار دیده شده است؛ دیگر دست‌نخورده نیست.'**
+  String alertHoldoutText(String title, int n);
+
+  /// No description provided for @alertEngine.
+  ///
+  /// In fa, this message translates to:
+  /// **'موتور'**
+  String get alertEngine;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

@@ -168,14 +168,6 @@ class L10nFa extends L10n {
   String get screenSettingsSub => 'نرخ تبدیل نمایشی و تنظیمات موتور';
 
   @override
-  String comingIn(String milestone) {
-    return 'این صفحه در مرحله $milestone ساخته می‌شود.';
-  }
-
-  @override
-  String get comingInHint => 'تا آن زمان، ساختار و مسیر آن آماده است.';
-
-  @override
   String get chartCrosshair => 'زیر اشاره‌گر';
 
   @override
@@ -1752,4 +1744,112 @@ class L10nFa extends L10n {
 
   @override
   String get reportOnChart => 'نمایش روی نمودار';
+
+  @override
+  String get homeImport => 'واردسازی داده';
+
+  @override
+  String get homeNewExperiment => 'آزمایش تازه';
+
+  @override
+  String get homeChampion => 'نسخه فعال (قهرمان)';
+
+  @override
+  String get homeChampionNone => 'هنوز نسخه فعالی نیست';
+
+  @override
+  String homeChampionModel(String id, String date) {
+    return 'مدل $id · آموزش تا $date';
+  }
+
+  @override
+  String get homeChampionNoModel => 'مدل فعالی ثبت نشده';
+
+  @override
+  String get homeNextCycle => 'چرخه بعدی بازآموزی';
+
+  @override
+  String get homeScheduleOff => 'خاموش';
+
+  @override
+  String homeFresh(int n) {
+    return 'حداقل داده تازه: $n کندل';
+  }
+
+  @override
+  String get homeQueue => 'صف اجرا';
+
+  @override
+  String homeQueueValue(int running, int queued) {
+    return '$running در حال اجرا · $queued در صف';
+  }
+
+  @override
+  String homeQueueSub(int n) {
+    return '$n آزمایش باز';
+  }
+
+  @override
+  String get homeData => 'سلامت داده';
+
+  @override
+  String homeDataValue(int pairs, int issues) {
+    return '$pairs جفت · $issues هشدار';
+  }
+
+  @override
+  String homeDataLive(int s) {
+    return 'آخرین کندل زنده: $s ثانیه پیش';
+  }
+
+  @override
+  String get homeDataOff => 'داده زنده خاموش است';
+
+  @override
+  String get homeLastCycle => 'آخرین چرخه یادگیری';
+
+  @override
+  String homeCycleMeta(int id, String trigger, String date) {
+    return 'چرخه #$id · محرک: $trigger · $date';
+  }
+
+  @override
+  String get homeCycleDetails => 'جزئیات چرخه';
+
+  @override
+  String homeCycleCands(int n) {
+    return '$n نامزد';
+  }
+
+  @override
+  String get homeNoCycle => 'هنوز چرخه یادگیری اجرا نشده.';
+
+  @override
+  String get homeRecent => 'آزمایش‌های اخیر';
+
+  @override
+  String get homeAllExperiments => 'همه آزمایش‌ها';
+
+  @override
+  String get homeNoExperiments => 'هنوز آزمایشی ندارید.';
+
+  @override
+  String get homeAlerts => 'هشدارها';
+
+  @override
+  String get homeNoAlerts => 'هشداری نیست.';
+
+  @override
+  String get alertData => 'کیفیت داده';
+
+  @override
+  String get alertHoldout => 'اعتبار آزمایش';
+
+  @override
+  String alertHoldoutText(String title, int n) {
+    return 'آزمون نهایی «$title» $n بار دیده شده است؛ دیگر دست‌نخورده نیست.';
+  }
+
+  @override
+  String get alertEngine => 'موتور';
 }

@@ -19,7 +19,7 @@ import '../../core/widgets/report_widgets.dart';
 import '../../gen/lab/v1/chart.pb.dart';
 import '../../gen/lab/v1/report.pb.dart' show Report;
 import '../../l10n/app_localizations.dart';
-import '../placeholder_screen.dart';
+import '../page_frame.dart';
 import '../reports/report_providers.dart';
 
 const layoutKey = 'lab.chart.layout.v1';

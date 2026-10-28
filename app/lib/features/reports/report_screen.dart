@@ -18,7 +18,7 @@ import '../../core/widgets/report_widgets.dart';
 import '../../gen/lab/v1/common.pb.dart' as pb;
 import '../../gen/lab/v1/report.pb.dart';
 import '../../l10n/app_localizations.dart';
-import '../placeholder_screen.dart';
+import '../page_frame.dart';
 import 'report_providers.dart';
 
 List<(DateTime, double)> equityPoints(List<pb.EquityPoint> pts) => [

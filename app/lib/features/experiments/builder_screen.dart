@@ -25,7 +25,7 @@ import '../../gen/lab/v1/experiment.pb.dart';
 import '../../gen/lab/v1/library.pb.dart';
 import '../../gen/lab/v1/report.pb.dart' show ParamSpec;
 import '../../l10n/app_localizations.dart';
-import '../placeholder_screen.dart';
+import '../page_frame.dart';
 import '../reports/report_providers.dart';
 import 'experiment_providers.dart';
 

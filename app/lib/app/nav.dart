@@ -1,12 +1,11 @@
 import '../l10n/app_localizations.dart';
 
-/// One sidebar destination. [milestone] is the plan milestone that builds the screen.
+/// One sidebar destination.
 class NavDest {
-  const NavDest(this.path, this.label, this.subtitle, this.milestone);
+  const NavDest(this.path, this.label, this.subtitle);
   final String path;
   final String Function(L10n) label;
   final String Function(L10n) subtitle;
-  final String milestone;
 
   /// True when [location] is this destination or one of its sub-routes.
   bool matches(String location) => path == '/' ? location == '/' : location == path || location.startsWith('$path/');
@@ -33,17 +32,17 @@ class NavSoon extends NavEntry {
 }
 
 abstract final class Dest {
-  static final home = NavDest('/', (l) => l.navHome, (l) => l.screenHomeSub, 'M6');
-  static final library = NavDest('/library', (l) => l.navLibrary, (l) => l.screenLibrarySub, 'M4');
-  static final builder = NavDest('/experiments/new', (l) => l.navBuilder, (l) => l.screenBuilderSub, 'M4');
-  static final queue = NavDest('/queue', (l) => l.navQueue, (l) => l.screenQueueSub, 'M4');
-  static final reports = NavDest('/reports', (l) => l.navReports, (l) => l.screenReportsSub, 'M3');
-  static final compare = NavDest('/compare', (l) => l.navCompare, (l) => l.screenCompareSub, 'M3');
-  static final pnl = NavDest('/pnl', (l) => l.navPnl, (l) => l.screenPnlSub, 'M3');
-  static final learning = NavDest('/learning', (l) => l.navLearning, (l) => l.screenLearningSub, 'M5');
-  static final chart = NavDest('/chart', (l) => l.navChart, (l) => l.screenChartSub, 'M6');
-  static final data = NavDest('/data', (l) => l.navData, (l) => l.screenDataSub, 'M1');
-  static final settings = NavDest('/settings', (l) => l.navSettings, (l) => l.screenSettingsSub, 'M1');
+  static final home = NavDest('/', (l) => l.navHome, (l) => l.screenHomeSub);
+  static final library = NavDest('/library', (l) => l.navLibrary, (l) => l.screenLibrarySub);
+  static final builder = NavDest('/experiments/new', (l) => l.navBuilder, (l) => l.screenBuilderSub);
+  static final queue = NavDest('/queue', (l) => l.navQueue, (l) => l.screenQueueSub);
+  static final reports = NavDest('/reports', (l) => l.navReports, (l) => l.screenReportsSub);
+  static final compare = NavDest('/compare', (l) => l.navCompare, (l) => l.screenCompareSub);
+  static final pnl = NavDest('/pnl', (l) => l.navPnl, (l) => l.screenPnlSub);
+  static final learning = NavDest('/learning', (l) => l.navLearning, (l) => l.screenLearningSub);
+  static final chart = NavDest('/chart', (l) => l.navChart, (l) => l.screenChartSub);
+  static final data = NavDest('/data', (l) => l.navData, (l) => l.screenDataSub);
+  static final settings = NavDest('/settings', (l) => l.navSettings, (l) => l.screenSettingsSub);
 
   static final all = [home, library, builder, queue, reports, compare, pnl, learning, chart, data, settings];
 

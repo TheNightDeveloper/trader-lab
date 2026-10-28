@@ -12,7 +12,7 @@ import '../../core/widgets/layout.dart';
 import '../../core/widgets/num.dart';
 import '../../gen/lab/v1/fx.pb.dart';
 import '../../l10n/app_localizations.dart';
-import '../placeholder_screen.dart';
+import '../page_frame.dart';
 
 final ratesProvider = FutureProvider<ListRatesResponse>(
   (ref) => ref.watch(fxClientProvider).listRates(ListRatesRequest(limit: 50)),

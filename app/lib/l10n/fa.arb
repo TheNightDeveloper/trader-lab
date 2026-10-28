@@ -58,15 +58,6 @@
   "screenChartSub": "شمع‌ها، شاخص‌های موتور و نشانگر تصمیم‌ها",
   "screenDataSub": "مجموعه‌داده‌ها، پوشش، مشکلات کیفیت و داده زنده",
   "screenSettingsSub": "نرخ تبدیل نمایشی و تنظیمات موتور",
-  "comingIn": "این صفحه در مرحله {milestone} ساخته می‌شود.",
-  "@comingIn": {
-    "placeholders": {
-      "milestone": {
-        "type": "String"
-      }
-    }
-  },
-  "comingInHint": "تا آن زمان، ساختار و مسیر آن آماده است.",
   "chartCrosshair": "زیر اشاره‌گر",
   "chartCrosshairNone": "اشاره‌گر روی نمودار نیست",
   "retry": "تلاش دوباره",
@@ -904,5 +895,116 @@
   "oc_filled": "اجرا شد",
   "oc_rejected": "رد شد",
   "oc_expired": "منقضی شد",
-  "reportOnChart": "نمایش روی نمودار"
+  "reportOnChart": "نمایش روی نمودار",
+  "homeImport": "واردسازی داده",
+  "homeNewExperiment": "آزمایش تازه",
+  "homeChampion": "نسخه فعال (قهرمان)",
+  "homeChampionNone": "هنوز نسخه فعالی نیست",
+  "homeChampionModel": "مدل {id} · آموزش تا {date}",
+  "@homeChampionModel": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeChampionNoModel": "مدل فعالی ثبت نشده",
+  "homeNextCycle": "چرخه بعدی بازآموزی",
+  "homeScheduleOff": "خاموش",
+  "homeFresh": "حداقل داده تازه: {n} کندل",
+  "@homeFresh": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "homeQueue": "صف اجرا",
+  "homeQueueValue": "{running} در حال اجرا · {queued} در صف",
+  "@homeQueueValue": {
+    "placeholders": {
+      "running": {
+        "type": "int"
+      },
+      "queued": {
+        "type": "int"
+      }
+    }
+  },
+  "homeQueueSub": "{n} آزمایش باز",
+  "@homeQueueSub": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "homeData": "سلامت داده",
+  "homeDataValue": "{pairs} جفت · {issues} هشدار",
+  "@homeDataValue": {
+    "placeholders": {
+      "pairs": {
+        "type": "int"
+      },
+      "issues": {
+        "type": "int"
+      }
+    }
+  },
+  "homeDataLive": "آخرین کندل زنده: {s} ثانیه پیش",
+  "@homeDataLive": {
+    "placeholders": {
+      "s": {
+        "type": "int"
+      }
+    }
+  },
+  "homeDataOff": "داده زنده خاموش است",
+  "homeLastCycle": "آخرین چرخه یادگیری",
+  "homeCycleMeta": "چرخه #{id} · محرک: {trigger} · {date}",
+  "@homeCycleMeta": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      },
+      "trigger": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeCycleDetails": "جزئیات چرخه",
+  "homeCycleCands": "{n} نامزد",
+  "@homeCycleCands": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "homeNoCycle": "هنوز چرخه یادگیری اجرا نشده.",
+  "homeRecent": "آزمایش‌های اخیر",
+  "homeAllExperiments": "همه آزمایش‌ها",
+  "homeNoExperiments": "هنوز آزمایشی ندارید.",
+  "homeAlerts": "هشدارها",
+  "homeNoAlerts": "هشداری نیست.",
+  "alertData": "کیفیت داده",
+  "alertHoldout": "اعتبار آزمایش",
+  "alertHoldoutText": "آزمون نهایی «{title}» {n} بار دیده شده است؛ دیگر دست‌نخورده نیست.",
+  "@alertHoldoutText": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "alertEngine": "موتور"
 }

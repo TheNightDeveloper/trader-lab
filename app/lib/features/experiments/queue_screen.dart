@@ -17,7 +17,7 @@ import '../../core/widgets/status.dart';
 import '../../gen/lab/v1/common.pb.dart' as pb;
 import '../../gen/lab/v1/experiment.pb.dart';
 import '../../l10n/app_localizations.dart';
-import '../placeholder_screen.dart';
+import '../page_frame.dart';
 import 'experiment_providers.dart';
 
 const _live = {'running', 'paused', 'finalizing'};

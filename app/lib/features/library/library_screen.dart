@@ -15,7 +15,7 @@ import '../../core/widgets/status.dart';
 import '../../gen/lab/v1/library.pb.dart';
 import '../../l10n/app_localizations.dart';
 import '../experiments/experiment_providers.dart';
-import '../placeholder_screen.dart';
+import '../page_frame.dart';
 
 const _families = ['trend', 'mean_reversion', 'learning', 'hybrid', 'benchmark'];
 

@@ -11,7 +11,7 @@ import '../../core/widgets/layout.dart';
 import '../../core/widgets/num.dart';
 import '../../core/widgets/report_widgets.dart';
 import '../../l10n/app_localizations.dart';
-import '../placeholder_screen.dart';
+import '../page_frame.dart';
 import 'new_report_form.dart';
 import 'report_providers.dart';
 

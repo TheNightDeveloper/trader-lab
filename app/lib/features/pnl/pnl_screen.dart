@@ -18,7 +18,7 @@ import '../../core/widgets/report_widgets.dart';
 import '../../gen/lab/v1/fx.pb.dart';
 import '../../gen/lab/v1/pnl.pb.dart';
 import '../../l10n/app_localizations.dart';
-import '../placeholder_screen.dart';
+import '../page_frame.dart';
 import '../reports/report_providers.dart';
 import '../reports/report_screen.dart';
 import '../settings/settings_screen.dart' show ratesProvider;

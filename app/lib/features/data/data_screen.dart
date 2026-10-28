@@ -11,7 +11,7 @@ import '../../core/widgets/num.dart';
 import '../../gen/lab/v1/data.pb.dart';
 import '../../gen/lab/v1/health.pbenum.dart';
 import '../../l10n/app_localizations.dart';
-import '../placeholder_screen.dart';
+import '../page_frame.dart';
 import 'coverage_timeline.dart';
 import 'data_providers.dart';
 import 'import_form.dart';

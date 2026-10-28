@@ -22,7 +22,7 @@ import '../../core/widgets/status.dart';
 import '../../gen/lab/v1/common.pb.dart' as pb;
 import '../../gen/lab/v1/learning.pb.dart';
 import '../../l10n/app_localizations.dart';
-import '../placeholder_screen.dart';
+import '../page_frame.dart';
 
 const cyclesPageSize = 10;
 
@@ -312,7 +312,7 @@ class _CycleCard extends StatelessWidget {
                 runSpacing: gap,
                 children: [
                   for (final (i, s) in c.steps.indexed)
-                    SizedBox(width: w, child: _StepTile(s))
+                    SizedBox(width: w, child: StepTile(s))
                         .animate(delay: AppMotion.of(context, AppMotion.stagger) * i)
                         .fadeIn(duration: AppMotion.of(context, AppMotion.normal)),
                 ],
@@ -329,8 +329,8 @@ class _CycleCard extends StatelessWidget {
   }
 }
 
-class _StepTile extends StatelessWidget {
-  const _StepTile(this.s);
+class StepTile extends StatelessWidget {
+  const StepTile(this.s, {super.key});
   final CycleStep s;
 
   @override
