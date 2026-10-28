@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package lab.v1;
+
+import "lab/v1/common.proto";
+import "lab/v1/report.proto";
+
+// ChartService: bars, engine-computed indicators and decision markers. The app
+// draws these values; it never computes an indicator itself.
+service ChartService {
+  rpc GetChart(GetChartRequest) returns (GetChartResponse);
+  rpc GetDecision(GetDecisionRequest) returns (GetDecisionResponse);
+}
+
+message GetChartRequest {
+  // With a report: its dataset bars for symbol, and its decisions as markers.
+  // Without: the latest bars of symbol at timeframe.
+  string report_id = 1;
+  string symbol = 2;
+  string timeframe = 3;
+  repeated string indicators = 4; // ma:20 | ema:48 | bb:20:2 | rsi:14 | macd:12:26:9
+  int32 max_bars = 5; // default 2000, at most 10000: the latest bars of the range
+}
+
+message ChartBar {
+  int64 open_unix_ms = 1;
+  Decimal open = 2;
+  Decimal high = 3;
+  Decimal low = 4;
+  Decimal close = 5;
+  Decimal volume = 6;
+}
+
+message IndicatorLine {
+  string name = 1;
+  // Aligned with bars; "" while the indicator is not defined yet (warm-up).
+  // Decimal strings at 8 decimals, from the engine's computation.
+  repeated string values = 2;
+}
+
+message ChartIndicator {
+  string key = 1;
+  string label = 2;
+  string pane = 3; // main | sub
+  repeated IndicatorLine lines = 4;
+}
+
+message ChartMarker {
+  int32 decision_id = 1; // 0: a stop/take exit (no decision)
+  int64 bar_open_unix_ms = 2;
+  string kind = 3; // entry | exit | rejected
+  Decimal price = 4;
+  string detail = 5; // for stop/take exits: why
+}
+
+message GetChartResponse {
+  string symbol = 1;
+  string timeframe = 2;
+  int32 price_precision = 3;
+  repeated ChartBar bars = 4;
+  repeated ChartIndicator indicators = 5;
+  repeated ChartMarker markers = 6;
+  string report_title = 7;
+  repeated string symbols = 8; // symbols the source has
+  int32 total_bars = 9; // before the max_bars cut
+}
+
+message GetDecisionRequest {
+  string report_id = 1;
+  int32 decision_id = 2;
+}
+
+message GetDecisionResponse {
+  DecisionRow decision = 1;
+  Money ref_price = 2; // close of the bar the decision was made on
+}

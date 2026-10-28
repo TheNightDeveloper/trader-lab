@@ -127,6 +127,7 @@ func run() error {
 		route(labv1connect.NewExperimentServiceHandler(&api.Experiment{Store: st, Scheduler: sched, Limiter: limiter})),
 		route(labv1connect.NewLibraryServiceHandler(&api.Library{Store: st})),
 		route(labv1connect.NewLearningServiceHandler(&api.Learning{Store: st, Loop: learning})),
+		route(labv1connect.NewChartServiceHandler(&api.Chart{Svc: reports, Clock: clock.Wall{}})),
 	)); err != nil {
 		return fmt.Errorf("serve: %w", err)
 	}
