@@ -33,7 +33,7 @@ func TestReportReadLatency(t *testing.T) {
 	require.NoError(t, err)
 	ds, _, err := data.CreateDataset(ctx, st, data.DatasetSpec{Symbol: "BTCUSDT", Timeframe: data.TF1m, From: bars[0].OpenTime, To: bars[len(bars)-1].CloseTime, GapPolicy: data.GapFlag})
 	require.NoError(t, err)
-	svc := report.Service{Store: st, Version: "test"}
+	svc := report.Service{Store: st, Version: "test", Cache: report.NewDatasetCache(4)} // as the engine runs it
 	srv := serve(t,
 		func(m *http.ServeMux) { m.Handle(labv1connect.NewReportServiceHandler(&Report{Svc: svc})) },
 		func(m *http.ServeMux) {

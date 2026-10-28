@@ -14,6 +14,7 @@ import (
 	"runtime"
 	"slices"
 	"strings"
+	"sync"
 
 	"github.com/jackc/pgx/v5"
 
@@ -41,6 +42,8 @@ type Service struct {
 	Store    *store.Store
 	Version  string // engine version recorded in every report
 	Parallel int    // simulator runs at once per report; 0 = all CPUs
+	// Cache holds recently used dataset versions (nil: load every time).
+	Cache *DatasetCache
 }
 
 // Stored is a report as read back.
@@ -76,7 +79,7 @@ func (s Service) bars(ctx context.Context, ids []string) (map[string][]data.Bar,
 	bars := map[string][]data.Bar{}
 	var tf data.Timeframe
 	for _, id := range ids {
-		ds, bs, err := data.LoadDataset(ctx, s.Store, id)
+		ds, bs, err := s.Cache.load(ctx, s, id)
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, "", 0, fmt.Errorf("%w: dataset %s not found", ErrInput, id)
 		}
@@ -356,4 +359,55 @@ func (s Service) Recalculate(ctx context.Context, id string, cfg sim.Config, sca
 		return eval.RunView{}, nil, err
 	}
 	return eval.Replay(ctx, st.Split, ds, cfg, scale, bars, Specs())
+}
+
+// DatasetCache keeps the most recently loaded dataset versions in memory. A
+// version is content-addressed and never changes, so a cached copy is always
+// current. Callers share the bars and must not modify them.
+type DatasetCache struct {
+	mu    sync.Mutex
+	size  int
+	order []string // oldest first
+	m     map[string]cachedDataset
+}
+
+type cachedDataset struct {
+	ds   data.Dataset
+	bars []data.Bar
+}
+
+func NewDatasetCache(size int) *DatasetCache {
+	return &DatasetCache{size: max(1, size), m: map[string]cachedDataset{}}
+}
+
+// load returns the version from the cache, or loads and verifies it (content
+// hash checked) and keeps it. A nil cache always loads.
+func (c *DatasetCache) load(ctx context.Context, s Service, id string) (data.Dataset, []data.Bar, error) {
+	if c == nil {
+		return data.LoadDataset(ctx, s.Store, id)
+	}
+	c.mu.Lock()
+	hit, ok := c.m[id]
+	if ok {
+		c.order = append(slices.DeleteFunc(c.order, func(x string) bool { return x == id }), id)
+	}
+	c.mu.Unlock()
+	if ok {
+		return hit.ds, hit.bars, nil
+	}
+	ds, bars, err := data.LoadDataset(ctx, s.Store, id)
+	if err != nil {
+		return ds, nil, err
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if _, ok := c.m[id]; !ok {
+		c.m[id] = cachedDataset{ds, bars}
+		c.order = append(c.order, id)
+		for len(c.order) > c.size {
+			delete(c.m, c.order[0])
+			c.order = c.order[1:]
+		}
+	}
+	return ds, bars, nil
 }

@@ -106,7 +106,7 @@ func run() error {
 			return nil
 		},
 	}
-	reports := report.Service{Store: st, Version: version, Parallel: limiter.Size()}
+	reports := report.Service{Store: st, Version: version, Parallel: limiter.Size(), Cache: report.NewDatasetCache(4)}
 	sched := &search.Scheduler{Store: st, Reports: reports, Limiter: limiter, Build: build}
 	go func() {
 		if err := sched.Run(ctx); err != nil {

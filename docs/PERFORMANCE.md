@@ -10,11 +10,14 @@ change could move a number.
 | 2026-10-28 | same | same | 0.59 s/op, 503 MB/op, 187k allocs/op | no regression |
 | 2026-10-28 | `GetReport`, 5 concurrent clients × 20 (`TestReportReadLatency`) | report over 100,000 1m bars | p50 12 ms, p95 27 ms, max 158 ms | p95 < 1 s |
 | 2026-10-28 | `GetChart` with 3 indicators, same load | same, 2,000 bars returned | p50 258 ms, p95 315 ms, max 347 ms | p95 < 1 s |
+| 2026-10-28 | same, while the whole test suite runs in parallel | same | p95 **1.26 s** — over target | p95 < 1 s |
+| 2026-10-28 | same, with the dataset cache (4 versions in memory) | same | p50 50 ms, p95 65 ms, max 81 ms (GetReport p95 59 ms) | p95 < 1 s |
 | 2026-10-27 | Health updates during a 500-attempt search | 100,000 1m bars | worst delay 2–7 ms | < 1 s |
 | 2026-10-27 | Report evaluation (main, holdout, stress, neighbourhood, benchmarks) | BTCUSDT 1h, 4,368 bars | 0.4 s | — |
 | 2026-10-28 | Learning cycle to freeze (8 candidates × 2 folds, ridge) | 20 days of 1h bars (synthetic) | ≈ 1 s | — |
 
 Notes
-- GetChart reloads and verifies the dataset on every call (content hash check); that is most
-  of its time. Cache only if a slower machine misses the target.
+- Without a cache, GetChart (and GetDecision, on every marker click) reloaded and re-hashed
+  the whole dataset; under load that missed the target. Dataset versions are content-addressed
+  and immutable, so the report service keeps the 4 most recent in memory (verified once on load).
 - Tests run without `-race` on this machine (no cgo/gcc); numbers are from normal builds.

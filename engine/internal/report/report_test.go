@@ -120,3 +120,22 @@ func TestCreateLoadViewRecalculate(t *testing.T) {
 }
 
 func allParams(id, run string) db.AllTradesParams { return db.AllTradesParams{ReportID: id, Run: run} }
+
+func TestDatasetCacheReusesVerifiedBarsAndEvicts(t *testing.T) {
+	st, ds := setup(t)
+	ctx := context.Background()
+	other, _, err := data.CreateDataset(ctx, st, data.DatasetSpec{Symbol: "BTCUSDT", Timeframe: data.TF1m, From: t0, To: t0.Add(time.Hour), GapPolicy: data.GapFlag})
+	require.NoError(t, err)
+	svc := Service{Store: st, Cache: NewDatasetCache(1)}
+	a, _, err := svc.Bars(ctx, []string{ds})
+	require.NoError(t, err)
+	b, _, err := svc.Bars(ctx, []string{ds})
+	require.NoError(t, err)
+	require.Same(t, &a["BTCUSDT"][0], &b["BTCUSDT"][0], "second read served from memory")
+	_, _, err = svc.Bars(ctx, []string{other.ID})
+	require.NoError(t, err)
+	c, _, err := svc.Bars(ctx, []string{ds})
+	require.NoError(t, err)
+	require.NotSame(t, &a["BTCUSDT"][0], &c["BTCUSDT"][0], "evicted by the newer version, loaded and verified again")
+	require.Equal(t, a, c)
+}
