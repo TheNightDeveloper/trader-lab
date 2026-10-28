@@ -1,6 +1,7 @@
 import 'package:connectrpc/connect.dart' as connect;
 import 'package:connectrpc/protobuf.dart';
 import 'package:connectrpc/protocol/connect.dart' as protocol;
+import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../gen/lab/v1/data.connect.client.dart';
@@ -13,11 +14,14 @@ import '../../gen/lab/v1/report.connect.client.dart';
 import '../../gen/lab/v1/health.pb.dart';
 import 'http_client_io.dart' if (dart.library.js_interop) 'http_client_web.dart';
 
-/// Engine origin. Same origin when the engine serves the app (`make run`);
-/// `flutter run --dart-define=ENGINE_URL=http://127.0.0.1:8080` in development.
+/// Engine origin. `--dart-define=ENGINE_URL=…` wins. A release build is served by
+/// the engine itself (`make run`), so it uses the page's origin; a debug build runs
+/// on Flutter's dev server (random port, 404 for API paths), so it calls the engine
+/// on its default address. The engine allows CORS from loopback origins.
 String engineBaseUrl() {
   const fromEnv = String.fromEnvironment('ENGINE_URL');
-  return fromEnv.isNotEmpty ? fromEnv : Uri.base.origin;
+  if (fromEnv.isNotEmpty) return fromEnv;
+  return kReleaseMode ? Uri.base.origin : 'http://127.0.0.1:8080';
 }
 
 final transportProvider = Provider<connect.Transport>(
