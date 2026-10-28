@@ -57,7 +57,7 @@ void main() {
 
     await tester.tap(find.text('چرخه یادگیری').first);
     await _settle(tester);
-    expect(find.text('این صفحه در مرحله M5 ساخته می‌شود.'), findsOneWidget);
+    expect(find.text('چرخه یادگیری'), findsNWidgets(2), reason: 'sidebar entry and page title');
   });
 
   testWidgets('engine down: banner shows and last status stays visible', (tester) async {

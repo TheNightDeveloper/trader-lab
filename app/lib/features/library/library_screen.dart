@@ -54,7 +54,11 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
           subtitle: Dest.library.subtitle(l),
           actions: [
             FilledButton.icon(
-              onPressed: version == null ? null : () => context.go('/experiments/new?algo=${version.id}'),
+              onPressed: version == null
+                  ? null
+                  : sel!.family == 'learning'
+                  ? () => context.go(Dest.learning.path)
+                  : () => context.go('/experiments/new?algo=${version.id}'),
               icon: const Icon(Icons.science_outlined, size: 18),
               label: Text(l.libExperiment),
             ),
@@ -249,6 +253,9 @@ class _Detail extends ConsumerWidget {
             Text(l.libRecipe, style: AppText.sectionTitle),
             const SizedBox(height: AppSpace.sm),
             for (final p in current.params) kv(p.name, Mono(fmtParam(p.default_2))),
+            for (final r in current.recipe)
+              kv(r.key, Flexible(child: Mono(r.value, style: AppText.mono.copyWith(fontSize: 13)))),
+            if (a.activeModel.isNotEmpty) kv(l.libActiveModel, Mono(a.activeModel)),
             kv('hash', Mono(shortHash(current.contentHash, prefix: ''))),
           ],
           const SizedBox(height: AppSpace.lg),
@@ -292,6 +299,10 @@ class _Detail extends ConsumerWidget {
                 ],
               ),
             ),
+          if (a.family == 'learning') ...[
+            const SizedBox(height: AppSpace.sm),
+            Text(l.libLearningNote, style: AppText.caption),
+          ],
           if (locked) ...[
             const SizedBox(height: AppSpace.sm),
             WarningBanner(l.libLockNote, icon: Icons.lock_outline_rounded),

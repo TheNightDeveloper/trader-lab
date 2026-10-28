@@ -575,7 +575,8 @@ class _BuilderScreenState extends ConsumerState<BuilderScreen> {
             spacing: AppSpace.md,
             runSpacing: AppSpace.md,
             children: [
-              for (final a in r.algorithms)
+              // Learning algorithms are trained in learning cycles, not searched here.
+              for (final a in r.algorithms.where((a) => a.family != 'learning'))
                 if (usableVersion(a) case final ver?)
                   _card(
                     on: f['algo'] == ver.id,

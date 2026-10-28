@@ -666,5 +666,176 @@
   "libNote": "یادداشت (چرا؟)",
   "libHistory": "رویدادها",
   "actorUser": "کاربر",
-  "actorSystem": "سیستم"
+  "actorSystem": "سیستم",
+  "lSubtitle": "بازآموزی روزانه {hour} UTC · حداقل داده تازه {bars} کندل · ارتقا فقط با تأیید شما",
+  "@lSubtitle": {
+    "placeholders": {
+      "hour": {
+        "type": "String"
+      },
+      "bars": {
+        "type": "int"
+      }
+    }
+  },
+  "lSubtitleOff": "بازآموزی خودکار خاموش است؛ چرخه را دستی اجرا کنید · ارتقا فقط با تأیید شما",
+  "lConfig": "تنظیم زمان‌بندی و بودجه",
+  "lRunNow": "اجرای چرخه اکنون",
+  "lStarted": "چرخه #{id} شروع شد.",
+  "@lStarted": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "lCurrent": "چرخه جاری",
+  "lStage": "مرحله: {stage}",
+  "@lStage": {
+    "placeholders": {
+      "stage": {
+        "type": "String"
+      }
+    }
+  },
+  "lForwardDay": "روز {d} از {n}",
+  "@lForwardDay": {
+    "placeholders": {
+      "d": {
+        "type": "int"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ls_collect": "گردآوری داده",
+  "ls_labels": "برچسب‌های آماده",
+  "ls_generate": "ساخت نامزد",
+  "ls_train": "آموزش",
+  "ls_walk_forward": "ارزیابی گام‌به‌گام",
+  "ls_forward_test": "آزمون پیشرو",
+  "ls_decision": "تصمیم ارتقا",
+  "lst_done": "انجام شد",
+  "lst_running": "در جریان",
+  "lst_waiting": "در جریان",
+  "lst_waiting_you": "منتظر شما",
+  "lst_pending": "منتظر",
+  "lst_skipped": "انجام نشد",
+  "lo_skipped": "پرش",
+  "lo_failed": "شکست",
+  "lo_not_better": "نامزد بهتر نیست",
+  "lo_gate_failed": "رد در دروازه",
+  "lo_recommended": "پیشنهاد ارتقا · منتظر تأیید شما",
+  "lo_approved": "ارتقا با تأیید شما",
+  "lo_rejected": "رد با تصمیم شما",
+  "lo_running": "در جریان",
+  "lChampion": "قهرمان (نسخه فعال)",
+  "lChampionBaseline": "قهرمان (نسخه پایه، بی‌مدل فعال)",
+  "lChallenger": "رقیب",
+  "lModelSince": "مدل {id} · آموزش تا {date}",
+  "@lModelSince": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "lBaselineDesc": "هنوز مدل فعالی نیست؛ دستور همین نسخه در لحظه انجماد آموزش دید.",
+  "lChange": "تغییر: {change} · نامزد #{seq}",
+  "@lChange": {
+    "placeholders": {
+      "change": {
+        "type": "String"
+      },
+      "seq": {
+        "type": "int"
+      }
+    }
+  },
+  "lFwdReturn": "بازده خالص پیشرو",
+  "lWalkReturn": "بازده گام‌به‌گام",
+  "lMaxDd": "بیشینه افت",
+  "lTrades": "معاملات",
+  "lFees": "هزینه",
+  "lNoChallenger": "هنوز رقیبی انتخاب نشده.",
+  "lGate": "دروازه ارتقا (ازپیش‌ثبت‌شده)",
+  "gPass": "قبول",
+  "gFail": "رد",
+  "gPending": "در انتظار",
+  "lGateEmpty": "دروازه پس از ارزیابی گام‌به‌گام سنجیده می‌شود.",
+  "lApprove": "تأیید ارتقا (پس از دروازه)",
+  "lReject": "رد نامزد",
+  "lApproveConfirm": "نسخه فعال «{from}» کنار می‌رود و دستور رقیب (تغییر «{change}») با مدل {model} نسخه فعال می‌شود. جفت فعلی برای بازگشت نگه داشته می‌شود.",
+  "@lApproveConfirm": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "change": {
+        "type": "String"
+      },
+      "model": {
+        "type": "String"
+      }
+    }
+  },
+  "lRejectConfirm": "رقیب کنار گذاشته می‌شود و نسخه و مدل فعال هیچ تغییری نمی‌کنند.",
+  "lNone": "هیچ",
+  "lHistory": "تاریخچه چرخه‌ها",
+  "hCycle": "چرخه",
+  "hTrigger": "محرک",
+  "hCands": "نامزدها",
+  "hBest": "بهترین رقیب (پیشرو)",
+  "hDecision": "تصمیم",
+  "trig_schedule": "زمان‌بندی",
+  "trig_manual": "دستی",
+  "lHistoryNote": "پایان چرخه با «نامزد بهتر نیست» خروجی عادی است. داده پیشرویی که در تصمیم استفاده شده، در چرخه بعد فقط داده آموزش است.",
+  "lHistoryEmpty": "هنوز چرخه‌ای اجرا نشده. «اجرای چرخه اکنون» را بزنید.",
+  "lModels": "ثبت مدل‌ها",
+  "ms_active": "فعال",
+  "ms_challenger": "رقیب",
+  "ms_baseline": "پایه",
+  "ms_archived": "بایگانی",
+  "lModelsEmpty": "هنوز مدلی ذخیره نشده.",
+  "lRollback": "بازگشت به مدل پیشین",
+  "lRollbackConfirm": "نسخه و مدل فعال به جفت پیش از آخرین ارتقا برمی‌گردند. این تصمیم ثبت می‌شود.",
+  "lBudget": "بودجه چرخه",
+  "bCpu": "CPU",
+  "bBars": "کندل‌ها (حافظه)",
+  "bCands": "نامزدها",
+  "lCandidates": "همه نامزدهای این چرخه ({n})",
+  "@lCandidates": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "cChange": "تغییر",
+  "cWins": "برد در گام‌ها",
+  "lcAlgorithm": "الگوریتم",
+  "lcEnabled": "اجرای خودکار روزانه",
+  "lcHour": "ساعت شروع (UTC)",
+  "lcLookback": "بازه داده (روز)",
+  "lcFresh": "حداقل کندل تازه",
+  "lcFolds": "گام‌های ارزیابی",
+  "lcCands": "سقف نامزدها",
+  "lcCpu": "بودجه CPU (دقیقه)",
+  "lcBars": "سقف کندل‌ها",
+  "lcGate": "دروازه — پیش از هر چرخه ثبت و قفل می‌شود",
+  "lcMaxDd": "سقف افت سرمایه",
+  "lcTrades": "حداقل معامله پیشرو",
+  "lcFwdDays": "طول آزمون پیشرو (روز)",
+  "lcImprove": "حداقل بهبود بازده",
+  "lcDdDeg": "حداکثر بدتر شدن افت",
+  "lcWins": "حداقل برد در گام‌ها",
+  "lcPoints": "واحد درصد",
+  "lcSaved": "تنظیمات ذخیره شد؛ از چرخه بعد اعمال می‌شود.",
+  "save": "ذخیره",
+  "libLearningNote": "الگوریتم یادگیرنده: در چرخه یادگیری آموزش و آزموده می‌شود، نه در آزمایش.",
+  "libActiveModel": "مدل فعال"
 }

@@ -1339,4 +1339,318 @@ class L10nFa extends L10n {
 
   @override
   String get actorSystem => 'سیستم';
+
+  @override
+  String lSubtitle(String hour, int bars) {
+    return 'بازآموزی روزانه $hour UTC · حداقل داده تازه $bars کندل · ارتقا فقط با تأیید شما';
+  }
+
+  @override
+  String get lSubtitleOff =>
+      'بازآموزی خودکار خاموش است؛ چرخه را دستی اجرا کنید · ارتقا فقط با تأیید شما';
+
+  @override
+  String get lConfig => 'تنظیم زمان‌بندی و بودجه';
+
+  @override
+  String get lRunNow => 'اجرای چرخه اکنون';
+
+  @override
+  String lStarted(int id) {
+    return 'چرخه #$id شروع شد.';
+  }
+
+  @override
+  String get lCurrent => 'چرخه جاری';
+
+  @override
+  String lStage(String stage) {
+    return 'مرحله: $stage';
+  }
+
+  @override
+  String lForwardDay(int d, int n) {
+    return 'روز $d از $n';
+  }
+
+  @override
+  String get ls_collect => 'گردآوری داده';
+
+  @override
+  String get ls_labels => 'برچسب‌های آماده';
+
+  @override
+  String get ls_generate => 'ساخت نامزد';
+
+  @override
+  String get ls_train => 'آموزش';
+
+  @override
+  String get ls_walk_forward => 'ارزیابی گام‌به‌گام';
+
+  @override
+  String get ls_forward_test => 'آزمون پیشرو';
+
+  @override
+  String get ls_decision => 'تصمیم ارتقا';
+
+  @override
+  String get lst_done => 'انجام شد';
+
+  @override
+  String get lst_running => 'در جریان';
+
+  @override
+  String get lst_waiting => 'در جریان';
+
+  @override
+  String get lst_waiting_you => 'منتظر شما';
+
+  @override
+  String get lst_pending => 'منتظر';
+
+  @override
+  String get lst_skipped => 'انجام نشد';
+
+  @override
+  String get lo_skipped => 'پرش';
+
+  @override
+  String get lo_failed => 'شکست';
+
+  @override
+  String get lo_not_better => 'نامزد بهتر نیست';
+
+  @override
+  String get lo_gate_failed => 'رد در دروازه';
+
+  @override
+  String get lo_recommended => 'پیشنهاد ارتقا · منتظر تأیید شما';
+
+  @override
+  String get lo_approved => 'ارتقا با تأیید شما';
+
+  @override
+  String get lo_rejected => 'رد با تصمیم شما';
+
+  @override
+  String get lo_running => 'در جریان';
+
+  @override
+  String get lChampion => 'قهرمان (نسخه فعال)';
+
+  @override
+  String get lChampionBaseline => 'قهرمان (نسخه پایه، بی‌مدل فعال)';
+
+  @override
+  String get lChallenger => 'رقیب';
+
+  @override
+  String lModelSince(String id, String date) {
+    return 'مدل $id · آموزش تا $date';
+  }
+
+  @override
+  String get lBaselineDesc =>
+      'هنوز مدل فعالی نیست؛ دستور همین نسخه در لحظه انجماد آموزش دید.';
+
+  @override
+  String lChange(String change, int seq) {
+    return 'تغییر: $change · نامزد #$seq';
+  }
+
+  @override
+  String get lFwdReturn => 'بازده خالص پیشرو';
+
+  @override
+  String get lWalkReturn => 'بازده گام‌به‌گام';
+
+  @override
+  String get lMaxDd => 'بیشینه افت';
+
+  @override
+  String get lTrades => 'معاملات';
+
+  @override
+  String get lFees => 'هزینه';
+
+  @override
+  String get lNoChallenger => 'هنوز رقیبی انتخاب نشده.';
+
+  @override
+  String get lGate => 'دروازه ارتقا (ازپیش‌ثبت‌شده)';
+
+  @override
+  String get gPass => 'قبول';
+
+  @override
+  String get gFail => 'رد';
+
+  @override
+  String get gPending => 'در انتظار';
+
+  @override
+  String get lGateEmpty => 'دروازه پس از ارزیابی گام‌به‌گام سنجیده می‌شود.';
+
+  @override
+  String get lApprove => 'تأیید ارتقا (پس از دروازه)';
+
+  @override
+  String get lReject => 'رد نامزد';
+
+  @override
+  String lApproveConfirm(String from, String change, String model) {
+    return 'نسخه فعال «$from» کنار می‌رود و دستور رقیب (تغییر «$change») با مدل $model نسخه فعال می‌شود. جفت فعلی برای بازگشت نگه داشته می‌شود.';
+  }
+
+  @override
+  String get lRejectConfirm =>
+      'رقیب کنار گذاشته می‌شود و نسخه و مدل فعال هیچ تغییری نمی‌کنند.';
+
+  @override
+  String get lNone => 'هیچ';
+
+  @override
+  String get lHistory => 'تاریخچه چرخه‌ها';
+
+  @override
+  String get hCycle => 'چرخه';
+
+  @override
+  String get hTrigger => 'محرک';
+
+  @override
+  String get hCands => 'نامزدها';
+
+  @override
+  String get hBest => 'بهترین رقیب (پیشرو)';
+
+  @override
+  String get hDecision => 'تصمیم';
+
+  @override
+  String get trig_schedule => 'زمان‌بندی';
+
+  @override
+  String get trig_manual => 'دستی';
+
+  @override
+  String get lHistoryNote =>
+      'پایان چرخه با «نامزد بهتر نیست» خروجی عادی است. داده پیشرویی که در تصمیم استفاده شده، در چرخه بعد فقط داده آموزش است.';
+
+  @override
+  String get lHistoryEmpty =>
+      'هنوز چرخه‌ای اجرا نشده. «اجرای چرخه اکنون» را بزنید.';
+
+  @override
+  String get lModels => 'ثبت مدل‌ها';
+
+  @override
+  String get ms_active => 'فعال';
+
+  @override
+  String get ms_challenger => 'رقیب';
+
+  @override
+  String get ms_baseline => 'پایه';
+
+  @override
+  String get ms_archived => 'بایگانی';
+
+  @override
+  String get lModelsEmpty => 'هنوز مدلی ذخیره نشده.';
+
+  @override
+  String get lRollback => 'بازگشت به مدل پیشین';
+
+  @override
+  String get lRollbackConfirm =>
+      'نسخه و مدل فعال به جفت پیش از آخرین ارتقا برمی‌گردند. این تصمیم ثبت می‌شود.';
+
+  @override
+  String get lBudget => 'بودجه چرخه';
+
+  @override
+  String get bCpu => 'CPU';
+
+  @override
+  String get bBars => 'کندل‌ها (حافظه)';
+
+  @override
+  String get bCands => 'نامزدها';
+
+  @override
+  String lCandidates(int n) {
+    return 'همه نامزدهای این چرخه ($n)';
+  }
+
+  @override
+  String get cChange => 'تغییر';
+
+  @override
+  String get cWins => 'برد در گام‌ها';
+
+  @override
+  String get lcAlgorithm => 'الگوریتم';
+
+  @override
+  String get lcEnabled => 'اجرای خودکار روزانه';
+
+  @override
+  String get lcHour => 'ساعت شروع (UTC)';
+
+  @override
+  String get lcLookback => 'بازه داده (روز)';
+
+  @override
+  String get lcFresh => 'حداقل کندل تازه';
+
+  @override
+  String get lcFolds => 'گام‌های ارزیابی';
+
+  @override
+  String get lcCands => 'سقف نامزدها';
+
+  @override
+  String get lcCpu => 'بودجه CPU (دقیقه)';
+
+  @override
+  String get lcBars => 'سقف کندل‌ها';
+
+  @override
+  String get lcGate => 'دروازه — پیش از هر چرخه ثبت و قفل می‌شود';
+
+  @override
+  String get lcMaxDd => 'سقف افت سرمایه';
+
+  @override
+  String get lcTrades => 'حداقل معامله پیشرو';
+
+  @override
+  String get lcFwdDays => 'طول آزمون پیشرو (روز)';
+
+  @override
+  String get lcImprove => 'حداقل بهبود بازده';
+
+  @override
+  String get lcDdDeg => 'حداکثر بدتر شدن افت';
+
+  @override
+  String get lcWins => 'حداقل برد در گام‌ها';
+
+  @override
+  String get lcPoints => 'واحد درصد';
+
+  @override
+  String get lcSaved => 'تنظیمات ذخیره شد؛ از چرخه بعد اعمال می‌شود.';
+
+  @override
+  String get save => 'ذخیره';
+
+  @override
+  String get libLearningNote =>
+      'الگوریتم یادگیرنده: در چرخه یادگیری آموزش و آزموده می‌شود، نه در آزمایش.';
+
+  @override
+  String get libActiveModel => 'مدل فعال';
 }

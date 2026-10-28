@@ -2564,6 +2564,588 @@ abstract class L10n {
   /// In fa, this message translates to:
   /// **'سیستم'**
   String get actorSystem;
+
+  /// No description provided for @lSubtitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازآموزی روزانه {hour} UTC · حداقل داده تازه {bars} کندل · ارتقا فقط با تأیید شما'**
+  String lSubtitle(String hour, int bars);
+
+  /// No description provided for @lSubtitleOff.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازآموزی خودکار خاموش است؛ چرخه را دستی اجرا کنید · ارتقا فقط با تأیید شما'**
+  String get lSubtitleOff;
+
+  /// No description provided for @lConfig.
+  ///
+  /// In fa, this message translates to:
+  /// **'تنظیم زمان‌بندی و بودجه'**
+  String get lConfig;
+
+  /// No description provided for @lRunNow.
+  ///
+  /// In fa, this message translates to:
+  /// **'اجرای چرخه اکنون'**
+  String get lRunNow;
+
+  /// No description provided for @lStarted.
+  ///
+  /// In fa, this message translates to:
+  /// **'چرخه #{id} شروع شد.'**
+  String lStarted(int id);
+
+  /// No description provided for @lCurrent.
+  ///
+  /// In fa, this message translates to:
+  /// **'چرخه جاری'**
+  String get lCurrent;
+
+  /// No description provided for @lStage.
+  ///
+  /// In fa, this message translates to:
+  /// **'مرحله: {stage}'**
+  String lStage(String stage);
+
+  /// No description provided for @lForwardDay.
+  ///
+  /// In fa, this message translates to:
+  /// **'روز {d} از {n}'**
+  String lForwardDay(int d, int n);
+
+  /// No description provided for @ls_collect.
+  ///
+  /// In fa, this message translates to:
+  /// **'گردآوری داده'**
+  String get ls_collect;
+
+  /// No description provided for @ls_labels.
+  ///
+  /// In fa, this message translates to:
+  /// **'برچسب‌های آماده'**
+  String get ls_labels;
+
+  /// No description provided for @ls_generate.
+  ///
+  /// In fa, this message translates to:
+  /// **'ساخت نامزد'**
+  String get ls_generate;
+
+  /// No description provided for @ls_train.
+  ///
+  /// In fa, this message translates to:
+  /// **'آموزش'**
+  String get ls_train;
+
+  /// No description provided for @ls_walk_forward.
+  ///
+  /// In fa, this message translates to:
+  /// **'ارزیابی گام‌به‌گام'**
+  String get ls_walk_forward;
+
+  /// No description provided for @ls_forward_test.
+  ///
+  /// In fa, this message translates to:
+  /// **'آزمون پیشرو'**
+  String get ls_forward_test;
+
+  /// No description provided for @ls_decision.
+  ///
+  /// In fa, this message translates to:
+  /// **'تصمیم ارتقا'**
+  String get ls_decision;
+
+  /// No description provided for @lst_done.
+  ///
+  /// In fa, this message translates to:
+  /// **'انجام شد'**
+  String get lst_done;
+
+  /// No description provided for @lst_running.
+  ///
+  /// In fa, this message translates to:
+  /// **'در جریان'**
+  String get lst_running;
+
+  /// No description provided for @lst_waiting.
+  ///
+  /// In fa, this message translates to:
+  /// **'در جریان'**
+  String get lst_waiting;
+
+  /// No description provided for @lst_waiting_you.
+  ///
+  /// In fa, this message translates to:
+  /// **'منتظر شما'**
+  String get lst_waiting_you;
+
+  /// No description provided for @lst_pending.
+  ///
+  /// In fa, this message translates to:
+  /// **'منتظر'**
+  String get lst_pending;
+
+  /// No description provided for @lst_skipped.
+  ///
+  /// In fa, this message translates to:
+  /// **'انجام نشد'**
+  String get lst_skipped;
+
+  /// No description provided for @lo_skipped.
+  ///
+  /// In fa, this message translates to:
+  /// **'پرش'**
+  String get lo_skipped;
+
+  /// No description provided for @lo_failed.
+  ///
+  /// In fa, this message translates to:
+  /// **'شکست'**
+  String get lo_failed;
+
+  /// No description provided for @lo_not_better.
+  ///
+  /// In fa, this message translates to:
+  /// **'نامزد بهتر نیست'**
+  String get lo_not_better;
+
+  /// No description provided for @lo_gate_failed.
+  ///
+  /// In fa, this message translates to:
+  /// **'رد در دروازه'**
+  String get lo_gate_failed;
+
+  /// No description provided for @lo_recommended.
+  ///
+  /// In fa, this message translates to:
+  /// **'پیشنهاد ارتقا · منتظر تأیید شما'**
+  String get lo_recommended;
+
+  /// No description provided for @lo_approved.
+  ///
+  /// In fa, this message translates to:
+  /// **'ارتقا با تأیید شما'**
+  String get lo_approved;
+
+  /// No description provided for @lo_rejected.
+  ///
+  /// In fa, this message translates to:
+  /// **'رد با تصمیم شما'**
+  String get lo_rejected;
+
+  /// No description provided for @lo_running.
+  ///
+  /// In fa, this message translates to:
+  /// **'در جریان'**
+  String get lo_running;
+
+  /// No description provided for @lChampion.
+  ///
+  /// In fa, this message translates to:
+  /// **'قهرمان (نسخه فعال)'**
+  String get lChampion;
+
+  /// No description provided for @lChampionBaseline.
+  ///
+  /// In fa, this message translates to:
+  /// **'قهرمان (نسخه پایه، بی‌مدل فعال)'**
+  String get lChampionBaseline;
+
+  /// No description provided for @lChallenger.
+  ///
+  /// In fa, this message translates to:
+  /// **'رقیب'**
+  String get lChallenger;
+
+  /// No description provided for @lModelSince.
+  ///
+  /// In fa, this message translates to:
+  /// **'مدل {id} · آموزش تا {date}'**
+  String lModelSince(String id, String date);
+
+  /// No description provided for @lBaselineDesc.
+  ///
+  /// In fa, this message translates to:
+  /// **'هنوز مدل فعالی نیست؛ دستور همین نسخه در لحظه انجماد آموزش دید.'**
+  String get lBaselineDesc;
+
+  /// No description provided for @lChange.
+  ///
+  /// In fa, this message translates to:
+  /// **'تغییر: {change} · نامزد #{seq}'**
+  String lChange(String change, int seq);
+
+  /// No description provided for @lFwdReturn.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازده خالص پیشرو'**
+  String get lFwdReturn;
+
+  /// No description provided for @lWalkReturn.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازده گام‌به‌گام'**
+  String get lWalkReturn;
+
+  /// No description provided for @lMaxDd.
+  ///
+  /// In fa, this message translates to:
+  /// **'بیشینه افت'**
+  String get lMaxDd;
+
+  /// No description provided for @lTrades.
+  ///
+  /// In fa, this message translates to:
+  /// **'معاملات'**
+  String get lTrades;
+
+  /// No description provided for @lFees.
+  ///
+  /// In fa, this message translates to:
+  /// **'هزینه'**
+  String get lFees;
+
+  /// No description provided for @lNoChallenger.
+  ///
+  /// In fa, this message translates to:
+  /// **'هنوز رقیبی انتخاب نشده.'**
+  String get lNoChallenger;
+
+  /// No description provided for @lGate.
+  ///
+  /// In fa, this message translates to:
+  /// **'دروازه ارتقا (ازپیش‌ثبت‌شده)'**
+  String get lGate;
+
+  /// No description provided for @gPass.
+  ///
+  /// In fa, this message translates to:
+  /// **'قبول'**
+  String get gPass;
+
+  /// No description provided for @gFail.
+  ///
+  /// In fa, this message translates to:
+  /// **'رد'**
+  String get gFail;
+
+  /// No description provided for @gPending.
+  ///
+  /// In fa, this message translates to:
+  /// **'در انتظار'**
+  String get gPending;
+
+  /// No description provided for @lGateEmpty.
+  ///
+  /// In fa, this message translates to:
+  /// **'دروازه پس از ارزیابی گام‌به‌گام سنجیده می‌شود.'**
+  String get lGateEmpty;
+
+  /// No description provided for @lApprove.
+  ///
+  /// In fa, this message translates to:
+  /// **'تأیید ارتقا (پس از دروازه)'**
+  String get lApprove;
+
+  /// No description provided for @lReject.
+  ///
+  /// In fa, this message translates to:
+  /// **'رد نامزد'**
+  String get lReject;
+
+  /// No description provided for @lApproveConfirm.
+  ///
+  /// In fa, this message translates to:
+  /// **'نسخه فعال «{from}» کنار می‌رود و دستور رقیب (تغییر «{change}») با مدل {model} نسخه فعال می‌شود. جفت فعلی برای بازگشت نگه داشته می‌شود.'**
+  String lApproveConfirm(String from, String change, String model);
+
+  /// No description provided for @lRejectConfirm.
+  ///
+  /// In fa, this message translates to:
+  /// **'رقیب کنار گذاشته می‌شود و نسخه و مدل فعال هیچ تغییری نمی‌کنند.'**
+  String get lRejectConfirm;
+
+  /// No description provided for @lNone.
+  ///
+  /// In fa, this message translates to:
+  /// **'هیچ'**
+  String get lNone;
+
+  /// No description provided for @lHistory.
+  ///
+  /// In fa, this message translates to:
+  /// **'تاریخچه چرخه‌ها'**
+  String get lHistory;
+
+  /// No description provided for @hCycle.
+  ///
+  /// In fa, this message translates to:
+  /// **'چرخه'**
+  String get hCycle;
+
+  /// No description provided for @hTrigger.
+  ///
+  /// In fa, this message translates to:
+  /// **'محرک'**
+  String get hTrigger;
+
+  /// No description provided for @hCands.
+  ///
+  /// In fa, this message translates to:
+  /// **'نامزدها'**
+  String get hCands;
+
+  /// No description provided for @hBest.
+  ///
+  /// In fa, this message translates to:
+  /// **'بهترین رقیب (پیشرو)'**
+  String get hBest;
+
+  /// No description provided for @hDecision.
+  ///
+  /// In fa, this message translates to:
+  /// **'تصمیم'**
+  String get hDecision;
+
+  /// No description provided for @trig_schedule.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان‌بندی'**
+  String get trig_schedule;
+
+  /// No description provided for @trig_manual.
+  ///
+  /// In fa, this message translates to:
+  /// **'دستی'**
+  String get trig_manual;
+
+  /// No description provided for @lHistoryNote.
+  ///
+  /// In fa, this message translates to:
+  /// **'پایان چرخه با «نامزد بهتر نیست» خروجی عادی است. داده پیشرویی که در تصمیم استفاده شده، در چرخه بعد فقط داده آموزش است.'**
+  String get lHistoryNote;
+
+  /// No description provided for @lHistoryEmpty.
+  ///
+  /// In fa, this message translates to:
+  /// **'هنوز چرخه‌ای اجرا نشده. «اجرای چرخه اکنون» را بزنید.'**
+  String get lHistoryEmpty;
+
+  /// No description provided for @lModels.
+  ///
+  /// In fa, this message translates to:
+  /// **'ثبت مدل‌ها'**
+  String get lModels;
+
+  /// No description provided for @ms_active.
+  ///
+  /// In fa, this message translates to:
+  /// **'فعال'**
+  String get ms_active;
+
+  /// No description provided for @ms_challenger.
+  ///
+  /// In fa, this message translates to:
+  /// **'رقیب'**
+  String get ms_challenger;
+
+  /// No description provided for @ms_baseline.
+  ///
+  /// In fa, this message translates to:
+  /// **'پایه'**
+  String get ms_baseline;
+
+  /// No description provided for @ms_archived.
+  ///
+  /// In fa, this message translates to:
+  /// **'بایگانی'**
+  String get ms_archived;
+
+  /// No description provided for @lModelsEmpty.
+  ///
+  /// In fa, this message translates to:
+  /// **'هنوز مدلی ذخیره نشده.'**
+  String get lModelsEmpty;
+
+  /// No description provided for @lRollback.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازگشت به مدل پیشین'**
+  String get lRollback;
+
+  /// No description provided for @lRollbackConfirm.
+  ///
+  /// In fa, this message translates to:
+  /// **'نسخه و مدل فعال به جفت پیش از آخرین ارتقا برمی‌گردند. این تصمیم ثبت می‌شود.'**
+  String get lRollbackConfirm;
+
+  /// No description provided for @lBudget.
+  ///
+  /// In fa, this message translates to:
+  /// **'بودجه چرخه'**
+  String get lBudget;
+
+  /// No description provided for @bCpu.
+  ///
+  /// In fa, this message translates to:
+  /// **'CPU'**
+  String get bCpu;
+
+  /// No description provided for @bBars.
+  ///
+  /// In fa, this message translates to:
+  /// **'کندل‌ها (حافظه)'**
+  String get bBars;
+
+  /// No description provided for @bCands.
+  ///
+  /// In fa, this message translates to:
+  /// **'نامزدها'**
+  String get bCands;
+
+  /// No description provided for @lCandidates.
+  ///
+  /// In fa, this message translates to:
+  /// **'همه نامزدهای این چرخه ({n})'**
+  String lCandidates(int n);
+
+  /// No description provided for @cChange.
+  ///
+  /// In fa, this message translates to:
+  /// **'تغییر'**
+  String get cChange;
+
+  /// No description provided for @cWins.
+  ///
+  /// In fa, this message translates to:
+  /// **'برد در گام‌ها'**
+  String get cWins;
+
+  /// No description provided for @lcAlgorithm.
+  ///
+  /// In fa, this message translates to:
+  /// **'الگوریتم'**
+  String get lcAlgorithm;
+
+  /// No description provided for @lcEnabled.
+  ///
+  /// In fa, this message translates to:
+  /// **'اجرای خودکار روزانه'**
+  String get lcEnabled;
+
+  /// No description provided for @lcHour.
+  ///
+  /// In fa, this message translates to:
+  /// **'ساعت شروع (UTC)'**
+  String get lcHour;
+
+  /// No description provided for @lcLookback.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازه داده (روز)'**
+  String get lcLookback;
+
+  /// No description provided for @lcFresh.
+  ///
+  /// In fa, this message translates to:
+  /// **'حداقل کندل تازه'**
+  String get lcFresh;
+
+  /// No description provided for @lcFolds.
+  ///
+  /// In fa, this message translates to:
+  /// **'گام‌های ارزیابی'**
+  String get lcFolds;
+
+  /// No description provided for @lcCands.
+  ///
+  /// In fa, this message translates to:
+  /// **'سقف نامزدها'**
+  String get lcCands;
+
+  /// No description provided for @lcCpu.
+  ///
+  /// In fa, this message translates to:
+  /// **'بودجه CPU (دقیقه)'**
+  String get lcCpu;
+
+  /// No description provided for @lcBars.
+  ///
+  /// In fa, this message translates to:
+  /// **'سقف کندل‌ها'**
+  String get lcBars;
+
+  /// No description provided for @lcGate.
+  ///
+  /// In fa, this message translates to:
+  /// **'دروازه — پیش از هر چرخه ثبت و قفل می‌شود'**
+  String get lcGate;
+
+  /// No description provided for @lcMaxDd.
+  ///
+  /// In fa, this message translates to:
+  /// **'سقف افت سرمایه'**
+  String get lcMaxDd;
+
+  /// No description provided for @lcTrades.
+  ///
+  /// In fa, this message translates to:
+  /// **'حداقل معامله پیشرو'**
+  String get lcTrades;
+
+  /// No description provided for @lcFwdDays.
+  ///
+  /// In fa, this message translates to:
+  /// **'طول آزمون پیشرو (روز)'**
+  String get lcFwdDays;
+
+  /// No description provided for @lcImprove.
+  ///
+  /// In fa, this message translates to:
+  /// **'حداقل بهبود بازده'**
+  String get lcImprove;
+
+  /// No description provided for @lcDdDeg.
+  ///
+  /// In fa, this message translates to:
+  /// **'حداکثر بدتر شدن افت'**
+  String get lcDdDeg;
+
+  /// No description provided for @lcWins.
+  ///
+  /// In fa, this message translates to:
+  /// **'حداقل برد در گام‌ها'**
+  String get lcWins;
+
+  /// No description provided for @lcPoints.
+  ///
+  /// In fa, this message translates to:
+  /// **'واحد درصد'**
+  String get lcPoints;
+
+  /// No description provided for @lcSaved.
+  ///
+  /// In fa, this message translates to:
+  /// **'تنظیمات ذخیره شد؛ از چرخه بعد اعمال می‌شود.'**
+  String get lcSaved;
+
+  /// No description provided for @save.
+  ///
+  /// In fa, this message translates to:
+  /// **'ذخیره'**
+  String get save;
+
+  /// No description provided for @libLearningNote.
+  ///
+  /// In fa, this message translates to:
+  /// **'الگوریتم یادگیرنده: در چرخه یادگیری آموزش و آزموده می‌شود، نه در آزمایش.'**
+  String get libLearningNote;
+
+  /// No description provided for @libActiveModel.
+  ///
+  /// In fa, this message translates to:
+  /// **'مدل فعال'**
+  String get libActiveModel;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

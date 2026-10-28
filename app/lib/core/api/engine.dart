@@ -8,6 +8,7 @@ import '../../gen/lab/v1/data.connect.client.dart';
 import '../../gen/lab/v1/experiment.connect.client.dart';
 import '../../gen/lab/v1/fx.connect.client.dart';
 import '../../gen/lab/v1/health.connect.client.dart';
+import '../../gen/lab/v1/learning.connect.client.dart';
 import '../../gen/lab/v1/library.connect.client.dart';
 import '../../gen/lab/v1/pnl.connect.client.dart';
 import '../../gen/lab/v1/report.connect.client.dart';
@@ -61,6 +62,7 @@ final reportClientProvider = Provider((ref) => ReportServiceClient(ref.watch(tra
 final pnlClientProvider = Provider((ref) => PnlServiceClient(ref.watch(transportProvider)));
 final experimentClientProvider = Provider((ref) => ExperimentServiceClient(ref.watch(transportProvider)));
 final libraryClientProvider = Provider((ref) => LibraryServiceClient(ref.watch(transportProvider)));
+final learningClientProvider = Provider((ref) => LearningServiceClient(ref.watch(transportProvider)));
 
 /// The latest USDT/TOMAN display rate id from the health stream (0 = none).
 final displayRateIdProvider = Provider<int>((ref) {

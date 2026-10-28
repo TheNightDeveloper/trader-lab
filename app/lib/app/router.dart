@@ -7,6 +7,7 @@ import '../features/chart/chart_screen.dart';
 import '../features/data/data_screen.dart';
 import '../features/experiments/builder_screen.dart';
 import '../features/experiments/queue_screen.dart';
+import '../features/learning/learning_screen.dart';
 import '../features/library/library_screen.dart';
 import '../features/placeholder_screen.dart';
 import '../features/pnl/pnl_screen.dart';
@@ -69,7 +70,10 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
           pageBuilder: (context, state) =>
               _page(context, state, PnlScreen(reportId: state.uri.queryParameters['report'])),
         ),
-        _placeholder(Dest.learning),
+        GoRoute(
+          path: Dest.learning.path,
+          pageBuilder: (context, state) => _page(context, state, const LearningScreen()),
+        ),
         GoRoute(path: Dest.chart.path, pageBuilder: (context, state) => _page(context, state, const ChartScreen())),
         GoRoute(path: Dest.data.path, pageBuilder: (context, state) => _page(context, state, const DataScreen())),
         GoRoute(
