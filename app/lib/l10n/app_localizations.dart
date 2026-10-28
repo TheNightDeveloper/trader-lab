@@ -411,18 +411,6 @@ abstract class L10n {
   /// **'تا آن زمان، ساختار و مسیر آن آماده است.'**
   String get comingInHint;
 
-  /// No description provided for @chartSpikeTitle.
-  ///
-  /// In fa, this message translates to:
-  /// **'آزمون نمودار (M0)'**
-  String get chartSpikeTitle;
-
-  /// No description provided for @chartSpikeHint.
-  ///
-  /// In fa, this message translates to:
-  /// **'شمع‌های نمونه و ثابت. اشاره‌گر را روی نمودار حرکت دهید و اندازه پنجره را تغییر دهید.'**
-  String get chartSpikeHint;
-
   /// No description provided for @chartCrosshair.
   ///
   /// In fa, this message translates to:
@@ -3146,6 +3134,198 @@ abstract class L10n {
   /// In fa, this message translates to:
   /// **'مدل فعال'**
   String get libActiveModel;
+
+  /// No description provided for @chartSub.
+  ///
+  /// In fa, this message translates to:
+  /// **'اجرای «{title}» روی {pair} · اندیکاتورها از موتور Go'**
+  String chartSub(String title, String pair);
+
+  /// No description provided for @chartSubLive.
+  ///
+  /// In fa, this message translates to:
+  /// **'{pair} · داده خام · اندیکاتورها از موتور Go'**
+  String chartSubLive(String pair);
+
+  /// No description provided for @chartSource.
+  ///
+  /// In fa, this message translates to:
+  /// **'لایه اجرا'**
+  String get chartSource;
+
+  /// No description provided for @chartNoSource.
+  ///
+  /// In fa, this message translates to:
+  /// **'بدون لایه (داده خام)'**
+  String get chartNoSource;
+
+  /// No description provided for @chartPair.
+  ///
+  /// In fa, this message translates to:
+  /// **'جفت'**
+  String get chartPair;
+
+  /// No description provided for @chartTimeframe.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازه'**
+  String get chartTimeframe;
+
+  /// No description provided for @chartIndicators.
+  ///
+  /// In fa, this message translates to:
+  /// **'اندیکاتورها'**
+  String get chartIndicators;
+
+  /// No description provided for @chartStrategyLines.
+  ///
+  /// In fa, this message translates to:
+  /// **'خطوط خود راهبرد'**
+  String get chartStrategyLines;
+
+  /// No description provided for @chartBarsCut.
+  ///
+  /// In fa, this message translates to:
+  /// **'{n} کندل آخر از {total}'**
+  String chartBarsCut(int n, int total);
+
+  /// No description provided for @chartEmpty.
+  ///
+  /// In fa, this message translates to:
+  /// **'برای این جفت و بازه کندلی نیست؛ از صفحه داده وارد کنید.'**
+  String get chartEmpty;
+
+  /// No description provided for @chartDecision.
+  ///
+  /// In fa, this message translates to:
+  /// **'تصمیم انتخاب‌شده'**
+  String get chartDecision;
+
+  /// No description provided for @chartPick.
+  ///
+  /// In fa, this message translates to:
+  /// **'روی یک نشانگر در نمودار بزنید یا با دکمه‌ها بین تصمیم‌ها جابه‌جا شوید.'**
+  String get chartPick;
+
+  /// No description provided for @chartNoMarks.
+  ///
+  /// In fa, this message translates to:
+  /// **'این لایه روی این جفت تصمیمی ندارد.'**
+  String get chartNoMarks;
+
+  /// No description provided for @chartPrev.
+  ///
+  /// In fa, this message translates to:
+  /// **'تصمیم قبلی'**
+  String get chartPrev;
+
+  /// No description provided for @chartNext.
+  ///
+  /// In fa, this message translates to:
+  /// **'تصمیم بعدی'**
+  String get chartNext;
+
+  /// No description provided for @chartMarkOf.
+  ///
+  /// In fa, this message translates to:
+  /// **'{i} از {n}'**
+  String chartMarkOf(int i, int n);
+
+  /// No description provided for @chartReplay.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازپخش کندل‌به‌کندل (فاز بعد)'**
+  String get chartReplay;
+
+  /// No description provided for @chartBack.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازگشت به گزارش'**
+  String get chartBack;
+
+  /// No description provided for @mk_entry.
+  ///
+  /// In fa, this message translates to:
+  /// **'ورود خرید'**
+  String get mk_entry;
+
+  /// No description provided for @mk_exit.
+  ///
+  /// In fa, this message translates to:
+  /// **'خروج'**
+  String get mk_exit;
+
+  /// No description provided for @mk_rejected.
+  ///
+  /// In fa, this message translates to:
+  /// **'سیگنال ردشده'**
+  String get mk_rejected;
+
+  /// No description provided for @dTime.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان تصمیم'**
+  String get dTime;
+
+  /// No description provided for @dRef.
+  ///
+  /// In fa, this message translates to:
+  /// **'قیمت مرجع'**
+  String get dRef;
+
+  /// No description provided for @dOutcome.
+  ///
+  /// In fa, this message translates to:
+  /// **'نتیجه'**
+  String get dOutcome;
+
+  /// No description provided for @dTarget.
+  ///
+  /// In fa, this message translates to:
+  /// **'هدف موقعیت'**
+  String get dTarget;
+
+  /// No description provided for @dModel.
+  ///
+  /// In fa, this message translates to:
+  /// **'مدل'**
+  String get dModel;
+
+  /// No description provided for @dRecipe.
+  ///
+  /// In fa, this message translates to:
+  /// **'نسخه دستور'**
+  String get dRecipe;
+
+  /// No description provided for @dDetail.
+  ///
+  /// In fa, this message translates to:
+  /// **'جزئیات'**
+  String get dDetail;
+
+  /// No description provided for @oc_filled.
+  ///
+  /// In fa, this message translates to:
+  /// **'اجرا شد'**
+  String get oc_filled;
+
+  /// No description provided for @oc_rejected.
+  ///
+  /// In fa, this message translates to:
+  /// **'رد شد'**
+  String get oc_rejected;
+
+  /// No description provided for @oc_expired.
+  ///
+  /// In fa, this message translates to:
+  /// **'منقضی شد'**
+  String get oc_expired;
+
+  /// No description provided for @reportOnChart.
+  ///
+  /// In fa, this message translates to:
+  /// **'نمایش روی نمودار'**
+  String get reportOnChart;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

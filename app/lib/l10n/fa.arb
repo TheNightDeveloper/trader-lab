@@ -67,8 +67,6 @@
     }
   },
   "comingInHint": "تا آن زمان، ساختار و مسیر آن آماده است.",
-  "chartSpikeTitle": "آزمون نمودار (M0)",
-  "chartSpikeHint": "شمع‌های نمونه و ثابت. اشاره‌گر را روی نمودار حرکت دهید و اندازه پنجره را تغییر دهید.",
   "chartCrosshair": "زیر اشاره‌گر",
   "chartCrosshairNone": "اشاره‌گر روی نمودار نیست",
   "retry": "تلاش دوباره",
@@ -837,5 +835,74 @@
   "lcSaved": "تنظیمات ذخیره شد؛ از چرخه بعد اعمال می‌شود.",
   "save": "ذخیره",
   "libLearningNote": "الگوریتم یادگیرنده: در چرخه یادگیری آموزش و آزموده می‌شود، نه در آزمایش.",
-  "libActiveModel": "مدل فعال"
+  "libActiveModel": "مدل فعال",
+  "chartSub": "اجرای «{title}» روی {pair} · اندیکاتورها از موتور Go",
+  "@chartSub": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "pair": {
+        "type": "String"
+      }
+    }
+  },
+  "chartSubLive": "{pair} · داده خام · اندیکاتورها از موتور Go",
+  "@chartSubLive": {
+    "placeholders": {
+      "pair": {
+        "type": "String"
+      }
+    }
+  },
+  "chartSource": "لایه اجرا",
+  "chartNoSource": "بدون لایه (داده خام)",
+  "chartPair": "جفت",
+  "chartTimeframe": "بازه",
+  "chartIndicators": "اندیکاتورها",
+  "chartStrategyLines": "خطوط خود راهبرد",
+  "chartBarsCut": "{n} کندل آخر از {total}",
+  "@chartBarsCut": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "chartEmpty": "برای این جفت و بازه کندلی نیست؛ از صفحه داده وارد کنید.",
+  "chartDecision": "تصمیم انتخاب‌شده",
+  "chartPick": "روی یک نشانگر در نمودار بزنید یا با دکمه‌ها بین تصمیم‌ها جابه‌جا شوید.",
+  "chartNoMarks": "این لایه روی این جفت تصمیمی ندارد.",
+  "chartPrev": "تصمیم قبلی",
+  "chartNext": "تصمیم بعدی",
+  "chartMarkOf": "{i} از {n}",
+  "@chartMarkOf": {
+    "placeholders": {
+      "i": {
+        "type": "int"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "chartReplay": "بازپخش کندل‌به‌کندل (فاز بعد)",
+  "chartBack": "بازگشت به گزارش",
+  "mk_entry": "ورود خرید",
+  "mk_exit": "خروج",
+  "mk_rejected": "سیگنال ردشده",
+  "dTime": "زمان تصمیم",
+  "dRef": "قیمت مرجع",
+  "dOutcome": "نتیجه",
+  "dTarget": "هدف موقعیت",
+  "dModel": "مدل",
+  "dRecipe": "نسخه دستور",
+  "dDetail": "جزئیات",
+  "oc_filled": "اجرا شد",
+  "oc_rejected": "رد شد",
+  "oc_expired": "منقضی شد",
+  "reportOnChart": "نمایش روی نمودار"
 }

@@ -74,7 +74,11 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
           path: Dest.learning.path,
           pageBuilder: (context, state) => _page(context, state, const LearningScreen()),
         ),
-        GoRoute(path: Dest.chart.path, pageBuilder: (context, state) => _page(context, state, const ChartScreen())),
+        GoRoute(
+          path: Dest.chart.path,
+          pageBuilder: (context, state) =>
+              _page(context, state, ChartScreen(report: state.uri.queryParameters['report'])),
+        ),
         GoRoute(path: Dest.data.path, pageBuilder: (context, state) => _page(context, state, const DataScreen())),
         GoRoute(
           path: Dest.settings.path,

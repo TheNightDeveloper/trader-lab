@@ -145,6 +145,11 @@ class _ActionsState extends ConsumerState<_Actions> {
       spacing: AppSpace.sm,
       runSpacing: AppSpace.sm,
       children: [
+        FilledButton.icon(
+          onPressed: () => context.go('/chart?report=${widget.r.id}'),
+          icon: const Icon(Icons.candlestick_chart_outlined, size: 18),
+          label: Text(l.reportOnChart),
+        ),
         OutlinedButton.icon(
           onPressed: () => _export('trades_csv'),
           icon: const Icon(Icons.table_view_outlined, size: 18),
@@ -271,7 +276,9 @@ class _Waterfall extends ConsumerWidget {
       children: [
         Expanded(child: Text(k, style: AppText.label)),
         const SizedBox(width: AppSpace.sm),
-        Flexible(child: Align(alignment: AlignmentDirectional.centerEnd, child: v)),
+        Flexible(
+          child: Align(alignment: AlignmentDirectional.centerEnd, child: v),
+        ),
       ],
     ),
   );

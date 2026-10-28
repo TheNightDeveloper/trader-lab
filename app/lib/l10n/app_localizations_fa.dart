@@ -176,13 +176,6 @@ class L10nFa extends L10n {
   String get comingInHint => 'تا آن زمان، ساختار و مسیر آن آماده است.';
 
   @override
-  String get chartSpikeTitle => 'آزمون نمودار (M0)';
-
-  @override
-  String get chartSpikeHint =>
-      'شمع‌های نمونه و ثابت. اشاره‌گر را روی نمودار حرکت دهید و اندازه پنجره را تغییر دهید.';
-
-  @override
   String get chartCrosshair => 'زیر اشاره‌گر';
 
   @override
@@ -1653,4 +1646,110 @@ class L10nFa extends L10n {
 
   @override
   String get libActiveModel => 'مدل فعال';
+
+  @override
+  String chartSub(String title, String pair) {
+    return 'اجرای «$title» روی $pair · اندیکاتورها از موتور Go';
+  }
+
+  @override
+  String chartSubLive(String pair) {
+    return '$pair · داده خام · اندیکاتورها از موتور Go';
+  }
+
+  @override
+  String get chartSource => 'لایه اجرا';
+
+  @override
+  String get chartNoSource => 'بدون لایه (داده خام)';
+
+  @override
+  String get chartPair => 'جفت';
+
+  @override
+  String get chartTimeframe => 'بازه';
+
+  @override
+  String get chartIndicators => 'اندیکاتورها';
+
+  @override
+  String get chartStrategyLines => 'خطوط خود راهبرد';
+
+  @override
+  String chartBarsCut(int n, int total) {
+    return '$n کندل آخر از $total';
+  }
+
+  @override
+  String get chartEmpty =>
+      'برای این جفت و بازه کندلی نیست؛ از صفحه داده وارد کنید.';
+
+  @override
+  String get chartDecision => 'تصمیم انتخاب‌شده';
+
+  @override
+  String get chartPick =>
+      'روی یک نشانگر در نمودار بزنید یا با دکمه‌ها بین تصمیم‌ها جابه‌جا شوید.';
+
+  @override
+  String get chartNoMarks => 'این لایه روی این جفت تصمیمی ندارد.';
+
+  @override
+  String get chartPrev => 'تصمیم قبلی';
+
+  @override
+  String get chartNext => 'تصمیم بعدی';
+
+  @override
+  String chartMarkOf(int i, int n) {
+    return '$i از $n';
+  }
+
+  @override
+  String get chartReplay => 'بازپخش کندل‌به‌کندل (فاز بعد)';
+
+  @override
+  String get chartBack => 'بازگشت به گزارش';
+
+  @override
+  String get mk_entry => 'ورود خرید';
+
+  @override
+  String get mk_exit => 'خروج';
+
+  @override
+  String get mk_rejected => 'سیگنال ردشده';
+
+  @override
+  String get dTime => 'زمان تصمیم';
+
+  @override
+  String get dRef => 'قیمت مرجع';
+
+  @override
+  String get dOutcome => 'نتیجه';
+
+  @override
+  String get dTarget => 'هدف موقعیت';
+
+  @override
+  String get dModel => 'مدل';
+
+  @override
+  String get dRecipe => 'نسخه دستور';
+
+  @override
+  String get dDetail => 'جزئیات';
+
+  @override
+  String get oc_filled => 'اجرا شد';
+
+  @override
+  String get oc_rejected => 'رد شد';
+
+  @override
+  String get oc_expired => 'منقضی شد';
+
+  @override
+  String get reportOnChart => 'نمایش روی نمودار';
 }
