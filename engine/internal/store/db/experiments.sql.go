@@ -460,7 +460,7 @@ func (q *Queries) ListAlgorithmVersions(ctx context.Context, algorithmID string)
 }
 
 const listAlgorithms = `-- name: ListAlgorithms :many
-SELECT id, family, description FROM algorithms ORDER BY id
+SELECT id, family, description, active_model FROM algorithms ORDER BY id
 `
 
 func (q *Queries) ListAlgorithms(ctx context.Context) ([]Algorithm, error) {
@@ -472,7 +472,12 @@ func (q *Queries) ListAlgorithms(ctx context.Context) ([]Algorithm, error) {
 	var items []Algorithm
 	for rows.Next() {
 		var i Algorithm
-		if err := rows.Scan(&i.ID, &i.Family, &i.Description); err != nil {
+		if err := rows.Scan(
+			&i.ID,
+			&i.Family,
+			&i.Description,
+			&i.ActiveModel,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

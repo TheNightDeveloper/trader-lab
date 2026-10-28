@@ -6,12 +6,15 @@ package db
 
 import (
 	"time"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Algorithm struct {
 	ID          string
 	Family      string
 	Description string
+	ActiveModel pgtype.Text
 }
 
 type AlgorithmVersion struct {
@@ -57,6 +60,17 @@ type Candle struct {
 	Source      string
 	SourceRef   string
 	IngestedAt  time.Time
+}
+
+type CycleCandidate struct {
+	CycleID    int64
+	Seq        int32
+	Change     string
+	Recipe     []byte
+	RecipeHash string
+	Status     string
+	Failure    string
+	Result     []byte
 }
 
 type Dataset struct {
@@ -160,6 +174,19 @@ type Instrument struct {
 	MinNotional int64
 }
 
+type LearningCycle struct {
+	ID            int64
+	AlgorithmID   string
+	Trigger       string
+	State         string
+	Outcome       string
+	Reason        string
+	Doc           []byte
+	ConsumedUntil *time.Time
+	StartedAt     time.Time
+	FinishedAt    *time.Time
+}
+
 type LifecycleEvent struct {
 	ID        int64
 	VersionID string
@@ -168,6 +195,29 @@ type LifecycleEvent struct {
 	Note      string
 	Actor     string
 	At        time.Time
+}
+
+type ModelArtifact struct {
+	ID          string
+	AlgorithmID string
+	RecipeHash  string
+	AsOf        time.Time
+	CycleID     *int64
+	Body        []byte
+	CreatedAt   time.Time
+}
+
+type Promotion struct {
+	ID            int64
+	AlgorithmID   string
+	Action        string
+	VersionID     string
+	ModelID       string
+	PrevVersionID pgtype.Text
+	PrevModelID   pgtype.Text
+	CycleID       *int64
+	Note          string
+	At            time.Time
 }
 
 type QualityIssue struct {
