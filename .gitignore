@@ -10,3 +10,6 @@
 /design/tokens.dart
 # rapid property-test failure replays (local only)
 testdata/rapid/
+
+# nightly database dumps (docs/BACKUP.md)
+/backups/

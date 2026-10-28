@@ -23,6 +23,7 @@ import (
 	"github.com/labstack/echo/v5/middleware"
 
 	"tradinglab/engine/internal/api"
+	"tradinglab/engine/internal/backup"
 	"tradinglab/engine/internal/clock"
 	"tradinglab/engine/internal/data"
 	"tradinglab/engine/internal/experiment"
@@ -112,6 +113,9 @@ func run() error {
 			slog.Error("research queue stopped", "err", err)
 		}
 	}()
+	if cfg.BackupDir != "" {
+		go (&backup.Nightly{URL: cfg.DatabaseURL, Dir: cfg.BackupDir, HourUTC: cfg.BackupHourUTC, Keep: cfg.BackupKeep, Clock: clock.Wall{}}).Run(ctx)
+	}
 	learning := &loop.Loop{Store: st, Clock: clock.Wall{}, Limiter: limiter}
 	go func() {
 		if err := learning.Run(ctx); err != nil {

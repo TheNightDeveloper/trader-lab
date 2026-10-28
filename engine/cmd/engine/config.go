@@ -23,6 +23,11 @@ type Config struct {
 	// ResearchShare is the percent of CPUs research may use (backtests, search);
 	// at least one core always stays free for control work.
 	ResearchShare int `json:"research_share"`
+	// BackupDir receives a pg_dump every night after BackupHourUTC; the newest
+	// BackupKeep files are kept. Empty disables nightly backups.
+	BackupDir     string `json:"backup_dir"`
+	BackupHourUTC int    `json:"backup_hour_utc"`
+	BackupKeep    int    `json:"backup_keep"`
 }
 
 func defaultConfig() Config {
@@ -32,6 +37,7 @@ func defaultConfig() Config {
 		IngestDelay:   "2s",
 		LiveSymbols:   []string{"BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT", "ETHBTC"},
 		ResearchShare: 75,
+		BackupDir:     "../backups", BackupHourUTC: 2, BackupKeep: 14,
 	}
 }
 
@@ -62,6 +68,9 @@ func (c Config) validate() error {
 	}
 	if d, err := time.ParseDuration(c.IngestDelay); err != nil || d < 0 {
 		return fmt.Errorf("ingest_delay %q: want a non-negative duration like \"2s\"", c.IngestDelay)
+	}
+	if c.BackupHourUTC < 0 || c.BackupHourUTC > 23 || c.BackupKeep < 1 {
+		return fmt.Errorf("backup: hour must be 0..23 UTC and keep at least 1, got %d and %d", c.BackupHourUTC, c.BackupKeep)
 	}
 	if c.ResearchShare < 1 || c.ResearchShare > 100 {
 		return fmt.Errorf("research_share must be 1..100 (percent), got %d", c.ResearchShare)
