@@ -256,3 +256,29 @@ budget.
   Improvement failed → "not better"; otherwise the first failed item is the reason.
 - CPU budget = research-slot minutes (wall time while holding a slot), checked before each
   candidate starts; candidates beyond it are recorded as cancelled.
+
+## Chart indicators (M6) — `strategy.ComputeIndicator`
+
+Computed by the engine over closes (float64, display/model math), with the same code the
+strategies use; values are sent as decimal strings with 8 decimals, "" while undefined.
+Indicators are computed over all bars of the source before the response keeps the last
+`max_bars`, so the first shown values are already warmed up.
+- `ma:n`: simple mean of the last n closes.
+- `ema:n`: trend-ema's EMA: seeded with the simple mean of the first n closes, then
+  `e += 2/(n+1) × (close − e)`.
+- `bb:n:k`: mean-rev-bands' band: population mean and standard deviation of the last n
+  closes (summed in ring-buffer order, as the strategy does); upper/lower = mean ± k·sd.
+- `rsi:n`: Wilder's RSI, 0..100: first average = mean of the first n gains/losses, then
+  `avg = (avg × (n−1) + x) / n`; 50 when there was no movement.
+- `macd:f:s:g`: `EMA(f) − EMA(s)`; signal = EMA(g) of that line; histogram = line − signal.
+- Parity: trend-ema decides exactly where the chart's EMA lines cross, mean-rev-bands exactly
+  where the close re-enters the chart's lower band or reaches its middle
+  (`strategy/TestIndicatorParityWithStrategies`); the API returns these values unchanged
+  (`api/TestChartService`); the chart's indicator `calc` returns the engine values per bar and
+  computes nothing (`app/test/chart_test.dart`).
+
+### Markers
+- Filled decision with target > 0 → entry (B); filled with target 0 → exit (S); rejected or
+  expired → × . Placed on the bar the decision was made on, at its close. Stop-loss and
+  take-profit exits (no decision) are exits on the bar they happened.
+- Report charts end at the out-of-sample end: the holdout stays hidden.

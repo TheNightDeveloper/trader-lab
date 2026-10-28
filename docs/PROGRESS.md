@@ -3,7 +3,31 @@
 Update at the end of every session.
 
 ## Current milestone
-M5 — Self-learning loop: **done** (2026-10-28). Next: M6 — Chart, hardening, release.
+M6 — Chart, hardening, release: **done** (2026-10-28). **v1 release gate passed** (below).
+Next: Phase 2 (plan §6), when you decide.
+
+## M6 done (2026-10-28)
+- ChartService: bars, engine-computed indicators (MA, EMA, BB, RSI, MACD), decision markers (entry, exit, rejected, stop/take), decision record; report charts end at the out-of-sample end.
+- Chart screen: KLineChart draws engine values only (ADR-033); a report's own strategy lines added automatically; markers clickable and reachable with previous/next; layout saved per browser; reports link to their chart.
+- Home screen: champion, retraining schedule, research queue, data health, last learning cycle, recent experiments, alerts. Placeholders removed.
+- Performance: read latency test and `make bench`; numbers in docs/PERFORMANCE.md; dataset cache (ADR-034).
+- Backup: nightly pg_dump in the engine, `cmd/verifydb`, `scripts/restore-drill.sh`; docs/BACKUP.md (ADR-035).
+- Usability: every route checked at 390 px by a test; fixes for the chart's source picker, unset Money, empty Compare, Persian issue labels on Home, help text on every Learning settings field.
+
+## v1 release gate
+| Condition | Evidence |
+|---|---|
+| All golden scenarios and leak tests pass | `sim/TestGolden` (11 scenarios), `model/train/TestFeaturesAndLabelsOnlySeeThePast`, `TestFittingOnAllHistoryIsCaught`, `strategy/TestFutureRowsDoNotChangePastDecisions`, `TestSavedModelReproducesPredictions` |
+| A full learning cycle runs unattended end to end and records its decision | `loop/TestScheduledCycleRunsUnattendedAndRecordsItsDecision`: with the schedule on, the scheduler alone starts, freezes, forward-tests and decides; the gate and decision are stored |
+| Every attempt, including failed ones, is visible in the UI | experiments: attempt registry with server-side status tabs incl. failed and cancelled (`app/test/experiments_test.dart`); learning: every cycle candidate with status, failure and why (`app/test/learning_test.dart`, `api/TestLearningService`) |
+| No code path can send a real order | `release/TestNoCodePathCanSendARealOrder` (AST scan: GET only, no order/account endpoints, no order RPC) and `TestScanCatchesAnOrderCall` (the scan catches a planted order call); RunMode is research only |
+
+Also: depguard probe passes (sim/eval/metrics never import search, loop or model/train); lint clean; all Go and Flutter tests pass.
+
+## Verified (M6)
+- Real report (trend-ema 12/26 on BTCUSDT 1h): the chart shows EMA 12/26 from the engine, the buy marker on the bar where EMA 12 crosses above EMA 26, and EMA 48 when toggled (headless Chrome against the engine).
+- Restore drill on the live database (8.8 MB): first run failed on encoding (WIN1252 cluster), second run OK with every dataset re-hashed.
+- Read latency on the reference machine: GetReport p95 27–59 ms, GetChart p95 65 ms with the cache.
 
 ## M5 done (2026-10-28)
 - `feature`: seven window features, forward-return labels with ReadyAt, z-score scaler; fits reject anything not available at their as-of time.
@@ -26,9 +50,6 @@ M5 — Self-learning loop: **done** (2026-10-28). Next: M6 — Chart, hardening,
 - Synthetic 1m data with hourly momentum: walk-forward challenger `+ret_1` +40.3% vs champion −3.4%. With a 2-day forward window noise won (+0.46% vs +1.46%, "not better"), so the test uses 4 days — an honest example of why the forward test exists.
 - Real database: a manual cycle on ridge-h4 skipped with "داده تازه ناکافی — 24 از 168 کندل لازم" (only live bars in the last 180 days; the archive is from 2024). Learning screen checked in headless Chrome against the running engine.
 
-## Next (M6)
-- Chart screen with engine indicators and decision markers, hardening, release.
-
 ## M4 done (2026-10-27)
 - `experiment`: pre-registered definitions (hypothesis and falsifier required), content id `exp_…`, locked on create; the same definition opens the existing experiment. Pause, resume, cancel.
 - Attempt registry: one row per candidate × pair with status, failure, metrics, eligibility, violations, cache info; never deleted.
@@ -46,9 +67,6 @@ M5 — Self-learning loop: **done** (2026-10-28). Next: M6 — Chart, hardening,
 
 ## Verified on real data (M4)
 - BTCUSDT 1h (4,368 bars), trend-ema@v1, fast {9, 12, 15} × slow {20, 26, 33}, 10 bps + 5 bps: 9 attempts finished within seconds. With max drawdown ≤ 25%: 8 eligible, winner fast=12 slow=26, +20.67% (the M3 report, reproduced). With ≤ 20%: 4 eligible, same winner. Queue, result and attempt table checked in headless Chrome against the running engine.
-
-## Next (M5)
-- Self-learning loop: scheduled retraining cycles, gates, recommendations; promotion stays a human action (Learning screen).
 
 ## M3 done (2026-10-27)
 - `metrics`: exact P&L sums, return, drawdown and duration, exposure, trade stats, integer Sharpe; invalid metrics carry a Persian reason and no number; Persian labels and definitions.
@@ -70,6 +88,7 @@ M5 — Self-learning loop: **done** (2026-10-28). Next: M6 — Chart, hardening,
 - Reviewing these reports by hand found three bugs, all fixed with tests: intent TTL on 1h bars (ADR-021), flat buy-and-hold benchmark, split defaults not stored.
 
 ## Still open
+- Headless screenshots sometimes catch the sidebar mid-animation (faded entries); a real browser shows it settled. Check by hand if it bothers you.
 - `-race` (needs gcc), `make` (not installed), Docker (not running; local PostgreSQL 18 is used), chart hover/resize manual check — as before.
 - Reports created before the TTL/benchmark fixes keep their old numbers (immutable); Reproduce on them now reports a difference, as it should.
 

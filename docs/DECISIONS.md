@@ -135,3 +135,20 @@ Consequence: the library's one-step-at-a-time rule applies to manual moves; a le
 ## ADR-032 Learning algorithms are not searched in experiments
 Decision: experiments reject algorithm versions with a recipe; the Builder hides them. Their candidates come from the cycle's bounded variants instead.
 Consequence: no grid search over recipes yet; parameter search stays for rule strategies.
+
+## ADR-033 The chart draws engine values through custom indicators
+Decision: KLineChart's built-in indicators are not used. For each engine indicator the adapter registers a template whose `calc` returns the engine's values per bar (looked up by timestamp) and computes nothing; markers are custom overlays with click handlers. Chart indicators come from `strategy.ComputeIndicator`, which reuses the strategies' EMA and Bollinger code.
+Consequence: what the chart shows is what the strategy traded on (parity test); KLineChart stays replaceable behind `CandleChart`.
+
+## ADR-034 Recent dataset versions are cached in memory
+Context: GetChart and GetDecision reloaded and re-hashed a whole dataset per call; under load GetChart's p95 reached 1.26 s.
+Decision: the report service keeps the 4 most recently used dataset versions after one verified load. Versions are content-addressed and immutable, so the cache cannot be stale; callers share the bars read-only (checked: nothing writes into input bars).
+Consequence: GetChart p95 65 ms, GetReport 59 ms under the same load; up to 4 datasets of memory (about 70 MB for four 100k-bar datasets, ~176 bytes per bar).
+
+## ADR-035 The engine takes the nightly backup; restores are manual and verified
+Decision: the engine runs `pg_dump` once a day (written aside, renamed when complete, newest 14 kept). Restoring is a documented manual step followed by `cmd/verifydb`, which re-hashes datasets and model artifacts. The drill restores into a throwaway UTF8 cluster started as the current OS user.
+Consequence: backups need no external scheduler; `pg_dump` must be on PATH. The drill never needs privileges on the real server. Its first run found that a default Windows cluster (WIN1252) cannot hold the Persian text; restore targets must be UTF8 (docs/BACKUP.md).
+
+## ADR-036 Release checks are tests
+Decision: the release gate's cross-cutting promises are tests that run with the suite: an AST scan proves every outbound request is a GET and no code or RPC names an order or account endpoint (with a planted-probe test that the scan is live); a scheduled learning cycle runs to its decision with no manual call; every route renders at 390 px.
+Consequence: a change that adds an order path, breaks unattended learning or overflows a phone layout fails `make test`.
