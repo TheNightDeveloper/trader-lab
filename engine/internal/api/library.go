@@ -4,12 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"strings"
 
 	"connectrpc.com/connect"
 	"github.com/jackc/pgx/v5"
 
 	"tradinglab/engine/internal/experiment"
 	labv1 "tradinglab/engine/internal/gen/lab/v1"
+	"tradinglab/engine/internal/model"
 	"tradinglab/engine/internal/store"
 )
 
@@ -24,7 +27,7 @@ func (h *Library) ListAlgorithms(ctx context.Context, _ *connect.Request[labv1.L
 	}
 	res := &labv1.ListAlgorithmsResponse{}
 	for _, a := range algs {
-		pa := &labv1.Algorithm{Id: a.ID, Family: a.Family, Description: a.Description}
+		pa := &labv1.Algorithm{Id: a.ID, Family: a.Family, Description: a.Description, ActiveModel: a.ActiveModel.String}
 		vs, err := h.Store.ListAlgorithmVersions(ctx, a.ID)
 		if err != nil {
 			return nil, err
@@ -37,6 +40,9 @@ func (h *Library) ListAlgorithms(ctx context.Context, _ *connect.Request[labv1.L
 			pv := &labv1.AlgorithmVersion{Id: v.ID, Version: v.Version, State: v.State, ContentHash: v.ContentHash, CreatedUnixMs: ms(v.CreatedAt), NextStates: experiment.NextStates(v.State)}
 			for _, p := range def.Params {
 				pv.Params = append(pv.Params, &labv1.ParamSpec{Name: p.Name, Default: p.Default, Integer: p.Integer})
+			}
+			if def.Recipe != nil {
+				pv.Recipe = recipeItems(*def.Recipe)
 			}
 			pa.Versions = append(pa.Versions, pv)
 		}
@@ -72,4 +78,27 @@ func (h *Library) ListLifecycleEvents(ctx context.Context, req *connect.Request[
 		res.Events = append(res.Events, &labv1.LifecycleEvent{FromState: r.FromState, ToState: r.ToState, Note: r.Note, Actor: r.Actor, AtUnixMs: ms(r.At)})
 	}
 	return connect.NewResponse(res), nil
+}
+
+// recipeItems describes a recipe for the library's detail panel.
+func recipeItems(r model.Recipe) []*labv1.RecipeItem {
+	item := func(k, v string) *labv1.RecipeItem { return &labv1.RecipeItem{Key: k, Value: v} }
+	out := []*labv1.RecipeItem{
+		item("ویژگی‌ها", strings.Join(r.Features, ", ")),
+		item("تبدیل", r.Transform+" (fit in train)"),
+		item("مدل", fmt.Sprintf("%s α=%g", r.Model, r.Alpha)),
+		item("برچسب", fmt.Sprintf("h=%d bars", r.Horizon)),
+		item("ورود", fmt.Sprintf("prediction > %g", r.Entry)),
+	}
+	if r.Filter != nil {
+		out = append(out, item("فیلتر", fmt.Sprintf("%s z ≤ %g", r.Filter.Feature, r.Filter.Max)))
+	}
+	exit := "signal off"
+	if r.StopLoss > 0 {
+		exit += fmt.Sprintf(" | stop %g%%", r.StopLoss*100)
+	}
+	if r.TakeProfit > 0 {
+		exit += fmt.Sprintf(" | take %g%%", r.TakeProfit*100)
+	}
+	return append(out, item("خروج", exit), item("سهم سرمایه", fmt.Sprintf("%g%%", r.Exposure*100)))
 }

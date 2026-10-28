@@ -36,6 +36,14 @@ const AlgorithmVersion$json = {
     },
     {'1': 'created_unix_ms', '3': 6, '4': 1, '5': 3, '10': 'createdUnixMs'},
     {'1': 'next_states', '3': 7, '4': 3, '5': 9, '10': 'nextStates'},
+    {
+      '1': 'recipe',
+      '3': 8,
+      '4': 3,
+      '5': 11,
+      '6': '.lab.v1.RecipeItem',
+      '10': 'recipe'
+    },
   ],
 };
 
@@ -45,7 +53,21 @@ final $typed_data.Uint8List algorithmVersionDescriptor = $convert.base64Decode(
     'JzaW9uEhQKBXN0YXRlGAMgASgJUgVzdGF0ZRIhCgxjb250ZW50X2hhc2gYBCABKAlSC2NvbnRl'
     'bnRIYXNoEikKBnBhcmFtcxgFIAMoCzIRLmxhYi52MS5QYXJhbVNwZWNSBnBhcmFtcxImCg9jcm'
     'VhdGVkX3VuaXhfbXMYBiABKANSDWNyZWF0ZWRVbml4TXMSHwoLbmV4dF9zdGF0ZXMYByADKAlS'
-    'Cm5leHRTdGF0ZXM=');
+    'Cm5leHRTdGF0ZXMSKgoGcmVjaXBlGAggAygLMhIubGFiLnYxLlJlY2lwZUl0ZW1SBnJlY2lwZQ'
+    '==');
+
+@$core.Deprecated('Use recipeItemDescriptor instead')
+const RecipeItem$json = {
+  '1': 'RecipeItem',
+  '2': [
+    {'1': 'key', '3': 1, '4': 1, '5': 9, '10': 'key'},
+    {'1': 'value', '3': 2, '4': 1, '5': 9, '10': 'value'},
+  ],
+};
+
+/// Descriptor for `RecipeItem`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List recipeItemDescriptor = $convert.base64Decode(
+    'CgpSZWNpcGVJdGVtEhAKA2tleRgBIAEoCVIDa2V5EhQKBXZhbHVlGAIgASgJUgV2YWx1ZQ==');
 
 @$core.Deprecated('Use latestReportDescriptor instead')
 const LatestReport$json = {
@@ -93,6 +115,7 @@ const Algorithm$json = {
       '6': '.lab.v1.LatestReport',
       '10': 'latestReport'
     },
+    {'1': 'active_model', '3': 6, '4': 1, '5': 9, '10': 'activeModel'},
   ],
 };
 
@@ -101,7 +124,8 @@ final $typed_data.Uint8List algorithmDescriptor = $convert.base64Decode(
     'CglBbGdvcml0aG0SDgoCaWQYASABKAlSAmlkEhYKBmZhbWlseRgCIAEoCVIGZmFtaWx5EiAKC2'
     'Rlc2NyaXB0aW9uGAMgASgJUgtkZXNjcmlwdGlvbhI0Cgh2ZXJzaW9ucxgEIAMoCzIYLmxhYi52'
     'MS5BbGdvcml0aG1WZXJzaW9uUgh2ZXJzaW9ucxI5Cg1sYXRlc3RfcmVwb3J0GAUgASgLMhQubG'
-    'FiLnYxLkxhdGVzdFJlcG9ydFIMbGF0ZXN0UmVwb3J0');
+    'FiLnYxLkxhdGVzdFJlcG9ydFIMbGF0ZXN0UmVwb3J0EiEKDGFjdGl2ZV9tb2RlbBgGIAEoCVIL'
+    'YWN0aXZlTW9kZWw=');
 
 @$core.Deprecated('Use listAlgorithmsRequestDescriptor instead')
 const ListAlgorithmsRequest$json = {
@@ -240,6 +264,7 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
   '.lab.v1.Algorithm': Algorithm$json,
   '.lab.v1.AlgorithmVersion': AlgorithmVersion$json,
   '.lab.v1.ParamSpec': $0.ParamSpec$json,
+  '.lab.v1.RecipeItem': RecipeItem$json,
   '.lab.v1.LatestReport': LatestReport$json,
   '.lab.v1.Decimal': $1.Decimal$json,
   '.lab.v1.SetVersionStateRequest': SetVersionStateRequest$json,

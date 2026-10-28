@@ -2,6 +2,7 @@ package loop
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 
 	"tradinglab/engine/internal/experiment"
+	"tradinglab/engine/internal/model"
 	"tradinglab/engine/internal/store/db"
 )
 
@@ -240,4 +242,54 @@ func (l *Loop) tick(ctx context.Context) error {
 		return nil // a cycle is still open (forward test or awaiting approval)
 	}
 	return err
+}
+
+// DocOf parses a cycle row's record.
+func DocOf(row db.LearningCycle) (Doc, error) {
+	var d Doc
+	err := json.Unmarshal(row.Doc, &d)
+	return d, err
+}
+
+// Active is the champion pair: the active version and the model serving it.
+type Active struct {
+	VersionID string
+	Model     *model.Artifact // nil: no active model
+}
+
+func (l *Loop) Active(ctx context.Context, alg string) (Active, error) {
+	a, err := l.Store.GetAlgorithm(ctx, alg)
+	if err != nil {
+		return Active{}, fmt.Errorf("%w: algorithm %s", ErrNotFound, alg)
+	}
+	v, err := activeVersion(ctx, l.Store.Queries, alg)
+	if err != nil {
+		return Active{}, err
+	}
+	out := Active{VersionID: v}
+	if a.ActiveModel.Valid {
+		m, err := l.artifact(ctx, a.ActiveModel.String)
+		if err != nil {
+			return Active{}, err
+		}
+		out.Model = &m
+	}
+	return out, nil
+}
+
+// CanRollback: the last promotion replaced an earlier active pair that is still
+// what a rollback would restore.
+func (l *Loop) CanRollback(ctx context.Context, alg string) (bool, error) {
+	last, err := l.Store.LastPromotion(ctx, alg)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	act, err := l.Active(ctx, alg)
+	if err != nil {
+		return false, err
+	}
+	return last.PrevModelID.Valid && last.PrevVersionID.Valid && act.VersionID == last.VersionID && act.Model != nil && act.Model.ID == last.ModelID, nil
 }

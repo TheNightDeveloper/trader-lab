@@ -30,6 +30,7 @@ type AlgorithmVersion struct {
 	Params        []*ParamSpec           `protobuf:"bytes,5,rep,name=params,proto3" json:"params,omitempty"`
 	CreatedUnixMs int64                  `protobuf:"varint,6,opt,name=created_unix_ms,json=createdUnixMs,proto3" json:"created_unix_ms,omitempty"`
 	NextStates    []string               `protobuf:"bytes,7,rep,name=next_states,json=nextStates,proto3" json:"next_states,omitempty"`
+	Recipe        []*RecipeItem          `protobuf:"bytes,8,rep,name=recipe,proto3" json:"recipe,omitempty"` // learning algorithms: the recipe, for display
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -113,6 +114,65 @@ func (x *AlgorithmVersion) GetNextStates() []string {
 	return nil
 }
 
+func (x *AlgorithmVersion) GetRecipe() []*RecipeItem {
+	if x != nil {
+		return x.Recipe
+	}
+	return nil
+}
+
+type RecipeItem struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Key           string                 `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	Value         string                 `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RecipeItem) Reset() {
+	*x = RecipeItem{}
+	mi := &file_lab_v1_library_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RecipeItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RecipeItem) ProtoMessage() {}
+
+func (x *RecipeItem) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_library_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RecipeItem.ProtoReflect.Descriptor instead.
+func (*RecipeItem) Descriptor() ([]byte, []int) {
+	return file_lab_v1_library_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *RecipeItem) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+func (x *RecipeItem) GetValue() string {
+	if x != nil {
+		return x.Value
+	}
+	return ""
+}
+
 type LatestReport struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ReportId      string                 `protobuf:"bytes,1,opt,name=report_id,json=reportId,proto3" json:"report_id,omitempty"`
@@ -124,7 +184,7 @@ type LatestReport struct {
 
 func (x *LatestReport) Reset() {
 	*x = LatestReport{}
-	mi := &file_lab_v1_library_proto_msgTypes[1]
+	mi := &file_lab_v1_library_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -136,7 +196,7 @@ func (x *LatestReport) String() string {
 func (*LatestReport) ProtoMessage() {}
 
 func (x *LatestReport) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_library_proto_msgTypes[1]
+	mi := &file_lab_v1_library_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -149,7 +209,7 @@ func (x *LatestReport) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LatestReport.ProtoReflect.Descriptor instead.
 func (*LatestReport) Descriptor() ([]byte, []int) {
-	return file_lab_v1_library_proto_rawDescGZIP(), []int{1}
+	return file_lab_v1_library_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *LatestReport) GetReportId() string {
@@ -180,13 +240,14 @@ type Algorithm struct {
 	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"` // Persian
 	Versions      []*AlgorithmVersion    `protobuf:"bytes,4,rep,name=versions,proto3" json:"versions,omitempty"`       // newest first
 	LatestReport  *LatestReport          `protobuf:"bytes,5,opt,name=latest_report,json=latestReport,proto3" json:"latest_report,omitempty"`
+	ActiveModel   string                 `protobuf:"bytes,6,opt,name=active_model,json=activeModel,proto3" json:"active_model,omitempty"` // learning algorithms: the model serving the active version
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Algorithm) Reset() {
 	*x = Algorithm{}
-	mi := &file_lab_v1_library_proto_msgTypes[2]
+	mi := &file_lab_v1_library_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -198,7 +259,7 @@ func (x *Algorithm) String() string {
 func (*Algorithm) ProtoMessage() {}
 
 func (x *Algorithm) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_library_proto_msgTypes[2]
+	mi := &file_lab_v1_library_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -211,7 +272,7 @@ func (x *Algorithm) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Algorithm.ProtoReflect.Descriptor instead.
 func (*Algorithm) Descriptor() ([]byte, []int) {
-	return file_lab_v1_library_proto_rawDescGZIP(), []int{2}
+	return file_lab_v1_library_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *Algorithm) GetId() string {
@@ -249,6 +310,13 @@ func (x *Algorithm) GetLatestReport() *LatestReport {
 	return nil
 }
 
+func (x *Algorithm) GetActiveModel() string {
+	if x != nil {
+		return x.ActiveModel
+	}
+	return ""
+}
+
 type ListAlgorithmsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -257,7 +325,7 @@ type ListAlgorithmsRequest struct {
 
 func (x *ListAlgorithmsRequest) Reset() {
 	*x = ListAlgorithmsRequest{}
-	mi := &file_lab_v1_library_proto_msgTypes[3]
+	mi := &file_lab_v1_library_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -269,7 +337,7 @@ func (x *ListAlgorithmsRequest) String() string {
 func (*ListAlgorithmsRequest) ProtoMessage() {}
 
 func (x *ListAlgorithmsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_library_proto_msgTypes[3]
+	mi := &file_lab_v1_library_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -282,7 +350,7 @@ func (x *ListAlgorithmsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAlgorithmsRequest.ProtoReflect.Descriptor instead.
 func (*ListAlgorithmsRequest) Descriptor() ([]byte, []int) {
-	return file_lab_v1_library_proto_rawDescGZIP(), []int{3}
+	return file_lab_v1_library_proto_rawDescGZIP(), []int{4}
 }
 
 type ListAlgorithmsResponse struct {
@@ -294,7 +362,7 @@ type ListAlgorithmsResponse struct {
 
 func (x *ListAlgorithmsResponse) Reset() {
 	*x = ListAlgorithmsResponse{}
-	mi := &file_lab_v1_library_proto_msgTypes[4]
+	mi := &file_lab_v1_library_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -306,7 +374,7 @@ func (x *ListAlgorithmsResponse) String() string {
 func (*ListAlgorithmsResponse) ProtoMessage() {}
 
 func (x *ListAlgorithmsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_library_proto_msgTypes[4]
+	mi := &file_lab_v1_library_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -319,7 +387,7 @@ func (x *ListAlgorithmsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAlgorithmsResponse.ProtoReflect.Descriptor instead.
 func (*ListAlgorithmsResponse) Descriptor() ([]byte, []int) {
-	return file_lab_v1_library_proto_rawDescGZIP(), []int{4}
+	return file_lab_v1_library_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ListAlgorithmsResponse) GetAlgorithms() []*Algorithm {
@@ -340,7 +408,7 @@ type SetVersionStateRequest struct {
 
 func (x *SetVersionStateRequest) Reset() {
 	*x = SetVersionStateRequest{}
-	mi := &file_lab_v1_library_proto_msgTypes[5]
+	mi := &file_lab_v1_library_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -352,7 +420,7 @@ func (x *SetVersionStateRequest) String() string {
 func (*SetVersionStateRequest) ProtoMessage() {}
 
 func (x *SetVersionStateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_library_proto_msgTypes[5]
+	mi := &file_lab_v1_library_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -365,7 +433,7 @@ func (x *SetVersionStateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetVersionStateRequest.ProtoReflect.Descriptor instead.
 func (*SetVersionStateRequest) Descriptor() ([]byte, []int) {
-	return file_lab_v1_library_proto_rawDescGZIP(), []int{5}
+	return file_lab_v1_library_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *SetVersionStateRequest) GetVersionId() string {
@@ -397,7 +465,7 @@ type SetVersionStateResponse struct {
 
 func (x *SetVersionStateResponse) Reset() {
 	*x = SetVersionStateResponse{}
-	mi := &file_lab_v1_library_proto_msgTypes[6]
+	mi := &file_lab_v1_library_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -409,7 +477,7 @@ func (x *SetVersionStateResponse) String() string {
 func (*SetVersionStateResponse) ProtoMessage() {}
 
 func (x *SetVersionStateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_library_proto_msgTypes[6]
+	mi := &file_lab_v1_library_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -422,7 +490,7 @@ func (x *SetVersionStateResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetVersionStateResponse.ProtoReflect.Descriptor instead.
 func (*SetVersionStateResponse) Descriptor() ([]byte, []int) {
-	return file_lab_v1_library_proto_rawDescGZIP(), []int{6}
+	return file_lab_v1_library_proto_rawDescGZIP(), []int{7}
 }
 
 type LifecycleEvent struct {
@@ -438,7 +506,7 @@ type LifecycleEvent struct {
 
 func (x *LifecycleEvent) Reset() {
 	*x = LifecycleEvent{}
-	mi := &file_lab_v1_library_proto_msgTypes[7]
+	mi := &file_lab_v1_library_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -450,7 +518,7 @@ func (x *LifecycleEvent) String() string {
 func (*LifecycleEvent) ProtoMessage() {}
 
 func (x *LifecycleEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_library_proto_msgTypes[7]
+	mi := &file_lab_v1_library_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -463,7 +531,7 @@ func (x *LifecycleEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LifecycleEvent.ProtoReflect.Descriptor instead.
 func (*LifecycleEvent) Descriptor() ([]byte, []int) {
-	return file_lab_v1_library_proto_rawDescGZIP(), []int{7}
+	return file_lab_v1_library_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *LifecycleEvent) GetFromState() string {
@@ -510,7 +578,7 @@ type ListLifecycleEventsRequest struct {
 
 func (x *ListLifecycleEventsRequest) Reset() {
 	*x = ListLifecycleEventsRequest{}
-	mi := &file_lab_v1_library_proto_msgTypes[8]
+	mi := &file_lab_v1_library_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -522,7 +590,7 @@ func (x *ListLifecycleEventsRequest) String() string {
 func (*ListLifecycleEventsRequest) ProtoMessage() {}
 
 func (x *ListLifecycleEventsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_library_proto_msgTypes[8]
+	mi := &file_lab_v1_library_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -535,7 +603,7 @@ func (x *ListLifecycleEventsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListLifecycleEventsRequest.ProtoReflect.Descriptor instead.
 func (*ListLifecycleEventsRequest) Descriptor() ([]byte, []int) {
-	return file_lab_v1_library_proto_rawDescGZIP(), []int{8}
+	return file_lab_v1_library_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *ListLifecycleEventsRequest) GetVersionId() string {
@@ -554,7 +622,7 @@ type ListLifecycleEventsResponse struct {
 
 func (x *ListLifecycleEventsResponse) Reset() {
 	*x = ListLifecycleEventsResponse{}
-	mi := &file_lab_v1_library_proto_msgTypes[9]
+	mi := &file_lab_v1_library_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -566,7 +634,7 @@ func (x *ListLifecycleEventsResponse) String() string {
 func (*ListLifecycleEventsResponse) ProtoMessage() {}
 
 func (x *ListLifecycleEventsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_library_proto_msgTypes[9]
+	mi := &file_lab_v1_library_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -579,7 +647,7 @@ func (x *ListLifecycleEventsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListLifecycleEventsResponse.ProtoReflect.Descriptor instead.
 func (*ListLifecycleEventsResponse) Descriptor() ([]byte, []int) {
-	return file_lab_v1_library_proto_rawDescGZIP(), []int{9}
+	return file_lab_v1_library_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *ListLifecycleEventsResponse) GetEvents() []*LifecycleEvent {
@@ -593,7 +661,7 @@ var File_lab_v1_library_proto protoreflect.FileDescriptor
 
 const file_lab_v1_library_proto_rawDesc = "" +
 	"\n" +
-	"\x14lab/v1/library.proto\x12\x06lab.v1\x1a\x13lab/v1/common.proto\x1a\x13lab/v1/report.proto\"\xe9\x01\n" +
+	"\x14lab/v1/library.proto\x12\x06lab.v1\x1a\x13lab/v1/common.proto\x1a\x13lab/v1/report.proto\"\x95\x02\n" +
 	"\x10AlgorithmVersion\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
 	"\aversion\x18\x02 \x01(\x05R\aversion\x12\x14\n" +
@@ -602,17 +670,23 @@ const file_lab_v1_library_proto_rawDesc = "" +
 	"\x06params\x18\x05 \x03(\v2\x11.lab.v1.ParamSpecR\x06params\x12&\n" +
 	"\x0fcreated_unix_ms\x18\x06 \x01(\x03R\rcreatedUnixMs\x12\x1f\n" +
 	"\vnext_states\x18\a \x03(\tR\n" +
-	"nextStates\"\x87\x01\n" +
+	"nextStates\x12*\n" +
+	"\x06recipe\x18\b \x03(\v2\x12.lab.v1.RecipeItemR\x06recipe\"4\n" +
+	"\n" +
+	"RecipeItem\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value\"\x87\x01\n" +
 	"\fLatestReport\x12\x1b\n" +
 	"\treport_id\x18\x01 \x01(\tR\breportId\x122\n" +
 	"\ftotal_return\x18\x02 \x01(\v2\x0f.lab.v1.DecimalR\vtotalReturn\x12&\n" +
-	"\x0fcreated_unix_ms\x18\x03 \x01(\x03R\rcreatedUnixMs\"\xc6\x01\n" +
+	"\x0fcreated_unix_ms\x18\x03 \x01(\x03R\rcreatedUnixMs\"\xe9\x01\n" +
 	"\tAlgorithm\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x16\n" +
 	"\x06family\x18\x02 \x01(\tR\x06family\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x124\n" +
 	"\bversions\x18\x04 \x03(\v2\x18.lab.v1.AlgorithmVersionR\bversions\x129\n" +
-	"\rlatest_report\x18\x05 \x01(\v2\x14.lab.v1.LatestReportR\flatestReport\"\x17\n" +
+	"\rlatest_report\x18\x05 \x01(\v2\x14.lab.v1.LatestReportR\flatestReport\x12!\n" +
+	"\factive_model\x18\x06 \x01(\tR\vactiveModel\"\x17\n" +
 	"\x15ListAlgorithmsRequest\"K\n" +
 	"\x16ListAlgorithmsResponse\x121\n" +
 	"\n" +
@@ -656,39 +730,41 @@ func file_lab_v1_library_proto_rawDescGZIP() []byte {
 	return file_lab_v1_library_proto_rawDescData
 }
 
-var file_lab_v1_library_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_lab_v1_library_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_lab_v1_library_proto_goTypes = []any{
 	(*AlgorithmVersion)(nil),            // 0: lab.v1.AlgorithmVersion
-	(*LatestReport)(nil),                // 1: lab.v1.LatestReport
-	(*Algorithm)(nil),                   // 2: lab.v1.Algorithm
-	(*ListAlgorithmsRequest)(nil),       // 3: lab.v1.ListAlgorithmsRequest
-	(*ListAlgorithmsResponse)(nil),      // 4: lab.v1.ListAlgorithmsResponse
-	(*SetVersionStateRequest)(nil),      // 5: lab.v1.SetVersionStateRequest
-	(*SetVersionStateResponse)(nil),     // 6: lab.v1.SetVersionStateResponse
-	(*LifecycleEvent)(nil),              // 7: lab.v1.LifecycleEvent
-	(*ListLifecycleEventsRequest)(nil),  // 8: lab.v1.ListLifecycleEventsRequest
-	(*ListLifecycleEventsResponse)(nil), // 9: lab.v1.ListLifecycleEventsResponse
-	(*ParamSpec)(nil),                   // 10: lab.v1.ParamSpec
-	(*Decimal)(nil),                     // 11: lab.v1.Decimal
+	(*RecipeItem)(nil),                  // 1: lab.v1.RecipeItem
+	(*LatestReport)(nil),                // 2: lab.v1.LatestReport
+	(*Algorithm)(nil),                   // 3: lab.v1.Algorithm
+	(*ListAlgorithmsRequest)(nil),       // 4: lab.v1.ListAlgorithmsRequest
+	(*ListAlgorithmsResponse)(nil),      // 5: lab.v1.ListAlgorithmsResponse
+	(*SetVersionStateRequest)(nil),      // 6: lab.v1.SetVersionStateRequest
+	(*SetVersionStateResponse)(nil),     // 7: lab.v1.SetVersionStateResponse
+	(*LifecycleEvent)(nil),              // 8: lab.v1.LifecycleEvent
+	(*ListLifecycleEventsRequest)(nil),  // 9: lab.v1.ListLifecycleEventsRequest
+	(*ListLifecycleEventsResponse)(nil), // 10: lab.v1.ListLifecycleEventsResponse
+	(*ParamSpec)(nil),                   // 11: lab.v1.ParamSpec
+	(*Decimal)(nil),                     // 12: lab.v1.Decimal
 }
 var file_lab_v1_library_proto_depIdxs = []int32{
-	10, // 0: lab.v1.AlgorithmVersion.params:type_name -> lab.v1.ParamSpec
-	11, // 1: lab.v1.LatestReport.total_return:type_name -> lab.v1.Decimal
-	0,  // 2: lab.v1.Algorithm.versions:type_name -> lab.v1.AlgorithmVersion
-	1,  // 3: lab.v1.Algorithm.latest_report:type_name -> lab.v1.LatestReport
-	2,  // 4: lab.v1.ListAlgorithmsResponse.algorithms:type_name -> lab.v1.Algorithm
-	7,  // 5: lab.v1.ListLifecycleEventsResponse.events:type_name -> lab.v1.LifecycleEvent
-	3,  // 6: lab.v1.LibraryService.ListAlgorithms:input_type -> lab.v1.ListAlgorithmsRequest
-	5,  // 7: lab.v1.LibraryService.SetVersionState:input_type -> lab.v1.SetVersionStateRequest
-	8,  // 8: lab.v1.LibraryService.ListLifecycleEvents:input_type -> lab.v1.ListLifecycleEventsRequest
-	4,  // 9: lab.v1.LibraryService.ListAlgorithms:output_type -> lab.v1.ListAlgorithmsResponse
-	6,  // 10: lab.v1.LibraryService.SetVersionState:output_type -> lab.v1.SetVersionStateResponse
-	9,  // 11: lab.v1.LibraryService.ListLifecycleEvents:output_type -> lab.v1.ListLifecycleEventsResponse
-	9,  // [9:12] is the sub-list for method output_type
-	6,  // [6:9] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	11, // 0: lab.v1.AlgorithmVersion.params:type_name -> lab.v1.ParamSpec
+	1,  // 1: lab.v1.AlgorithmVersion.recipe:type_name -> lab.v1.RecipeItem
+	12, // 2: lab.v1.LatestReport.total_return:type_name -> lab.v1.Decimal
+	0,  // 3: lab.v1.Algorithm.versions:type_name -> lab.v1.AlgorithmVersion
+	2,  // 4: lab.v1.Algorithm.latest_report:type_name -> lab.v1.LatestReport
+	3,  // 5: lab.v1.ListAlgorithmsResponse.algorithms:type_name -> lab.v1.Algorithm
+	8,  // 6: lab.v1.ListLifecycleEventsResponse.events:type_name -> lab.v1.LifecycleEvent
+	4,  // 7: lab.v1.LibraryService.ListAlgorithms:input_type -> lab.v1.ListAlgorithmsRequest
+	6,  // 8: lab.v1.LibraryService.SetVersionState:input_type -> lab.v1.SetVersionStateRequest
+	9,  // 9: lab.v1.LibraryService.ListLifecycleEvents:input_type -> lab.v1.ListLifecycleEventsRequest
+	5,  // 10: lab.v1.LibraryService.ListAlgorithms:output_type -> lab.v1.ListAlgorithmsResponse
+	7,  // 11: lab.v1.LibraryService.SetVersionState:output_type -> lab.v1.SetVersionStateResponse
+	10, // 12: lab.v1.LibraryService.ListLifecycleEvents:output_type -> lab.v1.ListLifecycleEventsResponse
+	10, // [10:13] is the sub-list for method output_type
+	7,  // [7:10] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_lab_v1_library_proto_init() }
@@ -704,7 +780,7 @@ func file_lab_v1_library_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_lab_v1_library_proto_rawDesc), len(file_lab_v1_library_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

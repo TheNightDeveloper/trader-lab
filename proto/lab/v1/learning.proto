@@ -1,0 +1,203 @@
+syntax = "proto3";
+
+package lab.v1;
+
+import "lab/v1/common.proto";
+
+// LearningService: learning cycles, their gate, the model registry and the
+// user's promotion decisions. The loop recommends; only ApproveCycle and
+// Rollback (user actions) change the active version and model.
+service LearningService {
+  rpc GetLearning(GetLearningRequest) returns (GetLearningResponse);
+  rpc SaveConfig(SaveConfigRequest) returns (SaveConfigResponse);
+  rpc StartCycle(StartCycleRequest) returns (StartCycleResponse);
+  rpc ListCycles(ListCyclesRequest) returns (ListCyclesResponse);
+  rpc ListCandidates(ListCandidatesRequest) returns (ListCandidatesResponse);
+  rpc ListModels(ListModelsRequest) returns (ListModelsResponse);
+  rpc ApproveCycle(ApproveCycleRequest) returns (ApproveCycleResponse);
+  rpc RejectCycle(RejectCycleRequest) returns (RejectCycleResponse);
+  rpc Rollback(RollbackRequest) returns (RollbackResponse);
+}
+
+message LearningGate {
+  Decimal max_drawdown = 1; // fraction
+  int32 min_forward_trades = 2;
+  int32 forward_days = 3;
+  Decimal min_improvement = 4; // fraction (0.01 = 1 percentage point)
+  Decimal max_dd_degradation = 5; // fraction
+  int32 min_walk_wins = 6;
+}
+
+message LearningConfig {
+  string algorithm_id = 1;
+  repeated string symbols = 2;
+  string timeframe = 3;
+  int32 lookback_days = 4;
+  bool enabled = 5; // daily scheduled cycles
+  int32 hour_utc = 6;
+  int32 min_fresh_bars = 7;
+  int32 folds = 8;
+  int32 max_candidates = 9;
+  int32 cpu_minutes = 10;
+  int64 max_bars = 11;
+  uint64 seed = 12;
+  Money capital = 13;
+  Decimal fee = 14;
+  Decimal slippage = 15;
+  LearningGate gate = 16;
+}
+
+message CycleStep {
+  string key = 1; // collect | labels | generate | train | walk_forward | forward_test | decision
+  string status = 2; // done | running | waiting | pending | skipped
+  string meta = 3;
+}
+
+message GateItem {
+  string key = 1;
+  string status = 2; // pass | fail | pending
+  string text = 3; // Persian, plain language
+}
+
+message Contender {
+  string version_id = 1; // champion: the version it serves
+  string model_id = 2; // the frozen model forward-tested
+  bool active = 3; // champion: the model is the active one (not a baseline)
+  string change = 4; // challenger: what differs from the parent recipe
+  int32 seq = 5; // challenger: candidate number
+  repeated Metric walk = 6; // walk-forward out of sample
+  repeated Metric forward = 7; // forward test so far
+}
+
+message CycleUsage {
+  int64 cpu_seconds = 1;
+  int64 cpu_budget_seconds = 2;
+  int32 candidates = 3;
+  int32 max_candidates = 4;
+  int64 bars = 5;
+  int64 max_bars = 6;
+}
+
+message Cycle {
+  int64 id = 1;
+  string algorithm_id = 2;
+  string trigger = 3; // schedule | manual
+  string state = 4;
+  string outcome = 5; // '' running | skipped | failed | not_better | gate_failed | recommended | approved | rejected
+  string reason = 6;
+  int64 started_unix_ms = 7;
+  int64 finished_unix_ms = 8;
+  int64 freeze_unix_ms = 9;
+  int32 forward_days = 10;
+  int32 forward_days_target = 11;
+  repeated CycleStep steps = 12;
+  repeated GateItem gate = 13;
+  Contender champion = 14;
+  Contender challenger = 15;
+  CycleUsage usage = 16;
+  int32 candidates = 17;
+  int32 eligible = 18;
+  int32 walk_wins = 19;
+  int32 walk_folds = 20;
+  bool can_approve = 21;
+}
+
+message ActiveModel {
+  string algorithm_id = 1;
+  string version_id = 2; // empty: no active version
+  string model_id = 3; // empty: no active model yet
+  int64 model_as_of_unix_ms = 4;
+}
+
+message GetLearningRequest {}
+
+message GetLearningResponse {
+  LearningConfig config = 1;
+  Cycle current = 2; // newest cycle; unset when there is none
+  ActiveModel active = 3;
+  bool can_rollback = 4;
+  repeated string learning_algorithms = 5; // choices for the config
+}
+
+message SaveConfigRequest {
+  LearningConfig config = 1;
+}
+
+message SaveConfigResponse {}
+
+message StartCycleRequest {}
+
+message StartCycleResponse {
+  int64 cycle_id = 1;
+}
+
+message ListCyclesRequest {
+  int32 page_size = 1;
+  int32 offset = 2;
+}
+
+message ListCyclesResponse {
+  repeated Cycle cycles = 1;
+  int64 total = 2;
+}
+
+message CycleCandidate {
+  int32 seq = 1;
+  string change = 2;
+  string status = 3; // queued | done | failed | cancelled
+  string failure = 4;
+  Metric total_return = 5;
+  Metric max_drawdown = 6;
+  int32 wins = 7;
+  bool eligible = 8;
+  string why = 9;
+}
+
+message ListCandidatesRequest {
+  int64 cycle_id = 1;
+}
+
+message ListCandidatesResponse {
+  repeated CycleCandidate candidates = 1;
+}
+
+message ModelInfo {
+  string id = 1;
+  string version_id = 2; // the version with this recipe; empty if none yet
+  string status = 3; // active | challenger | baseline | archived
+  int64 as_of_unix_ms = 4;
+  int64 train_from_unix_ms = 5;
+  int64 train_to_unix_ms = 6;
+  uint64 seed = 7;
+  string recipe_hash = 8;
+  int32 samples = 9;
+  string parent = 10;
+  int64 cycle_id = 11;
+  double train_error = 12; // in-sample RMSE (ridge) or log loss (logistic): model math
+}
+
+message ListModelsRequest {}
+
+message ListModelsResponse {
+  repeated ModelInfo models = 1;
+}
+
+message ApproveCycleRequest {
+  int64 cycle_id = 1;
+  string note = 2;
+}
+
+message ApproveCycleResponse {}
+
+message RejectCycleRequest {
+  int64 cycle_id = 1;
+  string note = 2;
+}
+
+message RejectCycleResponse {}
+
+message RollbackRequest {
+  string note = 1;
+}
+
+message RollbackResponse {}

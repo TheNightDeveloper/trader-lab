@@ -28,6 +28,7 @@ import (
 	"tradinglab/engine/internal/experiment"
 	"tradinglab/engine/internal/gen/lab/v1/labv1connect"
 	"tradinglab/engine/internal/jobs"
+	"tradinglab/engine/internal/loop"
 	"tradinglab/engine/internal/report"
 	"tradinglab/engine/internal/search"
 	"tradinglab/engine/internal/store"
@@ -111,6 +112,12 @@ func run() error {
 			slog.Error("research queue stopped", "err", err)
 		}
 	}()
+	learning := &loop.Loop{Store: st, Clock: clock.Wall{}, Limiter: limiter}
+	go func() {
+		if err := learning.Run(ctx); err != nil {
+			slog.Error("learning loop stopped", "err", err)
+		}
+	}()
 	if err := sc.Start(ctx, newServer(cfg,
 		route(labv1connect.NewHealthServiceHandler(health)),
 		route(labv1connect.NewDataServiceHandler(dataSvc)),
@@ -119,6 +126,7 @@ func run() error {
 		route(labv1connect.NewPnlServiceHandler(&api.Pnl{Svc: reports, Limiter: limiter})),
 		route(labv1connect.NewExperimentServiceHandler(&api.Experiment{Store: st, Scheduler: sched, Limiter: limiter})),
 		route(labv1connect.NewLibraryServiceHandler(&api.Library{Store: st})),
+		route(labv1connect.NewLearningServiceHandler(&api.Learning{Store: st, Loop: learning})),
 	)); err != nil {
 		return fmt.Errorf("serve: %w", err)
 	}

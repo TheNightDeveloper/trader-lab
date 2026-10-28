@@ -30,6 +30,7 @@ class AlgorithmVersion extends $pb.GeneratedMessage {
     $core.Iterable<$0.ParamSpec>? params,
     $fixnum.Int64? createdUnixMs,
     $core.Iterable<$core.String>? nextStates,
+    $core.Iterable<RecipeItem>? recipe,
   }) {
     final result = AlgorithmVersion._();
     if (id != null) result.id = id;
@@ -39,6 +40,7 @@ class AlgorithmVersion extends $pb.GeneratedMessage {
     if (params != null) result.params.addAll(params);
     if (createdUnixMs != null) result.createdUnixMs = createdUnixMs;
     if (nextStates != null) result.nextStates.addAll(nextStates);
+    if (recipe != null) result.recipe.addAll(recipe);
     return result;
   }
 
@@ -63,6 +65,8 @@ class AlgorithmVersion extends $pb.GeneratedMessage {
         subBuilder: $0.ParamSpec.$_createMessage)
     ..aInt64(6, _omitFieldNames ? '' : 'createdUnixMs')
     ..pPS(7, _omitFieldNames ? '' : 'nextStates')
+    ..pPM<RecipeItem>(8, _omitFieldNames ? '' : 'recipe',
+        subBuilder: RecipeItem.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -137,6 +141,76 @@ class AlgorithmVersion extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(7)
   $pb.PbList<$core.String> get nextStates => $_getList(6);
+
+  @$pb.TagNumber(8)
+  $pb.PbList<RecipeItem> get recipe => $_getList(7);
+}
+
+class RecipeItem extends $pb.GeneratedMessage {
+  factory RecipeItem({
+    $core.String? key,
+    $core.String? value,
+  }) {
+    final result = RecipeItem._();
+    if (key != null) result.key = key;
+    if (value != null) result.value = value;
+    return result;
+  }
+
+  RecipeItem._();
+
+  factory RecipeItem.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      RecipeItem()..mergeFromBuffer(data, registry);
+  factory RecipeItem.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      RecipeItem()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'RecipeItem',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: RecipeItem.$_createMessage)
+    ..aOS(1, _omitFieldNames ? '' : 'key')
+    ..aOS(2, _omitFieldNames ? '' : 'value')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RecipeItem clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RecipeItem copyWith(void Function(RecipeItem) updates) =>
+      super.copyWith((message) => updates(message as RecipeItem)) as RecipeItem;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use RecipeItem() / RecipeItem.new instead')
+  static RecipeItem create() => RecipeItem._();
+  static $pb.GeneratedMessage $_createMessage() => RecipeItem._();
+  @$core.override
+  RecipeItem createEmptyInstance() => RecipeItem._();
+  @$core.pragma('dart2js:noInline')
+  static RecipeItem getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<RecipeItem>(RecipeItem.$_createMessage);
+  static RecipeItem? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get key => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set key($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasKey() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearKey() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get value => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set value($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasValue() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearValue() => $_clearField(2);
 }
 
 class LatestReport extends $pb.GeneratedMessage {
@@ -230,6 +304,7 @@ class Algorithm extends $pb.GeneratedMessage {
     $core.String? description,
     $core.Iterable<AlgorithmVersion>? versions,
     LatestReport? latestReport,
+    $core.String? activeModel,
   }) {
     final result = Algorithm._();
     if (id != null) result.id = id;
@@ -237,6 +312,7 @@ class Algorithm extends $pb.GeneratedMessage {
     if (description != null) result.description = description;
     if (versions != null) result.versions.addAll(versions);
     if (latestReport != null) result.latestReport = latestReport;
+    if (activeModel != null) result.activeModel = activeModel;
     return result;
   }
 
@@ -260,6 +336,7 @@ class Algorithm extends $pb.GeneratedMessage {
         subBuilder: AlgorithmVersion.$_createMessage)
     ..aOM<LatestReport>(5, _omitFieldNames ? '' : 'latestReport',
         subBuilder: LatestReport.$_createMessage)
+    ..aOS(6, _omitFieldNames ? '' : 'activeModel')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -322,6 +399,15 @@ class Algorithm extends $pb.GeneratedMessage {
   void clearLatestReport() => $_clearField(5);
   @$pb.TagNumber(5)
   LatestReport ensureLatestReport() => $_ensure(4);
+
+  @$pb.TagNumber(6)
+  $core.String get activeModel => $_getSZ(5);
+  @$pb.TagNumber(6)
+  set activeModel($core.String value) => $_setString(5, value);
+  @$pb.TagNumber(6)
+  $core.bool hasActiveModel() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearActiveModel() => $_clearField(6);
 }
 
 class ListAlgorithmsRequest extends $pb.GeneratedMessage {

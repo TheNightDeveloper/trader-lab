@@ -21,6 +21,12 @@ message AlgorithmVersion {
   repeated ParamSpec params = 5;
   int64 created_unix_ms = 6;
   repeated string next_states = 7;
+  repeated RecipeItem recipe = 8; // learning algorithms: the recipe, for display
+}
+
+message RecipeItem {
+  string key = 1;
+  string value = 2;
 }
 
 message LatestReport {
@@ -35,6 +41,7 @@ message Algorithm {
   string description = 3; // Persian
   repeated AlgorithmVersion versions = 4; // newest first
   LatestReport latest_report = 5;
+  string active_model = 6; // learning algorithms: the model serving the active version
 }
 
 message ListAlgorithmsRequest {}
