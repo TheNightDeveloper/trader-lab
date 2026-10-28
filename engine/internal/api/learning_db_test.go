@@ -27,7 +27,9 @@ func TestLearningService(t *testing.T) {
 	require.NoError(t, experiment.SeedLibrary(ctx, st))
 	lp := &loop.Loop{Store: st, Clock: clock.Wall{}, Limiter: jobs.NewLimiter(1)}
 	srv := serve(t,
-		func(m *http.ServeMux) { m.Handle(labv1connect.NewLearningServiceHandler(&Learning{Store: st, Loop: lp})) },
+		func(m *http.ServeMux) {
+			m.Handle(labv1connect.NewLearningServiceHandler(&Learning{Store: st, Loop: lp}))
+		},
 		func(m *http.ServeMux) { m.Handle(labv1connect.NewLibraryServiceHandler(&Library{Store: st})) })
 	c := labv1connect.NewLearningServiceClient(srv.Client(), srv.URL)
 
