@@ -2,7 +2,7 @@ DATABASE_URL ?= postgres://lab:lab@127.0.0.1:5432/lab?sslmode=disable
 # -race needs cgo (gcc on Windows). Without it: make test RACE=
 RACE ?= -race
 
-.PHONY: dev-db gen migrate test lint golden run ci web
+.PHONY: dev-db gen migrate test lint golden bench run ci web
 
 dev-db:
 	docker compose up -d --wait db
@@ -32,6 +32,11 @@ web:
 
 run: web
 	cd engine && go run ./cmd/engine
+
+# Tracked numbers: docs/PERFORMANCE.md
+bench:
+	cd engine && go test ./internal/sim -run '^$$' -bench MillionBars -benchtime 3x -benchmem
+	cd engine && go test ./internal/api -run TestReportReadLatency -v
 
 ci:
 	sh scripts/ci.sh
