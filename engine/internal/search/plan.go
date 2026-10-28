@@ -35,6 +35,9 @@ func Plan(ctx context.Context, s *store.Store, def experiment.Definition) ([]exp
 	if err != nil {
 		return nil, err
 	}
+	if vdef.Recipe != nil {
+		return nil, invalid("%s is a learning algorithm: it is trained and tested in learning cycles, not in experiments", def.AlgorithmVersion)
+	}
 	if ver.State == experiment.Retired {
 		return nil, invalid("algorithm version %s is retired", def.AlgorithmVersion)
 	}

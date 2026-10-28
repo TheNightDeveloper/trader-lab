@@ -119,7 +119,7 @@ func TestExperimentAndLibraryServices(t *testing.T) {
 	// Library: lifecycle moves step by step and only by explicit request.
 	algs, err := lc.ListAlgorithms(ctx, connect.NewRequest(&labv1.ListAlgorithmsRequest{}))
 	require.NoError(t, err)
-	require.Len(t, algs.Msg.GetAlgorithms(), 4)
+	require.Len(t, algs.Msg.GetAlgorithms(), 6, "four rule algorithms, two learning")
 	var trend *labv1.Algorithm
 	for _, x := range algs.Msg.GetAlgorithms() {
 		if x.GetId() == "trend-ema" {

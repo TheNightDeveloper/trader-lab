@@ -172,6 +172,33 @@ func EvaluateOOS(ctx context.Context, spec Spec, bars map[string][]data.Bar, spe
 	return window(res, split.OOS, cfg.Capital.V), nil
 }
 
+// RunSplit runs an already-built strategy over bars up to split.OOS.To, trading
+// from split.OOS.From only (earlier bars warm it up), and returns the OOS view and
+// per-fold metrics. Learning cycles pass a strategy whose models were retrained
+// for each fold elsewhere; eval itself never trains.
+func RunSplit(ctx context.Context, s strategy.Strategy, cfg sim.Config, specs map[string]instrument.Spec, bars map[string][]data.Bar, split Split) (RunView, []FoldView, *sim.Result, error) {
+	cfg, err := cfg.Normalized()
+	if err != nil {
+		return RunView{}, nil, nil, fmt.Errorf("%w: %w", ErrSpec, err)
+	}
+	in := map[string][]data.Bar{}
+	for sym, bs := range bars {
+		i, _ := slices.BinarySearchFunc(bs, split.OOS.To, func(b data.Bar, t time.Time) int { return b.OpenTime.Compare(t) })
+		if i > 0 {
+			in[sym] = bs[:i:i]
+		}
+	}
+	res, err := sim.Run(ctx, cfg, specs, in, gated{s, split.OOS.From})
+	if err != nil {
+		return RunView{}, nil, nil, err
+	}
+	var folds []FoldView
+	for _, f := range split.Folds {
+		folds = append(folds, FoldView{Fold: f, Metrics: pick(window(res, f.Test, cfg.Capital.V), "net_pnl", "total_return", "max_drawdown", "trades", "win_rate")})
+	}
+	return view(res, split.OOS, cfg.Capital.V), folds, res, nil
+}
+
 // EvaluateWith is Evaluate with at most parallel simulator runs at once (the
 // research CPU share when called from the job queue).
 func EvaluateWith(ctx context.Context, spec Spec, bars map[string][]data.Bar, specs map[string]instrument.Spec, parallel int) (*Evaluation, error) {
