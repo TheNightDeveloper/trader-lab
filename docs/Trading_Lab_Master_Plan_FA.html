@@ -1,0 +1,1439 @@
+<!doctype html>
+<html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>پلن جامع توسعه Trading Lab</title>
+<style>
+:root{color-scheme:light;--ink:#19283c;--muted:#5b6d80;--line:#dce3ec;--blue:#245fa5;--paper:#fff;--wash:#f3f6fa}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:24px}body{margin:0;background:var(--wash);color:var(--ink);font-family:Vazirmatn,Tahoma,Arial,sans-serif;font-size:16px;line-height:2.05}
+aside{position:fixed;right:0;top:0;bottom:0;width:262px;background:#112238;color:#d4dfed;padding:28px 18px;overflow:auto;border-left:1px solid #21374f}aside .brand{font-size:13px;color:#91adc9;letter-spacing:.1px}aside .navtitle{font-size:20px;font-weight:700;margin:7px 0 20px}aside a{display:block;color:#d4dfed;padding:8px 10px;margin:3px 0;border-radius:6px;text-decoration:none;font-size:13px;line-height:1.8}aside a:hover,aside a:focus{background:#223f5f;color:white;outline:2px solid #7cb5ef}aside .foot{font-size:11px;color:#a8bcd2;margin-top:26px}
+main{max-width:1220px;margin:32px 292px 48px 30px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:40px 46px 55px}.eyebrow{font-size:12px;color:var(--blue);font-weight:700}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px}.toolbar button{background:#f0f5fb;border:1px solid #aec5de;border-radius:6px;color:#224e7d;padding:8px 16px;font:inherit;font-size:12px;cursor:pointer}h1{font-size:29px;line-height:1.7;letter-spacing:-.4px;margin:0 0 18px;font-weight:700}h2{font-size:23px;line-height:1.8;margin:54px 0 18px;padding-top:14px;border-top:1px solid var(--line)}h3{font-size:18px;line-height:1.9;color:#234f7e;margin:32px 0 12px}p{margin:12px 0 17px}li{margin:8px 0}ul,ol{padding-right:24px}a{color:#215fa3;text-underline-offset:4px;overflow-wrap:anywhere}strong{font-weight:700}code{direction:ltr;unicode-bidi:isolate;font-family:Consolas,monospace;font-size:.84em;background:#edf2f7;border-radius:4px;padding:2px 5px;overflow-wrap:anywhere}pre{direction:ltr;text-align:left;overflow:auto;background:#102238;color:#edf3fa;padding:18px;border-radius:7px;line-height:1.8}pre code{background:none;color:inherit;padding:0}.table-wrap{overflow-x:auto;max-width:100%;margin:20px 0 26px;border:1px solid var(--line);border-radius:7px}table{border-collapse:collapse;width:100%;min-width:600px;font-size:13px;line-height:1.95;table-layout:auto}th{background:#edf3f9;color:#234a73;text-align:right;font-weight:700;padding:12px 13px;border-bottom:1px solid #cbd8e7}td{vertical-align:top;padding:11px 13px;border-bottom:1px solid #e7ecf2;overflow-wrap:anywhere}tr:last-child td{border-bottom:0}tbody tr:nth-child(even){background:#fafbfd}.relationships{padding:14px 18px;border:1px solid #c5d7e9;background:#f5f9fd;border-radius:7px;margin:20px 0}.relationships summary{font-size:14px;font-weight:700;color:#245785;cursor:pointer}.relationships .table-wrap .table-wrap{border:0;margin:0}.note{font-size:12px;color:var(--muted)}footer{margin-top:50px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}.mobile-index{display:none}
+@media(min-width:1700px){main{margin-left:auto;margin-right:calc(262px + (100vw - 1482px)/2)}}
+@media(max-width:1100px){aside{width:220px;padding:22px 12px}main{margin-right:240px;margin-left:20px;padding:30px 26px}h1{font-size:25px}}
+@media(max-width:760px){aside{display:none}main{margin:12px 10px 30px;padding:24px 18px;border-radius:7px;font-size:15px}h1{font-size:24px}h2{font-size:21px;margin-top:40px}h3{font-size:17px}.mobile-index{display:block;background:#f2f6fa;border:1px solid var(--line);border-radius:6px;padding:10px 13px;margin:20px 0}.mobile-index a{display:block;font-size:13px;padding:5px}.toolbar{align-items:flex-start}.toolbar button{white-space:nowrap}table{font-size:12px;min-width:620px}td,th{padding:9px 10px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+@media print{aside,.toolbar,.mobile-index{display:none}body{background:white;font-size:11pt;line-height:1.8}main{margin:0;padding:0;border:0;max-width:none}h1{font-size:22pt}h2{break-before:auto;font-size:17pt}h2,h3{break-after:avoid}table{min-width:0;font-size:9pt}tr{break-inside:avoid}.table-wrap{overflow:visible}a{color:inherit}code{font-size:9pt}details>*{display:block!important}footer{font-size:9pt}}
+</style></head><body>
+<aside aria-label="فهرست سند"><div class="brand" dir="ltr">TRADING LAB · ROADMAP 2.0</div><div class="navtitle">پلن توسعه محصول</div><nav><a href="#section-1">فهرست راهنما</a><a href="#section-2">۱ مسیر محصول و تصمیم‌های دامنه</a><a href="#section-3">۲ معماری فعلی و استفادهٔ مجدد</a><a href="#section-4">۳ اصلاحات نسخهٔ موجود</a><a href="#section-5">۴ معماری هدف و مرز مسئولیت‌ها</a><a href="#section-6">۵ قابلیت‌های محصول و قرارداد رفتار</a><a href="#section-7">۶ طراحی فرانت و تجربهٔ کاربری</a><a href="#section-8">۷ فازهای توسعه و معیار پایان</a><a href="#section-9">۸ داده و API و مهاجرت</a><a href="#section-10">۹ کیفیت و سنجش و عملیات</a><a href="#section-11">۱۰ ترتیب شروع و پوشش همه قابلیت‌ها</a><a href="#section-12">۱۱ تصمیم‌های باز و منابع</a></nav><div class="foot">۱ نوامبر ۲۰۲۶<br>مبنای کد <bdi>8f17e45</bdi><br>سند طراحی و اجرا؛ قابلیت‌ها هنوز پیاده نشده‌اند.</div></aside>
+<main><div class="toolbar"><span class="eyebrow">پژوهش · تصمیم · مدیریت معامله</span><button type="button" onclick="window.print()">چاپ سند</button></div><details class="mobile-index"><summary>فهرست بخش‌ها</summary><a href="#section-1">فهرست راهنما</a><a href="#section-2">۱ مسیر محصول و تصمیم‌های دامنه</a><a href="#section-3">۲ معماری فعلی و استفادهٔ مجدد</a><a href="#section-4">۳ اصلاحات نسخهٔ موجود</a><a href="#section-5">۴ معماری هدف و مرز مسئولیت‌ها</a><a href="#section-6">۵ قابلیت‌های محصول و قرارداد رفتار</a><a href="#section-7">۶ طراحی فرانت و تجربهٔ کاربری</a><a href="#section-8">۷ فازهای توسعه و معیار پایان</a><a href="#section-9">۸ داده و API و مهاجرت</a><a href="#section-10">۹ کیفیت و سنجش و عملیات</a><a href="#section-11">۱۰ ترتیب شروع و پوشش همه قابلیت‌ها</a><a href="#section-12">۱۱ تصمیم‌های باز و منابع</a></details><h1>پلن جامع توسعه پلتفرم پژوهش و معامله هوشمند</h1>
+<p>نسخه ۲٫۰ | تاریخ ۱ نوامبر ۲۰۲۶ | وضعیت سند: پیشنهاد اجرایی برای طراحی و توسعه</p>
+<p><strong>هدف:</strong> توسعهٔ Trading Research Lab به پلتفرمی برای کشف و ساخت استراتژی، ارزیابی مستقل، پیشنهاد معامله با کمک AI، معاملهٔ مجازی، مدیریت ریسک و سپس اجرای واقعی اسپات و قراردادهای اهرم‌دار. ارزش محصول با کیفیت تصمیم و نتیجهٔ خالص قابل ردیابی سنجیده می‌شود؛ سودآوری آینده یک معیار قابل آزمون است، نه فرض تضمین‌شدهٔ برنامه.</p>
+<p><strong>تصمیم معماری:</strong> توسعهٔ تدریجی روی Flutter Web و موتور Go فعلی، با PostgreSQL، Connect/Protobuf و کامپوننت‌های موجود. بازنویسی کامل، تبدیل به میکروسرویس، مهاجرت به React یا افزودن Python به مسیر اصلی الزامی نیست. رابط کاربری و کیفیت تجربه، خروجی مستقل هر فازند و به پایان پروژه موکول نمی‌شوند.</p>
+<p><strong>مبنای فنی:</strong> شاخه main در مخزن TheNightDeveloper/trader-lab با commit <code>8f17e4574bda698c44798643b60826bd35fcfba7</code>. در شروع نگارش، head همچنان همین نسخه بود. گزارش فنی قبلی، PRD فارسی ۱٫۲، brief طراحی ۱٫۱، اسناد داخل مخزن و تصمیم‌های این گفتگو ورودی‌های سند هستند. هرجا میان سند قدیمی و کد اختلاف وجود دارد، بخش «وضعیت موجود» از کد گرفته شده و رفتار آینده صریحاً به‌عنوان پیشنهاد آمده است.</p>
+<p>این سند یک پلن است؛ قابلیت‌های پیشنهادی هنوز در مخزن پیاده نشده‌اند. اجرای کامل Go/Flutter، تست DB و race در بررسی قبلی به‌دلیل نبود toolchain تأیید نشده بود. فاز P0 این فاصلهٔ شواهد را می‌بندد. شناسه‌های P0 تا P8 در این سند <strong>فازهای جدید</strong> هستند و با milestoneهای M0 تا M6 نسخهٔ قبلی تفاوت دارند.</p>
+<h2 id="section-1">فهرست راهنما</h2>
+<p>۱. مسیر محصول و تصمیم‌های دامنه<br>۲. معماری فعلی و موارد قابل استفادهٔ مجدد<br>۳. اصلاحات نسخهٔ موجود<br>۴. معماری هدف و مرز مسئولیت‌ها<br>۵. قابلیت‌های محصول و قرارداد رفتار<br>۶. طراحی فرانت و تجربهٔ کاربری<br>۷. فازهای توسعه و معیار پایان<br>۸. داده، API، مهاجرت و سازگاری<br>۹. کیفیت، سنجش، عملیات و هزینه<br>۱۰. ترتیب شروع توسعه و نقشهٔ پوشش قابلیت‌ها<br>۱۱. تصمیم‌های باز و منابع</p>
+<h2 id="section-2">۱ مسیر محصول و تصمیم‌های دامنه</h2>
+<h3 id="section-2-1">۱٫۱ تجربهٔ نهایی</h3>
+<p>کاربر می‌تواند استراتژی شناخته‌شده‌ای را پیدا کند یا ایدهٔ خودش را با فرم یا زبان طبیعی تعریف کند؛ آن را روی دادهٔ نسخه‌دار با فرض‌های روشن آزمایش کند؛ نسخهٔ مناسب را در حساب مجازی قرار دهد؛ فرصت‌های دارای ورود، TP، SL، حجم و شرط ابطال ببیند؛ نتیجهٔ پیشنهاد و تصمیم خود را پیگیری کند؛ و پس از عبور از دروازه‌های انتشار، اجرای واقعی را فعال کند.</p>
+<p>پژوهش همچنان مبنای انتخاب و بهبود الگوریتم‌هاست. صفحهٔ اصلی محصول به کار روزانه، موقعیت‌های باز، فرصت‌ها و اقدام بعدی اختصاص می‌یابد. دستیار AI در متن همین کارها قرار می‌گیرد و صفحهٔ چت تمام‌صفحه جای صفحات اصلی را نمی‌گیرد.</p>
+<h3 id="section-2-2">۱٫۲ ترتیب انتشار</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>خروجی</th>
+<th>فازها</th>
+<th>چیزی که واقعاً قابل استفاده می‌شود</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>پایهٔ قابل اتکا</td>
+<td>P0 و P1</td>
+<td>اصلاح صحت موتور، طراحی مشترک، قرارداد داده و جریان‌های اصلی</td>
+</tr>
+<tr>
+<td>آزمایش و استراتژی قابل توسعه</td>
+<td>P2</td>
+<td>کتابخانه، استراتژی کاستوم و ترکیب‌های ساده با ارزیابی مستقل</td>
+</tr>
+<tr>
+<td>نسخهٔ کاربردی معاملات مجازی</td>
+<td>P3 و P4</td>
+<td>فرصت‌های زنده، برنامهٔ معامله، حساب مجازی، ژورنال و دستیار AI با مقایسهٔ سایه</td>
+</tr>
+<tr>
+<td>معاملات اهرم‌دار مجازی</td>
+<td>P5</td>
+<td>Long/Short روی قرارداد USDT خطی با مارجین و Funding</td>
+</tr>
+<tr>
+<td>اجرای واقعی اسپات</td>
+<td>P6</td>
+<td>یک آداپتور صرافی، ابتدا با تأیید هر معامله</td>
+</tr>
+<tr>
+<td>اجرای واقعی قرارداد و ترکیب پیشرفته</td>
+<td>P7</td>
+<td>اهرم‌دار پس از تأیید آداپتور؛ تخصیص و ترکیب پیشرفته</td>
+</tr>
+<tr>
+<td>گسترش منابع و یادگیری</td>
+<td>P8</td>
+<td>رادار رویداد، احساسات، جستجوی ساختاری گسترده‌تر و افزونهٔ کاستوم</td>
+</tr>
+</tbody></table></div>
+<p>P5 و P6 پس از آماده‌شدن زیرساخت مشترک P3/P4 دو شاخه‌اند؛ آزمون مجازی اهرم‌دار پیش‌نیاز اجباری انتشار اسپات واقعی نیست. P7 اجرای واقعی قرارداد به P5 و زیرساخت اجرای P6 نیاز دارد. جریان تأیید و مدت مشاهدهٔ forward قابل حذف با آماده‌شدن کد نیست.</p>
+<h3 id="section-2-3">۱٫۳ دامنهٔ اولیه و موارد موکول‌شده</h3>
+<ul>
+<li>ابتدا یک کاربر، یک workspace و یک موتور محلی؛ ساختار account و environment از ابتدا صریح باشد.</li>
+<li>Flutter Web دسکتاپ‌محور با استفادهٔ خوانا روی موبایل؛ خروجی native Android/iOS پروژهٔ جداگانهٔ بعدی است.</li>
+<li>اسپات اولیه فقط جفت‌های USDT؛ ETHBTC تا تکمیل موجودی quote و دادهٔ نرخ متقاطع انتخاب اجرایی ندارد.</li>
+<li>قرارداد اولیه: USDT-margined linear perpetual، Isolated، One-way و یک venue. Cross، Hedge، قرارداد معکوس، اسپات با قرض و Portfolio Margin در انتشار اول اهرم‌دار نیستند.</li>
+<li>اجرای حقیقی با حساب و آداپتور پشتیبانی‌شدهٔ کاربر تعیین می‌شود. استفاده از مستندات Binance/Bybit در این سند انتخاب یا تأیید دسترس‌پذیری آن صرافی برای کاربر نیست.</li>
+<li>اشتراک‌فروشی، چندمستاجری، marketplace عمومی استراتژی و کپی‌ترید اجتماعی جزو این پلن اجرایی اولیه نیستند؛ هدف فعلی استفادهٔ معاملاتی و اندازه‌گیری مزیت است.</li>
+</ul>
+<h2 id="section-3">۲ معماری فعلی و استفادهٔ مجدد</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>لایه</th>
+<th>واقعیت فعلی در کد</th>
+<th>تصمیم توسعه</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>بک‌اند</td>
+<td>یک Go binary، Echo v5، Connect API و کارهای پس‌زمینه</td>
+<td>حفظ modular monolith؛ مرز packageها قوی‌تر شود</td>
+</tr>
+<tr>
+<td>دیتابیس</td>
+<td>PostgreSQL، pgx، sqlc و goose؛ migration خودکار</td>
+<td>migrationهای افزایشی و ثبت وضعیت سازگاری</td>
+</tr>
+<tr>
+<td>حسابداری</td>
+<td>money.Amount/Price/Qty، fixed-point و rounding صریح</td>
+<td>استفاده برای همهٔ دفترها؛ افزودن مارجین، Funding و رزرو</td>
+</tr>
+<tr>
+<td>پژوهش</td>
+<td>data، sim، eval، metrics، report، search، experiment</td>
+<td>حفظ و توسعهٔ نسخه‌دار؛ خروجی اجرای عملیاتی از آن جدا باشد</td>
+</tr>
+<tr>
+<td>یادگیری</td>
+<td>feature، model/train، ridge/logistic و loop با تأیید ارتقا</td>
+<td>ارتقای bounded recipe و ارزیابی به‌ازای بازار/نسخه</td>
+</tr>
+<tr>
+<td>فرانت</td>
+<td>Flutter Web، Riverpod، go_router، decimal و localization فارسی</td>
+<td>حفظ stack و شکستن تدریجی screenهای بزرگ به widgets/controllers</td>
+</tr>
+<tr>
+<td>ظاهر</td>
+<td>tokens تیره، Vazirmatn، JetBrains Mono، RTL</td>
+<td>تم تیره فعلی مبنای تحویل؛ semantic tokens برای روشن در آینده</td>
+</tr>
+<tr>
+<td>نمودار</td>
+<td>KLineChart vendored پشت adapter؛ اندیکاتور از موتور</td>
+<td>حفظ adapter؛ اضافه‌کردن لایه‌های trade plan، order، fill و mark</td>
+</tr>
+<tr>
+<td>قرارداد</td>
+<td>proto/lab/v1 منبع Go/Dart generated</td>
+<td>توسعهٔ سازگار؛ فیلدهای قدیمی بازتفسیر نشوند</td>
+</tr>
+<tr>
+<td>عملیات</td>
+<td>limiter، backup، restore drill، scripts/ci.sh</td>
+<td>تکمیل admission، CI واقعی، health عملیاتی و بازیابی حساب</td>
+</tr>
+</tbody></table></div>
+<p>فایل‌های اصلی فرانت: <code>app/lib/app/router.dart</code>، <code>app/lib/app/nav.dart</code>، <code>app/lib/shell/</code>، <code>app/lib/core/api/engine.dart</code>، <code>app/lib/core/theme/tokens.dart</code>، <code>app/lib/core/widgets/</code> و <code>app/lib/features/</code>. فایل‌های generated در <code>app/lib/gen/</code> دستی ویرایش نمی‌شوند.</p>
+<p>فایل‌های اصلی بک‌اند: <code>engine/cmd/engine/main.go</code>، <code>engine/internal/api/</code>، packageهای دامنه، <code>engine/internal/store/queries/</code>، <code>engine/migrations/</code> و <code>proto/lab/v1/</code>. queryهای sqlc در source SQL تغییر می‌کنند، نه در فایل generated.</p>
+<h3 id="section-3-1">۲٫۱ حل اختلاف با اسناد قبلی</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>اختلاف</th>
+<th>تصمیم این پلن</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>brief اولیه تم روشن و کد فعلی تم تیره دارد</td>
+<td>حفظ تم و اجزای فعلی؛ اصلاح خوانایی/تراکم در P1؛ تم روشن بعد از تثبیت</td>
+</tr>
+<tr>
+<td>README تا M3 را ساخته‌شده می‌داند</td>
+<td>README با کد M6 و وضعیت تست واقعی همگام شود</td>
+</tr>
+<tr>
+<td>spot-only و no-real-order در v1</td>
+<td>همچنان invariant مسیر پژوهش و اسپات قدیمی باقی بماند؛ مشتقات و اجرای واقعی قراردادهای مستقل و ADR تازه دارند</td>
+</tr>
+<tr>
+<td>forward موجود حساب کاغذی کامل نیست</td>
+<td>forward مدل حفظ شود؛ paper account با order lifecycle و ledger جدا افزوده شود</td>
+</tr>
+<tr>
+<td>AI در سند قدیمی قابلیت بعدی بود</td>
+<td>این پلن آن را پس از پایهٔ ریسک و معاملهٔ مجازی، در P4 وارد محصول می‌کند</td>
+</tr>
+<tr>
+<td>قواعد و مدل‌ها محدودند</td>
+<td>تعریف قابل ترکیب و کاستوم در P2، جستجوی ساختاری وسیع‌تر در P8</td>
+</tr>
+</tbody></table></div>
+<h2 id="section-4">۳ اصلاحات نسخهٔ موجود</h2>
+<p>یافته‌های F01 تا F16 به گزارش بررسی فنی ارجاع دارند. P0 ابتدا با تست native، دامنهٔ دقیق هر یافته را بازتولید و ثبت می‌کند؛ این جدول به‌معنی اجرای قبلی همهٔ تست‌ها نیست.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>شناسه</th>
+<th>کار اجرایی</th>
+<th>محل اصلی</th>
+<th>فاز و شاهد پایان</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>F01</td>
+<td>تعریف صریح decision/eligibility/fill time؛ حذف fill پیش از تصمیم؛ ثبت فرض مدل قیمت</td>
+<td>sim/sim.go و golden</td>
+<td>P0؛ delay صفر/۲ثانیه/چندکندلی و backfill؛ هیچ signal fill پیش از تصمیم</td>
+</tr>
+<tr>
+<td>F02</td>
+<td>تفکیک warm-up اندیکاتور از تغییر وضعیت معاملاتی buy-and-hold</td>
+<td>eval/gated و strategy/baselines</td>
+<td>P0؛ خرید واقعی در OOS و holdout؛ benchmark جدا حفظ شود</td>
+</tr>
+<tr>
+<td>F03</td>
+<td>جایگزینی AcquireAll غیراتمی با admission وزنی اتمی و سیاست fairness</td>
+<td>jobs/limiter و مصرف‌کننده‌ها</td>
+<td>P0؛ دو گزارش هم‌زمان بدون deadlock؛ لغو بدون نشت ظرفیت</td>
+</tr>
+<tr>
+<td>F04</td>
+<td>ثبت training_cutoff، model_created_at، frozen_at و trade_start جدا؛ کنترل پوشش forward</td>
+<td>loop/cycle و forward</td>
+<td>P0؛ ساعت در train جلو برود؛ هیچ امتیازدهی پیش از freeze واقعی</td>
+</tr>
+<tr>
+<td>F05</td>
+<td>period_pnl و cohort_lifetime_pnl جدا؛ wins با متریک هم‌دوره</td>
+<td>eval/window و loop/gate</td>
+<td>P0؛ خروج آینده، سود دورهٔ بسته‌شده را تغییر ندهد؛ ADR-017 به‌روزرسانی شود</td>
+</tr>
+<tr>
+<td>F06</td>
+<td>terminal کردن candidateهای ناتمام همراه بستن چرخه در transaction</td>
+<td>loop و learning.sql</td>
+<td>P0؛ پس از kill/cancel/split failure هیچ queued در cycle نهایی</td>
+</tr>
+<tr>
+<td>F07</td>
+<td>عبور Reproduce و forward از admission؛ بودجه CPU/حافظه و حد ورودی پیش از allocation</td>
+<td>jobs، report، loop و strategy</td>
+<td>P0/P1؛ هیچ مسیر سنگین خارج از سقف؛ محدودیت period و dataset size</td>
+</tr>
+<tr>
+<td>F08</td>
+<td>حذف انتخاب اجرایی non-USDT از scope اولیه؛ مسیر کامل FX با holdings بعداً</td>
+<td>API، search و picker</td>
+<td>P0؛ پیام روشن capability؛ P8 فقط با تست حسابداری متقاطع</td>
+</tr>
+<tr>
+<td>F09</td>
+<td>مارکر خروج از fill.RefPrice/Price همان رخداد، نه جمع ExitRef</td>
+<td>api/chart</td>
+<td>P0؛ qty غیر۱ و partial exit روی قیمت درست</td>
+</tr>
+<tr>
+<td>F10</td>
+<td>invalidation انتخاب‌گر مشترک بعد از import و picker با server paging/search</td>
+<td>report/data providers</td>
+<td>P0؛ dataset تازه و ردیف ۲۰۱ قابل انتخاب</td>
+</tr>
+<tr>
+<td>F11</td>
+<td>generation ID، cancellation و mounted check برای درخواست‌های محاسبه</td>
+<td>pnl_screen و async controllers</td>
+<td>P0؛ پاسخ قدیمی نتیجهٔ جدید را نپوشاند؛ dispose بی‌خطا</td>
+</tr>
+<tr>
+<td>F12</td>
+<td>workflow واقعی با PostgreSQL، REQUIRE_DB=1، race، Flutter و generated check</td>
+<td>CI و storetest</td>
+<td>P0؛ قطع DB job اصلی را fail کند؛ passed/skipped جدا گزارش شوند</td>
+</tr>
+<tr>
+<td>F13</td>
+<td>provenance شامل commit/build/instrument/data/policy؛ مقایسه canonical معاملات و اعداد دقیق</td>
+<td>report و versioning</td>
+<td>P0/P1؛ fills متفاوت با PnL برابر، identical اعلام نشوند</td>
+</tr>
+<tr>
+<td>F14</td>
+<td>برابری فرض‌ها بر مقادیر canonical، مستقل از rounding نمایشی</td>
+<td>eval/compare</td>
+<td>P0؛ اختلاف۱ppm هزینه و timestamp داخل روز شناسایی شود</td>
+</tr>
+<tr>
+<td>F15</td>
+<td>سرویس مشترک تغییر version/model فعال با lock سطح algorithm و optimistic version</td>
+<td>library و loop/promote</td>
+<td>P0؛ approve/stop/switch/rollback زوج ناسازگار ندهد</td>
+</tr>
+<tr>
+<td>F16</td>
+<td>یکدست‌کردن README، PROGRESS، METRICS، UI_SPEC و شواهد release</td>
+<td>docs</td>
+<td>P0 و هر فاز؛ مشخص باشد چه چیزی ساخته، اجرا و تأیید شده</td>
+</tr>
+</tbody></table></div>
+<h3 id="section-4-1">۳٫۱ بررسی‌های تکمیلی اجباری در P0</h3>
+<p>۱. دادهٔ دیررس: History فقط بارهای واقعاً AvailableAt&lt;=virtualNow را برگرداند؛ prefix مبتنی بر index برای availability نامرتب کافی نیست. resample زمان availability را از همهٔ اعضای مؤثر و بسته‌شدن bucket بسازد. اصلاح گذشته به‌صورت revision جدا بماند.</p>
+<p>۲. snapshot دیتاست: آزمون ingest transaction که پیش از cutoff شروع و بعد از snapshot commit می‌شود. برای نسخه‌های تازه، عضویت صریح revisionهای کندل در <code>dataset_members</code> یا chunkهای content-addressed ثابت ثبت شود؛ repeatable-read به‌تنهایی نسخهٔ دائمی قابل بارگذاری در آینده نمی‌سازد. انتخاب اجرایی اولیه، manifest عضویت revisionها و hash canonical است؛ format_version مسیر legacy را جدا می‌کند.</p>
+<p>۳. رقابت claim/cancel: ثبت claim و مالکیت job، بازخوانی وضعیت پس از claim، terminal شدن orphanها و recovery آزمایش cancelled تست شود. تضمین exactly-once محاسبه ادعا نشود؛ اثر ذخیره‌شده idempotent باشد و تلاش مجدد قابل مشاهده بماند.</p>
+<p>۴. شبکه: timeout مستقل درخواست، retry با backoff و jitter برای خطاهای قابل تکرار، rate-limit و سلامت به‌ازای نماد؛ یک feed معطل نباید همهٔ نمادها را قفل کند.</p>
+<p>۵. حسابداری مرزی: جمع‌های int64 بیرون money نیز overflow کنترل‌شده داشته باشند؛ fees، balances، notional و aggregate metric تست property و مرزی داشته باشند. قیمت/مقدار/واحد به‌صورت typeدار حمل شود.</p>
+<p>۶. hash تست‌های قبلی تغییر کور نکند. تغییر معنای اجرای F01 یا متریک F05 نسخهٔ موتور/قرارداد ارزیابی تازه، ADR و راهنمای بازتولید می‌خواهد؛ گزارش تاریخی immutable می‌ماند و با برچسب legacy نمایش داده می‌شود.</p>
+<h2 id="section-5">۴ معماری هدف و مرز مسئولیت‌ها</h2>
+<h3 id="section-5-1">۴٫۱ معماری در یک نگاه</h3>
+<details class="relationships"><summary>روابط اجزای معماری — مشاهدهٔ روابط</summary><div class="table-wrap"><div class="table-wrap"><table><thead><tr><th>مبدأ</th><th>مقصد</th></tr></thead><tbody><tr><td>Flutter Web</td><td>Connect API</td></tr><tr><td>Connect API</td><td>Strategy Lab و Research</td></tr><tr><td>Connect API</td><td>Assistant و ابزارهای مجاز</td></tr><tr><td>Connect API</td><td>Opportunity و Trade Plan</td></tr><tr><td>Assistant و ابزارهای مجاز</td><td>Strategy Lab و Research</td></tr><tr><td>Assistant و ابزارهای مجاز</td><td>Opportunity و Trade Plan</td></tr><tr><td>Market Snapshot نسخه دار</td><td>Strategy Lab و Research</td></tr><tr><td>Market Snapshot نسخه دار</td><td>Opportunity و Trade Plan</td></tr><tr><td>Opportunity و Trade Plan</td><td>Risk و تخصیص حساب</td></tr><tr><td>Risk و تخصیص حساب</td><td>Execution و Order State</td></tr><tr><td>Execution و Order State</td><td>Paper Adapter</td></tr><tr><td>Execution و Order State</td><td>Live Adapter</td></tr><tr><td>Strategy Lab و Research</td><td>PostgreSQL و سوابق</td></tr><tr><td>Execution و Order State</td><td>PostgreSQL و سوابق</td></tr><tr><td>Opportunity و Trade Plan</td><td>PostgreSQL و سوابق</td></tr><tr><td>PostgreSQL و سوابق</td><td>Journal و Replay و Attribution</td></tr><tr><td>Journal و Replay و Attribution</td><td>Connect API</td></tr></tbody></table></div></div><p class="note">نمودار Mermaid همین قرارداد در نسخهٔ Markdown موجود است.</p></details>
+<p>این تقسیم‌بندی package و قرارداد است، نه الزام سرویس شبکه‌ای جدا. هسته یک binary می‌ماند. worker کد خارجی در P8 در صورت نیاز process جداست. Redis، Kafka، vector database و Kubernetes پیش‌نیاز این مسیر نیستند.</p>
+<h3 id="section-5-2">۴٫۲ چهار حالت اجرا</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>حالت</th>
+<th>هدف</th>
+<th>قاعدهٔ حساب و اقدام</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Research</td>
+<td>بک‌تست، آموزش و جستجو</td>
+<td>حساب واقعی و کلید ندارد؛ تصمیم تاریخی با virtual time</td>
+</tr>
+<tr>
+<td>Paper</td>
+<td>معاملات مجازی با دادهٔ زنده</td>
+<td>ledger و موجودی مجازی مستقل، فرض fill ثبت‌شده</td>
+</tr>
+<tr>
+<td>Shadow</td>
+<td>مقایسهٔ policy یا نسخه‌ها در دادهٔ آینده</td>
+<td>حساب‌های paper مجزا با بودجه، universe و زمان شروع ازپیش‌ثبت‌شده</td>
+</tr>
+<tr>
+<td>Live</td>
+<td>سفارش واقعی</td>
+<td>account مشخص، مجوز اجرا، اعتبارسنجی تازه و تطبیق صرافی</td>
+</tr>
+</tbody></table></div>
+<p>environment و account_id بخشی از همهٔ شناسه‌ها، cacheهای مجاز و mutationها هستند؛ یک boolean فرانت مرز ایمنی نیست. حالت در header، لیست و صفحهٔ سفارش دیده می‌شود. <code>RunMode_RESEARCH</code> فعلی دوباره معنا نمی‌شود؛ نوع جدید ExecutionEnvironment در proto افزوده می‌شود.</p>
+<h3 id="section-5-3">۴٫۳ packageهای پیشنهادی</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>package</th>
+<th>مسئولیت</th>
+<th>وابستگی و ممنوعیت مهم</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>data و instrument</td>
+<td>دادهٔ تاریخی/زنده، نسخه و قواعد instrument</td>
+<td>افزودن venue/product/contract identity؛ legacy adapter حفظ شود</td>
+</tr>
+<tr>
+<td>signal و strategy/definition</td>
+<td>DTO مشترک، AST قواعد، validation و interpreter</td>
+<td>بدون کلید صرافی، شبکه و اجرای مستقیم؛ strategy فعلی پشت adapter</td>
+</tr>
+<tr>
+<td>strategy/composite</td>
+<td>ترکیب و رفع تعارض</td>
+<td>اجزای pinned و ترتیب deterministic؛ بدون میانگین کور TP/SL</td>
+</tr>
+<tr>
+<td>market</td>
+<td>watchlist، snapshot، regime و کیفیت</td>
+<td>snapshot timestamp و freshness؛ مشتقات سری مستقل</td>
+</tr>
+<tr>
+<td>opportunity و tradeplan</td>
+<td>lifecycle فرصت و سناریوی ورود/خروج</td>
+<td>داده و نسخه‌های ثابت؛ plan هر تغییر revision تازه</td>
+</tr>
+<tr>
+<td>portfolio</td>
+<td>ledger، موجودی آزاد/رزرو، موقعیت و snapshot حساب</td>
+<td>منبع حقیقت حساب داخلی؛ reconciliation با venue</td>
+</tr>
+<tr>
+<td>risk</td>
+<td>بودجه زیان، exposure، سیاست رفتاری و leverage eligibility</td>
+<td>تصمیم deterministic از snapshot؛ AI حق دورزدن آن ندارد</td>
+</tr>
+<tr>
+<td>execution</td>
+<td>order lifecycle، idempotency، تأیید و outbox</td>
+<td>serial تصمیم به‌ازای حساب؛ ارسال فقط پس از risk check تازه</td>
+</tr>
+<tr>
+<td>broker</td>
+<td>interface و adapterهای read/paper/live</td>
+<td>capability matrix و contract tests؛ secret فقط این مرز</td>
+</tr>
+<tr>
+<td>assistant</td>
+<td>orchestration مدل، tool calls، توضیح و proposal</td>
+<td>import مستقیم live broker ممنوع؛ خروجی سفارش قابل ارسال نیست</td>
+</tr>
+<tr>
+<td>journal و attribution</td>
+<td>وقایع تصمیم، مداخله کاربر، replay و مقایسه</td>
+<td>شواهد ثبت‌شده؛ روایت AI جای event واقعی را نگیرد</td>
+</tr>
+<tr>
+<td>events و sentiment</td>
+<td>خبر، تقویم، timestamp و شاخص‌ها</td>
+<td>محتوای بیرونی دادهٔ غیرقابل اعتماد؛ بدون authority اجرای ابزار</td>
+</tr>
+<tr>
+<td>sim و sim/derivatives</td>
+<td>replay تاریخی و مدل قرارداد</td>
+<td>pure/domain-only؛ هرگز search/loop/train/assistant/broker live را import نکند</td>
+</tr>
+</tbody></table></div>
+<p>برای shared DTO از packageهای کوچک استفاده شود تا دور import ساخته نشود. depguard علاوه بر import مستقیم، مسیرهای حساس و composition root را بررسی کند. مدل آموزش‌دیده فقط artifact مصرف می‌کند و training را از داخل OnBar فراخوانی نمی‌کند.</p>
+<h3 id="section-5-4">۴٫۴ قرارداد زمانی و ثبت تصمیم</h3>
+<p>برای داده و تصمیم این زمان‌ها جدا نگهداری شوند: <code>event_at</code>، <code>published_at</code> در صورت وجود، <code>received_at</code>، <code>available_at</code>، <code>snapshot_at</code>، <code>decision_at</code>، <code>submitted_at</code> و <code>filled_at</code>. زمان ذخیره UTC است؛ نمایش پیش‌فرض Asia/Tehran با timezone آشکار. بار تایم‌فریم بالاتر فقط پس از بسته‌شدن و دریافت معتبر وارد تحلیل می‌شود.</p>
+<p>هر تصمیم به snapshot، strategy version، model artifact، policy version، instrument-spec version، build و input digest متصل است. AI نیز prompt template، model identifier، tools، usage و خروجی پذیرفته‌شده را ثبت می‌کند؛ بازپخش deterministic نتیجهٔ ثبت‌شده را مصرف می‌کند و برای بازتولید گذشته مدل زبانی را دوباره صدا نمی‌زند.</p>
+<h3 id="section-5-5">۴٫۵ مسیر ورود تا ارسال</h3>
+<p>signal → candidate opportunity → validated trade plan → paper/approval → risk authorization تازه → account reservation و command ثبت‌شده → ارسال adapter → acknowledgment/unknown → fill/reconciliation → position و journal.</p>
+<p>تأیید کاربر به hash همان plan، account، environment، policy version و محدودهٔ تغییر قیمت مجاز متصل است. تغییر مؤثر ورودی، اهرم، حجم یا SL تأیید قبلی را نامعتبر می‌کند. فاصلهٔ submit با validate محدود است؛ stale authorization اجرا نمی‌شود. رزرو سرمایه و تشخیص duplicate به‌ازای حساب transaction و serialization دارند تا دو تب یا دو استراتژی سرمایهٔ واحد را دوبار خرج نکنند.</p>
+<p>در اجرای واقعی، exactly-once روی شبکه ادعا نمی‌شود. client_order_id پایدار، transactional outbox و lookup صرافی برای unknown outcome الزامی‌اند. timeout پس از ارسال باعث retry کور یا سفارش دوم نمی‌شود. لایهٔ journal/event رکورد افزایشی دارد، اما نیازی به بازنویسی کل دیتابیس به event sourcing نیست؛ snapshotهای query-friendly کنار eventها باقی می‌مانند.</p>
+<details class="relationships"><summary>انتقال وضعیت سفارش — مشاهدهٔ روابط</summary><div class="table-wrap"><div class="table-wrap"><table><thead><tr><th>مبدأ</th><th>مقصد</th></tr></thead><tbody><tr><td>[*]</td><td>Proposed</td></tr><tr><td>Proposed</td><td>Validated</td></tr><tr><td>Proposed</td><td>Rejected</td></tr><tr><td>Validated</td><td>AwaitingApproval</td></tr><tr><td>Validated</td><td>Expired</td></tr><tr><td>AwaitingApproval</td><td>Revalidating</td></tr><tr><td>AwaitingApproval</td><td>Expired</td></tr><tr><td>Revalidating</td><td>Reserved</td></tr><tr><td>Revalidating</td><td>Rejected</td></tr><tr><td>Reserved</td><td>Submitted</td></tr><tr><td>Submitted</td><td>Acknowledged</td></tr><tr><td>Submitted</td><td>Unknown</td></tr><tr><td>Unknown</td><td>Reconciling</td></tr><tr><td>Reconciling</td><td>Acknowledged</td></tr><tr><td>Reconciling</td><td>Rejected</td></tr><tr><td>Acknowledged</td><td>PartiallyFilled</td></tr><tr><td>Acknowledged</td><td>Filled</td></tr><tr><td>Acknowledged</td><td>CancelPending</td></tr><tr><td>PartiallyFilled</td><td>Filled</td></tr><tr><td>PartiallyFilled</td><td>CancelPending</td></tr><tr><td>CancelPending</td><td>Cancelled</td></tr><tr><td>CancelPending</td><td>Filled</td></tr><tr><td>Filled</td><td>[*]</td></tr><tr><td>Cancelled</td><td>[*]</td></tr><tr><td>Rejected</td><td>[*]</td></tr><tr><td>Expired</td><td>[*]</td></tr></tbody></table></div></div><p class="note">نمودار Mermaid همین قرارداد در نسخهٔ Markdown موجود است.</p></details>
+<p>این نمودار مسیر نمونهٔ سفارش ورود است؛ protection/exit سفارش‌های وابسته با state مستقل‌اند. رقابت cancel/fill و partial fill، موجودی و پوشش خروج را از رخداد واقعی تعیین می‌کند، نه از آخرین دکمهٔ زده‌شده.</p>
+<h2 id="section-6">۵ قابلیت‌های محصول و قرارداد رفتار</h2>
+<h3 id="section-6-1">۵٫۱ فرصت و برنامهٔ معامله</h3>
+<p>خروجی روزمره یک Trade Plan نسخه‌دار است. فرصت ممکن است «در انتظار تأیید شرط»، «قابل بررسی»، «ردشده»، «منقضی» یا «نامناسب برای ورود با قیمت فعلی» باشد. هر استراتژی باید وضعیت بدهد، اما تولید پیشنهاد معامله برای همهٔ نمادها اجباری نیست. کمبود داده و نبود setup خروجی معتبرند.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>گروه</th>
+<th>دادهٔ لازم در plan</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>هویت</td>
+<td>plan/revision، snapshot، venue، instrument، product و جهت</td>
+</tr>
+<tr>
+<td>منطق</td>
+<td>strategy/composite version، اجزای مشارکت‌کننده، مدل و قواعد فعال‌شده</td>
+</tr>
+<tr>
+<td>ورود</td>
+<td>نوع سفارش، قیمت/محدوده، trigger قابل محاسبه، حداکثر انحراف مجاز</td>
+</tr>
+<tr>
+<td>خروج</td>
+<td>SL، مبنای trigger قیمت، اهداف TP و درصد هر خروج، time stop و trailing policy</td>
+</tr>
+<tr>
+<td>اندازه</td>
+<td>quantity، notional، مارجین در صورت نیاز، planned loss و محدودیت account</td>
+</tr>
+<tr>
+<td>هزینه</td>
+<td>fee، spread/slippage تخمینی، Funding تخمینی با سناریو/عدم قطعیت</td>
+</tr>
+<tr>
+<td>اعتبار</td>
+<td>زمان ارزیابی، TTL زمانی و شرطی، invalidation و minimum data coverage</td>
+</tr>
+<tr>
+<td>شواهد</td>
+<td>شاخص‌ها، وضعیت بازار، آمار OOS/forward مرتبط و محدودیت نمونه</td>
+</tr>
+<tr>
+<td>تصمیم</td>
+<td>eligible/rejected، دلیل machine-readable و متن فارسی موتور؛ شرح AI جدا</td>
+</tr>
+</tbody></table></div>
+<p>TTL با هر توضیح تازهٔ AI تمدید نمی‌شود. revalidation با بازار و حساب تازه انجام می‌شود. سیگنال‌های هم‌نماد با fingerprint و بازهٔ زمانی مشخص deduplicate می‌شوند؛ چند strategy موافق، سفارش مستقلِ تکراری نمی‌سازند. اولویت فرصت از معیارهای شفاف مثل eligibility، هزینه، عملکرد معتبر و تازگی می‌آید؛ درصد اطمینان مدل زبانی به‌عنوان احتمال برد نمایش داده نمی‌شود. score رتبه‌بندی نیز با احتمال calibrated متفاوت برچسب می‌خورد.</p>
+<h3 id="section-6-2">۵٫۲ کتابخانه و استراتژی کاستوم</h3>
+<p>تعریف استراتژی شامل universe، instrument capability، تایم‌فریم‌ها، warm-up، featureهای مجاز، regime filter، ورود، خروج، sizing، رفتار پس از stop، نیاز داده و بودجهٔ محاسبات است. strategy instance قابل ویرایش draft دارد؛ نسخهٔ استفاده‌شده در run، paper یا live immutable است. lineage شامل parent، diff و علت تغییر ذخیره می‌شود.</p>
+<p>سه مسیر ساخت:</p>
+<p>۱. فرم بدون کد با بلوک‌های typed: comparison، cross، rolling، AND/OR، session/زمان و entry/exit. AST JSON نسخه‌دار با محدودیت عمق، lookback، چرخه و منابع، schema validation و canonical hash. تاریخچهٔ آینده، تابع شبکه و کد آزاد در DSL وجود ندارد.</p>
+<p>۲. زبان طبیعی → پیش‌نویس AST: AI ابهام‌هایی مثل «روند قوی»، «پولبک» یا «کف معتبر» را به سؤال‌های دقیق و پارامتر تبدیل می‌کند؛ قواعد استخراج‌شده و دادهٔ لازم پیش از ذخیره قابل بررسی‌اند. خروجی از همان validator و interpreter عبور می‌کند. تا ابهام بحرانی رفع نشده، وضعیت draft/needs_definition باقی می‌ماند.</p>
+<p>۳. کد اختصاصی در P8: worker جدا با قرارداد ورودی/خروجی نسخه‌دار، سقف CPU/RAM/time و شبکهٔ بسته. کلید صرافی و mutate account در اختیار کد نیست. قرارداد روی Windows/Linux کار کند؛ Go plugin با فایل .so مبنای اولیه نیست. انتخاب sandbox runtime پس از spike و benchmark انجام شود؛ زبان جدید به مسیر اصلی تحمیل نشود.</p>
+<p>کاتالوگ اولیه ۴ تا ۶ template با تعریف دقیق، شامل trend EMA و mean-rev bands فعلی، شکست کانال و RSI pullback است؛ buy-and-hold و hold-cash baseline جدا می‌مانند. نام یک اندیکاتور، خودِ استراتژی کامل نیست. ICT با تعریف عددی eventهایی مثل شکست ساختار، sweep و FVG، زمان تشخیص و invalidation وارد P8 می‌شود؛ پوشش ادعایی کل سبک بدون قواعد رسمی پذیرفته نیست.</p>
+<h3 id="section-6-3">۵٫۳ تلفیق و تخصیص</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>شیوه</th>
+<th>انتشار</th>
+<th>تعریف و کنترل</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>تأیید مشترک</td>
+<td>P2</td>
+<td>AND/OR روی شروط مشخص؛ direction و افق زمانی سازگار</td>
+</tr>
+<tr>
+<td>انتخاب براساس regime</td>
+<td>P2 پایه، P7 پیشرفته</td>
+<td>regime classifier با دادهٔ گذشته؛ آستانه‌ها و زمان تعویض pinned</td>
+</tr>
+<tr>
+<td>رأی‌گیری وزنی</td>
+<td>P7</td>
+<td>signalهای normalized با افق/TTL؛ هم‌بستگی و اختلاف جهت آشکار</td>
+</tr>
+<tr>
+<td>تقسیم سرمایه میان استراتژی‌ها</td>
+<td>P7</td>
+<td>حساب مشترک با budget و arbitration؛ attribution هر سهم</td>
+</tr>
+</tbody></table></div>
+<p>در MVP خروجی composite یک تصمیم نهایی دارد و entry/exit/risk owner مشخص است. TP/SL چند جزء میانگین گرفته نمی‌شود. خروج ریسک بر ورود تازه اولویت دارد؛ سیاست حل اختلاف با reason ثبت می‌شود. تعویض regime باعث جابه‌جایی بی‌قاعدهٔ قواعد موقعیت باز نمی‌شود. هر ترکیب نسخه و تلاش پژوهشی جدا دارد و در برابر A، B و A+B با داده/هزینه یکسان و holdout دست‌نخورده سنجیده می‌شود. سود، drawdown یا win-rate اجزا را برای تخمین نتیجهٔ سبد جمع یا میانگین ساده نکنید؛ معاملات و سرمایهٔ مشترک باید واقعاً شبیه‌سازی شوند.</p>
+<h3 id="section-6-4">۵٫۴ جستجو و اعتماد به استراتژی</h3>
+<p>فیلترهای Library: خانواده، spot/perp، Long/Short، تایم‌فریم، وضعیت مناسب بازار، منبع، نیاز داده، هزینهٔ محاسبه، حساسیت به هزینه و مرحلهٔ شواهد. انتخاب یک هدف «بیشترین سود» بدون نشان‌دادن نمونه، drawdown و فرض‌ها کافی نیست.</p>
+<p>Discover ابتدا یک فهرست curated از منابع رسمی/متن‌باز با امکان جستجوی فارسی/انگلیسی و bookmark است. منابع قابل بررسی: مستندات و نمونه‌های QuantConnect، Freqtrade و اسکریپت‌های دارای کد قابل دسترسی در TradingView. discover/search به معنی دریافت و اجرای خودکار هر اسکریپت نیست. source URL، author، license/شرایط استفاده، commit/version و زمان دریافت ثبت می‌شود؛ دسترس‌ناپذیری کد در Protected/Invite-only روشن است. adapterهای import یکی‌یکی و با parity test افزوده شوند؛ مبدل عمومی Pine/Python به Go در MVP تعهد نیست.</p>
+<p>مسیر ورود: discovered → imported_draft → definition_reviewed → reproducible → oos_evaluated → forward_observed → eligible_for_account. وضعیت lifecycle و شواهد دو محور مستقل‌اند؛ «کد بررسی‌شده» یا «forward ثبت‌شده» تضمین سود نیست. خطاهای compile/validation/leak، هزینهٔ بیش از انتظار و دلیل رد نیز در شناسنامه باقی می‌مانند.</p>
+<h3 id="section-6-5">۵٫۵ رصد بازار و دستیار Agentic</h3>
+<p>رصد deterministic روی بسته‌شدن کندل یا رخداد لازم انجام شود. برای شروع ۵ تا ۱۰ نماد منتخب، تحلیل پایهٔ 1h و زمینهٔ 4h یک فرض قابل تغییر محصول است؛ انتخاب نهایی با نیاز داده و آزمایش تعیین شود. scanner با فهرست فعال و بودجه محدود شروع شود، نه همهٔ بازار روی هر tick. «لحظه‌ای» به معنی آخرین snapshot معتبر با timestamp است؛ UI تاخیر و freshness را نشان می‌دهد.</p>
+<p>ابزارهای مجاز دستیار: GetMarketSnapshot، InspectStrategyEvidence، ExplainDecision، CompareCandidates، DraftStrategy، ValidateDraft، EstimateExperiment، ProposeTradePlan، SummarizePositions، SearchApprovedSources و ProposeJournalNote. ابزارهای طولانی job ID برمی‌گردانند. ایجاد پژوهش هزینه‌دار سقف و اجازهٔ workspace دارد؛ پیش‌نویس، اجازهٔ ارسال سفارش واقعی نیست.</p>
+<p>AI مسئول جستجو، پرسیدن ابهام، استفاده از ابزار، توضیح شواهد، مقایسه و پیگیری است. محاسبهٔ قیمت، هزینه، مارجین، حجم و تصمیم gate در Go انجام می‌شود. خروجی مدل با schema و reference check سنجیده شود؛ عددی که به snapshot/metric/tool result برنمی‌گردد در plan authoritative پذیرفته نیست. دستورهای داخل خبر، اسکریپت و صفحهٔ وب authority ندارند و به tool policy منتقل نمی‌شوند.</p>
+<p>در AI failure، فرصت موتور و مدیریت موقعیت موجود ادامه دارند؛ UI «توضیح AI در دسترس نیست» نشان می‌دهد. مدل زبانی وابستگی حلقهٔ order/SL/reconciliation نیست. هزینه با event-driven calls، dedup، context محدود، cache به‌ازای snapshot+version، مدل سبک برای خلاصه و escalation محدود برای بررسی پیچیده کنترل شود. budget روزانهٔ توکن/هزینه، timeout، سقف tool iteration و cancellation در assistant_runs ثبت شود. انتخاب vendor در adapter قابل تعویض است؛ نسخه مدل و محدودیت مصرف در deployment pin شود.</p>
+<h3 id="section-6-6">۵٫۶ معاملات مجازی و ژورنال</h3>
+<p>حساب Paper موجودی، reserved funds، سفارش، partial fill، موقعیت و ledger واقعیِ مجازی دارد؛ یک ستون PnL افزوده به forward موجود جای آن را نمی‌گیرد. frozen recipe forward برای ارزیابی مدل حفظ می‌شود؛ paper deployment حلقهٔ عملیاتی با order lifecycle است. حتی با دادهٔ زنده، fillها simulated و با فرض مشخص‌اند.</p>
+<p>برای MVP، مدل fill بر best bid/ask یا قیمت قابل دسترسی پس از تصمیم، fee و slippage محافظه‌کارانه بنا شود. اگر فقط OHLC موجود است، فرض fill و ابهام intrabar صریح باشد؛ وضعیت «TP یا SL کدام اول؟» از داده‌ای که وجود ندارد قطعی استنتاج نشود. در نسخهٔ بهتر، quote/trade با ثبت زمان و عمق محدود برای مدل liquidity اضافه شود.</p>
+<p>ژورنال خودکار شامل برنامهٔ اولیه، شروط برقرار، snapshot، تصمیم ریسک، سفارش/اجرا، تغییرهای کاربر/AI، دلیل خروج و هزینه‌هاست. یادداشت خوداظهاری کاربر اختیاری و جداست. علت‌های سیستمی از event ثبت می‌آیند؛ AI می‌تواند تفسیر پیشنهادی قابل ویرایش بدهد، نه علت اثبات‌نشده.</p>
+<p>Replay دو کاربرد جدا دارد: بازبینی همان تصمیم با دادهٔ موجود آن لحظه؛ و اجرای what-if با policy تغییرکرده که run جدید و برچسب فرضی می‌گیرد. اطلاعات آینده تا زمان playback آشکار نشود. شبیه‌سازی پس از دیدن نتیجه به سابقهٔ واقعی افزوده نمی‌شود.</p>
+<h3 id="section-6-7">۵٫۷ ریسک سبد و کنترل رفتار</h3>
+<p>قواعد حساب: سقف زیان برنامه‌ریزی‌شدهٔ هر معامله، exposure به نماد/گروه، مجموع ریسک باز، سرمایهٔ آزاد/رزرو، محدودیت تعداد موقعیت و liquidity/cost limits. پورتفوی spot و perp، gross و net exposure و جمع قراردادهای هم‌جهت را جدا نشان دهد. hedge فرضی صفرشدن ریسک تلقی نشود.</p>
+<p>وقفه پس از تعداد ازپیش‌تعیین‌شدهٔ stop، سقف زیان روز/هفته و محدودیت افزایش حجم پس از زیان از settings user policy می‌آیند. زیان به‌تنهایی برچسب «انتقام‌جویی» یا تشخیص احساس/روان نمی‌گیرد. policy تغییرات ثبت‌شده و effective_at دارد؛ شل‌کردن محدودیت فعال برای دورزدن lock فوری اعمال نشود. بستن یا کاهش ریسک در حد capability واقعی مسدود نشود. UI زمان و دامنهٔ restriction را از سرور بگیرد؛ countdown کلاینت به‌تنهایی اجازه ورود نمی‌دهد.</p>
+<p>سناریوهای stress: gap قیمت، افزایش fee/slippage، funding adverse، fill ناقص، قطع feed و حرکت هم‌زمان چند دارایی. خروجی سناریو تخمین است و به فرض‌ها لینک دارد. planned loss تا SL از زیان تحقق‌یافته و tail scenario جداست؛ SL تضمین سقف زیان نیست.</p>
+<h3 id="section-6-8">۵٫۸ معاملات اهرم‌دار</h3>
+<p>برای Spot ledger اعتبارسنجی Target&gt;=0 و exposure&lt;=1 حفظ شود. Short با منفی‌کردن balance اسپات یا حذف guard قبلی پیاده نشود. برای مشتقات، position side/quantity، notional، initial/maintenance margin، collateral/reserved، funding cash flow و realized/unrealized PnL نوع و دفتر صریح دارند. InstrumentKey شامل venue، product، symbol، contract/settlement currency و spec version است؛ BTCUSDT اسپات و perp یک سری نیستند.</p>
+<p>حسابداری قرارداد خطی: PnL حرکت قیمت به qty بستگی دارد؛ مارجین موردنیاز از leverage و قواعد venue می‌آید. اول risk budget و فاصلهٔ SL با هزینه‌ها، سپس qty، بعد feasible margin و اهرم در policy انتخاب شود. افزایش اهرم با ثابت‌بودن qty، مزیت استراتژی را بیشتر نمی‌کند. ROI روی مارجین، سود USDT و بازده کل حساب جدا نمایش داده شوند.</p>
+<p>دادهٔ لازم: historical contract bars، mark/index در حد لازم، funding schedule و cash flows واقعی گذشته، fee tiers، tick/lot/min-notional و maintenance tiers نسخه‌دار. نرخ Funding تخمینی آینده از نرخ محقق‌شده جداست. در نبود دادهٔ کافی، liquidation-aware backtest unavailable/approximate برچسب می‌خورد و به gate اجرای واقعی راه ندارد.</p>
+<p>liquidation engine قواعد همان venue/account mode را پیاده و با مثال‌های رسمی و adapter تطبیق می‌دهد؛ فرمول سادهٔ 1/leverage یا ضرب بازده spot در اهرم کافی نیست. trigger مبنای mark/last در سفارش و نمودار مشخص باشد. فاصلهٔ stop از liquidation با بافر محافظه‌کارانه و سناریوی اختلاف mark/last بررسی شود؛ buffer تضمین جلوگیری از liquidation نیست.</p>
+<p>TP/SL باید reduce-only یا سازوکار معادل معتبر venue داشته باشد. پوشش partial fill، نسبت مقدار exit به موجودی، rounding و fee، cancel/replace و نرسیدن تأیید protection تست شوند. موقعیت بدون پوشش مورد انتظار وارد وضعیت critical شود و طبق policy ازپیش‌تعریف‌شده برای کاهش ریسک اقدام کند؛ مدل زبانی در این تصمیم مسیر حیاتی نیست.</p>
+<p>هر استراتژی capabilityهای Spot/Perp و Long/Short را جدا دارد و برای فعال‌شدن در هرکدام evidence مرتبط لازم است. Cross، inverse، hedge mode و margin borrowing فقط پس از ADR، داده و حسابداری مستقل به backlog بعدی می‌روند.</p>
+<h3 id="section-6-9">۵٫۹ یادگیری، سنجش AI و کاهش بیش‌برازش</h3>
+<p>loop فعلی نگه داشته شود: feature/label با readiness، آموزش در پنجره، scaler در train، candidate budget، walk-forward، frozen forward و human promotion. امکانات تازه: recipe AST lineage، component ablation، baseline بدون AI، multi-objective view و drift monitor. جستجو بر threshold/weights/model structure تنها در train و validation مجاز است؛ holdout نهایی برای انتخاب مکرر مصرف نشود.</p>
+<p>در P4، shadow حداقل سه policy pinned دارد: استراتژی پایه، همان استراتژی با فیلتر AI، و مسیر تصمیم کاربر در صورت وجود. universe، سرمایه، شروع، هزینه و قواعد fill مشترک ثبت شوند؛ اختلاف eligible set و timing قابل توضیح باشد. اختلاف PnL شبیه‌سازی به‌تنهایی اثبات علیت AI یا نتیجهٔ live نیست. هزینهٔ مدل نیز در هزینهٔ عملیاتی جدا دیده شود.</p>
+<p>تلاش‌های مرتبط در سطح خانوادهٔ پژوهش و data period شمارش شوند تا ساخت experiment جدید سابقه جستجو را صفر نکند. آزمون نهایی پس از مشاهده spent محسوب شود؛ گزارشِ مجدد با ID تازه، holdout را تازه نمی‌کند. مقایسهٔ net expectancy، drawdown، تعداد نمونه، turnover، هزینه و پایداری زمانی کنار بازده نمایش داده شود؛ ۳۰ معامله به‌تنهایی نشانه اثبات برتری آماری نیست.</p>
+<p>drift دو دسته دارد: data/execution drift و performance/model drift. آستانه، window، minimum observations و اقدام از پیش تعیین شود؛ چند زیان اتفاقی موجب ارتقای فوری مدل نشود. نامزد ضعیف، rollback یا شکست training active را تغییر نمی‌دهد. rollback تنظیم آینده را برمی‌گرداند؛ سفارش و موجودی واقعی را به گذشته بازنمی‌گرداند و نیازمند reconciliation است.</p>
+<h3 id="section-6-10">۵٫۱۰ رویداد، احساسات و مرور روزانه</h3>
+<p>P8: تقویم اقتصادی، token unlock، رخداد پروژه و اختلال venue با source، published_at، received_at، affected assets، revision و coverage. سند تازه‌دریافت‌شده با تاریخ گذشته نباید در replay گذشته قابل مشاهده باشد. نبود تاریخچهٔ قابل اتکا یعنی نمایش context زنده، نه ادعای بک‌تست اثر خبر.</p>
+<p>شاخص Fear &amp; Greed بازار با انتساب منبع و تازگی نمایش داده شود. شاخص شخصی رفتار فقط از اجزای قابل توضیح مثل تغییر اندازه، ورود خارج از برنامه و خوداظهاری ساخته شود؛ امتیاز بالینی یا تشخیص احساس نیست. داده ناکافی وضعیت مستقل دارد.</p>
+<p>مرور روزانه/جلسه‌ای: موقعیت‌های باز، ریسک متمرکز، فرصت‌های تازه/منقضی، استراتژی تحت بررسی، رویداد مرتبط و اقدام بعدی. اعلان‌ها durable، قابل تنظیم و deduplicated باشند. اعلان مرورگر در اجرای محلی فقط هنگام فعال‌بودن موتور و کانال مجاز کار می‌کند؛ ارسال ایمیل/پیام بیرونی قابلیت جدا با مقصد و مجوز صریح است.</p>
+<h2 id="section-7">۶ طراحی فرانت و تجربهٔ کاربری</h2>
+<h3 id="section-7-1">۶٫۱ اصول قابل تحویل</h3>
+<p>طراحی مدرن، مینیمال، خوانا و کم‌هزینه با تم تیرهٔ فعلی؛ تأکید روی تصمیم و شواهد. از پنل‌های تکراری KPI، گرافیک تزئینی، چشمک قیمت و تشویق بصری به معامله پرهیز شود. موفقیت UX یعنی کاربر بتواند mode، اعتبار داده، علت پیشنهاد، ریسک و اقدام بعدی را سریع و درست بفهمد.</p>
+<p>هر epic فرانت این اقلام را دارد: user flow، low-fidelity wireframe، design component/state، قرارداد داده، prototype قابل کلیک، پیاده‌سازی Flutter و سناریوی تست. صفحات جدید پس از gate همان فاز وارد navigation می‌شوند؛ منوی پر از «به‌زودی» حذف شود. اعتبار عملیات همیشه با پاسخ سرور است.</p>
+<h3 id="section-7-2">۶٫۲ معماری اطلاعات و مسیرها</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>گروه</th>
+<th>مقصد و route پیشنهادی</th>
+<th>استفاده از وضع موجود</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>روزانه</td>
+<td><code>/</code> نمای کلی، <code>/opportunities</code> فرصت‌ها</td>
+<td>Home فعلی به overview عملیاتی تبدیل شود</td>
+</tr>
+<tr>
+<td>معامله</td>
+<td><code>/accounts/:id</code>، <code>/orders</code>، <code>/positions/:id</code></td>
+<td>تب‌های Paper/Live در context حساب؛ mode آشکار</td>
+</tr>
+<tr>
+<td>پژوهش</td>
+<td><code>/library</code>، <code>/library/:id</code>، <code>/strategies/new</code>، <code>/strategies/:id/edit</code></td>
+<td>Library فعلی و detail panel توسعه یابد</td>
+</tr>
+<tr>
+<td>پژوهش</td>
+<td><code>/experiments/new</code>، <code>/queue</code>، <code>/reports</code>، <code>/reports/:id</code>، <code>/compare</code></td>
+<td>routeهای موجود و deep linkها حفظ شوند</td>
+</tr>
+<tr>
+<td>یادگیری</td>
+<td><code>/learning</code>، <code>/shadow/:id</code></td>
+<td>مدل فعال، challenger و attribution کنار هم</td>
+</tr>
+<tr>
+<td>بررسی</td>
+<td><code>/journal</code>، <code>/journal/:id/replay</code>، <code>/chart</code>، <code>/pnl</code></td>
+<td>chart و calculator فعلی با context دقیق</td>
+</tr>
+<tr>
+<td>کنترل</td>
+<td><code>/risk</code>، <code>/data</code>، <code>/settings</code></td>
+<td>policy، داده و اتصال؛ ابزارهای فنی در diagnostics</td>
+</tr>
+<tr>
+<td>توسعهٔ بعدی</td>
+<td><code>/discover</code> و <code>/market-events</code></td>
+<td>فقط از فاز انتشار مربوط نمایش یابد</td>
+</tr>
+</tbody></table></div>
+<p>sidebar راست فعلی حفظ و گروه‌بندی بازطراحی شود؛ Compare و Calculator می‌توانند اقدام context نیز داشته باشند. navigation با go_router و query params فیلتر قابل اشتراک در همان workspace باشد. با تغییر نام صفحه، لینک قدیمی queue/report نشکند. AI panel از header و context صفحه باز می‌شود و تاریخچهٔ گفت‌وگوی مرتبط با plan/strategy را حفظ می‌کند.</p>
+<h3 id="section-7-3">۶٫۳ layout و زبان بصری</h3>
+<ul>
+<li>دسکتاپ ≥۱۲۰۰: sidebar حدود۲۳۲px؛ header کم‌ارتفاع؛ صفحهٔ فرصت‌ها table/list اصلی و detail panel حدود۳۶۰–۴۲۰px؛ نمودار فضای کافی دارد.</li>
+<li>تبلت ۶۰۰–۱۱۹۹: sidebar قابل جمع‌شدن؛ panel به drawer؛ ستون‌های ثانویه زیر اصلی؛ جدول با ستون‌های ضروری و detail disclosure.</li>
+<li>موبایل &lt;۶۰۰ با هدف۳۹۰px: overview، فرصت، موقعیت و اعلان اولویت دارند؛ drawer و header فعلی توسعه یابد. طراحی rule builder پیشرفته دسکتاپ‌محور باشد، اما draft بدون از دست رفتن قابل خروج است. bottom navigation جدید فقط اگر usability test برتری‌اش را نشان داد اضافه شود.</li>
+<li>کارکرد responsive به معنی قابل دسترسی بودن موتور loopback از گوشی دیگر نیست. remote access تا auth/TLS/استقرار مشخص نشده وعده داده نمی‌شود.</li>
+<li>Vazirmatn برای فارسی و JetBrains Mono/tabular برای اعداد؛ numeric span و نماد LTR، کل صفحه RTL، زمان نمودار قدیم به جدید از چپ به راست.</li>
+<li>اندازه‌های مبنا از tokens فعلی؛ spacing و رنگ خام در screenها اضافه نشود. اگر نیاز تازه هست ابتدا token semantic اضافه و با <code>design/tokens.json</code> همگام شود.</li>
+<li>رنگ سود/زیان همراه علامت و متن؛ Long/Short با label؛ mode با label ثابت و سبک متفاوت، نه فقط رنگ. green موفقیت پردازش با سود استراتژی خلط نشود.</li>
+<li>مقدار صفر، missing، invalid و stale مستقل باشند. fallback فعلی Money خالی به صفر فقط در بافت zero واقعی مجاز است؛ مقادیر مالی مهم presence/status دارند و دادهٔ ناموجود «— همراه علت» نمایش داده شود.</li>
+<li>تومان نمایشی با نرخ و زمان مشخص؛ حسابداری و کنترل ریسک در USDT. ROI مارجین و return حساب نام و واحد مستقل داشته باشند.</li>
+</ul>
+<h3 id="section-7-4">۶٫۴ مشخصات صفحات مهم</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>صفحه</th>
+<th>چیدمان و اطلاعات اصلی</th>
+<th>تعامل تعیین‌کننده و حالت‌های ویژه</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>نمای کلی</td>
+<td>خلاصهٔ حساب، موقعیت‌های نیازمند اقدام، فرصت‌های معتبر، وضعیت موتور و آخرین چرخه</td>
+<td>یک اقدام اصلی متناسب با وضعیت؛ empty واقعی بدون اعداد ساختگی</td>
+</tr>
+<tr>
+<td>فرصت‌ها</td>
+<td>لیست قابل فیلتر با نماد/جهت/استراتژی/وضعیت/تازگی/هزینه؛ جزئیات در panel</td>
+<td>sorting زنده هنگام انتخاب freeze شود؛ expired از eligible متمایز؛ «دلیلی برای معامله نیست» حالت معتبر</td>
+</tr>
+<tr>
+<td>جزئیات Trade Plan</td>
+<td>ابتدا verdict، شرط ورود، زیان برنامه‌ریزی‌شده و TTL؛ سپس نمودار و شواهد</td>
+<td>بخش Risk Summary ثابت؛ نسخهٔ plan و تغییر مؤثر؛ CTA مطابق Paper/Live</td>
+</tr>
+<tr>
+<td>مرور سفارش</td>
+<td>account/mode، product، direction، qty/notional، fee، SL/TP و planned loss</td>
+<td>در perp مارجین/اهرم/mark/liquidation؛ preview سرور، تأیید همان revision؛ تغییر قیمت نیازمند بازبینی</td>
+</tr>
+<tr>
+<td>موقعیت باز</td>
+<td>نمودار، سفارش‌های محافظ، سود تحقق‌یافته/باز و timeline</td>
+<td>کاهش/بستن موقعیت، وضعیت protection و unknown؛ عمل حساس با نام/مقدار روشن</td>
+</tr>
+<tr>
+<td>کتابخانه</td>
+<td>فیلتر خانواده/capability/evidence، کارت یا جدول با مقایسه قابل فهم</td>
+<td>detail شامل قواعد، lineage، نیاز داده و نتایج؛ «افزودن به Paper» فقط با eligibility</td>
+</tr>
+<tr>
+<td>سازنده استراتژی</td>
+<td>شش گام: بازار، زمینه، ورود، خروج، ریسک، مرور/تست</td>
+<td>preview جملهٔ قواعد کنار فرم؛ ابهام‌ها inline؛ simulation کوچک توضیح قواعد با برچسب نمونه</td>
+</tr>
+<tr>
+<td>ترکیب استراتژی</td>
+<td>selector اجزای نسخه‌دار و سیاست ترکیب؛ خلاصه ورودی/خروجی</td>
+<td>conflict panel، دادهٔ ناسازگار و exit owner؛ graph drag-and-drop پیچیده پیش‌نیاز MVP نیست</td>
+</tr>
+<tr>
+<td>Discover</td>
+<td>نتایج curated با source/type/license/evidence و bookmark</td>
+<td>تفاوت «مشاهده»، «واردکردن draft» و «فعال‌کردن»؛ خطای adapter و عدم دسترسی کد</td>
+</tr>
+<tr>
+<td>آزمایش و صف</td>
+<td>wizard موجود، بودجه/تعداد تلاش/فرض‌ها؛ progress و failed attempts</td>
+<td>بعد از submit job ادامه دارد؛ retry مشخص؛ cancel اثر نهایی و حساب مرتبط را شرح می‌دهد</td>
+</tr>
+<tr>
+<td>گزارش و مقایسه</td>
+<td>comparability قبل رتبه‌بندی؛ period vs cohort؛ هزینه و sample کنار return</td>
+<td>holdout قبل بازشدن پیام مصرف و ثبت view؛ report legacy برچسب واضح</td>
+</tr>
+<tr>
+<td>یادگیری و Shadow</td>
+<td>champion/challenger، تفاوت recipe، gate و baseline بدون AI</td>
+<td>training complete با promotion eligible یکی نیست؛ رد/rollback با پیام اثر بر آینده</td>
+</tr>
+<tr>
+<td>ریسک سبد</td>
+<td>exposure، ریسک باز، margin reserve و سناریو</td>
+<td>policy restriction با scope/expiry؛ تغییر سیاست به صورت نسخه و effective time</td>
+</tr>
+<tr>
+<td>ژورنال و Replay</td>
+<td>timeline داده→پیشنهاد→کاربر→order→fill→exit</td>
+<td>cursor تاریخی، overlay قواعد و علت؛ بازپخش واقعی از what-if جدا</td>
+</tr>
+<tr>
+<td>داده و عملیات</td>
+<td>freshness/coverage به‌ازای سری، import و خطا؛ اتصال، backup و reconcile</td>
+<td>data gap قابل پیگیری؛ technical IDs در بخش اختیاری کپی‌شدنی</td>
+</tr>
+</tbody></table></div>
+<h3 id="section-7-5">۶٫۵ جریان‌های حیاتی UX</h3>
+<p><strong>J1 شروع کار:</strong> انتخاب حالت Paper → دریافت/بررسی داده → انتخاب template یا ساخت draft → تست → مرور evidence → ایجاد paper deployment. در هر مرحله فقط پیش‌نیازهای واقعی همان کار نمایش داده شود. بسته‌شدن مرورگر موتور را متوقف نمی‌کند؛ خاموشی/خواب دستگاه محلی می‌تواند آن را متوقف کند.</p>
+<p><strong>J2 از فرصت تا معامله:</strong> فیلتر فرصت → بازکردن panel → دیدن دلیل و شرط ورود → بررسی ریسک و هزینه → افزودن به Paper یا مرور Live → revalidate → دریافت وضعیت سفارش. Double click، refresh یا back نباید duplicate بسازد. پس از submit، route جزئیات order باز و receipt پایدار قابل بازیابی باشد.</p>
+<p><strong>J3 ساخت با AI:</strong> بیان ایده → نمایش ابهام‌ها → استخراج rule draft → ویرایش و مقایسه diff → validation → تخمین هزینهٔ تست → شروع آزمایش → نتیجه و اقدام بعدی. AI فقط جملهٔ جذاب تحویل ندهد؛ خروجی قابل بررسی و تست باشد.</p>
+<p><strong>J4 مدیریت موقعیت:</strong> انتخاب position → بررسی وضعیت fill/protection → درخواست تغییر مجاز → preview اثر بر ریسک → تأیید revision → مشاهدهٔ ack/unknown و reconciliation. اگر protection ناقص است، هشدار پایدار داخل صفحه و مرکز عملیات باشد؛ toast تنها کافی نیست.</p>
+<p><strong>J5 قطع اتصال و برگشت:</strong> حفظ آخرین داده با timestamp → غیرفعال‌کردن ورود جدید بدون مجوز تازه → نمایش reconnecting/reconciling → بازیابی snapshot و event cursor → فعال‌شدن اقدامات پس از تأیید سرور. دکمهٔ cancel یا close فقط وقتی راه معتبر دارد فعال باشد؛ UI موفقیت حدسی نمایش ندهد.</p>
+<p><strong>J6 بررسی نتیجه:</strong> بازکردن trade → timeline و replay → مشاهدهٔ entry/exit tags، cost و MAE/MFE → افزودن یادداشت → ساخت experiment تازه از فرض بهبود. تغییر حد ضرر پس از دیدن آینده فقط what-if است و به‌عنوان تصمیم زمان واقعی ثبت نمی‌شود.</p>
+<h3 id="section-7-6">۶٫۶ کامپوننت‌ها و معماری Flutter</h3>
+<p>استفادهٔ مجدد: Num/Mono، SectionCard، PageHeader، DataTableBox، AsyncSection، VerdictCard، GateItem، EquityChart، WaterfallBars و CandleChart. توسعه در <code>core/widgets/</code> برای اجزای عمومی و در feature برای اجزای خاص؛ universal widget چندصدپارامتری ساخته نشود.</p>
+<p>اجزای جدید: EnvironmentBadge، FreshnessBadge، EvidenceBadge، TradePlanSummary، RiskSummary، CostBreakdown، RuleGroupEditor، StrategyVersionPicker، ConflictPanel، OrderStateTimeline، ProtectionStatus، PolicyRestrictionBanner، SourceCitation و AssistantActionCard.</p>
+<p>هر feature پوشه‌های presentation/widgets، controller/providers و data mapping دارد؛ repository wrapper روی generated Connect client فقط برای domain mapping/stream/pagination ایجاد شود. domain number در UI Decimal بماند؛ double صرفاً برای رسم و پارامتر مدلِ مجاز. هیچ محاسبهٔ authoritative fee، PnL، indicator یا margin در Dart انجام نشود.</p>
+<p>Riverpod providerهای family به account/environment و query کامل key شوند. فیلتر و pagination سرور؛ request generation و cancellation؛ invalidation پس از mutation با query cache مرکزی؛ stream reconnect با exponential backoff و jitter، resume cursor و gap recovery. local draft برای دادهٔ غیرحساس است؛ secrets و مجوز Live در localStorage نگهداری نشوند. draft قابل اتکای استراتژی سمت سرور ذخیره شود؛ local cache کمکی است.</p>
+<h3 id="section-7-7">۶٫۷ حالت‌ها و microcopy</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>حالت</th>
+<th>رفتار</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>loading</td>
+<td>skeleton هم‌اندازه؛ تمرکز و layout جابه‌جا نشود</td>
+</tr>
+<tr>
+<td>empty</td>
+<td>علت و یک next action؛ بدون KPI ساختگی</td>
+</tr>
+<tr>
+<td>error</td>
+<td>عملیات ناموفق، اثر آن و retry درست؛ retry سفارش unknown ممنوع</td>
+</tr>
+<tr>
+<td>stale</td>
+<td>آخرین زمان معتبر، محدودیت اقدام و راه بازیابی</td>
+</tr>
+<tr>
+<td>partial data</td>
+<td>سری/ویژگی ناقص و اثری که بر eligibility دارد</td>
+</tr>
+<tr>
+<td>blocked</td>
+<td>reason سرور و scope؛ دکمهٔ خاکستری بدون توضیح کافی نیست</td>
+</tr>
+<tr>
+<td>pending/unknown</td>
+<td>receipt، زمان آخرین بررسی و وضعیت reconciliation؛ هیچ موفقیت خوش‌بینانه</td>
+</tr>
+<tr>
+<td>expired</td>
+<td>طرح قدیمی حفظ و غیراجرایی؛ اقدام «ارزیابی دوباره» revision تازه می‌سازد</td>
+</tr>
+</tbody></table></div>
+<p>نمونهٔ متن: «شرط ورود هنوز کامل نشده»، «دادهٔ قیمت قدیمی است؛ ورود جدید فعلاً ممکن نیست»، «سفارش ارسال شده و نتیجه در حال بررسی است»، «این تغییر حجم، تأیید قبلی را نامعتبر می‌کند»، «زیان برنامه‌ریزی‌شده تا حد ضرر؛ اجرای واقعی می‌تواند متفاوت باشد».</p>
+<h3 id="section-7-8">۶٫۸ معیار پذیرش UI/UX</h3>
+<ul>
+<li>عرض‌های۳۹۰،۷۶۸،۱۰۲۴ و۱۴۴۰؛ بدون overflow مخرب، جدول قابل پیمایش و نمودار قابل استفاده. حداقل touch target۴۴px برای اقدامات اصلی.</li>
+<li>دسترسی keyboard کامل برای فرم، فیلتر، مرور سفارش و خروج؛ focus قابل مشاهده، بازگشت focus بعد dialog، ترتیب RTL منطقی و Escape برای بستن غیرمخرب. shortcut تک‌کلید ارسال سفارش وجود نداشته باشد.</li>
+<li>متن عادی contrast حداقل۴٫۵:۱، متن بزرگ۳:۱؛ status فقط رنگ نیست؛ text scaling تا۲۰۰٪ صفحات حیاتی را خراب نکند.</li>
+<li>Semantics صحیح در Flutter Web و لایهٔ HTML نمودار؛ label برای کنترل icon-only؛ دادهٔ نمودار خلاصه/جدول قابل خواندن داشته باشد. قابلیت‌های نسخهٔ SDK فعلی بررسی شوند و صرف وجود feature در مستندات latest به معنی دسترس‌بودن در SDK پروژه نیست.</li>
+<li>reduced-motion از AppMotion فعلی رعایت؛ تغییر قیمت به flash مداوم تبدیل نشود. نمودار هنگام update، zoom/selection کاربر را حفظ کند.</li>
+<li>widget test، golden مؤلفه‌های حیاتی و تست واقعی Chrome/Firefox برای interop، resize، hover، focus، stream reconnect و async race؛ تست۳۹۰px فقط smoke اولیه است.</li>
+<li>آزمون task با۵ نفر نمایندهٔ مخاطب یا در مرحله شخصی حداقل۳ ارزیاب بیرونی: تشخیص mode و ریسک، ساخت rule، ورود Paper، فهم رد و بازیابی از قطع اتصال. هدف پیشنهادی ≥۸۰٪ تکمیل بدون کمک و صفر خطای بحرانی تشخیص Paper/Live؛ این هدف design gate است، نه نتیجهٔ اندازه‌گیری‌شده.</li>
+<li>هر فاز با screenshot/state checklist و prototype مسیر اصلی بازبینی شود. نمونه‌داده از دادهٔ واقعی با برچسب مشخص جدا باشد.</li>
+</ul>
+<h2 id="section-8">۷ فازهای توسعه و معیار پایان</h2>
+<h3 id="section-8-1">۷٫۱ برنامهٔ ظرفیت و وابستگی</h3>
+<p>برآوردها نفرهفتهٔ کار مهندسی شامل طراحی، پیاده‌سازی و QA هستند؛ زمان مشاهدهٔ بازار و زمان انتظار دسترسی به venue جداست. فرض برنامه، دو نفر ظرفیت خالص تمام‌وقت با توان بک‌اند/داده و Flutter/UX است؛ اگر سه نفر درگیرند، ظرفیت واقعی طراحی/QA و context switching باید محاسبه شود. اعداد تعهد موعد نیستند و بعد از P0 با سرعت واقعی بازتخمین می‌شوند.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>فاز</th>
+<th>effort اولیه</th>
+<th>وابستگی</th>
+<th>خروجی قابل تحویل</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>P0 تثبیت</td>
+<td>۲–۴ نفرهفته</td>
+<td>مبنای فعلی</td>
+<td>صحت و CI قابل اتکا</td>
+</tr>
+<tr>
+<td>P1 پایه محصول و UX</td>
+<td>۲–۳</td>
+<td>P0 برای داده واقعی؛ طراحی هم‌زمان مجاز</td>
+<td>shell، design system و قرارداد domain</td>
+</tr>
+<tr>
+<td>P2 Strategy Lab</td>
+<td>۴–۶</td>
+<td>P0/P1</td>
+<td>نسخه کاستوم و ترکیب ساده قابل تست</td>
+</tr>
+<tr>
+<td>P3 فرصت و Paper</td>
+<td>۴–۶</td>
+<td>P1/P2</td>
+<td>رصد، plan، risk و حساب مجازی</td>
+</tr>
+<tr>
+<td>P4 Agentic و Shadow</td>
+<td>۳–۵</td>
+<td>P3</td>
+<td>دستیار مستند و مقایسه با baseline</td>
+</tr>
+<tr>
+<td>P5 مشتقات مجازی</td>
+<td>۵–۸</td>
+<td>P3 و داده قرارداد؛ مستقل از تکمیل P6</td>
+<td>بک‌تست و Paper مارجین‌دار</td>
+</tr>
+<tr>
+<td>P6 اسپات واقعی</td>
+<td>۴–۶</td>
+<td>P3/P4 و gate عملیاتی</td>
+<td>یک venue و تأیید هر معامله</td>
+</tr>
+<tr>
+<td>P7 مشتقات واقعی و ترکیب پیشرفته</td>
+<td>۴–۶</td>
+<td>P5/P6</td>
+<td>live derivatives و allocation آزموده</td>
+</tr>
+<tr>
+<td>P8 گسترش</td>
+<td>۴–۷</td>
+<td>زیربخش‌ها به P2/P4/P7 وابسته</td>
+<td>events، ICT رسمی، plugins و structural search</td>
+</tr>
+</tbody></table></div>
+<p>جمع اولیه۳۲–۵۱ نفرهفته است؛ با۲۵٪ ذخیره، حدود۴۰–۶۴ نفرهفته. با دو ظرفیت خالص حدود۲۰–۳۲ هفتهٔ کار و زمان مشاهده/اتصال اضافه به‌دست می‌آید. برای P0 تا P4، حدود۱۲–۲۰ هفتهٔ تقویمی یک بازهٔ برنامه‌ریزی اولیه با مشاهدهٔ forward است؛ کد آماده به‌معنی شواهد سودآوری آماده نیست. هزینهٔ پولی بدون نرخ تیم و vendor قابل تعیین دقیق نیست؛ هزینهٔ مهندسی = نفرهفته واقعی × نرخ، و هزینهٔ ماهانهٔ داده/AI جدا اندازه‌گیری شود.</p>
+<p><strong>نقطهٔ توقف دامنه:</strong> P3 یک محصول Paper مفید دارد؛ P4 نسخهٔ AI قابل سنجش؛ این دو انتشار منتظر همهٔ اهرم/خبر/افزونه نمی‌مانند. backend و frontend در هر فاز slice عمودی مشترک تحویل دهند. حداکثر یک جریان اصلی ناتمام به‌ازای هر تیم فعال باشد.</p>
+<h3 id="section-8-2">P0 تثبیت صحت و شواهد نسخه موجود</h3>
+<p><strong>هدف:</strong> خروجی پژوهش و زیرساخت اجرای آینده روی فرض معیوب بنا نشود.</p>
+<p>بک‌اند: بازتولید F01–F16، اصلاح contract زمان و baseline، admission اتمی، snapshot ثابت، period PnL، terminal registry، provenance و lifecycle، timeout و recovery. specهای instrument و دادهٔ مبنا برای گزارش ثبت شوند. اختلاف‌های عمدی متریک با ADR و evaluation_version جدا شوند.</p>
+<p>فرانت: رفع race محاسبه، cache/paging dataset، مارکر chart، پیام‌های invalid و stale و report legacy؛ دادهٔ کم به‌صورت صفر معتبر نمایش داده نشود. حالت‌های UI و refresh bug به regression test اضافه شوند.</p>
+<p>Dev/QA: toolchain قفل‌شده، PostgreSQL در workflow، REQUIRE_DB=1، race و Flutter analyze/test، golden، depguard مثبت/منفی و generated parity. برای chart مسیر مرورگر واقعی وجود داشته باشد. شواهد ادعای release قبلی با نتیجهٔ اجرای commit جدا ثبت شوند.</p>
+<p><strong>Gate:</strong> تمام P1های گزارش رفع و P2های مؤثر بر correctness این انتشار بسته یا capability مربوط غیرفعال باشد؛ تست‌های توقف/دادهٔ دیررس/هم‌زمانی/overflow پاس؛ هیچ claim تست بدون log. benchmark و UX baseline ثبت شود. داده و گزارش قدیمی قابل خواندن و تغییرناپذیر بمانند.</p>
+<h3 id="section-8-3">P1 پایه محصول و طراحی تجربه</h3>
+<p><strong>هدف:</strong> قرارداد مشترک برای صفحات و domain، پیش از تکثیر feature.</p>
+<p>بک‌اند: InstrumentKey و account/environment types؛ signal schema و strategy capability؛ provenance، audit event و cursor؛ account snapshot DTO و risk policy version؛ health/capabilities API. feature flags فقط از configuration سرور و capability می‌آیند.</p>
+<p>فرانت: بازطراحی IA مطابق بخش۶، tokens semantic، Environment/Freshness/Evidence/Risk اجزای مشترک؛ Figma یا طرح قابل کلیک جریان‌های J1/J2/J5، state matrix و responsive. فایل‌های بزرگ screen فقط در بافت feature در حال تغییر تفکیک شوند. shell فعلی و routeهای قدیمی حفظ شوند.</p>
+<p><strong>Gate:</strong> prototype گردش اصلی با mode واضح بازبینی شده؛ قرارداد proto fixtures در Go و Dart یکسان؛ focus/RTL/۳۹۰px و حالت disconnected در componentها تست شده؛ صفر محاسبهٔ مالی authoritative در فرانت. صفحهٔ mock با label دمو از real response جداست.</p>
+<h3 id="section-8-4">P2 کتابخانه و ساخت استراتژی</h3>
+<p><strong>هدف:</strong> استراتژی به تعریف نسخه‌دار و قابل ترکیب تبدیل شود.</p>
+<p>بک‌اند: adapter برای چهار strategy و مدل‌های فعلی؛ AST validator/interpreter، schema version و hash؛ draft/clone/diff و lineage؛ ورودی typed و حدود منابع؛ catalog curated؛ AND/OR و regime routing ساده با سیاست conflict و exit owner. Donchian breakout و RSI pullback فقط با قواعد مشخص و آزمون اضافه شوند؛ baselineها ابزار مرجعند.</p>
+<p>فرانت: Library با server search/paging و evidence filters؛ detail تب‌های قواعد/عملکرد/نسخه‌ها/نیاز داده؛ wizard کاستوم؛ editor قواعد با keyboard و preview جمله؛ composer فرم‌محور و conflict panel. کاربر از template با draft شخصی شروع کند و نسخهٔ فعال را overwrite نکند.</p>
+<p><strong>Gate:</strong> قواعد native قدیمی و adapter رفتار یکسان روی fixtureهای ثابت؛ unknown/unsafe DSL رد شود؛ closed higher-TF و no-lookahead تست؛ ترکیب A/B/AB واقعاً روی معامله شبیه‌سازی شود؛ ذخیره/بازکردن draft و ۲۰۱مین آیتم picker کار کند. پروفایل evidence شرایط هر اجرا را نشان دهد.</p>
+<h3 id="section-8-5">P3 رصد فرصت و حساب مجازی عملیاتی</h3>
+<p><strong>هدف:</strong> چرخهٔ روزمره از فرصت تا سفارش و ژورنال با پول مجازی کامل شود.</p>
+<p>بک‌اند: watchlist، snapshot و scanner؛ فرصت و plan lifecycle، TTL/dedup و cost gate؛ sizing و portfolio restrictions؛ account/ledger/reservations، paper broker و order state machine؛ server job queue و outbox محلی؛ durable events، reconciliation داخلی، entry/exit tags و journal پایه. replay تصمیم از snapshot ثبت‌شده ساخته شود.</p>
+<p>فرانت: overview عملیاتی، opportunity list + panel، order review، paper account/positions، risk restriction و journal. risk summary کنار CTA؛ زیر نمودار زمان داده و فرض fill؛ ورود به‌ازای هر account مشخص. وضعیت pending/unknown/partial-fill قابل فهم و receipt قابل بازیابی باشد.</p>
+<p><strong>Gate:</strong> J1/J2/J5 انتهابه‌انتها؛ دو تب duplicate یا overspend نسازند؛ partial fill و cancel/fill race درست؛ restart موجودی و سفارش را حفظ کند؛ خروج ریسک‌کاه در سیاست مجاز مسدود نشود؛ هزینه و PnL دقیق با ledger برابر؛ بدون هیچ مسیر outbound سفارش واقعی. feed کهنه ورود جدید را ببندد و وضعیت آخر حفظ شود.</p>
+<h3 id="section-8-6">P4 دستیار AI و سنجش ارزش افزوده</h3>
+<p><strong>هدف:</strong> دستیار با ابزار واقعی فرصت را توضیح و پژوهش را تسهیل کند و اثر آن قابل اندازه‌گیری باشد.</p>
+<p>بک‌اند: assistant adapter، structured proposal/schema، tool registry و allowlist، evidence references و usage budget؛ draft از زبان طبیعی و ابهام‌ها؛ explain/compare و summary؛ shadow deployments پایه/AI/user با policy frozen؛ event-driven calls؛ evaluation suite کیفیت پاسخ و hallucinated number/unsupported source detection. news retrieval گسترده هنوز لازم نیست؛ شواهد موتور اولویت دارد.</p>
+<p>فرانت: پنل زمینه‌ای کنار فرصت/استراتژی؛ پیشنهاد AI به ActionCard با preview/diff/دلیل/هزینه تبدیل شود؛ وضعیت «درحال دریافت داده»، «پیش‌نویس نیازمند بررسی» و failure واضح؛ منبع هر عدد قابل بازکردن. داشبورد attribution و مرور روزانه، بدون نمایش fake confidence یا توصیهٔ اجباری.</p>
+<p><strong>Gate:</strong> برنامهٔ معامله فقط عدد مرجع معتبر داشته باشد؛ متن news/script نتواند اختیار tool را تغییر دهد؛ قطع AI مدیریت موقعیت را مختل نکند؛ هزینه/latency و failure path ثبت شود؛ draft طبیعی به همان AST validator برود؛ shadow از پیش ثبت و آینده‌نگر باشد. ارزیابی سود و هزینهٔ AI گزارش می‌شود؛ منفی‌بودن نتیجه مجوز پنهان‌کردن baseline نیست.</p>
+<h3 id="section-8-7">P5 بک‌تست و Paper معاملات اهرم‌دار</h3>
+<p><strong>هدف:</strong> مدل واقعی قرارداد و مارجین پیش از دسترسی به سرمایه واقعی ساخته شود.</p>
+<p>بک‌اند: سری مستقل داده قرارداد/mark/funding، metadata tiers؛ position Long/Short، وثیقه و مارجین، funding ledger؛ simulator خطی USDT و liquidation policy venue؛ risk sizing و liquidation buffer؛ paper derivatives adapter با One-way/Isolated؛ stop trigger basis و reduce-only semantics. تاریخچهٔ کافی mark/funding و نسخهٔ قواعد لازم است؛ نبود داده eligibility را محدود می‌کند.</p>
+<p>فرانت: context Spot/Perp، نمایش notional/qty/margin/leverage مستقل؛ نمودار mark و last با legend؛ SL/liquidation واضح؛ calculator مشتقات در PnlService و UI موجود؛ funding/ROI margin/return account تفکیک؛ شرایط هر استراتژی برای Long/Short و product دیده شود.</p>
+<p><strong>Gate:</strong> property tests conservation و عدم ایجاد collateral از هیچ؛ goldenهای long/short، funding مثبت/منفی، maintenance tier، partial exit، mark-last divergence و liquidation/stop ordering؛ افزایش leverage با qty ثابت PnL حرکت قیمت را تغییر ندهد؛ جریان spot قبلی همچنان short/leverage را رد کند. گزارش قرارداد بدون داده لازم، exact یا live-eligible معرفی نشود. Paper soak و restore drill اجرا شود.</p>
+<h3 id="section-8-8">P6 اجرای واقعی اسپات برای یک venue</h3>
+<p><strong>هدف:</strong> اجرای محدود با کنترل وضعیت و تطبیق حساب.</p>
+<p>بک‌اند: capability matrix venue و contract tests؛ credentials در secret store/OS keychain یا سازوکار رمزگذاری با کلید خارج DB؛ account permissions، trade-only و محدودیت دسترسی در حد پشتیبانی venue؛ live adapter، stable client IDs، outbox، lookup unknown، private order stream/poll fallback و reconciliation؛ pre-submit validate، reservation و protective exit policy. توقف ورود جدید از بستن همهٔ موقعیت‌ها دو command مستقل با توضیح اثر باشند.</p>
+<p>فرانت: اتصال account، پیش‌نمایش دسترسی‌ها، نشان Live دائمی، activation flow مجزا؛ review/confirm هر معامله و ریسک؛ وضعیت protection و recovery؛ mismatch حساب به‌صورت actionable. اجرای محدود ابتدا با حساب و سرمایهٔ آزمایشی واقعی تعیین‌شده توسط مالک انجام شود؛ مبلغ پیش‌فرض محصول در این سند تجویز نمی‌شود.</p>
+<p><strong>Gate:</strong> sandbox/testnet در صورت وجود و سپس canary محدود؛ network failure قبل/بعد از submit سفارش تکراری نسازد؛ stale approval رد شود؛ restart و سفارش بیرونی تطبیق داده شود؛ protective order شکست‌خورده مسیر کاهش ریسک ثبت‌شده داشته باشد؛ کلید در فرانت/log/backup بدون حفاظت نباشد. فعال‌سازی Live صریح و scopeدار است؛ دسترسی احتمالی API به معنی فعال‌شدن معامله نیست.</p>
+<p>تست قدیمی no-order به محافظ مرز پژوهش تبدیل شود: packageهای research/paper/assistant اجازه import یا ارسال live ندارند؛ outbound trading فقط adapter مشخص و feature gate دارد. تست planted-call و dependency guard باقی بمانند. این تغییر ADR و تست تازه می‌خواهد، نه حذف بی‌توضیح تست برای سبزشدن CI.</p>
+<h3 id="section-8-9">P7 اجرای واقعی مشتقات و ترکیب پیشرفته</h3>
+<p><strong>هدف:</strong> قابلیت اهرم‌دار فقط روی رفتار صرافی تطبیق‌یافته و بودجهٔ حساب وارد Live شود.</p>
+<p>بک‌اند: live derivatives adapter برای قرارداد تأییدشده، margin/funding/reduce-only و protection واقعی؛ مصونیت در برابر برداشت نادرست one-way/hedge و mode mismatch؛ تخصیص چند استراتژی و رأی وزنی با exposure مشترک؛ attribution، concurrency control و predeclared auto policy. خودکارسازی فقط برای نسخه/نماد/account/بودجه مشخص که کاربر جدا فعال کرده است؛ AI اجازه افزایش این scope را ندارد.</p>
+<p>فرانت: account readiness checklist عملیاتی، بیان شرایط محدودیت؛ allocation editor، conflict resolution، margin heatmap و stress؛ review order مشتقات با mark/liquidation و funding؛ توقف خودکارسازی با حفظ مدیریت موقعیت باز؛ alertهای liquidation/protection durable.</p>
+<p><strong>Gate:</strong> parity با paper و اختلاف اجرای واقعی اندازه‌گیری‌شده؛ داده mark و funding کامل؛ مرزهای مارجین، partial fill و reduce-only روی venue بررسی شده؛ مجموع reservations از بودجه تجاوز نکند؛ نسخهٔ spot روی perp بدون تأیید قابلیت فعال نشود؛ auto policy فقط با scope ثبت‌شده و امکان توقف ورود کار کند. عملکرد/شواهد نامناسب gate را می‌بندد، حتی اگر feature کامل باشد.</p>
+<h3 id="section-8-10">P8 گسترش کنترل‌شده</h3>
+<p>این فاز یک بستهٔ اجباری واحد نیست؛ epicهای مستقل با اولویت براساس دادهٔ استفاده و هزینه‌اند.</p>
+<ul>
+<li>رادار رویداد، اخبار و sentiment بازار با timestamp/revision و source؛ بازپخش فقط با تاریخچهٔ قابل اتکا؛ personal behavior index شفاف و غیرتشخیصی.</li>
+<li>Discover گسترده‌تر با source adapter مشخص، license metadata، import parity و نظارت کیفیت؛ کد بیرونی فقط مسیر quarantine و sandbox.</li>
+<li>formal ICT modules با تعریف detection/availability/invalidation و مثال مرزی؛ هیچ pattern پس‌نگر به گذشته منتقل نشود.</li>
+<li>structural recipe search و مدل‌های افزوده با complexity/budget/lineage، nested chronological validation و holdout discipline؛ گزینهٔ Pareto برای return/risk/cost.</li>
+<li>online learning تنها پس از checkpoint، delayed-label و prediction-before-update tests؛ مدل live خاموش و روشن‌شوندهٔ بی‌سابقه نباشد. انتشار اولیه همچنان offline retraining و frozen deployments دارد.</li>
+<li>تکمیل نرخ متقاطع و quote funding برای non-USDT، تم روشن یا native mobile فقط با نیاز سنجیده و scope مستقل؛ مدیون‌کردن همهٔ فازها به این موارد ممنوع.</li>
+</ul>
+<p><strong>Gate هر epic:</strong> مسئله و معیار موفقیت ثبت، هزینهٔ ساخت/نگهداری برآورد، capability و UI states کامل، تست زمانی/منابع/یکپارچهٔ مرتبط و rollout برگشت‌پذیر داشته باشد.</p>
+<h2 id="section-9">۸ داده و API و مهاجرت</h2>
+<h3 id="section-9-1">۸٫۱ مدل‌های داده افزوده</h3>
+<p>schema دقیق در ADR هر فاز نهایی می‌شود. جدول زیر مالکیت و کلیدهای ضروری را تعیین می‌کند؛ ساخت تمام جدول‌ها پیش از نیاز آن فاز لازم نیست.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>موجودیت</th>
+<th>فاز</th>
+<th>داده و invariant</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>dataset_members و provenance</td>
+<td>P0/P1</td>
+<td>revisionهای ثابت، format/evaluation version، build/spec/policy؛ load جدید تحت تأثیر commit دیررس نباشد</td>
+</tr>
+<tr>
+<td>strategy_definitions/versions/drafts</td>
+<td>P2</td>
+<td>AST/recipe، parent/hash/capabilities/source؛ state از evidence مستقل</td>
+</tr>
+<tr>
+<td>composite_definitions و components</td>
+<td>P2/P7</td>
+<td>component version/hash، وزن/routing/conflict/exit owner pinned</td>
+</tr>
+<tr>
+<td>catalog_sources و evidence_records</td>
+<td>P2/P8</td>
+<td>URL/version/license، validation result و scope؛ ادعا با data range</td>
+</tr>
+<tr>
+<td>market_snapshots و subscriptions</td>
+<td>P3</td>
+<td>universe، freshness/coverage، instrument spec و event sequence</td>
+</tr>
+<tr>
+<td>opportunities و trade_plan_revisions</td>
+<td>P3</td>
+<td>fingerprint، TTL، snapshot، eligibility و revision immutable</td>
+</tr>
+<tr>
+<td>accounts و policy_versions</td>
+<td>P3</td>
+<td>environment، base currency، venue link، scope و concurrency version</td>
+</tr>
+<tr>
+<td>orders و order_events</td>
+<td>P3</td>
+<td>account، environment، client ID، ack/unknown و dedup؛ state projection قابل بازیابی</td>
+</tr>
+<tr>
+<td>positions، reservations و ledger_entries</td>
+<td>P3/P5</td>
+<td>مقادیر exact و double-entry/balanced postings متناسب با دامنه؛ idempotency event</td>
+</tr>
+<tr>
+<td>execution_commands و outbox</td>
+<td>P3/P6</td>
+<td>command ID، plan hash، authorization/reservation، retry و unknown reconciliation</td>
+</tr>
+<tr>
+<td>journal_events و annotations</td>
+<td>P3</td>
+<td>شواهد immutable از یادداشت و تفسیر جدا؛ replay cursor</td>
+</tr>
+<tr>
+<td>assistant_runs و tool_calls</td>
+<td>P4</td>
+<td>model/prompt/tools/evidence، budget/usage/status؛ بدون secret</td>
+</tr>
+<tr>
+<td>shadow_deployments و attribution</td>
+<td>P4</td>
+<td>baseline policy، شروع/universe/capital/cost مشترک؛ simulated/actual جدا</td>
+</tr>
+<tr>
+<td>contract_specs، funding_events و mark_series</td>
+<td>P5</td>
+<td>venue/product/settlement/tier، as-of و revision؛ legacy spot جدا</td>
+</tr>
+<tr>
+<td>exchange_accounts و reconciliations</td>
+<td>P6</td>
+<td>secret reference، last sync، balances/orders mismatch و حل آن</td>
+</tr>
+<tr>
+<td>drift_checks، restrictions و notifications</td>
+<td>P3/P4/P7</td>
+<td>window/threshold/min samples، scope و reason و expiry سروری</td>
+</tr>
+<tr>
+<td>external_events و sentiment_observations</td>
+<td>P8</td>
+<td>source، publish/available/receive/revision، coverage و attribution</td>
+</tr>
+</tbody></table></div>
+<p>قیمت/qty/money با scale و واحد explicit ذخیره شود؛ float در ledger، margin و Funding cash flow مجاز نیست. risk ratio fixed-point؛ مدل ML می‌تواند float داشته باشد. timestampها UTC و ترتیب tie-break مشخص باشد: بازار/mark/funding/order event در یک زمان، priority نسخه‌دار و تست‌شده دارند. قیمت trigger با قیمت fill دو فیلد مستقل است.</p>
+<h3 id="section-9-2">۸٫۲ قرارداد API پیشنهادی</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>سرویس</th>
+<th>توسعهٔ اصلی</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>LibraryService موجود</td>
+<td>draft، validate، version diff، capabilities و evidence؛ composite و catalog در RPCهای افزایشی</td>
+</tr>
+<tr>
+<td>Experiment/Report/Pnl موجود</td>
+<td>async create/reproduce job، دقیق‌بودن compare، evaluation_version، period/cohort، derivative calculator</td>
+</tr>
+<tr>
+<td>HealthService موجود</td>
+<td>capabilities، degraded/reconciling، backup/data/AI budget status و event cursor</td>
+</tr>
+<tr>
+<td>MarketService جدید</td>
+<td>watchlist، snapshots و رصد خلاصه؛ raw tick به همهٔ صفحات ارسال نشود</td>
+</tr>
+<tr>
+<td>OpportunityService جدید</td>
+<td>list/watch، plan detail/revisions، revalidate و expire reason</td>
+</tr>
+<tr>
+<td>TradingService جدید</td>
+<td>account، paper deployment، order preview/confirm/cancel، positions و reconciliation؛ mode صریح</td>
+</tr>
+<tr>
+<td>RiskService جدید</td>
+<td>policy versions، preview، restrictions و stress؛ authorization فقط مسیر سرور</td>
+</tr>
+<tr>
+<td>AssistantService جدید</td>
+<td>request/run stream، tool action proposal، cancel و usage</td>
+</tr>
+<tr>
+<td>JournalService جدید</td>
+<td>timeline، annotation، replay و attribution query</td>
+</tr>
+<tr>
+<td>EventService در P8</td>
+<td>رویدادها و sentiment با source و temporal filters</td>
+</tr>
+</tbody></table></div>
+<p>Connect همان transport می‌ماند؛ افزودن WebSocket عمومی برای فرانت لازم نیست. اتصال market/private stream به venue در بک‌اند برحسب capability می‌تواند WebSocket باشد؛ polling fallback با سلامت مشخص. streamهای فرانت event_id/cursor و resume semantics دارند؛ gap در retention باعث snapshot refresh می‌شود. صفحه‌بندی جدید cursor-based با order پایدار، endpoint قدیمی offset-compatible می‌ماند.</p>
+<p>فرمت Money/Decimal فعلی string units + scale حفظ شود. optional value/status حضور داده را از صفر جدا کند؛ enumهای جدید zero=UNSPECIFIED و explicit rejection دارند. نام/شماره tag حذف‌شده reuse نشود. خطاها reason code، retryability و context دارند؛ متن فارسی از localization/مرجع موتور می‌آید. UI موفقیت mutation را حدس نمی‌زند.</p>
+<h3 id="section-9-3">۸٫۳ برنامهٔ مهاجرت و rollback</h3>
+<p>۱. migration افزایشی و نسخه‌دار؛ قبل آن backup قابل restore. تغییر دامنهٔ گزارش‌ها با evaluation_version و feature flag، نه rewrite نتایج قدیمی.</p>
+<p>۲. dual-read برای legacy datasets/reports/strategies؛ new-write در format تازه. dataset قدیمی اگر hash صحیح دارد می‌تواند manifest عضویت backfill شود؛ درصورت عدم تطابق legacy-unverified بماند و نتیجهٔ تازه جدا ساخته شود.</p>
+<p>۳. schema instrument جدید venue/product را صریح می‌کند. key نماد فعلی به series legacy spot map می‌شود؛ alias BTCUSDT هرگز خودکار به perp تغییر نمی‌کند. مهاجرت فعلی candle PK/partition با افزودن متادیتا و read adapter آغاز شود؛ سری قرارداد در جداول/namespace مستقل تا پایان parity.</p>
+<p>۴. model/strategy active service واحد؛ قفل account/algorithm، expected_version و uniqueness در DB. گزارش‌های موجود و مدل فعال از مقداردهی SeedLibrary دوباره‌نویسی نشوند.</p>
+<p>۵. live rollout: read-only connector → testnet/paper verification → canary با تأیید → انتشار محدود. feature off کردن ورود را می‌بندد، ولی reconciliation و مدیریت موقعیت‌های باز را قطع نمی‌کند. rollback نرم‌افزار با backward-compatible schema و ادامهٔ مدیریت سفارش‌ها طراحی شود؛ rollback دیتابیس یا ledger واقعی به گذشته مجاز نیست.</p>
+<p>۶. <code>docs/IMPLEMENTATION_PLAN.md</code> با این roadmap ارجاعی، <code>docs/DECISIONS.md</code> برای ADRهای تغییر invariant، <code>docs/METRICS.md</code> برای تعاریف و <code>docs/UI_SPEC.md</code> برای صفحه‌ها به‌روزرسانی شوند. <code>CLAUDE.md</code> و noorders tests فقط هم‌زمان با ADR و guardهای جایگزین دامنه‌دار اصلاح شوند. در این درخواست فقط سند برنامه تولید شده و هیچ‌یک از این تغییرهای مخزن اعمال نشده است.</p>
+<h2 id="section-10">۹ کیفیت و سنجش و عملیات</h2>
+<h3 id="section-10-1">۹٫۱ معیارهای محصول</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>محور</th>
+<th>معیار</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>نتیجه معاملاتی</td>
+<td>net PnL و expectancy، drawdown، بازده حساب، sample size و شرایط بازار؛ جدا برای simulated و actual</td>
+</tr>
+<tr>
+<td>ارزش AI</td>
+<td>تفاوت baseline/shadow با assumptions مشترک، میزان رد/اصلاح پیشنهاد، factual error و هزینهٔ مدل</td>
+</tr>
+<tr>
+<td>کیفیت اجرا</td>
+<td>decision-to-submit/fill، slippage و fee واقعی، partial/reject/unknown، reconciliation mismatch</td>
+</tr>
+<tr>
+<td>پژوهش</td>
+<td>زمان ایده تا گزارش معتبر، تعداد تلاش/خطا، reproducibility و مصرف holdout</td>
+</tr>
+<tr>
+<td>ریسک</td>
+<td>policy violations، exposure concentration، موقعیت بدون protection، مدت lock و پوشش داده</td>
+</tr>
+<tr>
+<td>UX</td>
+<td>task completion، تشخیص درست mode/risk، زمان رسیدن به اقدام و خطاهای بحرانی</td>
+</tr>
+<tr>
+<td>عملیات</td>
+<td>feed freshness، queue wait، RAM/CPU، failure/retry، backup success و restore verification</td>
+</tr>
+</tbody></table></div>
+<p>برد زیاد بدون اندازهٔ برد/باخت و هزینه، KPI کافی نیست. نتیجهٔ مثبت Paper به عملکرد واقعی معادل تلقی نشود. funding forecast، liquidation estimate و سناریوهای stress با عدم قطعیت و مدل مرتبط نمایش داده شوند.</p>
+<h3 id="section-10-2">۹٫۲ اهداف غیرعملکردی پیشنهادی</h3>
+<p>این اعداد هدف مهندسی‌اند و پس از P0 روی ماشین مرجع مستندشده نهایی می‌شوند؛ تضمین عمومی سخت‌افزار/اینترنت نیستند.</p>
+<ul>
+<li>read APIهای معمول p95&lt;۱ثانیه زیر۵ client هم‌زمان؛ کار سنگین async job با receipt سریع و progress پایدار.</li>
+<li>health/control update حدود۱ثانیه در بار پژوهش؛ order protection/reconciliation ظرفیت و deadline مستقل از ML jobها داشته باشد. counting semaphore سهم سخت CPU نیست؛ بودجه و فشار واقعی اندازه‌گیری شود.</li>
+<li>UI critical interaction معمولاً زیر۱۰۰ms و حفظ frame budget نزدیک۱۶ms روی ماشین مرجع؛ profiler release برای chart و table. coalescing update حدود۲۵۰–۱۰۰۰ms متناسب با صفحه، رخداد order lossless و durable.</li>
+<li>cache با سقف bytes و LRU، singleflight برای بارگذاری یک dataset و لغو درخواست offscreen. backpressure و محدودیت stream/client مانع نشت منابع شود.</li>
+<li>data freshness به‌ازای source/timeframe configurable؛ stale threshold از cadence واقعی مشتق شود. برای quote اجرای order آستانه مستقل و سخت‌تر از کندل تحلیل تعریف شود.</li>
+<li>هدف اولیهٔ backup روزانه RPO≤۲۴h و restore drill با RTO هدف≤۱h برای workspace محلی؛ event ledger/reconciliation حساب واقعی تداوم جدا دارد. این اهداف باید با اندازهٔ DB آزموده شوند، نه صرف وجود pg_dump.</li>
+</ul>
+<h3 id="section-10-3">۹٫۳ برنامهٔ تست</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>دسته</th>
+<th>سناریوهای ضروری</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>temporal و leakage</td>
+<td>future append، دیررس/revision، resample، multi-TF، label readiness، freeze واقعی و holdout spent</td>
+</tr>
+<tr>
+<td>حسابداری</td>
+<td>conservation، rounding، overflow، cost identities، partial close، collateral و funding، پوزیشن long/short</td>
+</tr>
+<tr>
+<td>منابع و concurrency</td>
+<td>دو AcquireAll، fairness، timeout/cancel، RAM bounds، claim/cancel race و account overspend</td>
+</tr>
+<tr>
+<td>چرخه سفارش</td>
+<td>idempotency، شبکه قبل/بعد submit، unknown، partial fill، cancel/fill، protection failure، restart</td>
+</tr>
+<tr>
+<td>strategy و AI</td>
+<td>adapter parity، DSL invalid/cycle، conflict، unsupported capability، hallucinated number، injected source، tool loop و vendor outage</td>
+</tr>
+<tr>
+<td>UI</td>
+<td>RTL/LTR، ۳۹۰ تا۱۴۴۰، keyboard/focus، missing vs zero، async out-of-order، stale/reconcile، chart web interop</td>
+</tr>
+<tr>
+<td>DB و migration</td>
+<td>legacy read، concurrent ingest snapshot، duplicate event، expected_version، restore و schema compatibility</td>
+</tr>
+<tr>
+<td>venue</td>
+<td>fee/spec precision، capabilities، reduce-only/trigger/margin، reference reconciliation با محیط هدف</td>
+</tr>
+</tbody></table></div>
+<p>CI در هر PR: proto lint/generate، sqlc generate، عدم stale generated، formatting/lint/depguard، Go unit/property/golden با race، DB integration اجباری، Dart analyze، Flutter widget و browser integration حیاتی. تست‌های پرهزینهٔ soak/venue می‌توانند job جدا داشته باشند، اما gate انتشار به نتیجهٔ آن‌ها وابسته است. تست skip شده معادل pass نیست؛ fixtureهای تست از ادعای عملکرد واقعی جدا باشند.</p>
+<p>پیش از Live، یک دوره Paper حداقل۱۴روز تقویمی به‌عنوان پیش‌فرض عملیاتی مشاهده شود؛ این دوره معیار آماری سودآوری نیست و با minimum sample/coverage برای همان strategy قابل افزایش است. حتماً restart، outage و mismatch مصنوعی در آن تست شود. عبور از gate عملیاتی، جای عبور از evidence gate استراتژی را نمی‌گیرد.</p>
+<h3 id="section-10-4">۹٫۴ معیار توقف یا کاهش دامنه</h3>
+<ul>
+<li>اگر ابزار، صحت زمانی/حسابداری یا بازیابی سفارش را پاس نمی‌کند، گسترش Live متوقف و کار روی همین علت متمرکز شود.</li>
+<li>اگر یک استراتژی در پنجره و معیارهای ازپیش‌ثبت‌شده شواهد کافی ندارد، در Research/Paper بماند؛ تغییر آستانه پس از دیدن نتیجه به آزمایش و نسخهٔ تازه نیاز دارد.</li>
+<li>اگر مقایسهٔ آینده‌نگر AI فایدهٔ متناسب با هزینه یا کیفیت لازم نشان نمی‌دهد، نقش آن به توضیح/ساخت draft محدود شود و فیلتر معاملاتی آن ارتقا نگیرد.</li>
+<li>اگر دادهٔ مشتقات یا capability صرافی برای margin/protection کافی نیست، انتشار آن product متوقف شود؛ موفقیت اسپات به آن تعمیم داده نشود.</li>
+<li>اگر task test نشان می‌دهد کاربر mode یا زیان برنامه‌ریزی‌شده را اشتباه می‌فهمد، صفحهٔ مرور سفارش پیش از افزودن feature بیشتر اصلاح شود.</li>
+</ul>
+<h3 id="section-10-5">۹٫۵ عملیات و امنیت متناسب با دامنه</h3>
+<p>local-first فعلی حفظ شود. برای remote exposure، احراز هویت، TLS، session/CSRF/Host-Origin policy و کنترل دسترسی سرور پیش‌نیازند. حتی loopback، Host validation و سناریوی DNS rebinding بررسی شود. دسترسی واقعی حساب، خروجی حساس و secret در log/chat/telemetry قرار نگیرد. log ساختاریافته با correlation_id و event trace، بدون دادهٔ اضافی حساس.</p>
+<p>credentials در فرانت یا local draft نیست؛ encrypted backup تنها با راه مدیریت کلید درست معنای حفاظت دارد. سطح دسترسی broker به قابلیت مورد نیاز محدود و withdrawal در این دامنه نیست. raw news/script ورودی غیرقابل اعتماد به assistant است؛ secret و ابزار اجرا به آن متصل نشود.</p>
+<p>startup بازیابی: migration → load state → reconcile venue → بررسی positions/protection → سلامت داده → بازشدن admission ورود. اگر engine محلی خاموش است، مدل/داشبورد مانع توقف کار نمی‌شود؛ سفارش محافظ native venue در صورت پشتیبانی ارجح است، ولی تأیید placement و شرایط trigger باید بررسی شود. صفحهٔ عملیات آخرین backup، restore result، feed lag و unresolved order را نگه دارد.</p>
+<h3 id="section-10-6">۹٫۶ بهینه‌سازی‌های افزوده در این پلن</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>بهبود</th>
+<th>علت و محل اجرا</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>یک Trade Plan نسخه‌دار برای پژوهش، Paper و Live</td>
+<td>جلوگیری از اختلاف متن AI، محاسبات و سفارش؛ P1/P3</td>
+</tr>
+<tr>
+<td>risk reservation اتمی به‌ازای account</td>
+<td>جلوگیری از دوباره‌خرج‌کردن سرمایه میان تب‌ها و استراتژی‌ها؛ P3</td>
+</tr>
+<tr>
+<td>approve-to-hash با TTL و revalidate</td>
+<td>تأیید قدیمی برای شرایط تازه مصرف نشود؛ P3/P6</td>
+</tr>
+<tr>
+<td>source-qualified InstrumentKey</td>
+<td>اختلاط spot/perp/venue و funding اشتباه رخ ندهد؛ P1/P5</td>
+</tr>
+<tr>
+<td>measured AI value و budget</td>
+<td>هزینهٔ AI و کیفیت تصمیم واقعاً قابل ارزیابی شود؛ P4</td>
+</tr>
+<tr>
+<td>family-level attempt و holdout usage</td>
+<td>ساخت ID تازه، سابقهٔ جستجو را پاک نکند؛ P2/P4</td>
+</tr>
+<tr>
+<td>plan-time و fill-time price جدا</td>
+<td>اختلاف ورود و دلیل لغزش قابل سنجش؛ P3</td>
+</tr>
+<tr>
+<td>typed missing/status در پاسخ مالی</td>
+<td>Money خالی به عدد معتبر و اطمینان کاذب تبدیل نشود؛ P1</td>
+</tr>
+<tr>
+<td>durable event + query projections + resume</td>
+<td>بازیابی بدون microservice/Kafka؛ P3/P6</td>
+</tr>
+<tr>
+<td>UI states و task gate در هر فاز</td>
+<td>UX به پایان کار موکول نشود؛ P1 به بعد</td>
+</tr>
+<tr>
+<td>pause entry مستقل از مدیریت خروج</td>
+<td>خاموش‌کردن feature یا AI موقعیت باز را رها نکند؛ P3/P6</td>
+</tr>
+<tr>
+<td>feature budget و focus روی یک venue</td>
+<td>scope و هزینه نگهداری کنترل شود؛ تمام فازها</td>
+</tr>
+</tbody></table></div>
+<h2 id="section-11">۱۰ ترتیب شروع و پوشش همه قابلیت‌ها</h2>
+<h3 id="section-11-1">۱۰٫۱ ده بستهٔ اول قابل تحویل به تیم</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ترتیب</th>
+<th>شناسه</th>
+<th>خروجی مشخص</th>
+<th>مالک اصلی</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>۱</td>
+<td>FIX-01</td>
+<td>CI با DB و race، ثبت baseline و گزارش skip</td>
+<td>بک‌اند/QA</td>
+</tr>
+<tr>
+<td>۲</td>
+<td>FIX-02</td>
+<td>تست و اصلاح causal fill + baseline warm-up</td>
+<td>بک‌اند دامنه</td>
+</tr>
+<tr>
+<td>۳</td>
+<td>FIX-03</td>
+<td>admission وزنی و stress هم‌زمانی</td>
+<td>بک‌اند زیرساخت</td>
+</tr>
+<tr>
+<td>۴</td>
+<td>FIX-04</td>
+<td>period metrics، freeze و coverage forward</td>
+<td>بک‌اند پژوهش</td>
+</tr>
+<tr>
+<td>۵</td>
+<td>FIX-05</td>
+<td>snapshot membership، provenance و terminal attempts</td>
+<td>بک‌اند داده</td>
+</tr>
+<tr>
+<td>۶</td>
+<td>UI-01</td>
+<td>رفع cache/race/chart و طرح shell/state matrix</td>
+<td>Flutter/UX</td>
+</tr>
+<tr>
+<td>۷</td>
+<td>CORE-01</td>
+<td>InstrumentKey، Environment و Signal schema</td>
+<td>بک‌اند + Flutter</td>
+</tr>
+<tr>
+<td>۸</td>
+<td>UX-01</td>
+<td>prototype فرصت، مرور سفارش Paper و disconnected flow</td>
+<td>UX/Flutter</td>
+</tr>
+<tr>
+<td>۹</td>
+<td>STR-01</td>
+<td>AST schema، validator و adapter parity</td>
+<td>بک‌اند strategy</td>
+</tr>
+<tr>
+<td>۱۰</td>
+<td>STR-02</td>
+<td>Library نسخه‌دار و rule builder با API واقعی</td>
+<td>Flutter + بک‌اند</td>
+</tr>
+</tbody></table></div>
+<p>هر بسته با problem، دامنه، dependencies، قرارداد API، states UI، acceptance tests و rollback note issue شود. اندازهٔ PR به یک تغییر منسجم محدود بماند؛ schema/contract قبل از مصرف frontend merge شود، اما fixture مشترک اجازه طراحی هم‌زمان می‌دهد. منابع انسانی این جدول نقش‌اند؛ الزام اضافه‌کردن نفر جدا برای هر نقش نیست.</p>
+<h3 id="section-11-2">۱۰٫۲ نقشهٔ پوشش پیشنهادهای گفتگو</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>پیشنهاد</th>
+<th>محل و فاز</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>بهبود نسخه موجود و۱۶ یافته</td>
+<td>بخش۳، P0/P1</td>
+</tr>
+<tr>
+<td>agentic assistant با تحلیل موقعیت</td>
+<td>۵٫۵ و P4</td>
+</tr>
+<tr>
+<td>پیشنهاد به‌ازای هر استراتژی و قابلیت عدم معامله</td>
+<td>۵٫۱، P3/P4</td>
+</tr>
+<tr>
+<td>ورود، TP/SL، خروج مرحله‌ای و مدیریت موقعیت</td>
+<td>۵٫۱/۵٫۶ و P3؛ اجرای واقعی P6/P7</td>
+</tr>
+<tr>
+<td>رصد بازار و regime</td>
+<td>۵٫۳/۵٫۵، P2/P3/P7</td>
+</tr>
+<tr>
+<td>ترکیب AND/OR و routing</td>
+<td>۵٫۳ و P2</td>
+</tr>
+<tr>
+<td>رأی وزنی و تخصیص سرمایه</td>
+<td>۵٫۳ و P7</td>
+</tr>
+<tr>
+<td>استراتژی کاستوم بدون کد/زبان طبیعی/کد</td>
+<td>۵٫۲، P2/P4/P8</td>
+</tr>
+<tr>
+<td>جستجو در استراتژی‌های شناخته‌شده و معتبر</td>
+<td>۵٫۴، P2 curated و P8 adapters</td>
+</tr>
+<tr>
+<td>evidence و ارزیابی اعتماد</td>
+<td>۵٫۴/۵٫۹، P2 به بعد</td>
+</tr>
+<tr>
+<td>ژورنال، علت نتیجه و replay</td>
+<td>۵٫۶، P3/P4</td>
+</tr>
+<tr>
+<td>کیفیت اجرا، هزینه و منقضی‌شدن ورود</td>
+<td>۵٫۱/۵٫۶، P3/P6</td>
+</tr>
+<tr>
+<td>مقایسه با و بدون AI و مداخلهٔ کاربر</td>
+<td>۵٫۹، P4</td>
+</tr>
+<tr>
+<td>drift و سلامت استراتژی</td>
+<td>۵٫۹، P4/P7</td>
+</tr>
+<tr>
+<td>ریسک سبد، stress و انضباط</td>
+<td>۵٫۷، P3/P5/P7</td>
+</tr>
+<tr>
+<td>خبر، رویداد و Fear &amp; Greed/رفتار شخصی</td>
+<td>۵٫۱۰، P8</td>
+</tr>
+<tr>
+<td>مرور روزانه و اعلان</td>
+<td>۵٫۱۰، P4 پایه و P8 غنی‌شده</td>
+</tr>
+<tr>
+<td>بازیابی، تطبیق حساب و اختلال</td>
+<td>۴٫۵/۹٫۴، P3/P6/P7</td>
+</tr>
+<tr>
+<td>اهرم‌دار، Long/Short و liquidation/funding</td>
+<td>۵٫۸، P5/P7</td>
+</tr>
+<tr>
+<td>self-learning و بازطراحی نسخه‌دار</td>
+<td>۵٫۹، حفظ loop فعلی + P2/P4/P8</td>
+</tr>
+<tr>
+<td>UI/UX مدرن و سبک و RTL</td>
+<td>بخش۶ و gate هر فاز</td>
+</tr>
+</tbody></table></div>
+<h2 id="section-12">۱۱ تصمیم‌های باز و منابع</h2>
+<h3 id="section-12-1">۱۱٫۱ فرض‌هایی که هنگام ورود به فاز مربوط نهایی می‌شوند</h3>
+<p>این موارد مانع نوشتن پلن یا P0 نیستند. برای هرکدام مالک و زمان تصمیم تعیین شود؛ تا آن زمان default این سند اجرا می‌شود.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>تصمیم</th>
+<th>default پیشنهادی</th>
+<th>زمان نهایی‌شدن</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>team capacity و budget</td>
+<td>دو ظرفیت خالص؛ بازتخمین بر مبنای P0</td>
+<td>پایان P0</td>
+</tr>
+<tr>
+<td>theme و density</td>
+<td>تیرهٔ فعلی، standard density؛ روشن بعداً</td>
+<td>P1 با prototype</td>
+</tr>
+<tr>
+<td>universe/timeframe</td>
+<td>watchlist محدود USDT و زمینهٔ1h/4h؛ بدون تعهد سود</td>
+<td>P2/P3 پس از data coverage</td>
+</tr>
+<tr>
+<td>venue واقعی</td>
+<td>هیچ venue برای Live هنوز انتخاب‌شده نیست</td>
+<td>شروع P6 و P7</td>
+</tr>
+<tr>
+<td>risk limits و leverage ceiling</td>
+<td>user policy و capability؛ مقادیر خاموش/غیراجرایی تا تعیین</td>
+<td>P3/P5 پیش از deployment</td>
+</tr>
+<tr>
+<td>AI vendor/model/cost</td>
+<td>interface قابل تعویض، model version pinned و budget محدود</td>
+<td>P4</td>
+</tr>
+<tr>
+<td>funding/mark history</td>
+<td>منبع رسمی venue با timestamp/revision و coverage</td>
+<td>پیش از P5 exact backtest</td>
+</tr>
+<tr>
+<td>منبع خبر و sentiment</td>
+<td>curated، source attribution و live-only در نبود تاریخچه</td>
+<td>P8</td>
+</tr>
+<tr>
+<td>remote/mobile</td>
+<td>local Flutter Web؛ remote با auth/TLS جدا</td>
+<td>براساس نیاز پس از P4</td>
+</tr>
+</tbody></table></div>
+<h3 id="section-12-2">۱۱٫۲ منابع مبنا</h3>
+<p><strong>اسناد پروژه و گفتگو:</strong> <a href="https://chatgpt.com/library?file_id=libfile_a4885f5b50bc81918e32bee6cf4cee3b&account_id=personal">گزارش بررسی فنی</a>، <a href="https://chatgpt.com/library?file_id=libfile_20f9e9adc1a881918cad97d6388de40e&account_id=personal">PRD فارسی۱٫۲</a> و <a href="https://chatgpt.com/library?file_id=libfile_ba7c7d09ad308191a20d5dfbe54d10bc&account_id=personal">brief طراحی۱٫۱</a>، خوانده‌شده از نسخه فعلی فایل‌ها؛ تصمیم‌های این گفتگو درباره AI، استراتژی کاستوم/ترکیبی، عملیات و اهرم‌دار. این سند برنامهٔ جدیدی است و اسناد مبنا را در این درخواست overwrite نمی‌کند.</p>
+<p><strong>کد مبنای ثابت:</strong></p>
+<ul>
+<li><a href="https://github.com/TheNightDeveloper/trader-lab/blob/8f17e4574bda698c44798643b60826bd35fcfba7/docs/IMPLEMENTATION_PLAN.md">معماری و برنامه موجود</a></li>
+<li><a href="https://github.com/TheNightDeveloper/trader-lab/blob/8f17e4574bda698c44798643b60826bd35fcfba7/docs/UI_SPEC.md">مشخصات رابط موجود</a></li>
+<li><a href="https://github.com/TheNightDeveloper/trader-lab/blob/8f17e4574bda698c44798643b60826bd35fcfba7/app/lib/core/theme/tokens.dart">توکن‌های فعلی</a></li>
+<li><a href="https://github.com/TheNightDeveloper/trader-lab/blob/8f17e4574bda698c44798643b60826bd35fcfba7/app/lib/app/router.dart">router و مسیرهای فعلی</a></li>
+<li><a href="https://github.com/TheNightDeveloper/trader-lab/blob/8f17e4574bda698c44798643b60826bd35fcfba7/engine/cmd/engine/main.go">ترکیب سرویس‌های موتور</a></li>
+<li><a href="https://github.com/TheNightDeveloper/trader-lab/blob/8f17e4574bda698c44798643b60826bd35fcfba7/engine/internal/strategy/strategy.go">قرارداد Strategy فعلی</a></li>
+</ul>
+<p><strong>مراجع اولیهٔ روش و رفتار:</strong> این‌ها مرجع معماری/مکانیزم‌اند، نه تضمین عملکرد استراتژی یا انتخاب صرافی.</p>
+<ul>
+<li><a href="https://www.quantconnect.com/docs/v2/writing-algorithms/algorithm-framework/alpha/key-concepts">QuantConnect Alpha و مدل‌های چندگانه</a></li>
+<li><a href="https://www.quantconnect.com/docs/v2/writing-algorithms/live-trading/reconciliation">QuantConnect تطبیق بک‌تست و اجرای واقعی</a></li>
+<li><a href="https://www.freqtrade.io/en/stable/lookahead-analysis/">Freqtrade بررسی نشت آینده</a></li>
+<li><a href="https://github.com/freqtrade/freqtrade/blob/develop/docs/advanced-backtesting.md">Freqtrade تحلیل برچسب‌های ورود و خروج</a></li>
+<li><a href="https://www.tradingview.com/support/solutions/43000482573-what-are-the-different-types-of-published-scripts/">TradingView انواع دسترسی به اسکریپت</a></li>
+<li><a href="https://www.bybit.com/en/help-center/article/Profit-Loss-calculations-USDT-Contract">Bybit محاسبات PnL و اثر leverage</a></li>
+<li><a href="https://www.bybit.com/en/help-center/article/Mark-Price-Calculation-Perpetual-Expiry-Contracts">Bybit Mark Price</a></li>
+<li><a href="https://www.bybit.com/en/help-center/article/UTA-Trading-Rules-Liquidation-Process">Bybit قواعد liquidation</a></li>
+<li><a href="https://developers.binance.com/en/docs/products/spot/faqs/spot_glossary">Binance تعریف OCO و OTOCO و پرشدن کامل</a></li>
+<li><a href="https://docs.flutter.dev/ui/adaptive-responsive/input">Flutter ورودی و دسترسی‌پذیری</a></li>
+<li><a href="https://docs.flutter.dev/ui/accessibility/web-accessibility">Flutter دسترسی‌پذیری وب</a></li>
+<li><a href="https://docs.flutter.dev/ui/accessibility/accessibility-testing">Flutter آزمون دسترسی‌پذیری</a></li>
+</ul>
+<p>مکانیزم‌های venue، SDK و شرایط منبع در شروع پیاده‌سازی همان adapter دوباره بررسی و نسخه می‌شوند. در ارزیابی نهایی، log آزمون همان build و حساب هدف بر برداشت از مستندات تقدم دارد.</p>
+<footer>نسخهٔ خواندنی پلن جامع توسعه · برای تحویل به تیم طراحی، فرانت و بک‌اند · نسخهٔ Markdown شامل نمودارهای Mermaid و متن قابل ویرایش است.</footer></main>
+</body></html>
