@@ -107,6 +107,13 @@ remain immutable. No live execution or real-market validation is claimed.
 
 ## Remaining P0 work / next batch
 
+The analytics/learning review after FIX-02 fixed dependency readiness, fit/model validation,
+complete/deterministic search selection and unnecessary per-bar explanation work. New model
+artifacts record `causal-features/v1`; evaluation remains `p0.2`. Verified: 197 Go tests/subtests,
+zero skip with DB mandatory, 48 existing Flutter tests, lint/vet, Dart analysis and depguard. See
+[P0_LEARNING_REVIEW_FA.md](P0_LEARNING_REVIEW_FA.md) for evidence, measured scope and compatibility.
+This additional batch does not complete FIX-04 or P0.
+
 1. FIX-04: actual training/freeze timestamps, forward coverage, period vs cohort PnL.
 2. FIX-05: fixed dataset membership/revisions, terminal candidates and claim/cancel recovery.
 3. Finish F07 admission/memory bounds on Reproduce and forward, F08 non-USDT capability,

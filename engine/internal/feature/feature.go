@@ -1,6 +1,6 @@
 // Package feature computes model inputs and labels from bars. A feature of bar i
-// is a function of bars[:i+1] only, so it is available exactly when bar i is;
-// a label needs h later bars and is ready only when the last of them is.
+// is a function of its trailing window, available only when all members exist;
+// a forward-return label needs both endpoint prices to be available.
 // Floats are allowed here: this is model math, never accounting.
 package feature
 
@@ -141,7 +141,7 @@ func Row(names []string, hist []data.Bar) ([]float64, bool) {
 type Sample struct {
 	At          time.Time // open time of the feature bar
 	AvailableAt time.Time // when the features existed
-	ReadyAt     time.Time // when the label's last bar was available
+	ReadyAt     time.Time // when both label endpoint prices were available
 	X           []float64
 	Y           float64
 }
@@ -156,17 +156,29 @@ func Samples(names []string, h int, bars []data.Bar, from, to, asOf time.Time) (
 		return nil, fmt.Errorf("feature: label horizon %d must be at least one bar", h)
 	}
 	var out []Sample
-	for i := Lookback(names) - 1; i+h < len(bars); i++ {
+	lookback := Lookback(names)
+	for i := lookback - 1; i < len(bars)-h; i++ {
 		b := bars[i]
 		if b.OpenTime.Before(from) || !b.OpenTime.Before(to) {
 			continue
 		}
 		end := bars[i+h]
-		if end.AvailableAt.After(asOf) {
+		ready := end.AvailableAt
+		if b.AvailableAt.After(ready) {
+			ready = b.AvailableAt
+		}
+		available := b.AvailableAt
+		// Earlier candles can arrive later than the last candle in this window.
+		for _, dependency := range bars[i-lookback+1 : i] {
+			if dependency.AvailableAt.After(available) {
+				available = dependency.AvailableAt
+			}
+		}
+		if available.After(asOf) || ready.After(asOf) {
 			continue
 		}
 		x, _ := Row(names, bars[:i+1])
-		out = append(out, Sample{At: b.OpenTime, AvailableAt: b.AvailableAt, ReadyAt: end.AvailableAt, X: x, Y: closeF(end)/closeF(b) - 1})
+		out = append(out, Sample{At: b.OpenTime, AvailableAt: available, ReadyAt: ready, X: x, Y: closeF(end)/closeF(b) - 1})
 	}
 	return out, nil
 }
@@ -175,8 +187,8 @@ func Samples(names []string, h int, bars []data.Bar, from, to, asOf time.Time) (
 func CheckAsOf(samples []Sample, asOf time.Time) error {
 	for _, s := range samples {
 		if s.AvailableAt.After(asOf) || s.ReadyAt.After(asOf) {
-			return fmt.Errorf("%w: row at %s has a label ready at %s, after %s", ErrLookAhead,
-				s.At.Format(time.RFC3339), s.ReadyAt.Format(time.RFC3339), asOf.Format(time.RFC3339))
+			return fmt.Errorf("%w: row at %s has features available at %s and label ready at %s (as-of %s)", ErrLookAhead,
+				s.At.Format(time.RFC3339), s.AvailableAt.Format(time.RFC3339), s.ReadyAt.Format(time.RFC3339), asOf.Format(time.RFC3339))
 		}
 	}
 	return nil
@@ -199,10 +211,19 @@ func FitScaler(samples []Sample, asOf time.Time) (Scaler, error) {
 		return Scaler{}, errors.New("feature: no samples to fit")
 	}
 	k := len(samples[0].X)
+	if k == 0 {
+		return Scaler{}, errors.New("feature: no columns to fit")
+	}
 	s := Scaler{Mean: make([]float64, k), Std: make([]float64, k)}
 	n := float64(len(samples))
-	for _, r := range samples {
+	for i, r := range samples {
+		if len(r.X) != k {
+			return Scaler{}, fmt.Errorf("feature: row %d has %d columns, want %d", i, len(r.X), k)
+		}
 		for j, v := range r.X {
+			if math.IsNaN(v) || math.IsInf(v, 0) {
+				return Scaler{}, fmt.Errorf("feature: row %d column %d is not finite", i, j)
+			}
 			s.Mean[j] += v / n
 		}
 	}
@@ -214,6 +235,9 @@ func FitScaler(samples []Sample, asOf time.Time) (Scaler, error) {
 	}
 	for j := range s.Std {
 		s.Std[j] = math.Sqrt(s.Std[j])
+		if math.IsNaN(s.Mean[j]) || math.IsInf(s.Mean[j], 0) || math.IsNaN(s.Std[j]) || math.IsInf(s.Std[j], 0) {
+			return Scaler{}, fmt.Errorf("feature: scaler column %d overflowed", j)
+		}
 		if s.Std[j] == 0 {
 			s.Std[j] = 1 // a constant feature carries no information; keep it at 0
 		}

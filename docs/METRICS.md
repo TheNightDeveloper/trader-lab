@@ -212,7 +212,9 @@ reason. Tests: `metrics/*` (Sharpe matches a float reference: 6.28 for the 40-da
 
 Floats are allowed here (model math); nothing in this section touches the ledger.
 
-### Features (of bar i, computed from bars[:i+1] only; available when bar i is)
+### Features (of bar i, computed from its trailing history only)
+Availability is the maximum AvailableAt of the trailing Lookback window, including bar i;
+a late earlier dependency cannot be hidden by the final bar's timestamp.
 - `ret_k` (k = 1, 4, 24, 72): `close[i] / close[i−k] − 1`. k counts bars, not hours: with
   gaps (gap policy "flag") the window spans more time.
 - `vol_24`: population standard deviation of the last 24 one-bar simple returns.
@@ -223,7 +225,7 @@ Floats are allowed here (model math); nothing in this section touches the ledger
 
 ### Labels
 - Forward return over the recipe horizon h: `close[i+h] / close[i] − 1`, `ReadyAt` =
-  availability of bar i+h. A training row enters a fit only if its features and label were
+  maximum availability of bars i and i+h. A training row enters a fit only if its features and label were
   available at the fit's as-of time; fits re-check this and fail otherwise (look-ahead).
 
 ### Models
@@ -241,6 +243,8 @@ Floats are allowed here (model math); nothing in this section touches the ledger
   round-trips). Artifact id = `m_` + first 16 hex of SHA-256 of its JSON without the id.
 
 ### Walk-forward with retraining (learning cycle)
+Known P0 gap (F05): fold net P&L currently uses lifetime results for trades opened in the
+fold. Future exits can affect it and fold wins; period/cohort separation is pending FIX-04.
 - Range: `[now − lookback, end)`, end = `now − 1 bar`, truncated to the timeframe.
 - Test region starts after the first fifth of the range (minimum training), or after the
   end of the last forward window used in a decision, whichever is later; it is cut into
@@ -259,6 +263,9 @@ and × 2 (logistic: ± 0.02). Duplicates and the parent are left out; capped at 
 budget.
 
 ### Forward test and gate
+Known P0 gap (F04): the implementation currently backdates freeze to the data cutoff and
+counts elapsed days without verifying per-symbol coverage. The rules below describe current
+behavior, not a validated forward gate; actual freeze/trade-start and coverage need FIX-04.
 - Freeze: the challenger is trained once on everything ready at the end of the range; the
   champion keeps its active model (or, without one, gets a baseline trained the same way).
   Both run from the freeze on bars that become available later, with the cycle's costs.
@@ -311,3 +318,19 @@ replace a newer close. Reports from any older evaluation version get a read-time
 badge and cannot be compared as current evaluations. Stored reports are never rewritten.
 Period/cohort attribution (F05), actual forward freeze/coverage (F04), and non-USDT execution
 capability (F08) remain open; passing these tests does not establish those acceptance criteria.
+
+## P0 training and selection compatibility (2026-11-01)
+- New fits record `training_version: causal-features/v1` in their content-addressed artifact.
+  Feature availability is the maximum over its trailing Lookback window; label readiness is
+  the maximum of its two endpoint availabilities. Both must be <= asOf. Fit rejects samples
+  outside its declared [from, to), non-finite inputs and inconsistent dimensions.
+- Legacy valid artifacts with no training_version retain their IDs and remain readable. They
+  are not retroactively retrained. Old binaries may reject new-version artifact hashes.
+- Prediction arithmetic and decision explanations are preserved; work for unchanged-target
+  explanations is removed. Recipe/model validation rejects malformed numbers before execution.
+- Search means use wide integer sums and half-even rounding. Only candidates with every
+  registered dataset exactly once, valid scale and eligible completed results can win;
+  ties use the lowest candidate number, independent of row order.
+- The h-bar label still measures close-to-close price return, not executable net PnL. With
+  delayed availability and h=1 its endpoint may be at/before the earliest causal fill. Aligning
+  that target with execution/costs requires a separate versioned change and OOS validation.

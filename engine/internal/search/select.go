@@ -5,6 +5,8 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"math/big"
+	"slices"
 
 	"tradinglab/engine/internal/eval"
 	"tradinglab/engine/internal/experiment"
@@ -96,42 +98,54 @@ func Select(def experiment.Definition, attempts []AttemptResult) Result {
 	type agg struct {
 		params  strategy.Params
 		ok      bool
-		sum     int64
+		sum     big.Int
 		n       int64
 		scale   int32
 		invalid bool
+		seen    map[string]bool
+	}
+	expected := make(map[string]bool, len(def.DatasetIDs))
+	for _, id := range def.DatasetIDs {
+		expected[id] = true
 	}
 	byCand := map[int]*agg{}
 	var order []int
 	for _, a := range attempts {
 		g := byCand[a.Candidate]
 		if g == nil {
-			g = &agg{params: a.Params, ok: true}
+			g = &agg{params: a.Params, ok: true, seen: map[string]bool{}}
 			byCand[a.Candidate] = g
 			order = append(order, a.Candidate)
 		}
+		// Every registered pair must contribute exactly once, even after recovery.
+		if !expected[a.DatasetID] || g.seen[a.DatasetID] {
+			g.ok = false
+		}
+		g.seen[a.DatasetID] = true
 		if a.Status != "done" || !a.Eligible {
 			g.ok = false
 			continue
 		}
 		m, found := metrics.Get(a.Metrics, def.Objective.Metric)
-		if !found || !m.Valid {
+		_, scale, known := metrics.UnitOf(def.Objective.Metric)
+		if !found || !m.Valid || !known || m.Scale != scale {
 			g.invalid = true
 			continue
 		}
-		g.sum += m.V
+		g.sum.Add(&g.sum, big.NewInt(m.V))
 		g.n++
 		g.scale = m.Scale
 	}
+	slices.Sort(order) // Completion/database order must not decide a tie.
 	r := Result{Candidates: len(order), Attempts: len(attempts)}
 	best, bestV := 0, int64(0)
 	for _, c := range order {
 		g := byCand[c]
-		if !g.ok || g.invalid || g.n == 0 {
+		if !g.ok || g.invalid || g.n == 0 || len(g.seen) != len(expected) {
 			continue
 		}
 		r.EligibleCandidates++
-		v, _ := money.MulDiv(g.sum, 1, g.n, money.HalfEven)
+		v := mean(&g.sum, g.n)
 		better := best == 0 || (def.Objective.Maximize && v > bestV) || (!def.Objective.Maximize && v < bestV)
 		if better {
 			best, bestV = c, v
@@ -146,4 +160,16 @@ func Select(def experiment.Definition, attempts []AttemptResult) Result {
 	r.Chosen, r.Params = best, g.params
 	r.Objective = &metrics.Metric{Key: def.Objective.Metric, V: bestV, Scale: g.scale, Unit: unit, Valid: true}
 	return r
+}
+
+// mean keeps the sum wide; an average of int64 inputs still fits in int64.
+func mean(sum *big.Int, n int64) int64 {
+	den := big.NewInt(n)
+	q, rem := new(big.Int), new(big.Int)
+	q.QuoRem(sum, den, rem)
+	rem.Abs(rem).Lsh(rem, 1)
+	if cmp := rem.Cmp(den); cmp > 0 || (cmp == 0 && q.Bit(0) == 1) {
+		q.Add(q, big.NewInt(int64(sum.Sign()))) // Half-even, including negative ties.
+	}
+	return q.Int64()
 }

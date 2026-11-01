@@ -2,6 +2,22 @@
 
 Update at the end of every session.
 
+## P0 analytics / learning review (2026-11-01)
+- Rechecked feature readiness, fitting, prediction, search selection, fold attribution and
+  forward gates. Detailed findings and priorities: [P0_LEARNING_REVIEW_FA.md](P0_LEARNING_REVIEW_FA.md).
+- Fixed late feature dependencies entering past fits; enforce sample windows, dimensions and
+  finite values; validate model artifacts before execution. New fits record causal-features/v1;
+  valid legacy model IDs remain readable and immutable.
+- Search requires every registered dataset exactly once, canonical metric scale, deterministic
+  tie-breaking and overflow-safe mean. No promotion thresholds or golden fixtures changed.
+- Unchanged-target prediction path: median 469.2 to 263.9 ns/op, 144 to 48 B/op across five
+  local measurements per version. This is not whole-cycle speed or profitability evidence.
+- Verified: 197 Go tests/subtests, zero skip, DB mandatory; all 11 goldens unchanged;
+  48 existing Flutter tests; Go lint/vet, Dart analysis and depguard passed.
+- Next remains FIX-04. The review additionally identifies close-to-close labels ending before
+  or at causal execution for horizon=1, and cancellation/budget gaps inside training.
+- P0 remains in progress. No local race or new real-market profitability evaluation.
+
 ## Table alignment fix (2026-11-01)
 - Shared DataTableBox cells align to the same directional start edge as their headers;
   numeric/date/symbol text keeps its LTR reading direction inside RTL tables.

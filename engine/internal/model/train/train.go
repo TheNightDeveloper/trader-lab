@@ -42,6 +42,20 @@ func Fit(r model.Recipe, samples []feature.Sample, from, to, asOf time.Time, met
 	if n := len(samples); n < MinSamples(len(r.Features)) {
 		return model.Artifact{}, fmt.Errorf("%w: %d (need %d)", ErrTooFew, n, MinSamples(len(r.Features)))
 	}
+	if to.After(asOf) {
+		return model.Artifact{}, fmt.Errorf("%w: training ends after as-of", feature.ErrLookAhead)
+	}
+	if !from.Before(to) {
+		return model.Artifact{}, errors.New("train: empty or reversed window")
+	}
+	for i, s := range samples {
+		if s.At.Before(from) || !s.At.Before(to) {
+			return model.Artifact{}, fmt.Errorf("train: sample %d is outside the training window", i)
+		}
+		if len(s.X) != len(r.Features) || math.IsNaN(s.Y) || math.IsInf(s.Y, 0) {
+			return model.Artifact{}, fmt.Errorf("train: sample %d has invalid dimensions or label", i)
+		}
+	}
 	sc, err := feature.FitScaler(samples, asOf)
 	if err != nil {
 		return model.Artifact{}, err
@@ -51,7 +65,8 @@ func Fit(r model.Recipe, samples []feature.Sample, from, to, asOf time.Time, met
 		z[i] = sc.Apply(s.X)
 	}
 	a := model.Artifact{
-		Algorithm: meta.Algorithm, Recipe: r, RecipeHash: r.Hash(), DatasetIDs: meta.DatasetIDs,
+		TrainingVersion: model.TrainingVersion,
+		Algorithm:       meta.Algorithm, Recipe: r, RecipeHash: r.Hash(), DatasetIDs: meta.DatasetIDs,
 		TrainFrom: from.UTC(), TrainTo: to.UTC(), AsOf: asOf.UTC(), Seed: meta.Seed, Scaler: sc,
 		Samples: len(samples), Parent: meta.Parent,
 	}
@@ -65,6 +80,9 @@ func Fit(r model.Recipe, samples []feature.Sample, from, to, asOf time.Time, met
 		return model.Artifact{}, err
 	}
 	a.TrainError = trainError(a, samples)
+	if err := a.Validate(); err != nil {
+		return model.Artifact{}, err
+	}
 	a.Seal()
 	return a, nil
 }

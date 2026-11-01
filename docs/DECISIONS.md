@@ -214,3 +214,22 @@ Consequence: the noise-based learning integration fixture needs persistence acro
 longer causal execution horizon; its synthetic hourly autocorrelation changes 0.6 to 0.9.
 All promotion gate thresholds and the deliberately worse challenger assertions stay intact.
 This fixture validates lifecycle paths, not evidence of profitability or actual market data.
+
+## ADR-042 Validate causal training inputs and version new fits (P0 review)
+Context: a sample inherited only its final feature bar's availability, hiding late earlier
+dependencies. Public Fit also accepted rows outside its declared window and malformed numbers.
+Decision: use maximum availability of the trailing feature window and both label endpoints;
+omit unavailable rows. Validate fit windows, row dimensions, finite values and model/scaler
+shape before use. New artifacts include training_version causal-features/v1 in their hash.
+Consequence: valid legacy models retain exact IDs; new fits have a distinct semantic version.
+Older binaries may reject new artifact IDs because they omit the added field when hashing.
+Reports are not rewritten and evaluation remains p0.2. Economic label/fill alignment and
+actual model-created/freeze timing remain separate work; this field does not solve either.
+
+## ADR-043 Fail closed on incomplete search selection (P0 review)
+Decision: a candidate must cover each registered dataset exactly once with a completed,
+eligible result and canonical metric scale. Sort candidate IDs for ties; sum objectives with
+big.Int and round the mean half-even, so valid int64 inputs cannot overflow their mean.
+Consequence: ordinary valid experiments keep their selection rule. Incomplete, duplicate,
+foreign or incomparable results cannot win. Stored historical experiment results are unchanged.
+This is independent of transaction/recovery work in FIX-05 and accounting overflow elsewhere.

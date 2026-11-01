@@ -156,3 +156,50 @@ func TestWalkForwardTrainsEachStepOnItsPast(t *testing.T) {
 	_, err = WalkForward(ctx, r, map[string][]data.Bar{"BTCUSDT": bars}, steps, Meta{})
 	require.True(t, errors.Is(err, context.Canceled))
 }
+
+// Fit is also a public boundary: callers cannot relabel a wider training window.
+func TestFitRejectsInvalidSamples(t *testing.T) {
+	r := Ridge()
+	bs := Bars(150, 8)
+	end := bs[100].OpenTime
+	rows, err := feature.Samples(r.Features, r.Horizon, bs, t0, end, end)
+	require.NoError(t, err)
+	for name, change := range map[string]func([]feature.Sample){
+		"before window":  func(s []feature.Sample) { s[0].At = t0.Add(-time.Hour) },
+		"at window end":  func(s []feature.Sample) { s[0].At = end },
+		"wrong width":    func(s []feature.Sample) { s[0].X = []float64{1} },
+		"nan label":      func(s []feature.Sample) { s[0].Y = math.NaN() },
+		"infinite label": func(s []feature.Sample) { s[0].Y = math.Inf(1) },
+	} {
+		t.Run(name, func(t *testing.T) {
+			copyRows := append([]feature.Sample(nil), rows...)
+			change(copyRows)
+			require.NotPanics(t, func() {
+				_, err := Fit(r, copyRows, t0, end, end, Meta{})
+				require.Error(t, err)
+			})
+		})
+	}
+	_, err = Fit(r, rows, t0, end.Add(time.Hour), end, Meta{})
+	require.ErrorIs(t, err, feature.ErrLookAhead)
+}
+
+// Editing a not-yet-observed dependency cannot alter a model fitted in the past.
+func TestDelayedDependenciesCannotChangePastModel(t *testing.T) {
+	r := Ridge()
+	bs := Bars(500, 12)
+	end := bs[300].OpenTime
+	bs[250].AvailableAt = bs[400].OpenTime
+	fit := func(bars []data.Bar) model.Artifact {
+		samples, err := feature.Samples(r.Features, r.Horizon, bars, t0, end, end)
+		require.NoError(t, err)
+		a, err := Fit(r, samples, t0, end, end, Meta{})
+		require.NoError(t, err)
+		return a
+	}
+	before := fit(bs)
+	bs[250].C.V *= 2
+	after := fit(bs)
+	require.Equal(t, before, after)
+	require.Equal(t, model.TrainingVersion, before.TrainingVersion)
+}

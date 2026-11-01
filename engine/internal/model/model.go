@@ -24,6 +24,9 @@ var (
 // RecipeFormat is the version of the recipe JSON format.
 const RecipeFormat = 1
 
+// TrainingVersion distinguishes fits with full dependency availability checks.
+const TrainingVersion = "causal-features/v1"
+
 // Recipe is everything a learned strategy is built from, besides its trained
 // weights. Any change is a new algorithm version.
 type Recipe struct {
@@ -55,6 +58,14 @@ type Filter struct {
 
 func (r Recipe) Validate() error {
 	bad := func(f string, a ...any) error { return fmt.Errorf("%w: "+f, append([]any{ErrRecipe}, a...)...) }
+	for _, v := range []float64{r.Alpha, r.Entry, r.Exposure, r.StopLoss, r.TakeProfit} {
+		if math.IsNaN(v) || math.IsInf(v, 0) {
+			return bad("settings must be finite")
+		}
+	}
+	if r.Filter != nil && (math.IsNaN(r.Filter.Max) || math.IsInf(r.Filter.Max, 0)) {
+		return bad("filter maximum must be finite")
+	}
 	switch {
 	case r.Format != RecipeFormat:
 		return bad("format %d (want %d)", r.Format, RecipeFormat)
@@ -96,13 +107,14 @@ func (r Recipe) Hash() string {
 // Artifact is one trained model: the recipe it came from, the data and window it
 // saw, the fitted transform and weights. Content-addressed: the ID covers all of it.
 type Artifact struct {
-	ID         string    `json:"id"`
-	Algorithm  string    `json:"algorithm"`
-	Recipe     Recipe    `json:"recipe"`
-	RecipeHash string    `json:"recipe_hash"`
-	DatasetIDs []string  `json:"dataset_ids"`
-	TrainFrom  time.Time `json:"train_from"` // feature bars opened in [TrainFrom, TrainTo)
-	TrainTo    time.Time `json:"train_to"`
+	TrainingVersion string    `json:"training_version,omitempty"` // absent on legacy fits; never rewritten
+	ID              string    `json:"id"`
+	Algorithm       string    `json:"algorithm"`
+	Recipe          Recipe    `json:"recipe"`
+	RecipeHash      string    `json:"recipe_hash"`
+	DatasetIDs      []string  `json:"dataset_ids"`
+	TrainFrom       time.Time `json:"train_from"` // feature bars opened in [TrainFrom, TrainTo)
+	TrainTo         time.Time `json:"train_to"`
 	// AsOf: every training label was ready by then. The model may only be used for
 	// decisions on bars opened at or after AsOf.
 	AsOf      time.Time      `json:"as_of"`
@@ -138,16 +150,47 @@ func Load(b []byte) (Artifact, error) {
 	if a.ID != a.contentID() {
 		return a, fmt.Errorf("%w: %s", ErrArtifact, a.ID)
 	}
+	if err := a.Validate(); err != nil {
+		return a, err
+	}
 	return a, nil
+}
+
+// Validate rejects malformed models before they reach prediction or persistence.
+func (a Artifact) Validate() error {
+	if err := a.Recipe.Validate(); err != nil {
+		return fmt.Errorf("%w: %w", ErrArtifact, err)
+	}
+	k := len(a.Recipe.Features)
+	if a.RecipeHash != a.Recipe.Hash() || len(a.Weights) != k || len(a.Scaler.Mean) != k || len(a.Scaler.Std) != k {
+		return fmt.Errorf("%w: recipe hash or model dimensions", ErrArtifact)
+	}
+	if a.TrainingVersion != "" && a.TrainingVersion != TrainingVersion {
+		return fmt.Errorf("%w: unknown training version %q", ErrArtifact, a.TrainingVersion)
+	}
+	for _, values := range [][]float64{a.Weights, a.Scaler.Mean, a.Scaler.Std, {a.Intercept, a.TrainError}} {
+		for _, v := range values {
+			if math.IsNaN(v) || math.IsInf(v, 0) {
+				return fmt.Errorf("%w: non-finite model value", ErrArtifact)
+			}
+		}
+	}
+	for _, std := range a.Scaler.Std {
+		if std <= 0 {
+			return fmt.Errorf("%w: scaler spread must be positive", ErrArtifact)
+		}
+	}
+	return nil
 }
 
 // Predict maps one raw feature row to the model output: a forward return (ridge)
 // or a probability (logistic).
 func (a Artifact) Predict(x []float64) float64 {
-	z := a.Scaler.Apply(x)
 	v := a.Intercept
 	for j, w := range a.Weights {
-		v += w * z[j]
+		// Normalize once in the dot product, preserving the original operation order.
+		z := (x[j] - a.Scaler.Mean[j]) / a.Scaler.Std[j]
+		v += w * z
 	}
 	if a.Recipe.Model == "logistic" {
 		return Sigmoid(v)

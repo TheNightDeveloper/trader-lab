@@ -35,6 +35,9 @@ func NewLearned(models []model.Artifact) (Strategy, error) {
 		return nil, err
 	}
 	for _, m := range models {
+		if err := m.Validate(); err != nil {
+			return nil, err
+		}
 		if m.RecipeHash != models[0].RecipeHash {
 			return nil, fmt.Errorf("strategy: models %s and %s come from different recipes", models[0].ID, m.ID)
 		}
@@ -66,17 +69,22 @@ func (s *learned) OnBar(ctx RunContext, b data.Bar) ([]Intent, error) {
 	}
 	p := m.Predict(x)
 	want := p > s.r.Entry
-	why := fmt.Sprintf("پیش‌بینی \u2066%.5f\u2069 در برابر آستانه \u2066%.5f\u2069", p, s.r.Entry)
+	filtered := false
 	if want && s.filter >= 0 {
-		if z := m.Scaler.Apply(x)[s.filter]; z > s.r.Filter.Max {
+		if z := (x[s.filter] - m.Scaler.Mean[s.filter]) / m.Scaler.Std[s.filter]; z > s.r.Filter.Max {
 			want = false
-			why += fmt.Sprintf("؛ فیلتر %s رد کرد", s.r.Filter.Feature)
+			filtered = true
 		}
 	}
 	if was, seen := s.long[b.Instrument]; seen && was == want {
 		return nil, nil
 	}
 	s.long[b.Instrument] = want
+	// Most bars keep the same target; format an explanation only for a decision.
+	why := fmt.Sprintf("پیش‌بینی \u2066%.5f\u2069 در برابر آستانه \u2066%.5f\u2069", p, s.r.Entry)
+	if filtered {
+		why += fmt.Sprintf("؛ فیلتر %s رد کرد", s.r.Filter.Feature)
+	}
 	in := Intent{Instrument: b.Instrument, Reason: why, ModelID: m.ID, RecipeVersion: m.RecipeHash[:12]}
 	if want {
 		in.Target, in.StopLoss, in.TakeProfit = s.exposure, s.stop, s.take

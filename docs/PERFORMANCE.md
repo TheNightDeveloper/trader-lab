@@ -37,3 +37,20 @@ Same local Go/Windows/CPU setup and one-iteration command as the starting baseli
 Ordered History uses the original prefix without materializing another full bar array.
 Backfill holes use a temporary sorted buffer. One timing sample is not evidence of a speedup;
 fill count changed with the causal contract, and B/op is not peak resident memory.
+
+## P0 learning review (2026-11-01)
+Same local Go/Windows/CPU setup. Identical `BenchmarkLearnedSteadyTarget` source copied into
+the engine snapshot at 3ff937c and run against the revised engine. Command in each engine:
+`go test ./internal/strategy -run '^$' -bench '^BenchmarkLearnedSteadyTarget$' -benchmem -benchtime=500ms -count=5`.
+Data preparation and training are outside `b.Loop`; the timed path keeps the target unchanged.
+
+| Version | ns/op, five runs | Median | B/op | allocs/op |
+|---|---|---|---|---|
+| 3ff937c | 469.2, 467.0, 563.4, 469.2, 468.0 | 469.2 | 144 | 5 |
+| learning review | 252.8, 293.4, 254.8, 269.6, 263.9 | 263.9 | 48 | 2 |
+
+The approximately 44% lower median applies to this hot path only: defer reason formatting
+until a decision changes and normalize the required filter/prediction values directly.
+It does not establish faster training, whole-cycle performance or better returns. Standalone
+Predict measurements had zero heap allocations both before and after, with noisy timings;
+no independent Predict speedup is claimed. Local logs: artifacts/learning-bench-{before,after}.txt.

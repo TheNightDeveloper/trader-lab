@@ -1,6 +1,9 @@
 package search
 
 import (
+	"math"
+	"math/big"
+	"slices"
 	"testing"
 	"time"
 
@@ -144,7 +147,7 @@ func TestCheckConstraints(t *testing.T) {
 }
 
 func TestSelectConstraintsFirstThenObjective(t *testing.T) {
-	def := experiment.Definition{Objective: experiment.Objective{Metric: "total_return", Maximize: true}}
+	def := experiment.Definition{DatasetIDs: []string{"a", "b"}, Objective: experiment.Objective{Metric: "total_return", Maximize: true}}
 	ret := func(v int64) []metrics.Metric { return []metrics.Metric{m("total_return", v, 6)} }
 	attempts := []AttemptResult{
 		{Candidate: 1, Status: "done", Eligible: true, Metrics: ret(50_000)},
@@ -155,6 +158,9 @@ func TestSelectConstraintsFirstThenObjective(t *testing.T) {
 		{Candidate: 3, Status: "failed"}, // one pair failed
 		{Candidate: 4, Status: "done", Eligible: true, Metrics: ret(60_000)},
 		{Candidate: 4, Status: "done", Eligible: true, Metrics: ret(60_000)}, // ties with 1: earlier wins
+	}
+	for i := range attempts {
+		attempts[i].DatasetID = def.DatasetIDs[i%2]
 	}
 	r := Select(def, attempts)
 	require.Equal(t, 1, r.Chosen)
@@ -169,4 +175,52 @@ func TestSelectConstraintsFirstThenObjective(t *testing.T) {
 	none := Select(def, attempts[2:4])
 	require.Zero(t, none.Chosen, "no eligible candidate is a valid result")
 	require.NotEmpty(t, none.Reason)
+}
+
+// A subset (or a repeated pair) must never masquerade as a complete experiment.
+func TestSelectRequiresEveryRegisteredDataset(t *testing.T) {
+	def := experiment.Definition{DatasetIDs: []string{"a", "b"}, Objective: experiment.Objective{Metric: "total_return", Maximize: true}}
+	a := AttemptResult{Candidate: 1, DatasetID: "a", Status: "done", Eligible: true, Metrics: []metrics.Metric{m("total_return", 100, 6)}}
+	for name, ids := range map[string][]string{"missing": {"a"}, "duplicate": {"a", "a"}, "unknown": {"a", "other"}, "extra": {"a", "b", "other"}} {
+		t.Run(name, func(t *testing.T) {
+			var attempts []AttemptResult
+			for _, id := range ids {
+				row := a
+				row.DatasetID = id
+				attempts = append(attempts, row)
+			}
+			require.Zero(t, Select(def, attempts).Chosen)
+		})
+	}
+	b := a
+	b.DatasetID = "b"
+	b.Metrics = []metrics.Metric{m("total_return", 100, 8)}
+	require.Zero(t, Select(def, []AttemptResult{a, b}).Chosen, "different metric scales are incomparable")
+}
+
+func TestSelectionIsOrderIndependentAndMeanCannotOverflow(t *testing.T) {
+	def := experiment.Definition{DatasetIDs: []string{"a", "b"}, Objective: experiment.Objective{Metric: "total_return", Maximize: true}}
+	for _, v := range []int64{100, math.MaxInt64, math.MinInt64} {
+		var attempts []AttemptResult
+		for _, c := range []int{2, 1} {
+			for _, id := range def.DatasetIDs {
+				attempts = append(attempts, AttemptResult{Candidate: c, DatasetID: id, Status: "done", Eligible: true, Metrics: []metrics.Metric{m("total_return", v, 6)}})
+			}
+		}
+		first := Select(def, attempts)
+		require.Equal(t, 1, first.Chosen, "ties go to the earliest candidate, not the first returned row")
+		require.Equal(t, v, first.Objective.V)
+		slices.Reverse(attempts)
+		require.Equal(t, first, Select(def, attempts))
+	}
+}
+
+func TestObjectiveMeanRoundsHalfEven(t *testing.T) {
+	for _, tc := range []struct{ a, b, want int64 }{
+		{0, 1, 0}, {1, 2, 2}, {-1, 0, 0}, {-2, -1, -2},
+		{math.MaxInt64, math.MinInt64, 0}, {math.MaxInt64, math.MaxInt64, math.MaxInt64},
+	} {
+		sum := new(big.Int).Add(big.NewInt(tc.a), big.NewInt(tc.b))
+		require.Equal(t, tc.want, mean(sum, 2))
+	}
 }
