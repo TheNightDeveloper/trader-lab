@@ -13,7 +13,7 @@ import (
 )
 
 const allAttempts = `-- name: AllAttempts :many
-SELECT experiment_id, seq, candidate, params, dataset_id, symbol, status, failure, cache, cache_key, metrics, eligible, violations, runs, started_at, finished_at FROM attempts WHERE experiment_id = $1 ORDER BY seq
+SELECT experiment_id, seq, candidate, params, dataset_id, symbol, status, failure, cache, cache_key, metrics, eligible, violations, runs, started_at, finished_at, claim_token FROM attempts WHERE experiment_id = $1 ORDER BY seq
 `
 
 func (q *Queries) AllAttempts(ctx context.Context, experimentID string) ([]Attempt, error) {
@@ -42,6 +42,7 @@ func (q *Queries) AllAttempts(ctx context.Context, experimentID string) ([]Attem
 			&i.Runs,
 			&i.StartedAt,
 			&i.FinishedAt,
+			&i.ClaimToken,
 		); err != nil {
 			return nil, err
 		}
@@ -127,6 +128,24 @@ func (q *Queries) CacheHits(ctx context.Context, experimentID string) (CacheHits
 	return i, err
 }
 
+const cancelExperimentAttempts = `-- name: CancelExperimentAttempts :execrows
+UPDATE attempts SET status = 'cancelled', failure = $1, finished_at = now(), claim_token = ''
+WHERE experiment_id = $2 AND status IN ('queued', 'running')
+`
+
+type CancelExperimentAttemptsParams struct {
+	Failure      string
+	ExperimentID string
+}
+
+func (q *Queries) CancelExperimentAttempts(ctx context.Context, arg CancelExperimentAttemptsParams) (int64, error) {
+	result, err := q.db.Exec(ctx, cancelExperimentAttempts, arg.Failure, arg.ExperimentID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const cancelQueued = `-- name: CancelQueued :execrows
 UPDATE attempts SET status = 'cancelled', failure = $1, finished_at = now()
 WHERE experiment_id = $2 AND status = 'queued'
@@ -146,7 +165,7 @@ func (q *Queries) CancelQueued(ctx context.Context, arg CancelQueuedParams) (int
 }
 
 const claimAttempt = `-- name: ClaimAttempt :one
-UPDATE attempts a SET status = 'running', started_at = now(), runs = a.runs + 1
+UPDATE attempts a SET status = 'running', started_at = now(), runs = a.runs + 1, claim_token = $1
 FROM (
     SELECT at.experiment_id, at.seq
     FROM attempts at JOIN experiments e ON e.id = at.experiment_id
@@ -156,12 +175,12 @@ FROM (
     FOR UPDATE OF at SKIP LOCKED
 ) n
 WHERE a.experiment_id = n.experiment_id AND a.seq = n.seq
-RETURNING a.experiment_id, a.seq, a.candidate, a.params, a.dataset_id, a.symbol, a.status, a.failure, a.cache, a.cache_key, a.metrics, a.eligible, a.violations, a.runs, a.started_at, a.finished_at
+RETURNING a.experiment_id, a.seq, a.candidate, a.params, a.dataset_id, a.symbol, a.status, a.failure, a.cache, a.cache_key, a.metrics, a.eligible, a.violations, a.runs, a.started_at, a.finished_at, a.claim_token
 `
 
 // Claims the next queued attempt of any running experiment (oldest first).
-func (q *Queries) ClaimAttempt(ctx context.Context) (Attempt, error) {
-	row := q.db.QueryRow(ctx, claimAttempt)
+func (q *Queries) ClaimAttempt(ctx context.Context, claimToken string) (Attempt, error) {
+	row := q.db.QueryRow(ctx, claimAttempt, claimToken)
 	var i Attempt
 	err := row.Scan(
 		&i.ExperimentID,
@@ -180,6 +199,7 @@ func (q *Queries) ClaimAttempt(ctx context.Context) (Attempt, error) {
 		&i.Runs,
 		&i.StartedAt,
 		&i.FinishedAt,
+		&i.ClaimToken,
 	)
 	return i, err
 }
@@ -187,7 +207,8 @@ func (q *Queries) ClaimAttempt(ctx context.Context) (Attempt, error) {
 const completeAttempt = `-- name: CompleteAttempt :exec
 UPDATE attempts SET status = 'done', metrics = $1, eligible = $2, violations = $3,
     cache = $4, cache_key = $5, finished_at = now()
-WHERE experiment_id = $6 AND seq = $7 AND status = 'running'
+WHERE experiment_id = $6 AND seq = $7 AND status = 'running' AND claim_token = $8
+  AND EXISTS (SELECT 1 FROM experiments e WHERE e.id = attempts.experiment_id AND e.status IN ('running', 'paused'))
 `
 
 type CompleteAttemptParams struct {
@@ -198,6 +219,7 @@ type CompleteAttemptParams struct {
 	CacheKey     string
 	ExperimentID string
 	Seq          int32
+	ClaimToken   string
 }
 
 func (q *Queries) CompleteAttempt(ctx context.Context, arg CompleteAttemptParams) error {
@@ -209,6 +231,7 @@ func (q *Queries) CompleteAttempt(ctx context.Context, arg CompleteAttemptParams
 		arg.CacheKey,
 		arg.ExperimentID,
 		arg.Seq,
+		arg.ClaimToken,
 	)
 	return err
 }
@@ -253,7 +276,7 @@ func (q *Queries) CountExperiments(ctx context.Context) (int64, error) {
 
 const endAttempt = `-- name: EndAttempt :exec
 UPDATE attempts SET status = $1, failure = $2, finished_at = now()
-WHERE experiment_id = $3 AND seq = $4 AND status IN ('queued', 'running')
+WHERE experiment_id = $3 AND seq = $4 AND status = 'running' AND claim_token = $5
 `
 
 type EndAttemptParams struct {
@@ -261,6 +284,7 @@ type EndAttemptParams struct {
 	Failure      string
 	ExperimentID string
 	Seq          int32
+	ClaimToken   string
 }
 
 func (q *Queries) EndAttempt(ctx context.Context, arg EndAttemptParams) error {
@@ -269,12 +293,14 @@ func (q *Queries) EndAttempt(ctx context.Context, arg EndAttemptParams) error {
 		arg.Failure,
 		arg.ExperimentID,
 		arg.Seq,
+		arg.ClaimToken,
 	)
 	return err
 }
 
 const finishExperiment = `-- name: FinishExperiment :exec
-UPDATE experiments SET status = $1, result = $2, error = $3, finished_at = now() WHERE id = $4
+UPDATE experiments SET status = $1, result = $2, error = $3, finished_at = now()
+WHERE id = $4 AND status = 'finalizing'
 `
 
 type FinishExperimentParams struct {
@@ -309,6 +335,45 @@ func (q *Queries) GetAlgorithmVersion(ctx context.Context, id string) (Algorithm
 		&i.Definition,
 		&i.State,
 		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getClaimedAttempt = `-- name: GetClaimedAttempt :one
+SELECT a.experiment_id, a.seq, a.candidate, a.params, a.dataset_id, a.symbol, a.status, a.failure, a.cache, a.cache_key, a.metrics, a.eligible, a.violations, a.runs, a.started_at, a.finished_at, a.claim_token FROM attempts a JOIN experiments e ON e.id = a.experiment_id
+WHERE a.experiment_id = $1 AND a.seq = $2 AND a.claim_token = $3
+  AND a.status = 'running' AND e.status IN ('running', 'paused')
+`
+
+type GetClaimedAttemptParams struct {
+	ExperimentID string
+	Seq          int32
+	ClaimToken   string
+}
+
+// Re-read after the worker registers its cancellation handler. Cancelling before
+// registration is still observed durably, even if the notification was missed.
+func (q *Queries) GetClaimedAttempt(ctx context.Context, arg GetClaimedAttemptParams) (Attempt, error) {
+	row := q.db.QueryRow(ctx, getClaimedAttempt, arg.ExperimentID, arg.Seq, arg.ClaimToken)
+	var i Attempt
+	err := row.Scan(
+		&i.ExperimentID,
+		&i.Seq,
+		&i.Candidate,
+		&i.Params,
+		&i.DatasetID,
+		&i.Symbol,
+		&i.Status,
+		&i.Failure,
+		&i.Cache,
+		&i.CacheKey,
+		&i.Metrics,
+		&i.Eligible,
+		&i.Violations,
+		&i.Runs,
+		&i.StartedAt,
+		&i.FinishedAt,
+		&i.ClaimToken,
 	)
 	return i, err
 }
@@ -489,7 +554,7 @@ func (q *Queries) ListAlgorithms(ctx context.Context) ([]Algorithm, error) {
 }
 
 const listAttempts = `-- name: ListAttempts :many
-SELECT experiment_id, seq, candidate, params, dataset_id, symbol, status, failure, cache, cache_key, metrics, eligible, violations, runs, started_at, finished_at FROM attempts
+SELECT experiment_id, seq, candidate, params, dataset_id, symbol, status, failure, cache, cache_key, metrics, eligible, violations, runs, started_at, finished_at, claim_token FROM attempts
 WHERE experiment_id = $1 AND ($2::text IS NULL OR status = $2)
 ORDER BY seq DESC
 LIMIT $4 OFFSET $3
@@ -533,6 +598,7 @@ func (q *Queries) ListAttempts(ctx context.Context, arg ListAttemptsParams) ([]A
 			&i.Runs,
 			&i.StartedAt,
 			&i.FinishedAt,
+			&i.ClaimToken,
 		); err != nil {
 			return nil, err
 		}
@@ -694,10 +760,18 @@ func (q *Queries) ReportExists(ctx context.Context, id string) (bool, error) {
 }
 
 const requeueRunning = `-- name: RequeueRunning :execrows
-UPDATE attempts SET status = 'queued' WHERE status = 'running'
+UPDATE attempts a SET
+    status = CASE WHEN e.status IN ('running', 'paused') THEN 'queued' ELSE 'cancelled' END,
+    failure = CASE WHEN e.status IN ('running', 'paused') THEN '' ELSE 'بازیابی: آزمایش پایان یافته است' END,
+    finished_at = CASE WHEN e.status IN ('running', 'paused') THEN NULL ELSE now() END,
+    claim_token = ''
+FROM experiments e
+WHERE e.id = a.experiment_id
+  AND (a.status = 'running' OR (a.status = 'queued' AND e.status NOT IN ('running', 'paused')))
 `
 
-// After a crash or kill: attempts left running by a dead process run again.
+// With the exclusive scheduler session held, recover dead claims. Paused work
+// stays queued, and terminal experiments cannot regain runnable attempts.
 func (q *Queries) RequeueRunning(ctx context.Context) (int64, error) {
 	result, err := q.db.Exec(ctx, requeueRunning)
 	if err != nil {
@@ -707,7 +781,8 @@ func (q *Queries) RequeueRunning(ctx context.Context) (int64, error) {
 }
 
 const setExperimentStatus = `-- name: SetExperimentStatus :execrows
-UPDATE experiments SET status = $1
+UPDATE experiments SET status = $1,
+    finished_at = CASE WHEN $1 = 'cancelled' THEN now() ELSE finished_at END
 WHERE id = $2 AND status = ANY($3::text[])
 `
 

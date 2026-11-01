@@ -2,6 +2,7 @@ package search
 
 import (
 	"context"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -81,10 +82,15 @@ func (s *Scheduler) Wake() {
 // Run processes the queue until ctx ends, then waits for running attempts.
 func (s *Scheduler) Run(ctx context.Context) error {
 	s.init()
+	lease, err := s.acquireLease(ctx)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = lease.Close(context.Background()) }()
 	if n, err := s.Store.RequeueRunning(ctx); err != nil {
 		return fmt.Errorf("requeue: %w", err)
 	} else if n > 0 {
-		slog.Info("re-queued attempts interrupted by the last shutdown", "attempts", n)
+		slog.Info("recovered interrupted attempts", "attempts", n)
 	}
 	var wg sync.WaitGroup
 	defer wg.Wait()
@@ -97,7 +103,12 @@ func (s *Scheduler) Run(ctx context.Context) error {
 		if err := s.Limiter.Acquire(ctx); err != nil {
 			return nil
 		}
-		a, err := s.Store.ClaimAttempt(ctx)
+		var token [16]byte
+		if _, err := rand.Read(token[:]); err != nil {
+			s.Limiter.Release()
+			return err
+		}
+		a, err := s.Store.ClaimAttempt(ctx, hex.EncodeToString(token[:]))
 		if err != nil {
 			s.Limiter.Release()
 			if !errors.Is(err, pgx.ErrNoRows) && ctx.Err() == nil {
@@ -209,8 +220,16 @@ func (s *Scheduler) run(ctx context.Context, a db.Attempt) {
 	}
 	end := func(status, why string) {
 		write(func(c context.Context) error {
-			return s.Store.EndAttempt(c, db.EndAttemptParams{ExperimentID: a.ExperimentID, Seq: a.Seq, Status: status, Failure: why})
+			return s.Store.EndAttempt(c, db.EndAttemptParams{ExperimentID: a.ExperimentID, Seq: a.Seq, ClaimToken: a.ClaimToken, Status: status, Failure: why})
 		})
+	}
+	// Cancellation may have committed between claim and handler registration.
+	// Re-read durable ownership before loading data or doing any computation.
+	if _, err := s.Store.GetClaimedAttempt(actx, db.GetClaimedAttemptParams{ExperimentID: a.ExperimentID, Seq: a.Seq, ClaimToken: a.ClaimToken}); err != nil {
+		if !errors.Is(err, pgx.ErrNoRows) && ctx.Err() == nil {
+			end("failed", failure(err))
+		}
+		return
 	}
 
 	ms, cacheState, key, err := s.evaluate(actx, a)
@@ -234,9 +253,30 @@ func (s *Scheduler) run(ctx context.Context, a db.Attempt) {
 	vJ, _ := json.Marshal(violations)
 	write(func(c context.Context) error {
 		return s.Store.CompleteAttempt(c, db.CompleteAttemptParams{
-			ExperimentID: a.ExperimentID, Seq: a.Seq, Metrics: msJ, Eligible: &ok, Violations: vJ, Cache: cacheState, CacheKey: key,
+			ExperimentID: a.ExperimentID, Seq: a.Seq, ClaimToken: a.ClaimToken, Metrics: msJ, Eligible: &ok, Violations: vJ, Cache: cacheState, CacheKey: key,
 		})
 	})
+}
+
+// The local engine has one scheduler per database schema. A dedicated session
+// lock prevents a second process from recovering a live worker's claims. Closing
+// the session releases ownership even on crashes; no long transaction is held.
+func (s *Scheduler) acquireLease(ctx context.Context) (*pgx.Conn, error) {
+	pooled, err := s.Store.Pool.Acquire(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn := pooled.Hijack()
+	var ok bool
+	err = conn.QueryRow(ctx, "SELECT pg_try_advisory_lock(hashtext(current_schema()), hashtext('search-scheduler'))").Scan(&ok)
+	if err != nil || !ok {
+		_ = conn.Close(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		return nil, errors.New("search: scheduler already running for this workspace")
+	}
+	return conn, nil
 }
 
 // evaluate returns the attempt's OOS metrics, from the run cache when every input matches.

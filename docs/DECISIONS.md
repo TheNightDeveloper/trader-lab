@@ -46,10 +46,14 @@ Consequence: 6–8 s steady latency (fine for 1m research). Switching to the kli
 
 ## ADR-011 Availability of live and backfilled bars
 Decision: a live bar's AvailableAt is when the engine actually received it, never earlier than close + ingest_delay. Bars backfilled after an outage are therefore late, and as-of reads during the outage do not see them. Outages are stored as `outage` quality issues.
-Consequence: backtests over live-ingested periods reflect what the live system really knew. Archive re-imports of the same bars with identical values do not change their stored AvailableAt (no new revision).
+Consequence (updated by ADR-046): same-value archive reimports cannot backdate an existing
+AvailableAt. Later availability or closure corrections are separate immutable revisions.
 
 ## ADR-012 Bitemporal candles and content-addressed datasets
-Decision: candle rows are never updated. A source correction inserts revision+1. Reads filter by AvailableAt (as-of, virtual time) and ingested_at (known-at, knowledge time). A dataset version pins known_at and its id is the SHA-256 of spec + bars; loading re-verifies the hash. known_at comes from the database clock, the same clock that stamps ingested_at.
+Decision: candle rows are never updated. A source correction inserts revision+1. Live reads
+filter AvailableAt. Legacy datasets reconstruct from ingested_at <= known_at and verify the
+spec/bar hash. New format-1 datasets use exact revision membership and a separate hash
+namespace (ADR-046); known_at is provenance rather than their membership definition.
 Consequence: old versions stay readable after corrections; re-importing identical data gives the same id.
 
 ## ADR-013 Fixed scale 8 for prices and quantities
@@ -72,7 +76,9 @@ Consequence: M2 has no DB writes; the golden files are the record of decisions f
 ## ADR-017 Walk-forward as one continuous run, sliced into folds
 Context: separate per-fold runs restart from flat with fresh capital, so folds do not add up to the report and positions are cut at artificial boundaries.
 Decision: one continuous out-of-sample run (warm-up gated), folds are windows of it; the holdout is its own run. In M5 the retrained model of each step feeds intents into the same continuous run.
-Consequence: report = Σ folds = Σ trades exactly; fold "train" windows matter only once models train (M5).
+Consequence (updated by ADR-044): period PnL = Σ fold period PnL, while cohort lifetime
+PnL = Σ opening-cohort trade nets through the run end. These two ledgers need not be equal
+at an intermediate observation boundary. Fold "train" windows matter once models train (M5).
 
 ## ADR-018 Integer statistics, including Sharpe
 Decision: no float anywhere in metrics; Sharpe uses math/big with integer square roots (10⁶ extra precision) and is truncated at 2 decimals. The no-float guard covers sim, money and metrics.
@@ -91,9 +97,11 @@ Decision: an unset TTL is (latency + 9) bars of the input timeframe (10 minutes 
 Consequence: golden scenarios unchanged; stored specs keep 0 = automatic, so reproduction is deterministic.
 
 ## ADR-022 The research queue lives in PostgreSQL
-Context: a search must survive an engine kill without losing or repeating attempts.
-Decision: attempts are rows; the scheduler claims them with `FOR UPDATE SKIP LOCKED`, marks done/failed in the same transaction as the result, and re-queues `running` rows on start. No in-memory queue or message broker.
-Consequence: kill/resume is exact (`search/TestKillMidSearchResumesWithoutLossOrDuplicates`); throughput is bounded by DB round trips (fine at thousands of attempts, not millions).
+Context: a search must survive an engine kill without losing attempt records or duplicating
+committed results. Decision: attempts are rows, claimed with `FOR UPDATE SKIP LOCKED`;
+result writes are atomic. Recovery and claim fencing are refined by ADR-047.
+Consequence: computation is at least once after interruption, never claimed exactly once.
+One durable attempt row remains per sequence, with retries visible through runs.
 
 ## ADR-023 One limiter for all research work
 Decision: `jobs.Limiter` holds the research share of CPUs (default 75%, always leaving one core). Search attempts take one slot each; a quick report (CreateReport) takes all slots; a P&L recalculation takes one. Health, data ingestion and the API never take a slot.
@@ -233,3 +241,68 @@ big.Int and round the mean half-even, so valid int64 inputs cannot overflow thei
 Consequence: ordinary valid experiments keep their selection rule. Incomplete, duplicate,
 foreign or incomparable results cannot win. Stored historical experiment results are unchanged.
 This is independent of transaction/recovery work in FIX-05 and accounting overflow elsewhere.
+
+## ADR-044 Period attribution and observed accounting (P0 FIX-04, 2026-11-02)
+Decision: evaluation p0.3 defines net_pnl (also exposed as period_pnl) as the change
+between the last equity marks known at/before each boundary. Observed events in (From, To]
+belong to exactly one period. Gross = period net + observed fees + observed slippage.
+The opening cohort remains [From, To), with a separately labeled cohort_lifetime_pnl
+through the complete run's end. Only valid period PnL over identical windows determines
+walk wins. Trade counts/stats belong to the opening cohort and exclude closes not yet
+observed; period exposure includes positions carried from earlier cohorts.
+Consequence: future exits can change lifetime cohort PnL but cannot revise a past period's
+score. Sim transient snapshots retain open-position marks and execution observation times;
+they are excluded from canonical JSON. All existing simulator golden files stay unchanged.
+New period aggregates use wide sums and report overflow as invalid. This does not resolve
+every pre-existing accounting overflow path. Old reports remain immutable, carry legacy
+warnings, and compare as different evaluation contracts. Regenerate rather than rewrite them.
+
+## ADR-045 Actual freeze and common forward coverage (P0 FIX-04, 2026-11-02)
+Decision: cycle documents separately persist training_cutoff, model_created_at, freeze_at
+and trade_start. Final fits use data/labels ready at the cutoff, but serve only from their
+actual completion clock reading (artifact AsOf, resealed before persistence). Freeze is read
+after both model records exist; trading starts at the first timeframe boundary at/after it.
+Historical walk-forward fits remain as-of simulations, distinct from prospective evidence.
+Forward end is fixed at trade_start + configured days, including on a late scheduler tick.
+Count only the common contiguous prefix of complete, real, available bars for every symbol;
+a missing minute, partial aggregate, synthetic fill or unavailable bar keeps the gate pending.
+Final training and forward each hold a research slot; forward checks its projected bar budget
+before loading. Legacy forward cycles close as failed, and old recommendations stay readable
+and rejectable but cannot promote under superseded evidence.
+Consequence: elapsed time alone cannot approve a challenger. Corrections/snapshot membership,
+full raw-ingest memory budgets and atomic lifecycle transitions remain separate P0 work.
+
+## ADR-046 Pin persistent dataset revision membership (P0 FIX-05, 2026-11-02)
+Context: a transaction can stamp ingested_at before a cutoff yet commit after snapshot
+creation. A later timestamp-filtered load can then select a revision the creator never saw.
+Decision: migration 00006 adds dataset_members with foreign keys to exact raw 1m candle
+revisions. New format_version 1 snapshots select, resample, hash, register members and save
+the manifest in one repeatable-read transaction. Dedup serialization conflicts retry boundedly.
+The dataset/snapshot/v1 hash covers spec, raw and resampled canonical values, close times
+and revision identities; corrections hidden by aggregation still produce a different ID.
+Load uses membership only, verifies member/output counts and recomputes the hash. No fallback
+to a newer cutoff on missing members. Legacy format-0 IDs/manifests keep their reconstruction.
+Ingest serializes revision allocation per symbol; first creation of a month partition is
+serialized across symbols. Availability and closure corrections are revisioned, while
+AvailableAt never moves earlier through reimport. No existing financial record is rewritten.
+Consequence: one member row per raw candle adds storage and load work. Raw-memory budgets,
+retention and full report build/instrument/policy provenance remain separate work. Older
+binaries cannot load format-1 snapshots; keep a compatible engine with retained new data.
+
+## ADR-047 Durable cancellation and claim-fenced completion (P0 FIX-05, 2026-11-02)
+Decision: cancel marks an experiment and all its queued/running attempts terminal in one
+transaction. Scheduler notification is an optimization to stop CPU work, not a correctness
+condition. Each claim has a fresh token; workers re-read state after registering their
+cancellation handler. Completion/failure requires the current running token; completed rows
+are never overwritten by stale workers. Startup requeues interrupted running/paused work,
+but cancels orphans belonging to terminal experiments. The runs counter preserves retries.
+A dedicated per-schema scheduler session lock precedes recovery; another scheduler cannot
+steal live claims. Shutdown waits for workers before releasing the session. This is a local
+single-engine policy, not a distributed exactly-once service. Learning recovery still follows
+the configured single learning-engine deployment.
+Learning finish/recovery cancels queued candidates and closes the cycle in one transaction;
+completed candidate results stay immutable. Actual registry counts repair a partial generation
+checkpoint, and a late candidate result cannot revive a cancelled row. A failed final cycle
+write rolls back candidate cancellation too.
+Consequence: raw compute can repeat after a crash, but obsolete claims cannot replace newer
+results. Full algorithm/version/model lifecycle locking remains F15, not established here.

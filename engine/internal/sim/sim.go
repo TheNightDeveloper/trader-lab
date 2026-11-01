@@ -538,7 +538,7 @@ func (r *runner) apply(sym string, l leg, quoteRate int64, at time.Time, kind st
 		if p.qty == 0 {
 			z := money.Amount{Asset: instrument.USDT}
 			r.res.Trades = append(r.res.Trades, Trade{
-				Instrument: sym, OpenedAt: at, Qty: money.Qty{Scale: sc}, OpenQty: money.Qty{Scale: sc},
+				Instrument: sym, OpenedAt: at, OpenedObservedAt: r.clk.Now(), Qty: money.Qty{Scale: sc}, OpenQty: money.Qty{Scale: sc},
 				EntryRef: z, ExitRef: z, Gross: z, Slippage: z, Fees: z, Net: z,
 			})
 			p.trade, p.entryCost, p.exitProceeds, p.stop, p.take = len(r.res.Trades)-1, 0, 0, 0, 0
@@ -561,6 +561,7 @@ func (r *runner) apply(sym string, l leg, quoteRate int64, at time.Time, kind st
 		if p.qty == 0 {
 			closed := at
 			t.ClosedAt = &closed
+			t.ClosedObservedAt = r.clk.Now()
 			t.Gross.V = t.ExitRef.V - t.EntryRef.V
 			t.Net.V = p.exitProceeds - p.entryCost
 			if t.Net.V != t.Gross.V-t.Slippage.V-t.Fees.V {
@@ -571,7 +572,7 @@ func (r *runner) apply(sym string, l leg, quoteRate int64, at time.Time, kind st
 	}
 	p.changedAt = at
 	r.res.Fills = append(r.res.Fills, Fill{
-		DecisionID: decisionID, Time: at, Instrument: sym, Side: side, Kind: kind,
+		DecisionID: decisionID, Time: at, ObservedAt: r.clk.Now(), Instrument: sym, Side: side, Kind: kind,
 		Qty:      money.Qty{V: l.qty, Scale: sc},
 		RefPrice: money.Price{V: l.ref, Scale: sc}, Price: money.Price{V: l.price, Scale: sc},
 		RefValue: money.Amount{V: l.refValue, Asset: q}, Value: money.Amount{V: l.value, Asset: q},
@@ -600,11 +601,16 @@ func (r *runner) usdtPer(ctx context.Context, a money.Asset) (int64, error) {
 // equity values every balance in USDT: positions through their own pair (ETHBTC:
 // ETH → BTC → USDT), remaining cash through <ASSET>USDT.
 func (r *runner) equity(ctx context.Context) (int64, error) {
+	eq, _, err := r.valuation(ctx)
+	return eq, err
+}
+
+func (r *runner) valuation(ctx context.Context) (int64, int64, error) {
 	cash := map[string]int64{}
 	for a, v := range r.bal {
 		cash[a] = v
 	}
-	var total int64
+	var total, unrealized int64
 	for _, sym := range r.symbols {
 		p := r.pos[sym]
 		if p == nil || p.qty == 0 {
@@ -614,9 +620,22 @@ func (r *runner) equity(ctx context.Context) (int64, error) {
 		cash[spec.Base.Code] -= p.qty
 		v, err := fx.PositionUSDT(ctx, r, spec, money.Qty{V: p.qty, Scale: sc}, r.clk.Now(), money.Floor)
 		if err != nil {
-			return 0, err
+			return 0, 0, err
 		}
 		total += v.V
+		openNet, err := (money.Amount{V: p.exitProceeds}).Add(money.Amount{V: v.V})
+		if err != nil {
+			return 0, 0, err
+		}
+		openNet, err = openNet.Sub(money.Amount{V: p.entryCost})
+		if err != nil {
+			return 0, 0, err
+		}
+		u, err := (money.Amount{V: unrealized}).Add(openNet)
+		if err != nil {
+			return 0, 0, err
+		}
+		unrealized = u.V
 	}
 	assets := make([]string, 0, len(cash))
 	for a := range cash {
@@ -629,25 +648,25 @@ func (r *runner) equity(ctx context.Context) (int64, error) {
 		}
 		v, err := fx.ToUSDT(ctx, r, money.Amount{V: cash[a], Asset: instrument.Asset(a)}, r.clk.Now(), money.Floor)
 		if err != nil {
-			return 0, err
+			return 0, 0, err
 		}
 		total += v.V
 	}
-	return total, nil
+	return total, unrealized, nil
 }
 
 // markEquity records equity when the closed-bar data becomes available. Until every held asset has a USDT
 // rate (e.g. BTC holdings before the first BTCUSDT bar) there is no honest value,
 // so no point is recorded.
 func (r *runner) markEquity(ctx context.Context, at time.Time) error {
-	eq, err := r.equity(ctx)
+	eq, unrealized, err := r.valuation(ctx)
 	if errors.Is(err, fx.ErrNoRate) {
 		return nil
 	}
 	if err != nil {
 		return fmt.Errorf("equity at %s: %w", stamp(at), err)
 	}
-	r.res.Equity = append(r.res.Equity, EquityPoint{Time: at, Equity: money.Amount{V: eq, Asset: instrument.USDT}})
+	r.res.Equity = append(r.res.Equity, EquityPoint{Time: at, Equity: money.Amount{V: eq, Asset: instrument.USDT}, Unrealized: unrealized})
 	return nil
 }
 

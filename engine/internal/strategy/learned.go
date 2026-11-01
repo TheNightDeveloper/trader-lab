@@ -91,3 +91,7 @@ func (s *learned) OnBar(ctx RunContext, b data.Bar) ([]Intent, error) {
 	}
 	return []Intent{in}, nil
 }
+
+// Features read observed history directly; warming a learned strategy must not
+// consume its first trading intent before the evaluated forward window.
+func (s *learned) Warmup(RunContext, data.Bar) error { return nil }

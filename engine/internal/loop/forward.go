@@ -14,6 +14,15 @@ import (
 	"tradinglab/engine/internal/strategy"
 )
 
+// CurrentEvidence rejects historical recommendations whose fold and forward
+// evidence used older semantics. They remain readable and can be rejected.
+func CurrentEvidence(d Doc) bool {
+	return d.EvaluationVersion == eval.Version && d.TrainingCutoff != nil &&
+		d.ModelCreatedAt != nil && d.FreezeAt != nil && d.TradeStart != nil &&
+		!d.ModelCreatedAt.Before(*d.TrainingCutoff) && !d.FreezeAt.Before(*d.ModelCreatedAt) &&
+		!d.TradeStart.Before(*d.FreezeAt)
+}
+
 // Advance updates every cycle in its forward test and decides those whose test
 // is complete. Called by the scheduler; tests call it with a virtual clock.
 func (l *Loop) Advance(ctx context.Context) error {
@@ -39,14 +48,25 @@ func (l *Loop) Advance(ctx context.Context) error {
 // forward runs the frozen challenger and the champion over the bars that became
 // available after the freeze, with the same simulator and costs.
 func (l *Loop) forward(ctx context.Context, c *cycle) error {
+	if !CurrentEvidence(c.doc) || c.doc.Challenger == nil {
+		return l.finish(c, Failed, "شواهد چرخه با قرارداد فعلی سازگار نیست؛ یک چرخه تازه اجرا کنید.")
+	}
 	cfg := c.doc.Config
 	tf := cfg.Timeframe.Duration()
-	freeze := *c.doc.FreezeAt
+	start := *c.doc.TradeStart
 	now := l.Clock.Now().UTC()
 	through := dataEnd(now, tf)
-	if !through.After(freeze) {
+	end := start.Add(time.Duration(cfg.Gate.ForwardDays) * 24 * time.Hour)
+	if through.After(end) {
+		through = end // a late scheduler tick must not change the registered window
+	}
+	if !through.After(start) {
 		return nil
 	}
+	if err := l.Limiter.Acquire(ctx); err != nil {
+		return err
+	}
+	defer l.Limiter.Release()
 	chal, err := l.artifact(ctx, c.doc.Challenger.ModelID)
 	if err != nil {
 		return err
@@ -57,15 +77,40 @@ func (l *Loop) forward(ctx context.Context, c *cycle) error {
 	}
 	// Warm-up: enough earlier bars for the first features after the freeze.
 	warm := time.Duration(max(feature.Lookback(chal.Recipe.Features), feature.Lookback(champ.Recipe.Features))+2) * tf
+	if int64(through.Sub(start.Add(-warm))/tf)*int64(len(cfg.Symbols)) > int64(cfg.MaxBars) {
+		return fmt.Errorf("%w: forward window exceeds bar budget", ErrConfig)
+	}
 	bars := map[string][]data.Bar{}
 	for _, sym := range cfg.Symbols {
-		bs, err := data.Reader{Q: l.Store.Queries}.Bars(ctx, data.Query{Symbol: sym, Timeframe: cfg.Timeframe, From: freeze.Add(-warm), To: through, AsOf: now})
+		bs, err := data.Reader{Q: l.Store.Queries}.Bars(ctx, data.Query{Symbol: sym, Timeframe: cfg.Timeframe, From: start.Add(-warm), To: through, AsOf: now})
 		if err != nil {
 			return err
 		}
 		bars[sym] = bs
 	}
-	w := eval.Window{From: freeze, To: through}
+	through, missing := coveredThrough(bars, cfg.Symbols, start, through, now, tf)
+	fwd := &Forward{Through: through, Days: int(through.Sub(start) / (24 * time.Hour)), MissingSymbols: missing}
+	c.doc.Forward = fwd
+	c.doc.Steps[ForwardTest] = fmt.Sprintf("%d / %d d", fwd.Days, cfg.Gate.ForwardDays)
+	if len(missing) > 0 {
+		c.doc.Steps[ForwardTest] += fmt.Sprintf(" — پوشش داده ناقص: %v", missing)
+	}
+	if !through.After(start) {
+		c.doc.Gate = gate(cfg.Gate, &c.doc, false)
+		return l.save(ctx, l.Store.Queries, c)
+	}
+	// Limit inputs to the proven common candle interval; eval also clips scores
+	// by the observation time of each event.
+	for sym, bs := range bars {
+		kept := bs[:0]
+		for _, b := range bs {
+			if !b.AvailableAt.After(now) && b.OpenTime.Before(through) {
+				kept = append(kept, b)
+			}
+		}
+		bars[sym] = kept
+	}
+	w := eval.Window{From: start, To: through}
 	split := eval.Split{Folds: []eval.Fold{{Index: 1, Test: w}}, OOS: w, Holdout: eval.Window{From: through, To: through}}
 	run := func(m model.Artifact) ([]metrics.Metric, error) {
 		s, err := strategy.NewLearned([]model.Artifact{m})
@@ -75,16 +120,13 @@ func (l *Loop) forward(ctx context.Context, c *cycle) error {
 		v, _, _, err := eval.RunSplit(ctx, s, cfg.sim(), report.Specs(), bars, split)
 		return v.Metrics, err
 	}
-	fwd := &Forward{Through: through, Days: int(through.Sub(freeze) / (24 * time.Hour))}
 	if fwd.Challenger, err = run(chal); err != nil {
 		return err
 	}
 	if fwd.Champion, err = run(champ); err != nil {
 		return err
 	}
-	c.doc.Forward = fwd
-	c.doc.Steps[ForwardTest] = fmt.Sprintf("%d / %d d", fwd.Days, cfg.Gate.ForwardDays)
-	complete := fwd.Days >= cfg.Gate.ForwardDays
+	complete := fwd.Days >= cfg.Gate.ForwardDays && len(missing) == 0
 	c.doc.Gate = gate(cfg.Gate, &c.doc, complete)
 	if !complete {
 		return l.save(ctx, l.Store.Queries, c)
@@ -92,7 +134,7 @@ func (l *Loop) forward(ctx context.Context, c *cycle) error {
 
 	// Decision. Record the forward window as dataset versions, then judge.
 	for _, sym := range cfg.Symbols {
-		ds, _, err := data.CreateDataset(ctx, l.Store, data.DatasetSpec{Symbol: sym, Timeframe: cfg.Timeframe, From: freeze.Add(-warm), To: through, GapPolicy: data.GapFlag})
+		ds, _, err := data.CreateDataset(ctx, l.Store, data.DatasetSpec{Symbol: sym, Timeframe: cfg.Timeframe, From: start.Add(-warm), To: through, GapPolicy: data.GapFlag})
 		if err != nil {
 			return err
 		}
@@ -107,6 +149,36 @@ func (l *Loop) forward(ctx context.Context, c *cycle) error {
 		return l.save(ctx, l.Store.Queries, c)
 	}
 	return l.finish(c, outcome, reason)
+}
+
+// coveredThrough proves a contiguous common prefix of real, complete bars.
+// Wall-clock age, sparse bars, synthetic gap fills and partial aggregates are
+// never substitutes for observed coverage of every configured instrument.
+func coveredThrough(bars map[string][]data.Bar, symbols []string, start, end, asOf time.Time, tf time.Duration) (time.Time, []string) {
+	through := end
+	var missing []string
+	if len(symbols) == 0 {
+		return start, []string{"no instruments"}
+	}
+	for _, sym := range symbols {
+		t := start
+		bs := bars[sym]
+		for i := firstAtOrAfter(bs, start); i < len(bs) && t.Before(end); i++ {
+			b := bs[i]
+			if b.Instrument != sym || !b.OpenTime.Equal(t) || !b.CloseTime.Equal(t.Add(tf)) ||
+				b.AvailableAt.Before(b.CloseTime) || b.AvailableAt.After(asOf) || b.Flags&(data.FlagFilled|data.FlagPartial) != 0 {
+				break
+			}
+			t = b.CloseTime
+		}
+		if t.Before(end) {
+			missing = append(missing, sym)
+		}
+		if t.Before(through) {
+			through = t
+		}
+	}
+	return through, missing
 }
 
 // decide: all pass → recommend. Otherwise not better when the improvement

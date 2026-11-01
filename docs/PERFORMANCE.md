@@ -1,5 +1,24 @@
 # Performance
 
+## P0 FIX-04 local measurement (2026-11-02)
+
+macOS arm64, Apple M4, Go 1.26.5. Same one-iteration command on a temporary copy of
+Phase-2 HEAD `d9f7016` and on the final working tree:
+`go test ./internal/sim -run '^$' -bench MillionBars -benchtime=1x -benchmem`.
+
+| Source | ns/op | allocated B/op | allocations/op | fills |
+|---|---:|---:|---:|---:|
+| Before FIX-04 | 338,999,375 | 503,186,872 | 188,462 | 332 |
+| Final FIX-04 | 350,002,333 | 523,867,256 | 188,429 | 332 |
+
+As-of open-position marks add transient state to each equity point. Moving fill observation
+timestamps onto fills rather than every equity point reduced the initial 581,717,744 B/op
+prototype to the final value above. Final allocated bytes are about 4.1% above this local
+baseline. This is one run per version, not a latency distribution, peak RAM or a comparison
+to the older Windows reference. No performance or profitability improvement is claimed.
+
+The historical measurements below retain their original hardware and test conditions.
+
 Reference hardware: Intel Core i3-12100F (4 cores / 8 threads), 16 GB RAM,
 Windows 10, local PostgreSQL 18, Go 1.26. Run `make bench` to reproduce; add a row when a
 change could move a number.

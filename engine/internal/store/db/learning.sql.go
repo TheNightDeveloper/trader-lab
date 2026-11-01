@@ -12,6 +12,24 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const cancelCycleCandidates = `-- name: CancelCycleCandidates :execrows
+UPDATE cycle_candidates SET status = 'cancelled', failure = $1
+WHERE cycle_id = $2 AND status = 'queued'
+`
+
+type CancelCycleCandidatesParams struct {
+	Failure string
+	CycleID int64
+}
+
+func (q *Queries) CancelCycleCandidates(ctx context.Context, arg CancelCycleCandidatesParams) (int64, error) {
+	result, err := q.db.Exec(ctx, cancelCycleCandidates, arg.Failure, arg.CycleID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const consumedUntil = `-- name: ConsumedUntil :one
 SELECT coalesce(max(consumed_until), '0001-01-01'::timestamptz)::timestamptz FROM learning_cycles WHERE algorithm_id = $1
 `
@@ -35,7 +53,8 @@ func (q *Queries) CountCycles(ctx context.Context, algorithmID string) (int64, e
 }
 
 const endCandidate = `-- name: EndCandidate :exec
-UPDATE cycle_candidates SET status = $3, failure = $4, result = $5 WHERE cycle_id = $1 AND seq = $2
+UPDATE cycle_candidates SET status = $3, failure = $4, result = $5
+WHERE cycle_id = $1 AND seq = $2 AND status = 'queued'
 `
 
 type EndCandidateParams struct {

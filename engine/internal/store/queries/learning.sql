@@ -51,7 +51,12 @@ INSERT INTO cycle_candidates (cycle_id, seq, change, recipe, recipe_hash, status
 VALUES ($1, $2, $3, $4, $5, 'queued');
 
 -- name: EndCandidate :exec
-UPDATE cycle_candidates SET status = $3, failure = $4, result = $5 WHERE cycle_id = $1 AND seq = $2;
+UPDATE cycle_candidates SET status = $3, failure = $4, result = $5
+WHERE cycle_id = $1 AND seq = $2 AND status = 'queued';
+
+-- name: CancelCycleCandidates :execrows
+UPDATE cycle_candidates SET status = 'cancelled', failure = @failure
+WHERE cycle_id = @cycle_id AND status = 'queued';
 
 -- name: ListCandidates :many
 SELECT * FROM cycle_candidates WHERE cycle_id = $1 ORDER BY seq;

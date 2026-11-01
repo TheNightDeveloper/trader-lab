@@ -32,6 +32,9 @@ func UpsertBars(ctx context.Context, s *store.Store, symbol, source, ref string,
 	var res Upserted
 	err := s.InTx(ctx, func(q *db.Queries) error {
 		res = Upserted{}
+		if err := q.LockCandleIngest(ctx, symbol); err != nil {
+			return err
+		}
 		months := map[time.Time]bool{}
 		for _, b := range bars {
 			m := time.Date(b.OpenTime.Year(), b.OpenTime.Month(), 1, 0, 0, 0, 0, time.UTC)
@@ -83,8 +86,9 @@ func SaveIssues(ctx context.Context, q *db.Queries, symbol string, issues []Issu
 	return nil
 }
 
-// Reader is the only way to read bars. Every call takes asOf; nothing with
-// AvailableAt > asOf is ever returned (plan §7: the as-of API is the only API).
+// Reader serves live/legacy as-of reads; nothing with AvailableAt > asOf is
+// returned. New persistent datasets instead load pinned revisions in datasets.go;
+// their simulator still reveals each bar only at its AvailableAt.
 type Reader struct {
 	Q *db.Queries
 }

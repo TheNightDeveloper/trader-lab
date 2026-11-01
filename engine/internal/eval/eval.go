@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"math/big"
 	"runtime"
 	"slices"
 	"sync"
@@ -19,7 +20,7 @@ import (
 )
 
 // Version changes whenever evaluation semantics change, including strategy warm-up.
-const Version = "p0.2"
+const Version = "p0.3"
 
 var ErrSpec = errors.New("eval: invalid spec")
 
@@ -205,7 +206,7 @@ func RunSplit(ctx context.Context, s strategy.Strategy, cfg sim.Config, specs ma
 	}
 	var folds []FoldView
 	for _, f := range split.Folds {
-		folds = append(folds, FoldView{Fold: f, Metrics: pick(window(res, f.Test, cfg.Capital.V), "net_pnl", "total_return", "max_drawdown", "trades", "win_rate")})
+		folds = append(folds, FoldView{Fold: f, Metrics: pick(window(res, f.Test, cfg.Capital.V), "net_pnl", "period_pnl", "cohort_lifetime_pnl", "total_return", "max_drawdown", "trades", "win_rate")})
 	}
 	return view(res, split.OOS, cfg.Capital.V), folds, res, nil
 }
@@ -325,7 +326,7 @@ func EvaluateWith(ctx context.Context, spec Spec, bars map[string][]data.Bar, sp
 	ev.Holdout = view(results[1], split.Holdout, cfg.Capital.V)
 	for _, f := range split.Folds {
 		full := window(results[0], f.Test, cfg.Capital.V)
-		ev.Folds = append(ev.Folds, FoldView{Fold: f, Metrics: pick(full, "net_pnl", "total_return", "max_drawdown", "trades", "win_rate")})
+		ev.Folds = append(ev.Folds, FoldView{Fold: f, Metrics: pick(full, "net_pnl", "period_pnl", "cohort_lifetime_pnl", "total_return", "max_drawdown", "trades", "win_rate")})
 	}
 	for k, key := range []string{"fee_x2", "slippage_x3", "latency_plus_1"} {
 		sv := StressView{Key: key}
@@ -403,30 +404,79 @@ func stress(c sim.Config, feeX, slipX int64, latency int) sim.Config {
 	return c
 }
 
-// window computes metrics of a run over w only: equity at closes inside w, trades
-// opened inside w, starting from the equity at w's start.
+// window attributes equity changes and observed fill costs to (From, To].
+// Cohorts are trades opened in [From, To); their lifetime PnL is explicitly
+// separate and must never determine a past fold's score.
 func window(r *sim.Result, w Window, capital int64) []metrics.Metric {
-	in := metrics.Input{Start: w.From, End: w.To, Initial: capital}
+	in := metrics.Input{Start: w.From, End: w.To, Initial: capital, ExposureTrades: []metrics.Trade{}}
+	var unrealized int64
+	cohort := new(big.Int)
 	for _, p := range r.Equity {
 		switch {
 		case !p.Time.After(w.From):
 			in.Initial = p.Equity.V // last mark at or before the window start
+			unrealized = p.Unrealized
 		case !p.Time.After(w.To):
 			in.Equity = append(in.Equity, metrics.Point{T: p.Time, Equity: p.Equity.V})
+			unrealized = p.Unrealized
 		}
 	}
 	for _, t := range r.Trades {
-		if !w.Contains(t.OpenedAt) {
+		inCohort := w.Contains(t.OpenedAt)
+		if inCohort {
+			cohort.Add(cohort, big.NewInt(t.Net.V)) // measured through the run's end, not w.To
+		}
+		if t.OpenedObservedAt.After(w.To) {
 			continue
 		}
-		mt := metrics.Trade{Opened: t.OpenedAt, Gross: t.Gross.V, Fees: t.Fees.V, Slippage: t.Slippage.V, Net: t.Net.V}
-		if t.ClosedAt != nil && !t.ClosedAt.After(w.To) {
+		mt := metrics.Trade{Opened: t.OpenedAt}
+		if t.ClosedAt != nil && !t.ClosedAt.After(w.To) && !t.ClosedObservedAt.After(w.To) {
 			c := *t.ClosedAt
 			mt.Closed = &c
+			mt.Gross, mt.Fees, mt.Slippage, mt.Net = t.Gross.V, t.Fees.V, t.Slippage.V, t.Net.V
 		}
-		in.Trades = append(in.Trades, mt)
+		in.ExposureTrades = append(in.ExposureTrades, mt)
+		if inCohort {
+			in.Trades = append(in.Trades, mt)
+		}
 	}
-	return metrics.Compute(in)
+	ms := metrics.Compute(in)
+	final := in.Initial
+	if len(in.Equity) > 0 {
+		final = in.Equity[len(in.Equity)-1].Equity
+	}
+	fees, slip := new(big.Int), new(big.Int)
+	for _, f := range r.Fills {
+		if !f.ObservedAt.After(w.From) || f.ObservedAt.After(w.To) {
+			continue
+		}
+		fees.Add(fees, big.NewInt(f.FeeUSDT.V))
+		slip.Add(slip, big.NewInt(f.SlippageUSDT.V))
+	}
+	net := new(big.Int).Sub(big.NewInt(final), big.NewInt(in.Initial))
+	gross := new(big.Int).Add(new(big.Int).Add(new(big.Int).Set(net), fees), slip)
+	values := map[string]*big.Int{"net_pnl": net, "gross_pnl": gross, "fees": fees, "slippage": slip, "unrealized_pnl": big.NewInt(unrealized)}
+	assign := func(m *metrics.Metric, v *big.Int) {
+		if !v.IsInt64() {
+			m.V, m.Valid, m.Invalid = 0, false, "خارج از محدوده عددی"
+		} else {
+			m.V = v.Int64()
+		}
+	}
+	for i := range ms {
+		if v, ok := values[ms[i].Key]; ok {
+			assign(&ms[i], v)
+		}
+	}
+	for _, item := range []struct {
+		key string
+		v   *big.Int
+	}{{"period_pnl", net}, {"cohort_lifetime_pnl", cohort}} {
+		m := metrics.Metric{Key: item.key, Group: metrics.GroupPnL, Scale: 8, Unit: metrics.USDT, Valid: true}
+		assign(&m, item.v)
+		ms = append(ms, m)
+	}
+	return ms
 }
 
 func view(r *sim.Result, w Window, capital int64) RunView {

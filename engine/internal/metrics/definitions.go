@@ -8,10 +8,12 @@ type Definition struct {
 }
 
 var Definitions = map[string]Definition{
-	"net_pnl":               {"سود خالص", "جمع سود و زیان همه معامله‌ها پس از کسر کارمزد و لغزش. معامله‌های باز با آخرین قیمت بسته‌شدن ارزش‌گذاری می‌شوند."},
-	"gross_pnl":             {"سود ناخالص", "تفاوت ارزش خروج و ورود به قیمت مرجع، پیش از هر هزینه."},
-	"fees":                  {"کارمزد", "جمع کارمزد هر دو سمت همه معامله‌ها، به USDT در لحظه اجرا."},
-	"slippage":              {"لغزش", "فاصله قیمت اجرا از قیمت مرجع (باز شدن کندل بعد)، جمع همه معامله‌ها."},
+	"net_pnl":               {"سود خالص", "در گزارش فعلی، تغییر سرمایه در همین دوره پس از هزینه‌هاست و خروج آینده آن را تغییر نمی‌دهد؛ در گزارش قدیمی، نتیجه نهایی معاملات بازشده در دوره است."},
+	"period_pnl":            {"سود دوره‌ای", "سرمایه در آخرین رخداد مشاهده‌شده تا پایان دوره منهای سرمایه آغاز آن؛ مبنای مقایسه گام‌های هم‌دوره."},
+	"cohort_lifetime_pnl":   {"سود نهایی معاملات دوره", "جمع نتیجه معاملات بازشده در این دوره تا پایان کل اجرا؛ می‌تواند شامل خروج در دوره‌های بعد باشد و مبنای امتیاز دوره نیست."},
+	"gross_pnl":             {"سود ناخالص دوره", "سود خالص دوره به‌علاوه کارمزد و لغزش رخدادهای مشاهده‌شده در همین دوره."},
+	"fees":                  {"کارمزد", "کارمزد اجراهایی که در همین دوره مشاهده شده‌اند، به USDT در لحظه اجرا."},
+	"slippage":              {"لغزش", "فاصله قیمت اجرا و مرجع برای اجراهای مشاهده‌شده در همین دوره."},
 	"unrealized_pnl":        {"سود تحقق‌نیافته", "سود خالص معامله‌هایی که در پایان دوره هنوز باز بودند، بدون هزینه خروج."},
 	"final_equity":          {"سرمایه پایانی", "ارزش همه دارایی‌ها به USDT در پایان دوره."},
 	"total_return":          {"بازده کل", "تغییر سرمایه پایانی نسبت به سرمایه اولیه."},
@@ -42,7 +44,7 @@ var GroupLabels = []struct{ Key, Label string }{
 // experiment objectives and constraints).
 func UnitOf(key string) (Unit, int32, bool) {
 	switch key {
-	case "net_pnl", "gross_pnl", "fees", "slippage", "unrealized_pnl", "final_equity", "avg_win", "avg_loss", "best_trade", "worst_trade":
+	case "net_pnl", "period_pnl", "cohort_lifetime_pnl", "gross_pnl", "fees", "slippage", "unrealized_pnl", "final_equity", "avg_win", "avg_loss", "best_trade", "worst_trade":
 		return USDT, 8, true
 	case "total_return", "max_drawdown", "exposure", "win_rate", "profit_factor":
 		return Ratio, 6, true

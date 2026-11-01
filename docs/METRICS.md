@@ -38,6 +38,22 @@ Source of truth for every number the engine reports. Start from IMPLEMENTATION_P
 - Forward-filled bar (gap policy `ffill`): `O=H=L=C = previous close`, volume 0,
   `AvailableAt = CloseTime + ingest_delay`.
 
+### Persistent dataset membership (P0 FIX-05)
+- New manifests use `format_version: 1`, retain `resample_version: 2`, and record the raw
+  member count. `dataset_members` pins each raw 1m open time and revision in one
+  repeatable-read transaction; synthetic gap bars are derived, never raw members.
+- Snapshot ID covers spec, raw and resampled values, close times and revision identities.
+  Load checks membership/count/hash rather than rerunning a timestamp membership query.
+  A late-committing ingest cannot change an existing new-format version.
+- Legacy manifests with no format_version keep their original IDs and cutoff semantics.
+  They are never silently upgraded; a newly created snapshot has a distinct ID namespace.
+- Ingest stores later availability/closure changes as revisions. Same-value archive reimports
+  cannot move a previously observed availability earlier. Concurrent revision allocation is
+  serialized per symbol, and concurrent initial month partition creation is serialized.
+- Test evidence includes late commits both hidden and visible in aggregation, metadata-only
+  corrections, concurrent dedup/ingest, missing-member corruption, atomic write failure and
+  a legacy-record migration down/up in an isolated schema. See ADR-046.
+
 ## Data quality rules (M1) — `data.Clean`, `data.Gaps`
 
 | Issue | Rule | Effect |
@@ -60,7 +76,7 @@ All values are int64 at scale 8; rates (fee, slippage, target) are parts per mil
 
 ### Fill reference and timing
 - A decision is made when its input bar becomes available (`AvailableAt`).
-- New reports record `fill_model: "causal-next-open/v1"` and evaluation `p0.2`.
+- New reports record `fill_model: "causal-next-open/v1"` and evaluation `p0.3`.
   Eligibility requires both a target bar index at least `LatencyBars` beyond the highest
   target index observed when deciding, and `OpenTime >= Decision.At`. The first qualifying
   bar processed fills at its open, provided `OpenTime <= Decision.At + IntentTTL`.
@@ -120,21 +136,27 @@ quote→USDT cross rate available at fill time (half-even). For USDT pairs the r
 
 ## Report metrics (M3) — `metrics.Compute`, all integer
 
-Evaluated over a window `[start, end)` from equity marks available inside it and the
-trades opened inside it. USDT at scale 8, ratios in ppm (scale 6), Sharpe at scale 2.
+Current evaluation p0.3 attributes equity changes and observed fill costs to `(start, end]`;
+opening cohorts are `[start, end)`. Initial equity is the last mark at/before start; final
+equity is the last mark at/before end. USDT at scale 8, ratios in ppm, Sharpe at scale 2.
+`metrics.Compute` remains the standalone trade-statistics primitive; eval applies the period
+ledger below. A last candle available after end is not retroactively marked into that period.
 
 | Key | Formula | Invalid when |
 |---|---|---|
-| net_pnl, gross_pnl, fees, slippage | Σ over trades (open trades: unrealized net) — exact sums | never |
-| unrealized_pnl | Σ net of trades still open at the end | never |
+| net_pnl, period_pnl | final equity − starting equity; includes carried positions | aggregate overflow |
+| gross_pnl | period_pnl + period fees + period slippage | aggregate overflow |
+| fees, slippage | costs of fills observed during (start, end], regardless of reference fill time | aggregate overflow |
+| cohort_lifetime_pnl | Σ lifetime net of trades opened in [start, end), through the complete run end; may contain later exits | aggregate overflow |
+| unrealized_pnl | as-of marked net of all still-open positions, including carried positions; not the lifetime value from a later close | overflow fails simulator valuation |
 | final_equity | last equity mark (or the initial equity if none) | never |
 | total_return | (final − initial) / initial, half-even | initial = 0 |
 | max_drawdown | max over marks of (running peak − equity) / peak | never (0 if none) |
 | max_drawdown_duration | longest time below a previous peak, to recovery or the end | never |
 | sharpe | mean / sample sd of period returns × √periods_per_year; risk-free 0; period 24 h, 365 per year; equity sampled at each period end (last mark at or before it); returns at scale 9; math/big with an integer square root (10⁶ extra precision), truncated | < 30 samples, zero variance, equity ≤ 0 |
 | exposure | length of the union of open-trade intervals ∩ window / window length | empty window |
-| trades | count, open and closed | never |
-| closed_trades | count closed inside the window | never |
+| trades | count of observed trades opened in this cohort, open and closed | never |
+| closed_trades | this cohort's trades with a close observed by end | never |
 | win_rate | closed with net > 0 / closed | < 5 closed trades |
 | profit_factor | Σ winning nets / −Σ losing nets | < 5 closed trades, or no losing trade |
 | avg_win, avg_loss | mean net of winners / losers, half-even | < 5 closed trades, or none of that kind |
@@ -188,6 +210,13 @@ reason. Tests: `metrics/*` (Sharpe matches a float reference: 6.28 for the 40-da
   anything is queued.
 - Attempt = one candidate on one pair (one dataset version). Statuses: queued, running,
   done, failed, cancelled. Every attempt counts toward "attempts" shown with a winner.
+- FIX-05: cancellation durably closes every queued/running row, even if its worker missed
+  the notification. Current claim tokens fence completion and failure. Recovery resumes
+  running/paused work, cancels terminal-experiment orphans, and preserves retry runs.
+  A per-schema scheduler session lock protects recovery from another live scheduler.
+  Computation may repeat after interruption; the registry/result effect is conditional
+  and idempotent. Terminal learning cycles retain no queued candidate; partial generation
+  counts come from the actual durable rows. See ADR-047.
 - Hard constraints (`Check`): each is `metric >= value` or `metric <= value`, compared as
   integers at the metric's own scale (ratios as fractions: 0.25 = 25%). An invalid metric
   (too few samples) fails its constraint: an unknown value never satisfies a hard limit.
@@ -243,8 +272,8 @@ a late earlier dependency cannot be hidden by the final bar's timestamp.
   round-trips). Artifact id = `m_` + first 16 hex of SHA-256 of its JSON without the id.
 
 ### Walk-forward with retraining (learning cycle)
-Known P0 gap (F05): fold net P&L currently uses lifetime results for trades opened in the
-fold. Future exits can affect it and fold wins; period/cohort separation is pending FIX-04.
+FIX-04 / p0.3: fold net P&L is period equity change. Lifetime opening-cohort PnL is
+separate and may change with future exits; it never determines a past fold's win.
 - Range: `[now − lookback, end)`, end = `now − 1 bar`, truncated to the timeframe.
 - Test region starts after the first fifth of the range (minimum training), or after the
   end of the last forward window used in a decision, whichever is later; it is cut into
@@ -253,8 +282,8 @@ fold. Future exits can affect it and fold wins; period/cohort separation is pend
 - One continuous simulator run over the region (ADR-017); folds are windows of it.
 - Candidate eligible: walk-forward max drawdown ≤ gate cap, return valid and greater than the
   champion's (retrained the same way on the same folds). Challenger = eligible candidate with
-  the highest walk-forward return (ties: lower number). Fold wins: folds where its net P&L
-  exceeds the champion's.
+  the highest walk-forward return (ties: lower number). Fold wins require valid period_pnl
+  exceeding the champion's over exactly the same test start/end. Missing evidence is not zero.
 
 ### Candidates (bounded, one change each, fixed order)
 Add each missing feature; drop each feature (when more than two, never the filter feature);
@@ -263,12 +292,16 @@ and × 2 (logistic: ± 0.02). Duplicates and the parent are left out; capped at 
 budget.
 
 ### Forward test and gate
-Known P0 gap (F04): the implementation currently backdates freeze to the data cutoff and
-counts elapsed days without verifying per-symbol coverage. The rules below describe current
-behavior, not a validated forward gate; actual freeze/trade-start and coverage need FIX-04.
-- Freeze: the challenger is trained once on everything ready at the end of the range; the
-  champion keeps its active model (or, without one, gets a baseline trained the same way).
-  Both run from the freeze on bars that become available later, with the cycle's costs.
+FIX-04 / p0.3 records training_cutoff, actual model_created_at, freeze_at and trade_start
+separately. Final training uses only labels ready at cutoff; model AsOf is completion time.
+- Freeze is recorded after final training and model persistence. The champion keeps its
+  active model (or gets a baseline); neither is scored before the next timeframe boundary
+  at/after actual freeze. Learned warm-up never consumes the first tradable intent.
+- Forward is bounded to trade_start + configured days. Days count the contiguous common
+  prefix of complete, non-synthetic available candles across all configured symbols.
+  Missing/partial data keeps it pending even after the wall-clock deadline; backfill can
+  complete the same fixed window. Missing symbols are retained in the cycle's progress.
+- Legacy cycles with old fold/freeze evidence cannot promote; old records remain readable.
 - Gate (copied into the cycle at its start): forward and walk-forward drawdown ≤ cap;
   `forward return(challenger) − forward return(champion) ≥ min improvement`;
   `forward drawdown(challenger) − forward drawdown(champion) ≤ max degradation`;
@@ -316,8 +349,8 @@ The second batch uses `evaluation_version: "p0.2"` for causal fills and marks eq
 closed-bar availability, so a delayed old candle cannot backdate a new equity point or
 replace a newer close. Reports from any older evaluation version get a read-time legacy
 badge and cannot be compared as current evaluations. Stored reports are never rewritten.
-Period/cohort attribution (F05), actual forward freeze/coverage (F04), and non-USDT execution
-capability (F08) remain open; passing these tests does not establish those acceptance criteria.
+Period/cohort attribution (F05) and actual forward freeze/coverage (F04) were superseded
+by p0.3 / FIX-04 on 2026-11-02 (ADR-044/045). Non-USDT execution capability (F08) remains open.
 
 ## P0 training and selection compatibility (2026-11-01)
 - New fits record `training_version: causal-features/v1` in their content-addressed artifact.

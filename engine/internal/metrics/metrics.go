@@ -52,6 +52,10 @@ type Input struct {
 	Initial    int64     // starting equity, USDT
 	Equity     []Point   // sorted by time, within the window
 	Trades     []Trade
+	// ExposureTrades may include positions carried into a window, whereas Trades
+	// is its opening cohort for counts and closed-trade statistics. Nil retains
+	// the standalone calculator's historical behavior.
+	ExposureTrades []Trade
 	// Sharpe sampling: Period (default 24h), periods per year (default 365, crypto
 	// trades every day), minimum samples (default 30).
 	Period      time.Duration
@@ -195,8 +199,12 @@ func exposure(in Input) Metric {
 		return m
 	}
 	type iv struct{ a, b time.Time }
-	ivs := make([]iv, 0, len(in.Trades))
-	for _, t := range in.Trades {
+	trades := in.ExposureTrades
+	if trades == nil {
+		trades = in.Trades
+	}
+	ivs := make([]iv, 0, len(trades))
+	for _, t := range trades {
 		end := in.End
 		if t.Closed != nil {
 			end = *t.Closed

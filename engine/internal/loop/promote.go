@@ -24,6 +24,9 @@ func (l *Loop) Approve(ctx context.Context, id int64, note string) error {
 		if err != nil {
 			return err
 		}
+		if !CurrentEvidence(c.doc) {
+			return fmt.Errorf("%w: legacy evidence requires a new learning cycle", ErrState)
+		}
 		alg := c.row.AlgorithmID
 		a, err := q.GetAlgorithm(ctx, alg)
 		if err != nil {
@@ -132,6 +135,9 @@ func (l *Loop) decided(ctx context.Context, q *db.Queries, id int64) (cycle, err
 func (l *Loop) close(ctx context.Context, q *db.Queries, c *cycle, outcome, reason string) error {
 	now := l.Clock.Now().UTC()
 	c.row.State, c.row.Outcome, c.row.Reason, c.row.FinishedAt = Done, outcome, reason, &now
+	if _, err := q.CancelCycleCandidates(ctx, db.CancelCycleCandidatesParams{CycleID: c.row.ID, Failure: reason}); err != nil {
+		return err
+	}
 	return l.save(ctx, q, c)
 }
 

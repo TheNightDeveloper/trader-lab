@@ -2,6 +2,37 @@
 
 Update at the end of every session.
 
+## P0 FIX-05 (2026-11-02)
+- Additive migration 00006 pins exact candle revisions in dataset_members and adds claim
+  tokens. New dataset format 1 has a separate hash namespace covering raw/aggregate values
+  and revision identities; old IDs/manifests/results remain unchanged. Evaluation stays p0.3.
+- Snapshot selection/hash/member persistence is one repeatable-read transaction; late commits
+  and aggregation-hidden corrections cannot alter an existing new-format version.
+- Durable cancellation closes every unfinished attempt; token-fenced writes reject stale
+  workers. A per-schema scheduler lease protects startup recovery; retries remain visible.
+- Cycle finish/recovery atomically closes queued candidates and retains actual generation
+  counts. Completed candidate results stay unchanged. See ADR-046/047.
+- Verified locally: **237 Go tests/subtests with DB mandatory and race, 0 failed/skipped,
+  22 packages**, 11 unchanged goldens, 48 Flutter tests, Dart MCP analysis, lint/vet and
+  reproducible sqlc generation. Evidence and migration limits: P0_STATUS.md.
+- Next: F07 Reproduce/raw-memory bounds and F08 capability restrictions; remaining F10,
+  F13, F15, accounting/network/label and hosted/browser gates keep P0 open.
+
+## P0 FIX-04 (2026-11-02)
+- Evaluation p0.3 separates as-of period PnL from opening-cohort lifetime PnL, with causal
+  fill-cost attribution, carried-position exposure and identical-window fold scoring.
+- Final model completion, actual freeze and first tradable boundary are separate from the
+  training cutoff. Forward requires a contiguous complete-data prefix for every symbol;
+  elapsed time with missing data cannot produce a recommendation.
+- Final fits and forward hold research slots; legacy learning evidence cannot promote.
+- Verified locally: **212 Go tests/subtests, 0 failed/skipped, 22 packages, race enabled
+  and DB mandatory**; 11 unchanged simulator goldens; go vet; 48 Flutter tests; Dart MCP
+  analysis; 2 CI-summary tests; lint and planted bad-import depguard probe. Same-machine
+  1M-bar allocation increases 4.1% for as-of marks; see PERFORMANCE.md. See P0_STATUS.md
+  and ADR-044/045 for contracts and evidence.
+- Next: FIX-05 snapshot membership, terminal candidates and claim/cancel recovery. Full P0,
+  hosted CI, accounting/lifecycle gates and real-browser UX acceptance remain open.
+
 ## P0 analytics / learning review (2026-11-01)
 - Rechecked feature readiness, fitting, prediction, search selection, fold attribution and
   forward gates. Detailed findings and priorities: [P0_LEARNING_REVIEW_FA.md](P0_LEARNING_REVIEW_FA.md).
@@ -35,20 +66,23 @@ Update at the end of every session.
 - Next: FIX-04 actual freeze/forward coverage and period/cohort metrics. See P0_STATUS.md.
 
 ## Current phase
-P0 — correctness and evidence stabilization: **in progress** (2026-11-01).
+P0 — correctness and evidence stabilization: **in progress** (2026-11-02).
 The new P0–P8 phases are defined in `Trading_Lab_Master_Plan_FA.md`; M0–M6 below
 are historical implementation milestones, not evidence that the P0 release gate passed.
 
 First P0 batch: atomic weighted research admission (F03), buy-and-hold warm-up (F02),
 exact comparison assumptions (F14), stop/take chart unit prices (F09), cancellable P&L
 requests (F11), shared dataset cache invalidation and retrieval beyond 200 (part of F10).
-The first batch used evaluation `p0.1`; current evaluations use `p0.2` (FIX-02).
+The first batch used evaluation `p0.1`, FIX-02 used `p0.2`, and current evaluations
+use `p0.3` (FIX-04).
 CI now has PostgreSQL, mandatory DB tests, race and retained pass/fail/skip evidence (F12);
 the hosted workflow still needs its first run. See [P0_STATUS.md](P0_STATUS.md) for the
 executed checks, remaining work, UX states and rollback notes.
 
-FIX-02 is complete; next is FIX-04 forward freeze/coverage and period metrics. Server-side dataset search, snapshot membership, lifecycle locking,
-provenance, recovery and remaining P0 stress cases are still open. **Do not start P1 yet.**
+FIX-02, FIX-04 and FIX-05 are implemented within their recorded scopes. Next are F07
+Reproduce/raw-memory bounds and F08 capability restrictions. Server-side dataset search,
+full report provenance, lifecycle locking and remaining P0 stress cases are still open.
+**Do not start P1 yet.**
 
 ## M6 done (2026-10-28)
 - ChartService: bars, engine-computed indicators (MA, EMA, BB, RSI, MACD), decision markers (entry, exit, rejected, stop/take), decision record; report charts end at the out-of-sample end.

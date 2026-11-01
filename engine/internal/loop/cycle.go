@@ -53,19 +53,23 @@ const (
 
 // Doc is a cycle's record: its pre-registered config and everything it found.
 type Doc struct {
-	Config     Config            `json:"config"`
-	Champion   Contender         `json:"champion"`
-	Datasets   []string          `json:"datasets,omitempty"`
-	DataFrom   time.Time         `json:"data_from"`
-	DataTo     time.Time         `json:"data_to"`
-	FreshBars  int               `json:"fresh_bars"`
-	Steps      map[string]string `json:"steps"` // short progress note per state
-	Candidates int               `json:"candidates"`
-	Eligible   int               `json:"eligible"`
-	Walk       *Walk             `json:"walk,omitempty"`
-	Challenger *Contender        `json:"challenger,omitempty"`
-	FreezeAt   *time.Time        `json:"freeze_at,omitempty"`
-	Forward    *Forward          `json:"forward,omitempty"`
+	EvaluationVersion string            `json:"evaluation_version,omitempty"`
+	Config            Config            `json:"config"`
+	Champion          Contender         `json:"champion"`
+	Datasets          []string          `json:"datasets,omitempty"`
+	DataFrom          time.Time         `json:"data_from"`
+	DataTo            time.Time         `json:"data_to"`
+	FreshBars         int               `json:"fresh_bars"`
+	Steps             map[string]string `json:"steps"` // short progress note per state
+	Candidates        int               `json:"candidates"`
+	Eligible          int               `json:"eligible"`
+	Walk              *Walk             `json:"walk,omitempty"`
+	Challenger        *Contender        `json:"challenger,omitempty"`
+	FreezeAt          *time.Time        `json:"freeze_at,omitempty"`
+	TrainingCutoff    *time.Time        `json:"training_cutoff,omitempty"`
+	ModelCreatedAt    *time.Time        `json:"model_created_at,omitempty"`
+	TradeStart        *time.Time        `json:"trade_start,omitempty"`
+	Forward           *Forward          `json:"forward,omitempty"`
 	// Datasets of the forward window, recorded at the decision.
 	ForwardDatasets []string   `json:"forward_datasets,omitempty"`
 	Gate            []GateItem `json:"gate,omitempty"`
@@ -93,10 +97,11 @@ type Walk struct {
 }
 
 type Forward struct {
-	Through    time.Time        `json:"through"`
-	Days       int              `json:"days"`
-	Champion   []metrics.Metric `json:"champion"`
-	Challenger []metrics.Metric `json:"challenger"`
+	Through        time.Time        `json:"through"`
+	Days           int              `json:"days"`
+	Champion       []metrics.Metric `json:"champion"`
+	Challenger     []metrics.Metric `json:"challenger"`
+	MissingSymbols []string         `json:"missing_symbols,omitempty"`
 }
 
 // GateItem: Status is pass | fail | pending; Text is the plain-language condition.
@@ -142,7 +147,7 @@ func (l *Loop) Begin(ctx context.Context, trigger string) (int64, error) {
 	if err := cfg.Validate(); err != nil {
 		return 0, err
 	}
-	doc, err := json.Marshal(Doc{Config: cfg, Steps: map[string]string{}})
+	doc, err := json.Marshal(Doc{EvaluationVersion: eval.Version, Config: cfg, Steps: map[string]string{}})
 	if err != nil {
 		return 0, err
 	}
@@ -228,7 +233,34 @@ func (l *Loop) finish(c *cycle, outcome, reason string) error {
 	// A cancelled run still has to be recorded: write with a fresh context.
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	return l.save(ctx, l.Store.Queries, c)
+	return l.Store.InTx(ctx, func(q *db.Queries) error {
+		row, err := q.GetCycleForUpdate(ctx, c.row.ID)
+		if err != nil {
+			return err
+		}
+		if row.State == Done {
+			return nil
+		}
+		if _, err := q.CancelCycleCandidates(ctx, db.CancelCycleCandidatesParams{CycleID: c.row.ID, Failure: reason}); err != nil {
+			return err
+		}
+		rows, err := q.ListCandidates(ctx, c.row.ID)
+		if err != nil {
+			return err
+		}
+		// Generation can be interrupted before its summary checkpoint was saved.
+		// The durable registry, including cancelled rows, is the source of truth.
+		c.doc.Candidates = len(rows)
+		c.doc.Usage.Candidates = max(c.doc.Usage.Candidates, len(rows))
+		c.doc.Eligible = 0
+		for _, row := range rows {
+			var result CandidateResult
+			if row.Status == "done" && json.Unmarshal(row.Result, &result) == nil && result.Eligible {
+				c.doc.Eligible++
+			}
+		}
+		return l.save(ctx, q, c)
+	})
 }
 
 const interrupted = "قطع شد پیش از پایان؛ نسخه و مدل فعال دست‌نخورده ماندند."
@@ -500,13 +532,19 @@ func (l *Loop) run(ctx context.Context, c *cycle) error {
 	// freeze: the challenger is trained once on everything ready at the freeze and
 	// never changes during its forward test. The champion keeps its active model;
 	// without one, its recipe gets a baseline trained the same way.
-	freeze := to
-	one := []train.Step{{From: from, To: freeze, AsOf: freeze}}
+	c.doc.TrainingCutoff = &to
+	if err := l.Limiter.Acquire(ctx); err != nil {
+		return err
+	}
+	defer l.Limiter.Release()
+	one := []train.Step{{From: from, To: to, AsOf: to}}
 	if !champ.Active {
 		ms, err := train.WalkForward(ctx, champ.Recipe, bars, one, meta)
 		if err != nil {
 			return fmt.Errorf("champion baseline: %w", err)
 		}
+		ms[0].AsOf = l.Clock.Now().UTC()
+		ms[0].Seal()
 		if err := l.storeArtifact(ctx, c.row.ID, ms[0]); err != nil {
 			return err
 		}
@@ -517,11 +555,27 @@ func (l *Loop) run(ctx context.Context, c *cycle) error {
 	if err != nil {
 		return fmt.Errorf("challenger: %w", err)
 	}
+	created := l.Clock.Now().UTC()
+	if created.Before(to) {
+		return fmt.Errorf("%w: model creation precedes training cutoff", ErrState)
+	}
+	ms[0].AsOf = created
+	ms[0].Seal()
 	if err := l.storeArtifact(ctx, c.row.ID, ms[0]); err != nil {
 		return err
 	}
 	c.doc.Challenger.ModelID = ms[0].ID
+	freeze := l.Clock.Now().UTC()
+	if freeze.Before(created) {
+		return fmt.Errorf("%w: clock moved backwards during freeze", ErrState)
+	}
+	tradeStart := freeze.Truncate(tf)
+	if tradeStart.Before(freeze) {
+		tradeStart = tradeStart.Add(tf)
+	}
+	c.doc.ModelCreatedAt = &created
 	c.doc.FreezeAt = &freeze
+	c.doc.TradeStart = &tradeStart
 	c.doc.Steps[ForwardTest] = fmt.Sprintf("0 / %d d", cfg.Gate.ForwardDays)
 	c.doc.Gate = gate(cfg.Gate, &c.doc, false)
 	return l.step(ctx, c, ForwardTest)
@@ -566,7 +620,12 @@ func metricOK(ms []metrics.Metric, key string) (int64, bool) {
 func countWins(a, b []eval.FoldView) int {
 	n := 0
 	for i := range a {
-		if i < len(b) && metricV(a[i].Metrics, "net_pnl") > metricV(b[i].Metrics, "net_pnl") {
+		if i >= len(b) || !a[i].Fold.Test.From.Before(a[i].Fold.Test.To) || !a[i].Fold.Test.From.Equal(b[i].Fold.Test.From) || !a[i].Fold.Test.To.Equal(b[i].Fold.Test.To) {
+			continue
+		}
+		av, aok := metricOK(a[i].Metrics, "period_pnl")
+		bv, bok := metricOK(b[i].Metrics, "period_pnl")
+		if aok && bok && av > bv {
 			n++
 		}
 	}

@@ -70,7 +70,8 @@ func TestEvaluateIdentitiesAndIsolation(t *testing.T) {
 	ev, err := Evaluate(context.Background(), testSpec(), bars, specs())
 	require.NoError(t, err)
 
-	// Report numbers are exact sums of trade-level numbers.
+	// Cohort lifetime numbers are exact sums of trade-level numbers; period PnL
+	// instead reconciles with the equity known at the evaluated boundary.
 	var net, n int64
 	for _, tr := range ev.Main.Trades {
 		if ev.Split.OOS.Contains(tr.OpenedAt) {
@@ -79,16 +80,21 @@ func TestEvaluateIdentitiesAndIsolation(t *testing.T) {
 		}
 	}
 	require.Positive(t, n, "the wave should produce trades")
-	require.Equal(t, net, get(t, ev.OOS.Metrics, "net_pnl").V)
+	require.Equal(t, net, get(t, ev.OOS.Metrics, "cohort_lifetime_pnl").V)
+	period := get(t, ev.OOS.Metrics, "period_pnl").V
+	require.Equal(t, period, get(t, ev.OOS.Metrics, "net_pnl").V)
+	require.Equal(t, get(t, ev.OOS.Metrics, "final_equity").V-testSpec().Sim.Capital.V, period)
 	require.Equal(t, n, get(t, ev.OOS.Metrics, "trades").V)
 
 	// Folds partition the out-of-sample trades.
-	var foldNet, foldTrades int64
+	var foldNet, foldTrades, foldCohort int64
 	for _, f := range ev.Folds {
 		foldNet += get(t, f.Metrics, "net_pnl").V
 		foldTrades += get(t, f.Metrics, "trades").V
+		foldCohort += get(t, f.Metrics, "cohort_lifetime_pnl").V
 	}
-	require.Equal(t, net, foldNet)
+	require.Equal(t, period, foldNet)
+	require.Equal(t, net, foldCohort)
 	require.Equal(t, n, foldTrades)
 
 	// The main run never trades before OOS or into the holdout; the holdout run

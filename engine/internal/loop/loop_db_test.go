@@ -129,7 +129,8 @@ func TestCycleRecommendsAndOnlyTheUserPromotes(t *testing.T) {
 	chal, err := l.artifact(ctx, c.doc.Challenger.ModelID)
 	require.NoError(t, err)
 	require.Equal(t, c.doc.Champion.ModelID, chal.Parent)
-	require.Equal(t, *c.doc.FreezeAt, chal.AsOf, "frozen at the freeze")
+	require.Equal(t, *c.doc.ModelCreatedAt, chal.AsOf, "model serves only after its fit completed")
+	require.True(t, CurrentEvidence(c.doc))
 
 	v, m := active(t, l)
 	require.Empty(t, v+m, "a recommendation changes nothing by itself")
@@ -155,6 +156,79 @@ func TestCycleRecommendsAndOnlyTheUserPromotes(t *testing.T) {
 	s := get(t, l, id)
 	require.Equal(t, Skipped, s.row.Outcome)
 	require.Contains(t, s.row.Reason, "داده تازه ناکافی")
+}
+
+type advancingClock struct {
+	t    time.Time
+	step time.Duration
+}
+
+func (c *advancingClock) Now() time.Time {
+	now := c.t
+	c.t = c.t.Add(c.step)
+	return now
+}
+
+func TestActualFreezeAndIncompleteForwardCannotRecommend(t *testing.T) {
+	st, l, clk := setup(t)
+	ctx := context.Background()
+	id, err := l.Begin(ctx, "manual")
+	require.NoError(t, err)
+	// Completion reads a clock that has advanced while the models were fitted.
+	l.Clock = &advancingClock{t: clk.Now(), step: 2 * time.Hour}
+	require.NoError(t, l.RunCycle(ctx, id))
+	c := get(t, l, id)
+	require.Equal(t, ForwardTest, c.row.State, c.row.Reason)
+	require.True(t, c.doc.ModelCreatedAt.After(*c.doc.TrainingCutoff))
+	require.True(t, c.doc.FreezeAt.After(*c.doc.ModelCreatedAt))
+	require.False(t, c.doc.TradeStart.Before(*c.doc.FreezeAt))
+	chal, err := l.artifact(ctx, c.doc.Challenger.ModelID)
+	require.NoError(t, err)
+	require.Equal(t, *c.doc.ModelCreatedAt, chal.AsOf)
+	missing := c.doc.TradeStart.Add(12 * time.Hour)
+	_, err = st.Pool.Exec(ctx, "DELETE FROM candles WHERE symbol='BTCUSDT' AND open_time=$1", missing)
+	require.NoError(t, err)
+	end := c.doc.TradeStart.Add(time.Duration(c.doc.Config.Gate.ForwardDays) * 24 * time.Hour)
+	l.Clock = clock.NewVirtual(end.Add(2 * time.Hour))
+	require.NoError(t, l.Advance(ctx))
+	c = get(t, l, id)
+	require.Equal(t, ForwardTest, c.row.State, "elapsed days alone cannot complete a test")
+	require.Zero(t, c.doc.Forward.Days)
+	require.Equal(t, missing, c.doc.Forward.Through)
+	require.Equal(t, []string{"BTCUSDT"}, c.doc.Forward.MissingSymbols)
+	require.Nil(t, c.row.ConsumedUntil)
+	// Backfilling the actual missing minute makes the same fixed window eligible.
+	bs := momentumBars(36)
+	i := int(missing.Sub(day0) / time.Minute)
+	_, err = data.UpsertBars(ctx, st, "BTCUSDT", "archive", "restore-test", bs[i:i+1])
+	require.NoError(t, err)
+	require.NoError(t, l.Advance(ctx))
+	c = get(t, l, id)
+	require.NotEqual(t, ForwardTest, c.row.State)
+	require.Equal(t, end, c.doc.Forward.Through, "late ticks do not extend the registered test")
+	require.Equal(t, c.doc.Config.Gate.ForwardDays, c.doc.Forward.Days)
+	require.Empty(t, c.doc.Forward.MissingSymbols)
+}
+
+func TestLegacyForwardAndRecommendationFailClosed(t *testing.T) {
+	_, l, _ := setup(t)
+	ctx := context.Background()
+	id, err := l.Begin(ctx, "manual")
+	require.NoError(t, err)
+	c := get(t, l, id)
+	c.doc.EvaluationVersion = "p0.2"
+	c.row.State = ForwardTest
+	require.NoError(t, l.save(ctx, l.Store.Queries, &c))
+	require.NoError(t, l.Advance(ctx))
+	c = get(t, l, id)
+	require.Equal(t, Failed, c.row.Outcome)
+	// A previously recommended cycle is readable/rejectable, but cannot promote
+	// a model based on superseded evidence.
+	c.row.State, c.row.Outcome = Decision, Recommended
+	c.row.FinishedAt = nil
+	require.NoError(t, l.save(ctx, l.Store.Queries, &c))
+	require.ErrorIs(t, l.Approve(ctx, id, ""), ErrState)
+	require.NoError(t, l.Reject(ctx, id, "old evidence"))
 }
 
 func TestWorseChallengerAndInterruptionsLeaveTheChampion(t *testing.T) {

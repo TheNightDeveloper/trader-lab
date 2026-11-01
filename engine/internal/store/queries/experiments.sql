@@ -40,7 +40,8 @@ SELECT * FROM experiments ORDER BY created_at DESC, id LIMIT $1 OFFSET $2;
 SELECT count(*) FROM experiments;
 
 -- name: SetExperimentStatus :execrows
-UPDATE experiments SET status = @to_status
+UPDATE experiments SET status = @to_status,
+    finished_at = CASE WHEN @to_status = 'cancelled' THEN now() ELSE finished_at END
 WHERE id = @id AND status = ANY(@from_statuses::text[]);
 
 -- Moves a running experiment with nothing left to run into finalizing (once).
@@ -54,7 +55,8 @@ RETURNING e.id;
 SELECT id FROM experiments WHERE status = 'finalizing' ORDER BY created_at;
 
 -- name: FinishExperiment :exec
-UPDATE experiments SET status = @status, result = @result, error = @error, finished_at = now() WHERE id = @id;
+UPDATE experiments SET status = @status, result = @result, error = @error, finished_at = now()
+WHERE id = @id AND status = 'finalizing';
 
 -- name: CopyAttempts :copyfrom
 INSERT INTO attempts (experiment_id, seq, candidate, params, dataset_id, symbol, status)
@@ -62,7 +64,7 @@ VALUES ($1, $2, $3, $4, $5, $6, $7);
 
 -- Claims the next queued attempt of any running experiment (oldest first).
 -- name: ClaimAttempt :one
-UPDATE attempts a SET status = 'running', started_at = now(), runs = a.runs + 1
+UPDATE attempts a SET status = 'running', started_at = now(), runs = a.runs + 1, claim_token = @claim_token
 FROM (
     SELECT at.experiment_id, at.seq
     FROM attempts at JOIN experiments e ON e.id = at.experiment_id
@@ -74,18 +76,38 @@ FROM (
 WHERE a.experiment_id = n.experiment_id AND a.seq = n.seq
 RETURNING a.*;
 
+-- Re-read after the worker registers its cancellation handler. Cancelling before
+-- registration is still observed durably, even if the notification was missed.
+-- name: GetClaimedAttempt :one
+SELECT a.* FROM attempts a JOIN experiments e ON e.id = a.experiment_id
+WHERE a.experiment_id = @experiment_id AND a.seq = @seq AND a.claim_token = @claim_token
+  AND a.status = 'running' AND e.status IN ('running', 'paused');
+
 -- name: CompleteAttempt :exec
 UPDATE attempts SET status = 'done', metrics = @metrics, eligible = @eligible, violations = @violations,
     cache = @cache, cache_key = @cache_key, finished_at = now()
-WHERE experiment_id = @experiment_id AND seq = @seq AND status = 'running';
+WHERE experiment_id = @experiment_id AND seq = @seq AND status = 'running' AND claim_token = @claim_token
+  AND EXISTS (SELECT 1 FROM experiments e WHERE e.id = attempts.experiment_id AND e.status IN ('running', 'paused'));
 
 -- name: EndAttempt :exec
 UPDATE attempts SET status = @status, failure = @failure, finished_at = now()
-WHERE experiment_id = @experiment_id AND seq = @seq AND status IN ('queued', 'running');
+WHERE experiment_id = @experiment_id AND seq = @seq AND status = 'running' AND claim_token = @claim_token;
 
--- After a crash or kill: attempts left running by a dead process run again.
+-- With the exclusive scheduler session held, recover dead claims. Paused work
+-- stays queued, and terminal experiments cannot regain runnable attempts.
 -- name: RequeueRunning :execrows
-UPDATE attempts SET status = 'queued' WHERE status = 'running';
+UPDATE attempts a SET
+    status = CASE WHEN e.status IN ('running', 'paused') THEN 'queued' ELSE 'cancelled' END,
+    failure = CASE WHEN e.status IN ('running', 'paused') THEN '' ELSE 'بازیابی: آزمایش پایان یافته است' END,
+    finished_at = CASE WHEN e.status IN ('running', 'paused') THEN NULL ELSE now() END,
+    claim_token = ''
+FROM experiments e
+WHERE e.id = a.experiment_id
+  AND (a.status = 'running' OR (a.status = 'queued' AND e.status NOT IN ('running', 'paused')));
+
+-- name: CancelExperimentAttempts :execrows
+UPDATE attempts SET status = 'cancelled', failure = @failure, finished_at = now(), claim_token = ''
+WHERE experiment_id = @experiment_id AND status IN ('queued', 'running');
 
 -- name: CancelQueued :execrows
 UPDATE attempts SET status = 'cancelled', failure = @failure, finished_at = now()

@@ -120,7 +120,7 @@ func cycleP(row db.LearningCycle) (*labv1.Cycle, error) {
 		Id: row.ID, AlgorithmId: row.AlgorithmID, Trigger: row.Trigger, State: row.State, Outcome: row.Outcome, Reason: row.Reason,
 		StartedUnixMs: ms(row.StartedAt), Steps: stepsP(row, d), Candidates: int32(d.Candidates), Eligible: int32(d.Eligible),
 		ForwardDaysTarget: int32(d.Config.Gate.ForwardDays),
-		CanApprove:        row.State == loop.Decision && row.Outcome == loop.Recommended,
+		CanApprove:        row.State == loop.Decision && row.Outcome == loop.Recommended && loop.CurrentEvidence(d),
 		Usage: &labv1.CycleUsage{
 			CpuSeconds: d.Usage.CPUMillis / 1000, CpuBudgetSeconds: int64(d.Config.CPUMinutes) * 60,
 			Candidates: int32(d.Usage.Candidates), MaxCandidates: int32(d.Config.MaxCandidates),
@@ -129,6 +129,9 @@ func cycleP(row db.LearningCycle) (*labv1.Cycle, error) {
 	}
 	if row.FinishedAt != nil {
 		c.FinishedUnixMs = ms(*row.FinishedAt)
+	}
+	if row.State == loop.Decision && !loop.CurrentEvidence(d) {
+		c.Reason += " — شواهد قدیمی است؛ برای ارتقا یک چرخه تازه اجرا کنید."
 	}
 	if d.FreezeAt != nil {
 		c.FreezeUnixMs = ms(*d.FreezeAt)

@@ -1,6 +1,6 @@
-# P0 — stabilization, first implementation batch
+# P0 — stabilization and release evidence
 
-Status: **in progress**, 2026-11-01. This is the start of the new master plan, not
+Status: **in progress**, 2026-11-02. This continues the new master plan, not
 completion of P0 and not approval to begin P1 or any execution feature.
 
 ## First batch scope
@@ -105,30 +105,119 @@ Old dataset versions retain their historical aggregation semantics; recreate/imp
 for corrected availability. Current computations can differ from saved legacy results, which
 remain immutable. No live execution or real-market validation is claimed.
 
+## FIX-04 implemented and locally verified (2026-11-02)
+
+F04/F05 now use evaluation **p0.3**, under ADR-044/045. No report, dataset, model or
+golden history was rewritten; no proto wire contract or database migration changed.
+
+- `net_pnl`/`period_pnl` are as-of equity changes, with observed fill fees/slippage in
+  the same period. Carried positions contribute to period PnL and exposure. Separate
+  `cohort_lifetime_pnl` explicitly includes later exits; it never determines fold wins.
+- Unrealized PnL and closed-trade statistics use evidence available at the period end.
+  New aggregates detect overflow. This does not close all accounting-overflow work.
+- Fold wins require valid period metrics and exactly matching test windows.
+- Cycle records distinguish `training_cutoff`, `model_created_at`, `freeze_at` and
+  `trade_start`. Final models serve from actual completion; freeze follows persistence.
+- Forward days require contiguous complete, real data for every symbol. A missing minute,
+  missing symbol, synthetic/partial or unavailable candle keeps the gate pending. The end
+  remains fixed on late ticks. Final training and forward acquire a research slot; forward
+  checks its projected resampled-bar budget before reading.
+- Legacy cycles remain readable; older forward cycles fail closed, and older recommendations
+  can be rejected but cannot promote. Run a fresh cycle for current evidence.
+
+Local machine: macOS arm64, Go 1.26.5; isolated PostgreSQL 17.11 on loopback port 55432.
+PostgreSQL was installed for this verification; no startup service or deployment was enabled.
+
+| Check | Observed result |
+|---|---|
+| `REQUIRE_DB=1 go test -count=1 -race -json ./...` | **212 passed tests/subtests, 0 failed, 0 skipped; 22 test packages passed** |
+| As-of future exits, carried positions, delayed costs, overflow | regression tests pass |
+| Clock advances during final fits | model completion/freeze after cutoff; trade-start at/after freeze |
+| Missing minute in forward DB data | gate stays pending despite elapsed days; restoring it completes the same fixed interval |
+| Legacy forward/recommendation | fail closed; rejection still works |
+| Simulator goldens | all 11 pass unchanged, including byte determinism |
+| Go vet / CI evidence-summary tests | passed; summary tests: 2 |
+| golangci-lint v2.15.0 / planted bad-import depguard probe | 0 issues; forbidden optimizer import rejected and temporary probe removed |
+| Dart analysis via Dart MCP | no errors |
+| Existing Flutter suite | **48 passed** after removing proxy variables for that test process; initial proxied run failed to connect to local tester WebSockets |
+| 1M-bar benchmark, one iteration per source on Apple M4 | 0.350 s, 523,867,256 allocated B/op; 4.1% allocation increase over same-machine HEAD; see PERFORMANCE.md |
+
+Evidence: `artifacts/p0-fix04-go-tests.jsonl` (git-ignored). Race ran locally on this
+source; hosted CI and the real-browser UX gate remain unexecuted. Synthetic fixtures
+establish the regression contracts, not market profitability or a P0 release pass.
+
+## FIX-05 implemented and locally verified (2026-11-02)
+
+Migration **00006** adds exact raw revision membership (`dataset_members`) and attempt
+claim tokens. New dataset manifests use **format_version 1** with a separate snapshot
+hash namespace; evaluation stays **p0.3**. SQL bindings were generated with sqlc v1.31.1;
+no proto/Dart wire contract or new runtime dependency changed.
+
+- New snapshots select raw revisions, aggregate, hash and store membership/manifest in
+  one repeatable-read transaction. Loading follows pinned revisions, verifies raw member
+  and output counts and re-hashes values/identities. Late commits cannot add members.
+- Even a raw correction hidden by aggregation creates a new version. Availability and
+  closure corrections are revisioned; archive reimports cannot backdate observed availability.
+  Revision allocation is serialized per symbol, initial month creation across symbols.
+- Format-0 datasets retain their exact IDs, manifests and cutoff reconstruction. Their
+  historical timestamp-membership limitation is not silently repaired; create a new-format
+  version when fixed membership is needed. Missing snapshot members fail the hash/count
+  check rather than triggering a newer-data fallback.
+- Experiment cancellation closes queued and running attempts in the same transaction.
+  Worker notification only stops CPU work. Each claim has a token; registration is followed
+  by a durable state re-read, and obsolete tokens cannot complete/cancel a newer execution.
+- Recovery requeues interrupted running/paused work but cancels terminal-experiment orphans.
+  A per-schema scheduler session lock protects live claims from a second scheduler. Retries
+  remain visible in `runs`; computation is not claimed exactly once.
+- Learning terminalization/recovery cancels queued candidates and closes the cycle in one
+  transaction, preserves completed results and repairs actual counts after partial generation.
+
+| Check | Observed result |
+|---|---|
+| `REQUIRE_DB=1 go test -count=1 -race -json ./...` | **237 passed tests/subtests, 0 failed, 0 skipped; 22 test packages passed** |
+| Ingest transaction opened before snapshot, committed afterward | prior snapshot loads exactly; both aggregation-hidden and visible corrections get distinct new IDs |
+| Concurrent snapshot creation / correction allocation / initial multi-symbol partition | pass; one member set, all correction revisions retained |
+| Missing member / failed member insertion | corruption rejected; no partial metadata row persisted |
+| Migration down/up with legacy records, isolated test schema | prior manifest, ID and bars unchanged |
+| Cancel before worker registration / obsolete claim / competing scheduler / terminal recovery | pass; obsolete work cannot revive or overwrite results |
+| Cycle finish failure, split failure and restart | rollback atomic; no queued candidate remains in a terminal cycle |
+| Simulator goldens | all 11 pass unchanged |
+| sqlc v1.31.1 generation / Go vet / golangci-lint | generated output reproducible; vet passed; 0 lint issues |
+| Dart MCP analysis / existing Flutter suite | no errors; **48 tests passed** |
+
+Evidence: `artifacts/p0-fix05-go-tests.jsonl` and `artifacts/p0-fix05-flutter-tests.log`
+(git-ignored), on the same isolated local PostgreSQL/macOS setup as FIX-04. No hosted
+workflow or real-browser UX gate was executed. A member row per raw candle adds storage
+and load work; this batch does not establish raw-memory or large-catalog performance bounds.
+Dataset provenance is pinned, but full build/instrument/policy provenance and canonical-fill
+reproduction (F13), lifecycle serialization (F15), and the complete P0 gate remain open.
+
 ## Remaining P0 work / next batch
 
 The analytics/learning review after FIX-02 fixed dependency readiness, fit/model validation,
 complete/deterministic search selection and unnecessary per-bar explanation work. New model
-artifacts record `causal-features/v1`; evaluation remains `p0.2`. Verified: 197 Go tests/subtests,
+artifacts record `causal-features/v1`; that review used evaluation `p0.2`. Verified: 197 Go tests/subtests,
 zero skip with DB mandatory, 48 existing Flutter tests, lint/vet, Dart analysis and depguard. See
 [P0_LEARNING_REVIEW_FA.md](P0_LEARNING_REVIEW_FA.md) for evidence, measured scope and compatibility.
-This additional batch does not complete FIX-04 or P0.
+That historical review preceded FIX-04/FIX-05 above. These batches do not complete all of P0.
 
-1. FIX-04: actual training/freeze timestamps, forward coverage, period vs cohort PnL.
-2. FIX-05: fixed dataset membership/revisions, terminal candidates and claim/cancel recovery.
-3. Finish F07 admission/memory bounds on Reproduce and forward, F08 non-USDT capability,
+1. Finish F07 admission/memory bounds on Reproduce and raw data loading, F08 non-USDT capability,
    F13 full provenance and exact canonical fills, F15 synchronized version/model lifecycle.
-4. Finish F10 with search-backed paginated pickers. Current pickers fetch all pages into
+2. Finish F10 with search-backed paginated pickers. Current pickers fetch all pages into
    memory; a shortcut comment records the limit. Network supervision, accounting overflow,
-   concurrent-ingest snapshot and remaining stress cases also remain open.
-5. Run the hosted workflow (race), real-browser chart/async/focus checks and P0 UX gate.
+   economic label/fill alignment and remaining stress cases also remain open.
+3. Run the hosted workflow, real-browser chart/async/focus checks and P0 UX gate.
 
-The existing passing suite does **not** establish the pending freeze/coverage, period/cohort,
-snapshot, overflow or concurrent-lifecycle acceptance criteria. Do not use this checkpoint as a P0 release pass.
+The existing passing suite does **not** establish full raw-memory, accounting-overflow
+or concurrent-lifecycle acceptance criteria. Do not use this checkpoint as a P0 release pass.
 
 ## Rollback / compatibility
 
-There is no destructive migration. Preserve all reports, attempts and dataset records;
+FIX-05 adds migration 00006 without rewriting prior financial records. Do not run its down
+migration on a database retaining format-1 snapshots: their revision membership is required
+to load them. Keep a compatible engine and a full backup with those new versions. Existing
+legacy datasets remain readable but do not gain fixed membership through an upgrade.
+Preserve all reports, attempts and dataset records;
 no history is rewritten. The first batch and table alignment were committed as `2d998d5`.
 New report JSON fields are optional to older readers, but old binaries do not implement
 version-2 resampling: they may fail a new dataset's hash check if its availability changed.

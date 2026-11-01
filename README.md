@@ -27,8 +27,17 @@ promotion/rollback. These remain research tools; no account or real execution ex
 The first P0 batch fixes research admission, baseline warm-up, exact comparison, protection
 markers and calculator request races. Imported datasets refresh shared pickers, including
 versions beyond the first 200. Larger-catalog server search is still pending.
-The second P0 batch enforces causal fills and availability-safe history/resampling;
-new evaluations use p0.2. Legacy data/reports remain readable with their recorded semantics.
+The second P0 batch enforces causal fills and availability-safe history/resampling.
+The FIX-04 batch separates period PnL from opening-cohort lifetime PnL, records actual
+model creation/freeze/trade-start, and requires complete per-symbol forward coverage.
+New evaluations use p0.3. Legacy data/reports remain readable with their recorded semantics;
+legacy learning recommendations require a fresh cycle before promotion.
+
+FIX-05 pins new dataset versions to exact candle revisions, makes cancellation durable
+across worker races/restarts, and closes unfinished learning candidates atomically.
+The additive migration runs on engine startup. New snapshot-format datasets require this
+engine version; existing dataset/report IDs and results are preserved. See P0_STATUS.md
+for remaining release work and rollback limits.
 
 
 ## Layout

@@ -44,6 +44,7 @@ type Attempt struct {
 	Runs         int32
 	StartedAt    *time.Time
 	FinishedAt   *time.Time
+	ClaimToken   string
 }
 
 type Candle struct {
@@ -84,6 +85,13 @@ type Dataset struct {
 	BarCount  int32
 	Manifest  []byte
 	CreatedAt time.Time
+}
+
+type DatasetMember struct {
+	DatasetID string
+	Symbol    string
+	OpenTime  time.Time
+	Revision  int32
 }
 
 type Decision struct {

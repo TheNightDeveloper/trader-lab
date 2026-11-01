@@ -27,7 +27,7 @@ WITH input AS (
            unnest(@cs::bigint[])                 AS c,
            unnest(@volumes::bigint[])            AS volume
 ), cur AS (
-    SELECT DISTINCT ON (k.open_time) k.open_time, k.revision, k.o, k.h, k.l, k.c, k.volume
+    SELECT DISTINCT ON (k.open_time) k.open_time, k.revision, k.close_time, k.available_at, k.o, k.h, k.l, k.c, k.volume
     FROM candles k
     WHERE k.symbol = @symbol
       AND k.open_time >= (SELECT min(open_time) FROM input)
@@ -35,16 +35,17 @@ WITH input AS (
     ORDER BY k.open_time, k.revision DESC
 )
 INSERT INTO candles (symbol, open_time, revision, close_time, available_at, o, h, l, c, volume, source, source_ref)
-SELECT @symbol, i.open_time, COALESCE(cur.revision, 0) + 1, i.close_time, i.available_at,
+SELECT @symbol, i.open_time, COALESCE(cur.revision, 0) + 1, i.close_time, GREATEST(i.available_at, cur.available_at),
        i.o, i.h, i.l, i.c, i.volume, @source, @source_ref
 FROM input i
 LEFT JOIN cur ON cur.open_time = i.open_time
 WHERE cur.open_time IS NULL
-   OR (cur.o, cur.h, cur.l, cur.c, cur.volume) IS DISTINCT FROM (i.o, i.h, i.l, i.c, i.volume)
+   OR (cur.close_time, cur.available_at, cur.o, cur.h, cur.l, cur.c, cur.volume)
+      IS DISTINCT FROM (i.close_time, GREATEST(i.available_at, cur.available_at), i.o, i.h, i.l, i.c, i.volume)
 RETURNING open_time, revision;
 
--- CandlesAsOf is the only read path for bars: the latest revision of each 1m bar
--- that was ingested by known_at and available by as_of.
+-- Live and legacy reads select the latest revision ingested by known_at and
+-- available by as_of. New snapshot loads use DatasetCandles instead.
 -- name: CandlesAsOf :many
 SELECT DISTINCT ON (open_time) open_time, close_time, available_at, o, h, l, c, volume
 FROM candles
@@ -99,6 +100,43 @@ ON CONFLICT (id) DO NOTHING;
 
 -- name: GetDataset :one
 SELECT * FROM datasets WHERE id = $1;
+
+-- Read once inside a repeatable-read snapshot; timestamps are provenance, never
+-- the membership definition of a new-format dataset.
+-- name: SnapshotCandles :many
+SELECT DISTINCT ON (open_time) open_time, revision, close_time, available_at, o, h, l, c, volume
+FROM candles
+WHERE symbol = @symbol AND open_time >= @from_time AND open_time < @to_time
+ORDER BY open_time, revision DESC;
+
+-- The same transaction snapshot as SnapshotCandles, so no late commit can add a
+-- member between materialization and persistence.
+-- name: InsertDatasetMembers :execrows
+INSERT INTO dataset_members (dataset_id, symbol, open_time, revision)
+SELECT @dataset_id, @symbol, members.open_time, members.revision
+FROM (
+    SELECT DISTINCT ON (c.open_time) c.open_time, c.revision
+    FROM candles c
+    WHERE c.symbol = @symbol AND c.open_time >= @from_time AND c.open_time < @to_time
+    ORDER BY c.open_time, c.revision DESC
+) members;
+
+-- name: DatasetCandles :many
+SELECT c.open_time, c.revision, c.close_time, c.available_at, c.o, c.h, c.l, c.c, c.volume
+FROM dataset_members m
+JOIN candles c ON c.symbol = m.symbol AND c.open_time = m.open_time AND c.revision = m.revision
+WHERE m.dataset_id = @dataset_id AND m.symbol = @symbol
+ORDER BY c.open_time;
+
+-- name: InsertSnapshotDataset :execrows
+INSERT INTO datasets (id, symbol, timeframe, range_from, range_to, gap_policy, known_at, bar_count, manifest)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+ON CONFLICT (id) DO NOTHING;
+
+-- Serialize ingestion per symbol so simultaneous corrections cannot allocate
+-- the same revision number. A hash collision merely serializes more work.
+-- name: LockCandleIngest :exec
+SELECT pg_advisory_xact_lock(hashtextextended(@symbol::text, 0));
 
 -- name: ListDatasets :many
 SELECT * FROM datasets ORDER BY created_at DESC, id LIMIT $1 OFFSET $2;

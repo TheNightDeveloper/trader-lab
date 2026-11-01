@@ -63,6 +63,8 @@ type Fill struct {
 	SlippageUSDT money.Amount `json:"slippage_usdt"`
 	FeeUSDT      money.Amount `json:"fee_usdt"`
 	Ambiguous    bool         `json:"ambiguous,omitempty"` // stop and take both inside the bar; stop assumed
+	// ObservedAt is the transient booking time, not the reference execution time.
+	ObservedAt time.Time `json:"-"`
 }
 
 // Trade is one round trip, flat → flat, in USDT. Net = Gross − Slippage − Fees exactly.
@@ -84,11 +86,18 @@ type Trade struct {
 	// Open trades only: remaining quantity valued at the last close (no exit costs).
 	OpenQty   money.Qty     `json:"open_qty"`
 	MarkValue *money.Amount `json:"mark_value,omitempty"`
+	// Observation times are transient evaluation bookkeeping, distinct from the
+	// reference execution times. They never alter the persisted trade contract.
+	OpenedObservedAt time.Time `json:"-"`
+	ClosedObservedAt time.Time `json:"-"`
 }
 
 type EquityPoint struct {
 	Time   time.Time    `json:"time"` // closed-bar availability time
 	Equity money.Amount `json:"equity"`
+	// As-of open-position mark for period metrics. Never serialized into the
+	// canonical run/golden contract; reports persist the derived metrics instead.
+	Unrealized int64 `json:"-"`
 }
 
 type Balance struct {

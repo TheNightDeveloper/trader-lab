@@ -41,8 +41,8 @@ type CandlesAsOfRow struct {
 	Volume      int64
 }
 
-// CandlesAsOf is the only read path for bars: the latest revision of each 1m bar
-// that was ingested by known_at and available by as_of.
+// Live and legacy reads select the latest revision ingested by known_at and
+// available by as_of. New snapshot loads use DatasetCandles instead.
 func (q *Queries) CandlesAsOf(ctx context.Context, arg CandlesAsOfParams) ([]CandlesAsOfRow, error) {
 	rows, err := q.db.Query(ctx, candlesAsOf,
 		arg.Symbol,
@@ -173,6 +173,61 @@ func (q *Queries) DatabaseSize(ctx context.Context) (int64, error) {
 	return column_1, err
 }
 
+const datasetCandles = `-- name: DatasetCandles :many
+SELECT c.open_time, c.revision, c.close_time, c.available_at, c.o, c.h, c.l, c.c, c.volume
+FROM dataset_members m
+JOIN candles c ON c.symbol = m.symbol AND c.open_time = m.open_time AND c.revision = m.revision
+WHERE m.dataset_id = $1 AND m.symbol = $2
+ORDER BY c.open_time
+`
+
+type DatasetCandlesParams struct {
+	DatasetID string
+	Symbol    string
+}
+
+type DatasetCandlesRow struct {
+	OpenTime    time.Time
+	Revision    int32
+	CloseTime   time.Time
+	AvailableAt time.Time
+	O           int64
+	H           int64
+	L           int64
+	C           int64
+	Volume      int64
+}
+
+func (q *Queries) DatasetCandles(ctx context.Context, arg DatasetCandlesParams) ([]DatasetCandlesRow, error) {
+	rows, err := q.db.Query(ctx, datasetCandles, arg.DatasetID, arg.Symbol)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []DatasetCandlesRow
+	for rows.Next() {
+		var i DatasetCandlesRow
+		if err := rows.Scan(
+			&i.OpenTime,
+			&i.Revision,
+			&i.CloseTime,
+			&i.AvailableAt,
+			&i.O,
+			&i.H,
+			&i.L,
+			&i.C,
+			&i.Volume,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const ensureCandlePartition = `-- name: EnsureCandlePartition :exec
 SELECT ensure_candle_partition($1::timestamptz)
 `
@@ -256,6 +311,39 @@ func (q *Queries) InsertDataset(ctx context.Context, arg InsertDatasetParams) er
 	return err
 }
 
+const insertDatasetMembers = `-- name: InsertDatasetMembers :execrows
+INSERT INTO dataset_members (dataset_id, symbol, open_time, revision)
+SELECT $1, $2, members.open_time, members.revision
+FROM (
+    SELECT DISTINCT ON (c.open_time) c.open_time, c.revision
+    FROM candles c
+    WHERE c.symbol = $2 AND c.open_time >= $3 AND c.open_time < $4
+    ORDER BY c.open_time, c.revision DESC
+) members
+`
+
+type InsertDatasetMembersParams struct {
+	DatasetID string
+	Symbol    string
+	FromTime  time.Time
+	ToTime    time.Time
+}
+
+// The same transaction snapshot as SnapshotCandles, so no late commit can add a
+// member between materialization and persistence.
+func (q *Queries) InsertDatasetMembers(ctx context.Context, arg InsertDatasetMembersParams) (int64, error) {
+	result, err := q.db.Exec(ctx, insertDatasetMembers,
+		arg.DatasetID,
+		arg.Symbol,
+		arg.FromTime,
+		arg.ToTime,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const insertFxRate = `-- name: InsertFxRate :one
 INSERT INTO fx_rates (pair, rate_date, rate, rate_scale, source)
 VALUES ('USDT/TOMAN', $1, $2, $3, $4)
@@ -312,6 +400,42 @@ func (q *Queries) InsertQualityIssue(ctx context.Context, arg InsertQualityIssue
 		arg.Detail,
 	)
 	return err
+}
+
+const insertSnapshotDataset = `-- name: InsertSnapshotDataset :execrows
+INSERT INTO datasets (id, symbol, timeframe, range_from, range_to, gap_policy, known_at, bar_count, manifest)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+ON CONFLICT (id) DO NOTHING
+`
+
+type InsertSnapshotDatasetParams struct {
+	ID        string
+	Symbol    string
+	Timeframe string
+	RangeFrom time.Time
+	RangeTo   time.Time
+	GapPolicy string
+	KnownAt   time.Time
+	BarCount  int32
+	Manifest  []byte
+}
+
+func (q *Queries) InsertSnapshotDataset(ctx context.Context, arg InsertSnapshotDatasetParams) (int64, error) {
+	result, err := q.db.Exec(ctx, insertSnapshotDataset,
+		arg.ID,
+		arg.Symbol,
+		arg.Timeframe,
+		arg.RangeFrom,
+		arg.RangeTo,
+		arg.GapPolicy,
+		arg.KnownAt,
+		arg.BarCount,
+		arg.Manifest,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }
 
 const lastCandleOpen = `-- name: LastCandleOpen :one
@@ -510,6 +634,17 @@ func (q *Queries) ListQualityIssues(ctx context.Context, arg ListQualityIssuesPa
 	return items, nil
 }
 
+const lockCandleIngest = `-- name: LockCandleIngest :exec
+SELECT pg_advisory_xact_lock(hashtextextended($1::text, 0))
+`
+
+// Serialize ingestion per symbol so simultaneous corrections cannot allocate
+// the same revision number. A hash collision merely serializes more work.
+func (q *Queries) LockCandleIngest(ctx context.Context, symbol string) error {
+	_, err := q.db.Exec(ctx, lockCandleIngest, symbol)
+	return err
+}
+
 const outagesSince = `-- name: OutagesSince :one
 SELECT count(*)::int AS outages,
        COALESCE(sum(extract(epoch FROM until - at)), 0)::bigint AS seconds
@@ -583,6 +718,63 @@ func (q *Queries) RecordImportFile(ctx context.Context, arg RecordImportFilePara
 	return err
 }
 
+const snapshotCandles = `-- name: SnapshotCandles :many
+SELECT DISTINCT ON (open_time) open_time, revision, close_time, available_at, o, h, l, c, volume
+FROM candles
+WHERE symbol = $1 AND open_time >= $2 AND open_time < $3
+ORDER BY open_time, revision DESC
+`
+
+type SnapshotCandlesParams struct {
+	Symbol   string
+	FromTime time.Time
+	ToTime   time.Time
+}
+
+type SnapshotCandlesRow struct {
+	OpenTime    time.Time
+	Revision    int32
+	CloseTime   time.Time
+	AvailableAt time.Time
+	O           int64
+	H           int64
+	L           int64
+	C           int64
+	Volume      int64
+}
+
+// Read once inside a repeatable-read snapshot; timestamps are provenance, never
+// the membership definition of a new-format dataset.
+func (q *Queries) SnapshotCandles(ctx context.Context, arg SnapshotCandlesParams) ([]SnapshotCandlesRow, error) {
+	rows, err := q.db.Query(ctx, snapshotCandles, arg.Symbol, arg.FromTime, arg.ToTime)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SnapshotCandlesRow
+	for rows.Next() {
+		var i SnapshotCandlesRow
+		if err := rows.Scan(
+			&i.OpenTime,
+			&i.Revision,
+			&i.CloseTime,
+			&i.AvailableAt,
+			&i.O,
+			&i.H,
+			&i.L,
+			&i.C,
+			&i.Volume,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const upsertCandles = `-- name: UpsertCandles :many
 WITH input AS (
     -- Parallel unnest in the select list zips the arrays row by row.
@@ -595,7 +787,7 @@ WITH input AS (
            unnest($10::bigint[])                 AS c,
            unnest($11::bigint[])            AS volume
 ), cur AS (
-    SELECT DISTINCT ON (k.open_time) k.open_time, k.revision, k.o, k.h, k.l, k.c, k.volume
+    SELECT DISTINCT ON (k.open_time) k.open_time, k.revision, k.close_time, k.available_at, k.o, k.h, k.l, k.c, k.volume
     FROM candles k
     WHERE k.symbol = $1
       AND k.open_time >= (SELECT min(open_time) FROM input)
@@ -603,12 +795,13 @@ WITH input AS (
     ORDER BY k.open_time, k.revision DESC
 )
 INSERT INTO candles (symbol, open_time, revision, close_time, available_at, o, h, l, c, volume, source, source_ref)
-SELECT $1, i.open_time, COALESCE(cur.revision, 0) + 1, i.close_time, i.available_at,
+SELECT $1, i.open_time, COALESCE(cur.revision, 0) + 1, i.close_time, GREATEST(i.available_at, cur.available_at),
        i.o, i.h, i.l, i.c, i.volume, $2, $3
 FROM input i
 LEFT JOIN cur ON cur.open_time = i.open_time
 WHERE cur.open_time IS NULL
-   OR (cur.o, cur.h, cur.l, cur.c, cur.volume) IS DISTINCT FROM (i.o, i.h, i.l, i.c, i.volume)
+   OR (cur.close_time, cur.available_at, cur.o, cur.h, cur.l, cur.c, cur.volume)
+      IS DISTINCT FROM (i.close_time, GREATEST(i.available_at, cur.available_at), i.o, i.h, i.l, i.c, i.volume)
 RETURNING open_time, revision
 `
 

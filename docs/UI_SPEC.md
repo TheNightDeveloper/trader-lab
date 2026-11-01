@@ -113,3 +113,25 @@ Legacy reports show a server-provided warning without changing persisted results
 P0 additions have controller/provider unit tests; no new widget tests were added. Existing
 widget tests remain runnable. Browser interop, focus, text-scaling and multi-width visual
 review are separate release-gate evidence; a 390 px smoke test does not replace them.
+
+## P0 FIX-04 metric and evidence presentation (2026-11-02)
+
+- Current reports separately label period PnL and opening-cohort lifetime PnL, with server
+  definitions explaining that later exits may change only the latter. Both use existing
+  metric components, invalid-value behavior and RTL/LTR financial formatting.
+- Legacy reports keep their persisted values and legacy warning; the generic net-PnL help
+  distinguishes historical cohort semantics from the current period metric.
+- Learning progress shows covered forward days and names symbols with incomplete data.
+  The existing freeze timestamp now represents actual freeze, after model persistence.
+- Old recommendations disable approval and explain that a new cycle is required; rejection
+  remains available. This does not introduce a live/Paper execution flow.
+
+## P0 FIX-05 durable research states (2026-11-02)
+
+- Existing cancel/error/progress components consume the same API contract. Cancelling an
+  experiment durably marks all unfinished attempts cancelled even if a worker misses its
+  notification; an obsolete result cannot reappear as a completed current attempt.
+- New cancellations record a finish timestamp; retry runs remain in the existing attempt
+  registry. Terminal learning-cycle candidate counts reflect actual generated records.
+- Snapshot-format metadata remains a backend concern; existing dataset pickers keep their
+  version IDs and counts. No new screen, widget test or visual acceptance claim is added.
