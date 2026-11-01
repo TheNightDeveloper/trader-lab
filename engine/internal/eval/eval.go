@@ -19,12 +19,13 @@ import (
 )
 
 // Version changes whenever evaluation semantics change, including strategy warm-up.
-const Version = "p0.1"
+const Version = "p0.2"
 
 var ErrSpec = errors.New("eval: invalid spec")
 
 // Spec is everything a report depends on besides the bars themselves.
 type Spec struct {
+	FillModel         string          `json:"fill_model,omitempty"`
 	EvaluationVersion string          `json:"evaluation_version,omitempty"`
 	DatasetIDs        []string        `json:"dataset_ids"`
 	Timeframe         data.Timeframe  `json:"timeframe"`
@@ -221,6 +222,7 @@ func EvaluateWith(ctx context.Context, spec Spec, bars map[string][]data.Bar, sp
 	}
 	spec.Sim = cfg
 	spec.EvaluationVersion = Version
+	spec.FillModel = sim.FillModel
 	tfDur, err := tfDuration(spec.Timeframe)
 	if err != nil {
 		return nil, err

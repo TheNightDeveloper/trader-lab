@@ -167,7 +167,7 @@ func TestResample(t *testing.T) {
 	out, err = Resample(holed, TF15m)
 	require.NoError(t, err)
 	require.Equal(t, FlagPartial, out[0].Flags)
-	require.Equal(t, t0.Add(15*time.Minute+delay), out[0].AvailableAt)
+	require.Equal(t, bars[15].AvailableAt, out[0].AvailableAt, "wait for the later bar proving closure")
 
 	// 1d buckets align to 00:00 UTC.
 	day := []Bar{mk(23*60+59, 100, 1), mk(24*60, 100, 1), mk(48*60, 100, 1)}
@@ -250,4 +250,24 @@ func TestFetchArchive(t *testing.T) {
 	bad := archiveServer(t, map[string][]byte{path: z}, true)
 	_, err = FetchArchive(ctx, bad.Client(), MonthlyURL(bad.URL, "BTCUSDT", t0))
 	require.ErrorIs(t, err, ErrChecksum)
+}
+
+// Every included constituent must be available before the aggregate is available.
+func TestResampleWaitsForLateConstituent(t *testing.T) {
+	bars := series(30)
+	bars[2].AvailableAt = t0.Add(time.Hour)
+	out, err := Resample(bars, TF15m)
+	require.NoError(t, err)
+	require.Equal(t, bars[2].AvailableAt, out[0].AvailableAt)
+	require.Equal(t, bars[14].C, out[0].C)
+}
+func TestPartialResampleWaitsForClosureEvidence(t *testing.T) {
+	bars := series(17)
+	bars = append(bars[:14], bars[15:]...)
+	bars[14].AvailableAt = t0.Add(time.Hour)
+	out, err := Resample(bars, TF15m)
+	require.NoError(t, err)
+	require.NotEmpty(t, out)
+	require.Equal(t, FlagPartial, out[0].Flags)
+	require.Equal(t, bars[14].AvailableAt, out[0].AvailableAt)
 }

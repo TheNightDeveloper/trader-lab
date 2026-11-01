@@ -245,6 +245,7 @@ func TestBuyAndHoldSurvivesWarmup(t *testing.T) {
 	ev, err := Evaluate(context.Background(), spec, map[string][]data.Bar{"BTCUSDT": walk("BTCUSDT", 1000, 3)}, specs())
 	require.NoError(t, err)
 	require.Equal(t, Version, ev.Spec.EvaluationVersion)
+	require.Equal(t, sim.FillModel, ev.Spec.FillModel)
 	for _, res := range []*sim.Result{ev.Main, ev.HoldoutRun} {
 		require.NotEmpty(t, res.Fills)
 		require.Equal(t, sim.Buy, res.Fills[0].Side)

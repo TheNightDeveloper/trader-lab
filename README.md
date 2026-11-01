@@ -27,6 +27,9 @@ promotion/rollback. These remain research tools; no account or real execution ex
 The first P0 batch fixes research admission, baseline warm-up, exact comparison, protection
 markers and calculator request races. Imported datasets refresh shared pickers, including
 versions beyond the first 200. Larger-catalog server search is still pending.
+The second P0 batch enforces causal fills and availability-safe history/resampling;
+new evaluations use p0.2. Legacy data/reports remain readable with their recorded semantics.
+
 
 ## Layout
 

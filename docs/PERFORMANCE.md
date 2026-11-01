@@ -29,3 +29,11 @@ Local Windows amd64, Intel Core i3-12100F, Go 1.26.4; one iteration without race
 One million bars: 1,027,394,700 ns/op (1.027 s), 503,084,664 B/op, 187,238 allocations,
 314 fills. B/op is allocated bytes, not peak resident memory. This single measurement is
 an orientation baseline, not a latency distribution or a cross-machine performance claim.
+
+
+## P0 FIX-02 baseline (2026-11-01)
+Same local Go/Windows/CPU setup and one-iteration command as the starting baseline:
+624,214,200 ns/op (0.624 s), 503,164,136 allocated B/op, 188,429 allocations, 332 fills.
+Ordered History uses the original prefix without materializing another full bar array.
+Backfill holes use a temporary sorted buffer. One timing sample is not evidence of a speedup;
+fill count changed with the causal contract, and B/op is not peak resident memory.

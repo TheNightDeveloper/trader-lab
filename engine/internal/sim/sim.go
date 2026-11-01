@@ -25,6 +25,9 @@ var (
 	ErrInvariant = errors.New("sim: ledger invariant broken")
 )
 
+// FillModel names the bar-open price assumption recorded with every new report.
+const FillModel = "causal-next-open/v1"
+
 type Sizing string
 
 const (
@@ -41,7 +44,7 @@ type Config struct {
 	SlipRate  money.Ratio    `json:"slip_rate"` // per side
 	Sizing    Sizing         `json:"sizing"`
 	FixedUSDT money.Amount   `json:"fixed_usdt,omitzero"`
-	// LatencyBars: a decision on bar i fills at the open of bar i+LatencyBars (default 1).
+	// LatencyBars sets the earliest target bar index (default 1); its open must also be at or after the decision.
 	LatencyBars int `json:"latency_bars"`
 	// IntentTTL: an intent not filled within this time expires. 0 = LatencyBars+9
 	// bars of the input timeframe (10 minutes on 1m bars, 10 hours on 1h bars).
@@ -89,9 +92,10 @@ func (c Config) normalized() (Config, error) {
 }
 
 type position struct {
-	qty, stop, take         int64 // stop/take prices; 0 = none
-	trade                   int   // index into Result.Trades of the open round trip
-	entryCost, exitProceeds int64 // USDT, for the trade's net
+	changedAt               time.Time // the range of an older candle cannot act on this newer state
+	qty, stop, take         int64     // stop/take prices; 0 = none
+	trade                   int       // index into Result.Trades of the open round trip
+	entryCost, exitProceeds int64     // USDT, for the trade's net
 }
 
 type order struct {
@@ -107,8 +111,9 @@ type runner struct {
 	cfg     Config
 	specs   map[string]instrument.Spec
 	bars    map[string][]data.Bar
-	symbols []string // sorted, for deterministic iteration
-	seen    map[string]int
+	symbols []string              // sorted, for deterministic iteration
+	seen    map[string]int        // highest observed index + 1
+	history map[string][]data.Bar // materialized only while a prefix has availability holes
 	bal     map[string]int64
 	pos     map[string]*position
 	pending map[string]*order
@@ -125,7 +130,8 @@ func Run(ctx context.Context, cfg Config, specs map[string]instrument.Spec, bars
 	}
 	r := &runner{
 		cfg: cfg, specs: specs, bars: bars,
-		seen: map[string]int{}, bal: map[string]int64{instrument.USDT.Code: cfg.Capital.V},
+		history: map[string][]data.Bar{},
+		seen:    map[string]int{}, bal: map[string]int64{instrument.USDT.Code: cfg.Capital.V},
 		pos: map[string]*position{}, pending: map[string]*order{}, last: map[string]money.Price{},
 		// Empty slices, not nil: an empty run serializes as [] rather than null.
 		res: &Result{Decisions: []Decision{}, Fills: []Fill{}, Trades: []Trade{}, Equity: []EquityPoint{}},
@@ -212,22 +218,21 @@ func (r *runner) events() ([]event, error) {
 //  2. record this batch's closes;
 //  3. strategies decide on the closed bars; then equity is marked.
 func (r *runner) batch(ctx context.Context, s strategy.Strategy, evs []event) error {
-	closeAt := time.Time{}
 	for _, ev := range evs {
 		b := r.bars[ev.sym][ev.i]
-		r.seen[ev.sym] = ev.i + 1
+		r.observe(ev)
 		if err := r.fillDue(ctx, ev.sym, ev.i, b); err != nil {
 			return err
 		}
 		if err := r.exits(ctx, ev.sym, b); err != nil {
 			return err
 		}
-		if b.CloseTime.After(closeAt) {
-			closeAt = b.CloseTime
-		}
 	}
 	for _, ev := range evs {
-		r.last[ev.sym] = r.bars[ev.sym][ev.i].C
+		// An old backfill must not replace a newer known closing price.
+		if ev.i == r.seen[ev.sym]-1 {
+			r.last[ev.sym] = r.bars[ev.sym][ev.i].C
+		}
 	}
 	for _, ev := range evs {
 		b := r.bars[ev.sym][ev.i]
@@ -242,7 +247,7 @@ func (r *runner) batch(ctx context.Context, s strategy.Strategy, evs []event) er
 	if err := r.checkInvariants(); err != nil {
 		return err
 	}
-	return r.markEquity(ctx, closeAt)
+	return r.markEquity(ctx, r.clk.Now())
 }
 
 // fillDue executes or expires the pending order of sym if bar i is its fill bar.
@@ -255,9 +260,8 @@ func (r *runner) fillDue(ctx context.Context, sym string, i int, b data.Bar) err
 	case b.OpenTime.After(o.validUntil):
 		delete(r.pending, sym)
 		r.outcome(o.decision, OutcomeExpired, fmt.Sprintf("no fill by %s (next bar opened %s)", stamp(o.validUntil), stamp(b.OpenTime)))
-	case !b.CloseTime.After(o.at):
-		// This bar had closed before the decision was made (late, backfilled data):
-		// its open is in the past. Wait for a bar still open at decision time.
+	case b.OpenTime.Before(o.at):
+		// A known close cannot authorize a fill at an opening price from its past.
 	default:
 		delete(r.pending, sym)
 		return r.execute(ctx, o, b)
@@ -460,6 +464,10 @@ func (r *runner) exits(ctx context.Context, sym string, b data.Bar) error {
 	if p == nil || p.qty == 0 {
 		return nil
 	}
+	// A delayed candle cannot apply protection to an earlier position state.
+	if b.OpenTime.Before(p.changedAt) {
+		return nil
+	}
 	stopHit := p.stop > 0 && b.L.V <= p.stop
 	takeHit := p.take > 0 && b.H.V >= p.take
 	if !stopHit && !takeHit {
@@ -561,6 +569,7 @@ func (r *runner) apply(sym string, l leg, quoteRate int64, at time.Time, kind st
 			p.stop, p.take = 0, 0
 		}
 	}
+	p.changedAt = at
 	r.res.Fills = append(r.res.Fills, Fill{
 		DecisionID: decisionID, Time: at, Instrument: sym, Side: side, Kind: kind,
 		Qty:      money.Qty{V: l.qty, Scale: sc},
@@ -627,7 +636,7 @@ func (r *runner) equity(ctx context.Context) (int64, error) {
 	return total, nil
 }
 
-// markEquity records equity at a bar close. Until every held asset has a USDT
+// markEquity records equity when the closed-bar data becomes available. Until every held asset has a USDT
 // rate (e.g. BTC holdings before the first BTCUSDT bar) there is no honest value,
 // so no point is recorded.
 func (r *runner) markEquity(ctx context.Context, at time.Time) error {
@@ -706,9 +715,31 @@ func (r *runner) finish(ctx context.Context) error {
 	return nil
 }
 
-// History implements strategy.RunContext. The capacity cap means reslicing past
-// the last seen bar panics instead of revealing the future.
+// observe keeps the usual ordered stream allocation-free; holes use a sorted buffer.
+func (r *runner) observe(ev event) {
+	n := r.seen[ev.sym]
+	known := r.history[ev.sym]
+	if ev.i != n || known != nil {
+		if known == nil {
+			known = slices.Clone(r.bars[ev.sym][:n])
+		}
+		b := r.bars[ev.sym][ev.i]
+		i, _ := slices.BinarySearchFunc(known, b.OpenTime, func(b data.Bar, at time.Time) int { return b.OpenTime.Compare(at) })
+		known = slices.Insert(known, i, b)
+		if len(known) == max(n, ev.i+1) {
+			delete(r.history, ev.sym) // all prefix members are now available
+		} else {
+			r.history[ev.sym] = known
+		}
+	}
+	r.seen[ev.sym] = max(n, ev.i+1)
+}
+
+// History returns only observed bars, oldest first, with no reslicing into future data.
 func (r *runner) History(symbol string) []data.Bar {
+	if known := r.history[symbol]; known != nil {
+		return known[:len(known):len(known)]
+	}
 	n := r.seen[symbol]
 	return r.bars[symbol][:n:n]
 }

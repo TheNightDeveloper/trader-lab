@@ -87,7 +87,7 @@ type Trade struct {
 }
 
 type EquityPoint struct {
-	Time   time.Time    `json:"time"` // bar close
+	Time   time.Time    `json:"time"` // closed-bar availability time
 	Equity money.Amount `json:"equity"`
 }
 

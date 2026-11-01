@@ -9,6 +9,15 @@ Update at the end of every session.
 - Verified: Dart analysis clean, 32 existing table/page/responsive tests passed,
   including the 390 px route sweep. Real-browser visual review was not performed.
 
+## P0 FIX-02 done (2026-11-01)
+- Causal signal fills, observed-only History, availability-time equity and protection against
+  delayed ranges acting on newer position state. Evaluation p0.2 records the fill model.
+- Version-2 aggregation timestamps include all constituents and closure evidence; legacy
+  dataset reconstruction/dedup stays readable. Golden outputs reviewed under ADR-039..041.
+- Verified: 163 Go tests/subtests with DB mandatory, zero skip; 48 Flutter tests; lint/vet,
+  Dart analysis and depguard passed. Race/hosted CI/browser review remain unverified.
+- Next: FIX-04 actual freeze/forward coverage and period/cohort metrics. See P0_STATUS.md.
+
 ## Current phase
 P0 — correctness and evidence stabilization: **in progress** (2026-11-01).
 The new P0–P8 phases are defined in `Trading_Lab_Master_Plan_FA.md`; M0–M6 below
@@ -17,13 +26,12 @@ are historical implementation milestones, not evidence that the P0 release gate 
 First P0 batch: atomic weighted research admission (F03), buy-and-hold warm-up (F02),
 exact comparison assumptions (F14), stop/take chart unit prices (F09), cancellable P&L
 requests (F11), shared dataset cache invalidation and retrieval beyond 200 (part of F10).
-Evaluation `p0.1` separates new reports and cache entries from legacy evaluations.
+The first batch used evaluation `p0.1`; current evaluations use `p0.2` (FIX-02).
 CI now has PostgreSQL, mandatory DB tests, race and retained pass/fail/skip evidence (F12);
 the hosted workflow still needs its first run. See [P0_STATUS.md](P0_STATUS.md) for the
 executed checks, remaining work, UX states and rollback notes.
 
-Next: FIX-02 causal fills and late history/resampling, then FIX-04 forward freeze/coverage
-and period metrics. Server-side dataset search, snapshot membership, lifecycle locking,
+FIX-02 is complete; next is FIX-04 forward freeze/coverage and period metrics. Server-side dataset search, snapshot membership, lifecycle locking,
 provenance, recovery and remaining P0 stress cases are still open. **Do not start P1 yet.**
 
 ## M6 done (2026-10-28)

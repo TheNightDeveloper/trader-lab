@@ -24,15 +24,15 @@ import (
 
 var day0 = time.Date(2024, 3, 1, 0, 0, 0, 0, time.UTC)
 
-// momentumBars: 1m bars whose hourly returns are autocorrelated (0.6), so a model
-// that sees the last hour's return has a real edge on the next one.
+// Synthetic fixture: persistent hourly returns keep the positive promotion path
+// testable even when a causal fill waits past the already-open next candle.
 func momentumBars(days int) []data.Bar {
 	rng := rand.New(rand.NewPCG(9, 9))
 	var out []data.Bar
 	price, r := 100.0, 0.0
 	p := func(v float64) money.Price { return money.Price{V: int64(v * 1e8), Scale: instrument.Scale} }
 	for h := range days * 24 {
-		r = 0.6*r + rng.NormFloat64()*0.006
+		r = 0.9*r + rng.NormFloat64()*0.006
 		target := price * (1 + r)
 		prev := price
 		for m := range 60 {

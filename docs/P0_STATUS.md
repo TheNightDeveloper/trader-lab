@@ -3,7 +3,7 @@
 Status: **in progress**, 2026-11-01. This is the start of the new master plan, not
 completion of P0 and not approval to begin P1 or any execution feature.
 
-## Implemented scope
+## First batch scope
 
 | Finding | Change | Regression evidence |
 |---|---|---|
@@ -22,7 +22,7 @@ The report provider re-exports the shared dataset provider to preserve existing 
 No database migration, new runtime dependency, widget test or real-order path is added.
 Backend calculations remain authoritative; UI changes only govern presentation and requests.
 
-## Executed verification
+## First batch verification
 
 Local machine: Windows amd64, Intel Core i3-12100F, Go 1.26.4, Flutter 3.44.2 / Dart 3.12.2,
 Python 3.12.10, local PostgreSQL. No remote service or deployment was changed.
@@ -68,31 +68,68 @@ responsive layout based on actual content constraints.
 | Dataset import, including partial success | invalidate shared picker and Data screen caches |
 | Legacy report | visible server warning; persisted record and figures remain unchanged |
 
+## FIX-02 completed (2026-11-01)
+
+The toolchain execution restriction recorded below is resolved. This second batch implements
+F01 and the late-data checks in master-plan section 3.1. Full P0 is still **in progress**.
+
+- Signal fills require both target-index latency and OpenTime >= decision AvailableAt, within
+  TTL. New report specifications record evaluation `p0.2` and fill model `causal-next-open/v1`.
+- History returns exactly the observed bars in chronological order, without leaking unavailable
+  prefix members or slice capacity. Ordered streams keep the original allocation-free prefix.
+- Backfills cannot rewind the latest known price, equity timestamp, or protection state.
+- New resampling includes all constituent availability and later-bar closure evidence.
+  Manifest version 2 records the rule; legacy manifests reconstruct their original hashes,
+  and dedup preserves the first-creation manifest. No schema migration or rewrite is needed.
+- Reports from any older evaluation version, including p0.1, show the legacy badge.
+- Golden outputs changed intentionally under ADR-039/041; all 11 scenario fill counts remain
+  unchanged, purpose checks pass, and exact money identities were independently audited.
+
+Executed on the current source:
+
+| Check | Result |
+|---|---|
+| Pre-fix regressions | reproduced pre-decision fills, unavailable History members, stale valuation, early resampling |
+| `REQUIRE_DB=1 go test -count=1 -json ./...` | **163 passed tests/subtests, 0 failed, 0 skipped; 21 test packages passed** |
+| Golden scenarios | all 11 pass, each deterministic across two runs; no CSV input changes |
+| Legacy dataset complete/partial and dedup | stored versions remain readable with exact hashes; unknown versions rejected |
+| Independent golden audit | every signal fill is causal and every trade satisfies gross - fees - slippage = net |
+| Existing Flutter suite | **48 passed**; no new widget tests |
+| Go lint/vet, Dart analyze, depguard positive/negative probe | passed |
+| Generated contract diff | no Go/SQL/Dart wire-contract changes |
+| 1M-bar benchmark | 0.624 s, 503,164,136 allocated B/op; see PERFORMANCE.md |
+
+Evidence: local `artifacts/p0-causal-tests.jsonl` and `artifacts/p0-golden-audit.json`
+(git-ignored). Current checks do not include race, hosted CI, or a real-browser visual review.
+Old dataset versions retain their historical aggregation semantics; recreate/import versions
+for corrected availability. Current computations can differ from saved legacy results, which
+remain immutable. No live execution or real-market validation is claimed.
+
 ## Remaining P0 work / next batch
 
-1. FIX-02: causal signal fills for zero/2-second/multi-bar delay and backfill; availability-safe
-   History and resampling; intentional golden changes with a new evaluation version.
-2. FIX-04: actual training/freeze timestamps, forward coverage, period vs cohort PnL.
-3. FIX-05: fixed dataset membership/revisions, terminal candidates and claim/cancel recovery.
-4. Finish F07 admission/memory bounds on Reproduce and forward, F08 non-USDT capability,
+1. FIX-04: actual training/freeze timestamps, forward coverage, period vs cohort PnL.
+2. FIX-05: fixed dataset membership/revisions, terminal candidates and claim/cancel recovery.
+3. Finish F07 admission/memory bounds on Reproduce and forward, F08 non-USDT capability,
    F13 full provenance and exact canonical fills, F15 synchronized version/model lifecycle.
-5. Finish F10 with search-backed paginated pickers. Current pickers fetch all pages into
+4. Finish F10 with search-backed paginated pickers. Current pickers fetch all pages into
    memory; a shortcut comment records the limit. Network supervision, accounting overflow,
    concurrent-ingest snapshot and remaining stress cases also remain open.
-6. Run the hosted workflow (race), real-browser chart/async/focus checks and P0 UX gate.
+5. Run the hosted workflow (race), real-browser chart/async/focus checks and P0 UX gate.
 
-The existing passing suite does **not** establish the new causal-fill, freeze, snapshot,
-overflow or lifecycle acceptance criteria. Do not use this checkpoint as a P0 release pass.
+The existing passing suite does **not** establish the pending freeze/coverage, period/cohort,
+snapshot, overflow or concurrent-lifecycle acceptance criteria. Do not use this checkpoint as a P0 release pass.
 
-## Rollback
+## Rollback / compatibility
 
-Revert this batch's code to restore the prior UI/admission/evaluation behavior; there is
-no destructive migration. New report JSON has one optional field and is readable by old
-code. Do not delete or rewrite reports or attempts. Cache namespace changes prevent reuse
-of older evaluations by the new engine; old reports must be recreated to use the corrected
-buy-and-hold behavior. The first batch and table-alignment fix were committed as `2d998d5`; no push was performed.
+There is no destructive migration. Preserve all reports, attempts and dataset records;
+no history is rewritten. The first batch and table alignment were committed as `2d998d5`.
+New report JSON fields are optional to older readers, but old binaries do not implement
+version-2 resampling: they may fail a new dataset's hash check if its availability changed.
+Keep this engine version available when retaining new version-2 datasets; do not rewrite
+hashes or manifests to force an older binary to accept them. Older dataset versions remain
+readable by this engine using legacy reconstruction. No push is performed by this work.
 
-## Continuation checkpoint (2026-11-01)
+## Historical toolchain blocker (2026-11-01; resolved for FIX-02 above)
 
 The first implementation batch and shared table-alignment fix are committed as
 `2d998d5` (`fix(p0): stabilize research admission, evaluation and UI state`).

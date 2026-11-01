@@ -66,18 +66,19 @@ func run(t testing.TB, c Config, bars map[string][]data.Bar, steps ...strategy.S
 func TestRoundTripFillsAtNextOpen(t *testing.T) {
 	bars := []data.Bar{
 		bar("BTCUSDT", 0, 100, 100, 100, 100),
-		bar("BTCUSDT", 1, 101, 112, 100, 110), // buy fills at this open
-		bar("BTCUSDT", 2, 110, 115, 109, 114),
-		bar("BTCUSDT", 3, 120, 121, 119, 120), // sell fills at this open
+		bar("BTCUSDT", 1, 101, 112, 100, 110), // already open when the decision arrives
+		bar("BTCUSDT", 2, 110, 115, 109, 114), // first eligible buy open
+		bar("BTCUSDT", 3, 120, 121, 119, 120),
+		bar("BTCUSDT", 4, 120, 121, 119, 120), // first eligible sell open
 	}
 	res := run(t, cfg(), map[string][]data.Bar{"BTCUSDT": bars}, step(0, "BTCUSDT", money.RatioOne), step(2, "BTCUSDT", 0))
 
 	require.Len(t, res.Fills, 2)
 	buy, sell := res.Fills[0], res.Fills[1]
 	require.Equal(t, Buy, buy.Side)
-	require.Equal(t, t0.Add(time.Minute), buy.Time)
-	require.Equal(t, "101.00000000", buy.RefPrice.String())
-	require.Equal(t, "101.05050000", buy.Price.String(), "ref × 1.0005")
+	require.Equal(t, t0.Add(2*time.Minute), buy.Time)
+	require.Equal(t, "110.00000000", buy.RefPrice.String())
+	require.Equal(t, "110.05500000", buy.Price.String(), "ref × 1.0005")
 	require.Equal(t, "119.94000000", sell.Price.String(), "ref × 0.9995")
 
 	require.Len(t, res.Trades, 1)
@@ -89,7 +90,7 @@ func TestRoundTripFillsAtNextOpen(t *testing.T) {
 	require.Zero(t, balanceOf(res, "BTC"))
 	require.Equal(t, OutcomeFilled, res.Decisions[0].Outcome)
 	require.Equal(t, OutcomeFilled, res.Decisions[1].Outcome)
-	require.Len(t, res.Equity, 4)
+	require.Len(t, res.Equity, 5)
 }
 
 func TestSpotOnlyAndValidation(t *testing.T) {
@@ -354,7 +355,7 @@ func BenchmarkMillionBars(b *testing.B) {
 func TestCalcTradeMatchesRunAndBreakEven(t *testing.T) {
 	c, err := CalcTrade(px(101e8), px(109e8), money.Qty{V: 988_615_000, Scale: 8}, 1000, 500, instrument.USDT)
 	require.NoError(t, err)
-	// Same numbers as the golden round-trip-fees scenario.
+	// Fixed-price reference, independent of bar-open eligibility in the simulator.
 	require.Equal(t, "75.97510227 USDT", c.Net.String())
 	require.Equal(t, "79.08920000 USDT", c.Gross.String())
 	require.Equal(t, c.Gross.V-c.Slippage.V-c.Fees.V, c.Net.V)
@@ -375,14 +376,15 @@ func TestCalcTradeMatchesRunAndBreakEven(t *testing.T) {
 func TestBreakEvenFee(t *testing.T) {
 	bars := []data.Bar{
 		bar("BTCUSDT", 0, 100, 100, 100, 100), bar("BTCUSDT", 1, 100, 100, 100, 100),
-		bar("BTCUSDT", 2, 110, 110, 110, 110), bar("BTCUSDT", 3, 110, 110, 110, 110),
+		bar("BTCUSDT", 2, 100, 100, 100, 100), bar("BTCUSDT", 3, 110, 110, 110, 110),
+		bar("BTCUSDT", 4, 110, 110, 110, 110),
 	}
-	res := run(t, cfg(), map[string][]data.Bar{"BTCUSDT": bars}, step(0, "BTCUSDT", money.RatioOne), step(1, "BTCUSDT", 0))
+	res := run(t, cfg(), map[string][]data.Bar{"BTCUSDT": bars}, step(0, "BTCUSDT", money.RatioOne), step(2, "BTCUSDT", 0))
 	f, ok := BreakEvenFee(res)
 	require.True(t, ok)
 	c := cfg()
 	c.FeeRate = f
-	at := run(t, c, map[string][]data.Bar{"BTCUSDT": bars}, step(0, "BTCUSDT", money.RatioOne), step(1, "BTCUSDT", 0))
+	at := run(t, c, map[string][]data.Bar{"BTCUSDT": bars}, step(0, "BTCUSDT", money.RatioOne), step(2, "BTCUSDT", 0))
 	require.InDelta(t, 0, at.Trades[0].Net.V, 1e6, "within 0.01 USDT of zero at the break-even fee")
 	require.Greater(t, int64(f), int64(40_000), "~+10% gross covers ~4.7% per side")
 }

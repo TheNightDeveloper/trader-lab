@@ -28,8 +28,13 @@ Source of truth for every number the engine reports. Start from IMPLEMENTATION_P
 - 1m bar from the archive: `AvailableAt = CloseTime + ingest_delay` (CloseTime exclusive = open + 1m).
 - 1m bar from the live feed: `AvailableAt = max(CloseTime + ingest_delay, received_at)`; backfilled
   bars after an outage are late on purpose (ADR-011). Test: `data/TestLiveCatchUpOutageAndBackfill`.
-- Resampled bar: `max(last member AvailableAt, bucket close + ingest_delay)`; only closed
-  buckets are emitted, missing members set `FlagPartial`.
+- Resampled bar (manifest `resample_version: 2`): maximum of all included members'
+  `AvailableAt` and the bucket close plus the last member's ingest delay. When a later bar
+  is the evidence that a partial bucket closed, its `AvailableAt` also bounds the result.
+  Missing members set `FlagPartial`; trailing still-open buckets are not emitted.
+- Old manifests (absent version or version 1) retain legacy reconstruction so their content
+  hashes remain readable. Re-import/version the data to use corrected aggregation; reading
+  a historical dataset does not retrofit its availability timestamps.
 - Forward-filled bar (gap policy `ffill`): `O=H=L=C = previous close`, volume 0,
   `AvailableAt = CloseTime + ingest_delay`.
 
@@ -55,9 +60,18 @@ All values are int64 at scale 8; rates (fee, slippage, target) are parts per mil
 
 ### Fill reference and timing
 - A decision is made when its input bar becomes available (`AvailableAt`).
-- It fills at the open of the bar `LatencyBars` (default 1) after the decision bar of the
-  same instrument; a bar that had already closed at decision time is skipped (late,
-  backfilled data never fills in the past). Unfilled after `IntentTTL` (default 10 m) → expired.
+- New reports record `fill_model: "causal-next-open/v1"` and evaluation `p0.2`.
+  Eligibility requires both a target bar index at least `LatencyBars` beyond the highest
+  target index observed when deciding, and `OpenTime >= Decision.At`. The first qualifying
+  bar processed fills at its open, provided `OpenTime <= Decision.At + IntentTTL`.
+  A zero-delay close can share the next open's timestamp; a 2-second delay on 1m bars
+  skips that already-open candle and fills at the following eligible open.
+- Decision time is input `AvailableAt`; eligibility is the index/time/TTL predicate above;
+  `Fill.Time` is the qualifying candle's `OpenTime`. This is a declared bar-open model,
+  not a guarantee of executable live quotes. Default TTL is `(LatencyBars + 9)` input
+  timeframes, not always ten wall-clock minutes.
+- Delayed ranges cannot trigger stop/take exits against a newer position state. History
+  contains all and only observed candles, sorted by open time, with capacity capped.
 - Bars available at the same instant are processed in three phases: fills and exits
   (valued with earlier closes only), then closes are recorded, then strategies decide.
 
@@ -106,7 +120,7 @@ quote→USDT cross rate available at fill time (half-even). For USDT pairs the r
 
 ## Report metrics (M3) — `metrics.Compute`, all integer
 
-Evaluated over a window `[start, end)` from equity marks at bar closes inside it and the
+Evaluated over a window `[start, end)` from equity marks available inside it and the
 trades opened inside it. USDT at scale 8, ratios in ppm (scale 6), Sharpe at scale 2.
 
 | Key | Formula | Invalid when |
@@ -285,11 +299,15 @@ Indicators are computed over all bars of the source before the response keeps th
 
 
 ## P0 evaluation compatibility (2026-11-01)
-New report specifications include `evaluation_version: "p0.1"`. Buy-and-hold's trading state
+The first P0 batch introduced `evaluation_version: "p0.1"`. Buy-and-hold's trading state
 is no longer advanced in pre-OOS or pre-holdout warm-up. Historical results remain immutable;
 an absent evaluation version means legacy. Comparison blocks evaluation-version differences,
 uses exact ppm costs, UTC timestamps and normalized split settings, and shows four decimal
 places for cost percentages so a 1 ppm difference stays visible.
 
-Period/cohort attribution (F05) and causal fill timing (F01) have not been corrected in this
-batch. Passing the existing tests is not evidence that those new acceptance criteria pass.
+The second batch uses `evaluation_version: "p0.2"` for causal fills and marks equity at
+closed-bar availability, so a delayed old candle cannot backdate a new equity point or
+replace a newer close. Reports from any older evaluation version get a read-time legacy
+badge and cannot be compared as current evaluations. Stored reports are never rewritten.
+Period/cohort attribution (F05), actual forward freeze/coverage (F04), and non-USDT execution
+capability (F08) remain open; passing these tests does not establish those acceptance criteria.

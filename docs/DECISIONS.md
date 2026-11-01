@@ -177,3 +177,40 @@ read-time badge and cannot be ranked as comparable to current evaluations. Creat
 report to evaluate with the correction; Reproduce can legitimately report a difference.
 This does not change the simulator's price/timing contract or regenerate its golden files.
 Causal fills and period/cohort metrics still require later P0 changes and new version bumps.
+
+
+## ADR-039 Causal bar-open fills and availability-safe history (P0 FIX-02)
+Context: checking whether a candidate candle closed after a decision still allowed its
+open to precede the decision by the ingest delay. Prefix History also exposed unavailable
+older candles when a later candle arrived first; a backfill could rewind the last mark.
+Decision: retain the configured target-index latency floor and require OpenTime >= decision
+AvailableAt, within TTL. New report JSON records fill_model causal-next-open/v1 and evaluation
+p0.2 (the existing cache key includes the latter). History has a sorted observed-only buffer
+while there are holes, reverting to the allocation-free source prefix when complete. Latest
+close is chosen by highest observed index; equity points use availability time. A candle
+older than the latest position change cannot retroactively trigger its protection.
+Consequence: with a 2-second ingest delay, the immediate next 1m open is ineligible; the next
+eligible open supplies the reference price. Zero-delay equality remains allowed. Historical
+reports remain unchanged, but older-version reports are labeled legacy on read. F04/F05 and
+cross-asset execution capability are separate pending work, not certified by this batch.
+
+## ADR-040 Version resampling reconstruction in dataset manifests (P0 FIX-02)
+Decision: new snapshots store resample_version 2, whose availability includes every member
+and, for partial buckets, the later candle proving closure. Old absent/version-1 manifests
+retain their exact legacy reconstruction; unknown versions fail explicitly. Content hashes
+remain hashes of actual bars; dedup returns the stored first-creation manifest version.
+Consequence: old datasets stay loadable without a migration or rewrite. They retain legacy
+availability semantics: create/import a new version for corrected aggregation. The known_at
+snapshot-membership race remains FIX-05 work; this version field does not solve it.
+
+## ADR-041 Golden changes preserve scenario coverage (P0 FIX-02)
+Decision: regenerate all 11 expected outputs under the declared causal contract. Before any
+golden write, assert signal fills never predate their decisions and retain purpose checks
+for round-trip, partial close, ambiguous stop, gap expiry, and unfinished final decisions.
+Round-trip reference now buys at 00:02 for 102 and sells at 00:05 for 110, not 00:01/00:04;
+net is +75.20090400 USDT. All scenario fill counts remain unchanged. Exact Decimal auditing
+independently checked gross - fees - slippage = net for every golden trade.
+Consequence: the noise-based learning integration fixture needs persistence across the
+longer causal execution horizon; its synthetic hourly autocorrelation changes 0.6 to 0.9.
+All promotion gate thresholds and the deliberately worse challenger assertions stay intact.
+This fixture validates lifecycle paths, not evidence of profitability or actual market data.

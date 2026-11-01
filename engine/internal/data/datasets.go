@@ -15,25 +15,27 @@ var ErrDatasetChanged = errors.New("data: dataset bars no longer match their has
 
 // Dataset is an immutable, content-addressed version of bars.
 type Dataset struct {
-	ID       string
-	Spec     DatasetSpec
-	KnownAt  time.Time // candle rows ingested after this are not part of the version
-	BarCount int
-	Gaps     int
-	Filled   int
+	ResampleVersion int
+	ID              string
+	Spec            DatasetSpec
+	KnownAt         time.Time // candle rows ingested after this are not part of the version
+	BarCount        int
+	Gaps            int
+	Filled          int
 }
 
 // Manifest is the JSON stored with each dataset version.
 type Manifest struct {
-	Symbol    string    `json:"symbol"`
-	Timeframe Timeframe `json:"timeframe"`
-	From      time.Time `json:"from"`
-	To        time.Time `json:"to"`
-	GapPolicy GapPolicy `json:"gap_policy"`
-	KnownAt   time.Time `json:"known_at"`
-	Bars      int       `json:"bars"`
-	Gaps      int       `json:"gaps"`
-	Filled    int       `json:"filled"`
+	ResampleVersion int       `json:"resample_version,omitempty"`
+	Symbol          string    `json:"symbol"`
+	Timeframe       Timeframe `json:"timeframe"`
+	From            time.Time `json:"from"`
+	To              time.Time `json:"to"`
+	GapPolicy       GapPolicy `json:"gap_policy"`
+	KnownAt         time.Time `json:"known_at"`
+	Bars            int       `json:"bars"`
+	Gaps            int       `json:"gaps"`
+	Filled          int       `json:"filled"`
 }
 
 // CreateDataset snapshots spec with every bar ingested so far (known_at is the
@@ -45,17 +47,17 @@ func CreateDataset(ctx context.Context, s *store.Store, spec DatasetSpec) (Datas
 	if err != nil {
 		return Dataset{}, nil, err
 	}
-	bars, gaps, err := datasetBars(ctx, s.Queries, spec, knownAt)
+	bars, gaps, err := datasetBars(ctx, s.Queries, spec, knownAt, false)
 	if err != nil {
 		return Dataset{}, nil, err
 	}
-	ds := Dataset{ID: HashDataset(spec, bars), Spec: spec, KnownAt: knownAt.UTC(), BarCount: len(bars), Gaps: len(gaps)}
+	ds := Dataset{ResampleVersion: resampleVersion, ID: HashDataset(spec, bars), Spec: spec, KnownAt: knownAt.UTC(), BarCount: len(bars), Gaps: len(gaps)}
 	for _, b := range bars {
 		if b.Flags&FlagFilled != 0 {
 			ds.Filled++
 		}
 	}
-	m, err := json.Marshal(Manifest{spec.Symbol, spec.Timeframe, spec.From.UTC(), spec.To.UTC(), spec.GapPolicy, ds.KnownAt, ds.BarCount, ds.Gaps, ds.Filled})
+	m, err := json.Marshal(Manifest{ResampleVersion: resampleVersion, Symbol: spec.Symbol, Timeframe: spec.Timeframe, From: spec.From.UTC(), To: spec.To.UTC(), GapPolicy: spec.GapPolicy, KnownAt: ds.KnownAt, Bars: ds.BarCount, Gaps: ds.Gaps, Filled: ds.Filled})
 	if err != nil {
 		return Dataset{}, nil, err
 	}
@@ -70,7 +72,11 @@ func CreateDataset(ctx context.Context, s *store.Store, spec DatasetSpec) (Datas
 	if err != nil {
 		return Dataset{}, nil, err
 	}
-	ds.KnownAt = stored.KnownAt.UTC() // first creation wins; the bars are identical by hash
+	// An identical content hash may already have a legacy manifest; first creation wins.
+	ds, err = datasetFromRow(stored)
+	if err != nil {
+		return Dataset{}, nil, err
+	}
 	if err := SaveIssues(ctx, s.Queries, spec.Symbol, gaps); err != nil {
 		return Dataset{}, nil, err
 	}
@@ -87,7 +93,7 @@ func LoadDataset(ctx context.Context, s *store.Store, id string) (Dataset, []Bar
 	if err != nil {
 		return Dataset{}, nil, err
 	}
-	bars, _, err := datasetBars(ctx, s.Queries, ds.Spec, ds.KnownAt)
+	bars, _, err := datasetBars(ctx, s.Queries, ds.Spec, ds.KnownAt, ds.ResampleVersion < resampleVersion)
 	if err != nil {
 		return Dataset{}, nil, err
 	}
@@ -111,17 +117,18 @@ func datasetFromRow(row db.Dataset) (Dataset, error) {
 		return Dataset{}, fmt.Errorf("dataset %s: %w", row.ID, err)
 	}
 	return Dataset{
-		ID: row.ID, Spec: DatasetSpec{row.Symbol, tf, row.RangeFrom.UTC(), row.RangeTo.UTC(), gp},
+		ResampleVersion: m.ResampleVersion,
+		ID:              row.ID, Spec: DatasetSpec{row.Symbol, tf, row.RangeFrom.UTC(), row.RangeTo.UTC(), gp},
 		KnownAt: row.KnownAt.UTC(), BarCount: int(row.BarCount), Gaps: m.Gaps, Filled: m.Filled,
 	}, nil
 }
 
 // datasetBars reads every bar in the range (availability is filtered later, at
 // run time, by the simulator's as-of reads) and applies the gap policy.
-func datasetBars(ctx context.Context, q *db.Queries, spec DatasetSpec, knownAt time.Time) ([]Bar, []Issue, error) {
-	bars, err := Reader{Q: q}.Bars(ctx, Query{
+func datasetBars(ctx context.Context, q *db.Queries, spec DatasetSpec, knownAt time.Time, legacy bool) ([]Bar, []Issue, error) {
+	bars, err := (Reader{Q: q}).bars(ctx, Query{
 		Symbol: spec.Symbol, Timeframe: spec.Timeframe, From: spec.From, To: spec.To, AsOf: farFuture, KnownAt: knownAt,
-	})
+	}, legacy)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -136,6 +143,9 @@ func ParseManifest(b []byte) (Manifest, error) {
 	var m Manifest
 	if err := json.Unmarshal(b, &m); err != nil {
 		return Manifest{}, fmt.Errorf("manifest: %w", err)
+	}
+	if m.ResampleVersion < 0 || m.ResampleVersion > resampleVersion {
+		return Manifest{}, fmt.Errorf("manifest: unsupported resample_version %d", m.ResampleVersion)
 	}
 	return m, nil
 }

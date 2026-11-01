@@ -164,7 +164,7 @@ func (h *Report) GetReport(ctx context.Context, req *connect.Request[labv1.GetRe
 		Summary: summaryP(ev.Summary), Oos: runViewP(ev.OOS), HoldoutViews: int32(st.Views),
 	}
 	// Historical reports stay immutable; the warning is a read-time annotation.
-	if st.Spec.EvaluationVersion == "" {
+	if st.Spec.EvaluationVersion != eval.Version {
 		r.Summary.Badges = append(r.Summary.Badges, &labv1.Badge{Kind: "legacy", Tone: "warning", Text: "گزارش با منطق ارزیابی قدیمی؛ برای نتیجهٔ فعلی گزارش تازه بسازید"})
 	}
 	for _, f := range ev.Folds {

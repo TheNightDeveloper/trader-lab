@@ -103,7 +103,9 @@ type Query struct {
 var farFuture = time.Date(9999, 1, 1, 0, 0, 0, 0, time.UTC)
 
 // Bars returns closed bars available at q.AsOf, resampled to q.Timeframe.
-func (r Reader) Bars(ctx context.Context, q Query) ([]Bar, error) {
+func (r Reader) Bars(ctx context.Context, q Query) ([]Bar, error) { return r.bars(ctx, q, false) }
+
+func (r Reader) bars(ctx context.Context, q Query, legacy bool) ([]Bar, error) {
 	known := q.KnownAt
 	if known.IsZero() {
 		known = farFuture
@@ -123,7 +125,7 @@ func (r Reader) Bars(ctx context.Context, q Query) ([]Bar, error) {
 			Volume: money.Qty{V: row.Volume, Scale: instrument.Scale},
 		}
 	}
-	out, err := Resample(bars, q.Timeframe)
+	out, err := resample(bars, q.Timeframe, legacy)
 	if err != nil {
 		return nil, err
 	}

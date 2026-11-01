@@ -13,9 +13,13 @@ import (
 // Only closed buckets are emitted: a bucket whose last minute is present, or
 // which a later bar proves is over. A bucket closed but missing members is
 // emitted with FlagPartial. The trailing, still-open bucket is never emitted.
-// A resampled bar is available when its last member is, and never before the
-// bucket closes.
-func Resample(bars []Bar, tf Timeframe) ([]Bar, error) {
+// Availability includes every member and the evidence that the bucket closed.
+func Resample(bars []Bar, tf Timeframe) ([]Bar, error) { return resample(bars, tf, false) }
+
+const resampleVersion = 2
+
+// legacy preserves old content hashes; new reads always use causal aggregation.
+func resample(bars []Bar, tf Timeframe, legacy bool) ([]Bar, error) {
 	if tf == TF1m {
 		return bars, nil
 	}
@@ -41,6 +45,9 @@ func Resample(bars []Bar, tf Timeframe) ([]Bar, error) {
 				return nil, fmt.Errorf("resample %s volume at %s: %w", tf, start.Format(time.RFC3339), err)
 			}
 			b.Flags |= m.Flags & FlagFilled
+			if !legacy {
+				b.AvailableAt = maxTime(b.AvailableAt, m.AvailableAt)
+			}
 			last = m
 			members++
 		}
@@ -54,7 +61,15 @@ func Resample(bars []Bar, tf Timeframe) ([]Bar, error) {
 		b.C = last.C
 		b.Volume = money.Qty{V: vol.V, Scale: vol.Asset.Scale}
 		delay := last.AvailableAt.Sub(last.CloseTime)
-		b.AvailableAt = maxTime(last.AvailableAt, end.Add(delay))
+		available := maxTime(last.AvailableAt, end.Add(delay))
+		if legacy {
+			b.AvailableAt = available
+		} else {
+			b.AvailableAt = maxTime(b.AvailableAt, available)
+			if !complete {
+				b.AvailableAt = maxTime(b.AvailableAt, bars[j].AvailableAt)
+			}
+		}
 		out = append(out, b)
 		i = j
 	}
