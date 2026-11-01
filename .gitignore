@@ -17,3 +17,5 @@ testdata/rapid/
 # Local test evidence and Python bytecode.
 /artifacts/
 __pycache__/
+
+graphify-out/

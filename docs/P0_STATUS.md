@@ -90,4 +90,21 @@ Revert this batch's code to restore the prior UI/admission/evaluation behavior; 
 no destructive migration. New report JSON has one optional field and is readable by old
 code. Do not delete or rewrite reports or attempts. Cache namespace changes prevent reuse
 of older evaluations by the new engine; old reports must be recreated to use the corrected
-buy-and-hold behavior. No commit or push was performed in this session.
+buy-and-hold behavior. The first batch and table-alignment fix were committed as `2d998d5`; no push was performed.
+
+## Continuation checkpoint (2026-11-01)
+
+The first implementation batch and shared table-alignment fix are committed as
+`2d998d5` (`fix(p0): stabilize research admission, evaluation and UI state`).
+The pre-existing, untracked `graphify-out/` artifacts remain outside the commit.
+
+FIX-02 callers, simulator tests, resampling and immutable dataset loading were inspected.
+Before any new source edit, Windows refused to launch `go.exe`, `gofmt.exe` and
+`python.exe` with "This program is blocked by group policy". Consequently no new
+regression file, production change or golden update was applied, and no new test
+execution is claimed. The working tree was verified to contain only the pre-existing
+graph artifacts before this documentation update.
+
+Resume FIX-02 after those tools are permitted to execute. Resampling changes must retain
+legacy dataset reconstruction by manifest version so existing content hashes remain
+readable; causal fill changes need evaluation versioning and reviewed golden outputs.
