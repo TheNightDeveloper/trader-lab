@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+	"time"
 
 	"tradinglab/engine/internal/metrics"
+	"tradinglab/engine/internal/money"
 )
 
 // Comparable is what Compare needs from a stored report.
@@ -45,13 +47,19 @@ func Compare(rs []Comparable) Comparison {
 		blocking   bool
 		val        func(r Comparable) string
 	}{
+		{"evaluation_version", "نسخه ارزیابی", true, func(r Comparable) string {
+			if r.Spec.EvaluationVersion == "" {
+				return "legacy"
+			}
+			return r.Spec.EvaluationVersion
+		}},
 		{"datasets", "نسخه داده", true, func(r Comparable) string { return strings.Join(r.Spec.DatasetIDs, ", ") }},
 		{"period", "دوره خارج از نمونه", true, func(r Comparable) string {
-			return r.Split.OOS.From.Format("2006-01-02") + " → " + r.Split.OOS.To.Add(-1).Format("2006-01-02")
+			return r.Split.OOS.From.UTC().Format(time.RFC3339Nano) + " → " + r.Split.OOS.To.UTC().Format(time.RFC3339Nano)
 		}},
 		{"timeframe", "تایم‌فریم", true, func(r Comparable) string { return string(r.Spec.Timeframe) }},
-		{"fee", "کارمزد هر سمت", true, func(r Comparable) string { return Pct(int64(r.Spec.Sim.FeeRate)) }},
-		{"slippage", "لغزش هر سمت", true, func(r Comparable) string { return Pct(int64(r.Spec.Sim.SlipRate)) }},
+		{"fee", "کارمزد هر سمت", true, func(r Comparable) string { return exactPct(r.Spec.Sim.FeeRate) }},
+		{"slippage", "لغزش هر سمت", true, func(r Comparable) string { return exactPct(r.Spec.Sim.SlipRate) }},
 		{"capital", "سرمایه اولیه", true, func(r Comparable) string { return r.Spec.Sim.Capital.String() }},
 		{"sizing", "اندازه موقعیت", true, func(r Comparable) string {
 			if r.Spec.Sim.Sizing == "fixed" {
@@ -65,7 +73,7 @@ func Compare(rs []Comparable) Comparison {
 			if r.Spec.Split.Rolling {
 				mode = "rolling"
 			}
-			return fmt.Sprintf("%d folds · %s · holdout %s · embargo %s", r.Spec.Split.Folds, mode, Pct(int64(r.Spec.Split.Holdout)), r.Spec.Split.Embargo)
+			return fmt.Sprintf("%d folds · %s · holdout %s · embargo %s", r.Spec.Split.Folds, mode, exactPct(r.Spec.Split.Holdout), r.Spec.Split.Embargo)
 		}},
 		{"attempts", "تعداد تلاش‌ها", false, func(r Comparable) string { return fmt.Sprint(max(1, r.Attempts)) }},
 		{"strategy", "راهبرد و پارامترها", false, func(r Comparable) string { return r.Spec.Strategy + " " + params(r.Spec) }},
@@ -85,7 +93,7 @@ func Compare(rs []Comparable) Comparison {
 			a.Values = append(a.Values, row.val(r))
 		}
 		for i := 1; i < len(a.Values); i++ {
-			if a.Values[i] != a.Values[0] {
+			if assumptionKey(row.key, rs[i], a.Values[i]) != assumptionKey(row.key, rs[0], a.Values[0]) {
 				a.Differs = true
 				if row.blocking {
 					c.Eligible[i] = false
@@ -145,4 +153,29 @@ func params(s Spec) string {
 		parts[i] = fmt.Sprintf("%s=%g", k, s.Params[k])
 	}
 	return strings.Join(parts, " ")
+}
+
+// Display rounding is never an identity for costs, timestamps or split settings.
+func assumptionKey(key string, r Comparable, display string) string {
+	switch key {
+	case "fee":
+		return r.Spec.Sim.FeeRate.String()
+	case "slippage":
+		return r.Spec.Sim.SlipRate.String()
+	case "period":
+		return r.Split.OOS.From.UTC().Format(time.RFC3339Nano) + "/" + r.Split.OOS.To.UTC().Format(time.RFC3339Nano)
+	case "split":
+		return fmt.Sprintf("%#v", r.Spec.Split.withDefaults())
+	default:
+		return display
+	}
+}
+
+// A one-ppm cost difference needs four percent decimals to remain visible.
+func exactPct(rate money.Ratio) string {
+	sign := ""
+	if rate > 0 {
+		sign = "+"
+	}
+	return sign + money.Format(int64(rate), 4) + "%"
 }

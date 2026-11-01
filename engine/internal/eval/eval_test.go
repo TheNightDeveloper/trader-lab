@@ -179,7 +179,7 @@ func TestCompareEligibility(t *testing.T) {
 	}
 	require.True(t, fee.Differs)
 	require.Contains(t, c.Conclusion, "رتبه‌بندی قطعی ممکن نیست", "no trades: no ranking")
-	require.Equal(t, []string{"+0.10%", "+0.10%", "+0.20%"}, fee.Values)
+	require.Equal(t, []string{"+0.1000%", "+0.1000%", "+0.2000%"}, fee.Values)
 }
 
 func TestPct(t *testing.T) {
@@ -211,4 +211,44 @@ func TestReplayReproducesNetExactly(t *testing.T) {
 	require.Less(t, half.Fills[0].Qty.V, res.Fills[0].Qty.V)
 	_, _, err = Replay(context.Background(), ev.Split, ev.Main.Decisions, ev.Spec.Sim, 0, bars, specs())
 	require.ErrorIs(t, err, ErrSpec)
+}
+
+// Formatting must never make distinct costs or intraday windows comparable.
+func TestCompareUsesExactAssumptions(t *testing.T) {
+	base := Comparable{ID: "a", Spec: testSpec(), Split: Split{OOS: Window{From: t0, To: t0.Add(24 * time.Hour)}}}
+	for _, key := range []string{"fee", "slippage", "period", "split", "evaluation_version"} {
+		t.Run(key, func(t *testing.T) {
+			other := base
+			switch key {
+			case "evaluation_version":
+				other.Spec.EvaluationVersion = Version
+			case "fee":
+				other.Spec.Sim.FeeRate++
+			case "slippage":
+				other.Spec.Sim.SlipRate++
+			case "period":
+				other.Split.OOS.From = other.Split.OOS.From.Add(time.Second)
+			case "split":
+				other.Spec.Split.Holdout++
+			}
+			c := Compare([]Comparable{base, other})
+			require.False(t, c.Eligible[1])
+			require.NotEmpty(t, c.Reasons[1])
+		})
+	}
+}
+
+// A selected buy-and-hold strategy must still buy after the warm-up window.
+func TestBuyAndHoldSurvivesWarmup(t *testing.T) {
+	spec := testSpec()
+	spec.Strategy, spec.Params = "buy-and-hold", strategy.WithDefaults("buy-and-hold", nil)
+	ev, err := Evaluate(context.Background(), spec, map[string][]data.Bar{"BTCUSDT": walk("BTCUSDT", 1000, 3)}, specs())
+	require.NoError(t, err)
+	require.Equal(t, Version, ev.Spec.EvaluationVersion)
+	for _, res := range []*sim.Result{ev.Main, ev.HoldoutRun} {
+		require.NotEmpty(t, res.Fills)
+		require.Equal(t, sim.Buy, res.Fills[0].Side)
+	}
+	require.False(t, ev.Main.Fills[0].Time.Before(ev.Split.OOS.From))
+	require.False(t, ev.HoldoutRun.Fills[0].Time.Before(ev.Split.Holdout.From))
 }

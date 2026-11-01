@@ -2,8 +2,9 @@ import 'package:fixnum/fixnum.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api/engine.dart';
-import '../../gen/lab/v1/data.pb.dart';
 import '../../gen/lab/v1/report.pb.dart';
+
+export '../data/data_providers.dart' show allDatasetsProvider;
 
 const reportsPageSize = 20;
 
@@ -14,11 +15,6 @@ final reportsProvider = FutureProvider.family<ListReportsResponse, int>(
 
 final strategiesProvider = FutureProvider<ListStrategiesResponse>(
   (ref) => ref.watch(reportClientProvider).listStrategies(ListStrategiesRequest()),
-);
-
-/// Every dataset version, for pickers (the Data screen pages them instead).
-final allDatasetsProvider = FutureProvider<ListDatasetsResponse>(
-  (ref) => ref.watch(dataClientProvider).listDatasets(ListDatasetsRequest(pageSize: 200)),
 );
 
 /// A report with Toman equivalents at the current display rate (if any).

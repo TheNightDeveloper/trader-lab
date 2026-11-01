@@ -27,6 +27,9 @@ func newBuyAndHold(p Params) (Strategy, error) {
 	return &buyAndHold{exposure: e, bought: map[string]bool{}}, p.only("exposure")
 }
 
+// Warmup has no indicators to prime; the first eligible bar must still buy.
+func (*buyAndHold) Warmup(RunContext, data.Bar) error { return nil }
+
 func (s *buyAndHold) OnBar(_ RunContext, b data.Bar) ([]Intent, error) {
 	if s.bought[b.Instrument] {
 		return nil, nil

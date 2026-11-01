@@ -93,6 +93,18 @@ abstract class L10n {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[Locale('fa')];
 
+  /// No description provided for @pnlCalculating.
+  ///
+  /// In fa, this message translates to:
+  /// **'در حال محاسبه با ورودی‌های فعلی…'**
+  String get pnlCalculating;
+
+  /// No description provided for @pnlCheckInputs.
+  ///
+  /// In fa, this message translates to:
+  /// **'ورودی‌ها را کامل و معتبر کنید تا نتیجهٔ تازه محاسبه شود.'**
+  String get pnlCheckInputs;
+
   /// No description provided for @appTitle.
   ///
   /// In fa, this message translates to:

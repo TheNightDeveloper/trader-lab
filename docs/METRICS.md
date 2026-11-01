@@ -282,3 +282,14 @@ Indicators are computed over all bars of the source before the response keeps th
   expired → × . Placed on the bar the decision was made on, at its close. Stop-loss and
   take-profit exits (no decision) are exits on the bar they happened.
 - Report charts end at the out-of-sample end: the holdout stays hidden.
+
+
+## P0 evaluation compatibility (2026-11-01)
+New report specifications include `evaluation_version: "p0.1"`. Buy-and-hold's trading state
+is no longer advanced in pre-OOS or pre-holdout warm-up. Historical results remain immutable;
+an absent evaluation version means legacy. Comparison blocks evaluation-version differences,
+uses exact ppm costs, UTC timestamps and normalized split settings, and shows four decimal
+places for cost percentages so a 1 ppm difference stays visible.
+
+Period/cohort attribution (F05) and causal fill timing (F01) have not been corrected in this
+batch. Passing the existing tests is not evidence that those new acceptance criteria pass.

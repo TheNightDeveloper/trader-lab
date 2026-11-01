@@ -2,9 +2,29 @@
 
 Update at the end of every session.
 
-## Current milestone
-M6 — Chart, hardening, release: **done** (2026-10-28). **v1 release gate passed** (below).
-Next: Phase 2 (plan §6), when you decide.
+## Table alignment fix (2026-11-01)
+- Shared DataTableBox cells align to the same directional start edge as their headers;
+  numeric/date/symbol text keeps its LTR reading direction inside RTL tables.
+- Replaced the cell helper with a class-based widget. No new widget tests.
+- Verified: Dart analysis clean, 32 existing table/page/responsive tests passed,
+  including the 390 px route sweep. Real-browser visual review was not performed.
+
+## Current phase
+P0 — correctness and evidence stabilization: **in progress** (2026-11-01).
+The new P0–P8 phases are defined in `Trading_Lab_Master_Plan_FA.md`; M0–M6 below
+are historical implementation milestones, not evidence that the P0 release gate passed.
+
+First P0 batch: atomic weighted research admission (F03), buy-and-hold warm-up (F02),
+exact comparison assumptions (F14), stop/take chart unit prices (F09), cancellable P&L
+requests (F11), shared dataset cache invalidation and retrieval beyond 200 (part of F10).
+Evaluation `p0.1` separates new reports and cache entries from legacy evaluations.
+CI now has PostgreSQL, mandatory DB tests, race and retained pass/fail/skip evidence (F12);
+the hosted workflow still needs its first run. See [P0_STATUS.md](P0_STATUS.md) for the
+executed checks, remaining work, UX states and rollback notes.
+
+Next: FIX-02 causal fills and late history/resampling, then FIX-04 forward freeze/coverage
+and period metrics. Server-side dataset search, snapshot membership, lifecycle locking,
+provenance, recovery and remaining P0 stress cases are still open. **Do not start P1 yet.**
 
 ## M6 done (2026-10-28)
 - ChartService: bars, engine-computed indicators (MA, EMA, BB, RSI, MACD), decision markers (entry, exit, rejected, stop/take), decision record; report charts end at the out-of-sample end.
@@ -14,7 +34,7 @@ Next: Phase 2 (plan §6), when you decide.
 - Backup: nightly pg_dump in the engine, `cmd/verifydb`, `scripts/restore-drill.sh`; docs/BACKUP.md (ADR-035).
 - Usability: every route checked at 390 px by a test; fixes for the chart's source picker, unset Money, empty Compare, Persian issue labels on Home, help text on every Learning settings field.
 
-## v1 release gate
+## Historical v1 release gate (M6; not the P0 gate)
 | Condition | Evidence |
 |---|---|
 | All golden scenarios and leak tests pass | `sim/TestGolden` (11 scenarios), `model/train/TestFeaturesAndLabelsOnlySeeThePast`, `TestFittingOnAllHistoryIsCaught`, `strategy/TestFutureRowsDoNotChangePastDecisions`, `TestSavedModelReproducesPredictions` |

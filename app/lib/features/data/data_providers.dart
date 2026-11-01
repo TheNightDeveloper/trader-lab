@@ -1,9 +1,28 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:connectrpc/connect.dart';
 
 import '../../core/api/engine.dart';
 import '../../gen/lab/v1/data.pb.dart';
 
 const pageSize = 20;
+
+/// Shared picker cache; imports invalidate it along with the paged Data screen.
+// shortcut: existing pickers need all versions; replace with server search for large catalogs.
+final allDatasetsProvider = FutureProvider<ListDatasetsResponse>((ref) async {
+  final client = ref.watch(dataClientProvider);
+  final signal = CancelableSignal();
+  ref.onDispose(signal.cancel);
+  final result = ListDatasetsResponse();
+  while (true) {
+    final page = await client.listDatasets(
+      ListDatasetsRequest(pageSize: 200, offset: result.datasets.length),
+      signal: signal,
+    );
+    result.total = page.total;
+    result.datasets.addAll(page.datasets);
+    if (page.datasets.isEmpty || result.datasets.length >= page.total.toInt()) return result;
+  }
+});
 
 final overviewProvider = FutureProvider<GetOverviewResponse>(
   (ref) => ref.watch(dataClientProvider).getOverview(GetOverviewRequest()),
@@ -56,6 +75,7 @@ class ImportController extends Notifier<ImportState> {
     } finally {
       // New bars, issues and versions: refresh every view that shows them.
       ref
+        ..invalidate(allDatasetsProvider)
         ..invalidate(datasetsProvider)
         ..invalidate(coverageProvider)
         ..invalidate(issuesProvider)

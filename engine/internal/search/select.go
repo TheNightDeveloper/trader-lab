@@ -23,15 +23,16 @@ func CacheKey(build string, spec eval.Spec) (string, error) {
 		return "", err
 	}
 	key := struct {
-		V        int             `json:"v"`
-		Build    string          `json:"build"`
-		Datasets []string        `json:"datasets"`
-		TF       string          `json:"tf"`
-		Strategy string          `json:"strategy"`
-		Params   strategy.Params `json:"params"`
-		Sim      sim.Config      `json:"sim"`
-		Split    eval.SplitPlan  `json:"split"`
-	}{1, build, spec.DatasetIDs, string(spec.Timeframe), spec.Strategy, spec.Params, cfg, spec.Split}
+		V          int             `json:"v"`
+		Evaluation string          `json:"evaluation_version"`
+		Build      string          `json:"build"`
+		Datasets   []string        `json:"datasets"`
+		TF         string          `json:"tf"`
+		Strategy   string          `json:"strategy"`
+		Params     strategy.Params `json:"params"`
+		Sim        sim.Config      `json:"sim"`
+		Split      eval.SplitPlan  `json:"split"`
+	}{2, eval.Version, build, spec.DatasetIDs, string(spec.Timeframe), spec.Strategy, spec.Params, cfg, spec.Split}
 	b, err := json.Marshal(key)
 	if err != nil {
 		return "", err

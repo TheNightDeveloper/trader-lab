@@ -1,4 +1,6 @@
 {
+  "pnlCalculating": "در حال محاسبه با ورودی‌های فعلی…",
+  "pnlCheckInputs": "ورودی‌ها را کامل و معتبر کنید تا نتیجهٔ تازه محاسبه شود.",
   "@@locale": "fa",
   "appTitle": "آزمایشگاه الگوریتم",
   "appSubtitle": "Trading Research Lab",

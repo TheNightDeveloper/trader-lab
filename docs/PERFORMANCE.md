@@ -21,3 +21,11 @@ Notes
   the whole dataset; under load that missed the target. Dataset versions are content-addressed
   and immutable, so the report service keeps the 4 most recent in memory (verified once on load).
 - Tests run without `-race` on this machine (no cgo/gcc); numbers are from normal builds.
+
+
+## P0 starting baseline (2026-11-01)
+Local Windows amd64, Intel Core i3-12100F, Go 1.26.4; one iteration without race:
+`go test ./internal/sim -run '^$' -bench MillionBars -benchtime=1x -benchmem`.
+One million bars: 1,027,394,700 ns/op (1.027 s), 503,084,664 B/op, 187,238 allocations,
+314 fills. B/op is allocated bytes, not peak resident memory. This single measurement is
+an orientation baseline, not a latency distribution or a cross-machine performance claim.

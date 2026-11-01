@@ -163,6 +163,10 @@ func (h *Report) GetReport(ctx context.Context, req *connect.Request[labv1.GetRe
 		Range: windowP(ev.Range), OosWindow: windowP(st.Split.OOS), HoldoutWindow: windowP(st.Split.Holdout),
 		Summary: summaryP(ev.Summary), Oos: runViewP(ev.OOS), HoldoutViews: int32(st.Views),
 	}
+	// Historical reports stay immutable; the warning is a read-time annotation.
+	if st.Spec.EvaluationVersion == "" {
+		r.Summary.Badges = append(r.Summary.Badges, &labv1.Badge{Kind: "legacy", Tone: "warning", Text: "گزارش با منطق ارزیابی قدیمی؛ برای نتیجهٔ فعلی گزارش تازه بسازید"})
+	}
 	for _, f := range ev.Folds {
 		r.Folds = append(r.Folds, &labv1.FoldView{Index: int32(f.Fold.Index), Train: windowP(f.Fold.Train), Test: windowP(f.Fold.Test), Metrics: metricsP(f.Metrics)})
 	}

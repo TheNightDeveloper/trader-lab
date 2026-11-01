@@ -9,6 +9,13 @@ class L10nFa extends L10n {
   L10nFa([String locale = 'fa']) : super(locale);
 
   @override
+  String get pnlCalculating => 'در حال محاسبه با ورودی‌های فعلی…';
+
+  @override
+  String get pnlCheckInputs =>
+      'ورودی‌ها را کامل و معتبر کنید تا نتیجهٔ تازه محاسبه شود.';
+
+  @override
   String get appTitle => 'آزمایشگاه الگوریتم';
 
   @override

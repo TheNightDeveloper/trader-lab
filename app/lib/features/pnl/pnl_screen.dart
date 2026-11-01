@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/nav.dart';
 import '../../core/api/engine.dart';
+import '../../core/api/latest_request.dart';
 import '../../core/metric.dart';
 import '../../core/money.dart';
 import '../../core/theme/tokens.dart';
@@ -35,7 +36,15 @@ bool _isPct(String s) =>
 /// Debounced engine call: waits 300 ms after the last edit (UI_SPEC).
 mixin _Debounce<T extends StatefulWidget> on State<T> {
   Timer? _t;
+  final requests = LatestRequest();
+
+  RequestTicket beginRequest() {
+    _t?.cancel();
+    return requests.begin();
+  }
+
   void debounce(VoidCallback f) {
+    requests.invalidate();
     _t?.cancel();
     _t = Timer(const Duration(milliseconds: 300), f);
   }
@@ -43,6 +52,7 @@ mixin _Debounce<T extends StatefulWidget> on State<T> {
   @override
   void dispose() {
     _t?.cancel();
+    requests.dispose();
     super.dispose();
   }
 }
@@ -80,8 +90,17 @@ class _PnlScreenState extends State<PnlScreen> {
   }
 }
 
-Widget _rateSelect(L10n l, AsyncValue<ListRatesResponse> rates, int value, ValueChanged<int> onChanged) =>
-    DropdownButtonFormField<int>(
+/// The display rate is a presentation choice; the engine still accounts in USDT.
+class _RateSelect extends StatelessWidget {
+  const _RateSelect(this.rates, this.value, this.onChanged);
+  final AsyncValue<ListRatesResponse> rates;
+  final int value;
+  final ValueChanged<int> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L10n.of(context);
+    return DropdownButtonFormField<int>(
       initialValue: value,
       decoration: InputDecoration(labelText: l.pnlRate),
       items: [
@@ -94,40 +113,57 @@ Widget _rateSelect(L10n l, AsyncValue<ListRatesResponse> rates, int value, Value
       ],
       onChanged: (v) => onChanged(v ?? 0),
     );
+  }
+}
 
-Widget _field(
-  String label,
-  TextEditingController c,
-  bool Function(String) ok,
-  String err,
-  VoidCallback onChanged, {
-  String? suffix,
-  String? help,
-}) => TextField(
-  controller: c,
-  textDirection: TextDirection.ltr,
-  style: AppText.mono,
-  onChanged: (_) => onChanged(),
-  decoration: InputDecoration(
-    labelText: label,
-    suffix: unitSuffix(suffix),
-    helperText: help,
-    errorText: c.text.isEmpty || ok(c.text) ? null : err,
-  ),
-);
+/// Numeric fields keep LTR input inside the RTL form and show validation inline.
+class _CalcField extends StatelessWidget {
+  const _CalcField(this.label, this.controller, this.validate, this.error, this.onChanged, {this.suffix, this.help});
+  final String label, error;
+  final TextEditingController controller;
+  final bool Function(String) validate;
+  final VoidCallback onChanged;
+  final String? suffix, help;
 
-Widget _layout(BuildContext context, Widget inputs, Widget output) {
-  final wide = MediaQuery.sizeOf(context).width >= 1100;
-  return wide
-      ? Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(width: 320, child: inputs),
-            const SizedBox(width: 18),
-            Expanded(child: output),
-          ],
-        )
-      : Column(children: [inputs, const SizedBox(height: 18), output]);
+  @override
+  Widget build(BuildContext context) => TextField(
+    controller: controller,
+    textDirection: TextDirection.ltr,
+    style: AppText.mono,
+    onChanged: (_) => onChanged(),
+    decoration: InputDecoration(
+      labelText: label,
+      suffix: unitSuffix(suffix),
+      helperText: help,
+      errorText: controller.text.isEmpty || validate(controller.text) ? null : error,
+    ),
+  );
+}
+
+/// Use the page's actual available width, including its sidebar and padding.
+class _CalcLayout extends StatelessWidget {
+  const _CalcLayout({required this.inputs, required this.output});
+  final Widget inputs, output;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) => constraints.maxWidth >= 1000
+        ? Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(width: 320, child: inputs),
+              const SizedBox(width: AppSpace.lg),
+              Expanded(child: output),
+            ],
+          )
+        : Column(
+            children: [
+              inputs,
+              const SizedBox(height: AppSpace.lg),
+              output,
+            ],
+          ),
+  );
 }
 
 class _RunCalc extends ConsumerStatefulWidget {
@@ -167,10 +203,21 @@ class _RunCalcState extends ConsumerState<_RunCalc> with _Debounce {
   bool get _valid => _isPos(_capital.text) && _isPct(_size.text) && _isBps(_fee.text) && _isBps(_slip.text);
 
   Future<void> _load({bool reset = false}) async {
-    if (_report == null || (!reset && !_valid)) return;
+    if (!mounted) return;
+    final ticket = beginRequest();
+    if (_report == null || (!reset && !_valid)) {
+      setState(() {
+        _loading = false;
+        _res = null;
+        _error = null;
+      });
+      return;
+    }
     setState(() {
       _loading = true;
+      _res = null;
       _error = null;
+      if (reset) _original = null;
     });
     try {
       final req = RecalculateRequest(reportId: _report, fxRateId: _rate == 0 ? null : Int64(_rate));
@@ -181,7 +228,8 @@ class _RunCalcState extends ConsumerState<_RunCalc> with _Debounce {
           ..fee = bpsOut(Decimal.parse(_fee.text.trim()))
           ..slippage = bpsOut(Decimal.parse(_slip.text.trim()));
       }
-      final res = await ref.read(pnlClientProvider).recalculate(req);
+      final res = await ref.read(pnlClientProvider).recalculate(req, signal: ticket.signal);
+      if (!mounted || !requests.isCurrent(ticket)) return;
       setState(() {
         _res = res;
         if (reset) {
@@ -193,9 +241,9 @@ class _RunCalcState extends ConsumerState<_RunCalc> with _Debounce {
         }
       });
     } catch (e) {
-      setState(() => _error = e);
+      if (mounted && requests.isCurrent(ticket)) setState(() => _error = e);
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted && requests.isCurrent(ticket)) setState(() => _loading = false);
     }
   }
 
@@ -204,7 +252,14 @@ class _RunCalcState extends ConsumerState<_RunCalc> with _Debounce {
     final l = L10n.of(context);
     final reports = ref.watch(reportsProvider(0));
     final rates = ref.watch(ratesProvider);
-    void changed() => debounce(_load);
+    void changed() {
+      setState(() {
+        _res = null;
+        _error = null;
+        _loading = false;
+      });
+      debounce(_load);
+    }
 
     final inputs = SectionCard(
       title: l.pnlInputs,
@@ -235,15 +290,15 @@ class _RunCalcState extends ConsumerState<_RunCalc> with _Debounce {
             ),
           ),
           const SizedBox(height: AppSpace.md),
-          _field(l.newCapital, _capital, _isPos, l.errPositive, changed, suffix: 'USDT'),
+          _CalcField(l.newCapital, _capital, _isPos, l.errPositive, changed, suffix: 'USDT'),
           const SizedBox(height: AppSpace.md),
-          _field(l.pnlSize, _size, _isPct, l.errNumber, changed, suffix: '%', help: l.pnlSizeHelp),
+          _CalcField(l.pnlSize, _size, _isPct, l.errNumber, changed, suffix: '%', help: l.pnlSizeHelp),
           const SizedBox(height: AppSpace.md),
-          _field(l.newFeeBps, _fee, _isBps, l.errBps, changed, suffix: l.bps, help: l.bpsHelp),
+          _CalcField(l.newFeeBps, _fee, _isBps, l.errBps, changed, suffix: l.bps, help: l.bpsHelp),
           const SizedBox(height: AppSpace.md),
-          _field(l.newSlipBps, _slip, _isBps, l.errBps, changed, suffix: l.bps),
+          _CalcField(l.newSlipBps, _slip, _isBps, l.errBps, changed, suffix: l.bps),
           const SizedBox(height: AppSpace.md),
-          _rateSelect(l, rates, _rate, (v) {
+          _RateSelect(rates, _rate, (v) {
             setState(() => _rate = v);
             _load();
           }),
@@ -256,88 +311,96 @@ class _RunCalcState extends ConsumerState<_RunCalc> with _Debounce {
         ],
       ),
     );
-    return _layout(context, inputs, _output(l));
+    final result = _res;
+    final output = _error != null
+        ? ErrorBox(error: _error!, onRetry: _load)
+        : result == null
+        ? _CalculationStatus(
+            loading: _loading,
+            message: _loading ? l.pnlCalculating : (_report == null ? l.pnlNoReports : l.pnlCheckInputs),
+          )
+        : _RunResult(result);
+    return _CalcLayout(inputs: inputs, output: output);
   }
+}
 
-  Widget _output(L10n l) {
-    final r = _res;
-    if (_error != null) return ErrorBox(error: _error!, onRetry: _load);
-    if (r == null) return SectionCard(child: EmptyState(l.pnlNoReports, icon: Icons.calculate_outlined));
+/// A result widget receives only a current server response, never form controllers.
+class _RunResult extends StatelessWidget {
+  const _RunResult(this.r);
+  final RecalculateResponse r;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L10n.of(context);
     final net = moneyValue(r.waterfall.net);
     final metrics = r.metrics;
     final finalEq = metricOf(metrics, 'final_equity');
-    return AnimatedOpacity(
-      opacity: _loading ? 0.6 : 1,
-      duration: AppMotion.of(context, AppMotion.fast),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          VerdictCard(verdict: r.verdict, tone: r.tone, sentence: r.sentence),
-          const SizedBox(height: 18),
-          StatGrid(
-            minWidth: 160,
-            children: [
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        VerdictCard(verdict: r.verdict, tone: r.tone, sentence: r.sentence),
+        const SizedBox(height: 18),
+        StatGrid(
+          minWidth: 160,
+          children: [
+            StatCard(
+              label: l.pnlNet,
+              value: Num(net, signed: true, fractionDigits: 2, unit: 'USDT', style: AppText.statValue),
+            ),
+            StatCard(label: l.pnlOriginalNet, value: moneyNum(r.originalNet)),
+            if (finalEq != null)
               StatCard(
-                label: l.pnlNet,
-                value: Num(net, signed: true, fractionDigits: 2, unit: 'USDT', style: AppText.statValue),
+                label: l.pnlFinal,
+                value: Num(decValue(finalEq.value), fractionDigits: 2, unit: 'USDT'),
               ),
-              StatCard(label: l.pnlOriginalNet, value: moneyNum(r.originalNet)),
-              if (finalEq != null)
-                StatCard(
-                  label: l.pnlFinal,
-                  value: Num(decValue(finalEq.value), fractionDigits: 2, unit: 'USDT'),
-                ),
-              StatCard(
-                label: l.pnlBreakEvenFee,
-                value: r.hasBreakEvenFee()
-                    ? Num(fractionToBps(r.breakEvenFee), fractionDigits: 1, unit: 'bps')
-                    : Text(l.reportBreakEvenNone, style: AppText.caption),
+            StatCard(
+              label: l.pnlBreakEvenFee,
+              value: r.hasBreakEvenFee()
+                  ? Num(fractionToBps(r.breakEvenFee), fractionDigits: 1, unit: 'bps')
+                  : Text(l.reportBreakEvenNone, style: AppText.caption),
+            ),
+            if (r.hasNetToman()) StatCard(label: l.pnlTomanNet, value: moneyNum(r.netToman, digits: 0)),
+          ],
+        ),
+        const SizedBox(height: 18),
+        SectionCard(
+          title: l.reportWaterfall,
+          child: WaterfallBars(
+            rows: [
+              WaterfallRow(l.tradeGross, moneyValue(r.waterfall.gross), AppColors.positive.withValues(alpha: 0.8)),
+              WaterfallRow(
+                metricOf(metrics, 'fees')?.label ?? '',
+                -moneyValue(r.waterfall.fees),
+                AppColors.negative.withValues(alpha: 0.85),
               ),
-              if (r.hasNetToman()) StatCard(label: l.pnlTomanNet, value: moneyNum(r.netToman, digits: 0)),
+              WaterfallRow(
+                metricOf(metrics, 'slippage')?.label ?? '',
+                -moneyValue(r.waterfall.slippage),
+                AppColors.negative.withValues(alpha: 0.6),
+              ),
+              WaterfallRow(l.tradeNet, net, AppColors.accent),
             ],
           ),
-          const SizedBox(height: 18),
-          SectionCard(
-            title: l.reportWaterfall,
-            child: WaterfallBars(
-              rows: [
-                WaterfallRow(l.tradeGross, moneyValue(r.waterfall.gross), AppColors.positive.withValues(alpha: 0.8)),
-                WaterfallRow(
-                  metricOf(metrics, 'fees')?.label ?? '',
-                  -moneyValue(r.waterfall.fees),
-                  AppColors.negative.withValues(alpha: 0.85),
-                ),
-                WaterfallRow(
-                  metricOf(metrics, 'slippage')?.label ?? '',
-                  -moneyValue(r.waterfall.slippage),
-                  AppColors.negative.withValues(alpha: 0.6),
-                ),
-                WaterfallRow(l.tradeNet, net, AppColors.accent),
-              ],
-            ),
+        ),
+        const SizedBox(height: 18),
+        SectionCard(
+          title: l.pnlEquity,
+          child: EquityChart(
+            height: 220,
+            format: axisUsdt,
+            series: [ChartSeries(label: l.reportCandidate, points: equityPoints(r.equity), color: AppColors.series[0])],
           ),
-          const SizedBox(height: 18),
-          SectionCard(
-            title: l.pnlEquity,
-            child: EquityChart(
-              height: 220,
-              format: axisUsdt,
-              series: [
-                ChartSeries(label: l.reportCandidate, points: equityPoints(r.equity), color: AppColors.series[0]),
-              ],
-            ),
+        ),
+        const SizedBox(height: 18),
+        SectionCard(
+          title: l.reportTrades,
+          child: DataTableBox(
+            minWidth: 720,
+            columns: ['#', l.dataColPair, l.tradeEntryExit, l.tradeGross, l.tradeCost, l.tradeNet],
+            rows: [for (final t in r.trades.take(200)) tradeRow(l, t)],
           ),
-          const SizedBox(height: 18),
-          SectionCard(
-            title: l.reportTrades,
-            child: DataTableBox(
-              minWidth: 720,
-              columns: ['#', l.dataColPair, l.tradeEntryExit, l.tradeGross, l.tradeCost, l.tradeNet],
-              rows: [for (final t in r.trades.take(200)) tradeRow(l, t)],
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -357,6 +420,7 @@ class _TradeCalcState extends ConsumerState<_TradeCalc> with _Debounce {
   int _rate = 0;
   CalculateTradeResponse? _res;
   Object? _error;
+  bool _loading = false;
 
   @override
   void initState() {
@@ -373,7 +437,21 @@ class _TradeCalcState extends ConsumerState<_TradeCalc> with _Debounce {
   }
 
   Future<void> _calc() async {
-    if (![_entry, _exit, _amount].every((c) => _isPos(c.text)) || !_isBps(_fee.text) || !_isBps(_slip.text)) return;
+    if (!mounted) return;
+    final ticket = beginRequest();
+    if (![_entry, _exit, _amount].every((c) => _isPos(c.text)) || !_isBps(_fee.text) || !_isBps(_slip.text)) {
+      setState(() {
+        _loading = false;
+        _res = null;
+        _error = null;
+      });
+      return;
+    }
+    setState(() {
+      _loading = true;
+      _res = null;
+      _error = null;
+    });
     try {
       final res = await ref
           .read(pnlClientProvider)
@@ -386,20 +464,32 @@ class _TradeCalcState extends ConsumerState<_TradeCalc> with _Debounce {
               slippage: bpsOut(Decimal.parse(_slip.text.trim())),
               fxRateId: _rate == 0 ? null : Int64(_rate),
             ),
+            signal: ticket.signal,
           );
+      if (!mounted || !requests.isCurrent(ticket)) return;
       setState(() {
         _res = res;
         _error = null;
       });
     } catch (e) {
-      setState(() => _error = e);
+      if (mounted && requests.isCurrent(ticket)) setState(() => _error = e);
+    } finally {
+      if (mounted && requests.isCurrent(ticket)) setState(() => _loading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final l = L10n.of(context);
-    void changed() => debounce(_calc);
+    void changed() {
+      setState(() {
+        _res = null;
+        _error = null;
+        _loading = false;
+      });
+      debounce(_calc);
+    }
+
     final inputs = SectionCard(
       title: l.pnlTradeInputs,
       child: Column(
@@ -407,17 +497,17 @@ class _TradeCalcState extends ConsumerState<_TradeCalc> with _Debounce {
         children: [
           WarningBanner(l.pnlSpotNote, icon: Icons.info_outline_rounded),
           const SizedBox(height: AppSpace.md),
-          _field(l.pnlEntry, _entry, _isPos, l.errPositive, changed, suffix: 'USDT'),
+          _CalcField(l.pnlEntry, _entry, _isPos, l.errPositive, changed, suffix: 'USDT'),
           const SizedBox(height: AppSpace.md),
-          _field(l.pnlExit, _exit, _isPos, l.errPositive, changed, suffix: 'USDT'),
+          _CalcField(l.pnlExit, _exit, _isPos, l.errPositive, changed, suffix: 'USDT'),
           const SizedBox(height: AppSpace.md),
-          _field(l.pnlAmount, _amount, _isPos, l.errPositive, changed, suffix: 'USDT'),
+          _CalcField(l.pnlAmount, _amount, _isPos, l.errPositive, changed, suffix: 'USDT'),
           const SizedBox(height: AppSpace.md),
-          _field(l.newFeeBps, _fee, _isBps, l.errBps, changed, suffix: l.bps, help: l.bpsHelp),
+          _CalcField(l.newFeeBps, _fee, _isBps, l.errBps, changed, suffix: l.bps, help: l.bpsHelp),
           const SizedBox(height: AppSpace.md),
-          _field(l.newSlipBps, _slip, _isBps, l.errBps, changed, suffix: l.bps),
+          _CalcField(l.newSlipBps, _slip, _isBps, l.errBps, changed, suffix: l.bps),
           const SizedBox(height: AppSpace.md),
-          _rateSelect(l, ref.watch(ratesProvider), _rate, (v) {
+          _RateSelect(ref.watch(ratesProvider), _rate, (v) {
             setState(() => _rate = v);
             _calc();
           }),
@@ -428,7 +518,7 @@ class _TradeCalcState extends ConsumerState<_TradeCalc> with _Debounce {
     final Widget output = _error != null
         ? ErrorBox(error: _error!, onRetry: _calc)
         : r == null
-        ? const SectionCard(child: SizedBox(height: 120))
+        ? _CalculationStatus(loading: _loading, message: _loading ? l.pnlCalculating : l.pnlCheckInputs)
         : Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -474,6 +564,27 @@ class _TradeCalcState extends ConsumerState<_TradeCalc> with _Debounce {
               ),
             ],
           );
-    return _layout(context, inputs, output);
+    return _CalcLayout(inputs: inputs, output: output);
   }
+}
+
+/// Explain missing output instead of showing an old number as a fresh result.
+class _CalculationStatus extends StatelessWidget {
+  const _CalculationStatus({required this.loading, required this.message});
+  final bool loading;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) => SectionCard(
+    child: Semantics(
+      liveRegion: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (loading) ...[LinearProgressIndicator(semanticsLabel: message), const SizedBox(height: AppSpace.md)],
+          Text(message, style: AppText.body),
+        ],
+      ),
+    ),
+  );
 }

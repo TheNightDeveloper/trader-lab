@@ -152,3 +152,28 @@ Consequence: backups need no external scheduler; `pg_dump` must be on PATH. The 
 ## ADR-036 Release checks are tests
 Decision: the release gate's cross-cutting promises are tests that run with the suite: an AST scan proves every outbound request is a GET and no code or RPC names an order or account endpoint (with a planted-probe test that the scan is live); a scheduled learning cycle runs to its decision with no manual call; every route renders at 390 px.
 Consequence: a change that adds an order path, breaks unattended learning or overflows a phone layout fails `make test`.
+
+
+## ADR-037 Research admission is weighted and atomic (P0)
+Context: taking every slot one at a time lets two report requests each hold a partial
+reservation forever. Cancelled contexts could also win a free-slot select.
+Decision: reuse the existing x/sync weighted semaphore; Acquire requests one slot and
+AcquireAll requests the entire research capacity in a single admission. FIFO waiters
+prevent smaller jobs from bypassing an exclusive waiter. Public callers and CPU limits
+stay the same.
+Consequence: cancellation frees the request without partial reservations. A full evaluation
+can delay later small research jobs; health and other control traffic remain outside it.
+Reproduce/forward admission and memory budgets remain separate P0 work (F07).
+
+## ADR-038 Warm-up and evaluation versions (P0)
+Context: buy-and-hold consumed its first purchase during the gated warm-up, leaving the
+selected strategy flat in both OOS and holdout. The separately sliced benchmark was unaffected.
+Decision: gated evaluation supports an optional Warmup method. Buy-and-hold has no
+indicators to warm and leaves its purchase state intact until trading is allowed. Indicator
+strategies retain their existing warm-up behavior. New evaluations record `p0.1` in their
+JSON specification; full-run cache schema 2 includes that evaluation version.
+Consequence: historical JSON is still readable and never rewritten. Legacy reports get a
+read-time badge and cannot be ranked as comparable to current evaluations. Create a new
+report to evaluate with the correction; Reproduce can legitimately report a difference.
+This does not change the simulator's price/timing contract or regenerate its golden files.
+Causal fills and period/cohort metrics still require later P0 changes and new version bumps.

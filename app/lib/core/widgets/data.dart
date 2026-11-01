@@ -178,7 +178,7 @@ class DataTableBox extends StatelessWidget {
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: AppColors.border)),
       ),
-      children: [for (final c in columns) _cell(Text(c, style: AppText.label))],
+      children: [for (final c in columns) _TableCell(Text(c, style: AppText.label))],
     );
     final body = [
       for (final r in rows)
@@ -186,7 +186,7 @@ class DataTableBox extends StatelessWidget {
           decoration: const BoxDecoration(
             border: Border(bottom: BorderSide(color: AppColors.divider)),
           ),
-          children: [for (final c in r) _cell(c)],
+          children: [for (final c in r) _TableCell(c)],
         ),
     ];
     return Column(
@@ -208,10 +208,17 @@ class DataTableBox extends StatelessWidget {
       ],
     );
   }
+}
 
-  static Widget _cell(Widget child) => Padding(
+class _TableCell extends StatelessWidget {
+  const _TableCell(this.child);
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.symmetric(horizontal: AppSpace.sm, vertical: 10),
-    child: child,
+    // Keep the column edge aligned even when its text has its own LTR direction.
+    child: Align(alignment: AlignmentDirectional.centerStart, child: child),
   );
 }
 

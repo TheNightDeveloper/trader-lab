@@ -213,6 +213,27 @@ func TestReportAndPnlServices(t *testing.T) {
 	require.NotNil(t, tr.Msg.GetNetToman())
 	_, err = pc.CalculateTrade(ctx, connect.NewRequest(&labv1.CalculateTradeRequest{Entry: usdtMoney("0"), Exit: usdtMoney("1"), Amount: usdtMoney("1")}))
 	require.Equal(t, connect.CodeInvalidArgument, connect.CodeOf(err))
+	t.Run("legacy annotation does not mutate a historical report", func(t *testing.T) {
+		// Remove the optional field to emulate a pre-P0 record in this test schema.
+		_, err := st.Pool.Exec(ctx, "UPDATE reports SET spec = spec - 'evaluation_version' WHERE id = $1", id)
+		require.NoError(t, err)
+		before, err := st.GetReport(ctx, id)
+		require.NoError(t, err)
+		result, err := rc.GetReport(ctx, connect.NewRequest(&labv1.GetReportRequest{ReportId: id}))
+		require.NoError(t, err)
+		found := false
+		for _, badge := range result.Msg.Report.Summary.Badges {
+			if badge.Kind == "legacy" {
+				found = true
+			}
+		}
+		require.True(t, found)
+		after, err := st.GetReport(ctx, id)
+		require.NoError(t, err)
+		require.Equal(t, before.Spec, after.Spec)
+		require.Equal(t, before.Evaluation, after.Evaluation)
+	})
+
 }
 
 func findMetric(ms []*labv1.Metric, key string) *labv1.Metric {

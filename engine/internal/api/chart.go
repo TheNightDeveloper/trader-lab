@@ -41,7 +41,7 @@ func (h *Chart) GetChart(ctx context.Context, req *connect.Request[labv1.GetChar
 	res := &labv1.GetChartResponse{}
 	var bars []data.Bar
 	var decisions []db.Decision
-	var trades []db.Trade
+	var fills []db.Fill
 	sym := m.GetSymbol()
 	if id := m.GetReportId(); id != "" {
 		st, err := h.Svc.Load(ctx, id)
@@ -68,7 +68,7 @@ func (h *Chart) GetChart(ctx context.Context, req *connect.Request[labv1.GetChar
 		if decisions, err = h.Svc.Store.AllDecisions(ctx, db.AllDecisionsParams{ReportID: id, Run: report.RunMain}); err != nil {
 			return nil, err
 		}
-		if trades, err = h.Svc.Store.AllTrades(ctx, db.AllTradesParams{ReportID: id, Run: report.RunMain}); err != nil {
+		if fills, err = h.Svc.Store.AllFills(ctx, db.AllFillsParams{ReportID: id, Run: report.RunMain}); err != nil {
 			return nil, err
 		}
 	} else {
@@ -138,14 +138,8 @@ func (h *Chart) GetChart(ctx context.Context, req *connect.Request[labv1.GetChar
 			res.Markers = append(res.Markers, &labv1.ChartMarker{DecisionId: d.ID, BarOpenUnixMs: ms(b.OpenTime), Kind: kind, Price: decP(b.C.V, 8)})
 		}
 	}
-	for _, t := range trades {
-		if t.Instrument != sym || t.ClosedAt == nil || (t.ExitReason != "stop loss" && t.ExitReason != "take profit") {
-			continue
-		}
-		if _, ok := byOpen[t.ClosedAt.UnixMilli()]; ok {
-			res.Markers = append(res.Markers, &labv1.ChartMarker{BarOpenUnixMs: ms(*t.ClosedAt), Kind: "exit", Price: decP(t.ExitRef, 8), Detail: t.ExitReason})
-		}
-	}
+	res.Markers = append(res.Markers, protectionMarkers(fills, sym, byOpen)...)
+
 	slices.SortStableFunc(res.Markers, func(a, b *labv1.ChartMarker) int { return int(a.BarOpenUnixMs - b.BarOpenUnixMs) })
 	return connect.NewResponse(res), nil
 }
@@ -202,4 +196,23 @@ func precision(s instrument.Spec) int32 {
 		v /= 10
 	}
 	return n
+}
+
+// A trade can have many exits: each marker uses its own fill's unit price.
+func protectionMarkers(fills []db.Fill, symbol string, shown map[int64]data.Bar) []*labv1.ChartMarker {
+	var markers []*labv1.ChartMarker
+	for _, f := range fills {
+		if f.Instrument != symbol || f.Side != string(sim.Sell) || (f.Kind != "stop" && f.Kind != "take") {
+			continue
+		}
+		if _, ok := shown[f.At.UnixMilli()]; !ok {
+			continue
+		}
+		detail := "stop loss"
+		if f.Kind == "take" {
+			detail = "take profit"
+		}
+		markers = append(markers, &labv1.ChartMarker{BarOpenUnixMs: ms(f.At), Kind: "exit", Price: decP(f.RefPrice, 8), Detail: detail})
+	}
+	return markers
 }

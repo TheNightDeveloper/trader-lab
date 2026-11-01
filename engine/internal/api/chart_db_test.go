@@ -106,3 +106,22 @@ func TestChartService(t *testing.T) {
 	_, err = cc.GetChart(ctx, connect.NewRequest(&labv1.GetChartRequest{ReportId: id, Indicators: []string{"vwap:3"}}))
 	require.Equal(t, connect.CodeInvalidArgument, connect.CodeOf(err))
 }
+
+// Partial exits and non-unit quantities must never multiply the chart price.
+func TestProtectionMarkersUseFillUnitPrice(t *testing.T) {
+	at := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	fills := []db.Fill{
+		{At: at, Instrument: "BTCUSDT", Side: "sell", Kind: "take", Qty: 3e8, RefPrice: 120e8, RefValue: 360e8},
+		{At: at.Add(time.Minute), Instrument: "BTCUSDT", Side: "sell", Kind: "stop", Qty: 2e8, RefPrice: 90e8, RefValue: 180e8},
+		{At: at, Instrument: "ETHUSDT", Side: "sell", Kind: "stop", RefPrice: 50e8},
+		{At: at, Instrument: "BTCUSDT", Side: "buy", Kind: "signal", RefPrice: 100e8},
+	}
+	shown := map[int64]data.Bar{at.UnixMilli(): {}, at.Add(time.Minute).UnixMilli(): {}}
+	markers := protectionMarkers(fills, "BTCUSDT", shown)
+	require.Len(t, markers, 2)
+	require.Equal(t, decP(120e8, 8), markers[0].Price)
+	require.Equal(t, decP(90e8, 8), markers[1].Price)
+	require.Equal(t, "take profit", markers[0].Detail)
+	require.Equal(t, "stop loss", markers[1].Detail)
+	require.Empty(t, protectionMarkers(fills, "BTCUSDT", nil))
+}

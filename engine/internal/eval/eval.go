@@ -18,16 +18,20 @@ import (
 	"tradinglab/engine/internal/strategy"
 )
 
+// Version changes whenever evaluation semantics change, including strategy warm-up.
+const Version = "p0.1"
+
 var ErrSpec = errors.New("eval: invalid spec")
 
 // Spec is everything a report depends on besides the bars themselves.
 type Spec struct {
-	DatasetIDs []string        `json:"dataset_ids"`
-	Timeframe  data.Timeframe  `json:"timeframe"`
-	Strategy   string          `json:"strategy"`
-	Params     strategy.Params `json:"params"` // complete: defaults filled in
-	Sim        sim.Config      `json:"sim"`
-	Split      SplitPlan       `json:"split"`
+	EvaluationVersion string          `json:"evaluation_version,omitempty"`
+	DatasetIDs        []string        `json:"dataset_ids"`
+	Timeframe         data.Timeframe  `json:"timeframe"`
+	Strategy          string          `json:"strategy"`
+	Params            strategy.Params `json:"params"` // complete: defaults filled in
+	Sim               sim.Config      `json:"sim"`
+	Split             SplitPlan       `json:"split"`
 	// EngineVersion of the code that produced the report (reproducibility badge).
 	EngineVersion string `json:"engine_version"`
 	// Origin is set when the report is the chosen candidate of an experiment: the
@@ -119,11 +123,17 @@ type gated struct {
 }
 
 func (g gated) OnBar(ctx strategy.RunContext, b data.Bar) ([]strategy.Intent, error) {
-	ins, err := g.s.OnBar(ctx, b)
 	if b.OpenTime.Before(g.from) {
+		// Strategies with trading state can warm indicators without consuming a trade.
+		if w, ok := g.s.(interface {
+			Warmup(strategy.RunContext, data.Bar) error
+		}); ok {
+			return nil, w.Warmup(ctx, b)
+		}
+		_, err := g.s.OnBar(ctx, b)
 		return nil, err
 	}
-	return ins, err
+	return g.s.OnBar(ctx, b)
 }
 
 // Evaluate runs the walk-forward evaluation of spec over bars (per symbol, at
@@ -210,6 +220,7 @@ func EvaluateWith(ctx context.Context, spec Spec, bars map[string][]data.Bar, sp
 		return nil, fmt.Errorf("%w: %w", ErrSpec, err)
 	}
 	spec.Sim = cfg
+	spec.EvaluationVersion = Version
 	tfDur, err := tfDuration(spec.Timeframe)
 	if err != nil {
 		return nil, err

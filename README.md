@@ -5,9 +5,9 @@ market data, runs deterministic simulations and evaluates strategies. A Flutter 
 (Persian, RTL) shows the results. **No real orders exist in v1.** There is no account and
 no API key.
 
-> Status: milestones M0–M3 are done (data, simulator, evaluation, reports, comparison,
-> P&L calculator). Experiments, search, the job queue and the learning loop (M4+) are not
-> built yet. See [docs/PROGRESS.md](docs/PROGRESS.md).
+> Status: M0–M6 are implemented. The new **P0 stabilization phase is in progress**;
+> its release gate has not passed. See [P0 status and verification](docs/P0_STATUS.md)
+> and [the master plan](docs/Trading_Lab_Master_Plan_FA.md).
 
 ## What works today
 
@@ -20,8 +20,13 @@ no API key.
 | Chart | Candles with decision markers |
 | Strategies | `hold-cash`, `buy-and-hold`, `trend-ema`, `mean-rev-bands` |
 
-Screens named "Library", "Builder", "Queue" and "Learning" in the sidebar are placeholders
-until M4.
+The Library, six-step Experiment Builder, streamed Run Queue and Learning screen are
+implemented. Learning includes bounded retraining, forward tests and human-approved
+promotion/rollback. These remain research tools; no account or real execution exists.
+
+The first P0 batch fixes research admission, baseline warm-up, exact comparison, protection
+markers and calculator request races. Imported datasets refresh shared pickers, including
+versions beyond the first 200. Larger-catalog server search is still pending.
 
 ## Layout
 

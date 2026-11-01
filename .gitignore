@@ -13,3 +13,7 @@ testdata/rapid/
 
 # nightly database dumps (docs/BACKUP.md)
 /backups/
+
+# Local test evidence and Python bytecode.
+/artifacts/
+__pycache__/

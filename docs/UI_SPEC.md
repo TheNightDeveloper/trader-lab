@@ -93,3 +93,23 @@ unreachable: banner, last data kept visible).
 3. A design change goes: edit canvas → re-export the changed `.dc.html` into
    `design/screens/` → commit → ask Claude Code to update the matching screen and its
    golden.
+
+
+## P0 UI checkpoint (2026-11-01)
+Calculator helpers are class-based widgets. Layout uses available constraints; the dark
+semantic tokens, Vazirmatn/JetBrains Mono, RTL form/LTR numbers and reduced-motion rules
+are reused. UI/UX Pro Max's Flutter guidance was applied to async states and responsive
+layout; landing-page suggestions and unrelated font/color replacements were not adopted.
+
+Editing immediately cancels and invalidates the previous calculation, before the 300 ms
+debounce. Run, trade, report-switch, rate-switch, retry and reset requests publish only if
+their generation is current and the screen is mounted. Loading has a labeled progress bar;
+invalid input has explanatory copy; prior figures are cleared instead of appearing fresh.
+Shared dataset pickers refresh after successful or partial imports and retrieve further
+server pages beyond the first 200. Search-backed pickers for large catalogs remain pending.
+Stop/take markers use the individual fill's reference price, including partial exits.
+Legacy reports show a server-provided warning without changing persisted results.
+
+P0 additions have controller/provider unit tests; no new widget tests were added. Existing
+widget tests remain runnable. Browser interop, focus, text-scaling and multi-width visual
+review are separate release-gate evidence; a 390 px smoke test does not replace them.
