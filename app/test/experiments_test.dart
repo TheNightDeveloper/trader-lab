@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:fixnum/fixnum.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:trading_lab/l10n/lab_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -58,12 +58,7 @@ Future<void> pumpAt(WidgetTester tester, String at, FakeTransport fake) async {
         theme: buildAppTheme(),
         locale: const Locale('fa'),
         supportedLocales: L10n.supportedLocales,
-        localizationsDelegates: const [
-          L10n.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
+        localizationsDelegates: labLocalizationDelegates,
         builder: (context, c) => ResponsiveBreakpoints.builder(breakpoints: breakpoints, child: c!),
       ),
     ),

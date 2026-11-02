@@ -332,3 +332,13 @@ Consequence: stored results stay immutable/readable; unsupported recomputation f
 The new UI needs a compatible engine for execution. Supported numerical outputs and their
 versions are unchanged. Full cross-asset execution requires quote funding/holdings and
 independent accounting tests in its later capability phase; display conversion is insufficient.
+
+## ADR-050 Share localization delegates across extracted UI libraries (2026-11-02)
+Context: material_ui and flutter_localizations export different GlobalMaterialLocalizations
+types with the same name. Mixing unqualified imports caused 13 app/test analyzer errors.
+Decision: app and test hosts share labLocalizationDelegates, explicitly naming the extracted
+library delegates and original Flutter delegates needed by dependencies. Keep generated L10n
+output untouched. Require Dart >=3.13 / Flutter >=3.47 for material_ui ^1.9.0 and use Flutter
+3.47.4 in CI, matching the IDE toolchain used for tests and the release build.
+Consequence: both localization type families are available without ambiguous imports;
+old Flutter 3.44 environments must select/upgrade to the compatible SDK before resolving.

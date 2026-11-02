@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:animations/animations.dart';
 import 'package:decimal/decimal.dart';
 import 'package:fixnum/fixnum.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 

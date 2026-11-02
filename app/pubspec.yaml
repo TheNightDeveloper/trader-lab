@@ -4,7 +4,9 @@ publish_to: 'none'
 version: 0.1.0+1
 
 environment:
-  sdk: '>=3.12.2' # بزرگتر از این ورژن باشد
+  # material_ui 1.9 requires Dart 3.13 and Flutter 3.47.
+  sdk: '>=3.13.0 <4.0.0'
+  flutter: '>=3.47.0'
 
 dependencies:
   animations: ^3.0.0
@@ -27,6 +29,7 @@ dependencies:
   skeletonizer: ^3.0.0
   web: ^1.1.1
 
+  material_ui: ^1.9.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

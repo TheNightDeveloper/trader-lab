@@ -2,6 +2,18 @@
 
 Update at the end of every session.
 
+## Material UI migration error fixes (2026-11-02)
+- Completed the in-progress material_ui import migration. Resolved 13 analyzer errors from
+  ambiguous GlobalMaterialLocalizations and resulting const-list errors in app/test hosts.
+- One shared constant delegate list supplies extracted Material/Cupertino localization types
+  alongside original Flutter types required by dependencies. Persian/RTL remains configured.
+- material_ui is constrained to ^1.9.0; minimum Dart 3.13 / Flutter 3.47 and CI Flutter 3.47.4
+  match the installed package and IDE SDK at D:/flutter347. The older PATH SDK is incompatible.
+- Verified: 52 existing Flutter tests, analyzer clean, offline enforced lockfile resolution,
+  and release web build successful. Existing CupertinoIcons font warning remains; no new widget tests.
+- Local logs: artifacts/material-ui-tests.txt and artifacts/material-ui-build.txt. No manual
+  browser review or hosted CI run; this frontend fix does not close the remaining P0 gates.
+
 ## P0 F08 research capability restrictions (2026-11-02)
 - One registry-based gate permits known USDT-quoted symbols only. Reports/replays,
   experiment planning, queued cache reuse and stored learning execution recheck permission.

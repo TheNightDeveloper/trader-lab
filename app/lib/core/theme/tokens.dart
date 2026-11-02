@@ -1,5 +1,5 @@
 // Generated from design/tokens.json. Keep both in sync; widgets must use these, never raw hex.
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 abstract final class AppColors {
   static const bg = Color(0xFF0D1015);
