@@ -12,6 +12,7 @@ import (
 	"tradinglab/engine/internal/clock"
 	"tradinglab/engine/internal/data"
 	labv1 "tradinglab/engine/internal/gen/lab/v1"
+	"tradinglab/engine/internal/instrument"
 	"tradinglab/engine/internal/store"
 	"tradinglab/engine/internal/store/db"
 )
@@ -46,6 +47,11 @@ func (d *Data) GetOverview(ctx context.Context, _ *connect.Request[labv1.GetOver
 	}
 	for _, i := range ins {
 		res.Symbols = append(res.Symbols, i.Symbol)
+		capability := &labv1.ResearchCapability{Symbol: i.Symbol, Supported: true}
+		if err := instrument.ResearchError(i.Symbol); err != nil {
+			capability.Supported, capability.Reason = false, err.Error()
+		}
+		res.ResearchCapabilities = append(res.ResearchCapabilities, capability)
 	}
 	return connect.NewResponse(res), nil
 }

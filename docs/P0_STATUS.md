@@ -238,6 +238,47 @@ error; create bounded versions rather than rewriting old records. There is no mi
 These are input/retention limits, not a measured process-RSS cap: concurrent loads, active
 runs, SQL execution and model-fitting work need further CPU/byte budget and stress checks.
 
+## F08 research capabilities (2026-11-02)
+
+The instrument registry now authorizes application research for known USDT-quoted symbols
+only. Unknown symbols and non-USDT pairs fail with a readable reason. Checks precede report
+evaluation/reproduction/recalculation, experiment planning, queued attempts (before cache),
+and stored learning collect/forward work. Unsupported evidence cannot authorize promotion.
+Rejected work is recorded without moving the active version/model. Data import/list/read,
+charts and stored report figures remain available, including ETHBTC; rejected recomputation
+does not rewrite historical figures. Low-level FX valuation/simulator fixtures are unchanged.
+
+GetOverview adds research_capabilities: symbol, supported, reason. New execution pickers
+require affirmative server permission; an older server without the added fields grants none.
+Older clients cannot bypass the backend gate. Shared filtered dataset providers keep the full
+Data catalog separate. Restored unsupported drafts cannot estimate/submit; learning settings
+select only permitted symbols. Class-based notice/picker widgets show loading, errors/retry
+and the server explanation using existing Persian RTL, typography and theme components.
+
+| Check | Result |
+|---|---|
+| Pre-fix non-USDT report/learning regressions | reproduced; pass after gate |
+| REQUIRE_DB=1 go test -count=1 -json ./... | **251 passed tests/subtests, 0 failed/skipped; 22 packages** |
+| Crafted RPC / misleading queued symbol / prior cache | execution rejected before computation |
+| Stored collect/forward cycle and promotion evidence | rejected; active version/model unchanged |
+| ETHBTC data/list/chart and saved report figures | remain readable; recompute rejection preserves figures |
+| Simulator goldens and FX tests | all 11 unchanged; valuation tests pass |
+| Flutter | **52 passed**; four provider/codec unit tests added, no new widget tests |
+| Unknown/denied symbol, missing/error/revoked permission | filtered/closed in provider tests |
+| Go lint/vet, Dart analysis, proto lint/generation | passed; generated Go/Dart output reproducible |
+
+Evidence: artifacts/p0-capability-go-tests.jsonl and artifacts/p0-capability-flutter.txt
+(git-ignored). Windows amd64, Go 1.26.4, local PostgreSQL, Flutter 3.44.2/Dart 3.12.2.
+Concurrent material_ui/IDE edits were preserved in the working tree and excluded from F08.
+The exact staged application source was exported to artifacts/f08-index-review; its full
+52-test Flutter suite and analysis also passed independently with the staged lockfile.
+Evidence: artifacts/p0-capability-index-flutter.txt. No concurrent migration is certified here.
+An invalid concurrent pubspec edit was corrected to valid YAML while preserving >=3.12.2;
+the successful full Flutter run followed. No dependency/migration was added. Evaluation
+stays p0.3 and training stays causal-features/v1: eligibility changed, numerical rules did not.
+Race, hosted CI and real-browser visual/focus acceptance were not run on this new source.
+Full cross-asset execution remains a later capability requiring quote funding/accounting tests.
+
 ## Remaining P0 work / next batch
 
 The analytics/learning review after FIX-02 fixed dependency readiness, fit/model validation,
@@ -247,8 +288,8 @@ zero skip with DB mandatory, 48 existing Flutter tests, lint/vet, Dart analysis 
 [P0_LEARNING_REVIEW_FA.md](P0_LEARNING_REVIEW_FA.md) for evidence, measured scope and compatibility.
 That historical review preceded FIX-04/FIX-05 above. These batches do not complete all of P0.
 
-1. Finish F08 non-USDT execution capability restrictions, F07 process-wide CPU/byte budgets,
-   F13 full provenance and exact canonical fills, F15 synchronized version/model lifecycle.
+1. Finish F13 full provenance and exact canonical fills, F15 synchronized version/model
+   lifecycle, and F07 process-wide CPU/byte budgets and fitting cancellation.
 2. Finish F10 with search-backed paginated pickers. Current pickers fetch all pages into
    memory; a shortcut comment records the limit. Network supervision, accounting overflow,
    economic label/fill alignment and remaining stress cases also remain open.

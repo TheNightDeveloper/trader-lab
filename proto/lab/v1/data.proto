@@ -22,6 +22,14 @@ message GetOverviewResponse {
   int64 outage_seconds_today = 4;
   int64 storage_bytes = 5;
   repeated string symbols = 6; // instruments the engine knows
+  repeated ResearchCapability research_capabilities = 7; // affirmative execution permission per symbol
+}
+
+// Research execution capability is independent of data import and chart availability.
+message ResearchCapability {
+  string symbol = 1;
+  bool supported = 2;
+  string reason = 3; // user-facing explanation when unsupported
 }
 
 message Dataset {

@@ -12,6 +12,7 @@ import (
 	"tradinglab/engine/internal/data"
 	"tradinglab/engine/internal/experiment"
 	labv1 "tradinglab/engine/internal/gen/lab/v1"
+	"tradinglab/engine/internal/instrument"
 	"tradinglab/engine/internal/loop"
 	"tradinglab/engine/internal/metrics"
 	"tradinglab/engine/internal/model"
@@ -26,6 +27,8 @@ type Learning struct {
 
 func learnErr(err error) error {
 	switch {
+	case errors.Is(err, instrument.ErrResearchUnsupported):
+		return connect.NewError(connect.CodeFailedPrecondition, err)
 	case errors.Is(err, loop.ErrConfig):
 		return connect.NewError(connect.CodeInvalidArgument, err)
 	case errors.Is(err, loop.ErrNotFound):

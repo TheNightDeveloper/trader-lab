@@ -359,6 +359,9 @@ func dataEnd(now time.Time, tf time.Duration) time.Time { return now.Add(-tf).Tr
 
 func (l *Loop) run(ctx context.Context, c *cycle) error {
 	cfg := c.doc.Config
+	if err := cfg.researchError(); err != nil {
+		return err
+	}
 	tf := cfg.Timeframe.Duration()
 	champ, err := l.champion(ctx, cfg.Algorithm)
 	if err != nil {

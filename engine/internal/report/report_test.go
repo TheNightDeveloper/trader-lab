@@ -151,6 +151,32 @@ func TestDatasetBudgetPreflightsCombinedRawRanges(t *testing.T) {
 	require.ErrorIs(t, err, data.ErrLimit, "reject combined raw cost before reconstructing invalid fixture manifests")
 }
 
+func TestReportRejectsNonUSDTBeforeMaterializing(t *testing.T) {
+	st, usdt := setup(t)
+	ctx := context.Background()
+	require.NoError(t, data.SeedInstruments(ctx, st.Queries))
+	// An incomplete fixture proves capability is checked before dataset rebuilding.
+	require.NoError(t, st.InsertDataset(ctx, db.InsertDatasetParams{ID: "cross", Symbol: "ETHBTC", Timeframe: "1h", RangeFrom: t0, RangeTo: t0.Add(time.Hour), GapPolicy: "flag", KnownAt: t0, Manifest: []byte(`{}`)}))
+	_, err := (Service{Store: st}).Create(ctx, spec("cross"))
+	require.ErrorContains(t, err, "USDT")
+	svc := Service{Store: st}
+	id, err := svc.Create(ctx, spec(usdt))
+	require.NoError(t, err)
+	before, err := svc.Load(ctx, id)
+	require.NoError(t, err)
+	// Construct historical input metadata in an isolated test schema, keeping saved figures.
+	_, err = st.Pool.Exec(ctx, "UPDATE reports SET spec=jsonb_set(spec, '{dataset_ids}', '[\"cross\"]'::jsonb) WHERE id=$1", id)
+	require.NoError(t, err)
+	_, err = svc.Reproduce(ctx, id)
+	require.ErrorIs(t, err, instrument.ErrResearchUnsupported)
+	_, _, err = svc.Recalculate(ctx, id, before.Spec.Sim, money.RatioOne)
+	require.ErrorIs(t, err, instrument.ErrResearchUnsupported)
+	after, err := svc.Load(ctx, id)
+	require.NoError(t, err)
+	require.Equal(t, before.Row.Evaluation, after.Row.Evaluation)
+	require.Equal(t, before.Row.Holdout, after.Row.Holdout)
+}
+
 // Dataset-count limits alone must not retain four independently large versions.
 func TestDatasetCacheEvictsByTotalBars(t *testing.T) {
 	st, id := setup(t)

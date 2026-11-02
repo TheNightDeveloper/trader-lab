@@ -72,8 +72,11 @@ func TestWalkWinsRequireSamePeriodAndValidPeriodPnL(t *testing.T) {
 func TestEvidenceRequiresRealFreezeAndCurrentContract(t *testing.T) {
 	t0 := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)
 	created, freeze, start := t0.Add(time.Hour), t0.Add(65*time.Minute), t0.Add(2*time.Hour)
-	d := Doc{EvaluationVersion: eval.Version, TrainingCutoff: &t0, ModelCreatedAt: &created, FreezeAt: &freeze, TradeStart: &start}
+	d := Doc{Config: Default(), EvaluationVersion: eval.Version, TrainingCutoff: &t0, ModelCreatedAt: &created, FreezeAt: &freeze, TradeStart: &start}
 	require.True(t, CurrentEvidence(d))
+	d.Config.Symbols = []string{"ETHBTC"}
+	require.False(t, CurrentEvidence(d), "unsupported stored evidence cannot authorize promotion")
+	d.Config = Default()
 	d.EvaluationVersion = "p0.2"
 	require.False(t, CurrentEvidence(d))
 	d.EvaluationVersion = eval.Version

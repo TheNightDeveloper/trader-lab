@@ -58,15 +58,16 @@ func (*GetOverviewRequest) Descriptor() ([]byte, []int) {
 }
 
 type GetOverviewResponse struct {
-	state              protoimpl.MessageState `protogen:"open.v1"`
-	LiveSymbols        int32                  `protobuf:"varint,1,opt,name=live_symbols,json=liveSymbols,proto3" json:"live_symbols,omitempty"`
-	LiveSource         string                 `protobuf:"bytes,2,opt,name=live_source,json=liveSource,proto3" json:"live_source,omitempty"` // e.g. "REST (data-api.binance.vision)"
-	OutagesToday       int32                  `protobuf:"varint,3,opt,name=outages_today,json=outagesToday,proto3" json:"outages_today,omitempty"`
-	OutageSecondsToday int64                  `protobuf:"varint,4,opt,name=outage_seconds_today,json=outageSecondsToday,proto3" json:"outage_seconds_today,omitempty"`
-	StorageBytes       int64                  `protobuf:"varint,5,opt,name=storage_bytes,json=storageBytes,proto3" json:"storage_bytes,omitempty"`
-	Symbols            []string               `protobuf:"bytes,6,rep,name=symbols,proto3" json:"symbols,omitempty"` // instruments the engine knows
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
+	state                protoimpl.MessageState `protogen:"open.v1"`
+	LiveSymbols          int32                  `protobuf:"varint,1,opt,name=live_symbols,json=liveSymbols,proto3" json:"live_symbols,omitempty"`
+	LiveSource           string                 `protobuf:"bytes,2,opt,name=live_source,json=liveSource,proto3" json:"live_source,omitempty"` // e.g. "REST (data-api.binance.vision)"
+	OutagesToday         int32                  `protobuf:"varint,3,opt,name=outages_today,json=outagesToday,proto3" json:"outages_today,omitempty"`
+	OutageSecondsToday   int64                  `protobuf:"varint,4,opt,name=outage_seconds_today,json=outageSecondsToday,proto3" json:"outage_seconds_today,omitempty"`
+	StorageBytes         int64                  `protobuf:"varint,5,opt,name=storage_bytes,json=storageBytes,proto3" json:"storage_bytes,omitempty"`
+	Symbols              []string               `protobuf:"bytes,6,rep,name=symbols,proto3" json:"symbols,omitempty"`                                                       // instruments the engine knows
+	ResearchCapabilities []*ResearchCapability  `protobuf:"bytes,7,rep,name=research_capabilities,json=researchCapabilities,proto3" json:"research_capabilities,omitempty"` // affirmative execution permission per symbol
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
 }
 
 func (x *GetOverviewResponse) Reset() {
@@ -141,6 +142,74 @@ func (x *GetOverviewResponse) GetSymbols() []string {
 	return nil
 }
 
+func (x *GetOverviewResponse) GetResearchCapabilities() []*ResearchCapability {
+	if x != nil {
+		return x.ResearchCapabilities
+	}
+	return nil
+}
+
+// Research execution capability is independent of data import and chart availability.
+type ResearchCapability struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Symbol        string                 `protobuf:"bytes,1,opt,name=symbol,proto3" json:"symbol,omitempty"`
+	Supported     bool                   `protobuf:"varint,2,opt,name=supported,proto3" json:"supported,omitempty"`
+	Reason        string                 `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"` // user-facing explanation when unsupported
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ResearchCapability) Reset() {
+	*x = ResearchCapability{}
+	mi := &file_lab_v1_data_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ResearchCapability) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResearchCapability) ProtoMessage() {}
+
+func (x *ResearchCapability) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_data_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResearchCapability.ProtoReflect.Descriptor instead.
+func (*ResearchCapability) Descriptor() ([]byte, []int) {
+	return file_lab_v1_data_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ResearchCapability) GetSymbol() string {
+	if x != nil {
+		return x.Symbol
+	}
+	return ""
+}
+
+func (x *ResearchCapability) GetSupported() bool {
+	if x != nil {
+		return x.Supported
+	}
+	return false
+}
+
+func (x *ResearchCapability) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
 type Dataset struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"` // content hash
@@ -160,7 +229,7 @@ type Dataset struct {
 
 func (x *Dataset) Reset() {
 	*x = Dataset{}
-	mi := &file_lab_v1_data_proto_msgTypes[2]
+	mi := &file_lab_v1_data_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -172,7 +241,7 @@ func (x *Dataset) String() string {
 func (*Dataset) ProtoMessage() {}
 
 func (x *Dataset) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_data_proto_msgTypes[2]
+	mi := &file_lab_v1_data_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -185,7 +254,7 @@ func (x *Dataset) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Dataset.ProtoReflect.Descriptor instead.
 func (*Dataset) Descriptor() ([]byte, []int) {
-	return file_lab_v1_data_proto_rawDescGZIP(), []int{2}
+	return file_lab_v1_data_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *Dataset) GetId() string {
@@ -275,7 +344,7 @@ type ListDatasetsRequest struct {
 
 func (x *ListDatasetsRequest) Reset() {
 	*x = ListDatasetsRequest{}
-	mi := &file_lab_v1_data_proto_msgTypes[3]
+	mi := &file_lab_v1_data_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -287,7 +356,7 @@ func (x *ListDatasetsRequest) String() string {
 func (*ListDatasetsRequest) ProtoMessage() {}
 
 func (x *ListDatasetsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_data_proto_msgTypes[3]
+	mi := &file_lab_v1_data_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -300,7 +369,7 @@ func (x *ListDatasetsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDatasetsRequest.ProtoReflect.Descriptor instead.
 func (*ListDatasetsRequest) Descriptor() ([]byte, []int) {
-	return file_lab_v1_data_proto_rawDescGZIP(), []int{3}
+	return file_lab_v1_data_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ListDatasetsRequest) GetPageSize() int32 {
@@ -327,7 +396,7 @@ type ListDatasetsResponse struct {
 
 func (x *ListDatasetsResponse) Reset() {
 	*x = ListDatasetsResponse{}
-	mi := &file_lab_v1_data_proto_msgTypes[4]
+	mi := &file_lab_v1_data_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -339,7 +408,7 @@ func (x *ListDatasetsResponse) String() string {
 func (*ListDatasetsResponse) ProtoMessage() {}
 
 func (x *ListDatasetsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_data_proto_msgTypes[4]
+	mi := &file_lab_v1_data_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -352,7 +421,7 @@ func (x *ListDatasetsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDatasetsResponse.ProtoReflect.Descriptor instead.
 func (*ListDatasetsResponse) Descriptor() ([]byte, []int) {
-	return file_lab_v1_data_proto_rawDescGZIP(), []int{4}
+	return file_lab_v1_data_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ListDatasetsResponse) GetDatasets() []*Dataset {
@@ -377,7 +446,7 @@ type GetCoverageRequest struct {
 
 func (x *GetCoverageRequest) Reset() {
 	*x = GetCoverageRequest{}
-	mi := &file_lab_v1_data_proto_msgTypes[5]
+	mi := &file_lab_v1_data_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -389,7 +458,7 @@ func (x *GetCoverageRequest) String() string {
 func (*GetCoverageRequest) ProtoMessage() {}
 
 func (x *GetCoverageRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_data_proto_msgTypes[5]
+	mi := &file_lab_v1_data_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -402,7 +471,7 @@ func (x *GetCoverageRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCoverageRequest.ProtoReflect.Descriptor instead.
 func (*GetCoverageRequest) Descriptor() ([]byte, []int) {
-	return file_lab_v1_data_proto_rawDescGZIP(), []int{5}
+	return file_lab_v1_data_proto_rawDescGZIP(), []int{6}
 }
 
 type Coverage struct {
@@ -419,7 +488,7 @@ type Coverage struct {
 
 func (x *Coverage) Reset() {
 	*x = Coverage{}
-	mi := &file_lab_v1_data_proto_msgTypes[6]
+	mi := &file_lab_v1_data_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -431,7 +500,7 @@ func (x *Coverage) String() string {
 func (*Coverage) ProtoMessage() {}
 
 func (x *Coverage) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_data_proto_msgTypes[6]
+	mi := &file_lab_v1_data_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -444,7 +513,7 @@ func (x *Coverage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Coverage.ProtoReflect.Descriptor instead.
 func (*Coverage) Descriptor() ([]byte, []int) {
-	return file_lab_v1_data_proto_rawDescGZIP(), []int{6}
+	return file_lab_v1_data_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *Coverage) GetSymbol() string {
@@ -499,7 +568,7 @@ type TimeRange struct {
 
 func (x *TimeRange) Reset() {
 	*x = TimeRange{}
-	mi := &file_lab_v1_data_proto_msgTypes[7]
+	mi := &file_lab_v1_data_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -511,7 +580,7 @@ func (x *TimeRange) String() string {
 func (*TimeRange) ProtoMessage() {}
 
 func (x *TimeRange) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_data_proto_msgTypes[7]
+	mi := &file_lab_v1_data_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -524,7 +593,7 @@ func (x *TimeRange) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TimeRange.ProtoReflect.Descriptor instead.
 func (*TimeRange) Descriptor() ([]byte, []int) {
-	return file_lab_v1_data_proto_rawDescGZIP(), []int{7}
+	return file_lab_v1_data_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *TimeRange) GetFromUnixMs() int64 {
@@ -550,7 +619,7 @@ type GetCoverageResponse struct {
 
 func (x *GetCoverageResponse) Reset() {
 	*x = GetCoverageResponse{}
-	mi := &file_lab_v1_data_proto_msgTypes[8]
+	mi := &file_lab_v1_data_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -562,7 +631,7 @@ func (x *GetCoverageResponse) String() string {
 func (*GetCoverageResponse) ProtoMessage() {}
 
 func (x *GetCoverageResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_data_proto_msgTypes[8]
+	mi := &file_lab_v1_data_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -575,7 +644,7 @@ func (x *GetCoverageResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCoverageResponse.ProtoReflect.Descriptor instead.
 func (*GetCoverageResponse) Descriptor() ([]byte, []int) {
-	return file_lab_v1_data_proto_rawDescGZIP(), []int{8}
+	return file_lab_v1_data_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *GetCoverageResponse) GetCoverage() []*Coverage {
@@ -599,7 +668,7 @@ type QualityIssue struct {
 
 func (x *QualityIssue) Reset() {
 	*x = QualityIssue{}
-	mi := &file_lab_v1_data_proto_msgTypes[9]
+	mi := &file_lab_v1_data_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -611,7 +680,7 @@ func (x *QualityIssue) String() string {
 func (*QualityIssue) ProtoMessage() {}
 
 func (x *QualityIssue) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_data_proto_msgTypes[9]
+	mi := &file_lab_v1_data_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -624,7 +693,7 @@ func (x *QualityIssue) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QualityIssue.ProtoReflect.Descriptor instead.
 func (*QualityIssue) Descriptor() ([]byte, []int) {
-	return file_lab_v1_data_proto_rawDescGZIP(), []int{9}
+	return file_lab_v1_data_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *QualityIssue) GetId() int64 {
@@ -680,7 +749,7 @@ type ListQualityIssuesRequest struct {
 
 func (x *ListQualityIssuesRequest) Reset() {
 	*x = ListQualityIssuesRequest{}
-	mi := &file_lab_v1_data_proto_msgTypes[10]
+	mi := &file_lab_v1_data_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -692,7 +761,7 @@ func (x *ListQualityIssuesRequest) String() string {
 func (*ListQualityIssuesRequest) ProtoMessage() {}
 
 func (x *ListQualityIssuesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_data_proto_msgTypes[10]
+	mi := &file_lab_v1_data_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -705,7 +774,7 @@ func (x *ListQualityIssuesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListQualityIssuesRequest.ProtoReflect.Descriptor instead.
 func (*ListQualityIssuesRequest) Descriptor() ([]byte, []int) {
-	return file_lab_v1_data_proto_rawDescGZIP(), []int{10}
+	return file_lab_v1_data_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ListQualityIssuesRequest) GetSymbol() string {
@@ -739,7 +808,7 @@ type ListQualityIssuesResponse struct {
 
 func (x *ListQualityIssuesResponse) Reset() {
 	*x = ListQualityIssuesResponse{}
-	mi := &file_lab_v1_data_proto_msgTypes[11]
+	mi := &file_lab_v1_data_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -751,7 +820,7 @@ func (x *ListQualityIssuesResponse) String() string {
 func (*ListQualityIssuesResponse) ProtoMessage() {}
 
 func (x *ListQualityIssuesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_data_proto_msgTypes[11]
+	mi := &file_lab_v1_data_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -764,7 +833,7 @@ func (x *ListQualityIssuesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListQualityIssuesResponse.ProtoReflect.Descriptor instead.
 func (*ListQualityIssuesResponse) Descriptor() ([]byte, []int) {
-	return file_lab_v1_data_proto_rawDescGZIP(), []int{11}
+	return file_lab_v1_data_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *ListQualityIssuesResponse) GetIssues() []*QualityIssue {
@@ -794,7 +863,7 @@ type ImportRequest struct {
 
 func (x *ImportRequest) Reset() {
 	*x = ImportRequest{}
-	mi := &file_lab_v1_data_proto_msgTypes[12]
+	mi := &file_lab_v1_data_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -806,7 +875,7 @@ func (x *ImportRequest) String() string {
 func (*ImportRequest) ProtoMessage() {}
 
 func (x *ImportRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_data_proto_msgTypes[12]
+	mi := &file_lab_v1_data_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -819,7 +888,7 @@ func (x *ImportRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ImportRequest.ProtoReflect.Descriptor instead.
 func (*ImportRequest) Descriptor() ([]byte, []int) {
-	return file_lab_v1_data_proto_rawDescGZIP(), []int{12}
+	return file_lab_v1_data_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *ImportRequest) GetSymbols() []string {
@@ -870,7 +939,7 @@ type ImportResponse struct {
 
 func (x *ImportResponse) Reset() {
 	*x = ImportResponse{}
-	mi := &file_lab_v1_data_proto_msgTypes[13]
+	mi := &file_lab_v1_data_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -882,7 +951,7 @@ func (x *ImportResponse) String() string {
 func (*ImportResponse) ProtoMessage() {}
 
 func (x *ImportResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_data_proto_msgTypes[13]
+	mi := &file_lab_v1_data_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -895,7 +964,7 @@ func (x *ImportResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ImportResponse.ProtoReflect.Descriptor instead.
 func (*ImportResponse) Descriptor() ([]byte, []int) {
-	return file_lab_v1_data_proto_rawDescGZIP(), []int{13}
+	return file_lab_v1_data_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *ImportResponse) GetEvent() isImportResponse_Event {
@@ -955,7 +1024,7 @@ type ImportProgress struct {
 
 func (x *ImportProgress) Reset() {
 	*x = ImportProgress{}
-	mi := &file_lab_v1_data_proto_msgTypes[14]
+	mi := &file_lab_v1_data_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -967,7 +1036,7 @@ func (x *ImportProgress) String() string {
 func (*ImportProgress) ProtoMessage() {}
 
 func (x *ImportProgress) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_data_proto_msgTypes[14]
+	mi := &file_lab_v1_data_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -980,7 +1049,7 @@ func (x *ImportProgress) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ImportProgress.ProtoReflect.Descriptor instead.
 func (*ImportProgress) Descriptor() ([]byte, []int) {
-	return file_lab_v1_data_proto_rawDescGZIP(), []int{14}
+	return file_lab_v1_data_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *ImportProgress) GetSymbol() string {
@@ -1044,7 +1113,7 @@ var File_lab_v1_data_proto protoreflect.FileDescriptor
 const file_lab_v1_data_proto_rawDesc = "" +
 	"\n" +
 	"\x11lab/v1/data.proto\x12\x06lab.v1\"\x14\n" +
-	"\x12GetOverviewRequest\"\xef\x01\n" +
+	"\x12GetOverviewRequest\"\xc0\x02\n" +
 	"\x13GetOverviewResponse\x12!\n" +
 	"\flive_symbols\x18\x01 \x01(\x05R\vliveSymbols\x12\x1f\n" +
 	"\vlive_source\x18\x02 \x01(\tR\n" +
@@ -1052,7 +1121,12 @@ const file_lab_v1_data_proto_rawDesc = "" +
 	"\routages_today\x18\x03 \x01(\x05R\foutagesToday\x120\n" +
 	"\x14outage_seconds_today\x18\x04 \x01(\x03R\x12outageSecondsToday\x12#\n" +
 	"\rstorage_bytes\x18\x05 \x01(\x03R\fstorageBytes\x12\x18\n" +
-	"\asymbols\x18\x06 \x03(\tR\asymbols\"\xc1\x02\n" +
+	"\asymbols\x18\x06 \x03(\tR\asymbols\x12O\n" +
+	"\x15research_capabilities\x18\a \x03(\v2\x1a.lab.v1.ResearchCapabilityR\x14researchCapabilities\"b\n" +
+	"\x12ResearchCapability\x12\x16\n" +
+	"\x06symbol\x18\x01 \x01(\tR\x06symbol\x12\x1c\n" +
+	"\tsupported\x18\x02 \x01(\bR\tsupported\x12\x16\n" +
+	"\x06reason\x18\x03 \x01(\tR\x06reason\"\xc1\x02\n" +
 	"\aDataset\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x16\n" +
 	"\x06symbol\x18\x02 \x01(\tR\x06symbol\x12\x1c\n" +
@@ -1147,47 +1221,49 @@ func file_lab_v1_data_proto_rawDescGZIP() []byte {
 	return file_lab_v1_data_proto_rawDescData
 }
 
-var file_lab_v1_data_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_lab_v1_data_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_lab_v1_data_proto_goTypes = []any{
 	(*GetOverviewRequest)(nil),        // 0: lab.v1.GetOverviewRequest
 	(*GetOverviewResponse)(nil),       // 1: lab.v1.GetOverviewResponse
-	(*Dataset)(nil),                   // 2: lab.v1.Dataset
-	(*ListDatasetsRequest)(nil),       // 3: lab.v1.ListDatasetsRequest
-	(*ListDatasetsResponse)(nil),      // 4: lab.v1.ListDatasetsResponse
-	(*GetCoverageRequest)(nil),        // 5: lab.v1.GetCoverageRequest
-	(*Coverage)(nil),                  // 6: lab.v1.Coverage
-	(*TimeRange)(nil),                 // 7: lab.v1.TimeRange
-	(*GetCoverageResponse)(nil),       // 8: lab.v1.GetCoverageResponse
-	(*QualityIssue)(nil),              // 9: lab.v1.QualityIssue
-	(*ListQualityIssuesRequest)(nil),  // 10: lab.v1.ListQualityIssuesRequest
-	(*ListQualityIssuesResponse)(nil), // 11: lab.v1.ListQualityIssuesResponse
-	(*ImportRequest)(nil),             // 12: lab.v1.ImportRequest
-	(*ImportResponse)(nil),            // 13: lab.v1.ImportResponse
-	(*ImportProgress)(nil),            // 14: lab.v1.ImportProgress
+	(*ResearchCapability)(nil),        // 2: lab.v1.ResearchCapability
+	(*Dataset)(nil),                   // 3: lab.v1.Dataset
+	(*ListDatasetsRequest)(nil),       // 4: lab.v1.ListDatasetsRequest
+	(*ListDatasetsResponse)(nil),      // 5: lab.v1.ListDatasetsResponse
+	(*GetCoverageRequest)(nil),        // 6: lab.v1.GetCoverageRequest
+	(*Coverage)(nil),                  // 7: lab.v1.Coverage
+	(*TimeRange)(nil),                 // 8: lab.v1.TimeRange
+	(*GetCoverageResponse)(nil),       // 9: lab.v1.GetCoverageResponse
+	(*QualityIssue)(nil),              // 10: lab.v1.QualityIssue
+	(*ListQualityIssuesRequest)(nil),  // 11: lab.v1.ListQualityIssuesRequest
+	(*ListQualityIssuesResponse)(nil), // 12: lab.v1.ListQualityIssuesResponse
+	(*ImportRequest)(nil),             // 13: lab.v1.ImportRequest
+	(*ImportResponse)(nil),            // 14: lab.v1.ImportResponse
+	(*ImportProgress)(nil),            // 15: lab.v1.ImportProgress
 }
 var file_lab_v1_data_proto_depIdxs = []int32{
-	2,  // 0: lab.v1.ListDatasetsResponse.datasets:type_name -> lab.v1.Dataset
-	7,  // 1: lab.v1.Coverage.problems:type_name -> lab.v1.TimeRange
-	7,  // 2: lab.v1.Coverage.segments:type_name -> lab.v1.TimeRange
-	6,  // 3: lab.v1.GetCoverageResponse.coverage:type_name -> lab.v1.Coverage
-	9,  // 4: lab.v1.ListQualityIssuesResponse.issues:type_name -> lab.v1.QualityIssue
-	14, // 5: lab.v1.ImportResponse.progress:type_name -> lab.v1.ImportProgress
-	2,  // 6: lab.v1.ImportResponse.dataset:type_name -> lab.v1.Dataset
-	0,  // 7: lab.v1.DataService.GetOverview:input_type -> lab.v1.GetOverviewRequest
-	3,  // 8: lab.v1.DataService.ListDatasets:input_type -> lab.v1.ListDatasetsRequest
-	5,  // 9: lab.v1.DataService.GetCoverage:input_type -> lab.v1.GetCoverageRequest
-	10, // 10: lab.v1.DataService.ListQualityIssues:input_type -> lab.v1.ListQualityIssuesRequest
-	12, // 11: lab.v1.DataService.Import:input_type -> lab.v1.ImportRequest
-	1,  // 12: lab.v1.DataService.GetOverview:output_type -> lab.v1.GetOverviewResponse
-	4,  // 13: lab.v1.DataService.ListDatasets:output_type -> lab.v1.ListDatasetsResponse
-	8,  // 14: lab.v1.DataService.GetCoverage:output_type -> lab.v1.GetCoverageResponse
-	11, // 15: lab.v1.DataService.ListQualityIssues:output_type -> lab.v1.ListQualityIssuesResponse
-	13, // 16: lab.v1.DataService.Import:output_type -> lab.v1.ImportResponse
-	12, // [12:17] is the sub-list for method output_type
-	7,  // [7:12] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	2,  // 0: lab.v1.GetOverviewResponse.research_capabilities:type_name -> lab.v1.ResearchCapability
+	3,  // 1: lab.v1.ListDatasetsResponse.datasets:type_name -> lab.v1.Dataset
+	8,  // 2: lab.v1.Coverage.problems:type_name -> lab.v1.TimeRange
+	8,  // 3: lab.v1.Coverage.segments:type_name -> lab.v1.TimeRange
+	7,  // 4: lab.v1.GetCoverageResponse.coverage:type_name -> lab.v1.Coverage
+	10, // 5: lab.v1.ListQualityIssuesResponse.issues:type_name -> lab.v1.QualityIssue
+	15, // 6: lab.v1.ImportResponse.progress:type_name -> lab.v1.ImportProgress
+	3,  // 7: lab.v1.ImportResponse.dataset:type_name -> lab.v1.Dataset
+	0,  // 8: lab.v1.DataService.GetOverview:input_type -> lab.v1.GetOverviewRequest
+	4,  // 9: lab.v1.DataService.ListDatasets:input_type -> lab.v1.ListDatasetsRequest
+	6,  // 10: lab.v1.DataService.GetCoverage:input_type -> lab.v1.GetCoverageRequest
+	11, // 11: lab.v1.DataService.ListQualityIssues:input_type -> lab.v1.ListQualityIssuesRequest
+	13, // 12: lab.v1.DataService.Import:input_type -> lab.v1.ImportRequest
+	1,  // 13: lab.v1.DataService.GetOverview:output_type -> lab.v1.GetOverviewResponse
+	5,  // 14: lab.v1.DataService.ListDatasets:output_type -> lab.v1.ListDatasetsResponse
+	9,  // 15: lab.v1.DataService.GetCoverage:output_type -> lab.v1.GetCoverageResponse
+	12, // 16: lab.v1.DataService.ListQualityIssues:output_type -> lab.v1.ListQualityIssuesResponse
+	14, // 17: lab.v1.DataService.Import:output_type -> lab.v1.ImportResponse
+	13, // [13:18] is the sub-list for method output_type
+	8,  // [8:13] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_lab_v1_data_proto_init() }
@@ -1195,7 +1271,7 @@ func file_lab_v1_data_proto_init() {
 	if File_lab_v1_data_proto != nil {
 		return
 	}
-	file_lab_v1_data_proto_msgTypes[13].OneofWrappers = []any{
+	file_lab_v1_data_proto_msgTypes[14].OneofWrappers = []any{
 		(*ImportResponse_Progress)(nil),
 		(*ImportResponse_Dataset)(nil),
 	}
@@ -1205,7 +1281,7 @@ func file_lab_v1_data_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_lab_v1_data_proto_rawDesc), len(file_lab_v1_data_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   15,
+			NumMessages:   16,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

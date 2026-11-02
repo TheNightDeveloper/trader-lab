@@ -9,6 +9,25 @@ class L10nFa extends L10n {
   L10nFa([String locale = 'fa']) : super(locale);
 
   @override
+  String get researchPairs => 'جفت‌های مجاز پژوهش';
+
+  @override
+  String get researchCapabilitiesLoading =>
+      'در حال دریافت قابلیت‌های پژوهش از موتور…';
+
+  @override
+  String get researchCapabilitiesMissing =>
+      'قابلیت‌های پژوهش دریافت نشد؛ اتصال و نسخهٔ موتور را بررسی کنید.';
+
+  @override
+  String get researchScopeHelp =>
+      'اجرا فقط برای جفت‌هایی فعال است که موتور پشتیبانی آن‌ها را تأیید کرده است.';
+
+  @override
+  String get researchDatasetsEmpty =>
+      'نسخهٔ دادهٔ مجاز برای پژوهش موجود نیست؛ دادهٔ یک جفت پشتیبانی‌شده را وارد کنید.';
+
+  @override
   String get pnlCalculating => 'در حال محاسبه با ورودی‌های فعلی…';
 
   @override

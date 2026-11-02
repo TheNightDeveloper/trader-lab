@@ -40,6 +40,14 @@ const GetOverviewResponse$json = {
     },
     {'1': 'storage_bytes', '3': 5, '4': 1, '5': 3, '10': 'storageBytes'},
     {'1': 'symbols', '3': 6, '4': 3, '5': 9, '10': 'symbols'},
+    {
+      '1': 'research_capabilities',
+      '3': 7,
+      '4': 3,
+      '5': 11,
+      '6': '.lab.v1.ResearchCapability',
+      '10': 'researchCapabilities'
+    },
   ],
 };
 
@@ -49,7 +57,23 @@ final $typed_data.Uint8List getOverviewResponseDescriptor = $convert.base64Decod
     'MSHwoLbGl2ZV9zb3VyY2UYAiABKAlSCmxpdmVTb3VyY2USIwoNb3V0YWdlc190b2RheRgDIAEo'
     'BVIMb3V0YWdlc1RvZGF5EjAKFG91dGFnZV9zZWNvbmRzX3RvZGF5GAQgASgDUhJvdXRhZ2VTZW'
     'NvbmRzVG9kYXkSIwoNc3RvcmFnZV9ieXRlcxgFIAEoA1IMc3RvcmFnZUJ5dGVzEhgKB3N5bWJv'
-    'bHMYBiADKAlSB3N5bWJvbHM=');
+    'bHMYBiADKAlSB3N5bWJvbHMSTwoVcmVzZWFyY2hfY2FwYWJpbGl0aWVzGAcgAygLMhoubGFiLn'
+    'YxLlJlc2VhcmNoQ2FwYWJpbGl0eVIUcmVzZWFyY2hDYXBhYmlsaXRpZXM=');
+
+@$core.Deprecated('Use researchCapabilityDescriptor instead')
+const ResearchCapability$json = {
+  '1': 'ResearchCapability',
+  '2': [
+    {'1': 'symbol', '3': 1, '4': 1, '5': 9, '10': 'symbol'},
+    {'1': 'supported', '3': 2, '4': 1, '5': 8, '10': 'supported'},
+    {'1': 'reason', '3': 3, '4': 1, '5': 9, '10': 'reason'},
+  ],
+};
+
+/// Descriptor for `ResearchCapability`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List researchCapabilityDescriptor = $convert.base64Decode(
+    'ChJSZXNlYXJjaENhcGFiaWxpdHkSFgoGc3ltYm9sGAEgASgJUgZzeW1ib2wSHAoJc3VwcG9ydG'
+    'VkGAIgASgIUglzdXBwb3J0ZWQSFgoGcmVhc29uGAMgASgJUgZyZWFzb24=');
 
 @$core.Deprecated('Use datasetDescriptor instead')
 const Dataset$json = {
@@ -366,6 +390,7 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
     DataServiceBase$messageJson = {
   '.lab.v1.GetOverviewRequest': GetOverviewRequest$json,
   '.lab.v1.GetOverviewResponse': GetOverviewResponse$json,
+  '.lab.v1.ResearchCapability': ResearchCapability$json,
   '.lab.v1.ListDatasetsRequest': ListDatasetsRequest$json,
   '.lab.v1.ListDatasetsResponse': ListDatasetsResponse$json,
   '.lab.v1.Dataset': Dataset$json,

@@ -58,7 +58,7 @@ FakeTransport engine() {
       ),
       'ListAlgorithms': (_) => ListAlgorithmsResponse(algorithms: [exp.trendEma()]),
       'ListDatasets': (_) => ListDatasetsResponse(datasets: [exp.dataset('aaaa1111', 'BTCUSDT', '1h')]),
-      'GetOverview': (_) => GetOverviewResponse(symbols: ['BTCUSDT', 'ETHUSDT']),
+      'GetOverview': (_) => researchOverview(),
       'ListQualityIssues': (_) => ListQualityIssuesResponse(
         total: Int64(1),
         issues: [QualityIssue(symbol: 'ETHUSDT', kind: 'gap', detail: '17 minutes missing between two bars')],

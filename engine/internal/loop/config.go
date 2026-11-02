@@ -112,11 +112,27 @@ func (c Config) Validate() error {
 		return bad("walk-forward wins must be 0..folds")
 	}
 	seen := map[string]bool{}
+	if err := c.researchError(); err != nil {
+		return err
+	}
 	for _, s := range c.Symbols {
 		if _, ok := report.Specs()[s]; !ok || seen[s] {
 			return bad("unknown or repeated pair %q", s)
 		}
 		seen[s] = true
+	}
+	return nil
+}
+
+// Recheck execution permission on stored cycles without changing their registered config.
+func (c Config) researchError() error {
+	if len(c.Symbols) == 0 {
+		return fmt.Errorf("%w: choose at least one pair", ErrConfig)
+	}
+	for _, s := range c.Symbols {
+		if err := instrument.ResearchError(s); err != nil {
+			return fmt.Errorf("%w: %w", ErrConfig, err)
+		}
 	}
 	return nil
 }

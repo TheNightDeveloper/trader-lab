@@ -93,6 +93,36 @@ abstract class L10n {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[Locale('fa')];
 
+  /// No description provided for @researchPairs.
+  ///
+  /// In fa, this message translates to:
+  /// **'جفت‌های مجاز پژوهش'**
+  String get researchPairs;
+
+  /// No description provided for @researchCapabilitiesLoading.
+  ///
+  /// In fa, this message translates to:
+  /// **'در حال دریافت قابلیت‌های پژوهش از موتور…'**
+  String get researchCapabilitiesLoading;
+
+  /// No description provided for @researchCapabilitiesMissing.
+  ///
+  /// In fa, this message translates to:
+  /// **'قابلیت‌های پژوهش دریافت نشد؛ اتصال و نسخهٔ موتور را بررسی کنید.'**
+  String get researchCapabilitiesMissing;
+
+  /// No description provided for @researchScopeHelp.
+  ///
+  /// In fa, this message translates to:
+  /// **'اجرا فقط برای جفت‌هایی فعال است که موتور پشتیبانی آن‌ها را تأیید کرده است.'**
+  String get researchScopeHelp;
+
+  /// No description provided for @researchDatasetsEmpty.
+  ///
+  /// In fa, this message translates to:
+  /// **'نسخهٔ دادهٔ مجاز برای پژوهش موجود نیست؛ دادهٔ یک جفت پشتیبانی‌شده را وارد کنید.'**
+  String get researchDatasetsEmpty;
+
   /// No description provided for @pnlCalculating.
   ///
   /// In fa, this message translates to:

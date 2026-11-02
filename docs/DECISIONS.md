@@ -319,3 +319,16 @@ Consequence: no stored record/version changes. Sparse or historical oversized ra
 be materialized under this engine, though their metadata and saved figures remain readable.
 Use smaller new versions. The bound is deliberately conservative and does not establish a
 hard global RSS limit, fitting cancellation or CPU deadline. F07/P0 remain open in that scope.
+
+## ADR-049 Explicit server permission for research (P0 F08, 2026-11-02)
+Context: starting capital in USDT does not implement quote funding for a non-USDT pair.
+Decision: one registry gate permits known USDT-quoted symbols for application research.
+Recheck it before report evaluation/replay, experiment planning and queued cache reuse,
+stored learning execution and promotion evidence. Keep data/chart reads and low-level FX
+and simulator fixtures general. GetOverview adds per-symbol supported/reason fields; the
+UI requires affirmative permission, shares a filtered dataset provider and blocks stale
+drafts. Missing capability fields or failed responses grant no execution permission.
+Consequence: stored results stay immutable/readable; unsupported recomputation fails clearly.
+The new UI needs a compatible engine for execution. Supported numerical outputs and their
+versions are unchanged. Full cross-asset execution requires quote funding/holdings and
+independent accounting tests in its later capability phase; display conversion is insufficient.

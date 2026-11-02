@@ -67,6 +67,7 @@ class GetOverviewResponse extends $pb.GeneratedMessage {
     $fixnum.Int64? outageSecondsToday,
     $fixnum.Int64? storageBytes,
     $core.Iterable<$core.String>? symbols,
+    $core.Iterable<ResearchCapability>? researchCapabilities,
   }) {
     final result = GetOverviewResponse._();
     if (liveSymbols != null) result.liveSymbols = liveSymbols;
@@ -76,6 +77,8 @@ class GetOverviewResponse extends $pb.GeneratedMessage {
       result.outageSecondsToday = outageSecondsToday;
     if (storageBytes != null) result.storageBytes = storageBytes;
     if (symbols != null) result.symbols.addAll(symbols);
+    if (researchCapabilities != null)
+      result.researchCapabilities.addAll(researchCapabilities);
     return result;
   }
 
@@ -98,6 +101,8 @@ class GetOverviewResponse extends $pb.GeneratedMessage {
     ..aInt64(4, _omitFieldNames ? '' : 'outageSecondsToday')
     ..aInt64(5, _omitFieldNames ? '' : 'storageBytes')
     ..pPS(6, _omitFieldNames ? '' : 'symbols')
+    ..pPM<ResearchCapability>(7, _omitFieldNames ? '' : 'researchCapabilities',
+        subBuilder: ResearchCapability.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -170,6 +175,91 @@ class GetOverviewResponse extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(6)
   $pb.PbList<$core.String> get symbols => $_getList(5);
+
+  @$pb.TagNumber(7)
+  $pb.PbList<ResearchCapability> get researchCapabilities => $_getList(6);
+}
+
+/// Research execution capability is independent of data import and chart availability.
+class ResearchCapability extends $pb.GeneratedMessage {
+  factory ResearchCapability({
+    $core.String? symbol,
+    $core.bool? supported,
+    $core.String? reason,
+  }) {
+    final result = ResearchCapability._();
+    if (symbol != null) result.symbol = symbol;
+    if (supported != null) result.supported = supported;
+    if (reason != null) result.reason = reason;
+    return result;
+  }
+
+  ResearchCapability._();
+
+  factory ResearchCapability.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ResearchCapability()..mergeFromBuffer(data, registry);
+  factory ResearchCapability.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ResearchCapability()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ResearchCapability',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: ResearchCapability.$_createMessage)
+    ..aOS(1, _omitFieldNames ? '' : 'symbol')
+    ..aOB(2, _omitFieldNames ? '' : 'supported')
+    ..aOS(3, _omitFieldNames ? '' : 'reason')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ResearchCapability clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ResearchCapability copyWith(void Function(ResearchCapability) updates) =>
+      super.copyWith((message) => updates(message as ResearchCapability))
+          as ResearchCapability;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use ResearchCapability() / ResearchCapability.new instead')
+  static ResearchCapability create() => ResearchCapability._();
+  static $pb.GeneratedMessage $_createMessage() => ResearchCapability._();
+  @$core.override
+  ResearchCapability createEmptyInstance() => ResearchCapability._();
+  @$core.pragma('dart2js:noInline')
+  static ResearchCapability getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ResearchCapability>(
+          ResearchCapability.$_createMessage);
+  static ResearchCapability? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get symbol => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set symbol($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSymbol() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSymbol() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.bool get supported => $_getBF(1);
+  @$pb.TagNumber(2)
+  set supported($core.bool value) => $_setBool(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasSupported() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearSupported() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get reason => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set reason($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasReason() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearReason() => $_clearField(3);
 }
 
 class Dataset extends $pb.GeneratedMessage {

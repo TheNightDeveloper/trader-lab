@@ -63,6 +63,26 @@ func Specs() map[string]instrument.Spec {
 	return m
 }
 
+// ValidateResearch checks metadata only, before loading candles or using cached results.
+func (s Service) ValidateResearch(ctx context.Context, ids []string) error {
+	if len(ids) == 0 || len(ids) > len(Specs()) {
+		return fmt.Errorf("%w: choose one dataset per supported pair", ErrInput)
+	}
+	for _, id := range ids {
+		row, err := s.Store.GetDataset(ctx, id)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return fmt.Errorf("%w: dataset %s not found", ErrInput, id)
+		}
+		if err != nil {
+			return err
+		}
+		if err := instrument.ResearchError(row.Symbol); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // Bars loads and verifies every dataset of spec (content hash checked) and
 // returns bars per symbol at the datasets' common timeframe.
 func (s Service) Bars(ctx context.Context, ids []string) (map[string][]data.Bar, data.Timeframe, error) {
@@ -152,6 +172,9 @@ func (s Service) CreateWithID(ctx context.Context, id string, spec eval.Spec) er
 
 // evaluate loads the datasets, evaluates spec and adds the data-quality badge.
 func (s Service) evaluate(ctx context.Context, spec eval.Spec) (*eval.Evaluation, map[string][]data.Bar, error) {
+	if err := s.ValidateResearch(ctx, spec.DatasetIDs); err != nil {
+		return nil, nil, err
+	}
 	bars, tf, gaps, err := s.bars(ctx, spec.DatasetIDs)
 	if err != nil {
 		return nil, nil, err
@@ -370,6 +393,9 @@ func (s Service) Decisions(ctx context.Context, id, run string) ([]sim.Decision,
 func (s Service) Recalculate(ctx context.Context, id string, cfg sim.Config, scale money.Ratio) (eval.RunView, *sim.Result, error) {
 	st, err := s.Load(ctx, id)
 	if err != nil {
+		return eval.RunView{}, nil, err
+	}
+	if err := s.ValidateResearch(ctx, st.Spec.DatasetIDs); err != nil {
 		return eval.RunView{}, nil, err
 	}
 	ds, err := s.Decisions(ctx, id, RunMain)

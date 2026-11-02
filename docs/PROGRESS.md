@@ -2,6 +2,25 @@
 
 Update at the end of every session.
 
+## P0 F08 research capability restrictions (2026-11-02)
+- One registry-based gate permits known USDT-quoted symbols only. Reports/replays,
+  experiment planning, queued cache reuse and stored learning execution recheck permission.
+  Unsupported stored evidence cannot authorize promotion; rejected work leaves active models untouched.
+- GetOverview adds per-symbol research_capabilities (supported/reason). Go/Dart bindings
+  regenerated reproducibly. Shared server-filtered pickers and learning symbol settings
+  require affirmative permission; missing/failed responses and stale drafts cannot grant it.
+- Data import/list/read, charts, saved figures and low-level FX/simulator fixtures remain
+  available. No migration, financial version change or stored-result rewrite.
+- UI/UX Pro Max informed inline explanations and loading/error states using existing RTL
+  components. Four provider/codec unit tests added; no new widget tests.
+- Verified: **251 Go tests/subtests, zero failed/skipped, 22 packages, DB mandatory**;
+  11 unchanged goldens; **52 Flutter tests**; Go lint/vet, Dart analysis, proto lint and
+  reproducible generation passed. Details and compatibility: P0_STATUS.md, ADR-049.
+- A simultaneous SDK-constraint edit was preserved as >=3.12.2 with valid YAML syntax;
+  Flutter tools and the full suite then passed. Unrelated IDE/analyzer edits are outside this bundle.
+- Next: F13 full provenance and canonical-fill reproduction, then F15/F10. F07 global
+  budgets, accounting/network/label and UX gates remain open; P0 is still in progress.
+
 ## P0 resource admission and input bounds (2026-11-02)
 - Reviewed the clean checkpoint at de3e6a9; FIX-04/FIX-05 are already implemented.
 - Reproduce now acquires the whole research share before loading a report; cancelled
@@ -99,7 +118,8 @@ executed checks, remaining work, UX states and rollback notes.
 
 FIX-02, FIX-04 and FIX-05 are implemented within their recorded scopes. F07 now includes
 Reproduce admission and raw-input/retention caps; process-wide budgets remain open. Next are
-F08 capability restrictions. Server-side dataset search,
+F13 full provenance and canonical-fill reproduction; F08 capability restrictions are implemented.
+Server-side dataset search,
 full report provenance, lifecycle locking and remaining P0 stress cases are still open.
 **Do not start P1 yet.**
 

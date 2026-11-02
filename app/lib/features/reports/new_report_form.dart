@@ -12,6 +12,8 @@ import '../../core/widgets/layout.dart';
 import '../../core/widgets/data.dart';
 import '../../gen/lab/v1/report.pb.dart';
 import '../../l10n/app_localizations.dart';
+import '../data/data_providers.dart';
+import '../data/research_capability_widgets.dart';
 import 'report_providers.dart';
 
 /// Quick backtest: datasets + strategy + costs + split → CreateReport. The full
@@ -57,8 +59,9 @@ class _NewReportFormState extends ConsumerState<NewReportForm> {
 
   Future<void> _submit(L10n l, StrategyInfo? info) async {
     setState(() => _tried = true);
+    final allowed = ref.read(researchDatasetsProvider).value?.datasets.map((d) => d.id).toSet() ?? <String>{};
     final errs = [
-      if (_datasets.isEmpty) l.errPickDataset,
+      if (_datasets.isEmpty || !_datasets.every(allowed.contains)) l.errPickDataset,
       vPositive(l, _capital.text),
       vBps(l, _fee.text),
       vBps(l, _slip.text),
@@ -103,7 +106,7 @@ class _NewReportFormState extends ConsumerState<NewReportForm> {
   @override
   Widget build(BuildContext context) {
     final l = L10n.of(context);
-    final datasets = ref.watch(allDatasetsProvider);
+    final datasets = ref.watch(researchDatasetsProvider);
     final strategies = ref.watch(strategiesProvider);
     final info = strategies.value?.strategies.where((s) => s.name == _strategy).firstOrNull;
     Widget field(String label, TextEditingController c, String? Function(String) err, {String? suffix, String? help}) =>
@@ -131,10 +134,13 @@ class _NewReportFormState extends ConsumerState<NewReportForm> {
         const SizedBox(height: AppSpace.sm),
         AsyncSection(
           value: datasets,
-          onRetry: () => ref.invalidate(allDatasetsProvider),
+          onRetry: () {
+            ref.invalidate(allDatasetsProvider);
+            ref.invalidate(overviewProvider);
+          },
           skeleton: const SizedBox(height: 44),
           isEmpty: (r) => r.datasets.isEmpty,
-          empty: Text(l.newDatasetsEmpty, style: AppText.caption),
+          empty: Text(l.researchDatasetsEmpty, style: AppText.caption),
           builder: (r) => LabChoiceChips<String>(
             multi: true,
             ltr: true,
@@ -147,6 +153,7 @@ class _NewReportFormState extends ConsumerState<NewReportForm> {
           ),
         ),
         Text(l.newDatasetsHelp, style: AppText.caption),
+        const ResearchCapabilityNotice(),
         if (_tried && _datasets.isEmpty)
           Text(l.errPickDataset, style: AppText.caption.copyWith(color: AppColors.negativeText)),
         const SizedBox(height: AppSpace.lg),
@@ -195,7 +202,9 @@ class _NewReportFormState extends ConsumerState<NewReportForm> {
         Align(
           alignment: AlignmentDirectional.centerStart,
           child: FilledButton.icon(
-            onPressed: _running ? null : () => _submit(l, info),
+            onPressed: _running || !datasets.hasValue || datasets.value!.datasets.isEmpty
+                ? null
+                : () => _submit(l, info),
             icon: _running
                 ? const SizedBox.square(
                     dimension: 16,

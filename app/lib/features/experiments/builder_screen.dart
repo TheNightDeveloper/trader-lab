@@ -26,7 +26,8 @@ import '../../gen/lab/v1/library.pb.dart';
 import '../../gen/lab/v1/report.pb.dart' show ParamSpec;
 import '../../l10n/app_localizations.dart';
 import '../page_frame.dart';
-import '../reports/report_providers.dart';
+import '../data/data_providers.dart';
+import '../data/research_capability_widgets.dart';
 import 'experiment_providers.dart';
 
 const draftKey = 'lab.builder.draft.v1';
@@ -195,6 +196,7 @@ class _BuilderScreenState extends ConsumerState<BuilderScreen> {
   /// [forEstimate] fills empty text so the run count shows before step 1 is done.
   ExperimentDefinition? _definition({bool forEstimate = false}) {
     if (ds.isEmpty || f['algo']!.isEmpty) return null;
+    if (!_datasets.map((d) => d.id).toSet().containsAll(ds)) return null;
     final space = _space();
     if (space == null) return null;
     try {
@@ -274,7 +276,7 @@ class _BuilderScreenState extends ConsumerState<BuilderScreen> {
 
   // ---- validation and navigation -----------------------------------------------
 
-  List<Dataset> get _datasets => ref.read(allDatasetsProvider).value?.datasets ?? const [];
+  List<Dataset> get _datasets => ref.read(researchDatasetsProvider).value?.datasets ?? const [];
 
   List<String> _errors(L10n l, int s) => switch (s) {
     1 => [
@@ -491,18 +493,22 @@ class _BuilderScreenState extends ConsumerState<BuilderScreen> {
   );
 
   Widget _stepData(L10n l) {
-    final all = ref.watch(allDatasetsProvider);
+    final all = ref.watch(researchDatasetsProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(l.bDataTitle, style: AppText.sectionTitle),
+        const ResearchCapabilityNotice(),
         const SizedBox(height: AppSpace.md),
         AsyncSection(
           value: all,
-          onRetry: () => ref.invalidate(allDatasetsProvider),
+          onRetry: () {
+            ref.invalidate(allDatasetsProvider);
+            ref.invalidate(overviewProvider);
+          },
           skeleton: const SizedBox(height: 88),
           isEmpty: (r) => r.datasets.isEmpty,
-          empty: Text(l.newDatasetsEmpty, style: AppText.caption),
+          empty: Text(l.researchDatasetsEmpty, style: AppText.caption),
           builder: (r) {
             final tfs = r.datasets.map((d) => d.timeframe).toSet().toList()
               ..sort((a, b) => _tfOrder.indexOf(a).compareTo(_tfOrder.indexOf(b)));
@@ -908,7 +914,7 @@ class _BuilderScreenState extends ConsumerState<BuilderScreen> {
     final l = L10n.of(context);
     // Versions and datasets arrive async; re-estimate once they do.
     ref.listen(algorithmsProvider, (_, _) => _scheduleEstimate());
-    ref.listen(allDatasetsProvider, (_, _) => _scheduleEstimate());
+    ref.listen(researchDatasetsProvider, (_, _) => _scheduleEstimate());
     final errs = tried ? _errors(l, step) : const <String>[];
     final body = [_stepStart, _stepIdea, _stepData, _stepAlgo, _stepMoney, _stepReview][step](l);
     final main = Column(

@@ -1,5 +1,11 @@
 # Metric and P&L definitions
 
+P0 F08 execution scope (2026-11-02): application research is limited to known instruments
+quoted in USDT, authorized by the server registry. Data/chart inspection and FX valuation
+remain general. Display conversion alone does not establish quote funding or full cross-asset
+execution. Historical saved figures remain readable; unsupported recomputation is rejected.
+This eligibility gate leaves evaluation p0.3, training causal-features/v1 and golden outputs unchanged.
+
 Source of truth for every number the engine reports. Start from IMPLEMENTATION_PLAN.md §4 and expand each entry with: formula, units, frequency/annualization, minimum samples, invalid conditions, and the test that covers it.
 
 ## Valuation and display (M1)

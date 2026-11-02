@@ -1,5 +1,12 @@
 # UI Spec — design to Flutter
 
+P0 F08 (2026-11-02): research execution pickers require affirmative GetOverview
+research_capabilities. Unsupported pairs stay available in Data and Chart; the legacy
+Builder prototype's executable ETHBTC sample is superseded by this capability rule.
+Show the server reason beside the picker; missing permission or errors grant no selection.
+Report/experiment drafts are revalidated, and Learning settings offer only permitted symbols.
+Existing figures remain viewable; unsupported reproduction/recalculation returns a clear error.
+
 The design lives in `design/screens/*.dc.html` (exported from the canvas "Trading Research
 Platform UI"). These files need the canvas runtime to render, so view them on the canvas;
 in the repo they are read as source: markup gives structure, copy and inline styles, and

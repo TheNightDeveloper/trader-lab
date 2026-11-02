@@ -128,6 +128,7 @@ void main() {
     localRemove(draftKey);
     final fake = FakeTransport(
       {
+        'GetOverview': (_) => researchOverview(),
         'ListDatasets': (_) => ListDatasetsResponse(
           datasets: [
             dataset('dddd4444', 'BTCUSDT', '1m'),

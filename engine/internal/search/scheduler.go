@@ -288,6 +288,10 @@ func (s *Scheduler) acquireLease(ctx context.Context) (*pgx.Conn, error) {
 
 // evaluate returns the attempt's OOS metrics, from the run cache when every input matches.
 func (s *Scheduler) evaluate(ctx context.Context, a db.Attempt) ([]metrics.Metric, string, string, error) {
+	// Existing queued work must pass today's capability gate before any cache hit.
+	if err := s.Reports.ValidateResearch(ctx, []string{a.DatasetID}); err != nil {
+		return nil, "", "", err
+	}
 	def, err := s.definition(ctx, a.ExperimentID)
 	if err != nil {
 		return nil, "", "", err

@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:connectrpc/connect.dart';
+import 'package:fixnum/fixnum.dart';
 
 import '../../core/api/engine.dart';
 import '../../gen/lab/v1/data.pb.dart';
@@ -27,6 +28,17 @@ final allDatasetsProvider = FutureProvider<ListDatasetsResponse>((ref) async {
 final overviewProvider = FutureProvider<GetOverviewResponse>(
   (ref) => ref.watch(dataClientProvider).getOverview(GetOverviewRequest()),
 );
+
+/// Execution requires affirmative server permission; Data keeps every version.
+final researchDatasetsProvider = FutureProvider<ListDatasetsResponse>((ref) async {
+  final overviewFuture = ref.watch(overviewProvider.future);
+  final datasetsFuture = ref.watch(allDatasetsProvider.future);
+  final overview = await overviewFuture;
+  final all = await datasetsFuture;
+  final allowed = overview.researchCapabilities.where((c) => c.supported).map((c) => c.symbol).toSet();
+  final datasets = all.datasets.where((d) => allowed.contains(d.symbol)).toList();
+  return ListDatasetsResponse(datasets: datasets, total: Int64(datasets.length));
+});
 
 final datasetsProvider = FutureProvider.family<ListDatasetsResponse, int>(
   (ref, offset) => ref.watch(dataClientProvider).listDatasets(ListDatasetsRequest(pageSize: pageSize, offset: offset)),

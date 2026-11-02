@@ -8,6 +8,70 @@ import 'package:trading_lab/gen/lab/v1/data.pb.dart';
 import 'fake_transport.dart';
 
 void main() {
+  test('execution pickers require explicit permission and preserve the data catalog', () async {
+    var approved = true;
+    final transport = FakeTransport({
+      'GetOverview': (_) => GetOverviewResponse(
+        researchCapabilities: [
+          ResearchCapability(symbol: 'BTCUSDT', supported: approved),
+          ResearchCapability(symbol: 'ETHBTC', reason: 'unsupported'),
+        ],
+      ),
+      'ListDatasets': (_) => ListDatasetsResponse(
+        total: Int64(3),
+        datasets: [
+          Dataset(id: 'allowed', symbol: 'BTCUSDT'),
+          Dataset(id: 'cross', symbol: 'ETHBTC'),
+          Dataset(id: 'unknown', symbol: 'UNKNOWNUSDT'),
+        ],
+      ),
+    });
+    final c = ProviderContainer(overrides: [transportProvider.overrideWithValue(transport)]);
+    addTearDown(c.dispose);
+    expect((await c.read(researchDatasetsProvider.future)).datasets.map((d) => d.id), ['allowed']);
+    expect((await c.read(allDatasetsProvider.future)).datasets.length, 3);
+    approved = false;
+    c.invalidate(overviewProvider);
+    expect((await c.read(researchDatasetsProvider.future)).datasets, isEmpty);
+  });
+
+  test('an older server without capabilities grants no execution permission', () async {
+    final transport = FakeTransport({
+      'GetOverview': (_) => GetOverviewResponse(symbols: ['BTCUSDT']),
+      'ListDatasets': (_) => ListDatasetsResponse(
+        total: Int64(1),
+        datasets: [Dataset(id: 'a', symbol: 'BTCUSDT')],
+      ),
+    });
+    final c = ProviderContainer(overrides: [transportProvider.overrideWithValue(transport)]);
+    addTearDown(c.dispose);
+    expect((await c.read(researchDatasetsProvider.future)).datasets, isEmpty);
+  });
+
+  test('capability transport errors cannot produce an allowed picker', () async {
+    final c = ProviderContainer(
+      overrides: [
+        transportProvider.overrideWithValue(
+          FakeTransport({
+            'GetOverview': (_) => throw StateError('offline'),
+            'ListDatasets': (_) => ListDatasetsResponse(),
+          }),
+        ),
+      ],
+    );
+    addTearDown(c.dispose);
+    await expectLater(c.read(researchDatasetsProvider.future), throwsA(isA<StateError>()));
+  });
+
+  test('capability wire fields round trip in the Dart client', () {
+    final response = researchOverview();
+    final back = GetOverviewResponse.fromBuffer(response.writeToBuffer());
+    expect(
+      back.researchCapabilities.map((c) => (c.symbol, c.supported, c.reason)),
+      response.researchCapabilities.map((c) => (c.symbol, c.supported, c.reason)),
+    );
+  });
+
   test('pickers include dataset 201 and imports invalidate the shared cache', () async {
     var imported = false;
     final transport = FakeTransport(

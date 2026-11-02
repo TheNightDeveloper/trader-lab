@@ -3,6 +3,7 @@ package search_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"runtime"
@@ -24,7 +25,9 @@ import (
 	"tradinglab/engine/internal/search"
 	"tradinglab/engine/internal/sim"
 	"tradinglab/engine/internal/store"
+	"tradinglab/engine/internal/store/db"
 	"tradinglab/engine/internal/store/storetest"
+	"tradinglab/engine/internal/strategy"
 
 	labv1 "tradinglab/engine/internal/gen/lab/v1"
 	"tradinglab/engine/internal/gen/lab/v1/labv1connect"
@@ -108,6 +111,44 @@ func waitStatus(t *testing.T, s *store.Store, id, status string, within time.Dur
 	}
 	e, _ := s.GetExperiment(context.Background(), id)
 	t.Fatalf("experiment %s is %s, want %s", id, e.Status, status)
+}
+
+func TestUnsupportedExistingAttemptFailsBeforeCachedEvaluation(t *testing.T) {
+	st, _ := setup(t, 200)
+	ctx := context.Background()
+	bs := wave(200)
+	for i := range bs {
+		bs[i].Instrument = "ETHBTC"
+	}
+	_, err := data.UpsertBars(ctx, st, "ETHBTC", "archive", "cross", bs)
+	require.NoError(t, err)
+	ds, _, err := data.CreateDataset(ctx, st, data.DatasetSpec{Symbol: "ETHBTC", Timeframe: data.TF1m, From: t0, To: bs[len(bs)-1].CloseTime, GapPolicy: data.GapFlag})
+	require.NoError(t, err)
+	def := definition(ds.ID, experiment.ParamRange{Values: []float64{10}}, experiment.ParamRange{Values: []float64{30}}, 1)
+	_, err = search.Plan(ctx, st, def)
+	require.ErrorIs(t, err, instrument.ErrResearchUnsupported)
+	params := strategy.WithDefaults("trend-ema", strategy.Params{"fast": 10, "slow": 30})
+	// Register legacy work directly, with a misleading stored symbol and a cache hit.
+	id, err := experiment.Create(ctx, st, def, []experiment.NewAttempt{{Candidate: 1, DatasetID: ds.ID, Symbol: "BTCUSDT", Params: params}})
+	require.NoError(t, err)
+	key, err := search.CacheKey("test-build", eval.Spec{DatasetIDs: []string{ds.ID}, Timeframe: data.TF1m, Strategy: "trend-ema", Params: params, Sim: def.Sim, Split: def.Split})
+	require.NoError(t, err)
+	require.NoError(t, st.PutRunCache(ctx, db.PutRunCacheParams{Key: key, Metrics: []byte(`[]`)}))
+	runCtx, cancel := context.WithCancel(ctx)
+	done := make(chan error, 1)
+	go func() { done <- scheduler(st, 1).Run(runCtx) }()
+	t.Cleanup(func() {
+		cancel()
+		if err := <-done; err != nil && !errors.Is(err, context.Canceled) {
+			t.Errorf("scheduler shutdown: %v", err)
+		}
+	})
+	waitStatus(t, st, id, "done", 10*time.Second)
+	attempts, err := st.AllAttempts(ctx, id)
+	require.NoError(t, err)
+	require.Len(t, attempts, 1)
+	require.Equal(t, "failed", attempts[0].Status)
+	require.Contains(t, attempts[0].Failure, instrument.ErrResearchUnsupported.Error())
 }
 
 func counts(t *testing.T, s *store.Store, id string) map[string]int32 {

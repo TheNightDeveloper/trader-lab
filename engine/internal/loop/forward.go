@@ -17,6 +17,9 @@ import (
 // CurrentEvidence rejects historical recommendations whose fold and forward
 // evidence used older semantics. They remain readable and can be rejected.
 func CurrentEvidence(d Doc) bool {
+	if err := d.Config.researchError(); err != nil {
+		return false
+	}
 	return d.EvaluationVersion == eval.Version && d.TrainingCutoff != nil &&
 		d.ModelCreatedAt != nil && d.FreezeAt != nil && d.TradeStart != nil &&
 		!d.ModelCreatedAt.Before(*d.TrainingCutoff) && !d.FreezeAt.Before(*d.ModelCreatedAt) &&
@@ -48,6 +51,9 @@ func (l *Loop) Advance(ctx context.Context) error {
 // forward runs the frozen challenger and the champion over the bars that became
 // available after the freeze, with the same simulator and costs.
 func (l *Loop) forward(ctx context.Context, c *cycle) error {
+	if err := c.doc.Config.researchError(); err != nil {
+		return l.finish(c, Failed, err.Error())
+	}
 	if !CurrentEvidence(c.doc) || c.doc.Challenger == nil {
 		return l.finish(c, Failed, "شواهد چرخه با قرارداد فعلی سازگار نیست؛ یک چرخه تازه اجرا کنید.")
 	}

@@ -88,6 +88,7 @@ Cycle cycle({required bool ready}) => Cycle(
 );
 
 FakeTransport fake({required bool ready}) => FakeTransport({
+  'GetOverview': (_) => researchOverview(),
   'GetLearning': (_) => GetLearningResponse(
     config: config(),
     current: cycle(ready: ready),
@@ -220,7 +221,10 @@ void main() {
         active: ActiveModel(algorithmId: 'ridge-h4'),
         learningAlgorithms: ['ridge-h4'],
       ),
-      'ListCycles': (_) => ListCyclesResponse(total: Int64(1), cycles: [Cycle(id: Int64(1), state: 'done', outcome: 'skipped')]),
+      'ListCycles': (_) => ListCyclesResponse(
+        total: Int64(1),
+        cycles: [Cycle(id: Int64(1), state: 'done', outcome: 'skipped')],
+      ),
       'ListModels': (_) => ListModelsResponse(),
     });
     await pumpLearning(tester, f);

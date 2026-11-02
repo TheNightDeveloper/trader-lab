@@ -106,6 +106,8 @@ func reportErr(err error) error {
 	switch {
 	case err == nil:
 		return nil
+	case errors.Is(err, instrument.ErrResearchUnsupported):
+		return connect.NewError(connect.CodeFailedPrecondition, err)
 	case errors.Is(err, data.ErrLimit):
 		return connect.NewError(connect.CodeResourceExhausted, err)
 	case errors.Is(err, report.ErrNotFound):
