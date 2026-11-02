@@ -75,6 +75,28 @@ func (s Service) bars(ctx context.Context, ids []string) (map[string][]data.Bar,
 	if len(ids) == 0 {
 		return nil, "", 0, fmt.Errorf("%w: choose at least one dataset", ErrInput)
 	}
+	// Validate the whole request before loading even its first large dataset.
+	if len(ids) > len(Specs()) {
+		return nil, "", 0, fmt.Errorf("%w: too many datasets", ErrInput)
+	}
+	rawCount := 0
+	for _, id := range ids {
+		row, err := s.Store.GetDataset(ctx, id)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, "", 0, fmt.Errorf("%w: dataset %s not found", ErrInput, id)
+		}
+		if err != nil {
+			return nil, "", 0, err
+		}
+		n, err := data.RawBarCount(data.Timeframe(row.Timeframe), row.RangeFrom, row.RangeTo)
+		if err != nil {
+			return nil, "", 0, err
+		}
+		rawCount += n
+		if rawCount > data.MaxRawBars {
+			return nil, "", 0, data.ErrLimit
+		}
+	}
 	gaps := 0
 	bars := map[string][]data.Bar{}
 	var tf data.Timeframe
@@ -369,6 +391,7 @@ type DatasetCache struct {
 	size  int
 	order []string // oldest first
 	m     map[string]cachedDataset
+	bars  int // retained output bars, bounded independently of dataset count
 }
 
 type cachedDataset struct {
@@ -403,8 +426,10 @@ func (c *DatasetCache) load(ctx context.Context, s Service, id string) (data.Dat
 	defer c.mu.Unlock()
 	if _, ok := c.m[id]; !ok {
 		c.m[id] = cachedDataset{ds, bars}
+		c.bars += len(bars)
 		c.order = append(c.order, id)
-		for len(c.order) > c.size {
+		for len(c.order) > c.size || c.bars > data.MaxRawBars {
+			c.bars -= len(c.m[c.order[0]].bars)
 			delete(c.m, c.order[0])
 			c.order = c.order[1:]
 		}

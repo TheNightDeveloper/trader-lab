@@ -192,6 +192,52 @@ and load work; this batch does not establish raw-memory or large-catalog perform
 Dataset provenance is pinned, but full build/instrument/policy provenance and canonical-fill
 reproduction (F13), lifecycle serialization (F15), and the complete P0 gate remain open.
 
+## Resource admission and input bounds (2026-11-02)
+
+This batch continues from de3e6a9 and closes the remaining Reproduce admission bypass,
+plus the raw-input part of F07. It does not certify all resource or P0 acceptance criteria.
+
+- Reproduce takes the entire weighted research share before any report/dataset read, like
+  report creation. Cancellation and database errors leave the semaphore balanced.
+- `data.MaxRawBars = 1,000,000` bounds the projected number of raw minute candles, regardless
+  of requested output timeframe. The projection includes the leading aggregation bucket,
+  rounds up partial minutes and rejects reversed/empty/unknown ranges before reading.
+- Live/legacy reads, snapshot creation and pinned member loads query at most cap + 1 rows.
+  A result over the cap fails; it is never hashed/scored/persisted as a truncated dataset.
+  Manifest/output counts are checked before constructing arrays. SQL bindings regenerated.
+- Import checks the range before downloading/writing. Report requests preflight all dataset
+  ranges and their combined raw cost before loading the first. Learning collection/forward
+  check combined raw inputs; collection now waits for a research slot before materialization.
+- Each report/search cache has both its existing dataset-count limit and a total retained-bar
+  cap of 1,000,000. Eviction does not invalidate bars already used by an active run.
+- Strategy periods are capped at 1000 before ring allocation; NaN/Inf parameters are rejected.
+  No evaluation, training, fill or dataset semantic version changes; no migration/proto changes.
+
+Executed on Windows amd64, Go 1.26.4, local PostgreSQL, Flutter 3.44.2/Dart 3.12.2:
+
+| Check | Result |
+|---|---|
+| Pre-fix regressions | Reproduce bypass, unbounded raw range and strategy period reproduced |
+| `REQUIRE_DB=1 go test -count=1 -json ./...` | **245 passed tests/subtests, 0 failed/skipped; 22 packages** |
+| Limit boundaries / raw SQL / combined report ranges / cache eviction | passed |
+| Reproduce full-share waiting / cancelled waiter / release after DB error | passed |
+| Collection cancellation / forward and lifecycle regressions | passed |
+| Simulator goldens | all 11 unchanged and passing |
+| golangci-lint / go vet / depguard planted import | passed; forbidden import rejected |
+| sqlc v1.31.1 generation | byte-reproducible generated market bindings |
+| Existing Flutter suite / Dart analysis | **48 passed** / no issues |
+
+Evidence: `artifacts/p0-resources-tests.jsonl` and `artifacts/p0-resources-flutter.txt`
+(git-ignored). Race was previously verified on the FIX-04/FIX-05 macOS source above; it
+was not executed for this new Windows source (CGO_ENABLED=0, no GCC). No hosted/browser run.
+
+The range preflight is intentionally conservative: sparse long ranges are rejected even
+when few rows exist. Existing oversized dataset/report metadata and saved numbers remain
+readable, but materializing/charting/replaying/reproducing those inputs now returns a limit
+error; create bounded versions rather than rewriting old records. There is no migration.
+These are input/retention limits, not a measured process-RSS cap: concurrent loads, active
+runs, SQL execution and model-fitting work need further CPU/byte budget and stress checks.
+
 ## Remaining P0 work / next batch
 
 The analytics/learning review after FIX-02 fixed dependency readiness, fit/model validation,
@@ -201,14 +247,14 @@ zero skip with DB mandatory, 48 existing Flutter tests, lint/vet, Dart analysis 
 [P0_LEARNING_REVIEW_FA.md](P0_LEARNING_REVIEW_FA.md) for evidence, measured scope and compatibility.
 That historical review preceded FIX-04/FIX-05 above. These batches do not complete all of P0.
 
-1. Finish F07 admission/memory bounds on Reproduce and raw data loading, F08 non-USDT capability,
+1. Finish F08 non-USDT execution capability restrictions, F07 process-wide CPU/byte budgets,
    F13 full provenance and exact canonical fills, F15 synchronized version/model lifecycle.
 2. Finish F10 with search-backed paginated pickers. Current pickers fetch all pages into
    memory; a shortcut comment records the limit. Network supervision, accounting overflow,
    economic label/fill alignment and remaining stress cases also remain open.
 3. Run the hosted workflow, real-browser chart/async/focus checks and P0 UX gate.
 
-The existing passing suite does **not** establish full raw-memory, accounting-overflow
+The existing passing suite does **not** establish process-wide resource, accounting-overflow
 or concurrent-lifecycle acceptance criteria. Do not use this checkpoint as a P0 release pass.
 
 ## Rollback / compatibility

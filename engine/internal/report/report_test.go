@@ -139,3 +139,29 @@ func TestDatasetCacheReusesVerifiedBarsAndEvicts(t *testing.T) {
 	require.NotSame(t, &a["BTCUSDT"][0], &c["BTCUSDT"][0], "evicted by the newer version, loaded and verified again")
 	require.Equal(t, a, c)
 }
+
+func TestDatasetBudgetPreflightsCombinedRawRanges(t *testing.T) {
+	st := storetest.Open(t)
+	ctx := context.Background()
+	require.NoError(t, data.SeedInstruments(ctx, st.Queries))
+	for _, id := range []string{"a", "b"} {
+		require.NoError(t, st.InsertDataset(ctx, db.InsertDatasetParams{ID: id, Symbol: "BTCUSDT", Timeframe: "1h", RangeFrom: t0, RangeTo: t0.Add((data.MaxRawBars/2 + 1) * time.Minute), GapPolicy: "flag", KnownAt: t0, Manifest: []byte(`{}`)}))
+	}
+	_, _, err := (Service{Store: st}).Bars(ctx, []string{"a", "b"})
+	require.ErrorIs(t, err, data.ErrLimit, "reject combined raw cost before reconstructing invalid fixture manifests")
+}
+
+// Dataset-count limits alone must not retain four independently large versions.
+func TestDatasetCacheEvictsByTotalBars(t *testing.T) {
+	st, id := setup(t)
+	c := NewDatasetCache(4)
+	c.m["older"] = cachedDataset{bars: make([]data.Bar, data.MaxRawBars)}
+	c.order = []string{"older"}
+	c.bars = data.MaxRawBars
+	svc := Service{Store: st, Cache: c}
+	got, _, err := svc.Bars(context.Background(), []string{id})
+	require.NoError(t, err)
+	require.NotContains(t, c.m, "older", "evict despite being below the four-dataset cap")
+	require.Equal(t, len(got["BTCUSDT"]), c.bars)
+	require.Equal(t, []string{id}, c.order)
+}

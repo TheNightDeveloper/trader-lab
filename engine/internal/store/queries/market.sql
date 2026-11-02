@@ -53,7 +53,8 @@ WHERE symbol = @symbol
   AND open_time >= @from_time AND open_time < @to_time
   AND available_at <= @as_of
   AND ingested_at <= @known_at
-ORDER BY open_time, revision DESC;
+ORDER BY open_time, revision DESC
+LIMIT @row_limit::int;
 
 -- name: LastCloseAsOf :one
 SELECT c FROM candles
@@ -107,7 +108,8 @@ SELECT * FROM datasets WHERE id = $1;
 SELECT DISTINCT ON (open_time) open_time, revision, close_time, available_at, o, h, l, c, volume
 FROM candles
 WHERE symbol = @symbol AND open_time >= @from_time AND open_time < @to_time
-ORDER BY open_time, revision DESC;
+ORDER BY open_time, revision DESC
+LIMIT @row_limit::int;
 
 -- The same transaction snapshot as SnapshotCandles, so no late commit can add a
 -- member between materialization and persistence.
@@ -126,7 +128,8 @@ SELECT c.open_time, c.revision, c.close_time, c.available_at, c.o, c.h, c.l, c.c
 FROM dataset_members m
 JOIN candles c ON c.symbol = m.symbol AND c.open_time = m.open_time AND c.revision = m.revision
 WHERE m.dataset_id = @dataset_id AND m.symbol = @symbol
-ORDER BY c.open_time;
+ORDER BY c.open_time
+LIMIT @row_limit::int;
 
 -- name: InsertSnapshotDataset :execrows
 INSERT INTO datasets (id, symbol, timeframe, range_from, range_to, gap_policy, known_at, bar_count, manifest)

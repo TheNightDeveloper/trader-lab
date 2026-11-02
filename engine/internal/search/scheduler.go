@@ -52,8 +52,7 @@ type datasetBars struct {
 	used time.Time
 }
 
-// maxCachedDatasets: datasets kept in memory between attempts.
-// ponytail: tiny LRU by last use; a byte budget if datasets get large.
+// Retention is bounded by both dataset count and data.MaxRawBars in total.
 const maxCachedDatasets = 4
 
 func (s *Scheduler) init() {
@@ -180,13 +179,21 @@ func (s *Scheduler) dataset(ctx context.Context, id string) (datasetBars, error)
 	d = datasetBars{tf: ds.Spec.Timeframe, bars: bars, used: time.Now()}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if len(s.bars) >= maxCachedDatasets {
+	if existing, ok := s.bars[id]; ok {
+		return existing, nil
+	}
+	retained := len(bars)
+	for _, v := range s.bars {
+		retained += len(v.bars)
+	}
+	for len(s.bars) > 0 && (len(s.bars) >= maxCachedDatasets || retained > data.MaxRawBars) {
 		var oldest string
 		for k, v := range s.bars {
 			if oldest == "" || v.used.Before(s.bars[oldest].used) {
 				oldest = k
 			}
 		}
+		retained -= len(s.bars[oldest].bars)
 		delete(s.bars, oldest)
 	}
 	s.bars[id] = d

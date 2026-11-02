@@ -256,7 +256,7 @@ func TestWorseChallengerAndInterruptionsLeaveTheChampion(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, p0.ID, p.ID)
 
-	// Training interrupted mid-way: the cycle fails, the active pair stays.
+	// Collection now waits for admission too: cancellation must still end durably.
 	lim := jobs.NewLimiter(1)
 	require.NoError(t, lim.Acquire(ctx)) // hold the only research slot
 	l2 := &Loop{Store: st, Clock: clk, Limiter: lim}
@@ -264,9 +264,14 @@ func TestWorseChallengerAndInterruptionsLeaveTheChampion(t *testing.T) {
 	id, err := l2.Begin(ctx, "manual")
 	require.NoError(t, err)
 	runCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
 	errc := make(chan error, 1)
 	go func() { errc <- l2.RunCycle(runCtx, id) }()
-	require.Eventually(t, func() bool { return get(t, l2, id).row.State == Train }, 30*time.Second, 10*time.Millisecond)
+	select {
+	case err := <-errc:
+		t.Fatalf("collection bypassed the held research slot: %v", err)
+	case <-time.After(100 * time.Millisecond):
+	}
 	cancel()
 	require.Error(t, <-errc)
 	lim.Release()
@@ -274,7 +279,7 @@ func TestWorseChallengerAndInterruptionsLeaveTheChampion(t *testing.T) {
 	require.Equal(t, Failed, c.row.Outcome)
 	require.Equal(t, interrupted, c.row.Reason)
 	v, m = active(t, l)
-	require.Equal(t, [2]string{v0, m0}, [2]string{v, m}, "an interrupted training run leaves the active version untouched")
+	require.Equal(t, [2]string{v0, m0}, [2]string{v, m}, "an interrupted research run leaves the active version untouched")
 
 	// A cycle a restart cut off mid-run is closed as interrupted on start.
 	id, err = l.Begin(ctx, "manual")

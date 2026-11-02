@@ -20,6 +20,7 @@ WHERE symbol = $1
   AND available_at <= $4
   AND ingested_at <= $5
 ORDER BY open_time, revision DESC
+LIMIT $6::int
 `
 
 type CandlesAsOfParams struct {
@@ -28,6 +29,7 @@ type CandlesAsOfParams struct {
 	ToTime   time.Time
 	AsOf     time.Time
 	KnownAt  time.Time
+	RowLimit int32
 }
 
 type CandlesAsOfRow struct {
@@ -50,6 +52,7 @@ func (q *Queries) CandlesAsOf(ctx context.Context, arg CandlesAsOfParams) ([]Can
 		arg.ToTime,
 		arg.AsOf,
 		arg.KnownAt,
+		arg.RowLimit,
 	)
 	if err != nil {
 		return nil, err
@@ -179,11 +182,13 @@ FROM dataset_members m
 JOIN candles c ON c.symbol = m.symbol AND c.open_time = m.open_time AND c.revision = m.revision
 WHERE m.dataset_id = $1 AND m.symbol = $2
 ORDER BY c.open_time
+LIMIT $3::int
 `
 
 type DatasetCandlesParams struct {
 	DatasetID string
 	Symbol    string
+	RowLimit  int32
 }
 
 type DatasetCandlesRow struct {
@@ -199,7 +204,7 @@ type DatasetCandlesRow struct {
 }
 
 func (q *Queries) DatasetCandles(ctx context.Context, arg DatasetCandlesParams) ([]DatasetCandlesRow, error) {
-	rows, err := q.db.Query(ctx, datasetCandles, arg.DatasetID, arg.Symbol)
+	rows, err := q.db.Query(ctx, datasetCandles, arg.DatasetID, arg.Symbol, arg.RowLimit)
 	if err != nil {
 		return nil, err
 	}
@@ -723,12 +728,14 @@ SELECT DISTINCT ON (open_time) open_time, revision, close_time, available_at, o,
 FROM candles
 WHERE symbol = $1 AND open_time >= $2 AND open_time < $3
 ORDER BY open_time, revision DESC
+LIMIT $4::int
 `
 
 type SnapshotCandlesParams struct {
 	Symbol   string
 	FromTime time.Time
 	ToTime   time.Time
+	RowLimit int32
 }
 
 type SnapshotCandlesRow struct {
@@ -746,7 +753,12 @@ type SnapshotCandlesRow struct {
 // Read once inside a repeatable-read snapshot; timestamps are provenance, never
 // the membership definition of a new-format dataset.
 func (q *Queries) SnapshotCandles(ctx context.Context, arg SnapshotCandlesParams) ([]SnapshotCandlesRow, error) {
-	rows, err := q.db.Query(ctx, snapshotCandles, arg.Symbol, arg.FromTime, arg.ToTime)
+	rows, err := q.db.Query(ctx, snapshotCandles,
+		arg.Symbol,
+		arg.FromTime,
+		arg.ToTime,
+		arg.RowLimit,
+	)
 	if err != nil {
 		return nil, err
 	}

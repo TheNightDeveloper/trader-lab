@@ -77,6 +77,13 @@ func (l *Loop) forward(ctx context.Context, c *cycle) error {
 	}
 	// Warm-up: enough earlier bars for the first features after the freeze.
 	warm := time.Duration(max(feature.Lookback(chal.Recipe.Features), feature.Lookback(champ.Recipe.Features))+2) * tf
+	rawCount, err := data.RawBarCount(cfg.Timeframe, start.Add(-warm), through)
+	if err != nil {
+		return err
+	}
+	if rawCount > data.MaxRawBars/len(cfg.Symbols) {
+		return data.ErrLimit
+	}
 	if int64(through.Sub(start.Add(-warm))/tf)*int64(len(cfg.Symbols)) > int64(cfg.MaxBars) {
 		return fmt.Errorf("%w: forward window exceeds bar budget", ErrConfig)
 	}

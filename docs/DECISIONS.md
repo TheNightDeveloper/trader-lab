@@ -306,3 +306,16 @@ checkpoint, and a late candidate result cannot revive a cancelled row. A failed 
 write rolls back candidate cancellation too.
 Consequence: raw compute can repeat after a crash, but obsolete claims cannot replace newer
 results. Full algorithm/version/model lifecycle locking remains F15, not established here.
+
+## ADR-048 Bound raw inputs before materialization (P0 F07, 2026-11-02)
+Context: a small hourly/daily output can hide a large minute-candle allocation, and checking
+learning bars after loading is too late. Reproduce also bypassed the research limiter.
+Decision: reuse weighted whole-share admission for Reproduce. Collection takes one slot and
+releases it before training acquires its slots. A shared 1,000,000 raw-minute range cap is
+checked before data reads/imports; reports and learning check aggregate raw costs. All three
+raw readers use SQL cap + 1 and fail closed on overflow; snapshot counts/hashes never use
+truncated input. Caches also limit total retained bars, and strategy periods are 1..1000.
+Consequence: no stored record/version changes. Sparse or historical oversized ranges cannot
+be materialized under this engine, though their metadata and saved figures remain readable.
+Use smaller new versions. The bound is deliberately conservative and does not establish a
+hard global RSS limit, fitting cancellation or CPU deadline. F07/P0 remain open in that scope.

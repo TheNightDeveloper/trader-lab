@@ -49,6 +49,12 @@ type Manifest struct {
 // CreateDataset fixes exact raw revision membership in one repeatable-read
 // transaction. KnownAt is informative; membership never depends on commit timing.
 func CreateDataset(ctx context.Context, s *store.Store, spec DatasetSpec) (Dataset, []Bar, error) {
+	if _, err := RawBarCount(spec.Timeframe, spec.From, spec.To); err != nil {
+		return Dataset{}, nil, err
+	}
+	if _, err := ParseGapPolicy(string(spec.GapPolicy)); err != nil {
+		return Dataset{}, nil, err
+	}
 	for range 3 {
 		ds, bars, err := createSnapshot(ctx, s, spec)
 		var pe *pgconn.PgError
@@ -73,9 +79,12 @@ func createSnapshot(ctx context.Context, s *store.Store, spec DatasetSpec) (Data
 			return err
 		}
 		from := spec.From.Truncate(spec.Timeframe.Duration())
-		rows, err := q.SnapshotCandles(ctx, db.SnapshotCandlesParams{Symbol: spec.Symbol, FromTime: from, ToTime: spec.To})
+		rows, err := q.SnapshotCandles(ctx, db.SnapshotCandlesParams{Symbol: spec.Symbol, FromTime: from, ToTime: spec.To, RowLimit: MaxRawBars + 1})
 		if err != nil {
 			return err
+		}
+		if len(rows) > MaxRawBars {
+			return ErrLimit
 		}
 		raw, revisions := revisionBars(spec.Symbol, len(rows), func(i int) db.SnapshotCandlesRow { return rows[i] })
 		var gaps []Issue
@@ -140,9 +149,15 @@ func LoadDataset(ctx context.Context, s *store.Store, id string) (Dataset, []Bar
 		if err != nil {
 			return Dataset{}, nil, err
 		}
-		rows, err := s.DatasetCandles(ctx, db.DatasetCandlesParams{DatasetID: id, Symbol: ds.Spec.Symbol})
+		if m.Members > MaxRawBars {
+			return Dataset{}, nil, ErrLimit
+		}
+		rows, err := s.DatasetCandles(ctx, db.DatasetCandlesParams{DatasetID: id, Symbol: ds.Spec.Symbol, RowLimit: MaxRawBars + 1})
 		if err != nil {
 			return Dataset{}, nil, err
+		}
+		if len(rows) > MaxRawBars {
+			return Dataset{}, nil, ErrLimit
 		}
 		if len(rows) != m.Members {
 			return Dataset{}, nil, fmt.Errorf("%w: %s membership count", ErrDatasetChanged, id)
@@ -179,6 +194,12 @@ func datasetFromRow(row db.Dataset) (Dataset, error) {
 	m, err := ParseManifest(row.Manifest)
 	if err != nil {
 		return Dataset{}, fmt.Errorf("dataset %s: %w", row.ID, err)
+	}
+	if _, err := RawBarCount(tf, row.RangeFrom, row.RangeTo); err != nil {
+		return Dataset{}, err
+	}
+	if row.BarCount < 0 || row.BarCount > MaxRawBars {
+		return Dataset{}, ErrLimit
 	}
 	return Dataset{
 		FormatVersion:   m.FormatVersion,

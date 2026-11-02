@@ -370,24 +370,42 @@ func (l *Loop) run(ctx context.Context, c *cycle) error {
 	to := dataEnd(l.Clock.Now().UTC(), tf)
 	from := to.Add(-time.Duration(cfg.LookbackDays) * 24 * time.Hour)
 	c.doc.DataFrom, c.doc.DataTo = from, to
+	rawCount, err := data.RawBarCount(cfg.Timeframe, from, to)
+	if err != nil {
+		return err
+	}
+	if rawCount > data.MaxRawBars/len(cfg.Symbols) || int64(rawCount)*int64(time.Minute)*int64(len(cfg.Symbols))/int64(tf) > int64(cfg.MaxBars) {
+		return l.finish(c, Skipped, "پرش: بازهٔ داده بیش از بودجهٔ کندل خام یا آموزش است؛ بازه را کوتاه‌تر کنید.")
+	}
 	consumed, err := l.Store.ConsumedUntil(ctx, cfg.Algorithm)
 	if err != nil {
 		return err
 	}
 	bars := map[string][]data.Bar{}
 	fresh := -1
-	for _, sym := range cfg.Symbols {
-		ds, bs, err := data.CreateDataset(ctx, l.Store, data.DatasetSpec{Symbol: sym, Timeframe: cfg.Timeframe, From: from, To: to, GapPolicy: data.GapFlag})
-		if err != nil {
+	err = func() error {
+		// Release collection admission before parallel training takes its own slots.
+		if err := l.Limiter.Acquire(ctx); err != nil {
 			return err
 		}
-		c.doc.Datasets = append(c.doc.Datasets, ds.ID)
-		bars[sym] = bs
-		c.doc.Usage.Bars += len(bs)
-		n := len(bs) - firstAtOrAfter(bs, consumed)
-		if fresh < 0 || n < fresh {
-			fresh = n
+		defer l.Limiter.Release()
+		for _, sym := range cfg.Symbols {
+			ds, bs, err := data.CreateDataset(ctx, l.Store, data.DatasetSpec{Symbol: sym, Timeframe: cfg.Timeframe, From: from, To: to, GapPolicy: data.GapFlag})
+			if err != nil {
+				return err
+			}
+			c.doc.Datasets = append(c.doc.Datasets, ds.ID)
+			bars[sym] = bs
+			c.doc.Usage.Bars += len(bs)
+			n := len(bs) - firstAtOrAfter(bs, consumed)
+			if fresh < 0 || n < fresh {
+				fresh = n
+			}
 		}
+		return nil
+	}()
+	if err != nil {
+		return err
 	}
 	c.doc.FreshBars = fresh
 	c.doc.Steps[Collect] = fmt.Sprintf("+%d bars", fresh)

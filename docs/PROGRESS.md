@@ -2,6 +2,24 @@
 
 Update at the end of every session.
 
+## P0 resource admission and input bounds (2026-11-02)
+- Reviewed the clean checkpoint at de3e6a9; FIX-04/FIX-05 are already implemented.
+- Reproduce now acquires the whole research share before loading a report; cancelled
+  waiters preserve other jobs' slots and admitted errors release all acquired slots.
+- Shared data preflight caps requested raw 1m ranges at 1,000,000 candles, including leading
+  aggregation buckets. Live/legacy/snapshot SQL readers have a cap-plus-one limit and reject
+  overflow; no truncated result is returned. Import rejects oversized ranges before download.
+- Reports preflight the combined raw cost before loading; learning collection and forward
+  check raw inputs as well as their own budgets. Collection holds a research slot and releases
+  it before parallel training. Report/search caches retain at most 1,000,000 output bars each.
+- Strategy periods are bounded to 1..1000 and non-finite parameters are rejected before use.
+- Verified on Windows: **245 Go tests/subtests, 0 failed/skipped, 22 packages; DB mandatory**;
+  11 unchanged goldens; Go lint/vet, depguard and reproducible sqlc generation. Existing
+  Flutter suite: 48 passed; Dart analysis clean. Local evidence: P0_STATUS.md.
+- F07 is partially complete: hard process-wide RAM/CPU deadlines and cancellation inside
+  fitting remain open. Next is F08 execution capability restrictions, then F13/F15/F10.
+- P0 remains open; this Windows run does not include race, hosted CI or browser acceptance.
+
 ## P0 FIX-05 (2026-11-02)
 - Additive migration 00006 pins exact candle revisions in dataset_members and adds claim
   tokens. New dataset format 1 has a separate hash namespace covering raw/aggregate values
@@ -79,8 +97,9 @@ CI now has PostgreSQL, mandatory DB tests, race and retained pass/fail/skip evid
 the hosted workflow still needs its first run. See [P0_STATUS.md](P0_STATUS.md) for the
 executed checks, remaining work, UX states and rollback notes.
 
-FIX-02, FIX-04 and FIX-05 are implemented within their recorded scopes. Next are F07
-Reproduce/raw-memory bounds and F08 capability restrictions. Server-side dataset search,
+FIX-02, FIX-04 and FIX-05 are implemented within their recorded scopes. F07 now includes
+Reproduce admission and raw-input/retention caps; process-wide budgets remain open. Next are
+F08 capability restrictions. Server-side dataset search,
 full report provenance, lifecycle locking and remaining P0 stress cases are still open.
 **Do not start P1 yet.**
 

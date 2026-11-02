@@ -110,16 +110,22 @@ var farFuture = time.Date(9999, 1, 1, 0, 0, 0, 0, time.UTC)
 func (r Reader) Bars(ctx context.Context, q Query) ([]Bar, error) { return r.bars(ctx, q, false) }
 
 func (r Reader) bars(ctx context.Context, q Query, legacy bool) ([]Bar, error) {
+	if _, err := RawBarCount(q.Timeframe, q.From, q.To); err != nil {
+		return nil, err
+	}
 	known := q.KnownAt
 	if known.IsZero() {
 		known = farFuture
 	}
 	d := q.Timeframe.Duration()
 	rows, err := r.Q.CandlesAsOf(ctx, db.CandlesAsOfParams{
-		Symbol: q.Symbol, FromTime: q.From.Truncate(d), ToTime: q.To, AsOf: q.AsOf, KnownAt: known,
+		Symbol: q.Symbol, FromTime: q.From.Truncate(d), ToTime: q.To, AsOf: q.AsOf, KnownAt: known, RowLimit: MaxRawBars + 1,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("read %s: %w", q.Symbol, err)
+	}
+	if len(rows) > MaxRawBars {
+		return nil, ErrLimit
 	}
 	bars := make([]Bar, len(rows))
 	for i, row := range rows {

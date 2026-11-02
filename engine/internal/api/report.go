@@ -13,6 +13,7 @@ import (
 	"connectrpc.com/connect"
 	"github.com/jackc/pgx/v5"
 
+	"tradinglab/engine/internal/data"
 	"tradinglab/engine/internal/eval"
 	"tradinglab/engine/internal/fx"
 	labv1 "tradinglab/engine/internal/gen/lab/v1"
@@ -105,6 +106,8 @@ func reportErr(err error) error {
 	switch {
 	case err == nil:
 		return nil
+	case errors.Is(err, data.ErrLimit):
+		return connect.NewError(connect.CodeResourceExhausted, err)
 	case errors.Is(err, report.ErrNotFound):
 		return connect.NewError(connect.CodeNotFound, err)
 	case errors.Is(err, report.ErrInput), errors.Is(err, eval.ErrSpec), errors.Is(err, eval.ErrPlan), errors.Is(err, sim.ErrConfig):
@@ -339,6 +342,13 @@ func (h *Report) Compare(ctx context.Context, req *connect.Request[labv1.Compare
 }
 
 func (h *Report) Reproduce(ctx context.Context, req *connect.Request[labv1.ReproduceRequest]) (*connect.Response[labv1.ReproduceResponse], error) {
+	// Reproduction runs the same parallel evaluation as report creation.
+	if h.Limiter != nil {
+		if err := h.Limiter.AcquireAll(ctx); err != nil {
+			return nil, err
+		}
+		defer h.Limiter.ReleaseN(h.Limiter.Size())
+	}
 	same, err := h.Svc.Reproduce(ctx, req.Msg.GetReportId())
 	if err != nil {
 		return nil, reportErr(err)

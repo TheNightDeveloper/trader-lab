@@ -44,6 +44,9 @@ func (im Importer) Import(ctx context.Context, symbol string, from, to time.Time
 	if !from.Before(to) {
 		return ImportProgress{}, fmt.Errorf("import %s: empty range %s – %s", symbol, from.Format(time.RFC3339), to.Format(time.RFC3339))
 	}
+	if _, err := RawBarCount(TF1m, from, to); err != nil {
+		return ImportProgress{}, err
+	}
 	var p ImportProgress
 	months := monthsIn(from, to)
 	p.FilesTotal = len(months)
