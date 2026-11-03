@@ -356,7 +356,21 @@ closed-bar availability, so a delayed old candle cannot backdate a new equity po
 replace a newer close. Reports from any older evaluation version get a read-time legacy
 badge and cannot be compared as current evaluations. Stored reports are never rewritten.
 Period/cohort attribution (F05) and actual forward freeze/coverage (F04) were superseded
-by p0.3 / FIX-04 on 2026-11-02 (ADR-044/045). Non-USDT execution capability (F08) remains open.
+by p0.3 / FIX-04 on 2026-11-02 (ADR-044/045). F08 now restricts application research to
+known USDT pairs (ADR-049); full cross-asset execution remains a later capability.
+
+### Report provenance and reproduction (2026-11-03)
+New specs record provenance v1: executable SHA-256, available VCS/compiler/platform metadata,
+dataset hashes/manifests, used instrument specs and explicit policy versions (ADR-051).
+The existing spec JSON export includes this metadata. Unknown metadata stays unknown.
+Reproduce requires matching build/release/context, exact JSON numbers and ordered canonical
+trade/fill/decision records in both main and holdout, including summary/spec/split consistency.
+Record timestamps use PostgreSQL UTC microsecond precision. Equal PnL alone is insufficient;
+a different binary is not certified identical even if totals match. Reproduce and calculator
+replay pin recorded instrument filters; legacy calculator replay remains unpinned and warned.
+Comparison blocks differing build/instrument/policy contexts using full SHA-256 identities,
+not their shortened display. Historical results remain immutable. No metric formula changes;
+evaluation stays p0.3, with the same simulator goldens and training version.
 
 ## P0 training and selection compatibility (2026-11-01)
 - New fits record `training_version: causal-features/v1` in their content-addressed artifact.

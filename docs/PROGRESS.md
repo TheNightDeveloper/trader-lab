@@ -2,6 +2,27 @@
 
 Update at the end of every session.
 
+## P0 F13 report provenance and exact reproduction (2026-11-03)
+- New reports record provenance v1: binary SHA-256, available VCS commit/time/dirty state,
+  Go/platform, each dataset ID and manifest, used instrument filters/assets/scales, and
+  evaluation/fill/accounting/research policy versions. Clients cannot supply this metadata.
+- Reproduce checks exact JSON numbers, separate spec/split/summary records, and every ordered
+  trade/fill/decision in main and holdout. Equal PnL no longer hides different fills. Both
+  reproduction and P&L replay use recorded instrument filters. Timestamp identity follows
+  PostgreSQL's stored UTC microsecond precision; transient simulator fields stay excluded.
+- Reproduction is strict about execution context: another binary/release is not identical,
+  even with matching financial totals. Comparison also blocks different execution contexts.
+  Full context is available through the existing spec JSON export; existing badges explain
+  missing provenance/build metadata or locally modified source. Historical rows stay unchanged.
+- Verified: **282 Go tests/subtests, 0 failed/skipped, 22 packages, DB mandatory**; all
+  **11 goldens unchanged**; **52 existing Flutter tests**; Dart analysis, Go lint/vet passed.
+  Depguard rejected a planted optimizer import; both Python CI-summary tests passed.
+  Engine build succeeded with VCS metadata (bb04d88 + dirty source) and a binary SHA-256.
+- Evidence: artifacts/p0-provenance-go-tests.jsonl and artifacts/p0-provenance-flutter.txt.
+  No migration, dependency, wire-contract, numerical version or new widget test was added.
+- Next: F15 synchronized version/model lifecycle, then remaining F07/F10 and P0 gates.
+  Race, hosted CI and browser acceptance remain open.
+
 ## Material UI migration error fixes (2026-11-02)
 - Completed the in-progress material_ui import migration. Resolved 13 analyzer errors from
   ambiguous GlobalMaterialLocalizations and resulting const-list errors in app/test hosts.
@@ -115,7 +136,7 @@ Update at the end of every session.
 - Next: FIX-04 actual freeze/forward coverage and period/cohort metrics. See P0_STATUS.md.
 
 ## Current phase
-P0 — correctness and evidence stabilization: **in progress** (2026-11-02).
+P0 — correctness and evidence stabilization: **in progress** (2026-11-03).
 The new P0–P8 phases are defined in `Trading_Lab_Master_Plan_FA.md`; M0–M6 below
 are historical implementation milestones, not evidence that the P0 release gate passed.
 
@@ -129,10 +150,10 @@ the hosted workflow still needs its first run. See [P0_STATUS.md](P0_STATUS.md) 
 executed checks, remaining work, UX states and rollback notes.
 
 FIX-02, FIX-04 and FIX-05 are implemented within their recorded scopes. F07 now includes
-Reproduce admission and raw-input/retention caps; process-wide budgets remain open. Next are
-F13 full provenance and canonical-fill reproduction; F08 capability restrictions are implemented.
-Server-side dataset search,
-full report provenance, lifecycle locking and remaining P0 stress cases are still open.
+Reproduce admission and raw-input/retention caps; process-wide budgets remain open. F13 report
+provenance/canonical reproduction and F08 capability restrictions are implemented in their
+recorded scopes. Next is F15 lifecycle locking. Server-side dataset search and remaining
+P0 resource/accounting/network/label and stress/UX gates are still open.
 **Do not start P1 yet.**
 
 ## M6 done (2026-10-28)

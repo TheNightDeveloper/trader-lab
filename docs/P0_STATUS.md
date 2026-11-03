@@ -1,6 +1,6 @@
 # P0 — stabilization and release evidence
 
-Status: **in progress**, 2026-11-02. This continues the new master plan, not
+Status: **in progress**, 2026-11-03. This continues the new master plan, not
 completion of P0 and not approval to begin P1 or any execution feature.
 
 ## First batch scope
@@ -279,6 +279,50 @@ stays p0.3 and training stays causal-features/v1: eligibility changed, numerical
 Race, hosted CI and real-browser visual/focus acceptance were not run on this new source.
 Full cross-asset execution remains a later capability requiring quote funding/accounting tests.
 
+## F13 report provenance and canonical reproduction (2026-11-03)
+
+New report specs contain optional, engine-owned provenance version 1. This pins the actual
+binary SHA-256, available Go VCS commit/time/modified flag, compiler/platform, dataset IDs
+and complete manifests, used instrument filters/assets/scales and explicit evaluation, fill,
+accounting and research policy identifiers. The existing Sim/Split/Params fields retain the
+costs, sizing, latency, TTL and evaluation settings. Metadata unavailable to Go is explicitly
+unknown; the release label is never used as a fabricated commit hash.
+
+Reproduce now compares spec, split, evaluation, holdout and summary integers, plus ordered
+trades, fills and decisions for both main/holdout. JSON numbers are decoded without float64
+and compared as exact rationals, tolerating jsonb decimal/exponent formatting only. Canonical
+records reuse the persistence projection, with UTC microsecond timestamps matching PostgreSQL.
+Transient simulator observation/mark fields retain their existing exclusion from persistence.
+Reproduce and Recalculate use recorded instrument filters; malformed/unknown provenance and
+inconsistent assets/scales fail rather than falling back to today's filters. Legacy reports
+remain readable; legacy Recalculate retains its old registry fallback, explicitly unpinned.
+
+Identical is deliberately strict: a changed binary/release/context returns false even when
+totals match. Reports with missing provenance cannot gain an identical result by backfilling
+today's metadata. Comparison blocks differing execution contexts using the full SHA-256 key,
+independent of its 12-character display. Existing badges explain legacy/incomplete/dirty build
+metadata, and spec_json exports all available provenance. No new RPC/DB schema or numerical
+evaluation/training version is introduced, and no stored financial row is rewritten.
+
+| Check | Observed result |
+|---|---|
+| Pre-fix regressions | >2^53/int64/decimal differences and changed/deleted/reordered canonical records incorrectly reported identical |
+| REQUIRE_DB=1 go test -count=1 -json ./... | **282 passed tests/subtests, 0 failed/skipped; 22 packages** |
+| Main/holdout fill, trade, decision and summary corruption with saved metrics | difference detected; reproduction leaves stored rows unchanged |
+| Historical instrument filters / changed binary or release / legacy JSON | pinned replay passes; context changes and unknown legacy provenance cannot certify identity |
+| Forged creation provenance / invalid instrument identity/scales | engine replaces supplied metadata; invalid replay inputs rejected |
+| Export JSON / legacy API warning / comparison contexts | passed |
+| Simulator goldens | all 11 unchanged and passing |
+| Flutter / Dart analysis | **52 existing tests passed** / no issues; no new widget tests |
+| Go lint / vet / executable build | passed; built executable contains commit bb04d88 and vcs.modified=true |
+| Depguard planted optimizer import / Python CI summary tests | import rejected and temporary probe removed / 2 passed |
+
+Evidence: artifacts/p0-provenance-go-tests.jsonl and artifacts/p0-provenance-flutter.txt
+(git-ignored). Windows amd64, Go 1.26.4, local PostgreSQL, Flutter 3.47.4/Dart 3.13.3.
+Race was not run (CGO_ENABLED=0, no GCC); no hosted CI or real-browser acceptance. The
+canonical row comparison adds reads/allocations; process-wide memory/CPU guarantees remain
+F07 work. Full P0 is still open; next is F15.
+
 ## Remaining P0 work / next batch
 
 The analytics/learning review after FIX-02 fixed dependency readiness, fit/model validation,
@@ -288,8 +332,8 @@ zero skip with DB mandatory, 48 existing Flutter tests, lint/vet, Dart analysis 
 [P0_LEARNING_REVIEW_FA.md](P0_LEARNING_REVIEW_FA.md) for evidence, measured scope and compatibility.
 That historical review preceded FIX-04/FIX-05 above. These batches do not complete all of P0.
 
-1. Finish F13 full provenance and exact canonical fills, F15 synchronized version/model
-   lifecycle, and F07 process-wide CPU/byte budgets and fitting cancellation.
+1. Finish F15 synchronized version/model lifecycle, and F07 process-wide CPU/byte budgets
+   and fitting cancellation. F13's report provenance/canonical reproduction scope is recorded above.
 2. Finish F10 with search-backed paginated pickers. Current pickers fetch all pages into
    memory; a shortcut comment records the limit. Network supervision, accounting overflow,
    economic label/fill alignment and remaining stress cases also remain open.

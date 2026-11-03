@@ -35,7 +35,8 @@ type Spec struct {
 	Sim               sim.Config      `json:"sim"`
 	Split             SplitPlan       `json:"split"`
 	// EngineVersion of the code that produced the report (reproducibility badge).
-	EngineVersion string `json:"engine_version"`
+	EngineVersion string      `json:"engine_version"`
+	Provenance    *Provenance `json:"provenance,omitempty"`
 	// Origin is set when the report is the chosen candidate of an experiment: the
 	// attempt count travels with it so every reader can discount for search.
 	Origin *Origin `json:"origin,omitempty"`

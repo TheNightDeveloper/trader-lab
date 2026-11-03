@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"strings"
 	"testing"
@@ -13,6 +14,7 @@ import (
 
 	"tradinglab/engine/internal/clock"
 	"tradinglab/engine/internal/data"
+	"tradinglab/engine/internal/eval"
 	labv1 "tradinglab/engine/internal/gen/lab/v1"
 	"tradinglab/engine/internal/gen/lab/v1/labv1connect"
 	"tradinglab/engine/internal/money"
@@ -186,6 +188,13 @@ func TestReportAndPnlServices(t *testing.T) {
 		ex, err := rc.Export(ctx, connect.NewRequest(&labv1.ExportRequest{ReportId: id, Kind: kind}))
 		require.NoError(t, err, kind)
 		require.NotEmpty(t, ex.Msg.GetContent())
+		if kind == "spec_json" {
+			var exported eval.Spec
+			require.NoError(t, json.Unmarshal(ex.Msg.GetContent(), &exported))
+			require.NotNil(t, exported.Provenance)
+			require.Equal(t, ds.ID, exported.Provenance.Datasets[0].ID)
+			require.Equal(t, "BTCUSDT", exported.Provenance.Instruments[0].Symbol)
+		}
 	}
 
 	rep, err := rc.Reproduce(ctx, connect.NewRequest(&labv1.ReproduceRequest{ReportId: id}))
@@ -215,19 +224,23 @@ func TestReportAndPnlServices(t *testing.T) {
 	require.Equal(t, connect.CodeInvalidArgument, connect.CodeOf(err))
 	t.Run("legacy annotation does not mutate a historical report", func(t *testing.T) {
 		// Remove the optional field to emulate a pre-P0 record in this test schema.
-		_, err := st.Pool.Exec(ctx, "UPDATE reports SET spec = spec - 'evaluation_version' WHERE id = $1", id)
+		_, err := st.Pool.Exec(ctx, "UPDATE reports SET spec = spec - 'evaluation_version' - 'provenance' WHERE id = $1", id)
 		require.NoError(t, err)
 		before, err := st.GetReport(ctx, id)
 		require.NoError(t, err)
 		result, err := rc.GetReport(ctx, connect.NewRequest(&labv1.GetReportRequest{ReportId: id}))
 		require.NoError(t, err)
-		found := false
+		found, provenanceWarning := false, false
 		for _, badge := range result.Msg.Report.Summary.Badges {
 			if badge.Kind == "legacy" {
 				found = true
 			}
+			if badge.Kind == "provenance" {
+				provenanceWarning = badge.Tone == "warning" && strings.Contains(badge.Text, "قدیمی")
+			}
 		}
 		require.True(t, found)
+		require.True(t, provenanceWarning)
 		after, err := st.GetReport(ctx, id)
 		require.NoError(t, err)
 		require.Equal(t, before.Spec, after.Spec)

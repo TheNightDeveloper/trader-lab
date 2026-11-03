@@ -7,6 +7,9 @@ import (
 
 var ErrResearchUnsupported = errors.New("قابلیت اجرای پژوهش برای این جفت فعال نیست")
 
+// ResearchPolicy changes when application research eligibility changes.
+const ResearchPolicy = "known-usdt/v1"
+
 // ResearchError is the application capability gate; valuation primitives remain general.
 func ResearchError(symbol string) error {
 	for _, s := range Defaults() {

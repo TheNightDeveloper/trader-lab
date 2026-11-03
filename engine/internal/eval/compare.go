@@ -1,6 +1,8 @@
 package eval
 
 import (
+	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"slices"
 	"strings"
@@ -54,6 +56,10 @@ func Compare(rs []Comparable) Comparison {
 			return r.Spec.EvaluationVersion
 		}},
 		{"datasets", "نسخه داده", true, func(r Comparable) string { return strings.Join(r.Spec.DatasetIDs, ", ") }},
+		{"execution_context", "منشأ و سیاست اجرا", true, func(r Comparable) string {
+			key := executionContext(r.Spec.Provenance)
+			return key[:min(12, len(key))]
+		}},
 		{"period", "دوره خارج از نمونه", true, func(r Comparable) string {
 			return r.Split.OOS.From.UTC().Format(time.RFC3339Nano) + " → " + r.Split.OOS.To.UTC().Format(time.RFC3339Nano)
 		}},
@@ -158,6 +164,8 @@ func params(s Spec) string {
 // Display rounding is never an identity for costs, timestamps or split settings.
 func assumptionKey(key string, r Comparable, display string) string {
 	switch key {
+	case "execution_context":
+		return executionContext(r.Spec.Provenance)
 	case "fee":
 		return r.Spec.Sim.FeeRate.String()
 	case "slippage":
@@ -169,6 +177,20 @@ func assumptionKey(key string, r Comparable, display string) string {
 	default:
 		return display
 	}
+}
+
+// Dataset IDs already have their own row; compare build/spec/policy without display truncation.
+func executionContext(p *Provenance) string {
+	if p == nil {
+		return "legacy"
+	}
+	context := *p
+	context.Datasets = nil
+	b, err := json.Marshal(context)
+	if err != nil {
+		return "invalid"
+	}
+	return fmt.Sprintf("%x", sha256.Sum256(b))
 }
 
 // A one-ppm cost difference needs four percent decimals to remain visible.

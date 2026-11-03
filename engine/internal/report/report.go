@@ -41,7 +41,8 @@ const (
 type Service struct {
 	Store    *store.Store
 	Version  string // engine version recorded in every report
-	Parallel int    // simulator runs at once per report; 0 = all CPUs
+	Build    eval.BuildIdentity
+	Parallel int // simulator runs at once per report; 0 = all CPUs
 	// Cache holds recently used dataset versions (nil: load every time).
 	Cache *DatasetCache
 }
@@ -144,7 +145,7 @@ func (s Service) bars(ctx context.Context, ids []string) (map[string][]data.Bar,
 // Create evaluates spec over its datasets and stores the report.
 func (s Service) Create(ctx context.Context, spec eval.Spec) (string, error) {
 	spec.EngineVersion = s.Version
-	ev, bars, err := s.evaluate(ctx, spec)
+	ev, bars, err := s.evaluate(ctx, spec, Specs())
 	if err != nil {
 		return "", err
 	}
@@ -163,7 +164,7 @@ func (s Service) CreateWithID(ctx context.Context, id string, spec eval.Spec) er
 		return err
 	}
 	spec.EngineVersion = s.Version
-	ev, bars, err := s.evaluate(ctx, spec)
+	ev, bars, err := s.evaluate(ctx, spec, Specs())
 	if err != nil {
 		return err
 	}
@@ -171,7 +172,7 @@ func (s Service) CreateWithID(ctx context.Context, id string, spec eval.Spec) er
 }
 
 // evaluate loads the datasets, evaluates spec and adds the data-quality badge.
-func (s Service) evaluate(ctx context.Context, spec eval.Spec) (*eval.Evaluation, map[string][]data.Bar, error) {
+func (s Service) evaluate(ctx context.Context, spec eval.Spec, specs map[string]instrument.Spec) (*eval.Evaluation, map[string][]data.Bar, error) {
 	if err := s.ValidateResearch(ctx, spec.DatasetIDs); err != nil {
 		return nil, nil, err
 	}
@@ -180,11 +181,16 @@ func (s Service) evaluate(ctx context.Context, spec eval.Spec) (*eval.Evaluation
 		return nil, nil, err
 	}
 	spec.Timeframe = tf
+	// Provenance is engine-owned even when a caller supplies an old or forged spec.
+	spec.Provenance, err = s.provenance(ctx, spec.DatasetIDs, specs)
+	if err != nil {
+		return nil, nil, err
+	}
 	parallel := s.Parallel
 	if parallel <= 0 {
 		parallel = runtime.NumCPU()
 	}
-	ev, err := eval.EvaluateWith(ctx, spec, bars, Specs(), parallel)
+	ev, err := eval.EvaluateWith(ctx, spec, bars, specs, parallel)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -195,7 +201,7 @@ func (s Service) evaluate(ctx context.Context, spec eval.Spec) (*eval.Evaluation
 }
 
 // Reproduce re-evaluates a stored report from its recorded inputs and reports
-// whether every number came out identical (invariant 1).
+// whether provenance, exact numbers and both canonical runs match (invariant 1).
 func (s Service) Reproduce(ctx context.Context, id string) (bool, error) {
 	row, err := s.Store.GetReport(ctx, id)
 	if errors.Is(err, pgx.ErrNoRows) {
@@ -208,7 +214,15 @@ func (s Service) Reproduce(ctx context.Context, id string) (bool, error) {
 	if err := json.Unmarshal(row.Spec, &spec); err != nil {
 		return false, err
 	}
-	ev, _, err := s.evaluate(ctx, spec)
+	if err := s.ValidateResearch(ctx, spec.DatasetIDs); err != nil {
+		return false, err
+	}
+	specs, err := recordedSpecs(spec.Provenance)
+	if err != nil {
+		return false, err
+	}
+	spec.EngineVersion = s.Version
+	ev, _, err := s.evaluate(ctx, spec, specs)
 	if err != nil {
 		return false, err
 	}
@@ -220,19 +234,33 @@ func (s Service) Reproduce(ctx context.Context, id string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return jsonEqual(evJ, row.Evaluation) && jsonEqual(holdJ, row.Holdout), nil
-}
-
-// jsonEqual compares JSON by value: PostgreSQL jsonb normalizes key order and
-// whitespace, so stored bytes differ from freshly marshalled ones.
-func jsonEqual(a, b []byte) bool {
-	var x, y any
-	if json.Unmarshal(a, &x) != nil || json.Unmarshal(b, &y) != nil {
-		return false
+	specJ, err := json.Marshal(ev.Spec)
+	if err != nil {
+		return false, err
 	}
-	ja, _ := json.Marshal(x)
-	jb, _ := json.Marshal(y)
-	return string(ja) == string(jb)
+	splitJ, err := json.Marshal(ev.Split)
+	if err != nil {
+		return false, err
+	}
+	if !jsonEqual(evJ, row.Evaluation) || !jsonEqual(holdJ, row.Holdout) || !jsonEqual(specJ, row.Spec) || !jsonEqual(splitJ, row.Split) {
+		return false, nil
+	}
+	net, _ := metrics.Get(ev.OOS.Metrics, "net_pnl")
+	ret, _ := metrics.Get(ev.OOS.Metrics, "total_return")
+	closed, _ := metrics.Get(ev.OOS.Metrics, "closed_trades")
+	if row.OosNet != net.V || row.OosReturn != ret.V || int64(row.ClosedTrades) != closed.V {
+		return false, nil
+	}
+	for _, run := range []struct {
+		name   string
+		result *sim.Result
+	}{{RunMain, ev.Main}, {RunHoldout, ev.HoldoutRun}} {
+		same, err := s.sameRun(ctx, id, run.name, run.result)
+		if err != nil || !same {
+			return false, err
+		}
+	}
+	return true, nil
 }
 
 func newID() (string, error) {
@@ -283,7 +311,8 @@ func (s Service) persist(ctx context.Context, id string, bars map[string][]data.
 	})
 }
 
-func copyRun(ctx context.Context, q *db.Queries, id, run string, r *sim.Result) error {
+// runRecords is the shared canonical projection for persistence and reproduction.
+func runRecords(id, run string, r *sim.Result) canonicalRun {
 	trades := make([]db.CopyTradesParams, len(r.Trades))
 	for i, t := range r.Trades {
 		var mark *int64
@@ -314,13 +343,18 @@ func copyRun(ctx context.Context, q *db.Queries, id, run string, r *sim.Result) 
 			Reason: d.Reason, ModelID: d.ModelID, RecipeVersion: d.RecipeVersion, Outcome: string(d.Outcome), Detail: d.Detail,
 		}
 	}
-	if _, err := q.CopyTrades(ctx, trades); err != nil {
+	return canonicalRun{trades, fills, decisions}
+}
+
+func copyRun(ctx context.Context, q *db.Queries, id, run string, r *sim.Result) error {
+	rows := runRecords(id, run, r)
+	if _, err := q.CopyTrades(ctx, rows.trades); err != nil {
 		return fmt.Errorf("copy %s trades: %w", run, err)
 	}
-	if _, err := q.CopyFills(ctx, fills); err != nil {
+	if _, err := q.CopyFills(ctx, rows.fills); err != nil {
 		return fmt.Errorf("copy %s fills: %w", run, err)
 	}
-	if _, err := q.CopyDecisions(ctx, decisions); err != nil {
+	if _, err := q.CopyDecisions(ctx, rows.decisions); err != nil {
 		return fmt.Errorf("copy %s decisions: %w", run, err)
 	}
 	return nil
@@ -406,7 +440,11 @@ func (s Service) Recalculate(ctx context.Context, id string, cfg sim.Config, sca
 	if err != nil {
 		return eval.RunView{}, nil, err
 	}
-	return eval.Replay(ctx, st.Split, ds, cfg, scale, bars, Specs())
+	specs, err := recordedSpecs(st.Spec.Provenance)
+	if err != nil {
+		return eval.RunView{}, nil, err
+	}
+	return eval.Replay(ctx, st.Split, ds, cfg, scale, bars, specs)
 }
 
 // DatasetCache keeps the most recently loaded dataset versions in memory. A

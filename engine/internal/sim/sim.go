@@ -28,6 +28,9 @@ var (
 // FillModel names the bar-open price assumption recorded with every new report.
 const FillModel = "causal-next-open/v1"
 
+// AccountingPolicy identifies fixed-8 spot sizing, rounding, fees and valuation rules.
+const AccountingPolicy = "spot-fixed8/v1"
+
 type Sizing string
 
 const (

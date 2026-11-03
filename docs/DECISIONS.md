@@ -342,3 +342,24 @@ output untouched. Require Dart >=3.13 / Flutter >=3.47 for material_ui ^1.9.0 an
 3.47.4 in CI, matching the IDE toolchain used for tests and the release build.
 Consequence: both localization type families are available without ambiguous imports;
 old Flutter 3.44 environments must select/upgrade to the compatible SDK before resolving.
+
+## ADR-051 Pin report provenance and compare canonical records (P0 F13, 2026-11-03)
+Context: aggregate reports omitted their trade/fill/decision records during Reproduce, and
+JSON decoding through float64 could collapse distinct large integers or precise decimals.
+Decision: provenance v1 in Spec captures binary SHA-256, available compiler-provided VCS
+metadata, compiler/platform, complete dataset manifests and hashes, used instrument specs,
+and evaluation/fill/accounting/research policy versions. Create owns these fields. A missing
+commit remains unknown, distinct from a clean source checkout. Existing JSON export and
+server badges expose the evidence without changing the wire or database schema.
+Reproduce and Recalculate use recorded instrument filters; legacy replay keeps its explicit
+unpinned fallback. Canonical trade/fill/decision comparison reuses the persistence projection
+for main and holdout, including row sequence, with PostgreSQL UTC microsecond precision.
+JSON uses exact rational number equality, never display rounding or float64. Reproduce also
+checks duplicated spec/split/summary records. No transient simulator contract/golden changes.
+Consequence: identical includes build/release/provenance, not just equal PnL; a different
+binary can return false despite equal financial outputs. Comparison blocks different build,
+instrument or policy contexts using a full context digest, displaying only a short key.
+Old reports stay readable and immutable, cannot gain provenance retroactively, and show a
+warning. Their old numbers are not rewritten. Numerical evaluation stays p0.3; training and
+snapshot versions stay unchanged. Canonical reads add memory/IO, not a new F07 budget proof.
+Keep a provenance-aware engine for pinned replay; old readers do not implement this guarantee.

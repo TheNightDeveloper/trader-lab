@@ -172,6 +172,16 @@ func (h *Report) GetReport(ctx context.Context, req *connect.Request[labv1.GetRe
 	if st.Spec.EvaluationVersion != eval.Version {
 		r.Summary.Badges = append(r.Summary.Badges, &labv1.Badge{Kind: "legacy", Tone: "warning", Text: "گزارش با منطق ارزیابی قدیمی؛ برای نتیجهٔ فعلی گزارش تازه بسازید"})
 	}
+	// Existing badge/export components expose provenance without rewriting historical results.
+	provenance := &labv1.Badge{Kind: "provenance", Tone: "neutral", Text: "منشأ اجرا در خروجی JSON گزارش ثبت شده است"}
+	if p := st.Spec.Provenance; p == nil {
+		provenance.Tone, provenance.Text = "warning", "منشأ کامل اجرای این گزارش قدیمی ثبت نشده؛ بازتولید دقیق قابل تأیید نیست"
+	} else if p.Build.BinarySHA256 == "" || !p.Build.VCSKnown {
+		provenance.Tone, provenance.Text = "warning", "اطلاعات ساخت یا commit کامل نیست؛ جزئیات موجود در خروجی JSON ثبت شده است"
+	} else if p.Build.Dirty {
+		provenance.Tone, provenance.Text = "warning", "گزارش با تغییرات محلی کد ساخته شده؛ منشأ اجرا در خروجی JSON ثبت شده است"
+	}
+	r.Summary.Badges = append(r.Summary.Badges, provenance)
 	for _, f := range ev.Folds {
 		r.Folds = append(r.Folds, &labv1.FoldView{Index: int32(f.Fold.Index), Train: windowP(f.Fold.Train), Test: windowP(f.Fold.Test), Metrics: metricsP(f.Metrics)})
 	}
