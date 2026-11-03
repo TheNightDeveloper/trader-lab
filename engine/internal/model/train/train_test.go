@@ -61,9 +61,9 @@ func TestFeaturesAndLabelsOnlySeeThePast(t *testing.T) {
 	more, err := feature.Samples(r.Features, 4, append(bars[:300:300], Bars(800, 2)[300:]...), t0, asOf, asOf)
 	require.NoError(t, err)
 	require.Equal(t, s, more)
-	a1, err := Fit(r, s, t0, asOf, asOf, Meta{})
+	a1, err := Fit(context.Background(), r, s, t0, asOf, asOf, Meta{})
 	require.NoError(t, err)
-	a2, err := Fit(r, more, t0, asOf, asOf, Meta{})
+	a2, err := Fit(context.Background(), r, more, t0, asOf, asOf, Meta{})
 	require.NoError(t, err)
 	require.Equal(t, a1.ID, a2.ID, "same past, same model")
 }
@@ -76,7 +76,7 @@ func TestFittingOnAllHistoryIsCaught(t *testing.T) {
 	trainEnd := bars[250].OpenTime
 	_, err = feature.FitScaler(all, trainEnd)
 	require.ErrorIs(t, err, feature.ErrLookAhead, "a scaler fit on all history is rejected")
-	_, err = Fit(r, all, t0, trainEnd, trainEnd, Meta{})
+	_, err = Fit(context.Background(), r, all, t0, trainEnd, trainEnd, Meta{})
 	require.ErrorIs(t, err, feature.ErrLookAhead)
 	_, err = WalkForward(context.Background(), r, map[string][]data.Bar{"BTCUSDT": bars}, []Step{{From: t0, To: bars[400].OpenTime, AsOf: trainEnd}}, Meta{})
 	require.ErrorIs(t, err, feature.ErrLookAhead, "a step cannot train past the time it serves from")
@@ -89,7 +89,7 @@ func TestSavedModelReproducesPredictions(t *testing.T) {
 		asOf := bars[400].OpenTime
 		s, err := feature.Samples(r.Features, r.Horizon, bars, t0, asOf, asOf)
 		require.NoError(t, err)
-		a, err := Fit(r, s, t0, asOf, asOf, Meta{Algorithm: "x", Seed: 42})
+		a, err := Fit(context.Background(), r, s, t0, asOf, asOf, Meta{Algorithm: "x", Seed: 42})
 		require.NoError(t, err)
 		b, err := a.Save()
 		require.NoError(t, err)
@@ -115,13 +115,13 @@ func TestModelsLearnTheSignal(t *testing.T) {
 	r := Ridge()
 	s, err := feature.Samples(r.Features, 1, bars, t0, asOf, asOf)
 	require.NoError(t, err)
-	a, err := Fit(r, s, t0, asOf, asOf, Meta{})
+	a, err := Fit(context.Background(), r, s, t0, asOf, asOf, Meta{})
 	require.NoError(t, err)
 	require.Greater(t, a.Weights[0], 0.0, "momentum weight is positive")
 
 	lg := r
 	lg.Model, lg.Entry = "logistic", 0.5
-	l, err := Fit(lg, s, t0, asOf, asOf, Meta{})
+	l, err := Fit(context.Background(), lg, s, t0, asOf, asOf, Meta{})
 	require.NoError(t, err)
 	hit, n := 0, 0
 	for i := 2000; i < len(bars)-1; i++ {
@@ -148,7 +148,7 @@ func TestWalkForwardTrainsEachStepOnItsPast(t *testing.T) {
 	require.Less(t, ms[0].Samples, ms[1].Samples, "expanding window")
 	require.Equal(t, steps[1].AsOf, ms[1].AsOf)
 
-	_, err = Fit(r, nil, t0, t0, t0, Meta{})
+	_, err = Fit(context.Background(), r, nil, t0, t0, t0, Meta{})
 	require.ErrorIs(t, err, ErrTooFew)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -175,12 +175,12 @@ func TestFitRejectsInvalidSamples(t *testing.T) {
 			copyRows := append([]feature.Sample(nil), rows...)
 			change(copyRows)
 			require.NotPanics(t, func() {
-				_, err := Fit(r, copyRows, t0, end, end, Meta{})
+				_, err := Fit(context.Background(), r, copyRows, t0, end, end, Meta{})
 				require.Error(t, err)
 			})
 		})
 	}
-	_, err = Fit(r, rows, t0, end.Add(time.Hour), end, Meta{})
+	_, err = Fit(context.Background(), r, rows, t0, end.Add(time.Hour), end, Meta{})
 	require.ErrorIs(t, err, feature.ErrLookAhead)
 }
 
@@ -193,7 +193,7 @@ func TestDelayedDependenciesCannotChangePastModel(t *testing.T) {
 	fit := func(bars []data.Bar) model.Artifact {
 		samples, err := feature.Samples(r.Features, r.Horizon, bars, t0, end, end)
 		require.NoError(t, err)
-		a, err := Fit(r, samples, t0, end, end, Meta{})
+		a, err := Fit(context.Background(), r, samples, t0, end, end, Meta{})
 		require.NoError(t, err)
 		return a
 	}

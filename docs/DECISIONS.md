@@ -383,3 +383,19 @@ no old writers sharing the new protocol. Old recommendations remain readable/rej
 Migration rejects ambiguous legacy champions rather than silently repairing history. A down
 migration loses revision history: retain a backup/compatible engine. Numerical contracts and
 financial records do not change. F07 resource guarantees and full P0 release gates stay open.
+
+## ADR-053 Cooperative training and conservative slot-time deadlines (P0 F07, 2026-11-03)
+Context: a step-level context check could not stop sample preparation or an in-flight fit;
+the old budget check ran only before candidates and omitted final fits from usage.
+Decision: Fit requires context; sample/scaler/fit passes check cancellation in bounded row
+chunks and between logistic iterations. Reject oversized inputs before new materialization:
+1,000,000 samples/combined bars, 12 steps. Preserve arithmetic/order and artifact versions;
+reference hashes verify completed fits. Feature helpers retain compatible background wrappers.
+Use a conservative training-to-freeze deadline equal to registered slot time divided by
+maximum slots, including waiting/IO. Parent cancellation and budget expiry remain distinct.
+Retain summed active slot wall time as usage, now including final fits and cancelled work;
+it is not an OS CPU measurement. Failed-cycle cleanup preserves serving state and history.
+Consequence: waiting can exhaust the deadline before recorded active usage reaches the cap.
+No hard preemption of allocation/GC or the feature-bounded linear solve is claimed. This
+does not certify a process-wide byte/RSS or OS CPU limit; F07's remaining admission/load work
+and P0 release gates stay open. No financial, dataset or training semantic version changes.

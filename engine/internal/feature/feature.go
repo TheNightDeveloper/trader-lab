@@ -5,6 +5,7 @@
 package feature
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"math"
@@ -149,6 +150,14 @@ type Sample struct {
 // Samples builds rows for bars opened in [from, to) whose label is ready at asOf.
 // Rows with an unready label are left out: nothing unready enters training.
 func Samples(names []string, h int, bars []data.Bar, from, to, asOf time.Time) ([]Sample, error) {
+	return SamplesContext(context.Background(), names, h, bars, from, to, asOf)
+}
+
+// SamplesContext cooperatively stops long training passes without changing arithmetic.
+func SamplesContext(ctx context.Context, names []string, h int, bars []data.Bar, from, to, asOf time.Time) ([]Sample, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	if err := Check(names); err != nil {
 		return nil, err
 	}
@@ -158,6 +167,11 @@ func Samples(names []string, h int, bars []data.Bar, from, to, asOf time.Time) (
 	var out []Sample
 	lookback := Lookback(names)
 	for i := lookback - 1; i < len(bars)-h; i++ {
+		if i%256 == 0 {
+			if err := ctx.Err(); err != nil {
+				return nil, err
+			}
+		}
 		b := bars[i]
 		if b.OpenTime.Before(from) || !b.OpenTime.Before(to) {
 			continue
@@ -180,12 +194,28 @@ func Samples(names []string, h int, bars []data.Bar, from, to, asOf time.Time) (
 		x, _ := Row(names, bars[:i+1])
 		out = append(out, Sample{At: b.OpenTime, AvailableAt: available, ReadyAt: ready, X: x, Y: closeF(end)/closeF(b) - 1})
 	}
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	return out, nil
 }
 
 // CheckAsOf fails when any sample (features or label) was not available at asOf.
 func CheckAsOf(samples []Sample, asOf time.Time) error {
-	for _, s := range samples {
+	return CheckAsOfContext(context.Background(), samples, asOf)
+}
+
+// CheckAsOfContext cooperatively stops long training passes without changing arithmetic.
+func CheckAsOfContext(ctx context.Context, samples []Sample, asOf time.Time) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	for i, s := range samples {
+		if i%256 == 0 {
+			if err := ctx.Err(); err != nil {
+				return err
+			}
+		}
 		if s.AvailableAt.After(asOf) || s.ReadyAt.After(asOf) {
 			return fmt.Errorf("%w: row at %s has features available at %s and label ready at %s (as-of %s)", ErrLookAhead,
 				s.At.Format(time.RFC3339), s.AvailableAt.Format(time.RFC3339), s.ReadyAt.Format(time.RFC3339), asOf.Format(time.RFC3339))
@@ -204,7 +234,12 @@ type Scaler struct {
 // FitScaler fits on samples, all of which must have been available at asOf.
 // Fitting on rows from after the window (e.g. all history) is an error.
 func FitScaler(samples []Sample, asOf time.Time) (Scaler, error) {
-	if err := CheckAsOf(samples, asOf); err != nil {
+	return FitScalerContext(context.Background(), samples, asOf)
+}
+
+// FitScalerContext cooperatively stops long training passes without changing arithmetic.
+func FitScalerContext(ctx context.Context, samples []Sample, asOf time.Time) (Scaler, error) {
+	if err := CheckAsOfContext(ctx, samples, asOf); err != nil {
 		return Scaler{}, err
 	}
 	if len(samples) == 0 {
@@ -217,6 +252,11 @@ func FitScaler(samples []Sample, asOf time.Time) (Scaler, error) {
 	s := Scaler{Mean: make([]float64, k), Std: make([]float64, k)}
 	n := float64(len(samples))
 	for i, r := range samples {
+		if i%256 == 0 {
+			if err := ctx.Err(); err != nil {
+				return Scaler{}, err
+			}
+		}
 		if len(r.X) != k {
 			return Scaler{}, fmt.Errorf("feature: row %d has %d columns, want %d", i, len(r.X), k)
 		}
@@ -227,7 +267,12 @@ func FitScaler(samples []Sample, asOf time.Time) (Scaler, error) {
 			s.Mean[j] += v / n
 		}
 	}
-	for _, r := range samples {
+	for i, r := range samples {
+		if i%256 == 0 {
+			if err := ctx.Err(); err != nil {
+				return Scaler{}, err
+			}
+		}
 		for j, v := range r.X {
 			d := v - s.Mean[j]
 			s.Std[j] += d * d / n
@@ -241,6 +286,9 @@ func FitScaler(samples []Sample, asOf time.Time) (Scaler, error) {
 		if s.Std[j] == 0 {
 			s.Std[j] = 1 // a constant feature carries no information; keep it at 0
 		}
+	}
+	if err := ctx.Err(); err != nil {
+		return Scaler{}, err
 	}
 	return s, nil
 }

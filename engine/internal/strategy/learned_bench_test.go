@@ -1,6 +1,7 @@
 package strategy_test
 
 import (
+	"context"
 	"testing"
 
 	"tradinglab/engine/internal/data"
@@ -24,7 +25,7 @@ func BenchmarkLearnedSteadyTarget(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
-	a, err := train.Fit(recipe, rows, t0, asOf, asOf, train.Meta{})
+	a, err := train.Fit(context.Background(), recipe, rows, t0, asOf, asOf, train.Meta{})
 	if err != nil {
 		b.Fatal(err)
 	}

@@ -18,6 +18,11 @@ import (
 )
 
 var ErrTooFew = errors.New("train: too few samples")
+var ErrLimit = errors.New("train: input exceeds fit limits")
+
+// Bound materialization/retained models before allocations, independently of timeframe.
+const MaxSamples = data.MaxRawBars
+const MaxSteps = 12
 
 // Meta is recorded in the artifact; it does not change the fit.
 type Meta struct {
@@ -32,11 +37,17 @@ func MinSamples(features int) int { return max(30, 10*features) }
 
 // Fit trains r on samples, every one of which must have been available (features
 // and label) at asOf; otherwise it fails with feature.ErrLookAhead.
-func Fit(r model.Recipe, samples []feature.Sample, from, to, asOf time.Time, meta Meta) (model.Artifact, error) {
+func Fit(ctx context.Context, r model.Recipe, samples []feature.Sample, from, to, asOf time.Time, meta Meta) (model.Artifact, error) {
+	if err := ctx.Err(); err != nil {
+		return model.Artifact{}, err
+	}
+	if len(samples) > MaxSamples {
+		return model.Artifact{}, ErrLimit
+	}
 	if err := r.Validate(); err != nil {
 		return model.Artifact{}, err
 	}
-	if err := feature.CheckAsOf(samples, asOf); err != nil {
+	if err := feature.CheckAsOfContext(ctx, samples, asOf); err != nil {
 		return model.Artifact{}, err
 	}
 	if n := len(samples); n < MinSamples(len(r.Features)) {
@@ -49,6 +60,11 @@ func Fit(r model.Recipe, samples []feature.Sample, from, to, asOf time.Time, met
 		return model.Artifact{}, errors.New("train: empty or reversed window")
 	}
 	for i, s := range samples {
+		if i%256 == 0 {
+			if err := ctx.Err(); err != nil {
+				return model.Artifact{}, err
+			}
+		}
 		if s.At.Before(from) || !s.At.Before(to) {
 			return model.Artifact{}, fmt.Errorf("train: sample %d is outside the training window", i)
 		}
@@ -56,12 +72,17 @@ func Fit(r model.Recipe, samples []feature.Sample, from, to, asOf time.Time, met
 			return model.Artifact{}, fmt.Errorf("train: sample %d has invalid dimensions or label", i)
 		}
 	}
-	sc, err := feature.FitScaler(samples, asOf)
+	sc, err := feature.FitScalerContext(ctx, samples, asOf)
 	if err != nil {
 		return model.Artifact{}, err
 	}
 	z := make([][]float64, len(samples))
 	for i, s := range samples {
+		if i%256 == 0 {
+			if err := ctx.Err(); err != nil {
+				return model.Artifact{}, err
+			}
+		}
 		z[i] = sc.Apply(s.X)
 	}
 	a := model.Artifact{
@@ -72,32 +93,54 @@ func Fit(r model.Recipe, samples []feature.Sample, from, to, asOf time.Time, met
 	}
 	switch r.Model {
 	case "ridge":
-		a.Weights, a.Intercept, err = ridge(z, samples, r.Alpha)
+		a.Weights, a.Intercept, err = ridge(ctx, z, samples, r.Alpha)
 	case "logistic":
-		a.Weights, a.Intercept, err = logistic(z, samples, r.Alpha)
+		a.Weights, a.Intercept, err = logistic(ctx, z, samples, r.Alpha)
 	}
 	if err != nil {
 		return model.Artifact{}, err
 	}
-	a.TrainError = trainError(a, samples)
+	a.TrainError, err = trainError(ctx, a, samples)
+	if err != nil {
+		return model.Artifact{}, err
+	}
+	if err := ctx.Err(); err != nil {
+		return model.Artifact{}, err
+	}
 	if err := a.Validate(); err != nil {
 		return model.Artifact{}, err
 	}
 	a.Seal()
+	if err := ctx.Err(); err != nil {
+		return model.Artifact{}, err
+	}
 	return a, nil
 }
 
 // ridge solves (ZᵀZ + αn·I) w = Zᵀ(y − ȳ); the intercept ȳ is not penalized
 // (Z is centered by the scaler).
-func ridge(z [][]float64, s []feature.Sample, alpha float64) ([]float64, float64, error) {
+func ridge(ctx context.Context, z [][]float64, s []feature.Sample, alpha float64) ([]float64, float64, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, 0, err
+	}
 	n, k := len(z), len(z[0])
 	var ybar float64
-	for _, r := range s {
+	for i, r := range s {
+		if i%256 == 0 {
+			if err := ctx.Err(); err != nil {
+				return nil, 0, err
+			}
+		}
 		ybar += r.Y / float64(n)
 	}
 	A := mat.NewSymDense(k, nil)
 	b := mat.NewVecDense(k, nil)
 	for i, row := range z {
+		if i%256 == 0 {
+			if err := ctx.Err(); err != nil {
+				return nil, 0, err
+			}
+		}
 		for p := range k {
 			b.SetVec(p, b.AtVec(p)+row[p]*(s[i].Y-ybar))
 			for q := p; q < k; q++ {
@@ -113,7 +156,10 @@ func ridge(z [][]float64, s []feature.Sample, alpha float64) ([]float64, float64
 }
 
 // logistic fits P(y > 0) with L2 by Newton's method (IRLS), at most 50 steps.
-func logistic(z [][]float64, s []feature.Sample, alpha float64) ([]float64, float64, error) {
+func logistic(ctx context.Context, z [][]float64, s []feature.Sample, alpha float64) ([]float64, float64, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, 0, err
+	}
 	n, k := len(z), len(z[0])
 	w := make([]float64, k+1) // [0] intercept
 	x := func(i, p int) float64 {
@@ -123,9 +169,17 @@ func logistic(z [][]float64, s []feature.Sample, alpha float64) ([]float64, floa
 		return z[i][p-1]
 	}
 	for range 50 {
+		if err := ctx.Err(); err != nil {
+			return nil, 0, err
+		}
 		H := mat.NewSymDense(k+1, nil)
 		g := mat.NewVecDense(k+1, nil)
 		for i := range n {
+			if i%256 == 0 {
+				if err := ctx.Err(); err != nil {
+					return nil, 0, err
+				}
+			}
 			v := w[0]
 			for p := 1; p <= k; p++ {
 				v += w[p] * z[i][p-1]
@@ -176,9 +230,14 @@ func solve(A *mat.SymDense, b *mat.VecDense) ([]float64, error) {
 	return x.RawVector().Data, nil
 }
 
-func trainError(a model.Artifact, s []feature.Sample) float64 {
+func trainError(ctx context.Context, a model.Artifact, s []feature.Sample) (float64, error) {
 	var sum float64
-	for _, r := range s {
+	for i, r := range s {
+		if i%256 == 0 {
+			if err := ctx.Err(); err != nil {
+				return 0, err
+			}
+		}
 		p := a.Predict(r.X)
 		if a.Recipe.Model == "logistic" {
 			p = min(max(p, 1e-12), 1-1e-12)
@@ -192,9 +251,9 @@ func trainError(a model.Artifact, s []feature.Sample) float64 {
 		sum += (p - r.Y) * (p - r.Y)
 	}
 	if a.Recipe.Model == "logistic" {
-		return sum / float64(len(s))
+		return sum / float64(len(s)), nil
 	}
-	return math.Sqrt(sum / float64(len(s)))
+	return math.Sqrt(sum / float64(len(s))), nil
 }
 
 // Step is one retraining point of a walk-forward: train on feature bars opened in
@@ -207,6 +266,19 @@ type Step struct {
 // pooled in sorted order. A step whose window has no ready labels fails: there is
 // no "train once on everything".
 func WalkForward(ctx context.Context, r model.Recipe, bars map[string][]data.Bar, steps []Step, meta Meta) ([]model.Artifact, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if len(steps) > MaxSteps {
+		return nil, ErrLimit
+	}
+	count := 0
+	for _, bs := range bars {
+		if len(bs) > MaxSamples-count {
+			return nil, ErrLimit
+		}
+		count += len(bs)
+	}
 	syms := make([]string, 0, len(bars))
 	for s := range bars {
 		syms = append(syms, s)
@@ -222,13 +294,13 @@ func WalkForward(ctx context.Context, r model.Recipe, bars map[string][]data.Bar
 		}
 		var samples []feature.Sample
 		for _, s := range syms {
-			ss, err := feature.Samples(r.Features, r.Horizon, bars[s], st.From, st.To, st.AsOf)
+			ss, err := feature.SamplesContext(ctx, r.Features, r.Horizon, bars[s], st.From, st.To, st.AsOf)
 			if err != nil {
 				return nil, err
 			}
 			samples = append(samples, ss...)
 		}
-		a, err := Fit(r, samples, st.From, st.To, st.AsOf, meta)
+		a, err := Fit(ctx, r, samples, st.From, st.To, st.AsOf, meta)
 		if err != nil {
 			return nil, fmt.Errorf("step %d: %w", i+1, err)
 		}

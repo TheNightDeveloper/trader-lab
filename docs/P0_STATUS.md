@@ -385,6 +385,40 @@ lifecycle state. Do not mix old writer binaries with the new service. Preserve a
 backup and revision history; dropping migration 00007 loses the optimistic decision history.
 No financial record, simulator/evaluation/training contract or dataset snapshot is rewritten.
 
+## F07 training cancellation and bounded fitting (2026-11-03)
+
+Fit takes context explicitly; WalkForward passes it into sample preparation, readiness,
+scaler fitting, standardized-row materialization, ridge/logistic accumulation and loss.
+Row passes cooperate at least every 256 rows; logistic also checks each Newton iteration.
+Errors/cancellation discard partial outputs. Existing non-context feature helpers remain
+compatible wrappers. Completed fits retain their original operation order, hashes and
+causal-features/v1 contract; both reference model IDs were captured before the edit and match.
+
+Fit rejects >1,000,000 samples before scaling/standardization allocation. WalkForward checks
+combined input bars and <=12 steps before sample/model allocations; no truncated input is
+accepted. These caps complement raw-data limits, not replace process-wide byte admission.
+
+From training through walk evaluation and final freeze, the cycle uses a conservative wall
+deadline = registered research-slot time / maximum research slots. Waiting/IO also consume
+this deadline, so it can expire with recorded active work below the nominal budget. Usage
+continues to describe summed active slot wall time, not measured OS CPU time, and now includes
+final fits and cancelled training. Parent cancellation remains cancellation; budget expiry
+retains errBudget. Existing failed-cycle finalization cancels unfinished candidates and
+preserves the serving pair. Already saved unused baseline artifacts are not promoted.
+
+Verified: **311 Go tests/subtests, 0 failed/skipped, 22 packages, database mandatory**.
+The pre-fix within-step cancellation regression failed as expected; fixed tests cover
+sample/scaler/solver cancellation, preflight rejection, slot release, deadline causes and
+unchanged reference artifacts. All 11 simulator goldens remain unchanged.
+Evidence: artifacts/p0-training-go-tests.jsonl (git-ignored).
+The existing Flutter suite passed **54 tests**; Dart analysis, Go lint/vet and engine build
+passed. Flutter evidence: artifacts/p0-training-flutter.txt. No frontend source changed.
+
+No migration, wire/dependency change or new widget test. F07/P0 remain open: aggregate active
+memory, OS CPU budgets and load acceptance are not established. Context checks cannot
+interrupt allocation/GC or the small feature-bounded Gonum factorization. No local race,
+hosted workflow or real-browser acceptance was executed in this batch.
+
 ## Remaining P0 work / next batch
 
 The analytics/learning review after FIX-02 fixed dependency readiness, fit/model validation,
@@ -394,8 +428,8 @@ zero skip with DB mandatory, 48 existing Flutter tests, lint/vet, Dart analysis 
 [P0_LEARNING_REVIEW_FA.md](P0_LEARNING_REVIEW_FA.md) for evidence, measured scope and compatibility.
 That historical review preceded FIX-04/FIX-05 above. These batches do not complete all of P0.
 
-1. Finish F07 process-wide CPU/byte budgets and fitting cancellation. F13 report provenance
-   and F15 synchronized version/model lifecycle scopes and evidence are recorded above.
+1. Finish F07 process-wide CPU/byte budgets and load acceptance. Cooperative fitting
+   cancellation and conservative slot-time deadlines are implemented in the scope above.
 2. Finish F10 with search-backed paginated pickers. Current pickers fetch all pages into
    memory; a shortcut comment records the limit. Network supervision, accounting overflow,
    economic label/fill alignment and remaining stress cases also remain open.

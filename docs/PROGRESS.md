@@ -2,6 +2,26 @@
 
 Update at the end of every session.
 
+## P0 F07 cooperative training cancellation and fit bounds (2026-11-03)
+- Fit now requires context. Walk-forward propagates it through sample preparation, readiness
+  checks, both scaler passes, standardization, ridge/logistic accumulation and training error.
+  Long row passes check every 256 rows; logistic also checks between Newton iterations.
+  Cancellation returns no partial artifact/model set. Existing feature APIs remain wrappers.
+- Preflight rejects more than 1,000,000 samples/combined source bars or 12 walk-forward steps
+  before materializing extra matrices/models. Rejection never truncates or scores a prefix.
+- Learning reserves a conservative training-through-freeze deadline: registered slot-time
+  budget / maximum research slots. It covers waiting/IO, walk evaluation and final fits too;
+  final fitting and cancelled training now contribute to recorded usage. Exhaustion follows
+  existing failed-cycle/candidate cleanup and never changes the serving version/model.
+- Before-fix cancellation regression reproduced. Full DB-mandatory Go run: **311 passed,
+  0 failed/skipped, 22 packages**; simulator goldens unchanged. Completed ridge/logistic fit
+  IDs match the exact pre-change references; numerical/training versions remain unchanged.
+- Existing Flutter suite: **54 passed**; Dart analysis, Go lint/vet and executable build
+  passed. Evidence: artifacts/p0-training-go-tests.jsonl and p0-training-flutter.txt.
+- F07 remains partial: process-wide byte admission/RSS and OS CPU guarantees are not proven.
+  Cooperative checks do not interrupt allocation/GC or the small bounded Gonum factorization.
+  Next: shared memory budgets, then remaining F10 and P0 accounting/network/label/UX gates.
+
 ## P0 F15 atomic version/model lifecycle (2026-11-03)
 - F13 was committed as fe7d078 before this batch. Library moves, learning approval and
   rollback now share one algorithm lock, expected lifecycle revision and transaction for

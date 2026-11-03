@@ -354,7 +354,7 @@ func (c Config) sim() sim.Config {
 // in range was available when the cycle read it.
 func dataEnd(now time.Time, tf time.Duration) time.Time { return now.Add(-tf).Truncate(tf) }
 
-func (l *Loop) run(ctx context.Context, c *cycle) error {
+func (l *Loop) run(ctx context.Context, c *cycle) (err error) {
 	cfg := c.doc.Config
 	if err := cfg.researchError(); err != nil {
 		return err
@@ -443,6 +443,14 @@ func (l *Loop) run(ctx context.Context, c *cycle) error {
 		return err
 	}
 
+	// Reserve the worst-case slot time through walk-forward and both final fits.
+	ctx, cancelTraining := trainingDeadline(ctx, time.Duration(cfg.CPUMinutes)*time.Minute, l.Limiter.Size())
+	defer cancelTraining()
+	defer func() {
+		if err != nil && errors.Is(context.Cause(ctx), errBudget) {
+			err = errors.Join(errBudget, err)
+		}
+	}()
 	// train: every contender retrained per fold on its own past.
 	if err := l.step(ctx, c, Train); err != nil {
 		return err
@@ -458,6 +466,13 @@ func (l *Loop) run(ctx context.Context, c *cycle) error {
 	}
 	budget := int64(cfg.CPUMinutes) * 60_000
 	var used atomic.Int64
+	var finalStarted time.Time
+	defer func() {
+		c.doc.Usage.CPUMillis = used.Load()
+		if !finalStarted.IsZero() {
+			c.doc.Usage.CPUMillis += time.Since(finalStarted).Milliseconds()
+		}
+	}()
 	models := make([][]model.Artifact, len(recipes))
 	errs := make([]error, len(recipes))
 	l.parallel(ctx, len(recipes), func(i int) {
@@ -555,6 +570,7 @@ func (l *Loop) run(ctx context.Context, c *cycle) error {
 		return err
 	}
 	defer l.Limiter.Release()
+	finalStarted = time.Now()
 	one := []train.Step{{From: from, To: to, AsOf: to}}
 	if !champ.Active {
 		ms, err := train.WalkForward(ctx, champ.Recipe, bars, one, meta)
@@ -596,10 +612,17 @@ func (l *Loop) run(ctx context.Context, c *cycle) error {
 	c.doc.TradeStart = &tradeStart
 	c.doc.Steps[ForwardTest] = fmt.Sprintf("0 / %d d", cfg.Gate.ForwardDays)
 	c.doc.Gate = gate(cfg.Gate, &c.doc, false)
+	c.doc.Usage.CPUMillis = used.Load() + time.Since(finalStarted).Milliseconds()
 	return l.step(ctx, c, ForwardTest)
 }
 
 var errBudget = errors.New("loop: CPU budget exhausted")
+
+// Count waiting/IO conservatively too: wall time times maximum slots bounds slot work.
+// This is not measured OS CPU time or a process-wide memory guarantee.
+func trainingDeadline(ctx context.Context, budget time.Duration, slots int) (context.Context, context.CancelFunc) {
+	return context.WithTimeoutCause(ctx, budget/time.Duration(max(1, slots)), errBudget)
+}
 
 func (l *Loop) logErr(err error) { slog.Error("learning loop", "err", err) }
 
