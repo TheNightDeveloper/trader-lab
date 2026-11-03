@@ -399,3 +399,22 @@ Consequence: waiting can exhaust the deadline before recorded active usage reach
 No hard preemption of allocation/GC or the feature-bounded linear solve is claimed. This
 does not certify a process-wide byte/RSS or OS CPU limit; F07's remaining admission/load work
 and P0 release gates stay open. No financial, dataset or training semantic version changes.
+
+## ADR-054 Share conservative active-memory admission (P0 F07, 2026-11-03)
+Context: input caps and CPU slots alone allowed concurrent report/search/training workspaces
+to multiply. A cycle retains input bars between CPU-admitted stages, so waiting for memory
+while holding slots could deadlock against that cycle's later training admission.
+Decision: main constructs one configurable jobs.Memory pool (1024 MiB default, 16..65536).
+Use checked range-based estimates before raw reconstruction: 1 MiB base + 1024 bytes/raw
+minute + 8192 bytes/output candle times workers plus two retained runs. Reservations reject
+atomically, never wait, and return an idempotent release. Apply at service boundaries through
+report persistence/reproduction, search attempts and winner reports, learning through freeze
+and forward, and chart/decision projection. Calculator projection deliberately retains an
+additional outer reservation. Limit chart response expansion to eight indicators.
+Consequence: resource pressure can fail a recorded attempt/cycle, with no partial report or
+serving-pair change; forward polls remain retryable. Report/chart RPCs use ResourceExhausted.
+Cached inputs are conservatively counted for each job, while cache retention has separate
+caps. Large inputs may require smaller ranges or an explicitly larger configured budget.
+Estimates do not enforce RSS/OS CPU, GC, archive decompression or outbound serialization;
+those paths and actual load measurements remain F07 work. No financial/training semantics,
+migration, wire change or new dependency is introduced. Full P0 remains open.

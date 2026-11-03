@@ -2,6 +2,25 @@
 
 Update at the end of every session.
 
+## P0 F07 shared active-memory admission (2026-11-03)
+- One process-owned budget now serves report Create/CreateWithID/Reproduce/Recalculate,
+  queued search attempts and winner reports, learning collection-through-freeze/forward,
+  and chart/decision handlers. Metadata preflight reserves before reconstructing datasets,
+  including cached inputs; release spans persistence or handler projection where applicable.
+- Reservations reject atomically without waiting while holding CPU slots/retained cycle
+  data. Exhaustion returns ResourceExhausted for report/chart RPCs; search failures remain
+  recorded, collection fails without moving the serving pair, and forward polls can retry.
+- research_memory_mib defaults to 1024 (valid 16..65536). The conservative estimate includes
+  raw reconstruction, concurrent working sets and retained results. Chart requests allow
+  at most eight indicators. No truncation, migration, numerical or training version change.
+- Verified: **319 Go tests/subtests, zero failed/skipped, 22 packages, DB mandatory**;
+  **54 existing Flutter tests**, all 11 unchanged goldens, lint/vet, analyzer, engine build,
+  planted depguard rejection and two Python CI-summary tests. Evidence:
+  artifacts/p0-memory-go-tests.jsonl and artifacts/p0-memory-flutter.txt.
+- F07/P0 remain open: estimates are not measured RSS/OS CPU quotas. Retained caches keep
+  their separate caps; archive import/decompression and process-wide load acceptance need
+  the next pass. Hosted CI/race and real-browser acceptance remain unverified.
+
 ## P0 F07 cooperative training cancellation and fit bounds (2026-11-03)
 - Fit now requires context. Walk-forward propagates it through sample preparation, readiness
   checks, both scaler passes, standardization, ridge/logistic accumulation and training error.

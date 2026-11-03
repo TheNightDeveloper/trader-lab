@@ -11,7 +11,6 @@ import (
 	"errors"
 	"fmt"
 	"maps"
-	"runtime"
 	"slices"
 	"strings"
 	"sync"
@@ -21,6 +20,7 @@ import (
 	"tradinglab/engine/internal/data"
 	"tradinglab/engine/internal/eval"
 	"tradinglab/engine/internal/instrument"
+	"tradinglab/engine/internal/jobs"
 	"tradinglab/engine/internal/metrics"
 	"tradinglab/engine/internal/money"
 	"tradinglab/engine/internal/sim"
@@ -42,7 +42,8 @@ type Service struct {
 	Store    *store.Store
 	Version  string // engine version recorded in every report
 	Build    eval.BuildIdentity
-	Parallel int // simulator runs at once per report; 0 = all CPUs
+	Parallel int          // simulator runs at once per report; 0 = all CPUs
+	Memory   *jobs.Memory // shared active-work budget; nil only for isolated callers
 	// Cache holds recently used dataset versions (nil: load every time).
 	Cache *DatasetCache
 }
@@ -144,6 +145,14 @@ func (s Service) bars(ctx context.Context, ids []string) (map[string][]data.Bar,
 
 // Create evaluates spec over its datasets and stores the report.
 func (s Service) Create(ctx context.Context, spec eval.Spec) (string, error) {
+	if err := s.ValidateResearch(ctx, spec.DatasetIDs); err != nil {
+		return "", err
+	}
+	release, err := s.ReserveWork(ctx, spec.DatasetIDs, s.parallelism())
+	if err != nil {
+		return "", err
+	}
+	defer release()
 	spec.EngineVersion = s.Version
 	ev, bars, err := s.evaluate(ctx, spec, Specs())
 	if err != nil {
@@ -163,6 +172,14 @@ func (s Service) CreateWithID(ctx context.Context, id string, spec eval.Spec) er
 	if ok, err := s.Store.ReportExists(ctx, id); err != nil || ok {
 		return err
 	}
+	if err := s.ValidateResearch(ctx, spec.DatasetIDs); err != nil {
+		return err
+	}
+	release, err := s.ReserveWork(ctx, spec.DatasetIDs, s.parallelism())
+	if err != nil {
+		return err
+	}
+	defer release()
 	spec.EngineVersion = s.Version
 	ev, bars, err := s.evaluate(ctx, spec, Specs())
 	if err != nil {
@@ -186,11 +203,7 @@ func (s Service) evaluate(ctx context.Context, spec eval.Spec, specs map[string]
 	if err != nil {
 		return nil, nil, err
 	}
-	parallel := s.Parallel
-	if parallel <= 0 {
-		parallel = runtime.NumCPU()
-	}
-	ev, err := eval.EvaluateWith(ctx, spec, bars, specs, parallel)
+	ev, err := eval.EvaluateWith(ctx, spec, bars, specs, s.parallelism())
 	if err != nil {
 		return nil, nil, err
 	}
@@ -217,6 +230,11 @@ func (s Service) Reproduce(ctx context.Context, id string) (bool, error) {
 	if err := s.ValidateResearch(ctx, spec.DatasetIDs); err != nil {
 		return false, err
 	}
+	release, err := s.ReserveWork(ctx, spec.DatasetIDs, s.parallelism())
+	if err != nil {
+		return false, err
+	}
+	defer release()
 	specs, err := recordedSpecs(spec.Provenance)
 	if err != nil {
 		return false, err
@@ -432,6 +450,11 @@ func (s Service) Recalculate(ctx context.Context, id string, cfg sim.Config, sca
 	if err := s.ValidateResearch(ctx, st.Spec.DatasetIDs); err != nil {
 		return eval.RunView{}, nil, err
 	}
+	release, err := s.ReserveWork(ctx, st.Spec.DatasetIDs, 1)
+	if err != nil {
+		return eval.RunView{}, nil, err
+	}
+	defer release()
 	ds, err := s.Decisions(ctx, id, RunMain)
 	if err != nil {
 		return eval.RunView{}, nil, err

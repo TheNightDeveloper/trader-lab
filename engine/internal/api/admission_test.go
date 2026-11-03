@@ -46,3 +46,10 @@ func TestReproduceWaitsForWholeResearchShareAndReleasesOnError(t *testing.T) {
 	require.Equal(t, connect.CodeNotFound, connect.CodeOf(err))
 	require.Zero(t, lim.InUse(), "an admitted database error releases every acquired slot")
 }
+
+func TestMemoryRejectionUsesResourceExhausted(t *testing.T) {
+	require.Equal(t, connect.CodeResourceExhausted, connect.CodeOf(reportErr(jobs.ErrMemory)))
+	h := Chart{}
+	_, err := h.GetChart(context.Background(), connect.NewRequest(&labv1.GetChartRequest{Indicators: make([]string, chartIndicatorsMax+1)}))
+	require.Equal(t, connect.CodeInvalidArgument, connect.CodeOf(err), "bound indicator expansion before loading any data")
+}

@@ -69,6 +69,8 @@ The engine reads `engine.json` from its working directory (`engine/engine.json` 
   "log_level": "info",
   "database_url": "postgres://lab:lab@127.0.0.1:5432/lab?sslmode=disable",
   "ingest_delay": "2s",
+  "research_share": 75,
+  "research_memory_mib": 1024,
   "live_symbols": ["BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT", "ETHBTC"]
 }
 ```
@@ -81,6 +83,8 @@ The engine reads `engine.json` from its working directory (`engine/engine.json` 
 | `log_level` | `debug`, `info`, `warn`, `error` |
 | `database_url` | PostgreSQL connection string |
 | `ingest_delay` | Added to a bar's close time to get when it became available |
+| `research_share` | Concurrent research slots as a percentage of CPU count (1..100); this is not an OS CPU quota |
+| `research_memory_mib` | Shared conservative active-work budget, default 1024 MiB, valid 16..65536; exhaustion rejects the job with a reason |
 | `live_symbols` | Pairs kept current from the REST mirror; `[]` turns live data off |
 
 ## 5. First use
@@ -141,6 +145,7 @@ cd engine && go test -run Golden ./...
 | Blank page or 404 at `/` | The web app is not built. Run `make web`, and check `web_dir` points at `app/build/web` |
 | Live status shows off or stale | `live_symbols` is empty, or the network is down. The status block in the sidebar shows the state |
 | `-race requires cgo` | Install gcc, or run `make test RACE=` |
+| Research memory budget exhausted | Retry after other work completes, shorten the dataset range, lower research parallelism, or deliberately increase `research_memory_mib` for the machine; the estimate is not an RSS cap |
 | `make: command not found` | Use the plain commands in sections 3 and 6 |
 | Generated code stale (CI) | Run `make gen` (needs `buf` and `sqlc`) and commit the result |
 

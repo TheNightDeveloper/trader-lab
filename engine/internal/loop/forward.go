@@ -8,6 +8,7 @@ import (
 	"tradinglab/engine/internal/data"
 	"tradinglab/engine/internal/eval"
 	"tradinglab/engine/internal/feature"
+	"tradinglab/engine/internal/jobs"
 	"tradinglab/engine/internal/metrics"
 	"tradinglab/engine/internal/model"
 	"tradinglab/engine/internal/report"
@@ -93,6 +94,17 @@ func (l *Loop) forward(ctx context.Context, c *cycle) error {
 	if int64(through.Sub(start.Add(-warm))/tf)*int64(len(cfg.Symbols)) > int64(cfg.MaxBars) {
 		return fmt.Errorf("%w: forward window exceeds bar budget", ErrConfig)
 	}
+	minutes := int(tf / time.Minute)
+	rows := (rawCount + minutes - 1) / minutes * len(cfg.Symbols)
+	bytes, err := jobs.WorkBytes(int64(rawCount)*int64(len(cfg.Symbols)), int64(rows), 1)
+	if err != nil {
+		return err
+	}
+	release, err := l.Memory.Reserve(ctx, bytes)
+	if err != nil {
+		return err
+	}
+	defer release()
 	bars := map[string][]data.Bar{}
 	for _, sym := range cfg.Symbols {
 		bs, err := data.Reader{Q: l.Store.Queries}.Bars(ctx, data.Query{Symbol: sym, Timeframe: cfg.Timeframe, From: start.Add(-warm), To: through, AsOf: now})

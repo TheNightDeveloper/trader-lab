@@ -292,6 +292,11 @@ func (s *Scheduler) evaluate(ctx context.Context, a db.Attempt) ([]metrics.Metri
 	if err := s.Reports.ValidateResearch(ctx, []string{a.DatasetID}); err != nil {
 		return nil, "", "", err
 	}
+	release, err := s.Reports.ReserveWork(ctx, []string{a.DatasetID}, 1)
+	if err != nil {
+		return nil, "", "", err
+	}
+	defer release()
 	def, err := s.definition(ctx, a.ExperimentID)
 	if err != nil {
 		return nil, "", "", err

@@ -20,9 +20,11 @@ type Config struct {
 	IngestDelay string `json:"ingest_delay"`
 	// LiveSymbols are kept current from the REST mirror; [] turns live data off.
 	LiveSymbols []string `json:"live_symbols"`
-	// ResearchShare is the percent of CPUs research may use (backtests, search);
-	// at least one core always stays free for control work.
+	// ResearchShare sets concurrent research slots as a percentage of CPU count;
+	// control work bypasses admission, but this is not an OS CPU quota.
 	ResearchShare int `json:"research_share"`
+	// ResearchMemoryMiB caps shared active-work estimates, independently of CPU slots.
+	ResearchMemoryMiB int `json:"research_memory_mib"`
 	// BackupDir receives a pg_dump every night after BackupHourUTC; the newest
 	// BackupKeep files are kept. Empty disables nightly backups.
 	BackupDir     string `json:"backup_dir"`
@@ -33,11 +35,12 @@ type Config struct {
 func defaultConfig() Config {
 	return Config{
 		Listen: "127.0.0.1:8080", WebDir: "../app/build/web", Workers: 4, LogLevel: "info",
-		DatabaseURL:   "postgres://lab:lab@127.0.0.1:5432/lab?sslmode=disable",
-		IngestDelay:   "2s",
-		LiveSymbols:   []string{"BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT", "ETHBTC"},
-		ResearchShare: 75,
-		BackupDir:     "../backups", BackupHourUTC: 2, BackupKeep: 14,
+		DatabaseURL:       "postgres://lab:lab@127.0.0.1:5432/lab?sslmode=disable",
+		IngestDelay:       "2s",
+		LiveSymbols:       []string{"BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT", "ETHBTC"},
+		ResearchShare:     75,
+		ResearchMemoryMiB: 1024,
+		BackupDir:         "../backups", BackupHourUTC: 2, BackupKeep: 14,
 	}
 }
 
@@ -74,6 +77,9 @@ func (c Config) validate() error {
 	}
 	if c.ResearchShare < 1 || c.ResearchShare > 100 {
 		return fmt.Errorf("research_share must be 1..100 (percent), got %d", c.ResearchShare)
+	}
+	if c.ResearchMemoryMiB < 16 || c.ResearchMemoryMiB > 65536 {
+		return fmt.Errorf("research_memory_mib must be 16..65536, got %d", c.ResearchMemoryMiB)
 	}
 	if c.Workers < 1 {
 		return fmt.Errorf("workers must be >= 1, got %d", c.Workers)

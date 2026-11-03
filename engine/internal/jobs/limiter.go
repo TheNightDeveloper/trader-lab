@@ -1,6 +1,5 @@
-// Package jobs limits research work. Control work (API, health, live ingestion)
-// runs outside the limiter, so it is never starved: research can occupy at most
-// its share of the CPUs.
+// Package jobs limits admitted research work. Control work (API, health, ingestion)
+// does not wait for research admission; OS CPU scheduling is not a hard quota.
 package jobs
 
 import (
@@ -18,7 +17,7 @@ type Limiter struct {
 }
 
 // ResearchSlots is the research share of cpus (percent, 1..100), at least 1 and,
-// with more than one CPU, at most cpus-1 so control work always has a core.
+// with more than one CPU, at most cpus-1. Slots are not exclusive OS cores.
 func ResearchSlots(cpus, percent int) int {
 	n := cpus * percent / 100
 	if cpus > 1 {

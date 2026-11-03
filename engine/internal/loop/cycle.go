@@ -133,6 +133,7 @@ type Loop struct {
 	Store   *store.Store
 	Clock   clock.Clock
 	Limiter *jobs.Limiter
+	Memory  *jobs.Memory  // one reservation spans collection through freeze
 	Poll    time.Duration // scheduler tick; default 1 minute
 
 	base    context.Context
@@ -377,6 +378,17 @@ func (l *Loop) run(ctx context.Context, c *cycle) (err error) {
 	if rawCount > data.MaxRawBars/len(cfg.Symbols) || int64(rawCount)*int64(time.Minute)*int64(len(cfg.Symbols))/int64(tf) > int64(cfg.MaxBars) {
 		return l.finish(c, Skipped, "پرش: بازهٔ داده بیش از بودجهٔ کندل خام یا آموزش است؛ بازه را کوتاه‌تر کنید.")
 	}
+	minutes := int(tf / time.Minute)
+	rows := (rawCount + minutes - 1) / minutes * len(cfg.Symbols)
+	bytes, err := jobs.WorkBytes(int64(rawCount)*int64(len(cfg.Symbols)), int64(rows), int64(min(cfg.MaxCandidates+1, l.Limiter.Size())))
+	if err != nil {
+		return err
+	}
+	release, err := l.Memory.Reserve(ctx, bytes)
+	if err != nil {
+		return err
+	}
+	defer release()
 	consumed, err := l.Store.ConsumedUntil(ctx, cfg.Algorithm)
 	if err != nil {
 		return err

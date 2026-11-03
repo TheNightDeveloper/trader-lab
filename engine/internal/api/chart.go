@@ -14,6 +14,7 @@ import (
 	"tradinglab/engine/internal/data"
 	labv1 "tradinglab/engine/internal/gen/lab/v1"
 	"tradinglab/engine/internal/instrument"
+	"tradinglab/engine/internal/jobs"
 	"tradinglab/engine/internal/money"
 	"tradinglab/engine/internal/report"
 	"tradinglab/engine/internal/sim"
@@ -27,12 +28,17 @@ type Chart struct {
 }
 
 const (
-	chartBarsDefault = 2000
-	chartBarsMax     = 10_000
+	chartBarsDefault   = 2000
+	chartBarsMax       = 10_000
+	chartIndicatorsMax = 8
 )
 
 func (h *Chart) GetChart(ctx context.Context, req *connect.Request[labv1.GetChartRequest]) (*connect.Response[labv1.GetChartResponse], error) {
 	m := req.Msg
+	// Bound indicator response expansion independently of the visible candle count.
+	if len(m.GetIndicators()) > chartIndicatorsMax {
+		return nil, invalid("حداکثر ۸ اندیکاتور در هر درخواست نمودار مجاز است")
+	}
 	limit := int(m.GetMaxBars())
 	if limit <= 0 {
 		limit = chartBarsDefault
@@ -48,6 +54,11 @@ func (h *Chart) GetChart(ctx context.Context, req *connect.Request[labv1.GetChar
 		if err != nil {
 			return nil, reportErr(err)
 		}
+		release, err := h.Svc.ReserveWork(ctx, st.Spec.DatasetIDs, 1)
+		if err != nil {
+			return nil, reportErr(err)
+		}
+		defer release()
 		all, tf, err := h.Svc.Bars(ctx, st.Spec.DatasetIDs)
 		if err != nil {
 			return nil, err
@@ -82,6 +93,19 @@ func (h *Chart) GetChart(ctx context.Context, req *connect.Request[labv1.GetChar
 		now := h.Clock.Now()
 		// Enough history for indicator warm-up before the shown window.
 		from := now.Add(-time.Duration(limit+1000) * tf.Duration())
+		raw, err := data.RawBarCount(tf, from, now)
+		if err != nil {
+			return nil, reportErr(err)
+		}
+		bytes, err := jobs.WorkBytes(int64(raw), int64(limit+1000), 1)
+		if err != nil {
+			return nil, reportErr(err)
+		}
+		release, err := h.Svc.Memory.Reserve(ctx, bytes)
+		if err != nil {
+			return nil, reportErr(err)
+		}
+		defer release()
 		if bars, err = (data.Reader{Q: h.Svc.Store.Queries}).Bars(ctx, data.Query{Symbol: sym, Timeframe: tf, From: from, To: now, AsOf: now}); err != nil {
 			return nil, err
 		}
@@ -150,6 +174,11 @@ func (h *Chart) GetDecision(ctx context.Context, req *connect.Request[labv1.GetD
 	if err != nil {
 		return nil, reportErr(err)
 	}
+	release, err := h.Svc.ReserveWork(ctx, st.Spec.DatasetIDs, 1)
+	if err != nil {
+		return nil, reportErr(err)
+	}
+	defer release()
 	ds, err := h.Svc.Store.AllDecisions(ctx, db.AllDecisionsParams{ReportID: m.GetReportId(), Run: report.RunMain})
 	if err != nil {
 		return nil, err

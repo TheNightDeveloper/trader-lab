@@ -76,7 +76,8 @@ func run() error {
 		return err
 	}
 	limiter := jobs.NewLimiter(jobs.ResearchSlots(runtime.NumCPU(), cfg.ResearchShare))
-	slog.Info("research share", "slots", limiter.Size(), "cpus", runtime.NumCPU())
+	memory := jobs.NewMemory(int64(cfg.ResearchMemoryMiB) << 20)
+	slog.Info("research share", "slots", limiter.Size(), "cpus", runtime.NumCPU(), "active_memory_mib", cfg.ResearchMemoryMiB)
 
 	var live *data.Live
 	if len(cfg.LiveSymbols) > 0 {
@@ -106,7 +107,7 @@ func run() error {
 			return nil
 		},
 	}
-	reports := report.Service{Store: st, Version: version, Build: report.CurrentBuild(build), Parallel: limiter.Size(), Cache: report.NewDatasetCache(4)}
+	reports := report.Service{Store: st, Version: version, Build: report.CurrentBuild(build), Parallel: limiter.Size(), Memory: memory, Cache: report.NewDatasetCache(4)}
 	sched := &search.Scheduler{Store: st, Reports: reports, Limiter: limiter, Build: build}
 	go func() {
 		if err := sched.Run(ctx); err != nil {
@@ -116,7 +117,7 @@ func run() error {
 	if cfg.BackupDir != "" {
 		go (&backup.Nightly{URL: cfg.DatabaseURL, Dir: cfg.BackupDir, HourUTC: cfg.BackupHourUTC, Keep: cfg.BackupKeep, Clock: clock.Wall{}}).Run(ctx)
 	}
-	learning := &loop.Loop{Store: st, Clock: clock.Wall{}, Limiter: limiter}
+	learning := &loop.Loop{Store: st, Clock: clock.Wall{}, Limiter: limiter, Memory: memory}
 	go func() {
 		if err := learning.Run(ctx); err != nil {
 			slog.Error("learning loop stopped", "err", err)

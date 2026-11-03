@@ -52,6 +52,12 @@ func (h *Pnl) Recalculate(ctx context.Context, req *connect.Request[labv1.Recalc
 		size = v
 	}
 
+	// Keep an outer reservation while projecting the returned run into the RPC response.
+	release, err := h.Svc.ReserveWork(ctx, st.Spec.DatasetIDs, 1)
+	if err != nil {
+		return nil, reportErr(err)
+	}
+	defer release()
 	if h.Limiter != nil {
 		if err := h.Limiter.Acquire(ctx); err != nil {
 			return nil, err

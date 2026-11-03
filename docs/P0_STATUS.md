@@ -419,6 +419,45 @@ memory, OS CPU budgets and load acceptance are not established. Context checks c
 interrupt allocation/GC or the small feature-bounded Gonum factorization. No local race,
 hosted workflow or real-browser acceptance was executed in this batch.
 
+## F07 shared active-memory admission (2026-11-03)
+
+The executable creates one jobs.Memory budget and passes it to the report service and
+learning loop; search uses that same report service. research_memory_mib defaults to
+1024 MiB, validates 16..65536 and appears in startup logs. Isolated library/test callers
+may omit the pool; production construction always supplies it.
+
+Before loading raw inputs, range metadata estimates 1 MiB fixed cost + 1024 bytes per raw
+minute + 8192 bytes per projected output candle per (parallel workers + 2 retained runs).
+All arithmetic is checked against int64 overflow. The estimate intentionally counts cached
+inputs again for each owner. Reservations are atomic, reject immediately on exhaustion,
+and have idempotent cleanup. Immediate rejection avoids deadlocks when a retained training
+workspace needs CPU slots held by another request. The counter is not measured RSS.
+
+Guards cover Create/CreateWithID/Reproduce through persistence/canonical verification,
+Recalculate through replay, scheduler attempts (including cache hits) and winner reports,
+learning collection through freeze, each forward evaluation, and chart/decision handlers.
+The calculator handler additionally reserves while projecting the returned simulator run;
+its conservative outer/inner reservations can reject a request that a direct replay admits.
+Chart indicator expansion is capped at eight. Report/chart resource errors use the existing
+ResourceExhausted code. A rejected search attempt is durably failed with a resource reason;
+collection failure preserves the serving pair, while a forward poll remains retryable.
+No rejected job produces a partial evaluation or rewrites saved financial evidence.
+
+Verified: **319 Go tests/subtests passed, zero failed/skipped, 22 packages, DB mandatory**.
+Tests cover exact/shared capacity, contention, overflow, cancellation, cleanup after errors,
+cached/uncached report guards, idempotent completion and immutable figures, search terminal
+ownership, collection rejection and forward retry without a serving-pair change. All 11
+simulator goldens remain unchanged. **54 existing Flutter tests**, analyzer, Go lint/vet,
+engine build, planted depguard rejection and two Python CI-summary tests passed.
+Logs: artifacts/p0-memory-go-tests.jsonl and artifacts/p0-memory-flutter.txt (git-ignored).
+
+Compatibility: older configs inherit the default; previously runnable large inputs may now
+require a shorter range/lower parallelism or a deliberately increased machine budget. No
+financial/training/dataset semantic version, migration, dependency or wire schema changes.
+Retained dataset caches still have their separate count/bar caps, outside the active counter.
+Archive import/decompression and outbound serialization are not a hard process-wide memory
+boundary. RSS/OS CPU/load acceptance, local race, hosted CI and browser UX remain open.
+
 ## Remaining P0 work / next batch
 
 The analytics/learning review after FIX-02 fixed dependency readiness, fit/model validation,
@@ -428,8 +467,9 @@ zero skip with DB mandatory, 48 existing Flutter tests, lint/vet, Dart analysis 
 [P0_LEARNING_REVIEW_FA.md](P0_LEARNING_REVIEW_FA.md) for evidence, measured scope and compatibility.
 That historical review preceded FIX-04/FIX-05 above. These batches do not complete all of P0.
 
-1. Finish F07 process-wide CPU/byte budgets and load acceptance. Cooperative fitting
-   cancellation and conservative slot-time deadlines are implemented in the scope above.
+1. Finish F07 archive/import bounds and process-wide CPU/RSS/load acceptance. Shared
+   active-work byte admission, cooperative fitting cancellation and conservative slot-time
+   deadlines are implemented in the scopes above; they are not OS resource quotas.
 2. Finish F10 with search-backed paginated pickers. Current pickers fetch all pages into
    memory; a shortcut comment records the limit. Network supervision, accounting overflow,
    economic label/fill alignment and remaining stress cases also remain open.
