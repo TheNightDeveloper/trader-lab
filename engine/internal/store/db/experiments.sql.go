@@ -111,6 +111,24 @@ func (q *Queries) BeginFinalize(ctx context.Context) ([]string, error) {
 	return items, nil
 }
 
+const bumpLifecycleRevision = `-- name: BumpLifecycleRevision :execrows
+UPDATE algorithms SET lifecycle_revision = lifecycle_revision + 1
+WHERE id = $1 AND lifecycle_revision = $2
+`
+
+type BumpLifecycleRevisionParams struct {
+	ID               string
+	ExpectedRevision int64
+}
+
+func (q *Queries) BumpLifecycleRevision(ctx context.Context, arg BumpLifecycleRevisionParams) (int64, error) {
+	result, err := q.db.Exec(ctx, bumpLifecycleRevision, arg.ID, arg.ExpectedRevision)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const cacheHits = `-- name: CacheHits :one
 SELECT count(*) FILTER (WHERE cache = 'hit')::int AS hits, count(*) FILTER (WHERE cache <> '')::int AS looked
 FROM attempts WHERE experiment_id = $1
@@ -525,7 +543,7 @@ func (q *Queries) ListAlgorithmVersions(ctx context.Context, algorithmID string)
 }
 
 const listAlgorithms = `-- name: ListAlgorithms :many
-SELECT id, family, description, active_model FROM algorithms ORDER BY id
+SELECT id, family, description, active_model, lifecycle_revision FROM algorithms ORDER BY id
 `
 
 func (q *Queries) ListAlgorithms(ctx context.Context) ([]Algorithm, error) {
@@ -542,6 +560,7 @@ func (q *Queries) ListAlgorithms(ctx context.Context) ([]Algorithm, error) {
 			&i.Family,
 			&i.Description,
 			&i.ActiveModel,
+			&i.LifecycleRevision,
 		); err != nil {
 			return nil, err
 		}
@@ -732,6 +751,24 @@ func (q *Queries) ListStartedExperiments(ctx context.Context) ([]ListStartedExpe
 		return nil, err
 	}
 	return items, nil
+}
+
+const lockAlgorithm = `-- name: LockAlgorithm :one
+SELECT id, family, description, active_model, lifecycle_revision FROM algorithms WHERE id = $1 FOR UPDATE
+`
+
+// All lifecycle writers lock the algorithm before versions/cycles.
+func (q *Queries) LockAlgorithm(ctx context.Context, id string) (Algorithm, error) {
+	row := q.db.QueryRow(ctx, lockAlgorithm, id)
+	var i Algorithm
+	err := row.Scan(
+		&i.ID,
+		&i.Family,
+		&i.Description,
+		&i.ActiveModel,
+		&i.LifecycleRevision,
+	)
+	return i, err
 }
 
 const putRunCache = `-- name: PutRunCache :exec

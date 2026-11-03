@@ -78,6 +78,8 @@ type Doc struct {
 
 // Contender is the champion (active version) or the challenger (best candidate).
 type Contender struct {
+	// Revision pins the champion before training; nil identifies legacy evidence.
+	Revision  *int64       `json:"lifecycle_revision,omitempty"`
 	VersionID string       `json:"version_id,omitempty"` // champion
 	Seq       int          `json:"seq,omitempty"`        // challenger: candidate number
 	Change    string       `json:"change,omitempty"`
@@ -292,14 +294,12 @@ func (l *Loop) RunCycle(ctx context.Context, id int64) (err error) {
 // champion is the active version of the algorithm (else its newest usable
 // version) and, when it matches that version's recipe, the active model.
 func (l *Loop) champion(ctx context.Context, alg string) (Contender, error) {
-	a, err := l.Store.GetAlgorithm(ctx, alg)
-	if err != nil {
-		return Contender{}, fmt.Errorf("%w: algorithm %s", ErrNotFound, alg)
-	}
-	vs, err := l.Store.ListAlgorithmVersions(ctx, alg)
+	snapshot, err := experiment.Snapshot(ctx, l.Store, alg)
 	if err != nil {
 		return Contender{}, err
 	}
+	a := snapshot.Algorithm
+	vs := snapshot.Versions
 	var pick *db.AlgorithmVersion
 	for i, v := range vs {
 		if v.State == experiment.Active {
@@ -320,12 +320,9 @@ func (l *Loop) champion(ctx context.Context, alg string) (Contender, error) {
 	if def.Recipe == nil {
 		return Contender{}, fmt.Errorf("%w: %s is not a learning algorithm", ErrConfig, alg)
 	}
-	ch := Contender{VersionID: pick.ID, Recipe: *def.Recipe}
+	ch := Contender{VersionID: pick.ID, Recipe: *def.Recipe, Revision: &a.LifecycleRevision}
 	if a.ActiveModel.Valid && pick.State == experiment.Active {
-		m, err := l.artifact(ctx, a.ActiveModel.String)
-		if err != nil {
-			return Contender{}, err
-		}
+		m := *snapshot.Model
 		if m.RecipeHash == ch.Recipe.Hash() {
 			ch.ModelID, ch.Active = m.ID, true
 		}

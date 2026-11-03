@@ -323,6 +323,68 @@ Race was not run (CGO_ENABLED=0, no GCC); no hosted CI or real-browser acceptanc
 canonical row comparison adds reads/allocations; process-wide memory/CPU guarantees remain
 F07 work. Full P0 is still open; next is F15.
 
+## F15 atomic lifecycle decisions (2026-11-03)
+
+Library transitions, Approve and Rollback now use one shared lifecycle service in experiment.
+It locks the algorithm before its versions/cycle, checks the caller's expected revision,
+and commits the version/model pair, lifecycle/promotion audit, cycle closure and revision
+increment together. Errors roll everything back. Stopping the active version clears its
+model; activating a fixed strategy clears any previous model. Learning activation requires
+a sealed artifact whose algorithm and recipe match the target version. Retired versions
+cannot be reactivated through promotion or rollback. Version registration shares the lock
+for numbering/deduplication, without itself changing the serving-pair revision.
+
+Migration 00007 adds algorithms.lifecycle_revision, promotions.lifecycle_revision and a
+unique partial index allowing at most one active version per algorithm. It preserves legacy
+states/history and starts counters at zero; ambiguous legacy active versions cause migration
+failure rather than an automatic champion choice. Migration tests exercise both cases.
+Serving-pair readers in Library and Learning use a repeatable-read snapshot, including
+artifact identity validation, rather than combining independently read versions and models.
+
+The champion revision is fixed before training. Approval requires that revision still to
+match, even when a client refreshes its request token. Missing legacy champion revisions
+cannot authorize promotion. Old/stale recommendations remain readable and rejectable so
+the user can start a new cycle. Rollback checks both current pair and promotion revision,
+rejecting an intervening change even when the pair returned to its previous values (ABA).
+Its request pins the displayed algorithm ID, independent of another tab changing settings.
+
+Library/Approve/Rollback requests now require optional expected_revision to be explicitly
+present: missing and zero are distinct. Rollback additionally requires algorithm_id.
+Missing/stale tokens return FailedPrecondition with refresh guidance. Flutter captures the
+token of the confirmed view and refreshes after a rejected action. Learning activation is
+offered through cycle approval; the Library no longer offers model-less learning activation.
+The existing class-based UI and confirmations remain; no new widget tests were introduced.
+
+| Check | Observed result |
+|---|---|
+| Before fixes | stop retained a model; library activation bypassed the algorithm lock |
+| REQUIRE_DB=1 go test -count=1 -json ./... (Go-only final run) | **302 passed tests/subtests, 0 failed/skipped; 22 packages** |
+| Concurrent approve/stop/switch/rollback, stale tabs and ABA | one winner per revision; serving pairs remain consistent |
+| Promotion insert failure | pair, audit, revision and cycle changes roll back together |
+| Concurrent version allocation and serving reads | dedup/numbering serialized; model recipe matches the visible version |
+| Legacy/champion changes, foreign models and retired versions | activation rejected; stale recommendations remain rejectable |
+| Migration with one/two legacy active versions | valid state preserved / ambiguous state rejected without choosing a winner |
+| RPC missing/zero/stale token, rollback target vs config | enforced; explicit displayed algorithm used |
+| Flutter / analyzer | **54 passed**, including two codec unit tests; no issues |
+| Go lint / vet / executable build | passed |
+| Proto lint and Go/Dart/SQL regeneration | passed; 84 generated files byte-reproducible |
+| Simulator goldens | all 11 unchanged and passing |
+
+Evidence: artifacts/p0-lifecycle-go-tests.jsonl and artifacts/p0-lifecycle-flutter.txt
+(git-ignored). An earlier concurrent Go/Flutter/build run had 301 passes and one timeout in
+TestKillMidSearchResumesWithoutLossOrDuplicates; preserved as p0-lifecycle-go-tests-first.jsonl.
+The isolated test passed in 1.67 s and the later complete Go-only run passed. The timeout's
+cause is not established; no test threshold was weakened and no scheduler fix is claimed.
+Windows amd64, Go 1.26.4, local PostgreSQL, Flutter 3.47.4/Dart 3.13.3. No local race
+(CGO_ENABLED=0/no GCC), hosted CI or real-browser acceptance. Full P0 remains open.
+The planted depguard import was rejected and its temporary directory removed; both Python
+CI-summary tests passed. No production database migration was applied during this verification.
+
+Compatibility: deploy a matching client/engine; old clients without tokens cannot mutate
+lifecycle state. Do not mix old writer binaries with the new service. Preserve a database
+backup and revision history; dropping migration 00007 loses the optimistic decision history.
+No financial record, simulator/evaluation/training contract or dataset snapshot is rewritten.
+
 ## Remaining P0 work / next batch
 
 The analytics/learning review after FIX-02 fixed dependency readiness, fit/model validation,
@@ -332,15 +394,15 @@ zero skip with DB mandatory, 48 existing Flutter tests, lint/vet, Dart analysis 
 [P0_LEARNING_REVIEW_FA.md](P0_LEARNING_REVIEW_FA.md) for evidence, measured scope and compatibility.
 That historical review preceded FIX-04/FIX-05 above. These batches do not complete all of P0.
 
-1. Finish F15 synchronized version/model lifecycle, and F07 process-wide CPU/byte budgets
-   and fitting cancellation. F13's report provenance/canonical reproduction scope is recorded above.
+1. Finish F07 process-wide CPU/byte budgets and fitting cancellation. F13 report provenance
+   and F15 synchronized version/model lifecycle scopes and evidence are recorded above.
 2. Finish F10 with search-backed paginated pickers. Current pickers fetch all pages into
    memory; a shortcut comment records the limit. Network supervision, accounting overflow,
    economic label/fill alignment and remaining stress cases also remain open.
 3. Run the hosted workflow, real-browser chart/async/focus checks and P0 UX gate.
 
-The existing passing suite does **not** establish process-wide resource, accounting-overflow
-or concurrent-lifecycle acceptance criteria. Do not use this checkpoint as a P0 release pass.
+The existing passing suite does **not** establish process-wide resource or accounting-overflow
+acceptance criteria. Do not use this checkpoint as a P0 release pass.
 
 ## Rollback / compatibility
 

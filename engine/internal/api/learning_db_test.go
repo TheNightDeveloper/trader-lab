@@ -17,6 +17,7 @@ import (
 	"tradinglab/engine/internal/gen/lab/v1/labv1connect"
 	"tradinglab/engine/internal/jobs"
 	"tradinglab/engine/internal/loop"
+	"tradinglab/engine/internal/store/db"
 	"tradinglab/engine/internal/store/storetest"
 )
 
@@ -75,9 +76,10 @@ func TestLearningService(t *testing.T) {
 	require.NoError(t, err)
 	require.EqualValues(t, 1, list.Msg.GetTotal())
 
-	_, err = c.ApproveCycle(ctx, connect.NewRequest(&labv1.ApproveCycleRequest{CycleId: cur.GetId()}))
+	revision := got.Msg.GetActive().GetLifecycleRevision()
+	_, err = c.ApproveCycle(ctx, connect.NewRequest(&labv1.ApproveCycleRequest{CycleId: cur.GetId(), ExpectedRevision: &revision}))
 	require.Equal(t, connect.CodeFailedPrecondition, connect.CodeOf(err), "nothing to approve")
-	_, err = c.Rollback(ctx, connect.NewRequest(&labv1.RollbackRequest{}))
+	_, err = c.Rollback(ctx, connect.NewRequest(&labv1.RollbackRequest{AlgorithmId: got.Msg.Active.AlgorithmId, ExpectedRevision: &revision}))
 	require.Equal(t, connect.CodeFailedPrecondition, connect.CodeOf(err))
 	models, err := c.ListModels(ctx, connect.NewRequest(&labv1.ListModelsRequest{}))
 	require.NoError(t, err)
@@ -92,4 +94,21 @@ func TestLearningService(t *testing.T) {
 			require.Equal(t, "ret_1, ret_4, ret_24, vol_24, rsi_14", a.GetVersions()[0].GetRecipe()[0].GetValue())
 		}
 	}
+}
+
+func TestRollbackTargetsDisplayedAlgorithmWithoutReadingMutableConfig(t *testing.T) {
+	ctx := context.Background()
+	st := storetest.Open(t)
+	require.NoError(t, experiment.SeedLibrary(ctx, st))
+	handler := &Learning{Store: st, Loop: &loop.Loop{Store: st}}
+	// A malformed setting proves rollback does not reselect its target from global config.
+	require.NoError(t, st.PutSetting(ctx, db.PutSettingParams{Key: "learning", Value: []byte(`{"algorithm":99}`)}))
+	zero := int64(0)
+	_, err := handler.Rollback(ctx, connect.NewRequest(&labv1.RollbackRequest{ExpectedRevision: &zero}))
+	require.Equal(t, connect.CodeFailedPrecondition, connect.CodeOf(err))
+	_, err = handler.Rollback(ctx, connect.NewRequest(&labv1.RollbackRequest{AlgorithmId: "ridge-h4", ExpectedRevision: &zero}))
+	require.Equal(t, connect.CodeFailedPrecondition, connect.CodeOf(err))
+	require.Contains(t, err.Error(), "no promotion")
+	_, err = handler.Rollback(ctx, connect.NewRequest(&labv1.RollbackRequest{AlgorithmId: "unknown", ExpectedRevision: &zero}))
+	require.Equal(t, connect.CodeNotFound, connect.CodeOf(err))
 }

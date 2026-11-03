@@ -42,6 +42,7 @@ message Algorithm {
   repeated AlgorithmVersion versions = 4; // newest first
   LatestReport latest_report = 5;
   string active_model = 6; // learning algorithms: the model serving the active version
+  int64 lifecycle_revision = 7; // server revision for optimistic lifecycle decisions
 }
 
 message ListAlgorithmsRequest {}
@@ -54,6 +55,7 @@ message SetVersionStateRequest {
   string version_id = 1;
   string state = 2;
   string note = 3;
+  optional int64 expected_revision = 4; // required for mutations, including revision zero
 }
 
 message SetVersionStateResponse {}

@@ -104,11 +104,13 @@ func runToDecision(t *testing.T, l *Loop, clk *clock.Virtual) cycle {
 }
 
 func active(t *testing.T, l *Loop) (string, string) {
-	a, err := l.Store.GetAlgorithm(context.Background(), "test-learn")
+	state, err := l.Active(context.Background(), "test-learn")
 	require.NoError(t, err)
-	v, err := activeVersion(context.Background(), l.Store.Queries, "test-learn")
-	require.NoError(t, err)
-	return v, a.ActiveModel.String
+	modelID := ""
+	if state.Model != nil {
+		modelID = state.Model.ID
+	}
+	return state.VersionID, modelID
 }
 
 func TestCycleRecommendsAndOnlyTheUserPromotes(t *testing.T) {
@@ -135,7 +137,7 @@ func TestCycleRecommendsAndOnlyTheUserPromotes(t *testing.T) {
 	v, m := active(t, l)
 	require.Empty(t, v+m, "a recommendation changes nothing by itself")
 
-	require.NoError(t, l.Approve(ctx, c.row.ID, "looks right"))
+	require.NoError(t, l.Approve(ctx, c.row.ID, "looks right", lifecycleRevision(t, l)))
 	v, m = active(t, l)
 	require.Equal(t, c.doc.Challenger.ModelID, m)
 	_, def, err := experiment.Version(ctx, l.Store.Queries, v)
@@ -146,8 +148,8 @@ func TestCycleRecommendsAndOnlyTheUserPromotes(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "user", ev[0].Actor)
 
-	require.ErrorIs(t, l.Approve(ctx, c.row.ID, ""), ErrState, "approved once")
-	require.ErrorIs(t, l.Rollback(ctx, "test-learn", ""), ErrState, "no earlier active model to return to")
+	require.ErrorIs(t, l.Approve(ctx, c.row.ID, "", lifecycleRevision(t, l)), ErrState, "approved once")
+	require.ErrorIs(t, l.Rollback(ctx, "test-learn", "", lifecycleRevision(t, l)), ErrState, "no earlier active model to return to")
 
 	// Right after a decision, the forward data is used up: the next cycle skips.
 	id, err := l.Begin(ctx, "manual")
@@ -227,7 +229,7 @@ func TestLegacyForwardAndRecommendationFailClosed(t *testing.T) {
 	c.row.State, c.row.Outcome = Decision, Recommended
 	c.row.FinishedAt = nil
 	require.NoError(t, l.save(ctx, l.Store.Queries, &c))
-	require.ErrorIs(t, l.Approve(ctx, id, ""), ErrState)
+	require.ErrorIs(t, l.Approve(ctx, id, "", lifecycleRevision(t, l)), ErrState)
 	require.NoError(t, l.Reject(ctx, id, "old evidence"))
 }
 
@@ -236,7 +238,7 @@ func TestWorseChallengerAndInterruptionsLeaveTheChampion(t *testing.T) {
 	ctx := context.Background()
 	first := runToDecision(t, l, clk)
 	require.Equal(t, Recommended, first.row.Outcome, first.row.Reason)
-	require.NoError(t, l.Approve(ctx, first.row.ID, ""))
+	require.NoError(t, l.Approve(ctx, first.row.ID, "", lifecycleRevision(t, l)))
 	v0, m0 := active(t, l)
 	p0, err := st.LastPromotion(ctx, "test-learn")
 	require.NoError(t, err)
@@ -353,4 +355,12 @@ func TestScheduledCycleRunsUnattendedAndRecordsItsDecision(t *testing.T) {
 	require.Contains(t, []string{Recommended, NotBetter, GateFailed}, c.row.Outcome, c.row.Reason)
 	cancel()
 	require.NoError(t, <-done)
+}
+
+// Test callers explicitly observe the revision they authorize.
+func lifecycleRevision(t *testing.T, l *Loop) int64 {
+	t.Helper()
+	a, err := l.Store.GetAlgorithm(context.Background(), "test-learn")
+	require.NoError(t, err)
+	return a.LifecycleRevision
 }

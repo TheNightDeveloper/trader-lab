@@ -108,6 +108,13 @@ func SeedLibrary(ctx context.Context, s *store.Store) error {
 // AddVersion records def as the next version of algorithm in state, unless some
 // version already has the same content; then it returns that version's id.
 func AddVersion(ctx context.Context, q *db.Queries, algorithm string, def VersionDefinition, state, note, actor string) (string, bool, error) {
+	// Version allocation shares the algorithm lock with lifecycle changes.
+	if _, err := q.LockAlgorithm(ctx, algorithm); err != nil {
+		return "", false, err
+	}
+	if state == Active {
+		return "", false, fmt.Errorf("%w: activate through the lifecycle service", ErrState)
+	}
 	defJ, err := json.Marshal(def)
 	if err != nil {
 		return "", false, err
@@ -151,36 +158,12 @@ func Version(ctx context.Context, q *db.Queries, id string) (db.AlgorithmVersion
 
 // SetState moves a version along its lifecycle on a user decision. Activating a
 // version stops the previously active version of the same algorithm.
-func SetState(ctx context.Context, s *store.Store, id, to, note string) error {
-	return s.InTx(ctx, func(q *db.Queries) error {
-		v, _, err := Version(ctx, q, id)
-		if err != nil {
-			return err
-		}
-		if !slices.Contains(next[v.State], to) {
-			return fmt.Errorf("%w: %s → %s is not allowed", ErrState, v.State, to)
-		}
-		if to == Active {
-			vs, err := q.ListAlgorithmVersions(ctx, v.AlgorithmID)
-			if err != nil {
-				return err
-			}
-			for _, o := range vs {
-				if o.State == Active && o.ID != id {
-					if err := q.SetVersionState(ctx, db.SetVersionStateParams{ID: o.ID, State: Stopped}); err != nil {
-						return err
-					}
-					if err := q.InsertLifecycleEvent(ctx, db.InsertLifecycleEventParams{VersionID: o.ID, FromState: Active, ToState: Stopped, Note: "جایگزین شد با " + id, Actor: "user"}); err != nil {
-						return err
-					}
-				}
-			}
-		}
-		if err := q.SetVersionState(ctx, db.SetVersionStateParams{ID: id, State: to}); err != nil {
-			return err
-		}
-		return q.InsertLifecycleEvent(ctx, db.InsertLifecycleEventParams{VersionID: id, FromState: v.State, ToState: to, Note: note, Actor: "user"})
-	})
+func SetState(ctx context.Context, s *store.Store, id, to, note string, expected int64) error {
+	v, _, err := Version(ctx, s.Queries, id)
+	if err != nil {
+		return err
+	}
+	return ChangeLifecycle(ctx, s, v.AlgorithmID, expected, func(l *Lifecycle) error { return l.Move(ctx, id, to, note) })
 }
 
 // NextStates is what the UI may offer for a version in state.

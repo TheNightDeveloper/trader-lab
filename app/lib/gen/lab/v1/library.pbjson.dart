@@ -116,6 +116,13 @@ const Algorithm$json = {
       '10': 'latestReport'
     },
     {'1': 'active_model', '3': 6, '4': 1, '5': 9, '10': 'activeModel'},
+    {
+      '1': 'lifecycle_revision',
+      '3': 7,
+      '4': 1,
+      '5': 3,
+      '10': 'lifecycleRevision'
+    },
   ],
 };
 
@@ -125,7 +132,8 @@ final $typed_data.Uint8List algorithmDescriptor = $convert.base64Decode(
     'Rlc2NyaXB0aW9uGAMgASgJUgtkZXNjcmlwdGlvbhI0Cgh2ZXJzaW9ucxgEIAMoCzIYLmxhYi52'
     'MS5BbGdvcml0aG1WZXJzaW9uUgh2ZXJzaW9ucxI5Cg1sYXRlc3RfcmVwb3J0GAUgASgLMhQubG'
     'FiLnYxLkxhdGVzdFJlcG9ydFIMbGF0ZXN0UmVwb3J0EiEKDGFjdGl2ZV9tb2RlbBgGIAEoCVIL'
-    'YWN0aXZlTW9kZWw=');
+    'YWN0aXZlTW9kZWwSLQoSbGlmZWN5Y2xlX3JldmlzaW9uGAcgASgDUhFsaWZlY3ljbGVSZXZpc2'
+    'lvbg==');
 
 @$core.Deprecated('Use listAlgorithmsRequestDescriptor instead')
 const ListAlgorithmsRequest$json = {
@@ -164,14 +172,27 @@ const SetVersionStateRequest$json = {
     {'1': 'version_id', '3': 1, '4': 1, '5': 9, '10': 'versionId'},
     {'1': 'state', '3': 2, '4': 1, '5': 9, '10': 'state'},
     {'1': 'note', '3': 3, '4': 1, '5': 9, '10': 'note'},
+    {
+      '1': 'expected_revision',
+      '3': 4,
+      '4': 1,
+      '5': 3,
+      '9': 0,
+      '10': 'expectedRevision',
+      '17': true
+    },
+  ],
+  '8': [
+    {'1': '_expected_revision'},
   ],
 };
 
 /// Descriptor for `SetVersionStateRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List setVersionStateRequestDescriptor =
-    $convert.base64Decode(
-        'ChZTZXRWZXJzaW9uU3RhdGVSZXF1ZXN0Eh0KCnZlcnNpb25faWQYASABKAlSCXZlcnNpb25JZB'
-        'IUCgVzdGF0ZRgCIAEoCVIFc3RhdGUSEgoEbm90ZRgDIAEoCVIEbm90ZQ==');
+final $typed_data.Uint8List setVersionStateRequestDescriptor = $convert.base64Decode(
+    'ChZTZXRWZXJzaW9uU3RhdGVSZXF1ZXN0Eh0KCnZlcnNpb25faWQYASABKAlSCXZlcnNpb25JZB'
+    'IUCgVzdGF0ZRgCIAEoCVIFc3RhdGUSEgoEbm90ZRgDIAEoCVIEbm90ZRIwChFleHBlY3RlZF9y'
+    'ZXZpc2lvbhgEIAEoA0gAUhBleHBlY3RlZFJldmlzaW9uiAEBQhQKEl9leHBlY3RlZF9yZXZpc2'
+    'lvbg==');
 
 @$core.Deprecated('Use setVersionStateResponseDescriptor instead')
 const SetVersionStateResponse$json = {

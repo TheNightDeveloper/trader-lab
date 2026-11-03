@@ -162,6 +162,8 @@ class _LearningScreenState extends ConsumerState<LearningScreen> {
       _refresh();
       if (done != null && mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(done)));
     } catch (e) {
+      // Reload stale state before the next user decision.
+      if (mounted) _refresh();
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errorText(e))));
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -231,7 +233,11 @@ class _LearningScreenState extends ConsumerState<LearningScreen> {
                               c.challenger.modelId,
                             ),
                           );
-                          if (ok) await _act(() => _quiet(client.approveCycle(ApproveCycleRequest(cycleId: c.id))));
+                          if (ok) {
+                            await _act(() => _quiet(client.approveCycle(ApproveCycleRequest(
+                              cycleId: c.id, expectedRevision: r.active.lifecycleRevision,
+                            ))));
+                          }
                         },
                         onReject: () async {
                           final ok = await confirmAction(context, title: l.lReject, body: l.lRejectConfirm);
@@ -256,7 +262,11 @@ class _LearningScreenState extends ConsumerState<LearningScreen> {
                   canRollback: r?.canRollback ?? false,
                   onRollback: () async {
                     final ok = await confirmAction(context, title: l.lRollback, body: l.lRollbackConfirm);
-                    if (ok) await _act(() => _quiet(client.rollback(RollbackRequest())));
+                    if (ok) {
+                      await _act(() => _quiet(client.rollback(RollbackRequest(
+                        algorithmId: r?.active.algorithmId, expectedRevision: r?.active.lifecycleRevision,
+                      ))));
+                    }
                   },
                 ),
                 if (r != null && r.hasCurrent()) ...[const SizedBox(height: AppSpace.lg), _Budget(r.current.usage)],
@@ -467,7 +477,8 @@ class _GateCard extends StatelessWidget {
               ),
               OutlinedButton(
                 style: OutlinedButton.styleFrom(foregroundColor: AppColors.negativeText),
-                onPressed: c.canApprove && !busy ? onReject : null,
+                // Stale recommendations stay rejectable so a new cycle can run.
+                onPressed: c.state == 'decision' && c.outcome == 'recommended' && !busy ? onReject : null,
                 child: Text(l.lReject),
               ),
             ],

@@ -11,10 +11,11 @@ import (
 )
 
 type Algorithm struct {
-	ID          string
-	Family      string
-	Description string
-	ActiveModel pgtype.Text
+	ID                string
+	Family            string
+	Description       string
+	ActiveModel       pgtype.Text
+	LifecycleRevision int64
 }
 
 type AlgorithmVersion struct {
@@ -216,16 +217,17 @@ type ModelArtifact struct {
 }
 
 type Promotion struct {
-	ID            int64
-	AlgorithmID   string
-	Action        string
-	VersionID     string
-	ModelID       string
-	PrevVersionID pgtype.Text
-	PrevModelID   pgtype.Text
-	CycleID       *int64
-	Note          string
-	At            time.Time
+	ID                int64
+	AlgorithmID       string
+	Action            string
+	VersionID         string
+	ModelID           string
+	PrevVersionID     pgtype.Text
+	PrevModelID       pgtype.Text
+	CycleID           *int64
+	Note              string
+	At                time.Time
+	LifecycleRevision int64
 }
 
 type QualityIssue struct {

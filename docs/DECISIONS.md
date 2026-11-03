@@ -363,3 +363,23 @@ Old reports stay readable and immutable, cannot gain provenance retroactively, a
 warning. Their old numbers are not rewritten. Numerical evaluation stays p0.3; training and
 snapshot versions stay unchanged. Canonical reads add memory/IO, not a new F07 budget proof.
 Keep a provenance-aware engine for pinned replay; old readers do not implement this guarantee.
+
+## ADR-052 Serialize lifecycle decisions and bind their context (P0 F15, 2026-11-03)
+Context: Library and learning had separate version/model writers. Stop retained the serving
+model, concurrent mutations could mix a version and model, and rollback inferred its target
+from mutable settings. Comparing IDs alone could not detect an intervening change and return.
+Decision: migration 00007 adds monotonic lifecycle revisions and a unique active-version
+index. A shared experiment lifecycle service locks the algorithm before versions/cycles,
+checks the caller revision, validates model/recipe/algorithm identity and commits pair/audit/
+cycle/revision changes together. Stop/fixed-strategy activation clears the model. Retired
+versions cannot be revived. AddVersion uses the algorithm lock for numbering/deduplication;
+registration alone does not advance the serving-pair revision. Reads use coherent snapshots.
+Learning pins the champion revision before training and rejects approval after any lifecycle
+change or with missing legacy revision evidence. Rollback requires the promotion revision
+still to match, plus an explicit displayed algorithm ID. Proto mutation revisions are optional
+only to preserve wire compatibility: presence is mandatory, so missing differs from zero.
+Consequence: stale/missing tokens fail closed; client and engine must upgrade together, with
+no old writers sharing the new protocol. Old recommendations remain readable/rejectable.
+Migration rejects ambiguous legacy champions rather than silently repairing history. A down
+migration loses revision history: retain a backup/compatible engine. Numerical contracts and
+financial records do not change. F07 resource guarantees and full P0 release gates stay open.

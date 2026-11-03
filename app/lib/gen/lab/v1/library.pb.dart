@@ -305,6 +305,7 @@ class Algorithm extends $pb.GeneratedMessage {
     $core.Iterable<AlgorithmVersion>? versions,
     LatestReport? latestReport,
     $core.String? activeModel,
+    $fixnum.Int64? lifecycleRevision,
   }) {
     final result = Algorithm._();
     if (id != null) result.id = id;
@@ -313,6 +314,7 @@ class Algorithm extends $pb.GeneratedMessage {
     if (versions != null) result.versions.addAll(versions);
     if (latestReport != null) result.latestReport = latestReport;
     if (activeModel != null) result.activeModel = activeModel;
+    if (lifecycleRevision != null) result.lifecycleRevision = lifecycleRevision;
     return result;
   }
 
@@ -337,6 +339,7 @@ class Algorithm extends $pb.GeneratedMessage {
     ..aOM<LatestReport>(5, _omitFieldNames ? '' : 'latestReport',
         subBuilder: LatestReport.$_createMessage)
     ..aOS(6, _omitFieldNames ? '' : 'activeModel')
+    ..aInt64(7, _omitFieldNames ? '' : 'lifecycleRevision')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -408,6 +411,15 @@ class Algorithm extends $pb.GeneratedMessage {
   $core.bool hasActiveModel() => $_has(5);
   @$pb.TagNumber(6)
   void clearActiveModel() => $_clearField(6);
+
+  @$pb.TagNumber(7)
+  $fixnum.Int64 get lifecycleRevision => $_getI64(6);
+  @$pb.TagNumber(7)
+  set lifecycleRevision($fixnum.Int64 value) => $_setInt64(6, value);
+  @$pb.TagNumber(7)
+  $core.bool hasLifecycleRevision() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearLifecycleRevision() => $_clearField(7);
 }
 
 class ListAlgorithmsRequest extends $pb.GeneratedMessage {
@@ -512,11 +524,13 @@ class SetVersionStateRequest extends $pb.GeneratedMessage {
     $core.String? versionId,
     $core.String? state,
     $core.String? note,
+    $fixnum.Int64? expectedRevision,
   }) {
     final result = SetVersionStateRequest._();
     if (versionId != null) result.versionId = versionId;
     if (state != null) result.state = state;
     if (note != null) result.note = note;
+    if (expectedRevision != null) result.expectedRevision = expectedRevision;
     return result;
   }
 
@@ -536,6 +550,7 @@ class SetVersionStateRequest extends $pb.GeneratedMessage {
     ..aOS(1, _omitFieldNames ? '' : 'versionId')
     ..aOS(2, _omitFieldNames ? '' : 'state')
     ..aOS(3, _omitFieldNames ? '' : 'note')
+    ..aInt64(4, _omitFieldNames ? '' : 'expectedRevision')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -588,6 +603,15 @@ class SetVersionStateRequest extends $pb.GeneratedMessage {
   $core.bool hasNote() => $_has(2);
   @$pb.TagNumber(3)
   void clearNote() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $fixnum.Int64 get expectedRevision => $_getI64(3);
+  @$pb.TagNumber(4)
+  set expectedRevision($fixnum.Int64 value) => $_setInt64(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasExpectedRevision() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearExpectedRevision() => $_clearField(4);
 }
 
 class SetVersionStateResponse extends $pb.GeneratedMessage {

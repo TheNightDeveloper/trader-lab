@@ -2,6 +2,29 @@
 
 Update at the end of every session.
 
+## P0 F15 atomic version/model lifecycle (2026-11-03)
+- F13 was committed as fe7d078 before this batch. Library moves, learning approval and
+  rollback now share one algorithm lock, expected lifecycle revision and transaction for
+  version/model changes, audit records and revision advancement. Stop clears the serving
+  model; fixed-strategy switches cannot retain a learning model. Retired versions stay retired.
+- Migration 00007 adds algorithm/promotion revisions and a unique active-version index.
+  Version allocation uses the same lock. Reads of the serving pair use a coherent snapshot;
+  activation checks the artifact hash, algorithm and version recipe before any state change.
+- Learning captures the champion revision before training. Changed or legacy evidence cannot
+  promote, but remains rejectable. Rollback also checks the promotion revision (including ABA)
+  and targets the explicitly displayed algorithm rather than mutable global configuration.
+- API mutations require an explicitly present expected_revision, including zero. Go/Dart
+  bindings regenerated reproducibly (84 files checked). Flutter sends the confirmed token,
+  refreshes stale decisions and keeps rejection enabled; no new widget tests or visual redesign.
+- Verified: **302 Go tests/subtests, 0 failed/skipped; 22 packages, DB mandatory**; all 11
+  simulator goldens unchanged; **54 Flutter tests** (2 new codec unit tests); analyzer, Go
+  lint/vet and engine build passed. See P0_STATUS.md and ADR-052 for compatibility and limits.
+- A combined Go/Flutter/build run had one search-recovery timeout. Isolated recovery passed
+  in 1.67 s, then the complete Go-only run passed. No timeout/threshold was relaxed; the cause
+  of the earlier timeout is unproven. Logs are retained in artifacts/p0-lifecycle-*.jsonl/txt.
+- Next: remaining F07 process-wide budgets and fitting cancellation, then F10 and the P0
+  accounting/network/label/UX gates. Race, hosted CI and real-browser acceptance remain open.
+
 ## P0 F13 report provenance and exact reproduction (2026-11-03)
 - New reports record provenance v1: binary SHA-256, available VCS commit/time/dirty state,
   Go/platform, each dataset ID and manifest, used instrument filters/assets/scales, and
@@ -152,7 +175,8 @@ executed checks, remaining work, UX states and rollback notes.
 FIX-02, FIX-04 and FIX-05 are implemented within their recorded scopes. F07 now includes
 Reproduce admission and raw-input/retention caps; process-wide budgets remain open. F13 report
 provenance/canonical reproduction and F08 capability restrictions are implemented in their
-recorded scopes. Next is F15 lifecycle locking. Server-side dataset search and remaining
+recorded scopes. F15 lifecycle locking/revision checks are implemented; next is remaining F07.
+Server-side dataset search and remaining
 P0 resource/accounting/network/label and stress/UX gates are still open.
 **Do not start P1 yet.**
 

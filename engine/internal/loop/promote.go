@@ -18,21 +18,27 @@ import (
 // Approve is the user's promotion of a recommended challenger: its recipe becomes
 // the active version (a new version when the recipe is new) and its frozen model
 // the active model. The previous pair is recorded for rollback.
-func (l *Loop) Approve(ctx context.Context, id int64, note string) error {
-	return l.Store.InTx(ctx, func(q *db.Queries) error {
+func (l *Loop) Approve(ctx context.Context, id int64, note string, expected int64) error {
+	row, err := l.Store.GetCycle(ctx, id)
+	if err != nil {
+		return fmt.Errorf("%w: cycle %d", ErrNotFound, id)
+	}
+	// Lock order is algorithm, then cycle, shared with library/rollback writers.
+	return experiment.ChangeLifecycle(ctx, l.Store, row.AlgorithmID, expected, func(lifecycle *experiment.Lifecycle) error {
+		q := lifecycle.Q
 		c, err := l.decided(ctx, q, id)
 		if err != nil {
 			return err
 		}
-		if !CurrentEvidence(c.doc) {
+		if !CurrentEvidence(c.doc) || c.doc.Challenger == nil {
 			return fmt.Errorf("%w: legacy evidence requires a new learning cycle", ErrState)
 		}
 		alg := c.row.AlgorithmID
-		a, err := q.GetAlgorithm(ctx, alg)
-		if err != nil {
-			return err
+		a := lifecycle.Algorithm
+		if c.doc.Champion.Revision == nil || *c.doc.Champion.Revision != a.LifecycleRevision {
+			return fmt.Errorf("%w: champion changed since evaluation; run a new cycle", ErrState)
 		}
-		prevVersion, err := activeVersion(ctx, q, alg)
+		prevVersion, err := lifecycle.ActiveVersion(ctx)
 		if err != nil {
 			return err
 		}
@@ -41,19 +47,16 @@ func (l *Loop) Approve(ctx context.Context, id int64, note string) error {
 			why += " — " + note
 		}
 		ch := c.doc.Challenger
-		vid, _, err := experiment.AddVersion(ctx, q, alg, experiment.VersionDefinition{Strategy: experiment.RecipeStrategy, Recipe: &ch.Recipe}, experiment.Active, why, "user")
+		vid, _, err := experiment.AddVersion(ctx, q, alg, experiment.VersionDefinition{Strategy: experiment.RecipeStrategy, Recipe: &ch.Recipe}, experiment.Research, why, "user")
 		if err != nil {
 			return err
 		}
-		if err := activate(ctx, q, alg, vid, why); err != nil {
-			return err
-		}
-		if err := q.SetActiveModel(ctx, db.SetActiveModelParams{ID: alg, ActiveModel: text(ch.ModelID)}); err != nil {
+		if err := lifecycle.Activate(ctx, vid, ch.ModelID, why); err != nil {
 			return err
 		}
 		if err := q.InsertPromotion(ctx, db.InsertPromotionParams{
 			AlgorithmID: alg, Action: "promote", VersionID: vid, ModelID: ch.ModelID,
-			PrevVersionID: text(prevVersion), PrevModelID: a.ActiveModel, CycleID: &id, Note: note,
+			PrevVersionID: text(prevVersion), PrevModelID: a.ActiveModel, CycleID: &id, Note: note, LifecycleRevision: expected + 1,
 		}); err != nil {
 			return err
 		}
@@ -78,8 +81,9 @@ func (l *Loop) Reject(ctx context.Context, id int64, note string) error {
 
 // Rollback restores the version and model that the last promotion replaced. It
 // refuses when the active pair has changed since (e.g. in the library).
-func (l *Loop) Rollback(ctx context.Context, alg, note string) error {
-	return l.Store.InTx(ctx, func(q *db.Queries) error {
+func (l *Loop) Rollback(ctx context.Context, alg, note string, expected int64) error {
+	return experiment.ChangeLifecycle(ctx, l.Store, alg, expected, func(lifecycle *experiment.Lifecycle) error {
+		q := lifecycle.Q
 		last, err := q.LastPromotion(ctx, alg)
 		if errors.Is(err, pgx.ErrNoRows) {
 			return fmt.Errorf("%w: %s has no promotion to roll back", ErrState, alg)
@@ -90,30 +94,24 @@ func (l *Loop) Rollback(ctx context.Context, alg, note string) error {
 		if !last.PrevModelID.Valid || !last.PrevVersionID.Valid {
 			return fmt.Errorf("%w: there was no active model before the last promotion", ErrState)
 		}
-		a, err := q.GetAlgorithm(ctx, alg)
+		a := lifecycle.Algorithm
+		cur, err := lifecycle.ActiveVersion(ctx)
 		if err != nil {
 			return err
 		}
-		cur, err := activeVersion(ctx, q, alg)
-		if err != nil {
-			return err
-		}
-		if cur != last.VersionID || a.ActiveModel.String != last.ModelID {
+		if cur != last.VersionID || a.ActiveModel.String != last.ModelID || last.LifecycleRevision != a.LifecycleRevision {
 			return fmt.Errorf("%w: the active version changed since the last promotion", ErrState)
 		}
 		why := "بازگشت به نسخه و مدل پیشین با تصمیم کاربر"
 		if note != "" {
 			why += " — " + note
 		}
-		if err := activate(ctx, q, alg, last.PrevVersionID.String, why); err != nil {
-			return err
-		}
-		if err := q.SetActiveModel(ctx, db.SetActiveModelParams{ID: alg, ActiveModel: last.PrevModelID}); err != nil {
+		if err := lifecycle.Activate(ctx, last.PrevVersionID.String, last.PrevModelID.String, why); err != nil {
 			return err
 		}
 		return q.InsertPromotion(ctx, db.InsertPromotionParams{
 			AlgorithmID: alg, Action: "rollback", VersionID: last.PrevVersionID.String, ModelID: last.PrevModelID.String,
-			PrevVersionID: text(last.VersionID), PrevModelID: text(last.ModelID), Note: note,
+			PrevVersionID: text(last.VersionID), PrevModelID: text(last.ModelID), Note: note, LifecycleRevision: expected + 1,
 		})
 	})
 }
@@ -139,47 +137,6 @@ func (l *Loop) close(ctx context.Context, q *db.Queries, c *cycle, outcome, reas
 		return err
 	}
 	return l.save(ctx, q, c)
-}
-
-func activeVersion(ctx context.Context, q *db.Queries, alg string) (string, error) {
-	vs, err := q.ListAlgorithmVersions(ctx, alg)
-	if err != nil {
-		return "", err
-	}
-	for _, v := range vs {
-		if v.State == experiment.Active {
-			return v.ID, nil
-		}
-	}
-	return "", nil
-}
-
-// activate makes id the only active version of alg, logging each change as the
-// user's decision.
-func activate(ctx context.Context, q *db.Queries, alg, id, why string) error {
-	vs, err := q.ListAlgorithmVersions(ctx, alg)
-	if err != nil {
-		return err
-	}
-	for _, v := range vs {
-		to := ""
-		switch {
-		case v.ID == id && v.State != experiment.Active:
-			to = experiment.Active
-		case v.ID != id && v.State == experiment.Active:
-			to = experiment.Stopped
-		}
-		if to == "" {
-			continue
-		}
-		if err := q.SetVersionState(ctx, db.SetVersionStateParams{ID: v.ID, State: to}); err != nil {
-			return err
-		}
-		if err := q.InsertLifecycleEvent(ctx, db.InsertLifecycleEventParams{VersionID: v.ID, FromState: v.State, ToState: to, Note: why, Actor: "user"}); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 func text(s string) pgtype.Text { return pgtype.Text{String: s, Valid: s != ""} }
@@ -259,26 +216,25 @@ func DocOf(row db.LearningCycle) (Doc, error) {
 
 // Active is the champion pair: the active version and the model serving it.
 type Active struct {
+	Revision  int64
 	VersionID string
 	Model     *model.Artifact // nil: no active model
 }
 
 func (l *Loop) Active(ctx context.Context, alg string) (Active, error) {
-	a, err := l.Store.GetAlgorithm(ctx, alg)
-	if err != nil {
+	snapshot, err := experiment.Snapshot(ctx, l.Store, alg)
+	if errors.Is(err, experiment.ErrNotFound) {
 		return Active{}, fmt.Errorf("%w: algorithm %s", ErrNotFound, alg)
 	}
-	v, err := activeVersion(ctx, l.Store.Queries, alg)
 	if err != nil {
 		return Active{}, err
 	}
-	out := Active{VersionID: v}
-	if a.ActiveModel.Valid {
-		m, err := l.artifact(ctx, a.ActiveModel.String)
-		if err != nil {
-			return Active{}, err
+	out := Active{Revision: snapshot.Algorithm.LifecycleRevision, Model: snapshot.Model}
+	for _, v := range snapshot.Versions {
+		if v.State == experiment.Active {
+			out.VersionID = v.ID
+			break
 		}
-		out.Model = &m
 	}
 	return out, nil
 }
@@ -297,5 +253,5 @@ func (l *Loop) CanRollback(ctx context.Context, alg string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return last.PrevModelID.Valid && last.PrevVersionID.Valid && act.VersionID == last.VersionID && act.Model != nil && act.Model.ID == last.ModelID, nil
+	return last.LifecycleRevision == act.Revision && last.PrevModelID.Valid && last.PrevVersionID.Valid && act.VersionID == last.VersionID && act.Model != nil && act.Model.ID == last.ModelID, nil
 }

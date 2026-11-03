@@ -2,6 +2,14 @@
 INSERT INTO algorithms (id, family, description) VALUES ($1, $2, $3)
 ON CONFLICT (id) DO UPDATE SET family = EXCLUDED.family, description = EXCLUDED.description;
 
+-- All lifecycle writers lock the algorithm before versions/cycles.
+-- name: LockAlgorithm :one
+SELECT * FROM algorithms WHERE id = $1 FOR UPDATE;
+
+-- name: BumpLifecycleRevision :execrows
+UPDATE algorithms SET lifecycle_revision = lifecycle_revision + 1
+WHERE id = @id AND lifecycle_revision = @expected_revision;
+
 -- name: LatestAlgorithmVersion :one
 SELECT * FROM algorithm_versions WHERE algorithm_id = $1 ORDER BY version DESC LIMIT 1;
 

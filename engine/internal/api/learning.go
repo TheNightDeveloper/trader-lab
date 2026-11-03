@@ -31,9 +31,9 @@ func learnErr(err error) error {
 		return connect.NewError(connect.CodeFailedPrecondition, err)
 	case errors.Is(err, loop.ErrConfig):
 		return connect.NewError(connect.CodeInvalidArgument, err)
-	case errors.Is(err, loop.ErrNotFound):
+	case errors.Is(err, loop.ErrNotFound), errors.Is(err, experiment.ErrNotFound):
 		return connect.NewError(connect.CodeNotFound, err)
-	case errors.Is(err, loop.ErrBusy), errors.Is(err, loop.ErrState):
+	case errors.Is(err, loop.ErrBusy), errors.Is(err, loop.ErrState), errors.Is(err, experiment.ErrState):
 		return connect.NewError(connect.CodeFailedPrecondition, err)
 	}
 	return err
@@ -123,7 +123,7 @@ func cycleP(row db.LearningCycle) (*labv1.Cycle, error) {
 		Id: row.ID, AlgorithmId: row.AlgorithmID, Trigger: row.Trigger, State: row.State, Outcome: row.Outcome, Reason: row.Reason,
 		StartedUnixMs: ms(row.StartedAt), Steps: stepsP(row, d), Candidates: int32(d.Candidates), Eligible: int32(d.Eligible),
 		ForwardDaysTarget: int32(d.Config.Gate.ForwardDays),
-		CanApprove:        row.State == loop.Decision && row.Outcome == loop.Recommended && loop.CurrentEvidence(d),
+		CanApprove:        row.State == loop.Decision && row.Outcome == loop.Recommended && loop.CurrentEvidence(d) && d.Champion.Revision != nil,
 		Usage: &labv1.CycleUsage{
 			CpuSeconds: d.Usage.CPUMillis / 1000, CpuBudgetSeconds: int64(d.Config.CPUMinutes) * 60,
 			Candidates: int32(d.Usage.Candidates), MaxCandidates: int32(d.Config.MaxCandidates),
@@ -133,7 +133,7 @@ func cycleP(row db.LearningCycle) (*labv1.Cycle, error) {
 	if row.FinishedAt != nil {
 		c.FinishedUnixMs = ms(*row.FinishedAt)
 	}
-	if row.State == loop.Decision && !loop.CurrentEvidence(d) {
+	if row.State == loop.Decision && (!loop.CurrentEvidence(d) || d.Champion.Revision == nil) {
 		c.Reason += " — شواهد قدیمی است؛ برای ارتقا یک چرخه تازه اجرا کنید."
 	}
 	if d.FreezeAt != nil {
@@ -186,7 +186,17 @@ func (h *Learning) GetLearning(ctx context.Context, _ *connect.Request[labv1.Get
 	if err != nil && !errors.Is(err, loop.ErrNotFound) {
 		return nil, err
 	}
-	res.Active.VersionId = act.VersionID
+	res.Active.VersionId, res.Active.LifecycleRevision = act.VersionID, act.Revision
+	if res.Current != nil && res.Current.CanApprove {
+		doc, err := loop.DocOf(rows[0])
+		if err != nil {
+			return nil, err
+		}
+		if doc.Champion.Revision == nil || *doc.Champion.Revision != act.Revision {
+			res.Current.CanApprove = false
+			res.Current.Reason += " — وضعیت الگوریتم تغییر کرده؛ توصیه را رد و یک چرخه تازه اجرا کنید."
+		}
+	}
 	if act.Model != nil {
 		res.Active.ModelId, res.Active.ModelAsOfUnixMs = act.Model.ID, ms(act.Model.AsOf)
 	}
@@ -351,7 +361,10 @@ func (h *Learning) ListModels(ctx context.Context, _ *connect.Request[labv1.List
 }
 
 func (h *Learning) ApproveCycle(ctx context.Context, req *connect.Request[labv1.ApproveCycleRequest]) (*connect.Response[labv1.ApproveCycleResponse], error) {
-	if err := h.Loop.Approve(ctx, req.Msg.GetCycleId(), req.Msg.GetNote()); err != nil {
+	if req.Msg.ExpectedRevision == nil {
+		return nil, learnErr(experiment.ErrConflict)
+	}
+	if err := h.Loop.Approve(ctx, req.Msg.GetCycleId(), req.Msg.GetNote(), req.Msg.GetExpectedRevision()); err != nil {
 		return nil, learnErr(err)
 	}
 	return connect.NewResponse(&labv1.ApproveCycleResponse{}), nil
@@ -365,11 +378,11 @@ func (h *Learning) RejectCycle(ctx context.Context, req *connect.Request[labv1.R
 }
 
 func (h *Learning) Rollback(ctx context.Context, req *connect.Request[labv1.RollbackRequest]) (*connect.Response[labv1.RollbackResponse], error) {
-	cfg, err := loop.LoadConfig(ctx, h.Store.Queries)
-	if err != nil {
-		return nil, err
+	// The confirmation authorizes the displayed algorithm, even if another tab changes config.
+	if req.Msg.ExpectedRevision == nil || req.Msg.GetAlgorithmId() == "" {
+		return nil, learnErr(experiment.ErrConflict)
 	}
-	if err := h.Loop.Rollback(ctx, cfg.Algorithm, req.Msg.GetNote()); err != nil {
+	if err := h.Loop.Rollback(ctx, req.Msg.GetAlgorithmId(), req.Msg.GetNote(), req.Msg.GetExpectedRevision()); err != nil {
 		return nil, learnErr(err)
 	}
 	return connect.NewResponse(&labv1.RollbackResponse{}), nil

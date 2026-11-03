@@ -770,13 +770,14 @@ func (x *Cycle) GetCanApprove() bool {
 }
 
 type ActiveModel struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	AlgorithmId     string                 `protobuf:"bytes,1,opt,name=algorithm_id,json=algorithmId,proto3" json:"algorithm_id,omitempty"`
-	VersionId       string                 `protobuf:"bytes,2,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"` // empty: no active version
-	ModelId         string                 `protobuf:"bytes,3,opt,name=model_id,json=modelId,proto3" json:"model_id,omitempty"`       // empty: no active model yet
-	ModelAsOfUnixMs int64                  `protobuf:"varint,4,opt,name=model_as_of_unix_ms,json=modelAsOfUnixMs,proto3" json:"model_as_of_unix_ms,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	AlgorithmId       string                 `protobuf:"bytes,1,opt,name=algorithm_id,json=algorithmId,proto3" json:"algorithm_id,omitempty"`
+	VersionId         string                 `protobuf:"bytes,2,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"` // empty: no active version
+	ModelId           string                 `protobuf:"bytes,3,opt,name=model_id,json=modelId,proto3" json:"model_id,omitempty"`       // empty: no active model yet
+	ModelAsOfUnixMs   int64                  `protobuf:"varint,4,opt,name=model_as_of_unix_ms,json=modelAsOfUnixMs,proto3" json:"model_as_of_unix_ms,omitempty"`
+	LifecycleRevision int64                  `protobuf:"varint,5,opt,name=lifecycle_revision,json=lifecycleRevision,proto3" json:"lifecycle_revision,omitempty"` // revision of this coherent active pair
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *ActiveModel) Reset() {
@@ -833,6 +834,13 @@ func (x *ActiveModel) GetModelId() string {
 func (x *ActiveModel) GetModelAsOfUnixMs() int64 {
 	if x != nil {
 		return x.ModelAsOfUnixMs
+	}
+	return 0
+}
+
+func (x *ActiveModel) GetLifecycleRevision() int64 {
+	if x != nil {
+		return x.LifecycleRevision
 	}
 	return 0
 }
@@ -1622,11 +1630,12 @@ func (x *ListModelsResponse) GetModels() []*ModelInfo {
 }
 
 type ApproveCycleRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	CycleId       int64                  `protobuf:"varint,1,opt,name=cycle_id,json=cycleId,proto3" json:"cycle_id,omitempty"`
-	Note          string                 `protobuf:"bytes,2,opt,name=note,proto3" json:"note,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	CycleId          int64                  `protobuf:"varint,1,opt,name=cycle_id,json=cycleId,proto3" json:"cycle_id,omitempty"`
+	Note             string                 `protobuf:"bytes,2,opt,name=note,proto3" json:"note,omitempty"`
+	ExpectedRevision *int64                 `protobuf:"varint,3,opt,name=expected_revision,json=expectedRevision,proto3,oneof" json:"expected_revision,omitempty"` // required; must also match the evaluated champion
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *ApproveCycleRequest) Reset() {
@@ -1671,6 +1680,13 @@ func (x *ApproveCycleRequest) GetNote() string {
 		return x.Note
 	}
 	return ""
+}
+
+func (x *ApproveCycleRequest) GetExpectedRevision() int64 {
+	if x != nil && x.ExpectedRevision != nil {
+		return *x.ExpectedRevision
+	}
+	return 0
 }
 
 type ApproveCycleResponse struct {
@@ -1798,10 +1814,12 @@ func (*RejectCycleResponse) Descriptor() ([]byte, []int) {
 }
 
 type RollbackRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Note          string                 `protobuf:"bytes,1,opt,name=note,proto3" json:"note,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Note             string                 `protobuf:"bytes,1,opt,name=note,proto3" json:"note,omitempty"`
+	ExpectedRevision *int64                 `protobuf:"varint,2,opt,name=expected_revision,json=expectedRevision,proto3,oneof" json:"expected_revision,omitempty"` // required for a fresh user decision
+	AlgorithmId      string                 `protobuf:"bytes,3,opt,name=algorithm_id,json=algorithmId,proto3" json:"algorithm_id,omitempty"`                       // binds the decision to the displayed algorithm, not mutable settings
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *RollbackRequest) Reset() {
@@ -1837,6 +1855,20 @@ func (*RollbackRequest) Descriptor() ([]byte, []int) {
 func (x *RollbackRequest) GetNote() string {
 	if x != nil {
 		return x.Note
+	}
+	return ""
+}
+
+func (x *RollbackRequest) GetExpectedRevision() int64 {
+	if x != nil && x.ExpectedRevision != nil {
+		return *x.ExpectedRevision
+	}
+	return 0
+}
+
+func (x *RollbackRequest) GetAlgorithmId() string {
+	if x != nil {
+		return x.AlgorithmId
 	}
 	return ""
 }
@@ -1964,13 +1996,14 @@ const file_lab_v1_learning_proto_rawDesc = "" +
 	"\n" +
 	"walk_folds\x18\x14 \x01(\x05R\twalkFolds\x12\x1f\n" +
 	"\vcan_approve\x18\x15 \x01(\bR\n" +
-	"canApprove\"\x98\x01\n" +
+	"canApprove\"\xc7\x01\n" +
 	"\vActiveModel\x12!\n" +
 	"\falgorithm_id\x18\x01 \x01(\tR\valgorithmId\x12\x1d\n" +
 	"\n" +
 	"version_id\x18\x02 \x01(\tR\tversionId\x12\x19\n" +
 	"\bmodel_id\x18\x03 \x01(\tR\amodelId\x12,\n" +
-	"\x13model_as_of_unix_ms\x18\x04 \x01(\x03R\x0fmodelAsOfUnixMs\"\x14\n" +
+	"\x13model_as_of_unix_ms\x18\x04 \x01(\x03R\x0fmodelAsOfUnixMs\x12-\n" +
+	"\x12lifecycle_revision\x18\x05 \x01(\x03R\x11lifecycleRevision\"\x14\n" +
 	"\x12GetLearningRequest\"\xef\x01\n" +
 	"\x13GetLearningResponse\x12.\n" +
 	"\x06config\x18\x01 \x01(\v2\x16.lab.v1.LearningConfigR\x06config\x12'\n" +
@@ -2026,17 +2059,22 @@ const file_lab_v1_learning_proto_rawDesc = "" +
 	"trainError\"\x13\n" +
 	"\x11ListModelsRequest\"?\n" +
 	"\x12ListModelsResponse\x12)\n" +
-	"\x06models\x18\x01 \x03(\v2\x11.lab.v1.ModelInfoR\x06models\"D\n" +
+	"\x06models\x18\x01 \x03(\v2\x11.lab.v1.ModelInfoR\x06models\"\x8c\x01\n" +
 	"\x13ApproveCycleRequest\x12\x19\n" +
 	"\bcycle_id\x18\x01 \x01(\x03R\acycleId\x12\x12\n" +
-	"\x04note\x18\x02 \x01(\tR\x04note\"\x16\n" +
+	"\x04note\x18\x02 \x01(\tR\x04note\x120\n" +
+	"\x11expected_revision\x18\x03 \x01(\x03H\x00R\x10expectedRevision\x88\x01\x01B\x14\n" +
+	"\x12_expected_revision\"\x16\n" +
 	"\x14ApproveCycleResponse\"C\n" +
 	"\x12RejectCycleRequest\x12\x19\n" +
 	"\bcycle_id\x18\x01 \x01(\x03R\acycleId\x12\x12\n" +
 	"\x04note\x18\x02 \x01(\tR\x04note\"\x15\n" +
-	"\x13RejectCycleResponse\"%\n" +
+	"\x13RejectCycleResponse\"\x90\x01\n" +
 	"\x0fRollbackRequest\x12\x12\n" +
-	"\x04note\x18\x01 \x01(\tR\x04note\"\x12\n" +
+	"\x04note\x18\x01 \x01(\tR\x04note\x120\n" +
+	"\x11expected_revision\x18\x02 \x01(\x03H\x00R\x10expectedRevision\x88\x01\x01\x12!\n" +
+	"\falgorithm_id\x18\x03 \x01(\tR\valgorithmIdB\x14\n" +
+	"\x12_expected_revision\"\x12\n" +
 	"\x10RollbackResponse2\x90\x05\n" +
 	"\x0fLearningService\x12F\n" +
 	"\vGetLearning\x12\x1a.lab.v1.GetLearningRequest\x1a\x1b.lab.v1.GetLearningResponse\x12C\n" +
@@ -2156,6 +2194,8 @@ func file_lab_v1_learning_proto_init() {
 		return
 	}
 	file_lab_v1_common_proto_init()
+	file_lab_v1_learning_proto_msgTypes[22].OneofWrappers = []any{}
+	file_lab_v1_learning_proto_msgTypes[26].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

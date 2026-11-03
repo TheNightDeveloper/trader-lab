@@ -217,11 +217,16 @@ class _Detail extends ConsumerWidget {
     try {
       await ref
           .read(libraryClientProvider)
-          .setVersionState(SetVersionStateRequest(versionId: v.id, state: to, note: note.trim()));
+          .setVersionState(SetVersionStateRequest(
+            versionId: v.id, state: to, note: note.trim(), expectedRevision: a.lifecycleRevision,
+          ));
       ref.invalidate(algorithmsProvider);
       ref.invalidate(lifecycleEventsProvider(v.id));
     } catch (e) {
-      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errorText(e))));
+      // A stale confirmation must refresh before another decision.
+      if (!context.mounted) return;
+      ref.invalidate(algorithmsProvider);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errorText(e))));
     }
   }
 

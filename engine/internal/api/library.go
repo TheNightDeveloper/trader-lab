@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 
 	"connectrpc.com/connect"
@@ -27,11 +28,13 @@ func (h *Library) ListAlgorithms(ctx context.Context, _ *connect.Request[labv1.L
 	}
 	res := &labv1.ListAlgorithmsResponse{}
 	for _, a := range algs {
-		pa := &labv1.Algorithm{Id: a.ID, Family: a.Family, Description: a.Description, ActiveModel: a.ActiveModel.String}
-		vs, err := h.Store.ListAlgorithmVersions(ctx, a.ID)
+		snapshot, err := experiment.Snapshot(ctx, h.Store, a.ID)
 		if err != nil {
-			return nil, err
+			return nil, expErr(err)
 		}
+		a = snapshot.Algorithm
+		pa := &labv1.Algorithm{Id: a.ID, Family: a.Family, Description: a.Description, ActiveModel: a.ActiveModel.String, LifecycleRevision: a.LifecycleRevision}
+		vs := snapshot.Versions
 		for _, v := range vs {
 			var def experiment.VersionDefinition
 			if err := json.Unmarshal(v.Definition, &def); err != nil {
@@ -42,6 +45,8 @@ func (h *Library) ListAlgorithms(ctx context.Context, _ *connect.Request[labv1.L
 				pv.Params = append(pv.Params, &labv1.ParamSpec{Name: p.Name, Default: p.Default, Integer: p.Integer})
 			}
 			if def.Recipe != nil {
+				// Learning activation is available only through evaluated cycle approval.
+				pv.NextStates = slices.DeleteFunc(slices.Clone(pv.NextStates), func(s string) bool { return s == experiment.Active })
 				pv.Recipe = recipeItems(*def.Recipe)
 			}
 			pa.Versions = append(pa.Versions, pv)
@@ -59,10 +64,13 @@ func (h *Library) ListAlgorithms(ctx context.Context, _ *connect.Request[labv1.L
 	return connect.NewResponse(res), nil
 }
 
-// SetVersionState is the only path to a lifecycle change, and it is a user action.
+// SetVersionState delegates library decisions to the shared revision-checked lifecycle service.
 func (h *Library) SetVersionState(ctx context.Context, req *connect.Request[labv1.SetVersionStateRequest]) (*connect.Response[labv1.SetVersionStateResponse], error) {
 	m := req.Msg
-	if err := experiment.SetState(ctx, h.Store, m.GetVersionId(), m.GetState(), m.GetNote()); err != nil {
+	if m.ExpectedRevision == nil {
+		return nil, expErr(experiment.ErrConflict)
+	}
+	if err := experiment.SetState(ctx, h.Store, m.GetVersionId(), m.GetState(), m.GetNote(), m.GetExpectedRevision()); err != nil {
 		return nil, expErr(err)
 	}
 	return connect.NewResponse(&labv1.SetVersionStateResponse{}), nil

@@ -234,15 +234,16 @@ func (x *LatestReport) GetCreatedUnixMs() int64 {
 }
 
 type Algorithm struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Family        string                 `protobuf:"bytes,2,opt,name=family,proto3" json:"family,omitempty"`           // trend | mean_reversion | learning | hybrid | benchmark
-	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"` // Persian
-	Versions      []*AlgorithmVersion    `protobuf:"bytes,4,rep,name=versions,proto3" json:"versions,omitempty"`       // newest first
-	LatestReport  *LatestReport          `protobuf:"bytes,5,opt,name=latest_report,json=latestReport,proto3" json:"latest_report,omitempty"`
-	ActiveModel   string                 `protobuf:"bytes,6,opt,name=active_model,json=activeModel,proto3" json:"active_model,omitempty"` // learning algorithms: the model serving the active version
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Id                string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Family            string                 `protobuf:"bytes,2,opt,name=family,proto3" json:"family,omitempty"`           // trend | mean_reversion | learning | hybrid | benchmark
+	Description       string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"` // Persian
+	Versions          []*AlgorithmVersion    `protobuf:"bytes,4,rep,name=versions,proto3" json:"versions,omitempty"`       // newest first
+	LatestReport      *LatestReport          `protobuf:"bytes,5,opt,name=latest_report,json=latestReport,proto3" json:"latest_report,omitempty"`
+	ActiveModel       string                 `protobuf:"bytes,6,opt,name=active_model,json=activeModel,proto3" json:"active_model,omitempty"`                    // learning algorithms: the model serving the active version
+	LifecycleRevision int64                  `protobuf:"varint,7,opt,name=lifecycle_revision,json=lifecycleRevision,proto3" json:"lifecycle_revision,omitempty"` // server revision for optimistic lifecycle decisions
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *Algorithm) Reset() {
@@ -315,6 +316,13 @@ func (x *Algorithm) GetActiveModel() string {
 		return x.ActiveModel
 	}
 	return ""
+}
+
+func (x *Algorithm) GetLifecycleRevision() int64 {
+	if x != nil {
+		return x.LifecycleRevision
+	}
+	return 0
 }
 
 type ListAlgorithmsRequest struct {
@@ -398,12 +406,13 @@ func (x *ListAlgorithmsResponse) GetAlgorithms() []*Algorithm {
 }
 
 type SetVersionStateRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	VersionId     string                 `protobuf:"bytes,1,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	State         string                 `protobuf:"bytes,2,opt,name=state,proto3" json:"state,omitempty"`
-	Note          string                 `protobuf:"bytes,3,opt,name=note,proto3" json:"note,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	VersionId        string                 `protobuf:"bytes,1,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	State            string                 `protobuf:"bytes,2,opt,name=state,proto3" json:"state,omitempty"`
+	Note             string                 `protobuf:"bytes,3,opt,name=note,proto3" json:"note,omitempty"`
+	ExpectedRevision *int64                 `protobuf:"varint,4,opt,name=expected_revision,json=expectedRevision,proto3,oneof" json:"expected_revision,omitempty"` // required for mutations, including revision zero
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *SetVersionStateRequest) Reset() {
@@ -455,6 +464,13 @@ func (x *SetVersionStateRequest) GetNote() string {
 		return x.Note
 	}
 	return ""
+}
+
+func (x *SetVersionStateRequest) GetExpectedRevision() int64 {
+	if x != nil && x.ExpectedRevision != nil {
+		return *x.ExpectedRevision
+	}
+	return 0
 }
 
 type SetVersionStateResponse struct {
@@ -679,24 +695,27 @@ const file_lab_v1_library_proto_rawDesc = "" +
 	"\fLatestReport\x12\x1b\n" +
 	"\treport_id\x18\x01 \x01(\tR\breportId\x122\n" +
 	"\ftotal_return\x18\x02 \x01(\v2\x0f.lab.v1.DecimalR\vtotalReturn\x12&\n" +
-	"\x0fcreated_unix_ms\x18\x03 \x01(\x03R\rcreatedUnixMs\"\xe9\x01\n" +
+	"\x0fcreated_unix_ms\x18\x03 \x01(\x03R\rcreatedUnixMs\"\x98\x02\n" +
 	"\tAlgorithm\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x16\n" +
 	"\x06family\x18\x02 \x01(\tR\x06family\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x124\n" +
 	"\bversions\x18\x04 \x03(\v2\x18.lab.v1.AlgorithmVersionR\bversions\x129\n" +
 	"\rlatest_report\x18\x05 \x01(\v2\x14.lab.v1.LatestReportR\flatestReport\x12!\n" +
-	"\factive_model\x18\x06 \x01(\tR\vactiveModel\"\x17\n" +
+	"\factive_model\x18\x06 \x01(\tR\vactiveModel\x12-\n" +
+	"\x12lifecycle_revision\x18\a \x01(\x03R\x11lifecycleRevision\"\x17\n" +
 	"\x15ListAlgorithmsRequest\"K\n" +
 	"\x16ListAlgorithmsResponse\x121\n" +
 	"\n" +
 	"algorithms\x18\x01 \x03(\v2\x11.lab.v1.AlgorithmR\n" +
-	"algorithms\"a\n" +
+	"algorithms\"\xa9\x01\n" +
 	"\x16SetVersionStateRequest\x12\x1d\n" +
 	"\n" +
 	"version_id\x18\x01 \x01(\tR\tversionId\x12\x14\n" +
 	"\x05state\x18\x02 \x01(\tR\x05state\x12\x12\n" +
-	"\x04note\x18\x03 \x01(\tR\x04note\"\x19\n" +
+	"\x04note\x18\x03 \x01(\tR\x04note\x120\n" +
+	"\x11expected_revision\x18\x04 \x01(\x03H\x00R\x10expectedRevision\x88\x01\x01B\x14\n" +
+	"\x12_expected_revision\"\x19\n" +
 	"\x17SetVersionStateResponse\"\x92\x01\n" +
 	"\x0eLifecycleEvent\x12\x1d\n" +
 	"\n" +
@@ -774,6 +793,7 @@ func file_lab_v1_library_proto_init() {
 	}
 	file_lab_v1_common_proto_init()
 	file_lab_v1_report_proto_init()
+	file_lab_v1_library_proto_msgTypes[6].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
