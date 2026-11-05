@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"tradinglab/engine/internal/clock"
+	"tradinglab/engine/internal/jobs"
 	"tradinglab/engine/internal/store"
 	"tradinglab/engine/internal/store/db"
 )
@@ -20,7 +21,11 @@ type Importer struct {
 	BaseURL string        // ArchiveBaseURL in production
 	Delay   time.Duration // ingest delay: AvailableAt = close + Delay
 	Clock   clock.Clock
+	Memory  *jobs.Memory // the process-owned budget, also used by research jobs
 }
+
+// Covers one downloaded ZIP, bounded CSV parsing, cleaning and database projections.
+const archiveWorkspaceBytes = 384 << 20
 
 // ImportProgress is reported after every file.
 type ImportProgress struct {
@@ -44,25 +49,21 @@ func (im Importer) Import(ctx context.Context, symbol string, from, to time.Time
 	if !from.Before(to) {
 		return ImportProgress{}, fmt.Errorf("import %s: empty range %s – %s", symbol, from.Format(time.RFC3339), to.Format(time.RFC3339))
 	}
-	if _, err := RawBarCount(TF1m, from, to); err != nil {
+	n, err := RawBarCount(TF1m, from, to)
+	if err != nil {
 		return ImportProgress{}, err
 	}
+	release, err := im.Memory.Reserve(ctx, archiveWorkspaceBytes+int64(n)*1024)
+	if err != nil {
+		return ImportProgress{}, err
+	}
+	defer release()
 	var p ImportProgress
 	months := monthsIn(from, to)
 	p.FilesTotal = len(months)
 	for _, m := range months {
-		files, err := im.monthFiles(ctx, symbol, m, from, to, &p)
-		if err != nil {
+		if err := im.month(ctx, symbol, m, from, to, &p, progress); err != nil {
 			return p, err
-		}
-		for _, f := range files {
-			if err := im.load(ctx, symbol, f, from, to, &p); err != nil {
-				return p, err
-			}
-			p.FilesDone++
-			if progress != nil {
-				progress(p)
-			}
 		}
 	}
 	// Gaps across file boundaries and unpublished days.
@@ -76,37 +77,43 @@ func (im Importer) Import(ctx context.Context, symbol string, from, to time.Time
 	return p, nil
 }
 
-// monthFiles fetches the monthly file for m, or the daily files when the monthly
-// one is not published.
-func (im Importer) monthFiles(ctx context.Context, symbol string, m, from, to time.Time, p *ImportProgress) ([]ArchiveFile, error) {
+// Process daily fallbacks one at a time so downloaded ZIPs cannot accumulate for a month.
+func (im Importer) month(ctx context.Context, symbol string, m, from, to time.Time, p *ImportProgress, progress func(ImportProgress)) error {
 	f, err := FetchArchive(ctx, im.HTTP, MonthlyURL(im.BaseURL, symbol, m))
 	if err == nil {
-		return []ArchiveFile{f}, nil
+		return im.load(ctx, symbol, f, from, to, p, progress)
 	}
 	if !errors.Is(err, ErrNotPublished) {
-		return nil, err
+		return err
 	}
-	var files []ArchiveFile
 	end := m.AddDate(0, 1, 0)
+	start := maxTime(m, from.Truncate(24*time.Hour))
 	p.FilesTotal-- // the monthly slot becomes daily slots
-	for d := maxTime(m, from.Truncate(24*time.Hour)); d.Before(end) && d.Before(to); d = d.AddDate(0, 0, 1) {
+	for d := start; d.Before(end) && d.Before(to); d = d.AddDate(0, 0, 1) {
 		p.FilesTotal++
+	}
+	for d := start; d.Before(end) && d.Before(to); d = d.AddDate(0, 0, 1) {
 		f, err := FetchArchive(ctx, im.HTTP, DailyURL(im.BaseURL, symbol, d))
 		if errors.Is(err, ErrNotPublished) {
 			p.Missing++
 			p.FilesDone++
+			if progress != nil {
+				progress(*p)
+			}
 			continue
 		}
 		if err != nil {
-			return nil, err
+			return err
 		}
-		files = append(files, f)
+		if err := im.load(ctx, symbol, f, from, to, p, progress); err != nil {
+			return err
+		}
 	}
-	return files, nil
+	return nil
 }
 
-func (im Importer) load(ctx context.Context, symbol string, f ArchiveFile, from, to time.Time, p *ImportProgress) error {
-	bars, err := ParseArchive(f, symbol, im.Delay)
+func (im Importer) load(ctx context.Context, symbol string, f ArchiveFile, from, to time.Time, p *ImportProgress, progress func(ImportProgress)) error {
+	bars, err := ParseArchiveContext(ctx, f, symbol, im.Delay)
 	if err != nil {
 		return err
 	}
@@ -131,6 +138,10 @@ func (im Importer) load(ctx context.Context, symbol string, f ArchiveFile, from,
 		return fmt.Errorf("record %s: %w", f.URL, err)
 	}
 	p.File, p.Rows, p.Inserted, p.Corrections = f.URL, p.Rows+len(clean), p.Inserted+up.Inserted, p.Corrections+len(up.Corrections)
+	p.FilesDone++
+	if progress != nil {
+		progress(*p)
+	}
 	slog.Info("archive imported", "file", f.URL, "rows", len(clean), "inserted", up.Inserted, "corrections", len(up.Corrections), "issues", len(issues))
 	return nil
 }

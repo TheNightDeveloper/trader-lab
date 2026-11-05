@@ -149,6 +149,13 @@ cd engine && go test -run Golden ./...
 | `make: command not found` | Use the plain commands in sections 3 and 6 |
 | Generated code stale (CI) | Run `make gen` (needs `buf` and `sqlc`) and commit the result |
 
+Archive imports also share this budget. Daily fallbacks are processed one file at a time;
+ZIPs above 64 MiB, inflated CSVs above 32 MiB, numeric lines above 4096 bytes or files above
+44,640 bars are rejected without accepting a prefix. A later-file failure keeps earlier
+valid imported files; re-running the range resumes idempotently. Import memory admission
+adds a conservative 384 MiB archive workspace to the raw-range estimate, so very low budgets
+can reject an import even when its compressed download is small.
+
 ## 8. Reset
 
 To wipe all data and start clean (this deletes every dataset and report):

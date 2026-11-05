@@ -92,7 +92,7 @@ func run() error {
 	health := &api.Health{Clock: clock.Wall{}, Version: version, Workers: int32(cfg.Workers), Every: time.Second, Live: liveSource(live), Rates: fxSvc}
 	dataSvc := &api.Data{
 		Store: st, Live: live, Clock: clock.Wall{},
-		Importer: data.Importer{Store: st, HTTP: http.DefaultClient, BaseURL: data.ArchiveBaseURL, Delay: cfg.ingestDelay(), Clock: clock.Wall{}},
+		Importer: data.Importer{Store: st, HTTP: http.DefaultClient, BaseURL: data.ArchiveBaseURL, Delay: cfg.ingestDelay(), Clock: clock.Wall{}, Memory: memory},
 	}
 	sc := echo.StartConfig{
 		Address:         cfg.Listen,

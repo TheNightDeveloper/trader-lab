@@ -8,6 +8,7 @@ import (
 	"connectrpc.com/connect"
 	"github.com/stretchr/testify/require"
 
+	"tradinglab/engine/internal/data"
 	labv1 "tradinglab/engine/internal/gen/lab/v1"
 	"tradinglab/engine/internal/jobs"
 	"tradinglab/engine/internal/report"
@@ -52,4 +53,13 @@ func TestMemoryRejectionUsesResourceExhausted(t *testing.T) {
 	h := Chart{}
 	_, err := h.GetChart(context.Background(), connect.NewRequest(&labv1.GetChartRequest{Indicators: make([]string, chartIndicatorsMax+1)}))
 	require.Equal(t, connect.CodeInvalidArgument, connect.CodeOf(err), "bound indicator expansion before loading any data")
+}
+
+func TestImportSnapshotRespectsSharedMemoryBeforeReading(t *testing.T) {
+	memory := jobs.NewMemory(1)
+	h := Data{Importer: data.Importer{Memory: memory}}
+	from := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)
+	_, err := h.snapshot(context.Background(), data.DatasetSpec{Symbol: "BTCUSDT", Timeframe: data.TF1h, From: from, To: from.Add(time.Hour), GapPolicy: data.GapFlag})
+	require.ErrorIs(t, err, jobs.ErrMemory, "no store is needed for a rejected snapshot")
+	require.Zero(t, memory.InUse())
 }

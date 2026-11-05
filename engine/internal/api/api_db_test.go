@@ -20,6 +20,7 @@ import (
 	"tradinglab/engine/internal/data"
 	labv1 "tradinglab/engine/internal/gen/lab/v1"
 	"tradinglab/engine/internal/gen/lab/v1/labv1connect"
+	"tradinglab/engine/internal/jobs"
 	"tradinglab/engine/internal/money"
 	"tradinglab/engine/internal/store/storetest"
 )
@@ -125,7 +126,9 @@ func TestDataImportStreamAndViews(t *testing.T) {
 	t.Cleanup(archive.Close)
 
 	clk := clock.NewVirtual(now)
-	svc := &Data{Store: st, Clock: clk, Importer: data.Importer{Store: st, HTTP: archive.Client(), BaseURL: archive.URL, Delay: 2 * time.Second, Clock: clk}}
+	memory := jobs.NewMemory(512 << 20)
+	t.Cleanup(func() { require.Zero(t, memory.InUse(), "import and snapshot errors release admission") })
+	svc := &Data{Store: st, Clock: clk, Importer: data.Importer{Store: st, HTTP: archive.Client(), BaseURL: archive.URL, Delay: 2 * time.Second, Clock: clk, Memory: memory}}
 	srv := serve(t, func(m *http.ServeMux) { m.Handle(labv1connect.NewDataServiceHandler(svc)) })
 	c := labv1connect.NewDataServiceClient(srv.Client(), srv.URL)
 
@@ -152,6 +155,11 @@ func TestDataImportStreamAndViews(t *testing.T) {
 	}
 
 	req := &labv1.ImportRequest{Symbols: []string{"BTCUSDT"}, FromDate: "2024-01-01", ToDate: "2024-01-02", Timeframe: "1h", GapPolicy: "flag"}
+	release, err := memory.Reserve(ctx, 512<<20)
+	require.NoError(t, err)
+	_, err = runImport(req)
+	require.Equal(t, connect.CodeResourceExhausted, code(err), "import shares research capacity")
+	release()
 	evs, err := runImport(req)
 	require.NoError(t, err)
 	require.GreaterOrEqual(t, len(evs), 2)

@@ -1,5 +1,27 @@
 # Performance
 
+## P0 F07 import fixture calibration (2026-11-05)
+
+Windows amd64, Go 1.26.4, local PostgreSQL. Compile the existing API test package with
+`go test -c -o ../artifacts/api-import-profile.test.exe ./internal/api` from engine, then run
+the executable with `-test.run=^TestDataImportStreamAndViews$ -test.v` and REQUIRE_DB=1.
+The fixture uses a shared 512 MiB admission pool, a two-day numeric archive with a gap,
+repeated imports, snapshots, rejected budgets and a gap-policy failure. It makes no external
+market request. Sample the child process every 20 ms using System.Diagnostics.Process
+PeakWorkingSet64 and TotalProcessorTime; elapsed time includes process launch/poll overhead.
+
+| Observed counter | Single run |
+|---|---:|
+| Peak working set sampled | 80,683,008 bytes (about 77 MiB) |
+| CPU time sampled | 0.234375 s |
+| Elapsed including launch | 1.6753859 s |
+| Test's own elapsed / exit | 1.20 s / 0 |
+
+Raw evidence: artifacts/p0-import-profile.json and p0-import-profile.txt (git-ignored).
+This is a narrow input calibration: neither maximum-size/mixed workload acceptance nor a
+hard process-RSS/CPU guarantee. Database server memory/CPU is outside this child counter;
+the last sampling interval can miss work before exit. No before/after speed claim is made.
+
 ## P0 FIX-04 local measurement (2026-11-02)
 
 macOS arm64, Apple M4, Go 1.26.5. Same one-iteration command on a temporary copy of

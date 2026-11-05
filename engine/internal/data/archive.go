@@ -2,6 +2,7 @@ package data
 
 import (
 	"archive/zip"
+	"bufio"
 	"bytes"
 	"context"
 	"crypto/sha256"
@@ -29,6 +30,13 @@ const ArchiveBaseURL = "https://data.binance.vision"
 
 // maxArchiveBytes bounds one download; a month of 1m klines zips to ~2.5 MB.
 const maxArchiveBytes = 64 << 20
+
+// Monthly numeric CSVs are bounded independently of ZIP compression and request range.
+const (
+	maxArchiveCSVBytes  = 32 << 20
+	maxArchiveRows      = 31 * 1440
+	maxArchiveLineBytes = 4096
+)
 
 // MonthlyURL is the 1m kline zip for one month, e.g. 2024-01.
 func MonthlyURL(base, symbol string, month time.Time) string {
@@ -85,18 +93,32 @@ func get(ctx context.Context, c *http.Client, url string, limit int64) ([]byte, 
 	case resp.StatusCode != http.StatusOK:
 		return nil, fmt.Errorf("get %s: status %d", url, resp.StatusCode)
 	}
+	if resp.ContentLength > limit {
+		return nil, fmt.Errorf("%w: get %s: larger than %d bytes", ErrLimit, url, limit)
+	}
 	b, err := io.ReadAll(io.LimitReader(resp.Body, limit+1))
 	if err != nil {
 		return nil, fmt.Errorf("read %s: %w", url, err)
 	}
 	if int64(len(b)) > limit {
-		return nil, fmt.Errorf("get %s: larger than %d bytes", url, limit)
+		return nil, fmt.Errorf("%w: get %s: larger than %d bytes", ErrLimit, url, limit)
 	}
 	return b, nil
 }
 
 // ParseArchive reads the single CSV inside a kline zip.
 func ParseArchive(f ArchiveFile, symbol string, delay time.Duration) ([]Bar, error) {
+	return ParseArchiveContext(context.Background(), f, symbol, delay)
+}
+
+// ParseArchiveContext checks cancellation during decompression as well as row parsing.
+func ParseArchiveContext(ctx context.Context, f ArchiveFile, symbol string, delay time.Duration) ([]Bar, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if len(f.Zip) > maxArchiveBytes {
+		return nil, fmt.Errorf("%w: archive ZIP exceeds %d bytes", ErrLimit, maxArchiveBytes)
+	}
 	zr, err := zip.NewReader(bytes.NewReader(f.Zip), int64(len(f.Zip)))
 	if err != nil {
 		return nil, fmt.Errorf("open zip %s: %w", f.URL, err)
@@ -104,12 +126,15 @@ func ParseArchive(f ArchiveFile, symbol string, delay time.Duration) ([]Bar, err
 	if len(zr.File) != 1 {
 		return nil, fmt.Errorf("zip %s: want 1 file, got %d", f.URL, len(zr.File))
 	}
+	if zr.File[0].UncompressedSize64 > maxArchiveCSVBytes {
+		return nil, fmt.Errorf("%w: archive CSV exceeds %d bytes", ErrLimit, maxArchiveCSVBytes)
+	}
 	r, err := zr.File[0].Open()
 	if err != nil {
 		return nil, err
 	}
 	defer func() { _ = r.Close() }()
-	return ParseKlinesCSV(r, symbol, delay)
+	return ParseKlinesCSVContext(ctx, r, symbol, delay)
 }
 
 // ParseKlinesCSV parses Binance 1m kline rows:
@@ -118,15 +143,35 @@ func ParseArchive(f ArchiveFile, symbol string, delay time.Duration) ([]Bar, err
 // Values must have at most 8 decimals (instrument.Scale); anything else is an error,
 // never a silent rounding.
 func ParseKlinesCSV(r io.Reader, symbol string, delay time.Duration) ([]Bar, error) {
-	cr := csv.NewReader(r)
-	cr.FieldsPerRecord = -1
-	cr.ReuseRecord = true
+	return ParseKlinesCSVContext(context.Background(), r, symbol, delay)
+}
+
+// Numeric archive rows are single-line records; bound a line before CSV allocates its fields.
+func ParseKlinesCSVContext(ctx context.Context, r io.Reader, symbol string, delay time.Duration) ([]Bar, error) {
+	limited := &io.LimitedReader{R: archiveReader{ctx, r}, N: maxArchiveCSVBytes + 1}
+	scanner := bufio.NewScanner(limited)
+	scanner.Buffer(make([]byte, maxArchiveLineBytes), maxArchiveLineBytes+1)
+	// Reuse CSV's input buffer; allocating 4 KiB per numeric row multiplies import work.
+	row := bytes.NewReader(nil)
+	csvBuffer := bufio.NewReader(row)
 	var bars []Bar
-	for line := 1; ; line++ {
-		rec, err := cr.Read()
-		if errors.Is(err, io.EOF) {
-			return bars, nil
+	line := 0
+	for scanner.Scan() {
+		if err := ctx.Err(); err != nil {
+			return nil, err
 		}
+		if limited.N <= 0 {
+			return nil, fmt.Errorf("%w: archive CSV exceeds %d bytes", ErrLimit, maxArchiveCSVBytes)
+		}
+		if len(scanner.Bytes()) == 0 {
+			continue // match encoding/csv's empty-line handling
+		}
+		line++
+		row.Reset(scanner.Bytes())
+		csvBuffer.Reset(row)
+		cr := csv.NewReader(csvBuffer)
+		cr.FieldsPerRecord = -1
+		rec, err := cr.Read()
 		if err != nil {
 			return nil, fmt.Errorf("csv line %d: %w", line, err)
 		}
@@ -138,8 +183,34 @@ func ParseKlinesCSV(r io.Reader, symbol string, delay time.Duration) ([]Bar, err
 		if err != nil {
 			return nil, fmt.Errorf("csv line %d: %w", line, err)
 		}
+		if len(bars) >= maxArchiveRows {
+			return nil, fmt.Errorf("%w: archive exceeds %d rows", ErrLimit, maxArchiveRows)
+		}
 		bars = append(bars, b)
 	}
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if limited.N <= 0 || errors.Is(scanner.Err(), bufio.ErrTooLong) {
+		return nil, fmt.Errorf("%w: CSV byte or line limit exceeded", ErrLimit)
+	}
+	if err := scanner.Err(); err != nil {
+		return nil, fmt.Errorf("read archive CSV: %w", err)
+	}
+	return bars, nil
+}
+
+// A long row or compressed stream must observe cancellation at each buffered read.
+type archiveReader struct {
+	ctx context.Context
+	r   io.Reader
+}
+
+func (r archiveReader) Read(p []byte) (int, error) {
+	if err := r.ctx.Err(); err != nil {
+		return 0, err
+	}
+	return r.r.Read(p)
 }
 
 type headerError struct{ error }

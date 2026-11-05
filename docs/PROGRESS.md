@@ -2,6 +2,27 @@
 
 Update at the end of every session.
 
+## P0 F07 archive/import bounds (2026-11-05)
+- Import uses the same active-memory pool as research: 384 MiB archive workspace plus
+  1024 bytes per requested raw minute, before network work. Dataset snapshot creation
+  after import has separate admission. Exhaustion is exposed as ResourceExhausted.
+- Daily fallback downloads/parses/persists one file before fetching the next. Missing-file
+  progress is emitted; valid completed files remain resumable if a later file fails.
+- ZIP downloads remain capped at 64 MiB. CSV metadata and actual reads are capped at
+  32 MiB, numeric rows at 4096 bytes and monthly input at 44,640 bars. Over-limit or
+  cancelled parsing returns no bar prefix. Existing parser APIs retain wrappers; import
+  propagates context through decompression/rows and stops after progress send failure.
+- Three before-edit regressions reproduced excess rows, inflated-size acceptance and daily
+  ZIP accumulation. Final DB-mandatory run: **325 Go tests/subtests passed, zero failed/skipped,
+  22 packages**; all 11 unchanged goldens, **54 Flutter tests**, analyzer/lint/vet/build,
+  depguard rejection and two Python CI-summary tests passed. No new widget tests.
+- A single Windows process sample of the real import RPC fixture observed 80,683,008 bytes
+  peak working set (about 77 MiB), 0.234375 CPU seconds and 1.675 s including launch overhead.
+  This is a fixture calibration, not process-wide load acceptance. See PERFORMANCE.md.
+- Evidence: artifacts/p0-import-go-tests.jsonl, p0-import-flutter.txt and
+  p0-import-profile.json/txt. Next: resource/load acceptance and remaining F10/network/
+  accounting/label/CI/UX gates. P0 remains open; no schema/numerical version changed.
+
 ## P0 F07 shared active-memory admission (2026-11-03)
 - One process-owned budget now serves report Create/CreateWithID/Reproduce/Recalculate,
   queued search attempts and winner reports, learning collection-through-freeze/forward,
@@ -198,7 +219,7 @@ Update at the end of every session.
 - Next: FIX-04 actual freeze/forward coverage and period/cohort metrics. See P0_STATUS.md.
 
 ## Current phase
-P0 — correctness and evidence stabilization: **in progress** (2026-11-03).
+P0 — correctness and evidence stabilization: **in progress** (2026-11-05).
 The new P0–P8 phases are defined in `Trading_Lab_Master_Plan_FA.md`; M0–M6 below
 are historical implementation milestones, not evidence that the P0 release gate passed.
 

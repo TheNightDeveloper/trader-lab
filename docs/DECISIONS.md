@@ -418,3 +418,20 @@ caps. Large inputs may require smaller ranges or an explicitly larger configured
 Estimates do not enforce RSS/OS CPU, GC, archive decompression or outbound serialization;
 those paths and actual load measurements remain F07 work. No financial/training semantics,
 migration, wire change or new dependency is introduced. Full P0 remains open.
+
+## ADR-055 Bound archive parsing and process daily fallbacks incrementally (2026-11-05)
+Context: bounding compressed downloads/ranges did not bound inflated CSV rows/fields, and
+daily fallback retained every downloaded ZIP before parsing even the first file.
+Decision: share active admission with Importer (384 MiB workspace + 1024 bytes/raw minute),
+and admit post-import snapshot reconstruction separately. Fetch/parse/persist daily files
+sequentially. Keep the 64 MiB ZIP cap; reject inflated CSVs above 32 MiB, physical rows above
+4096 bytes and files above 44,640 bars. Bound each numeric line before encoding/csv field
+allocation and reuse its input buffer. Preserve ordinary quoted numeric CSV/blank-line/CRLF
+interpretation; multiline numeric records are unsupported. Context propagates through reads,
+decompression and rows; progress-send failure cancels remaining work.
+Consequence: no truncated prefix is accepted as a parsed file. Earlier valid files remain
+committed/resumable after a later failure, with idempotent re-import and unchanged snapshot
+hashing. Resource errors reach the UI as ResourceExhausted. Large ranges may require shorter
+imports or an explicitly larger machine budget. Single-fixture process counters provide a
+local calibration only; mixed-load RSS/CPU/OS guarantees and P0 gates remain open. No new
+dependency, migration, numerical contract or historical financial rewrite is introduced.

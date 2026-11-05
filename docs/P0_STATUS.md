@@ -1,6 +1,6 @@
 # P0 — stabilization and release evidence
 
-Status: **in progress**, 2026-11-03. This continues the new master plan, not
+Status: **in progress**, 2026-11-05. This continues the new master plan, not
 completion of P0 and not approval to begin P1 or any execution feature.
 
 ## First batch scope
@@ -458,6 +458,44 @@ Retained dataset caches still have their separate count/bar caps, outside the ac
 Archive import/decompression and outbound serialization are not a hard process-wide memory
 boundary. RSS/OS CPU/load acceptance, local race, hosted CI and browser UX remain open.
 
+## F07 archive/import bounds (2026-11-05)
+
+The production Importer now shares main's jobs.Memory pool. It reserves 384 MiB for the
+bounded archive/cleaning/database workspace plus 1024 bytes per requested raw minute before
+network work; post-import dataset reconstruction reserves separately. Resource errors use
+ResourceExhausted in the streaming API. Daily fallback processes each ZIP before fetching
+the next instead of retaining the whole month's downloads. Progress includes missing days.
+
+ZIP download/parse input stays limited to 64 MiB. Inflated entry metadata and actual CSV
+reads are limited to 32 MiB; each numeric CSV row is single-line, at most 4096 bytes; a file
+has at most 44,640 bars (31 days). The scanner bounds a row before encoding/csv allocates
+its fields. Quoted numeric fields, blank lines, CRLF, timestamps and fixed-point decoding
+retain their interpretation; multiline CSV records are not a supported numeric archive row.
+Context-aware parsers check reads and rows; compatibility wrappers use background context.
+Cancellation/limits discard local parsed prefixes, and a failed file is never upserted.
+Previously committed valid files remain after a later-file/stream failure, as before;
+re-import is idempotent. Failure to send progress cancels remaining download/processing.
+
+Before-edit tests reproduced unbounded rows, inflated-size parsing and downloads beyond
+the first invalid day. Final verification: **325 Go tests/subtests, 0 failed/skipped,
+22 packages, database mandatory**; all 11 goldens unchanged; **54 existing Flutter tests**;
+Dart analysis, Go lint/vet/build, planted depguard rejection and both Python summary tests
+passed. The real import RPC fixture uses a 512 MiB pool and checks shared exhaustion,
+retry, matching snapshot IDs and cleanup, including error paths. Tests also cover the row
+boundary, byte/line limits, pre-network rejection and cancellation during reads.
+Evidence: artifacts/p0-import-go-tests.jsonl and artifacts/p0-import-flutter.txt (ignored).
+
+A separate compiled API test process was sampled every 20 ms with Windows process counters:
+observed peak working set 80,683,008 bytes, CPU 0.234375 s, elapsed 1.6753859 s including
+process launch; TestDataImportStreamAndViews passed. Scope/method: PERFORMANCE.md; logs:
+artifacts/p0-import-profile.json and .txt. This is not a mixed-workload RSS/CPU acceptance
+test, nor a hard OS resource cap. No local race/hosted CI/browser acceptance was executed.
+WSL Ubuntu-24.04 is present but has neither Go nor GCC; Windows still has no GCC on PATH.
+
+No dependency, wire/schema migration, dataset/evaluation/training semantic version change
+or financial rewrite. Oversized archives now fail explicitly; already stored datasets and
+reports remain readable. F07's process-wide resource/load acceptance and full P0 stay open.
+
 ## Remaining P0 work / next batch
 
 The analytics/learning review after FIX-02 fixed dependency readiness, fit/model validation,
@@ -467,7 +505,7 @@ zero skip with DB mandatory, 48 existing Flutter tests, lint/vet, Dart analysis 
 [P0_LEARNING_REVIEW_FA.md](P0_LEARNING_REVIEW_FA.md) for evidence, measured scope and compatibility.
 That historical review preceded FIX-04/FIX-05 above. These batches do not complete all of P0.
 
-1. Finish F07 archive/import bounds and process-wide CPU/RSS/load acceptance. Shared
+1. Finish F07 process-wide CPU/RSS/load acceptance. Archive/import bounds, shared
    active-work byte admission, cooperative fitting cancellation and conservative slot-time
    deadlines are implemented in the scopes above; they are not OS resource quotas.
 2. Finish F10 with search-backed paginated pickers. Current pickers fetch all pages into
