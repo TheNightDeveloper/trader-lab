@@ -23,7 +23,11 @@ func (r Ratio) Apply(v int64, mode Rounding) (int64, error) {
 
 // Plus returns v × (1 + r), rounded with mode (e.g. a buy price with slippage).
 func (r Ratio) Plus(v int64, mode Rounding) (int64, error) {
-	return MulDiv(v, int64(RatioOne+r), int64(RatioOne), mode)
+	x, err := AddInt64(int64(RatioOne), int64(r))
+	if err != nil {
+		return 0, err
+	}
+	return MulDiv(v, x, int64(RatioOne), mode)
 }
 
 // Minus returns v × (1 − r), rounded with mode (e.g. a sell price with slippage).
@@ -31,5 +35,9 @@ func (r Ratio) Minus(v int64, mode Rounding) (int64, error) {
 	if r > RatioOne {
 		return 0, fmt.Errorf("money: ratio %s above 1", r)
 	}
-	return MulDiv(v, int64(RatioOne-r), int64(RatioOne), mode)
+	x, err := SubInt64(int64(RatioOne), int64(r))
+	if err != nil {
+		return 0, err
+	}
+	return MulDiv(v, x, int64(RatioOne), mode)
 }

@@ -461,3 +461,12 @@ Report charts read only chart inputs and fetch markers for the visible symbol an
 range. Decision details use their primary key. Report chart admission counts raw history
 for reconstruction and visible output bars for response work. This admits routine charts
 under the shared pool while preserving the full simulation reservation for report runs.
+
+## ADR-058 Reject unrepresentable simulator ledger entries
+
+The simulator checks per-leg cash, balances, cumulative trade values and marked equity
+before publishing a fill or a completed result. Protection prices report overflow
+instead of silently dropping protection. The calculator rejects unrepresentable costs
+or fee totals and returns no partial result. The API maps numeric overflow to OutOfRange.
+Break-even fee is omitted if the ledger totals needed for it exceed the integer range.
+Representable calculations retain the fixed-point scales, rounding and report contract.

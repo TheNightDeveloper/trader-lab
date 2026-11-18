@@ -173,7 +173,10 @@ func Run(ctx context.Context, cfg Config, specs map[string]instrument.Spec, bars
 		start = end
 	}
 	r.res.Bars = len(events)
-	return r.res, r.finish(ctx)
+	if err := r.finish(ctx); err != nil {
+		return nil, err
+	}
+	return r.res, nil
 }
 
 type event struct {
@@ -427,14 +430,27 @@ func (r *runner) execute(ctx context.Context, o *order, b data.Bar) error {
 		r.outcome(o.decision, OutcomeRejected, "order below min notional "+spec.MinNotional.String())
 		return nil
 	}
+	var stop, take int64
+	if o.intent.StopLoss > 0 {
+		stop, err = o.intent.StopLoss.Minus(l.price, money.Floor)
+		if err != nil {
+			return fmt.Errorf("%s stop loss: %w", o.symbol, err)
+		}
+	}
+	if o.intent.TakeProfit > 0 {
+		take, err = o.intent.TakeProfit.Plus(l.price, money.Ceil)
+		if err != nil {
+			return fmt.Errorf("%s take profit: %w", o.symbol, err)
+		}
+	}
 	if err := r.apply(o.symbol, l, quoteRate, b.OpenTime, "signal", id, false); err != nil {
 		return err
 	}
 	if o.intent.StopLoss > 0 {
-		p.stop, _ = o.intent.StopLoss.Minus(l.price, money.Floor)
+		p.stop = stop
 	}
 	if o.intent.TakeProfit > 0 {
-		p.take, _ = o.intent.TakeProfit.Plus(l.price, money.Ceil)
+		p.take = take
 	}
 	r.outcome(o.decision, OutcomeFilled, "")
 	return nil
@@ -533,47 +549,66 @@ func (r *runner) apply(sym string, l leg, quoteRate int64, at time.Time, kind st
 	}
 
 	q, a := spec.Quote, func(v int64) money.Amount { return money.Amount{V: v, Asset: instrument.USDT} }
-	r.bal[q.Code] += l.cash()
+	quoteBalance, err := money.AddInt64(r.bal[q.Code], l.cash)
+	if err != nil {
+		return fmt.Errorf("%s quote balance: %w", sym, err)
+	}
 	side := Sell
+	quantity := -l.qty
 	if l.buy {
-		side = Buy
-		r.bal[spec.Base.Code] += l.qty
-		if p.qty == 0 {
-			z := money.Amount{Asset: instrument.USDT}
-			r.res.Trades = append(r.res.Trades, Trade{
-				Instrument: sym, OpenedAt: at, OpenedObservedAt: r.clk.Now(), Qty: money.Qty{Scale: sc}, OpenQty: money.Qty{Scale: sc},
-				EntryRef: z, ExitRef: z, Gross: z, Slippage: z, Fees: z, Net: z,
-			})
-			p.trade, p.entryCost, p.exitProceeds, p.stop, p.take = len(r.res.Trades)-1, 0, 0, 0, 0
-		}
-		p.qty += l.qty
-		t := &r.res.Trades[p.trade]
-		t.Qty.V += l.qty
-		t.EntryRef.V += refU
-		t.Slippage.V += slipU
-		t.Fees.V += feeU
-		p.entryCost += refU + slipU + feeU
+		side, quantity = Buy, l.qty
+	}
+	baseBalance, err := money.AddInt64(r.bal[spec.Base.Code], quantity)
+	if err != nil {
+		return fmt.Errorf("%s base balance: %w", sym, err)
+	}
+	// Stage the ledger transition so a rejected fill never publishes partial totals.
+	next := *p
+	newTrade := l.buy && p.qty == 0
+	var t Trade
+	if newTrade {
+		next = position{trade: len(r.res.Trades)}
+		z := a(0)
+		t = Trade{Instrument: sym, OpenedAt: at, OpenedObservedAt: r.clk.Now(), Qty: money.Qty{Scale: sc},
+			OpenQty: money.Qty{Scale: sc}, EntryRef: z, ExitRef: z, Gross: z, Slippage: z, Fees: z, Net: z}
 	} else {
-		r.bal[spec.Base.Code] -= l.qty
-		p.qty -= l.qty
-		t := &r.res.Trades[p.trade]
-		t.ExitRef.V += refU
-		t.Slippage.V += slipU
-		t.Fees.V += feeU
-		p.exitProceeds += refU - slipU - feeU
-		if p.qty == 0 {
+		t = r.res.Trades[next.trade]
+	}
+	if err := applyLedgerDeltas(ledgerDelta{&next.qty, quantity}, ledgerDelta{&t.Slippage.V, slipU}, ledgerDelta{&t.Fees.V, feeU}); err != nil {
+		return fmt.Errorf("%s position totals: %w", sym, err)
+	}
+	if l.buy {
+		if err := applyLedgerDeltas(ledgerDelta{&t.Qty.V, l.qty}, ledgerDelta{&t.EntryRef.V, refU},
+			ledgerDelta{&next.entryCost, refU}, ledgerDelta{&next.entryCost, slipU}, ledgerDelta{&next.entryCost, feeU}); err != nil {
+			return fmt.Errorf("%s entry totals: %w", sym, err)
+		}
+	} else {
+		// Ref and slippage are nonnegative, so their difference is representable.
+		proceeds, err := money.SubInt64(refU-slipU, feeU)
+		if err != nil {
+			return fmt.Errorf("%s exit proceeds: %w", sym, err)
+		}
+		if err := applyLedgerDeltas(ledgerDelta{&t.ExitRef.V, refU}, ledgerDelta{&next.exitProceeds, proceeds}); err != nil {
+			return fmt.Errorf("%s exit totals: %w", sym, err)
+		}
+		if next.qty == 0 {
 			closed := at
 			t.ClosedAt = &closed
 			t.ClosedObservedAt = r.clk.Now()
-			t.Gross.V = t.ExitRef.V - t.EntryRef.V
-			t.Net.V = p.exitProceeds - p.entryCost
-			if t.Net.V != t.Gross.V-t.Slippage.V-t.Fees.V {
-				return fmt.Errorf("%w: %s trade net %d != gross %d - slippage %d - fees %d", ErrInvariant, sym, t.Net.V, t.Gross.V, t.Slippage.V, t.Fees.V)
+			if err := totalTrade(&t, next, 0); err != nil {
+				return err
 			}
-			p.stop, p.take = 0, 0
+			next.stop, next.take = 0, 0
 		}
 	}
-	p.changedAt = at
+	next.changedAt = at
+	*p = next
+	r.bal[q.Code], r.bal[spec.Base.Code] = quoteBalance, baseBalance
+	if newTrade {
+		r.res.Trades = append(r.res.Trades, t)
+	} else {
+		r.res.Trades[next.trade] = t
+	}
 	r.res.Fills = append(r.res.Fills, Fill{
 		DecisionID: decisionID, Time: at, ObservedAt: r.clk.Now(), Instrument: sym, Side: side, Kind: kind,
 		Qty:      money.Qty{V: l.qty, Scale: sc},
@@ -582,6 +617,48 @@ func (r *runner) apply(sym string, l leg, quoteRate int64, at time.Time, kind st
 		Slippage: money.Amount{V: l.slippage, Asset: q}, Fee: money.Amount{V: l.fee, Asset: q},
 		RefValueUSDT: a(refU), SlippageUSDT: a(slipU), FeeUSDT: a(feeU), Ambiguous: ambiguous,
 	})
+	return nil
+}
+
+type ledgerDelta struct {
+	field *int64
+	value int64
+}
+
+// The targets belong to a staged ledger transition which is discarded on error.
+func applyLedgerDeltas(changes ...ledgerDelta) error {
+	for _, change := range changes {
+		v, err := money.AddInt64(*change.field, change.value)
+		if err != nil {
+			return err
+		}
+		*change.field = v
+	}
+	return nil
+}
+
+func totalTrade(t *Trade, p position, mark int64) error {
+	var err error
+	if t.Gross.V, err = money.AddInt64(t.ExitRef.V-t.EntryRef.V, mark); err != nil {
+		return fmt.Errorf("%s trade gross: %w", t.Instrument, err)
+	}
+	net, err := money.SubInt64(p.exitProceeds, p.entryCost)
+	if err == nil {
+		t.Net.V, err = money.AddInt64(net, mark)
+	}
+	if err != nil {
+		return fmt.Errorf("%s trade net: %w", t.Instrument, err)
+	}
+	expected, err := money.SubInt64(t.Gross.V, t.Slippage.V)
+	if err == nil {
+		expected, err = money.SubInt64(expected, t.Fees.V)
+	}
+	if err != nil {
+		return fmt.Errorf("%s trade costs: %w", t.Instrument, err)
+	}
+	if t.Net.V != expected {
+		return fmt.Errorf("%w: %s trade net %d != gross %d - slippage %d - fees %d", ErrInvariant, t.Instrument, t.Net.V, t.Gross.V, t.Slippage.V, t.Fees.V)
+	}
 	return nil
 }
 
@@ -625,7 +702,9 @@ func (r *runner) valuation(ctx context.Context) (int64, int64, error) {
 		if err != nil {
 			return 0, 0, err
 		}
-		total += v.V
+		if total, err = money.AddInt64(total, v.V); err != nil {
+			return 0, 0, fmt.Errorf("position equity: %w", err)
+		}
 		openNet, err := (money.Amount{V: p.exitProceeds}).Add(money.Amount{V: v.V})
 		if err != nil {
 			return 0, 0, err
@@ -653,7 +732,9 @@ func (r *runner) valuation(ctx context.Context) (int64, int64, error) {
 		if err != nil {
 			return 0, 0, err
 		}
-		total += v.V
+		if total, err = money.AddInt64(total, v.V); err != nil {
+			return 0, 0, fmt.Errorf("cash equity: %w", err)
+		}
 	}
 	return total, unrealized, nil
 }
@@ -682,7 +763,12 @@ func (r *runner) checkInvariants() error {
 			if p.qty < 0 {
 				return fmt.Errorf("%w: %s position %d < 0", ErrInvariant, sym, p.qty)
 			}
-			held[r.specs[sym].Base.Code] += p.qty
+			asset := r.specs[sym].Base.Code
+			qty, err := money.AddInt64(held[asset], p.qty)
+			if err != nil {
+				return fmt.Errorf("%s held quantity: %w", asset, err)
+			}
+			held[asset] = qty
 		}
 	}
 	for a, v := range r.bal {
@@ -715,10 +801,8 @@ func (r *runner) finish(ctx context.Context) error {
 		t := &r.res.Trades[p.trade]
 		t.OpenQty = money.Qty{V: p.qty, Scale: sc}
 		t.MarkValue = &v
-		t.Gross.V = t.ExitRef.V + v.V - t.EntryRef.V
-		t.Net.V = p.exitProceeds + v.V - p.entryCost
-		if t.Net.V != t.Gross.V-t.Slippage.V-t.Fees.V {
-			return fmt.Errorf("%w: open %s trade net != gross - slippage - fees", ErrInvariant, sym)
+		if err := totalTrade(t, *p, v.V); err != nil {
+			return err
 		}
 	}
 	assets := make([]string, 0, len(r.bal))

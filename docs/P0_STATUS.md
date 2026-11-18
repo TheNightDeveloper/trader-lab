@@ -541,6 +541,22 @@ The 500-attempt search passed with a 15.96 ms worst health heartbeat delay.
 Linux vet and engine build passed. Independent SQL generation with sqlc v1.31.1
 matched every checked-in store binding byte for byte.
 
+## Simulator ledger arithmetic (2026-11-18)
+
+Buy-leg debit, balance and position updates, lifetime trade amounts, aggregate equity and
+protection triggers use checked arithmetic. A failed fill leaves its book balances and
+trade entry untouched. The simulation and calculator discard results on overflow and the
+report/calculator RPCs return OutOfRange. Break-even fee remains absent when its underlying
+ledger totals are unrepresentable. Valid fixed-point rounding remains compatible.
+
+The pre-edit cases reproduced wraparound in entry cost and equity, silent loss of a
+take-profit, and partial calculator data. Focused money/simulator/API race tests and
+golangci-lint passed. The unrestricted DB-mandatory race run had **345 passes, 1 failure,
+0 skipped tests/subtests**. The known search-restart test stalled at `running` again.
+GetChart p95 remained below 1 s at 728 ms. Evidence: artifacts/p0-ledger-before.txt and
+artifacts/p0-ledger-race-go-tests.jsonl. Search recovery and aggregate evaluation metrics
+still need their own fixes and regressions.
+
 ## Remaining P0 work / next batch
 
 The analytics/learning review after FIX-02 fixed dependency readiness, fit/model validation,

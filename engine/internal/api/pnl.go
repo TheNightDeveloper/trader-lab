@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"errors"
 
 	"connectrpc.com/connect"
 
@@ -141,21 +140,18 @@ func (h *Pnl) CalculateTrade(ctx context.Context, req *connect.Request[labv1.Cal
 	}
 	buyPrice, err := slip.Plus(entry.V, money.Ceil)
 	if err != nil {
-		return nil, err
+		return nil, reportErr(err)
 	}
 	qty, err := money.MulDiv(amount.V, 100_000_000, buyPrice, money.Floor)
 	if err != nil {
-		return nil, invalid(err.Error())
+		return nil, reportErr(err)
 	}
 	if qty <= 0 {
 		return nil, invalid("amount is too small for this price")
 	}
 	c, err := sim.CalcTrade(money.Price{V: entry.V, Scale: 8}, money.Price{V: exit.V, Scale: 8}, money.Qty{V: qty, Scale: 8}, fee, slip, instrument.USDT)
-	if errors.Is(err, sim.ErrInput) {
-		return nil, invalid(err.Error())
-	}
 	if err != nil {
-		return nil, err
+		return nil, reportErr(err)
 	}
 	leg := func(l sim.LegView) *labv1.TradeLeg {
 		price := func(p money.Price) *labv1.Money { return usdtP(p.V) }

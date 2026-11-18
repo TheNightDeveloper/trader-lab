@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"math"
 	"net/http"
 	"strings"
 	"testing"
@@ -61,6 +62,14 @@ func usdtMoney(s string) *labv1.Money {
 		panic(err)
 	}
 	return usdtP(v)
+}
+
+func TestTradeCalculatorReturnsOutOfRangeWithoutPartialResult(t *testing.T) {
+	resp, err := (&Pnl{}).CalculateTrade(context.Background(), connect.NewRequest(&labv1.CalculateTradeRequest{
+		Entry: usdtP(math.MaxInt64), Exit: usdtP(math.MaxInt64), Amount: usdtP(math.MaxInt64), Slippage: dec("0.01"),
+	}))
+	require.Equal(t, connect.CodeOutOfRange, connect.CodeOf(err))
+	require.Nil(t, resp)
 }
 
 func TestReportAndPnlServices(t *testing.T) {

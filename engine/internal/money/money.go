@@ -49,7 +49,7 @@ func (a Amount) Add(b Amount) (Amount, error) {
 	if a.Asset != b.Asset {
 		return Amount{}, fmt.Errorf("%w: %s + %s", ErrAssetMismatch, a.Asset.Code, b.Asset.Code)
 	}
-	s, err := add(a.V, b.V)
+	s, err := AddInt64(a.V, b.V)
 	return Amount{s, a.Asset}, err
 }
 
@@ -57,9 +57,9 @@ func (a Amount) Sub(b Amount) (Amount, error) {
 	if a.Asset != b.Asset {
 		return Amount{}, fmt.Errorf("%w: %s - %s", ErrAssetMismatch, a.Asset.Code, b.Asset.Code)
 	}
-	d := a.V - b.V
-	if (b.V > 0 && d > a.V) || (b.V < 0 && d < a.V) {
-		return Amount{}, ErrOverflow
+	d, err := SubInt64(a.V, b.V)
+	if err != nil {
+		return Amount{}, err
 	}
 	return Amount{d, a.Asset}, nil
 }
@@ -208,12 +208,22 @@ func digits(s string) bool {
 	return true
 }
 
-func add(a, b int64) (int64, error) {
+// AddInt64 checks addition for ledger quantities that already share a scale.
+func AddInt64(a, b int64) (int64, error) {
 	s := a + b
 	if (s > a) != (b > 0) {
 		return 0, ErrOverflow
 	}
 	return s, nil
+}
+
+// SubInt64 checks subtraction without first negating a possible MinInt64.
+func SubInt64(a, b int64) (int64, error) {
+	d := a - b
+	if (b > 0 && d > a) || (b < 0 && d < a) {
+		return 0, ErrOverflow
+	}
+	return d, nil
 }
 
 func abs(v int64) uint64 {

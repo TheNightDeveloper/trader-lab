@@ -110,9 +110,11 @@ func reportErr(err error) error {
 		return connect.NewError(connect.CodeFailedPrecondition, err)
 	case errors.Is(err, data.ErrLimit), errors.Is(err, jobs.ErrMemory):
 		return connect.NewError(connect.CodeResourceExhausted, err)
+	case errors.Is(err, money.ErrOverflow):
+		return connect.NewError(connect.CodeOutOfRange, fmt.Errorf("مقدار محاسبه‌شده از محدودهٔ عددی موتور بیشتر است: %w", err))
 	case errors.Is(err, report.ErrNotFound):
 		return connect.NewError(connect.CodeNotFound, err)
-	case errors.Is(err, report.ErrInput), errors.Is(err, eval.ErrSpec), errors.Is(err, eval.ErrPlan), errors.Is(err, sim.ErrConfig):
+	case errors.Is(err, report.ErrInput), errors.Is(err, eval.ErrSpec), errors.Is(err, eval.ErrPlan), errors.Is(err, sim.ErrConfig), errors.Is(err, sim.ErrInput):
 		return connect.NewError(connect.CodeInvalidArgument, err)
 	}
 	return err

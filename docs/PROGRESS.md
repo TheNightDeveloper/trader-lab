@@ -2,6 +2,18 @@
 
 Update at the end of every session.
 
+## P0 simulator ledger overflow (2026-11-18)
+- Check fixed-point addition and subtraction across fill cash, asset balances, cumulative
+  trade totals, mark-to-market and protection prices. Stage fill changes and publish them
+  only once every amount is representable. A failed simulation returns no partial ledger.
+- The calculator and report API return OutOfRange for numeric overflow. Break-even fee
+  omits an unrepresentable turnover total. Normal rounding and valid fixtures are preserved.
+- Boundary tests reproduced buy-cost and equity overflow, a silently dropped take-profit,
+  and partial calculator output. Regressions cover the exact int64 boundary, atomic fill
+  rejection, the fee aggregate and the Connect error. Aggregate evaluation metrics remain open.
+- Targeted race tests and lint passed. The full race run had 345 passes and one historical
+  search-restart timeout. Chart p95 was 728 ms. Details are in P0_STATUS.md.
+
 ## P0 F07 chart reads under load (2026-11-18)
 - Compute only visible indicator values while maintaining historical warm-up. The suffix
   matches the full series bit for bit for all five indicator families in the regression.
