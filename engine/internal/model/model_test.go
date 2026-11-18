@@ -80,7 +80,17 @@ func TestLoadValidatesModelAndPreservesLegacyID(t *testing.T) {
 			require.ErrorIs(t, err, ErrArtifact)
 		})
 	}
+	a.TrainingVersion = legacyTrainingVersion
+	a.Seal()
+	body, err = a.Save()
+	require.NoError(t, err)
+	loaded, err = Load(body)
+	require.NoError(t, err)
+	require.Equal(t, a.ID, loaded.ID)
+
 	a.TrainingVersion = TrainingVersion
+	require.ErrorIs(t, a.Validate(), ErrArtifact)
+	a.LabelCosts = &feature.LabelCosts{}
 	a.Seal()
 	require.NotEqual(t, legacyID, a.ID, "training semantics are content-addressed")
 }

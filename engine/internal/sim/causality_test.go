@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"tradinglab/engine/internal/data"
+	"tradinglab/engine/internal/feature"
 	"tradinglab/engine/internal/money"
 	"tradinglab/engine/internal/strategy"
 )
@@ -98,6 +99,30 @@ func TestCausalFillExpiresWithoutAnEligibleOpen(t *testing.T) {
 	res := run(t, c, map[string][]data.Bar{"BTCUSDT": flat("BTCUSDT", 4, 100)}, step(0, "BTCUSDT", money.RatioOne))
 	require.Empty(t, res.Fills)
 	require.Equal(t, OutcomeExpired, res.Decisions[0].Outcome)
+}
+
+func TestLearningLabelMatchesCausalRoundTrip(t *testing.T) {
+	const sym = "BTCUSDT"
+	bars := flat(sym, 8, 100)
+	bars[3] = bar(sym, 3, 130, 132, 129, 131)
+	bars[5] = bar(sym, 5, 150, 152, 149, 151)
+	for i := range bars {
+		bars[i].AvailableAt = bars[i].CloseTime.Add(2 * time.Second)
+	}
+	c := cfg()
+	res := run(t, c, map[string][]data.Bar{sym: bars}, step(1, sym, money.RatioOne), step(3, sym, 0))
+	require.Len(t, res.Fills, 2)
+	require.Equal(t, bars[3].OpenTime, res.Fills[0].Time)
+	require.Equal(t, bars[5].OpenTime, res.Fills[1].Time)
+	costs := feature.LabelCosts{Fee: c.FeeRate, Slippage: c.SlipRate}
+	rows, err := feature.SamplesContext(context.Background(), []string{"ret_1"}, 1, bars, bars[1].OpenTime, bars[2].OpenTime, bars[5].AvailableAt, costs)
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	buy := res.Fills[0]
+	debit := buy.Value.V + buy.FeeUSDT.V
+	// The label uses a unit-size continuous return, while fills round at scale 8.
+	require.InDelta(t, float64(res.Trades[0].Net.V)/float64(debit), rows[0].Y, 1e-8)
+	require.Equal(t, res.Trades[0].ClosedObservedAt, rows[0].ReadyAt)
 }
 
 func TestBackfillCannotTriggerProtectionBeforeEntry(t *testing.T) {

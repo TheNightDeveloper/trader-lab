@@ -479,3 +479,19 @@ Claims have their own five-second deadline so orderly shutdown can finish them. 
 allows up to two seconds for the prior session to release its lock. The new scheduler
 can recover attempts only after it owns the lease, and a live owner remains protected.
 Attempt outcomes still use the existing claim token before changing a row.
+
+## ADR-060 Train on observable causal round trips
+
+New artifacts record `causal-round-trip/v2` and the per-side fee and slippage used
+for labels. Entry follows the shared default next-open rule. Exit targets the
+recipe horizon from entry and waits until the entry candle is observed. Require
+complete, consecutive candles and discard a sample when the feature window is
+unready at the decision or publication delay makes the fill ordering ambiguous.
+Only a label with an observed exit enters a fit. Both champion and candidates use
+the same assumptions during walk-forward and fresh final fits. A logistic output
+estimates the positive-label class, and the simulator still judges policy outcomes.
+
+The training version and costs participate in the artifact ID. Keep existing models,
+reports and serving pointers intact. Previous cycles remain readable and may be
+rejected. Forward and approval require a cycle using the current training contract.
+The fill and evaluation versions are unchanged, and no migration is needed.

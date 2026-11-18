@@ -21,7 +21,7 @@ func CurrentEvidence(d Doc) bool {
 	if err := d.Config.researchError(); err != nil {
 		return false
 	}
-	return d.EvaluationVersion == eval.Version && d.TrainingCutoff != nil &&
+	return d.EvaluationVersion == eval.Version && d.TrainingVersion == model.TrainingVersion && d.TrainingCutoff != nil &&
 		d.ModelCreatedAt != nil && d.FreezeAt != nil && d.TradeStart != nil &&
 		!d.ModelCreatedAt.Before(*d.TrainingCutoff) && !d.FreezeAt.Before(*d.ModelCreatedAt) &&
 		!d.TradeStart.Before(*d.FreezeAt)

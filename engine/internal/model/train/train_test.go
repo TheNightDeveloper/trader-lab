@@ -111,6 +111,10 @@ func TestSavedModelReproducesPredictions(t *testing.T) {
 
 func TestModelsLearnTheSignal(t *testing.T) {
 	bars := Bars(3000, 4)
+	for i := range bars {
+		// With immediate publication, the next hourly return is executable.
+		bars[i].AvailableAt = bars[i].CloseTime
+	}
 	asOf := bars[2000].OpenTime
 	r := Ridge()
 	s, err := feature.Samples(r.Features, 1, bars, t0, asOf, asOf)
@@ -147,6 +151,12 @@ func TestWalkForwardTrainsEachStepOnItsPast(t *testing.T) {
 	require.Len(t, ms, 2)
 	require.Less(t, ms[0].Samples, ms[1].Samples, "expanding window")
 	require.Equal(t, steps[1].AsOf, ms[1].AsOf)
+	costs := feature.LabelCosts{Fee: 1000, Slippage: 500}
+	net, err := WalkForward(context.Background(), r, map[string][]data.Bar{"BTCUSDT": bars}, steps[:1], Meta{Algorithm: "ridge", LabelCosts: costs})
+	require.NoError(t, err)
+	require.Equal(t, &costs, net[0].LabelCosts)
+	require.Less(t, net[0].Intercept, ms[0].Intercept, "the production fit must train on net returns")
+	require.NotEqual(t, ms[0].ID, net[0].ID)
 
 	_, err = Fit(context.Background(), r, nil, t0, t0, t0, Meta{})
 	require.ErrorIs(t, err, ErrTooFew)

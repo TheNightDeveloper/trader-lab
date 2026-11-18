@@ -53,7 +53,7 @@ func recommendation(t *testing.T, l *Loop, m model.Artifact) int64 {
 	cutoff, created, freeze, start := day0, day0.Add(time.Hour), day0.Add(65*time.Minute), day0.Add(2*time.Hour)
 	cfg := Default()
 	cfg.Algorithm = "test-learn"
-	doc := Doc{Config: cfg, EvaluationVersion: eval.Version, TrainingCutoff: &cutoff, ModelCreatedAt: &created, FreezeAt: &freeze, TradeStart: &start,
+	doc := Doc{Config: cfg, EvaluationVersion: eval.Version, TrainingVersion: model.TrainingVersion, TrainingCutoff: &cutoff, ModelCreatedAt: &created, FreezeAt: &freeze, TradeStart: &start,
 		Champion: Contender{VersionID: a.VersionID, ModelID: a.Model.ID, Recipe: a.Model.Recipe, Active: true, Revision: &a.Revision}, Challenger: &Contender{ModelID: m.ID, Recipe: m.Recipe}}
 	require.True(t, CurrentEvidence(doc))
 	body, err := json.Marshal(doc)

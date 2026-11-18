@@ -33,7 +33,7 @@ func TestCancellationInsideWalkForwardStep(t *testing.T) {
 	require.Empty(t, models, "never expose a partial fit after cancellation")
 }
 
-func TestUnchangedFitReference(t *testing.T) {
+func TestRoundTripFitReference(t *testing.T) {
 	bs := Bars(600, 3)
 	for _, kind := range []string{"ridge", "logistic"} {
 		r := Ridge()
@@ -46,8 +46,8 @@ func TestUnchangedFitReference(t *testing.T) {
 		require.NoError(t, err)
 		a, err := Fit(context.Background(), r, rows, t0, end, end, Meta{Algorithm: "reference", Seed: 42})
 		require.NoError(t, err)
-		want := map[string]string{"ridge": "m_e28fe1113ecceecd", "logistic": "m_58589b6c51d65f83"}
-		require.Equal(t, want[kind], a.ID, "cancellation checks must not change a completed fit")
+		want := map[string]string{"ridge": "m_712da9c859de822a", "logistic": "m_431171fde407c556"}
+		require.Equal(t, want[kind], a.ID, "%s reference fit must be reproducible", kind)
 	}
 }
 
@@ -91,7 +91,7 @@ func TestFitLimitsAndCancelledInputs(t *testing.T) {
 func TestFeaturePreparationCancellationReturnsNoPartialData(t *testing.T) {
 	ctx := &checkpointContext{Context: context.Background(), remaining: 2}
 	bs := Bars(600, 3)
-	rows, err := feature.SamplesContext(ctx, Ridge().Features, 1, bs, t0, bs[500].OpenTime, bs[500].OpenTime)
+	rows, err := feature.SamplesContext(ctx, Ridge().Features, 1, bs, t0, bs[500].OpenTime, bs[500].OpenTime, feature.LabelCosts{})
 	require.ErrorIs(t, err, context.Canceled)
 	require.Nil(t, rows)
 	input := make([]feature.Sample, 300)

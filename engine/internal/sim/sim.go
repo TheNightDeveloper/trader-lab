@@ -12,6 +12,7 @@ import (
 
 	"tradinglab/engine/internal/clock"
 	"tradinglab/engine/internal/data"
+	"tradinglab/engine/internal/fillpolicy"
 	"tradinglab/engine/internal/fx"
 	"tradinglab/engine/internal/instrument"
 	"tradinglab/engine/internal/money"
@@ -86,7 +87,7 @@ func (c Config) normalized() (Config, error) {
 		return bad("unknown sizing %q", c.Sizing)
 	}
 	if c.LatencyBars == 0 {
-		c.LatencyBars = 1
+		c.LatencyBars = fillpolicy.DefaultLatencyBars
 	}
 	if c.LatencyBars < 1 {
 		return bad("latency must be >= 1 bar")
@@ -152,7 +153,7 @@ func Run(ctx context.Context, cfg Config, specs map[string]instrument.Spec, bars
 	first := bars[events[0].sym][events[0].i]
 	r.clk = clock.NewVirtual(first.AvailableAt)
 	if r.cfg.IntentTTL == 0 {
-		r.cfg.IntentTTL = time.Duration(r.cfg.LatencyBars+9) * first.CloseTime.Sub(first.OpenTime)
+		r.cfg.IntentTTL = fillpolicy.DefaultTTL(r.cfg.LatencyBars, first.CloseTime.Sub(first.OpenTime))
 	}
 
 	for start := 0; start < len(events); {
@@ -266,9 +267,7 @@ func (r *runner) fillDue(ctx context.Context, sym string, i int, b data.Bar) err
 	case b.OpenTime.After(o.validUntil):
 		delete(r.pending, sym)
 		r.outcome(o.decision, OutcomeExpired, fmt.Sprintf("no fill by %s (next bar opened %s)", stamp(o.validUntil), stamp(b.OpenTime)))
-	case b.OpenTime.Before(o.at):
-		// A known close cannot authorize a fill at an opening price from its past.
-	default:
+	case fillpolicy.AllowsOpen(b.OpenTime, o.at, o.validUntil):
 		delete(r.pending, sym)
 		return r.execute(ctx, o, b)
 	}

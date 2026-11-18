@@ -9,6 +9,7 @@ import (
 	"tradinglab/engine/internal/data"
 	"tradinglab/engine/internal/eval"
 	"tradinglab/engine/internal/metrics"
+	"tradinglab/engine/internal/model"
 )
 
 func TestForwardCoverageNeedsEveryBarOfEverySymbol(t *testing.T) {
@@ -72,8 +73,11 @@ func TestWalkWinsRequireSamePeriodAndValidPeriodPnL(t *testing.T) {
 func TestEvidenceRequiresRealFreezeAndCurrentContract(t *testing.T) {
 	t0 := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)
 	created, freeze, start := t0.Add(time.Hour), t0.Add(65*time.Minute), t0.Add(2*time.Hour)
-	d := Doc{Config: Default(), EvaluationVersion: eval.Version, TrainingCutoff: &t0, ModelCreatedAt: &created, FreezeAt: &freeze, TradeStart: &start}
+	d := Doc{Config: Default(), EvaluationVersion: eval.Version, TrainingVersion: model.TrainingVersion, TrainingCutoff: &t0, ModelCreatedAt: &created, FreezeAt: &freeze, TradeStart: &start}
 	require.True(t, CurrentEvidence(d))
+	d.TrainingVersion = ""
+	require.False(t, CurrentEvidence(d), "a close-to-close fit cannot authorize a new promotion")
+	d.TrainingVersion = model.TrainingVersion
 	d.Config.Symbols = []string{"ETHBTC"}
 	require.False(t, CurrentEvidence(d), "unsupported stored evidence cannot authorize promotion")
 	d.Config = Default()

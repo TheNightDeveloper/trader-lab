@@ -1,6 +1,6 @@
 // Package feature computes model inputs and labels from bars. A feature of bar i
 // is a function of its trailing window, available only when all members exist;
-// a forward-return label needs both endpoint prices to be available.
+// a round-trip label needs both execution endpoint prices to be available.
 // Floats are allowed here: this is model math, never accounting.
 package feature
 
@@ -13,6 +13,8 @@ import (
 	"time"
 
 	"tradinglab/engine/internal/data"
+	"tradinglab/engine/internal/fillpolicy"
+	"tradinglab/engine/internal/money"
 )
 
 var (
@@ -137,8 +139,8 @@ func Row(names []string, hist []data.Bar) ([]float64, bool) {
 	return x, true
 }
 
-// Sample is one training row: features of the bar opened at At, and the forward
-// return over the next h bars as the label.
+// Sample is one training row: features of the bar opened at At and the net
+// return of a hypothetical round trip as the label.
 type Sample struct {
 	At          time.Time // open time of the feature bar
 	AvailableAt time.Time // when the features existed
@@ -150,54 +152,121 @@ type Sample struct {
 // Samples builds rows for bars opened in [from, to) whose label is ready at asOf.
 // Rows with an unready label are left out: nothing unready enters training.
 func Samples(names []string, h int, bars []data.Bar, from, to, asOf time.Time) ([]Sample, error) {
-	return SamplesContext(context.Background(), names, h, bars, from, to, asOf)
+	return SamplesContext(context.Background(), names, h, bars, from, to, asOf, LabelCosts{})
 }
 
-// SamplesContext cooperatively stops long training passes without changing arithmetic.
-func SamplesContext(ctx context.Context, names []string, h int, bars []data.Bar, from, to, asOf time.Time) ([]Sample, error) {
+// LabelCosts are the simulator's per-side rates, in millionths.
+type LabelCosts struct {
+	Fee      money.Ratio `json:"fee_ppm"`
+	Slippage money.Ratio `json:"slippage_ppm"`
+}
+
+// Valid checks the same rate bounds as simulated fills.
+func (c LabelCosts) Valid() bool {
+	return c.Fee >= 0 && c.Fee < money.RatioOne && c.Slippage >= 0 && c.Slippage < money.RatioOne
+}
+
+// SamplesContext labels verifiable same-symbol round trips using observed prices.
+func SamplesContext(ctx context.Context, names []string, h int, bars []data.Bar, from, to, asOf time.Time, costs LabelCosts) ([]Sample, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
 	if err := Check(names); err != nil {
 		return nil, err
 	}
-	if h < 1 {
-		return nil, fmt.Errorf("feature: label horizon %d must be at least one bar", h)
+	if h < 1 || !costs.Valid() {
+		return nil, errors.New("feature: invalid label horizon or costs")
 	}
+	if len(bars) == 0 {
+		return nil, nil
+	}
+	frame := bars[0].CloseTime.Sub(bars[0].OpenTime)
+	if frame <= 0 || frame > 24*time.Hour {
+		return nil, errors.New("feature: invalid candle duration")
+	}
+	fee := float64(costs.Fee) / float64(money.RatioOne)
+	slip := float64(costs.Slippage) / float64(money.RatioOne)
+	factor := (1 - slip) * (1 - fee) / ((1 + slip) * (1 + fee))
 	var out []Sample
 	lookback := Lookback(names)
-	for i := lookback - 1; i < len(bars)-h; i++ {
+	runEnd := len(bars)
+	for i := len(bars) - 1; i >= lookback-1; i-- {
 		if i%256 == 0 {
 			if err := ctx.Err(); err != nil {
 				return nil, err
 			}
 		}
 		b := bars[i]
-		if b.OpenTime.Before(from) || !b.OpenTime.Before(to) {
+		if !realBar(b, frame) {
+			runEnd = i
 			continue
 		}
-		end := bars[i+h]
-		ready := end.AvailableAt
-		if b.AvailableAt.After(ready) {
-			ready = b.AvailableAt
+		if i+1 < runEnd && !b.CloseTime.Equal(bars[i+1].OpenTime) {
+			runEnd = i + 1
 		}
-		available := b.AvailableAt
-		// Earlier candles can arrive later than the last candle in this window.
-		for _, dependency := range bars[i-lookback+1 : i] {
-			if dependency.AvailableAt.After(available) {
-				available = dependency.AvailableAt
-			}
+		if b.OpenTime.Before(from) {
+			break
 		}
-		if available.After(asOf) || ready.After(asOf) {
+		if !b.OpenTime.Before(to) || b.AvailableAt.After(asOf) ||
+			!b.AvailableAt.Before(b.CloseTime.Add(frame)) || !observedWindow(bars[i-lookback+1:i+1], frame) {
+			continue
+		}
+		entry := i + fillpolicy.DefaultLatencyBars
+		entry += causalOpen(bars[entry:runEnd], b.AvailableAt, frame)
+		if h >= runEnd-entry {
+			continue
+		}
+		// The exit is activated at the holding target or once entry is observed,
+		// whichever comes later. The earlier open cannot fill an unseen position.
+		exit := entry + h
+		exitAt := bars[exit].OpenTime
+		if observed := bars[entry].AvailableAt; observed.After(exitAt) {
+			exitAt = observed
+		}
+		exit += causalOpen(bars[exit:runEnd], exitAt, frame)
+		if exit >= runEnd || bars[exit].AvailableAt.After(asOf) {
 			continue
 		}
 		x, _ := Row(names, bars[:i+1])
-		out = append(out, Sample{At: b.OpenTime, AvailableAt: available, ReadyAt: ready, X: x, Y: closeF(end)/closeF(b) - 1})
+		out = append(out, Sample{At: b.OpenTime, AvailableAt: b.AvailableAt, ReadyAt: bars[exit].AvailableAt, X: x,
+			Y: float64(bars[exit].O.V)/float64(bars[entry].O.V)*factor - 1})
 	}
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
+	slices.Reverse(out)
 	return out, nil
+}
+
+func realBar(b data.Bar, frame time.Duration) bool {
+	// A later open can execute first if this bar arrives after the next close.
+	return b.Flags&(data.FlagFilled|data.FlagPartial) == 0 && b.O.V > 0 && b.C.V > 0 &&
+		b.CloseTime.Equal(b.OpenTime.Add(frame)) && !b.AvailableAt.Before(b.CloseTime) &&
+		!b.AvailableAt.After(b.CloseTime.Add(frame))
+}
+
+func observedWindow(bars []data.Bar, frame time.Duration) bool {
+	decision := bars[len(bars)-1].AvailableAt
+	for i, b := range bars[:len(bars)-1] {
+		if !realBar(b, frame) || b.AvailableAt.After(decision) || !b.CloseTime.Equal(bars[i+1].OpenTime) {
+			return false
+		}
+	}
+	return true
+}
+
+func causalOpen(bars []data.Bar, at time.Time, frame time.Duration) int {
+	until := at.Add(fillpolicy.DefaultTTL(fillpolicy.DefaultLatencyBars, frame))
+	// Contiguity and the publication bound mean at most one open is already past.
+	for j, b := range bars {
+		if !b.OpenTime.Before(at) {
+			if fillpolicy.AllowsOpen(b.OpenTime, at, until) {
+				return j
+			}
+			break
+		}
+	}
+	return len(bars)
 }
 
 // CheckAsOf fails when any sample (features or label) was not available at asOf.

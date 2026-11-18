@@ -30,6 +30,7 @@ type Meta struct {
 	DatasetIDs []string
 	Seed       uint64
 	Parent     string
+	LabelCosts feature.LabelCosts
 }
 
 // MinSamples a fit needs: 30, or 10 per feature.
@@ -87,6 +88,7 @@ func Fit(ctx context.Context, r model.Recipe, samples []feature.Sample, from, to
 	}
 	a := model.Artifact{
 		TrainingVersion: model.TrainingVersion,
+		LabelCosts:      &meta.LabelCosts,
 		Algorithm:       meta.Algorithm, Recipe: r, RecipeHash: r.Hash(), DatasetIDs: meta.DatasetIDs,
 		TrainFrom: from.UTC(), TrainTo: to.UTC(), AsOf: asOf.UTC(), Seed: meta.Seed, Scaler: sc,
 		Samples: len(samples), Parent: meta.Parent,
@@ -294,7 +296,7 @@ func WalkForward(ctx context.Context, r model.Recipe, bars map[string][]data.Bar
 		}
 		var samples []feature.Sample
 		for _, s := range syms {
-			ss, err := feature.SamplesContext(ctx, r.Features, r.Horizon, bars[s], st.From, st.To, st.AsOf)
+			ss, err := feature.SamplesContext(ctx, r.Features, r.Horizon, bars[s], st.From, st.To, st.AsOf, meta.LabelCosts)
 			if err != nil {
 				return nil, err
 			}

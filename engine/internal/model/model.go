@@ -24,8 +24,11 @@ var (
 // RecipeFormat is the version of the recipe JSON format.
 const RecipeFormat = 1
 
-// TrainingVersion distinguishes fits with full dependency availability checks.
-const TrainingVersion = "causal-features/v1"
+const (
+	// TrainingVersion identifies fits against net causal round-trip labels.
+	TrainingVersion       = "causal-round-trip/v2"
+	legacyTrainingVersion = "causal-features/v1"
+)
 
 // Recipe is everything a learned strategy is built from, besides its trained
 // weights. Any change is a new algorithm version.
@@ -107,14 +110,15 @@ func (r Recipe) Hash() string {
 // Artifact is one trained model: the recipe it came from, the data and window it
 // saw, the fitted transform and weights. Content-addressed: the ID covers all of it.
 type Artifact struct {
-	TrainingVersion string    `json:"training_version,omitempty"` // absent on legacy fits; never rewritten
-	ID              string    `json:"id"`
-	Algorithm       string    `json:"algorithm"`
-	Recipe          Recipe    `json:"recipe"`
-	RecipeHash      string    `json:"recipe_hash"`
-	DatasetIDs      []string  `json:"dataset_ids"`
-	TrainFrom       time.Time `json:"train_from"` // feature bars opened in [TrainFrom, TrainTo)
-	TrainTo         time.Time `json:"train_to"`
+	TrainingVersion string              `json:"training_version,omitempty"` // absent on legacy fits; never rewritten
+	LabelCosts      *feature.LabelCosts `json:"label_costs,omitempty"`
+	ID              string              `json:"id"`
+	Algorithm       string              `json:"algorithm"`
+	Recipe          Recipe              `json:"recipe"`
+	RecipeHash      string              `json:"recipe_hash"`
+	DatasetIDs      []string            `json:"dataset_ids"`
+	TrainFrom       time.Time           `json:"train_from"` // feature bars opened in [TrainFrom, TrainTo)
+	TrainTo         time.Time           `json:"train_to"`
 	// AsOf: every training label was ready by then. The model may only be used for
 	// decisions on bars opened at or after AsOf.
 	AsOf      time.Time      `json:"as_of"`
@@ -165,7 +169,16 @@ func (a Artifact) Validate() error {
 	if a.RecipeHash != a.Recipe.Hash() || len(a.Weights) != k || len(a.Scaler.Mean) != k || len(a.Scaler.Std) != k {
 		return fmt.Errorf("%w: recipe hash or model dimensions", ErrArtifact)
 	}
-	if a.TrainingVersion != "" && a.TrainingVersion != TrainingVersion {
+	switch a.TrainingVersion {
+	case TrainingVersion:
+		if a.LabelCosts == nil || !a.LabelCosts.Valid() {
+			return fmt.Errorf("%w: missing or invalid label costs", ErrArtifact)
+		}
+	case "", legacyTrainingVersion:
+		if a.LabelCosts != nil {
+			return fmt.Errorf("%w: unexpected legacy label costs", ErrArtifact)
+		}
+	default:
 		return fmt.Errorf("%w: unknown training version %q", ErrArtifact, a.TrainingVersion)
 	}
 	for _, values := range [][]float64{a.Weights, a.Scaler.Mean, a.Scaler.Std, {a.Intercept, a.TrainError}} {

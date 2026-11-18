@@ -17,6 +17,8 @@ import (
 	"tradinglab/engine/internal/data"
 	"tradinglab/engine/internal/eval"
 	"tradinglab/engine/internal/experiment"
+	"tradinglab/engine/internal/feature"
+	"tradinglab/engine/internal/fillpolicy"
 	"tradinglab/engine/internal/jobs"
 	"tradinglab/engine/internal/metrics"
 	"tradinglab/engine/internal/model"
@@ -54,6 +56,7 @@ const (
 // Doc is a cycle's record: its pre-registered config and everything it found.
 type Doc struct {
 	EvaluationVersion string            `json:"evaluation_version,omitempty"`
+	TrainingVersion   string            `json:"training_version,omitempty"`
 	Config            Config            `json:"config"`
 	Champion          Contender         `json:"champion"`
 	Datasets          []string          `json:"datasets,omitempty"`
@@ -150,7 +153,7 @@ func (l *Loop) Begin(ctx context.Context, trigger string) (int64, error) {
 	if err := cfg.Validate(); err != nil {
 		return 0, err
 	}
-	doc, err := json.Marshal(Doc{EvaluationVersion: eval.Version, Config: cfg, Steps: map[string]string{}})
+	doc, err := json.Marshal(Doc{EvaluationVersion: eval.Version, TrainingVersion: model.TrainingVersion, Config: cfg, Steps: map[string]string{}})
 	if err != nil {
 		return 0, err
 	}
@@ -348,7 +351,7 @@ func (l *Loop) storeArtifact(ctx context.Context, cycleID int64, a model.Artifac
 }
 
 func (c Config) sim() sim.Config {
-	return sim.Config{Capital: c.Capital, FeeRate: c.Fee, SlipRate: c.Slippage, LatencyBars: 1}
+	return sim.Config{Capital: c.Capital, FeeRate: c.Fee, SlipRate: c.Slippage, LatencyBars: fillpolicy.DefaultLatencyBars}
 }
 
 // dataEnd: the last bar used closes at least one bar before now, so every bar
@@ -471,7 +474,8 @@ func (l *Loop) run(ctx context.Context, c *cycle) (err error) {
 	for _, v := range vars {
 		recipes = append(recipes, v.Recipe)
 	}
-	meta := train.Meta{Algorithm: cfg.Algorithm, DatasetIDs: c.doc.Datasets, Seed: cfg.Seed}
+	meta := train.Meta{Algorithm: cfg.Algorithm, DatasetIDs: c.doc.Datasets, Seed: cfg.Seed,
+		LabelCosts: feature.LabelCosts{Fee: cfg.Fee, Slippage: cfg.Slippage}}
 	var steps []train.Step
 	for _, f := range split.Folds {
 		steps = append(steps, train.Step{From: f.Train.From, To: f.Train.To, AsOf: f.Test.From})

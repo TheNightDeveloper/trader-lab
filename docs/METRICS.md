@@ -259,15 +259,24 @@ a late earlier dependency cannot be hidden by the final bar's timestamp.
 - `range_24`: `(max high − min low) over 24 bars / close`.
 
 ### Labels
-- Forward return over the recipe horizon h: `close[i+h] / close[i] − 1`, `ReadyAt` =
-  maximum availability of bars i and i+h. A training row enters a fit only if its features and label were
-  available at the fit's as-of time; fits re-check this and fail otherwise (look-ahead).
+- `causal-round-trip/v2` trains on the net return of a hypothetical same-symbol round trip.
+  Entry uses the first open at or after the feature candle became available, with at least
+  one bar of index latency and the simulator's default TTL. Exit targets h bars after
+  entry and uses an open at or after that target and the observation of the entry candle.
+- The feature window must already exist at decision time. Training requires consecutive
+  complete real candles across the feature window and holding path. Ambiguous execution
+  order from late publication discards the sample. The earliest possible fit cutoff is
+  the exit candle's availability. Each fit also checks the training window and as-of.
+- Net label = `sell_open × (1 − slip) × (1 − fee) / (buy_open × (1 + slip) × (1 + fee)) − 1`.
+  Both rates are pinned to the cycle config and stored in the artifact. This is a continuous
+  return for a unit position. Position sizing, lot rounding, stop/take and strategy exits
+  are evaluated separately in the simulator. Legacy artifacts retain their original labels.
 
 ### Models
 - Transform: z-score per feature, fit on the training rows only (a constant feature gets
   spread 1, i.e. stays 0).
-- Ridge: `(ZᵀZ + α·n·I) w = Zᵀ(y − ȳ)`, intercept ȳ (not penalized). Predicts the h-bar
-  forward return. Solved by Cholesky (gonum).
+- Ridge: `(ZᵀZ + α·n·I) w = Zᵀ(y − ȳ)`, intercept ȳ (not penalized). Predicts the
+  hypothetical net round-trip return. Solved by Cholesky (gonum).
 - Logistic: P(y > 0), L2 `α·n` on the weights (not the intercept), Newton/IRLS, ≤ 50 steps,
   stop when the largest step < 1e−10.
 - Train error (registry only): RMSE (ridge) or mean log loss (logistic), in sample.

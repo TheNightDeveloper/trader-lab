@@ -577,6 +577,37 @@ The full DB-mandatory race run passed the restart and ownership regressions. It 
 unchanged 1 s target. The earlier passing chart run does not settle this load variation.
 Evidence: artifacts/p0-claim-race-go-tests.jsonl.
 
+## Aggregate research metrics (2026-11-18)
+
+Totals and averages use wide intermediate arithmetic to keep representable results
+exact and mark unrepresentable metrics invalid. The evaluation's period projection
+replaces both the old cohort value and its validity. Committed as `2cbc4e3`.
+The Windows host's Linux container run passed 350 Go tests/subtests before the
+500-attempt load test was stopped after five minutes. It then passed in isolation
+with a worst health delay of 672 ms. GetChart p95 in the full run was 733 ms.
+Evidence: artifacts/p0-metrics-race-go-tests.jsonl and p0-metrics-search-retry.txt.
+
+## Causal training labels (2026-11-18)
+
+New fits use `causal-round-trip/v2` (ADR-060). Training uses the first causal
+entry open and an eligible exit after the configured holding horizon. It charges
+both sides' fee and slippage from the cycle config and waits for the exit candle.
+Missing or ambiguous candles exclude the sample. The artifact records rates and
+training version in its content ID. Previously saved artifacts keep their IDs.
+New forward and promotion evidence requires a current-version cycle.
+The simulator and its versioned evaluation contract keep their fill behavior.
+
+On Windows Go 1.26.4 with PostgreSQL mandatory, the full suite passed **353
+tests/subtests, 0 failed or skipped, 22 test packages**, including all 11 unchanged
+simulator golden scenarios, repeatable artifact IDs and the learning recommendation
+and approval path. A direct simulator fixture matches the delayed entry and exit,
+observation cutoff, and net return within fixed-point rounding tolerance.
+`go vet ./...` passed. GetChart p95 was 36 ms in this non-race run. The
+500-attempt heartbeat test's worst delay was 8.52 ms.
+Evidence: artifacts/p0-label-go-tests.jsonl. Windows race requires an unavailable
+C compiler, and the Docker engine was stopped. Production market performance,
+hosted CI, and real-browser behavior are outside this verification.
+
 ## Remaining P0 work / next batch
 
 The analytics/learning review after FIX-02 fixed dependency readiness, fit/model validation,
@@ -590,8 +621,8 @@ That historical review preceded FIX-04/FIX-05 above. These batches do not comple
    active-work byte admission, cooperative fitting cancellation and conservative slot-time
    deadlines are implemented in the scopes above; they are not OS resource quotas.
 2. Finish F10 with search-backed paginated pickers. Current pickers fetch all pages into
-   memory. Accounting overflow, economic label/fill alignment and remaining stress cases
-   also remain open.
+   memory. Report presentation of unrepresentable metrics and remaining accounting
+   stress cases also remain open.
 3. Run the hosted workflow, real-browser chart/async/focus checks and P0 UX gate.
 
 The existing passing suite does **not** establish process-wide resource or accounting-overflow
