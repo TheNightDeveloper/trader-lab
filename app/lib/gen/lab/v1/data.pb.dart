@@ -441,10 +441,20 @@ class ListDatasetsRequest extends $pb.GeneratedMessage {
   factory ListDatasetsRequest({
     $core.int? pageSize,
     $core.int? offset,
+    $core.String? query,
+    $core.String? symbol,
+    $core.bool? researchOnly,
+    $core.Iterable<$core.String>? ids,
+    $core.String? timeframe,
   }) {
     final result = ListDatasetsRequest._();
     if (pageSize != null) result.pageSize = pageSize;
     if (offset != null) result.offset = offset;
+    if (query != null) result.query = query;
+    if (symbol != null) result.symbol = symbol;
+    if (researchOnly != null) result.researchOnly = researchOnly;
+    if (ids != null) result.ids.addAll(ids);
+    if (timeframe != null) result.timeframe = timeframe;
     return result;
   }
 
@@ -463,6 +473,11 @@ class ListDatasetsRequest extends $pb.GeneratedMessage {
       createEmptyInstance: ListDatasetsRequest.$_createMessage)
     ..aI(1, _omitFieldNames ? '' : 'pageSize')
     ..aI(2, _omitFieldNames ? '' : 'offset')
+    ..aOS(3, _omitFieldNames ? '' : 'query')
+    ..aOS(4, _omitFieldNames ? '' : 'symbol')
+    ..aOB(5, _omitFieldNames ? '' : 'researchOnly')
+    ..pPS(6, _omitFieldNames ? '' : 'ids')
+    ..aOS(7, _omitFieldNames ? '' : 'timeframe')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -505,6 +520,45 @@ class ListDatasetsRequest extends $pb.GeneratedMessage {
   $core.bool hasOffset() => $_has(1);
   @$pb.TagNumber(2)
   void clearOffset() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get query => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set query($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasQuery() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearQuery() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.String get symbol => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set symbol($core.String value) => $_setString(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasSymbol() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearSymbol() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.bool get researchOnly => $_getBF(4);
+  @$pb.TagNumber(5)
+  set researchOnly($core.bool value) => $_setBool(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasResearchOnly() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearResearchOnly() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  $pb.PbList<$core.String> get ids => $_getList(5);
+
+  @$pb.TagNumber(7)
+  $core.String get timeframe => $_getSZ(6);
+  @$pb.TagNumber(7)
+  set timeframe($core.String value) => $_setString(6, value);
+  @$pb.TagNumber(7)
+  $core.bool hasTimeframe() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearTimeframe() => $_clearField(7);
 }
 
 class ListDatasetsResponse extends $pb.GeneratedMessage {

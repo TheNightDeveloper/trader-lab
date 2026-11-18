@@ -338,6 +338,11 @@ type ListDatasetsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	PageSize      int32                  `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	Offset        int32                  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
+	Query         string                 `protobuf:"bytes,3,opt,name=query,proto3" json:"query,omitempty"`                                    // literal, case-insensitive text across symbol, timeframe and ID
+	Symbol        string                 `protobuf:"bytes,4,opt,name=symbol,proto3" json:"symbol,omitempty"`                                  // exact pair when the picker already scopes it
+	ResearchOnly  bool                   `protobuf:"varint,5,opt,name=research_only,json=researchOnly,proto3" json:"research_only,omitempty"` // exclude pairs without research capability
+	Ids           []string               `protobuf:"bytes,6,rep,name=ids,proto3" json:"ids,omitempty"`                                        // exact saved selections, combined with the other filters
+	Timeframe     string                 `protobuf:"bytes,7,opt,name=timeframe,proto3" json:"timeframe,omitempty"`                            // exact timeframe, when selected independently of the search text
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -384,6 +389,41 @@ func (x *ListDatasetsRequest) GetOffset() int32 {
 		return x.Offset
 	}
 	return 0
+}
+
+func (x *ListDatasetsRequest) GetQuery() string {
+	if x != nil {
+		return x.Query
+	}
+	return ""
+}
+
+func (x *ListDatasetsRequest) GetSymbol() string {
+	if x != nil {
+		return x.Symbol
+	}
+	return ""
+}
+
+func (x *ListDatasetsRequest) GetResearchOnly() bool {
+	if x != nil {
+		return x.ResearchOnly
+	}
+	return false
+}
+
+func (x *ListDatasetsRequest) GetIds() []string {
+	if x != nil {
+		return x.Ids
+	}
+	return nil
+}
+
+func (x *ListDatasetsRequest) GetTimeframe() string {
+	if x != nil {
+		return x.Timeframe
+	}
+	return ""
 }
 
 type ListDatasetsResponse struct {
@@ -1142,10 +1182,15 @@ const file_lab_v1_data_proto_rawDesc = "" +
 	"\x06filled\x18\t \x01(\x05R\x06filled\x12&\n" +
 	"\x0fcreated_unix_ms\x18\n" +
 	" \x01(\x03R\rcreatedUnixMs\x12 \n" +
-	"\vexperiments\x18\v \x01(\x05R\vexperiments\"J\n" +
+	"\vexperiments\x18\v \x01(\x05R\vexperiments\"\xcd\x01\n" +
 	"\x13ListDatasetsRequest\x12\x1b\n" +
 	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x16\n" +
-	"\x06offset\x18\x02 \x01(\x05R\x06offset\"Y\n" +
+	"\x06offset\x18\x02 \x01(\x05R\x06offset\x12\x14\n" +
+	"\x05query\x18\x03 \x01(\tR\x05query\x12\x16\n" +
+	"\x06symbol\x18\x04 \x01(\tR\x06symbol\x12#\n" +
+	"\rresearch_only\x18\x05 \x01(\bR\fresearchOnly\x12\x10\n" +
+	"\x03ids\x18\x06 \x03(\tR\x03ids\x12\x1c\n" +
+	"\ttimeframe\x18\a \x01(\tR\ttimeframe\"Y\n" +
 	"\x14ListDatasetsResponse\x12+\n" +
 	"\bdatasets\x18\x01 \x03(\v2\x0f.lab.v1.DatasetR\bdatasets\x12\x14\n" +
 	"\x05total\x18\x02 \x01(\x03R\x05total\"\x14\n" +

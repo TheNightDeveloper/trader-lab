@@ -147,6 +147,24 @@ SELECT * FROM datasets ORDER BY created_at DESC, id LIMIT $1 OFFSET $2;
 -- name: CountDatasets :one
 SELECT count(*) FROM datasets;
 
+-- name: ListDatasetCatalog :many
+SELECT * FROM datasets
+WHERE (NOT @research_only::boolean OR symbol = ANY(@allowed_symbols::text[]))
+  AND (@symbol::text = '' OR symbol = @symbol)
+  AND (@timeframe::text = '' OR timeframe = @timeframe)
+  AND (coalesce(cardinality(@ids::text[]), 0) = 0 OR id = ANY(@ids))
+  AND (@query::text = '' OR strpos(lower(symbol || ' ' || timeframe || ' ' || id), @query) > 0)
+ORDER BY created_at DESC, id
+LIMIT @page_size::int OFFSET @page_offset::int;
+
+-- name: CountDatasetCatalog :one
+SELECT count(*) FROM datasets
+WHERE (NOT @research_only::boolean OR symbol = ANY(@allowed_symbols::text[]))
+  AND (@symbol::text = '' OR symbol = @symbol)
+  AND (@timeframe::text = '' OR timeframe = @timeframe)
+  AND (coalesce(cardinality(@ids::text[]), 0) = 0 OR id = ANY(@ids))
+  AND (@query::text = '' OR strpos(lower(symbol || ' ' || timeframe || ' ' || id), @query) > 0);
+
 -- name: InsertFxRate :one
 INSERT INTO fx_rates (pair, rate_date, rate, rate_scale, source)
 VALUES ('USDT/TOMAN', $1, $2, $3, $4)

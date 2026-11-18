@@ -5,9 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strings"
 	"time"
 
 	"connectrpc.com/connect"
+	"github.com/jackc/pgx/v5"
 
 	"tradinglab/engine/internal/clock"
 	"tradinglab/engine/internal/data"
@@ -58,15 +60,53 @@ func (d *Data) GetOverview(ctx context.Context, _ *connect.Request[labv1.GetOver
 }
 
 func (d *Data) ListDatasets(ctx context.Context, req *connect.Request[labv1.ListDatasetsRequest]) (*connect.Response[labv1.ListDatasetsResponse], error) {
-	rows, err := d.Store.ListDatasets(ctx, db.ListDatasetsParams{Limit: pageSize(req.Msg.GetPageSize()), Offset: max(0, req.Msg.GetOffset())})
+	msg := req.Msg
+	if len(msg.GetQuery()) > 128 || len(msg.GetSymbol()) > 32 || len(msg.GetIds()) > 50 {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("جست‌وجو یا تعداد شناسه‌های دیتاست از حد مجاز بیشتر است"))
+	}
+	for _, id := range msg.GetIds() {
+		if id == "" || len(id) > 128 {
+			return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("شناسهٔ دیتاست نامعتبر است"))
+		}
+	}
+	filter := db.CountDatasetCatalogParams{
+		Query:  strings.ToLower(strings.Join(strings.Fields(msg.GetQuery()), " ")),
+		Symbol: strings.ToUpper(strings.TrimSpace(msg.GetSymbol())),
+		Ids:    msg.GetIds(), ResearchOnly: msg.GetResearchOnly(),
+	}
+	if tf := msg.GetTimeframe(); tf != "" {
+		parsed, err := data.ParseTimeframe(tf)
+		if err != nil {
+			return nil, connect.NewError(connect.CodeInvalidArgument, err)
+		}
+		filter.Timeframe = string(parsed)
+	}
+	if filter.ResearchOnly {
+		for _, spec := range instrument.Defaults() {
+			if instrument.ResearchError(spec.Symbol) == nil {
+				filter.AllowedSymbols = append(filter.AllowedSymbols, spec.Symbol)
+			}
+		}
+	}
+	res := &labv1.ListDatasetsResponse{}
+	// Count and page see the same catalog when an import commits concurrently.
+	var rows []db.Dataset
+	err := d.Store.InTxOptions(ctx, pgx.TxOptions{IsoLevel: pgx.RepeatableRead, AccessMode: pgx.ReadOnly}, func(q *db.Queries) error {
+		total, err := q.CountDatasetCatalog(ctx, filter)
+		if err != nil {
+			return err
+		}
+		res.Total = total
+		rows, err = q.ListDatasetCatalog(ctx, db.ListDatasetCatalogParams{
+			ResearchOnly: filter.ResearchOnly, AllowedSymbols: filter.AllowedSymbols,
+			Symbol: filter.Symbol, Timeframe: filter.Timeframe, Ids: filter.Ids, Query: filter.Query,
+			PageSize: pageSize(msg.GetPageSize()), PageOffset: max(0, msg.GetOffset()),
+		})
+		return err
+	})
 	if err != nil {
 		return nil, err
 	}
-	total, err := d.Store.CountDatasets(ctx)
-	if err != nil {
-		return nil, err
-	}
-	res := &labv1.ListDatasetsResponse{Total: total}
 	for _, r := range rows {
 		ds, err := datasetProto(r)
 		if err != nil {

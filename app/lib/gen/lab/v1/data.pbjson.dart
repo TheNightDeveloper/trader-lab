@@ -108,13 +108,20 @@ const ListDatasetsRequest$json = {
   '2': [
     {'1': 'page_size', '3': 1, '4': 1, '5': 5, '10': 'pageSize'},
     {'1': 'offset', '3': 2, '4': 1, '5': 5, '10': 'offset'},
+    {'1': 'query', '3': 3, '4': 1, '5': 9, '10': 'query'},
+    {'1': 'symbol', '3': 4, '4': 1, '5': 9, '10': 'symbol'},
+    {'1': 'research_only', '3': 5, '4': 1, '5': 8, '10': 'researchOnly'},
+    {'1': 'ids', '3': 6, '4': 3, '5': 9, '10': 'ids'},
+    {'1': 'timeframe', '3': 7, '4': 1, '5': 9, '10': 'timeframe'},
   ],
 };
 
 /// Descriptor for `ListDatasetsRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List listDatasetsRequestDescriptor = $convert.base64Decode(
     'ChNMaXN0RGF0YXNldHNSZXF1ZXN0EhsKCXBhZ2Vfc2l6ZRgBIAEoBVIIcGFnZVNpemUSFgoGb2'
-    'Zmc2V0GAIgASgFUgZvZmZzZXQ=');
+    'Zmc2V0GAIgASgFUgZvZmZzZXQSFAoFcXVlcnkYAyABKAlSBXF1ZXJ5EhYKBnN5bWJvbBgEIAEo'
+    'CVIGc3ltYm9sEiMKDXJlc2VhcmNoX29ubHkYBSABKAhSDHJlc2VhcmNoT25seRIQCgNpZHMYBi'
+    'ADKAlSA2lkcxIcCgl0aW1lZnJhbWUYByABKAlSCXRpbWVmcmFtZQ==');
 
 @$core.Deprecated('Use listDatasetsResponseDescriptor instead')
 const ListDatasetsResponse$json = {

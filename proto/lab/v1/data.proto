@@ -49,6 +49,11 @@ message Dataset {
 message ListDatasetsRequest {
   int32 page_size = 1;
   int32 offset = 2;
+  string query = 3; // literal, case-insensitive text across symbol, timeframe and ID
+  string symbol = 4; // exact pair when the picker already scopes it
+  bool research_only = 5; // exclude pairs without research capability
+  repeated string ids = 6; // exact saved selections, combined with the other filters
+  string timeframe = 7; // exact timeframe, when selected independently of the search text
 }
 
 message ListDatasetsResponse {

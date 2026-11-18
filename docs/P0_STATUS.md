@@ -608,6 +608,20 @@ Evidence: artifacts/p0-label-go-tests.jsonl. Windows race requires an unavailabl
 C compiler, and the Docker engine was stopped. Production market performance,
 hosted CI, and real-browser behavior are outside this verification.
 
+## F10 catalog API (2026-11-18)
+
+`ListDatasets` accepts literal, case-insensitive search text, exact pair and timeframe,
+exact saved IDs, and a research-only filter. Ordering remains newest first with an
+ID tie-breaker. The count and page use a common read-only snapshot. Existing clients
+can omit the filters and keep the full catalog, including historical cross-pair data.
+The Go and Dart contracts were regenerated with Buf; SQL bindings with sqlc v1.31.1.
+PostgreSQL RPC regressions cover 202 versions, the 201st research result, exact saved
+ID recovery, literal wildcard handling, capabilities, and the existing import flow.
+The DB-mandatory Windows Go suite passed 354 tests/subtests across 22 test packages,
+without test skips or failures; `go vet` and Buf lint passed.
+Evidence: artifacts/p0-catalog-go-tests.jsonl.
+The Flutter pickers still need to consume the new contract.
+
 ## Remaining P0 work / next batch
 
 The analytics/learning review after FIX-02 fixed dependency readiness, fit/model validation,

@@ -81,6 +81,38 @@ func (q *Queries) CandlesAsOf(ctx context.Context, arg CandlesAsOfParams) ([]Can
 	return items, nil
 }
 
+const countDatasetCatalog = `-- name: CountDatasetCatalog :one
+SELECT count(*) FROM datasets
+WHERE (NOT $1::boolean OR symbol = ANY($2::text[]))
+  AND ($3::text = '' OR symbol = $3)
+  AND ($4::text = '' OR timeframe = $4)
+  AND (coalesce(cardinality($5::text[]), 0) = 0 OR id = ANY($5))
+  AND ($6::text = '' OR strpos(lower(symbol || ' ' || timeframe || ' ' || id), $6) > 0)
+`
+
+type CountDatasetCatalogParams struct {
+	ResearchOnly   bool
+	AllowedSymbols []string
+	Symbol         string
+	Timeframe      string
+	Ids            []string
+	Query          string
+}
+
+func (q *Queries) CountDatasetCatalog(ctx context.Context, arg CountDatasetCatalogParams) (int64, error) {
+	row := q.db.QueryRow(ctx, countDatasetCatalog,
+		arg.ResearchOnly,
+		arg.AllowedSymbols,
+		arg.Symbol,
+		arg.Timeframe,
+		arg.Ids,
+		arg.Query,
+	)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const countDatasets = `-- name: CountDatasets :one
 SELECT count(*) FROM datasets
 `
@@ -490,6 +522,68 @@ func (q *Queries) LatestFxRate(ctx context.Context) (FxRate, error) {
 		&i.EnteredAt,
 	)
 	return i, err
+}
+
+const listDatasetCatalog = `-- name: ListDatasetCatalog :many
+SELECT id, symbol, timeframe, range_from, range_to, gap_policy, known_at, bar_count, manifest, created_at FROM datasets
+WHERE (NOT $1::boolean OR symbol = ANY($2::text[]))
+  AND ($3::text = '' OR symbol = $3)
+  AND ($4::text = '' OR timeframe = $4)
+  AND (coalesce(cardinality($5::text[]), 0) = 0 OR id = ANY($5))
+  AND ($6::text = '' OR strpos(lower(symbol || ' ' || timeframe || ' ' || id), $6) > 0)
+ORDER BY created_at DESC, id
+LIMIT $8::int OFFSET $7::int
+`
+
+type ListDatasetCatalogParams struct {
+	ResearchOnly   bool
+	AllowedSymbols []string
+	Symbol         string
+	Timeframe      string
+	Ids            []string
+	Query          string
+	PageOffset     int32
+	PageSize       int32
+}
+
+func (q *Queries) ListDatasetCatalog(ctx context.Context, arg ListDatasetCatalogParams) ([]Dataset, error) {
+	rows, err := q.db.Query(ctx, listDatasetCatalog,
+		arg.ResearchOnly,
+		arg.AllowedSymbols,
+		arg.Symbol,
+		arg.Timeframe,
+		arg.Ids,
+		arg.Query,
+		arg.PageOffset,
+		arg.PageSize,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Dataset
+	for rows.Next() {
+		var i Dataset
+		if err := rows.Scan(
+			&i.ID,
+			&i.Symbol,
+			&i.Timeframe,
+			&i.RangeFrom,
+			&i.RangeTo,
+			&i.GapPolicy,
+			&i.KnownAt,
+			&i.BarCount,
+			&i.Manifest,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listDatasets = `-- name: ListDatasets :many
