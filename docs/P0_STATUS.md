@@ -520,6 +520,27 @@ The same chart threshold failed at 1.277 s in the two-package run. Evidence:
 artifacts/p0-network-race-p2-go-tests.jsonl. Linux vet and the engine build passed.
 The external data provider and real-browser behavior were outside these local fixtures.
 
+## F07 report chart reads (2026-11-18)
+
+Chart calculations retain historical warm-up and produce only the visible values. SQL
+loads a report's chart inputs, filters main-run markers to the visible symbol and candle
+window and fetches one main-run decision by ID. Backend tests match indicator values bit
+for bit against the full series and compare RPC marker values and order, including the
+holdout cut. Chart admission still counts raw reconstruction of the pinned dataset. Its
+response estimate uses the visible bar count rather than the simulation size.
+
+On the 100,000-bar latency fixture, 100 requests from five concurrent clients returned
+2,000 visible bars and three indicators per chart under the default 1 GiB chart pool.
+Chart p95 was 523 ms in the focused race run and 792 ms in the unrestricted race suite.
+The report setup bypasses admission to seed a large fixture. The latency measurement
+verifies the chart read path under admission and does not establish an engine-wide CPU
+or RSS budget. See PERFORMANCE.md and artifacts/p0-chart-db-race-go-tests.jsonl.
+The full Go race suite passed **337 tests/subtests**, zero failed or skipped, over
+22 test packages with PostgreSQL required. All 11 golden scenarios stayed unchanged.
+The 500-attempt search passed with a 15.96 ms worst health heartbeat delay.
+Linux vet and engine build passed. Independent SQL generation with sqlc v1.31.1
+matched every checked-in store binding byte for byte.
+
 ## Remaining P0 work / next batch
 
 The analytics/learning review after FIX-02 fixed dependency readiness, fit/model validation,

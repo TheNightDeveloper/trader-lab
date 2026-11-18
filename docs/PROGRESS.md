@@ -2,6 +2,19 @@
 
 Update at the end of every session.
 
+## P0 F07 chart reads under load (2026-11-18)
+- Compute only visible indicator values while maintaining historical warm-up. The suffix
+  matches the full series bit for bit for all five indicator families in the regression.
+- Query chart metadata, visible main-run markers and a single decision directly. The SQL
+  window preserves millisecond membership and marker order. Charge chart response work by
+  visible bars while still accounting for reconstruction of all raw inputs.
+- The 100,000-bar latency fixture creates its report as setup and uses the default 1 GiB
+  pool for chart reads. Five concurrent clients passed the 1 s p95 target at 523 ms in
+  the focused race run. The full race run measured GetChart p95 at 792 ms.
+- Full DB-mandatory Linux race run: **337 Go tests/subtests passed, 0 failed or skipped,
+  22 test packages**, including all 11 unchanged goldens. The 500-attempt search fixture
+  observed a worst health heartbeat delay of 15.96 ms. Accounting overflow is next.
+
 ## P0 live-feed supervision (2026-11-18)
 - Each live symbol polls, resumes its committed cursor, and records outage recovery independently.
   A stalled symbol does not hold the status lock or the other symbol's worker. The engine

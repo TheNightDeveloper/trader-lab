@@ -152,6 +152,122 @@ func (q *Queries) AllTrades(ctx context.Context, arg AllTradesParams) ([]Trade, 
 	return items, nil
 }
 
+const chartDecisions = `-- name: ChartDecisions :many
+SELECT report_id, run, id, at, input_symbol, input_bar_open, instrument, target, stop_loss, take_profit, reason, model_id, recipe_version, outcome, detail FROM decisions
+WHERE report_id = $1 AND run = 'main' AND input_symbol = $2 AND instrument = $2
+  AND input_bar_open >= $3 AND input_bar_open < $4
+  AND outcome IN ('filled', 'rejected', 'expired')
+ORDER BY id
+`
+
+type ChartDecisionsParams struct {
+	ReportID string
+	Symbol   string
+	FromTime time.Time
+	ToTime   time.Time
+}
+
+func (q *Queries) ChartDecisions(ctx context.Context, arg ChartDecisionsParams) ([]Decision, error) {
+	rows, err := q.db.Query(ctx, chartDecisions,
+		arg.ReportID,
+		arg.Symbol,
+		arg.FromTime,
+		arg.ToTime,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Decision
+	for rows.Next() {
+		var i Decision
+		if err := rows.Scan(
+			&i.ReportID,
+			&i.Run,
+			&i.ID,
+			&i.At,
+			&i.InputSymbol,
+			&i.InputBarOpen,
+			&i.Instrument,
+			&i.Target,
+			&i.StopLoss,
+			&i.TakeProfit,
+			&i.Reason,
+			&i.ModelID,
+			&i.RecipeVersion,
+			&i.Outcome,
+			&i.Detail,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const chartProtectionFills = `-- name: ChartProtectionFills :many
+SELECT report_id, run, seq, decision_id, at, instrument, side, kind, qty, ref_price, price, quote, ref_value, value, slippage, fee, ref_value_usdt, slippage_usdt, fee_usdt, ambiguous FROM fills
+WHERE report_id = $1 AND run = 'main' AND instrument = $2
+  AND at >= $3 AND at < $4 AND side = 'sell' AND kind IN ('stop', 'take')
+ORDER BY seq
+`
+
+type ChartProtectionFillsParams struct {
+	ReportID string
+	Symbol   string
+	FromTime time.Time
+	ToTime   time.Time
+}
+
+func (q *Queries) ChartProtectionFills(ctx context.Context, arg ChartProtectionFillsParams) ([]Fill, error) {
+	rows, err := q.db.Query(ctx, chartProtectionFills,
+		arg.ReportID,
+		arg.Symbol,
+		arg.FromTime,
+		arg.ToTime,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Fill
+	for rows.Next() {
+		var i Fill
+		if err := rows.Scan(
+			&i.ReportID,
+			&i.Run,
+			&i.Seq,
+			&i.DecisionID,
+			&i.At,
+			&i.Instrument,
+			&i.Side,
+			&i.Kind,
+			&i.Qty,
+			&i.RefPrice,
+			&i.Price,
+			&i.Quote,
+			&i.RefValue,
+			&i.Value,
+			&i.Slippage,
+			&i.Fee,
+			&i.RefValueUsdt,
+			&i.SlippageUsdt,
+			&i.FeeUsdt,
+			&i.Ambiguous,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 type CopyDecisionsParams struct {
 	ReportID      string
 	Run           string
@@ -267,6 +383,38 @@ func (q *Queries) CountTrades(ctx context.Context, arg CountTradesParams) (int64
 	return count, err
 }
 
+const getMainDecision = `-- name: GetMainDecision :one
+SELECT report_id, run, id, at, input_symbol, input_bar_open, instrument, target, stop_loss, take_profit, reason, model_id, recipe_version, outcome, detail FROM decisions WHERE report_id = $1 AND run = 'main' AND id = $2
+`
+
+type GetMainDecisionParams struct {
+	ReportID string
+	ID       int32
+}
+
+func (q *Queries) GetMainDecision(ctx context.Context, arg GetMainDecisionParams) (Decision, error) {
+	row := q.db.QueryRow(ctx, getMainDecision, arg.ReportID, arg.ID)
+	var i Decision
+	err := row.Scan(
+		&i.ReportID,
+		&i.Run,
+		&i.ID,
+		&i.At,
+		&i.InputSymbol,
+		&i.InputBarOpen,
+		&i.Instrument,
+		&i.Target,
+		&i.StopLoss,
+		&i.TakeProfit,
+		&i.Reason,
+		&i.ModelID,
+		&i.RecipeVersion,
+		&i.Outcome,
+		&i.Detail,
+	)
+	return i, err
+}
+
 const getReport = `-- name: GetReport :one
 SELECT id, created_at, title, spec, split, evaluation, holdout, oos_net, oos_return, closed_trades, verdict, tone FROM reports WHERE id = $1
 `
@@ -288,6 +436,23 @@ func (q *Queries) GetReport(ctx context.Context, id string) (Report, error) {
 		&i.Verdict,
 		&i.Tone,
 	)
+	return i, err
+}
+
+const getReportChartInputs = `-- name: GetReportChartInputs :one
+SELECT title, spec, split FROM reports WHERE id = $1
+`
+
+type GetReportChartInputsRow struct {
+	Title string
+	Spec  []byte
+	Split []byte
+}
+
+func (q *Queries) GetReportChartInputs(ctx context.Context, id string) (GetReportChartInputsRow, error) {
+	row := q.db.QueryRow(ctx, getReportChartInputs, id)
+	var i GetReportChartInputsRow
+	err := row.Scan(&i.Title, &i.Spec, &i.Split)
 	return i, err
 }
 

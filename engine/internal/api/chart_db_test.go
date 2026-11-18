@@ -8,6 +8,7 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/proto"
 
 	"tradinglab/engine/internal/clock"
 	"tradinglab/engine/internal/data"
@@ -94,7 +95,21 @@ func TestChartService(t *testing.T) {
 	cut, err := cc.GetChart(ctx, connect.NewRequest(&labv1.GetChartRequest{ReportId: id, Indicators: []string{"ema:30"}, MaxBars: 100}))
 	require.NoError(t, err)
 	require.Len(t, cut.Msg.GetBars(), 100)
-	require.NotEmpty(t, cut.Msg.GetIndicators()[0].GetLines()[0].GetValues()[0])
+	fullEMA := c.GetIndicators()[1].GetLines()[0].GetValues()
+	require.Equal(t, fullEMA[len(fullEMA)-100:], cut.Msg.GetIndicators()[0].GetLines()[0].GetValues(), "visible values must equal the corresponding full-chart values")
+	var visibleMarkers []*labv1.ChartMarker
+	start := cut.Msg.GetBars()[0].GetOpenUnixMs()
+	for _, marker := range c.GetMarkers() {
+		if marker.GetBarOpenUnixMs() >= start {
+			visibleMarkers = append(visibleMarkers, marker)
+		}
+	}
+	require.Len(t, cut.Msg.GetMarkers(), len(visibleMarkers))
+	for i, marker := range visibleMarkers {
+		require.True(t, proto.Equal(marker, cut.Msg.GetMarkers()[i]), "the SQL window preserves marker values and ordering")
+	}
+	_, err = cc.GetDecision(ctx, connect.NewRequest(&labv1.GetDecisionRequest{ReportId: id, DecisionId: -1}))
+	require.Equal(t, connect.CodeNotFound, connect.CodeOf(err))
 
 	// No report: latest bars of a pair.
 	live, err := cc.GetChart(ctx, connect.NewRequest(&labv1.GetChartRequest{Symbol: "BTCUSDT", Timeframe: "1h", MaxBars: 50}))

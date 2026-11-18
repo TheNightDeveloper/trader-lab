@@ -15,6 +15,7 @@ import (
 	"tradinglab/engine/internal/data"
 	labv1 "tradinglab/engine/internal/gen/lab/v1"
 	"tradinglab/engine/internal/gen/lab/v1/labv1connect"
+	"tradinglab/engine/internal/jobs"
 	"tradinglab/engine/internal/report"
 	"tradinglab/engine/internal/store/storetest"
 )
@@ -34,10 +35,12 @@ func TestReportReadLatency(t *testing.T) {
 	ds, _, err := data.CreateDataset(ctx, st, data.DatasetSpec{Symbol: "BTCUSDT", Timeframe: data.TF1m, From: bars[0].OpenTime, To: bars[len(bars)-1].CloseTime, GapPolicy: data.GapFlag})
 	require.NoError(t, err)
 	svc := report.Service{Store: st, Version: "test", Cache: report.NewDatasetCache(4)} // as the engine runs it
+	chartSvc := svc
+	chartSvc.Memory = jobs.NewMemory(1024 << 20)
 	srv := serve(t,
 		func(m *http.ServeMux) { m.Handle(labv1connect.NewReportServiceHandler(&Report{Svc: svc})) },
 		func(m *http.ServeMux) {
-			m.Handle(labv1connect.NewChartServiceHandler(&Chart{Svc: svc, Clock: clock.NewVirtual(time.Now())}))
+			m.Handle(labv1connect.NewChartServiceHandler(&Chart{Svc: chartSvc, Clock: clock.NewVirtual(time.Now())}))
 		})
 	rc := labv1connect.NewReportServiceClient(srv.Client(), srv.URL)
 	cc := labv1connect.NewChartServiceClient(srv.Client(), srv.URL)
@@ -79,4 +82,5 @@ func TestReportReadLatency(t *testing.T) {
 		_, err := cc.GetChart(ctx, connect.NewRequest(&labv1.GetChartRequest{ReportId: id, Indicators: []string{"ema:10", "ema:30", "bb:20:2"}}))
 		return err
 	})
+	require.Zero(t, chartSvc.Memory.InUse())
 }

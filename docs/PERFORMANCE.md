@@ -1,5 +1,24 @@
 # Performance
 
+## P0 F07 chart read latency (2026-11-18)
+
+Go 1.26.4 Linux amd64 in Docker Desktop on Windows with local PostgreSQL and race enabled.
+`TestReportReadLatency` issues 100 requests from five clients over a cached 100,000-bar
+report. GetChart returns 2,000 visible bars with two EMAs and Bollinger Bands.
+
+| Implementation and suite scope | GetReport p95 | GetChart p95 |
+|---|---:|---:|
+| Before chart changes, full suite | 466 ms | 1,226 ms |
+| Visible indicators only, full suite | 292 ms | 1,167 ms |
+| Visible indicators and SQL window, focused API run | 149 ms | 523 ms |
+| Visible indicators and SQL window, full suite | 320 ms | 792 ms |
+
+The final rows use the real 1 GiB chart admission pool. Report fixture creation uses no
+pool. These are individual runs with variable background load and race overhead. The
+last run passed the existing 1 s p95 requirement without changing the threshold.
+Evidence: artifacts/p0-network-race-go-tests.jsonl, p0-chart-window-race-go-tests.jsonl
+and p0-chart-db-race-go-tests.jsonl. Mixed workload resource acceptance remains open.
+
 ## P0 F07 import fixture calibration (2026-11-05)
 
 Windows amd64, Go 1.26.4, local PostgreSQL. Compile the existing API test package with

@@ -450,3 +450,14 @@ or 30 seconds when it is absent. Archive 404 responses still select daily fallba
 Live polls are bounded to four pages and 30 seconds, then resume from committed progress.
 Bars that arrive during recovery keep the actual receipt timestamp as their earliest
 availability, subject to the configured ingest delay.
+
+## ADR-057 Bound chart work to the displayed window
+
+Indicator warm-up still uses the report's historical input and preserves the original
+arithmetic order. Only visible values are materialized. Moving averages and bands skip
+unneeded window reductions, and MACD advances its EMA states without hidden series.
+
+Report charts read only chart inputs and fetch markers for the visible symbol and candle
+range. Decision details use their primary key. Report chart admission counts raw history
+for reconstruction and visible output bars for response work. This admits routine charts
+under the shared pool while preserving the full simulation reservation for report runs.

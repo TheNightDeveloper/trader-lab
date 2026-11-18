@@ -29,6 +29,15 @@ var Indicators = map[string]string{"ma": "ma:20", "ema": "ema:12", "bb": "bb:20:
 
 // ComputeIndicator parses key ("ema:48", "bb:20:2", …) and computes it over bars.
 func ComputeIndicator(key string, bars []data.Bar) (Indicator, error) {
+	return ComputeIndicatorWindow(key, bars, 0)
+}
+
+// ComputeIndicatorWindow returns values from start while preserving the warm-up
+// and arithmetic order of the full indicator series.
+func ComputeIndicatorWindow(key string, bars []data.Bar, start int) (Indicator, error) {
+	if start < 0 || start > len(bars) {
+		return Indicator{}, fmt.Errorf("indicator %q: invalid window start %d", key, start)
+	}
 	parts := strings.Split(key, ":")
 	nums := make([]float64, 0, len(parts)-1)
 	for _, p := range parts[1:] {
@@ -56,28 +65,28 @@ func ComputeIndicator(key string, bars []data.Bar) (Indicator, error) {
 			return Indicator{}, fmt.Errorf("indicator %q: use ma:<period>", key)
 		}
 		ind.Label = fmt.Sprintf("MA %d", n)
-		ind.Lines = []Line{{"ma", sma(closes, n)}}
+		ind.Lines = []Line{{"ma", sma(closes, n, start)}}
 	case "ema":
 		n, err := period(0)
 		if err != nil || len(nums) != 1 {
 			return Indicator{}, fmt.Errorf("indicator %q: use ema:<period>", key)
 		}
 		ind.Label = fmt.Sprintf("EMA %d", n)
-		ind.Lines = []Line{{"ema", emaSeries(closes, n)}}
+		ind.Lines = []Line{{"ema", emaSeries(closes, n, start)}}
 	case "bb":
 		n, err := period(0)
 		if err != nil || len(nums) != 2 || n < 2 {
 			return Indicator{}, fmt.Errorf("indicator %q: use bb:<period ≥ 2>:<k>", key)
 		}
 		ind.Label = fmt.Sprintf("BB %d %g", n, nums[1])
-		ind.Lines = bollinger(closes, n, nums[1])
+		ind.Lines = bollinger(closes, n, nums[1], start)
 	case "rsi":
 		n, err := period(0)
 		if err != nil || len(nums) != 1 {
 			return Indicator{}, fmt.Errorf("indicator %q: use rsi:<period>", key)
 		}
 		ind.Label, ind.Pane = fmt.Sprintf("RSI %d", n), "sub"
-		ind.Lines = []Line{{"rsi", rsi(closes, n)}}
+		ind.Lines = []Line{{"rsi", rsi(closes, n, start)}}
 	case "macd":
 		f, e1 := period(0)
 		s, e2 := period(1)
@@ -86,7 +95,7 @@ func ComputeIndicator(key string, bars []data.Bar) (Indicator, error) {
 			return Indicator{}, fmt.Errorf("indicator %q: use macd:<fast>:<slow>:<signal>, fast < slow", key)
 		}
 		ind.Label, ind.Pane = fmt.Sprintf("MACD %d %d %d", f, s, g), "sub"
-		ind.Lines = macd(closes, f, s, g)
+		ind.Lines = macd(closes, f, s, g, start)
 	default:
 		return Indicator{}, fmt.Errorf("indicator %q: unknown (have ma, ema, bb, rsi, macd)", key)
 	}
@@ -102,51 +111,50 @@ func nans(n int) []float64 {
 }
 
 // emaSeries uses trend-ema's ema type: the chart line is the strategy's line.
-func emaSeries(xs []float64, n int) []float64 {
-	out, e := nans(len(xs)), newEMA(n)
+func emaSeries(xs []float64, n, start int) []float64 {
+	out, e := nans(len(xs)-start), newEMA(n)
 	for i, x := range xs {
-		if v, ok := e.add(x); ok {
-			out[i] = v
+		if v, ok := e.add(x); ok && i >= start {
+			out[i-start] = v
 		}
 	}
 	return out
 }
 
-func sma(xs []float64, n int) []float64 {
-	out := nans(len(xs))
-	for i := n - 1; i < len(xs); i++ {
+func sma(xs []float64, n, start int) []float64 {
+	out := nans(len(xs) - start)
+	for i := max(n-1, start); i < len(xs); i++ {
 		var s float64
 		for _, x := range xs[i-n+1 : i+1] {
 			s += x
 		}
-		out[i] = s / float64(n)
+		out[i-start] = s / float64(n)
 	}
 	return out
 }
 
 // bollinger uses mean-rev-bands' ring buffer and meanStd, in the same order, so
 // the lower band on the chart is the one the strategy compares against.
-func bollinger(xs []float64, n int, k float64) []Line {
-	mid, up, lo := nans(len(xs)), nans(len(xs)), nans(len(xs))
-	st := bandState{win: make([]float64, n)}
-	for i, c := range xs {
-		st.win[st.next] = c
-		st.next = (st.next + 1) % n
-		if st.next == 0 {
-			st.full = true
-		}
-		if !st.full {
+func bollinger(xs []float64, n int, k float64, start int) []Line {
+	size := len(xs) - start
+	mid, up, lo := nans(size), nans(size), nans(size)
+	win := make([]float64, n)
+	// Seed only the required lookback and keep the original ring order for rounding.
+	for i := max(0, start-n+1); i < len(xs); i++ {
+		win[i%n] = xs[i]
+		if i < start || i < n-1 {
 			continue
 		}
-		mean, sd := meanStd(st.win)
-		mid[i], up[i], lo[i] = mean, float64(mean+float64(k*sd)), float64(mean-float64(k*sd))
+		mean, sd := meanStd(win)
+		j := i - start
+		mid[j], up[j], lo[j] = mean, float64(mean+float64(k*sd)), float64(mean-float64(k*sd))
 	}
 	return []Line{{"mid", mid}, {"upper", up}, {"lower", lo}}
 }
 
 // rsi: Wilder's smoothing, 0..100; 50 when there was no movement.
-func rsi(xs []float64, n int) []float64 {
-	out := nans(len(xs))
+func rsi(xs []float64, n, start int) []float64 {
+	out := nans(len(xs) - start)
 	var gain, loss float64
 	for i := 1; i < len(xs); i++ {
 		d := xs[i] - xs[i-1]
@@ -160,26 +168,37 @@ func rsi(xs []float64, n int) []float64 {
 		default:
 			gain, loss = (gain*float64(n-1)+g)/float64(n), (loss*float64(n-1)+l)/float64(n)
 		}
+		if i < start {
+			continue
+		}
 		if gain+loss == 0 {
-			out[i] = 50
+			out[i-start] = 50
 		} else {
-			out[i] = 100 * gain / (gain + loss)
+			out[i-start] = 100 * gain / (gain + loss)
 		}
 	}
 	return out
 }
 
-func macd(xs []float64, f, s, g int) []Line {
-	fast, slow := emaSeries(xs, f), emaSeries(xs, s)
-	line, sig, hist := nans(len(xs)), nans(len(xs)), nans(len(xs))
-	e := newEMA(g)
-	for i := range xs {
-		if math.IsNaN(slow[i]) {
+func macd(xs []float64, f, s, g, start int) []Line {
+	size := len(xs) - start
+	line, sig, hist := nans(size), nans(size), nans(size)
+	fast, slow, signal := newEMA(f), newEMA(s), newEMA(g)
+	for i, x := range xs {
+		fv, _ := fast.add(x)
+		sv, ready := slow.add(x)
+		if !ready {
 			continue
 		}
-		line[i] = fast[i] - slow[i]
-		if v, ok := e.add(line[i]); ok {
-			sig[i], hist[i] = v, line[i]-v
+		value := fv - sv
+		v, ready := signal.add(value)
+		if i < start {
+			continue
+		}
+		j := i - start
+		line[j] = value
+		if ready {
+			sig[j], hist[j] = v, value-v
 		}
 	}
 	return []Line{{"macd", line}, {"signal", sig}, {"hist", hist}}

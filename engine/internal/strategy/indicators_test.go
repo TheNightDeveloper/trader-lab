@@ -98,3 +98,28 @@ func TestIndicatorKeys(t *testing.T) {
 		require.Error(t, err, bad)
 	}
 }
+
+func TestIndicatorWindowMatchesFullSeriesBits(t *testing.T) {
+	bars := walkBars(803)
+	for _, key := range []string{"ma:20", "ema:12", "bb:20:2", "rsi:14", "macd:12:26:9"} {
+		t.Run(key, func(t *testing.T) {
+			full, err := ComputeIndicator(key, bars)
+			require.NoError(t, err)
+			for _, start := range []int{0, 3, 19, 26, 37, 307, 802, len(bars)} {
+				window, err := ComputeIndicatorWindow(key, bars, start)
+				require.NoError(t, err)
+				require.Equal(t, full.Label, window.Label)
+				require.Equal(t, full.Pane, window.Pane)
+				require.Len(t, window.Lines, len(full.Lines))
+				for i, line := range window.Lines {
+					want := full.Lines[i]
+					require.Equal(t, want.Name, line.Name)
+					require.Len(t, line.Values, len(bars)-start)
+					for j, got := range line.Values {
+						require.Equal(t, math.Float64bits(want.Values[start+j]), math.Float64bits(got), "bar %d", start+j)
+					}
+				}
+			}
+		})
+	}
+}
