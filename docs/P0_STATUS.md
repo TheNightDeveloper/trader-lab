@@ -620,7 +620,14 @@ ID recovery, literal wildcard handling, capabilities, and the existing import fl
 The DB-mandatory Windows Go suite passed 354 tests/subtests across 22 test packages,
 without test skips or failures; `go vet` and Buf lint passed.
 Evidence: artifacts/p0-catalog-go-tests.jsonl.
-The Flutter pickers still need to consume the new contract.
+The report and experiment pickers now request one server page at a time, debounce
+search, cancel disposed requests, and keep selected versions visible while paging.
+Import invalidates search pages and exact draft lookups. Experiment drafts resolve
+their stored IDs directly, and picking a second version replaces the first for
+that pair. The provider tests verify page 201 and refresh after an import.
+All 54 existing Flutter tests, Dart analysis and the release Web build passed.
+The build still reports the pre-existing CupertinoIcons font warning.
+Evidence is in artifacts/p0-catalog-flutter.txt and p0-catalog-flutter-web.txt.
 
 ## Remaining P0 work / next batch
 
@@ -634,9 +641,8 @@ That historical review preceded FIX-04/FIX-05 above. These batches do not comple
 1. Finish F07 process-wide CPU/RSS/load acceptance. Archive/import bounds, shared
    active-work byte admission, cooperative fitting cancellation and conservative slot-time
    deadlines are implemented in the scopes above; they are not OS resource quotas.
-2. Finish F10 with search-backed paginated pickers. Current pickers fetch all pages into
-   memory. Report presentation of unrepresentable metrics and remaining accounting
-   stress cases also remain open.
+2. Finish report presentation of unrepresentable metrics and the remaining accounting
+   stress cases.
 3. Run the hosted workflow, real-browser chart/async/focus checks and P0 UX gate.
 
 The existing passing suite does **not** establish process-wide resource or accounting-overflow

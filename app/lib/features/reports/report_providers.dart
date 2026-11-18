@@ -4,8 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/engine.dart';
 import '../../gen/lab/v1/report.pb.dart';
 
-export '../data/data_providers.dart' show allDatasetsProvider;
-
 const reportsPageSize = 20;
 
 final reportsProvider = FutureProvider.family<ListReportsResponse, int>(

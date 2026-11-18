@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -26,6 +27,12 @@ class L10nFa extends L10n {
   @override
   String get researchDatasetsEmpty =>
       'نسخهٔ دادهٔ مجاز برای پژوهش موجود نیست؛ دادهٔ یک جفت پشتیبانی‌شده را وارد کنید.';
+
+  @override
+  String get datasetSearch => 'جست‌وجوی نماد، تایم‌فریم یا شناسهٔ دیتاست';
+
+  @override
+  String get datasetNoSearchResults => 'نسخه‌ای با این جست‌وجو پیدا نشد.';
 
   @override
   String get pnlCalculating => 'در حال محاسبه با ورودی‌های فعلی…';

@@ -204,7 +204,7 @@ class DataTableBox extends StatelessWidget {
             );
           },
         ),
-        if (paging != null) _PagingBar(paging!),
+        if (paging != null) PagingBar(paging!),
       ],
     );
   }
@@ -228,8 +228,8 @@ class Paging {
   final ValueChanged<int> onOffset;
 }
 
-class _PagingBar extends StatelessWidget {
-  const _PagingBar(this.p);
+class PagingBar extends StatelessWidget {
+  const PagingBar(this.p, {super.key});
   final Paging p;
 
   @override

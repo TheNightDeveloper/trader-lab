@@ -4,15 +4,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/api/engine.dart';
-import '../../core/format.dart';
 import '../../core/metric.dart';
 import '../../core/theme/tokens.dart';
 import '../../core/validate.dart';
 import '../../core/widgets/layout.dart';
 import '../../core/widgets/data.dart';
+import '../../gen/lab/v1/data.pb.dart';
 import '../../gen/lab/v1/report.pb.dart';
 import '../../l10n/app_localizations.dart';
 import '../data/data_providers.dart';
+import '../data/dataset_picker.dart';
 import '../data/research_capability_widgets.dart';
 import 'report_providers.dart';
 
@@ -26,7 +27,7 @@ class NewReportForm extends ConsumerStatefulWidget {
 }
 
 class _NewReportFormState extends ConsumerState<NewReportForm> {
-  Set<String> _datasets = {};
+  final _datasets = <String, Dataset>{};
   String _strategy = 'trend-ema';
   final _params = <String, TextEditingController>{};
   final _capital = TextEditingController(text: '10000');
@@ -59,9 +60,16 @@ class _NewReportFormState extends ConsumerState<NewReportForm> {
 
   Future<void> _submit(L10n l, StrategyInfo? info) async {
     setState(() => _tried = true);
-    final allowed = ref.read(researchDatasetsProvider).value?.datasets.map((d) => d.id).toSet() ?? <String>{};
+    final allowed = ref
+        .read(overviewProvider)
+        .value
+        ?.researchCapabilities
+        .where((c) => c.supported)
+        .map((c) => c.symbol)
+        .toSet();
     final errs = [
-      if (_datasets.isEmpty || !_datasets.every(allowed.contains)) l.errPickDataset,
+      if (_datasets.isEmpty || allowed == null || !_datasets.values.every((d) => allowed.contains(d.symbol)))
+        l.errPickDataset,
       vPositive(l, _capital.text),
       vBps(l, _fee.text),
       vBps(l, _slip.text),
@@ -80,11 +88,10 @@ class _NewReportFormState extends ConsumerState<NewReportForm> {
           .createReport(
             CreateReportRequest(
               spec: ReportSpec(
-                datasetIds: _datasets,
+                datasetIds: _datasets.keys,
                 strategy: _strategy,
-                params: {
-                  for (final p in info?.params ?? <ParamSpec>[]) p.name: double.parse(_param(p).text.trim()),
-                }.entries,
+                params: {for (final p in info?.params ?? <ParamSpec>[]) p.name: double.parse(_param(p).text.trim())}
+                    .entries,
                 capital: usdtOut(Decimal.parse(_capital.text.trim())),
                 fee: bpsOut(Decimal.parse(_fee.text.trim())),
                 slippage: bpsOut(Decimal.parse(_slip.text.trim())),
@@ -94,10 +101,12 @@ class _NewReportFormState extends ConsumerState<NewReportForm> {
               ),
             ),
           );
-      ref.invalidate(reportsProvider);
-      if (mounted) context.go('/reports/${res.reportId}');
+      if (mounted) {
+        ref.invalidate(reportsProvider);
+        context.go('/reports/${res.reportId}');
+      }
     } catch (e) {
-      setState(() => _error = e);
+      if (mounted) setState(() => _error = e);
     } finally {
       if (mounted) setState(() => _running = false);
     }
@@ -106,7 +115,6 @@ class _NewReportFormState extends ConsumerState<NewReportForm> {
   @override
   Widget build(BuildContext context) {
     final l = L10n.of(context);
-    final datasets = ref.watch(researchDatasetsProvider);
     final strategies = ref.watch(strategiesProvider);
     final info = strategies.value?.strategies.where((s) => s.name == _strategy).firstOrNull;
     Widget field(String label, TextEditingController c, String? Function(String) err, {String? suffix, String? help}) =>
@@ -132,25 +140,15 @@ class _NewReportFormState extends ConsumerState<NewReportForm> {
       children: [
         Text(l.newDatasets, style: AppText.label),
         const SizedBox(height: AppSpace.sm),
-        AsyncSection(
-          value: datasets,
-          onRetry: () {
-            ref.invalidate(allDatasetsProvider);
-            ref.invalidate(overviewProvider);
-          },
-          skeleton: const SizedBox(height: 44),
-          isEmpty: (r) => r.datasets.isEmpty,
-          empty: Text(l.researchDatasetsEmpty, style: AppText.caption),
-          builder: (r) => LabChoiceChips<String>(
-            multi: true,
-            ltr: true,
-            options: [
-              for (final d in r.datasets)
-                (d.id, '${d.symbol} ${d.timeframe} · ${fmtDate(utcMs(d.fromUnixMs))} · ${shortHash(d.id)}'),
-            ],
-            selected: _datasets,
-            onChanged: (v) => setState(() => _datasets = v),
-          ),
+        DatasetPicker(
+          timeframe: _datasets.values.firstOrNull?.timeframe ?? '',
+          selected: _datasets,
+          onPick: (d) => setState(() {
+            // Keep one immutable version per pair for the shared timeframe.
+            _datasets.removeWhere((_, old) => old.symbol == d.symbol);
+            _datasets[d.id] = d;
+          }),
+          onRemove: (id) => setState(() => _datasets.remove(id)),
         ),
         Text(l.newDatasetsHelp, style: AppText.caption),
         const ResearchCapabilityNotice(),
@@ -202,9 +200,7 @@ class _NewReportFormState extends ConsumerState<NewReportForm> {
         Align(
           alignment: AlignmentDirectional.centerStart,
           child: FilledButton.icon(
-            onPressed: _running || !datasets.hasValue || datasets.value!.datasets.isEmpty
-                ? null
-                : () => _submit(l, info),
+            onPressed: _running || _datasets.isEmpty ? null : () => _submit(l, info),
             icon: _running
                 ? const SizedBox.square(
                     dimension: 16,

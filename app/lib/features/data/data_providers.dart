@@ -1,44 +1,52 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:connectrpc/connect.dart';
-import 'package:fixnum/fixnum.dart';
 
 import '../../core/api/engine.dart';
 import '../../gen/lab/v1/data.pb.dart';
 
 const pageSize = 20;
 
-/// Shared picker cache; imports invalidate it along with the paged Data screen.
-// shortcut: existing pickers need all versions; replace with server search for large catalogs.
-final allDatasetsProvider = FutureProvider<ListDatasetsResponse>((ref) async {
-  final client = ref.watch(dataClientProvider);
-  final signal = CancelableSignal();
-  ref.onDispose(signal.cancel);
-  final result = ListDatasetsResponse();
-  while (true) {
-    final page = await client.listDatasets(
-      ListDatasetsRequest(pageSize: 200, offset: result.datasets.length),
-      signal: signal,
-    );
-    result.total = page.total;
-    result.datasets.addAll(page.datasets);
-    if (page.datasets.isEmpty || result.datasets.length >= page.total.toInt()) return result;
-  }
-});
-
 final overviewProvider = FutureProvider<GetOverviewResponse>(
   (ref) => ref.watch(dataClientProvider).getOverview(GetOverviewRequest()),
 );
 
-/// Execution requires affirmative server permission; Data keeps every version.
-final researchDatasetsProvider = FutureProvider<ListDatasetsResponse>((ref) async {
-  final overviewFuture = ref.watch(overviewProvider.future);
-  final datasetsFuture = ref.watch(allDatasetsProvider.future);
-  final overview = await overviewFuture;
-  final all = await datasetsFuture;
-  final allowed = overview.researchCapabilities.where((c) => c.supported).map((c) => c.symbol).toSet();
-  final datasets = all.datasets.where((d) => allowed.contains(d.symbol)).toList();
-  return ListDatasetsResponse(datasets: datasets, total: Int64(datasets.length));
+typedef DatasetPage = ({String query, String timeframe, int offset});
+
+final researchDatasetPageProvider = FutureProvider.autoDispose.family<ListDatasetsResponse, DatasetPage>(
+  (ref, page) => _researchCatalog(
+    ref,
+    ListDatasetsRequest(
+      query: page.query,
+      timeframe: page.timeframe,
+      offset: page.offset,
+      pageSize: pageSize,
+      researchOnly: true,
+    ),
+  ),
+);
+
+// Resolve draft selections independently of the visible page.
+final researchDatasetByIdProvider = FutureProvider.autoDispose.family<Dataset?, String>((ref, id) async {
+  final result = await _researchCatalog(ref, ListDatasetsRequest(ids: [id], pageSize: 1, researchOnly: true));
+  return result.datasets.where((d) => d.id == id).firstOrNull;
 });
+
+Future<ListDatasetsResponse> _researchCatalog(Ref ref, ListDatasetsRequest request) async {
+  final client = ref.watch(dataClientProvider);
+  final signal = CancelableSignal();
+  ref.onDispose(signal.cancel);
+  final overview = await ref.watch(overviewProvider.future);
+  final allowed = overview.researchCapabilities.where((c) => c.supported).map((c) => c.symbol).toSet();
+  if (allowed.isEmpty) return ListDatasetsResponse();
+  final result = await client.listDatasets(request, signal: signal);
+  // Older engines can ignore the new request fields. Permission stays affirmative.
+  return ListDatasetsResponse(
+    total: result.total,
+    datasets: result.datasets.where(
+      (d) => allowed.contains(d.symbol) && (request.timeframe.isEmpty || d.timeframe == request.timeframe),
+    ),
+  );
+}
 
 final datasetsProvider = FutureProvider.family<ListDatasetsResponse, int>(
   (ref, offset) => ref.watch(dataClientProvider).listDatasets(ListDatasetsRequest(pageSize: pageSize, offset: offset)),
@@ -87,7 +95,8 @@ class ImportController extends Notifier<ImportState> {
     } finally {
       // New bars, issues and versions: refresh every view that shows them.
       ref
-        ..invalidate(allDatasetsProvider)
+        ..invalidate(researchDatasetPageProvider)
+        ..invalidate(researchDatasetByIdProvider)
         ..invalidate(datasetsProvider)
         ..invalidate(coverageProvider)
         ..invalidate(issuesProvider)

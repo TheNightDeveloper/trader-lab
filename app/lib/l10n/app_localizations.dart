@@ -123,6 +123,18 @@ abstract class L10n {
   /// **'نسخهٔ دادهٔ مجاز برای پژوهش موجود نیست؛ دادهٔ یک جفت پشتیبانی‌شده را وارد کنید.'**
   String get researchDatasetsEmpty;
 
+  /// No description provided for @datasetSearch.
+  ///
+  /// In fa, this message translates to:
+  /// **'جست‌وجوی نماد، تایم‌فریم یا شناسهٔ دیتاست'**
+  String get datasetSearch;
+
+  /// No description provided for @datasetNoSearchResults.
+  ///
+  /// In fa, this message translates to:
+  /// **'نسخه‌ای با این جست‌وجو پیدا نشد.'**
+  String get datasetNoSearchResults;
+
   /// No description provided for @pnlCalculating.
   ///
   /// In fa, this message translates to:

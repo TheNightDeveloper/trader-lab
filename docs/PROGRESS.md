@@ -2,6 +2,17 @@
 
 Update at the end of every session.
 
+## P0 training labels and F10 dataset selection (2026-11-18)
+
+- Learning artifacts use causal entry and exit opens with the cycle's per-side costs.
+  Earlier artifacts stay readable and new recommendations require the current training
+  version. A delayed simulator round trip verifies the label and its observation cutoff.
+- The Data API searches the catalog by pair, timeframe and ID. Reports and experiments
+  use paginated pickers, retain selections across searches and resolve saved drafts by
+  exact ID. The 201st version and import invalidation are covered.
+- PostgreSQL-mandatory Go tests passed 354 cases and subtests. All 54 existing Flutter
+  tests, Dart analysis, Buf lint and Go vet passed. See [P0 status](P0_STATUS.md).
+
 ## P0 search restart ownership (2026-11-18)
 - PostgreSQL recorded the retryable claim on a connection without the scheduler lease.
   Run now claims, recovers and updates queue state on the lease session. The final attempt
