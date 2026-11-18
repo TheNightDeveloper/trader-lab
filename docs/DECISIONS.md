@@ -435,3 +435,18 @@ hashing. Resource errors reach the UI as ResourceExhausted. Large ranges may req
 imports or an explicitly larger machine budget. Single-fixture process counters provide a
 local calibration only; mixed-load RSS/CPU/OS guarantees and P0 gates remain open. No new
 dependency, migration, numerical contract or historical financial rewrite is introduced.
+
+## ADR-056 Isolate live symbol recovery and bound market HTTP requests
+
+Each live symbol owns its polling loop, committed cursor and failure interval. A failed
+symbol retries with capped exponential backoff and jitter. Recovery records an outage for
+the affected symbol after it reaches the provider again. Engine health retains the last
+close and state per symbol. The existing sidebar still shows aggregate health.
+
+Live and archive traffic use separate shared token buckets for their public hosts. Each
+HTTP attempt has its own deadline, including body reads. Transport failures, 408 and 5xx
+can retry up to twice with jitter. A 429 or 418 starts a host cooldown using Retry-After
+or 30 seconds when it is absent. Archive 404 responses still select daily fallback.
+Live polls are bounded to four pages and 30 seconds, then resume from committed progress.
+Bars that arrive during recovery keep the actual receipt timestamp as their earliest
+availability, subject to the configured ingest delay.

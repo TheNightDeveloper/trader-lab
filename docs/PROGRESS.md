@@ -2,6 +2,19 @@
 
 Update at the end of every session.
 
+## P0 live-feed supervision (2026-11-18)
+- Each live symbol polls, resumes its committed cursor, and records outage recovery independently.
+  A stalled symbol does not hold the status lock or the other symbol's worker. The engine
+  tracks freshness per symbol and the sidebar continues to report aggregate freshness.
+- Live and archive share the same GET policy with separate host budgets. Request deadlines
+  cover response bodies. Transient failures get bounded retries and jitter, provider throttling
+  applies a host cooldown, and interrupted backfill resumes after bounded page batches.
+- Network regressions passed under race with PostgreSQL required in a Go 1.26.4 Linux container.
+  An unrestricted race suite recorded 330 passes, zero skips, and one latency failure.
+  GetChart p95 reached 1.226 s against the existing 1 s target. See P0_STATUS.md for scope.
+- Next F07 work targets the chart's latency under load. The same route exceeded the target
+  with two Go packages running concurrently. Linux vet and the engine build passed.
+
 ## P0 F07 archive/import bounds (2026-11-05)
 - Import uses the same active-memory pool as research: 384 MiB archive workspace plus
   1024 bytes per requested raw minute, before network work. Dataset snapshot creation

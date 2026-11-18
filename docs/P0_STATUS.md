@@ -1,6 +1,6 @@
 # P0 — stabilization and release evidence
 
-Status: **in progress**, 2026-11-05. This continues the new master plan, not
+Status: **in progress**, 2026-11-18. This continues the new master plan, not
 completion of P0 and not approval to begin P1 or any execution feature.
 
 ## First batch scope
@@ -496,6 +496,30 @@ No dependency, wire/schema migration, dataset/evaluation/training semantic versi
 or financial rewrite. Oversized archives now fail explicitly; already stored datasets and
 reports remain readable. F07's process-wide resource/load acceptance and full P0 stay open.
 
+## Live-feed supervision (2026-11-18)
+
+Live ingestion runs an independent worker per unique configured symbol. Each worker tracks
+its committed cursor and outage interval and backs off with jitter after failures. Recovery
+records the outage only for its symbol. Internal health includes symbol state and last close,
+while the existing dashboard API exposes aggregate state. Backfill yields after four REST
+pages per poll, with a 30 s poll deadline. Old or unaligned timestamps fail before writing a
+page, and successfully committed pages keep their actual receipt times.
+
+Live GET attempts use a 5 s body-inclusive deadline and a process-local 5/s request-start
+budget with burst 6. Archive GET attempts use 30 s and 4/s with burst 2. Each transient request
+can retry twice with jitter. A 429 or 418 pauses starts for the corresponding provider using
+Retry-After or 30 s by default. The policy keeps archive 404 and checksum handling intact.
+
+Stalled body deadlines, transient versus permanent errors, rate and cooldown sharing, healthy
+symbol progress during another symbol's stall, per-symbol outage accounting, and bounded
+backfill passed under race in official Go 1.26.4 Linux with local PostgreSQL required.
+The unrestricted full race run had **330 passes, 1 failure, 0 skipped tests/subtests**.
+The failure was GetChart p95 at 1.226 s against a 1 s target. GetReport p95 was 466 ms.
+No race detector warning was reported. Evidence: artifacts/p0-network-race-go-tests.jsonl.
+The same chart threshold failed at 1.277 s in the two-package run. Evidence:
+artifacts/p0-network-race-p2-go-tests.jsonl. Linux vet and the engine build passed.
+The external data provider and real-browser behavior were outside these local fixtures.
+
 ## Remaining P0 work / next batch
 
 The analytics/learning review after FIX-02 fixed dependency readiness, fit/model validation,
@@ -509,8 +533,8 @@ That historical review preceded FIX-04/FIX-05 above. These batches do not comple
    active-work byte admission, cooperative fitting cancellation and conservative slot-time
    deadlines are implemented in the scopes above; they are not OS resource quotas.
 2. Finish F10 with search-backed paginated pickers. Current pickers fetch all pages into
-   memory; a shortcut comment records the limit. Network supervision, accounting overflow,
-   economic label/fill alignment and remaining stress cases also remain open.
+   memory. Accounting overflow, economic label/fill alignment and remaining stress cases
+   also remain open.
 3. Run the hosted workflow, real-browser chart/async/focus checks and P0 UX gate.
 
 The existing passing suite does **not** establish process-wide resource or accounting-overflow

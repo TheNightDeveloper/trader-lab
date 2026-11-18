@@ -58,7 +58,7 @@ type ArchiveFile struct {
 // FetchArchive downloads url and its .CHECKSUM sibling and verifies SHA-256.
 // A 404 on either returns ErrNotPublished.
 func FetchArchive(ctx context.Context, c *http.Client, url string) (ArchiveFile, error) {
-	sum, err := get(ctx, c, url+".CHECKSUM", 4096)
+	sum, err := archiveRequests.get(ctx, c, url+".CHECKSUM", 4096)
 	if err != nil {
 		return ArchiveFile{}, err
 	}
@@ -66,7 +66,7 @@ func FetchArchive(ctx context.Context, c *http.Client, url string) (ArchiveFile,
 	if len(want) != 64 {
 		return ArchiveFile{}, fmt.Errorf("%w: malformed CHECKSUM for %s", ErrChecksum, url)
 	}
-	body, err := get(ctx, c, url, maxArchiveBytes)
+	body, err := archiveRequests.get(ctx, c, url, maxArchiveBytes)
 	if err != nil {
 		return ArchiveFile{}, err
 	}
@@ -75,35 +75,6 @@ func FetchArchive(ctx context.Context, c *http.Client, url string) (ArchiveFile,
 		return ArchiveFile{}, fmt.Errorf("%w: %s: got %s, want %s", ErrChecksum, url, got, want)
 	}
 	return ArchiveFile{URL: url, SHA256: strings.ToLower(want), Zip: body}, nil
-}
-
-func get(ctx context.Context, c *http.Client, url string, limit int64) ([]byte, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := c.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("get %s: %w", url, err)
-	}
-	defer func() { _ = resp.Body.Close() }()
-	switch {
-	case resp.StatusCode == http.StatusNotFound:
-		return nil, fmt.Errorf("%w: %s", ErrNotPublished, url)
-	case resp.StatusCode != http.StatusOK:
-		return nil, fmt.Errorf("get %s: status %d", url, resp.StatusCode)
-	}
-	if resp.ContentLength > limit {
-		return nil, fmt.Errorf("%w: get %s: larger than %d bytes", ErrLimit, url, limit)
-	}
-	b, err := io.ReadAll(io.LimitReader(resp.Body, limit+1))
-	if err != nil {
-		return nil, fmt.Errorf("read %s: %w", url, err)
-	}
-	if int64(len(b)) > limit {
-		return nil, fmt.Errorf("%w: get %s: larger than %d bytes", ErrLimit, url, limit)
-	}
-	return b, nil
 }
 
 // ParseArchive reads the single CSV inside a kline zip.
