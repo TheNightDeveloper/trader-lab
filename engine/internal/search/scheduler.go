@@ -86,17 +86,21 @@ func (s *Scheduler) Run(ctx context.Context) error {
 		return err
 	}
 	defer func() { _ = lease.Close(context.Background()) }()
-	if n, err := s.Store.RequeueRunning(ctx); err != nil {
+	// Share the lease session with claim/recovery writes. PostgreSQL cannot
+	// release that lease before its own in-flight claim finishes or rolls back.
+	owner := db.New(lease)
+	if n, err := owner.RequeueRunning(ctx); err != nil {
 		return fmt.Errorf("requeue: %w", err)
 	} else if n > 0 {
 		slog.Info("recovered interrupted attempts", "attempts", n)
 	}
 	var wg sync.WaitGroup
-	defer wg.Wait()
+	ctx, stop := context.WithCancel(ctx)
+	defer func() { stop(); wg.Wait() }()
 	lastHouse := time.Time{}
 	for ctx.Err() == nil {
 		if time.Since(lastHouse) >= s.Poll {
-			s.housekeep(ctx)
+			s.housekeep(ctx, owner)
 			lastHouse = time.Now()
 		}
 		if err := s.Limiter.Acquire(ctx); err != nil {
@@ -107,10 +111,19 @@ func (s *Scheduler) Run(ctx context.Context) error {
 			s.Limiter.Release()
 			return err
 		}
-		a, err := s.Store.ClaimAttempt(ctx, hex.EncodeToString(token[:]))
+		// Let a short in-flight claim finish before shutdown closes the lease.
+		claim, cancelClaim := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
+		a, err := owner.ClaimAttempt(claim, hex.EncodeToString(token[:]))
+		cancelClaim()
 		if err != nil {
 			s.Limiter.Release()
-			if !errors.Is(err, pgx.ErrNoRows) && ctx.Err() == nil {
+			if ctx.Err() != nil {
+				return nil
+			}
+			if lease.IsClosed() {
+				return fmt.Errorf("queue lease lost: %w", err)
+			}
+			if !errors.Is(err, pgx.ErrNoRows) {
 				slog.Warn("claim attempt", "err", err)
 			}
 			select {
@@ -269,21 +282,43 @@ func (s *Scheduler) run(ctx context.Context, a db.Attempt) {
 // lock prevents a second process from recovering a live worker's claims. Closing
 // the session releases ownership even on crashes; no long transaction is held.
 func (s *Scheduler) acquireLease(ctx context.Context) (*pgx.Conn, error) {
-	pooled, err := s.Store.Pool.Acquire(ctx)
+	// A just-disconnected owner can still hold its server-side lock briefly.
+	acquire, cancel := context.WithTimeout(ctx, 2*time.Second)
+	defer cancel()
+	pooled, err := s.Store.Pool.Acquire(acquire)
 	if err != nil {
 		return nil, err
 	}
 	conn := pooled.Hijack()
-	var ok bool
-	err = conn.QueryRow(ctx, "SELECT pg_try_advisory_lock(hashtext(current_schema()), hashtext('search-scheduler'))").Scan(&ok)
-	if err != nil || !ok {
-		_ = conn.Close(context.Background())
+	retry := time.NewTicker(25 * time.Millisecond)
+	defer retry.Stop()
+	busy := false
+	for acquire.Err() == nil {
+		var ok bool
+		err = conn.QueryRow(acquire, "SELECT pg_try_advisory_lock(hashtext(current_schema()), hashtext('search-scheduler'))").Scan(&ok)
 		if err != nil {
-			return nil, err
+			break
 		}
+		if ok {
+			return conn, nil
+		}
+		busy = true
+		select {
+		case <-acquire.Done():
+		case <-retry.C:
+		}
+	}
+	_ = conn.Close(context.Background())
+	if ctx.Err() != nil {
+		return nil, ctx.Err()
+	}
+	if busy && acquire.Err() != nil {
 		return nil, errors.New("search: scheduler already running for this workspace")
 	}
-	return conn, nil
+	if err != nil {
+		return nil, err
+	}
+	return nil, acquire.Err()
 }
 
 // evaluate returns the attempt's OOS metrics, from the run cache when every input matches.
@@ -345,8 +380,8 @@ func failure(err error) string {
 }
 
 // housekeep enforces time budgets and finalizes experiments with nothing left to run.
-func (s *Scheduler) housekeep(ctx context.Context) {
-	exps, err := s.Store.ListStartedExperiments(ctx)
+func (s *Scheduler) housekeep(ctx context.Context, owner *db.Queries) {
+	exps, err := owner.ListStartedExperiments(ctx)
 	if err != nil {
 		return
 	}
@@ -356,27 +391,27 @@ func (s *Scheduler) housekeep(ctx context.Context) {
 			continue
 		}
 		if time.Since(e.CreatedAt) > time.Duration(def.Search.MaxWallSeconds)*time.Second {
-			if n, _ := s.Store.CancelQueued(ctx, db.CancelQueuedParams{ExperimentID: e.ID, Failure: "بودجه زمان تمام شد"}); n > 0 {
+			if n, _ := owner.CancelQueued(ctx, db.CancelQueuedParams{ExperimentID: e.ID, Failure: "بودجه زمان تمام شد"}); n > 0 {
 				slog.Info("time budget reached", "experiment", e.ID, "cancelled_attempts", n)
 			}
 		}
 	}
-	if _, err := s.Store.BeginFinalize(ctx); err != nil {
+	if _, err := owner.BeginFinalize(ctx); err != nil {
 		return
 	}
-	ids, err := s.Store.ListFinalizing(ctx)
+	ids, err := owner.ListFinalizing(ctx)
 	if err != nil {
 		return
 	}
 	for _, id := range ids {
-		s.finalize(ctx, id)
+		s.finalize(ctx, owner, id)
 	}
 }
 
 // finalize selects the winner and writes its full reports. Idempotent: report ids
 // are derived from the experiment and dataset, so a re-run after a crash does not
 // duplicate them.
-func (s *Scheduler) finalize(ctx context.Context, id string) {
+func (s *Scheduler) finalize(ctx context.Context, owner *db.Queries, id string) {
 	def, err := s.definition(ctx, id)
 	if err != nil {
 		return
@@ -424,7 +459,7 @@ func (s *Scheduler) finalize(ctx context.Context, id string) {
 		}
 	}
 	resJ, _ := json.Marshal(res)
-	if err := s.Store.FinishExperiment(ctx, db.FinishExperimentParams{ID: id, Status: status, Result: resJ, Error: errText}); err != nil {
+	if err := owner.FinishExperiment(ctx, db.FinishExperimentParams{ID: id, Status: status, Result: resJ, Error: errText}); err != nil {
 		slog.Error("finish experiment", "experiment", id, "err", err)
 		return
 	}

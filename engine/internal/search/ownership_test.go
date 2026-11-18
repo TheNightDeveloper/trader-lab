@@ -3,6 +3,7 @@ package search
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -103,4 +104,22 @@ func TestSecondSchedulerCannotRecoverLiveClaims(t *testing.T) {
 	require.ErrorContains(t, (&Scheduler{Store: s}).Run(ctx), "scheduler already running")
 	_, err = s.GetClaimedAttempt(ctx, db.GetClaimedAttemptParams{ExperimentID: a.ExperimentID, Seq: a.Seq, ClaimToken: a.ClaimToken})
 	require.NoError(t, err, "second startup cannot invalidate a live process's token")
+}
+
+func TestLeaseWaitsForPreviousOwnerToRelease(t *testing.T) {
+	s := storetest.Open(t)
+	ctx := context.Background()
+	sch := &Scheduler{Store: s}
+	old, err := sch.acquireLease(ctx)
+	require.NoError(t, err)
+	released := make(chan error, 1)
+	go func() {
+		// Allow the new connection to see the held lease before the owner shuts down.
+		time.Sleep(100 * time.Millisecond)
+		released <- old.Close(ctx)
+	}()
+	lease, err := sch.acquireLease(ctx)
+	require.NoError(t, <-released)
+	require.NoError(t, err, "a brief overlap must not permanently disable queue startup")
+	require.NoError(t, lease.Close(ctx))
 }

@@ -557,6 +557,26 @@ GetChart p95 remained below 1 s at 728 ms. Evidence: artifacts/p0-ledger-before.
 artifacts/p0-ledger-race-go-tests.jsonl. Search recovery and aggregate evaluation metrics
 still need their own fixes and regressions.
 
+## Search restart ownership (2026-11-18)
+
+An audit trigger in a temporary schema showed the old worker claimed rows on a connection
+without the advisory lock. Queue reads/writes for claim, recovery and finalization now use
+the lock owner's session. Claim-token checks continue to guard attempt outcomes. The
+claim has a five-second deadline and settles independently of normal shutdown cancellation.
+A new runner allows up to two seconds for the prior PostgreSQL lock session to end.
+
+The first session-only version still reproduced a restart stall with 5 done, 23 queued
+and 2 running attempts. Five repeated race runs passed after the claim deadline and lease
+startup changes, including the previously failing restart test. The companion tests show
+a short overlap can recover and a second scheduler cannot take an active lease. No restart
+assertion or timeout was relaxed. Evidence: artifacts/p0-claim-before.txt,
+p0-claim-after.txt and p0-claim-final.txt.
+
+The full DB-mandatory race run passed the restart and ownership regressions. It recorded
+**347 passes, 1 failure, 0 skipped tests/subtests**. GetChart p95 was 1.167 s, above its
+unchanged 1 s target. The earlier passing chart run does not settle this load variation.
+Evidence: artifacts/p0-claim-race-go-tests.jsonl.
+
 ## Remaining P0 work / next batch
 
 The analytics/learning review after FIX-02 fixed dependency readiness, fit/model validation,

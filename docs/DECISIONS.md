@@ -470,3 +470,12 @@ instead of silently dropping protection. The calculator rejects unrepresentable 
 or fee totals and returns no partial result. The API maps numeric overflow to OutOfRange.
 Break-even fee is omitted if the ledger totals needed for it exceed the integer range.
 Representable calculations retain the fixed-point scales, rounding and report contract.
+
+## ADR-059 Tie search claims to the PostgreSQL lease session
+
+Recovery, claiming and queue status writes use the advisory-lock session. If a claim
+is in flight during shutdown, the server settles that write before releasing its lock.
+Claims have their own five-second deadline so orderly shutdown can finish them. Startup
+allows up to two seconds for the prior session to release its lock. The new scheduler
+can recover attempts only after it owns the lease, and a live owner remains protected.
+Attempt outcomes still use the existing claim token before changing a row.

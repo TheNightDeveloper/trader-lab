@@ -110,7 +110,7 @@ func waitStatus(t *testing.T, s *store.Store, id, status string, within time.Dur
 		time.Sleep(20 * time.Millisecond)
 	}
 	e, _ := s.GetExperiment(context.Background(), id)
-	t.Fatalf("experiment %s is %s, want %s", id, e.Status, status)
+	t.Fatalf("experiment %s is %s, want %s; attempts: %v", id, e.Status, status, counts(t, s, id))
 }
 
 func TestUnsupportedExistingAttemptFailsBeforeCachedEvaluation(t *testing.T) {
@@ -203,6 +203,40 @@ func TestSearchRunsSelectsAndReports(t *testing.T) {
 	require.ErrorIs(t, err, experiment.ErrExists, "identical definition is the same experiment")
 }
 
+func TestClaimUsesSchedulerLeaseSession(t *testing.T) {
+	s, ds := setup(t, 1200)
+	ctx, stop := context.WithTimeout(context.Background(), 15*time.Second)
+	defer stop()
+	// PostgreSQL records session identity at the exact write boundary, even
+	// when the Go caller never receives a response to a cancelled claim.
+	_, err := s.Pool.Exec(ctx, `
+		CREATE TABLE claim_audit (owns_lease boolean NOT NULL);
+		CREATE FUNCTION audit_claim() RETURNS trigger LANGUAGE plpgsql AS $$
+		BEGIN
+			IF OLD.status = 'queued' AND NEW.status = 'running' THEN
+				INSERT INTO claim_audit VALUES (EXISTS (
+					SELECT 1 FROM pg_locks WHERE pid = pg_backend_pid()
+					AND locktype = 'advisory' AND objsubid = 2 AND granted
+				));
+			END IF;
+			RETURN NEW;
+		END;
+		$$;
+		CREATE TRIGGER audit_claim AFTER UPDATE ON attempts FOR EACH ROW EXECUTE FUNCTION audit_claim();`)
+	require.NoError(t, err)
+	start(t, s, definition(ds, experiment.ParamRange{Values: []float64{5}}, experiment.ParamRange{Values: []float64{30}}, 1))
+	done := make(chan struct{})
+	go func() { _ = scheduler(s, 1).Run(ctx); close(done) }()
+	defer func() { stop(); <-done }()
+	require.Eventually(t, func() bool {
+		var n int
+		return s.Pool.QueryRow(ctx, "SELECT count(*) FROM claim_audit").Scan(&n) == nil && n == 1
+	}, 5*time.Second, 20*time.Millisecond)
+	var owns bool
+	require.NoError(t, s.Pool.QueryRow(ctx, "SELECT owns_lease FROM claim_audit").Scan(&owns))
+	require.True(t, owns, "pool claims can commit after the lease has been released")
+}
+
 // Plan M4 acceptance: killing the engine mid-search and restarting resumes
 // without duplicate or lost attempts.
 func TestKillMidSearchResumesWithoutLossOrDuplicates(t *testing.T) {
@@ -212,7 +246,12 @@ func TestKillMidSearchResumesWithoutLossOrDuplicates(t *testing.T) {
 
 	ctx, kill := context.WithCancel(context.Background())
 	stopped := make(chan struct{})
-	go func() { _ = scheduler(s, 2).Run(ctx); close(stopped) }()
+	go func() {
+		defer close(stopped)
+		if err := scheduler(s, 2).Run(ctx); err != nil {
+			t.Errorf("first scheduler stopped with error: %v", err)
+		}
+	}()
 	for counts(t, s, id)["done"] < 5 {
 		time.Sleep(5 * time.Millisecond)
 	}
@@ -224,7 +263,13 @@ func TestKillMidSearchResumesWithoutLossOrDuplicates(t *testing.T) {
 
 	ctx, stop := context.WithCancel(context.Background())
 	stopped = make(chan struct{})
-	go func() { _ = scheduler(s, 2).Run(ctx); close(stopped) }()
+	go func() {
+		defer close(stopped)
+		if err := scheduler(s, 2).Run(ctx); err != nil {
+			t.Errorf("restarted scheduler stopped with error: %v", err)
+		}
+	}()
+	defer func() { stop(); <-stopped }() // also stop on assertion failure before the test store closes
 	waitStatus(t, s, id, "done", 120*time.Second)
 	stop()
 	<-stopped

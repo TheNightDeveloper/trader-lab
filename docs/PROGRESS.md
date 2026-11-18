@@ -2,6 +2,18 @@
 
 Update at the end of every session.
 
+## P0 search restart ownership (2026-11-18)
+- PostgreSQL recorded the retryable claim on a connection without the scheduler lease.
+  Run now claims, recovers and updates queue state on the lease session. The final attempt
+  gate still matches claim tokens. An in-flight claim has a five-second deadline and
+  startup waits up to two seconds for a departing owner to release its lock.
+- The database ownership regression failed before the fix. The restart, claim ownership,
+  temporary overlap and concurrent-owner checks all passed in five repeated race runs.
+  Existing restart timeout and completion assertions stay in force. Test cleanup stops
+  its worker even when an assertion fails.
+- Full race confirmed restart recovery. It recorded 347 passes and one chart latency
+  failure at 1.167 s p95. Mixed-load and aggregate accounting work remain open.
+
 ## P0 simulator ledger overflow (2026-11-18)
 - Check fixed-point addition and subtraction across fill cash, asset balances, cumulative
   trade totals, mark-to-market and protection prices. Stage fill changes and publish them
