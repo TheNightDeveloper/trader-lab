@@ -50,7 +50,10 @@ func TestPeriodAggregatesRejectOverflow(t *testing.T) {
 	r := &sim.Result{
 		Equity: []sim.EquityPoint{{Time: to, Equity: money.Amount{V: 100}}},
 		Fills:  []sim.Fill{{ObservedAt: to, FeeUSDT: money.Amount{V: math.MaxInt64}}, {ObservedAt: to, FeeUSDT: money.Amount{V: math.MaxInt64}}},
-		Trades: []sim.Trade{{OpenedAt: from, Net: money.Amount{V: math.MaxInt64}}, {OpenedAt: from, Net: money.Amount{V: math.MaxInt64}}},
+		Trades: []sim.Trade{
+			{OpenedAt: from, ClosedAt: &to, ClosedObservedAt: to, Net: money.Amount{V: math.MaxInt64}},
+			{OpenedAt: from, ClosedAt: &to, ClosedObservedAt: to, Net: money.Amount{V: math.MaxInt64}},
+		},
 	}
 	ms := window(r, Window{From: from, To: to}, 100)
 	for _, key := range []string{"fees", "gross_pnl", "cohort_lifetime_pnl"} {
@@ -59,6 +62,8 @@ func TestPeriodAggregatesRejectOverflow(t *testing.T) {
 	}
 	require.True(t, get(t, ms, "period_pnl").Valid)
 	require.Zero(t, get(t, ms, "period_pnl").V)
+	require.True(t, get(t, ms, "net_pnl").Valid, "the period projection replaces overflowing cohort net")
+	require.Zero(t, get(t, ms, "net_pnl").V)
 }
 
 func TestPeriodCostsUseObservedEventsAtSharedBoundary(t *testing.T) {

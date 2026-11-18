@@ -461,7 +461,8 @@ func window(r *sim.Result, w Window, capital int64) []metrics.Metric {
 		if !v.IsInt64() {
 			m.V, m.Valid, m.Invalid = 0, false, "خارج از محدوده عددی"
 		} else {
-			m.V = v.Int64()
+			// Period metrics replace the cohort's aggregate and its validity.
+			m.V, m.Valid, m.Invalid = v.Int64(), true, ""
 		}
 	}
 	for i := range ms {
