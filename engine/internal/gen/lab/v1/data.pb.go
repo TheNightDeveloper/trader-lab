@@ -154,7 +154,8 @@ type ResearchCapability struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Symbol        string                 `protobuf:"bytes,1,opt,name=symbol,proto3" json:"symbol,omitempty"`
 	Supported     bool                   `protobuf:"varint,2,opt,name=supported,proto3" json:"supported,omitempty"`
-	Reason        string                 `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"` // user-facing explanation when unsupported
+	Reason        string                 `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"`         // user-facing explanation when unsupported
+	Instrument    *InstrumentKey         `protobuf:"bytes,4,opt,name=instrument,proto3" json:"instrument,omitempty"` // canonical for registered markets; legacy symbol above remains available
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -208,6 +209,13 @@ func (x *ResearchCapability) GetReason() string {
 		return x.Reason
 	}
 	return ""
+}
+
+func (x *ResearchCapability) GetInstrument() *InstrumentKey {
+	if x != nil {
+		return x.Instrument
+	}
+	return nil
 }
 
 type Dataset struct {
@@ -1152,7 +1160,7 @@ var File_lab_v1_data_proto protoreflect.FileDescriptor
 
 const file_lab_v1_data_proto_rawDesc = "" +
 	"\n" +
-	"\x11lab/v1/data.proto\x12\x06lab.v1\"\x14\n" +
+	"\x11lab/v1/data.proto\x12\x06lab.v1\x1a\x16lab/v1/workspace.proto\"\x14\n" +
 	"\x12GetOverviewRequest\"\xc0\x02\n" +
 	"\x13GetOverviewResponse\x12!\n" +
 	"\flive_symbols\x18\x01 \x01(\x05R\vliveSymbols\x12\x1f\n" +
@@ -1162,11 +1170,14 @@ const file_lab_v1_data_proto_rawDesc = "" +
 	"\x14outage_seconds_today\x18\x04 \x01(\x03R\x12outageSecondsToday\x12#\n" +
 	"\rstorage_bytes\x18\x05 \x01(\x03R\fstorageBytes\x12\x18\n" +
 	"\asymbols\x18\x06 \x03(\tR\asymbols\x12O\n" +
-	"\x15research_capabilities\x18\a \x03(\v2\x1a.lab.v1.ResearchCapabilityR\x14researchCapabilities\"b\n" +
+	"\x15research_capabilities\x18\a \x03(\v2\x1a.lab.v1.ResearchCapabilityR\x14researchCapabilities\"\x99\x01\n" +
 	"\x12ResearchCapability\x12\x16\n" +
 	"\x06symbol\x18\x01 \x01(\tR\x06symbol\x12\x1c\n" +
 	"\tsupported\x18\x02 \x01(\bR\tsupported\x12\x16\n" +
-	"\x06reason\x18\x03 \x01(\tR\x06reason\"\xc1\x02\n" +
+	"\x06reason\x18\x03 \x01(\tR\x06reason\x125\n" +
+	"\n" +
+	"instrument\x18\x04 \x01(\v2\x15.lab.v1.InstrumentKeyR\n" +
+	"instrument\"\xc1\x02\n" +
 	"\aDataset\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x16\n" +
 	"\x06symbol\x18\x02 \x01(\tR\x06symbol\x12\x1c\n" +
@@ -1284,31 +1295,33 @@ var file_lab_v1_data_proto_goTypes = []any{
 	(*ImportRequest)(nil),             // 13: lab.v1.ImportRequest
 	(*ImportResponse)(nil),            // 14: lab.v1.ImportResponse
 	(*ImportProgress)(nil),            // 15: lab.v1.ImportProgress
+	(*InstrumentKey)(nil),             // 16: lab.v1.InstrumentKey
 }
 var file_lab_v1_data_proto_depIdxs = []int32{
 	2,  // 0: lab.v1.GetOverviewResponse.research_capabilities:type_name -> lab.v1.ResearchCapability
-	3,  // 1: lab.v1.ListDatasetsResponse.datasets:type_name -> lab.v1.Dataset
-	8,  // 2: lab.v1.Coverage.problems:type_name -> lab.v1.TimeRange
-	8,  // 3: lab.v1.Coverage.segments:type_name -> lab.v1.TimeRange
-	7,  // 4: lab.v1.GetCoverageResponse.coverage:type_name -> lab.v1.Coverage
-	10, // 5: lab.v1.ListQualityIssuesResponse.issues:type_name -> lab.v1.QualityIssue
-	15, // 6: lab.v1.ImportResponse.progress:type_name -> lab.v1.ImportProgress
-	3,  // 7: lab.v1.ImportResponse.dataset:type_name -> lab.v1.Dataset
-	0,  // 8: lab.v1.DataService.GetOverview:input_type -> lab.v1.GetOverviewRequest
-	4,  // 9: lab.v1.DataService.ListDatasets:input_type -> lab.v1.ListDatasetsRequest
-	6,  // 10: lab.v1.DataService.GetCoverage:input_type -> lab.v1.GetCoverageRequest
-	11, // 11: lab.v1.DataService.ListQualityIssues:input_type -> lab.v1.ListQualityIssuesRequest
-	13, // 12: lab.v1.DataService.Import:input_type -> lab.v1.ImportRequest
-	1,  // 13: lab.v1.DataService.GetOverview:output_type -> lab.v1.GetOverviewResponse
-	5,  // 14: lab.v1.DataService.ListDatasets:output_type -> lab.v1.ListDatasetsResponse
-	9,  // 15: lab.v1.DataService.GetCoverage:output_type -> lab.v1.GetCoverageResponse
-	12, // 16: lab.v1.DataService.ListQualityIssues:output_type -> lab.v1.ListQualityIssuesResponse
-	14, // 17: lab.v1.DataService.Import:output_type -> lab.v1.ImportResponse
-	13, // [13:18] is the sub-list for method output_type
-	8,  // [8:13] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	16, // 1: lab.v1.ResearchCapability.instrument:type_name -> lab.v1.InstrumentKey
+	3,  // 2: lab.v1.ListDatasetsResponse.datasets:type_name -> lab.v1.Dataset
+	8,  // 3: lab.v1.Coverage.problems:type_name -> lab.v1.TimeRange
+	8,  // 4: lab.v1.Coverage.segments:type_name -> lab.v1.TimeRange
+	7,  // 5: lab.v1.GetCoverageResponse.coverage:type_name -> lab.v1.Coverage
+	10, // 6: lab.v1.ListQualityIssuesResponse.issues:type_name -> lab.v1.QualityIssue
+	15, // 7: lab.v1.ImportResponse.progress:type_name -> lab.v1.ImportProgress
+	3,  // 8: lab.v1.ImportResponse.dataset:type_name -> lab.v1.Dataset
+	0,  // 9: lab.v1.DataService.GetOverview:input_type -> lab.v1.GetOverviewRequest
+	4,  // 10: lab.v1.DataService.ListDatasets:input_type -> lab.v1.ListDatasetsRequest
+	6,  // 11: lab.v1.DataService.GetCoverage:input_type -> lab.v1.GetCoverageRequest
+	11, // 12: lab.v1.DataService.ListQualityIssues:input_type -> lab.v1.ListQualityIssuesRequest
+	13, // 13: lab.v1.DataService.Import:input_type -> lab.v1.ImportRequest
+	1,  // 14: lab.v1.DataService.GetOverview:output_type -> lab.v1.GetOverviewResponse
+	5,  // 15: lab.v1.DataService.ListDatasets:output_type -> lab.v1.ListDatasetsResponse
+	9,  // 16: lab.v1.DataService.GetCoverage:output_type -> lab.v1.GetCoverageResponse
+	12, // 17: lab.v1.DataService.ListQualityIssues:output_type -> lab.v1.ListQualityIssuesResponse
+	14, // 18: lab.v1.DataService.Import:output_type -> lab.v1.ImportResponse
+	14, // [14:19] is the sub-list for method output_type
+	9,  // [9:14] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_lab_v1_data_proto_init() }
@@ -1316,6 +1329,7 @@ func file_lab_v1_data_proto_init() {
 	if File_lab_v1_data_proto != nil {
 		return
 	}
+	file_lab_v1_workspace_proto_init()
 	file_lab_v1_data_proto_msgTypes[14].OneofWrappers = []any{
 		(*ImportResponse_Progress)(nil),
 		(*ImportResponse_Dataset)(nil),

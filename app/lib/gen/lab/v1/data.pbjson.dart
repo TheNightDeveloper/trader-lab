@@ -15,6 +15,8 @@ import 'dart:convert' as $convert;
 import 'dart:core' as $core;
 import 'dart:typed_data' as $typed_data;
 
+import 'workspace.pbjson.dart' as $0;
+
 @$core.Deprecated('Use getOverviewRequestDescriptor instead')
 const GetOverviewRequest$json = {
   '1': 'GetOverviewRequest',
@@ -67,13 +69,22 @@ const ResearchCapability$json = {
     {'1': 'symbol', '3': 1, '4': 1, '5': 9, '10': 'symbol'},
     {'1': 'supported', '3': 2, '4': 1, '5': 8, '10': 'supported'},
     {'1': 'reason', '3': 3, '4': 1, '5': 9, '10': 'reason'},
+    {
+      '1': 'instrument',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.InstrumentKey',
+      '10': 'instrument'
+    },
   ],
 };
 
 /// Descriptor for `ResearchCapability`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List researchCapabilityDescriptor = $convert.base64Decode(
     'ChJSZXNlYXJjaENhcGFiaWxpdHkSFgoGc3ltYm9sGAEgASgJUgZzeW1ib2wSHAoJc3VwcG9ydG'
-    'VkGAIgASgIUglzdXBwb3J0ZWQSFgoGcmVhc29uGAMgASgJUgZyZWFzb24=');
+    'VkGAIgASgIUglzdXBwb3J0ZWQSFgoGcmVhc29uGAMgASgJUgZyZWFzb24SNQoKaW5zdHJ1bWVu'
+    'dBgEIAEoCzIVLmxhYi52MS5JbnN0cnVtZW50S2V5UgppbnN0cnVtZW50');
 
 @$core.Deprecated('Use datasetDescriptor instead')
 const Dataset$json = {
@@ -398,6 +409,7 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
   '.lab.v1.GetOverviewRequest': GetOverviewRequest$json,
   '.lab.v1.GetOverviewResponse': GetOverviewResponse$json,
   '.lab.v1.ResearchCapability': ResearchCapability$json,
+  '.lab.v1.InstrumentKey': $0.InstrumentKey$json,
   '.lab.v1.ListDatasetsRequest': ListDatasetsRequest$json,
   '.lab.v1.ListDatasetsResponse': ListDatasetsResponse$json,
   '.lab.v1.Dataset': Dataset$json,

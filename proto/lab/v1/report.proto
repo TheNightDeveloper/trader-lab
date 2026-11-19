@@ -3,6 +3,7 @@ syntax = "proto3";
 package lab.v1;
 
 import "lab/v1/common.proto";
+import "lab/v1/workspace.proto";
 
 // ReportService: evaluate a configuration, read reports, compare, export.
 service ReportService {
@@ -30,6 +31,7 @@ message ParamSpec {
 message StrategyInfo {
   string name = 1;
   repeated ParamSpec params = 2;
+  StrategyCapability capability = 3;
 }
 
 message ListStrategiesRequest {}

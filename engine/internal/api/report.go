@@ -35,7 +35,10 @@ type Report struct {
 func (h *Report) ListStrategies(context.Context, *connect.Request[labv1.ListStrategiesRequest]) (*connect.Response[labv1.ListStrategiesResponse], error) {
 	res := &labv1.ListStrategiesResponse{}
 	for _, n := range strategy.Names() {
-		info := &labv1.StrategyInfo{Name: n}
+		info := &labv1.StrategyInfo{Name: n, Capability: &labv1.StrategyCapability{
+			Products:     []labv1.MarketProduct{labv1.MarketProduct_MARKET_PRODUCT_SPOT},
+			Environments: []labv1.Environment{labv1.Environment_ENVIRONMENT_RESEARCH},
+		}}
 		for _, p := range strategy.ParamSpecs[n] {
 			info.Params = append(info.Params, &labv1.ParamSpec{Name: p.Name, Default: p.Default, Integer: p.Integer})
 		}

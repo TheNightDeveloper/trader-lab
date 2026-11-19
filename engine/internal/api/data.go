@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"crypto/sha256"
 	"errors"
 	"fmt"
 	"slices"
@@ -16,6 +17,7 @@ import (
 	labv1 "tradinglab/engine/internal/gen/lab/v1"
 	"tradinglab/engine/internal/instrument"
 	"tradinglab/engine/internal/jobs"
+	"tradinglab/engine/internal/report"
 	"tradinglab/engine/internal/store"
 	"tradinglab/engine/internal/store/db"
 )
@@ -48,15 +50,29 @@ func (d *Data) GetOverview(ctx context.Context, _ *connect.Request[labv1.GetOver
 	if d.Live != nil {
 		res.LiveSymbols = int32(len(d.Live.Symbols))
 	}
+	specs := report.Specs()
 	for _, i := range ins {
 		res.Symbols = append(res.Symbols, i.Symbol)
 		capability := &labv1.ResearchCapability{Symbol: i.Symbol, Supported: true}
+		if spec, ok := specs[i.Symbol]; ok {
+			capability.Instrument = spotKey(spec)
+		}
 		if err := instrument.ResearchError(i.Symbol); err != nil {
 			capability.Supported, capability.Reason = false, err.Error()
 		}
 		res.ResearchCapabilities = append(res.ResearchCapabilities, capability)
 	}
 	return connect.NewResponse(res), nil
+}
+
+// spotKey fingerprints the canonical engine spec, independently of database row order.
+func spotKey(s instrument.Spec) *labv1.InstrumentKey {
+	revision := sha256.Sum256(fmt.Appendf(nil, "binance/spot/v1\n%s\n%s/%d\n%s/%d\n%s\n%s\n%s",
+		s.Symbol, s.Base.Code, s.Base.Scale, s.Quote.Code, s.Quote.Scale, s.Tick, s.Lot, s.MinNotional))
+	return &labv1.InstrumentKey{
+		Venue: "binance", Product: labv1.MarketProduct_MARKET_PRODUCT_SPOT,
+		Symbol: s.Symbol, SpecRevision: fmt.Sprintf("sha256:%x", revision),
+	}
 }
 
 func (d *Data) ListDatasets(ctx context.Context, req *connect.Request[labv1.ListDatasetsRequest]) (*connect.Response[labv1.ListDatasetsResponse], error) {

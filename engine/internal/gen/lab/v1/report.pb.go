@@ -85,6 +85,7 @@ type StrategyInfo struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Params        []*ParamSpec           `protobuf:"bytes,2,rep,name=params,proto3" json:"params,omitempty"`
+	Capability    *StrategyCapability    `protobuf:"bytes,3,opt,name=capability,proto3" json:"capability,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -129,6 +130,13 @@ func (x *StrategyInfo) GetName() string {
 func (x *StrategyInfo) GetParams() []*ParamSpec {
 	if x != nil {
 		return x.Params
+	}
+	return nil
+}
+
+func (x *StrategyInfo) GetCapability() *StrategyCapability {
+	if x != nil {
+		return x.Capability
 	}
 	return nil
 }
@@ -2706,14 +2714,17 @@ var File_lab_v1_report_proto protoreflect.FileDescriptor
 
 const file_lab_v1_report_proto_rawDesc = "" +
 	"\n" +
-	"\x13lab/v1/report.proto\x12\x06lab.v1\x1a\x13lab/v1/common.proto\"S\n" +
+	"\x13lab/v1/report.proto\x12\x06lab.v1\x1a\x13lab/v1/common.proto\x1a\x16lab/v1/workspace.proto\"S\n" +
 	"\tParamSpec\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n" +
 	"\adefault\x18\x02 \x01(\x01R\adefault\x12\x18\n" +
-	"\ainteger\x18\x03 \x01(\bR\ainteger\"M\n" +
+	"\ainteger\x18\x03 \x01(\bR\ainteger\"\x89\x01\n" +
 	"\fStrategyInfo\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12)\n" +
-	"\x06params\x18\x02 \x03(\v2\x11.lab.v1.ParamSpecR\x06params\"\x17\n" +
+	"\x06params\x18\x02 \x03(\v2\x11.lab.v1.ParamSpecR\x06params\x12:\n" +
+	"\n" +
+	"capability\x18\x03 \x01(\v2\x1a.lab.v1.StrategyCapabilityR\n" +
+	"capability\"\x17\n" +
 	"\x15ListStrategiesRequest\"N\n" +
 	"\x16ListStrategiesResponse\x124\n" +
 	"\n" +
@@ -3004,96 +3015,98 @@ var file_lab_v1_report_proto_goTypes = []any{
 	(*ReproduceRequest)(nil),       // 38: lab.v1.ReproduceRequest
 	(*ReproduceResponse)(nil),      // 39: lab.v1.ReproduceResponse
 	nil,                            // 40: lab.v1.ReportSpec.ParamsEntry
-	(*Money)(nil),                  // 41: lab.v1.Money
-	(*Decimal)(nil),                // 42: lab.v1.Decimal
-	(*Metric)(nil),                 // 43: lab.v1.Metric
-	(*EquityPoint)(nil),            // 44: lab.v1.EquityPoint
+	(*StrategyCapability)(nil),     // 41: lab.v1.StrategyCapability
+	(*Money)(nil),                  // 42: lab.v1.Money
+	(*Decimal)(nil),                // 43: lab.v1.Decimal
+	(*Metric)(nil),                 // 44: lab.v1.Metric
+	(*EquityPoint)(nil),            // 45: lab.v1.EquityPoint
 }
 var file_lab_v1_report_proto_depIdxs = []int32{
 	0,  // 0: lab.v1.StrategyInfo.params:type_name -> lab.v1.ParamSpec
-	1,  // 1: lab.v1.ListStrategiesResponse.strategies:type_name -> lab.v1.StrategyInfo
-	40, // 2: lab.v1.ReportSpec.params:type_name -> lab.v1.ReportSpec.ParamsEntry
-	41, // 3: lab.v1.ReportSpec.capital:type_name -> lab.v1.Money
-	42, // 4: lab.v1.ReportSpec.fee:type_name -> lab.v1.Decimal
-	42, // 5: lab.v1.ReportSpec.slippage:type_name -> lab.v1.Decimal
-	41, // 6: lab.v1.ReportSpec.fixed_usdt:type_name -> lab.v1.Money
-	42, // 7: lab.v1.ReportSpec.holdout:type_name -> lab.v1.Decimal
-	4,  // 8: lab.v1.CreateReportRequest.spec:type_name -> lab.v1.ReportSpec
-	41, // 9: lab.v1.ReportListItem.net:type_name -> lab.v1.Money
-	42, // 10: lab.v1.ReportListItem.total_return:type_name -> lab.v1.Decimal
-	7,  // 11: lab.v1.ListReportsResponse.reports:type_name -> lab.v1.ReportListItem
-	10, // 12: lab.v1.RunView.window:type_name -> lab.v1.Window
-	43, // 13: lab.v1.RunView.metrics:type_name -> lab.v1.Metric
-	44, // 14: lab.v1.RunView.equity:type_name -> lab.v1.EquityPoint
-	10, // 15: lab.v1.FoldView.train:type_name -> lab.v1.Window
-	10, // 16: lab.v1.FoldView.test:type_name -> lab.v1.Window
-	43, // 17: lab.v1.FoldView.metrics:type_name -> lab.v1.Metric
-	43, // 18: lab.v1.StressView.metrics:type_name -> lab.v1.Metric
-	43, // 19: lab.v1.GridCell.total_return:type_name -> lab.v1.Metric
-	14, // 20: lab.v1.GridRow.cells:type_name -> lab.v1.GridCell
-	15, // 21: lab.v1.Grid.rows:type_name -> lab.v1.GridRow
-	17, // 22: lab.v1.Summary.badges:type_name -> lab.v1.Badge
-	44, // 23: lab.v1.Benchmark.equity:type_name -> lab.v1.EquityPoint
-	43, // 24: lab.v1.Benchmark.total_return:type_name -> lab.v1.Metric
-	4,  // 25: lab.v1.Report.spec:type_name -> lab.v1.ReportSpec
-	10, // 26: lab.v1.Report.range:type_name -> lab.v1.Window
-	10, // 27: lab.v1.Report.oos_window:type_name -> lab.v1.Window
-	10, // 28: lab.v1.Report.holdout_window:type_name -> lab.v1.Window
-	18, // 29: lab.v1.Report.summary:type_name -> lab.v1.Summary
-	11, // 30: lab.v1.Report.oos:type_name -> lab.v1.RunView
-	12, // 31: lab.v1.Report.folds:type_name -> lab.v1.FoldView
-	13, // 32: lab.v1.Report.stress:type_name -> lab.v1.StressView
-	16, // 33: lab.v1.Report.grid:type_name -> lab.v1.Grid
-	19, // 34: lab.v1.Report.benchmarks:type_name -> lab.v1.Benchmark
-	42, // 35: lab.v1.Report.break_even_fee:type_name -> lab.v1.Decimal
-	20, // 36: lab.v1.Report.groups:type_name -> lab.v1.MetricGroup
-	41, // 37: lab.v1.Report.final_equity_toman:type_name -> lab.v1.Money
-	41, // 38: lab.v1.Report.net_toman:type_name -> lab.v1.Money
-	21, // 39: lab.v1.GetReportResponse.report:type_name -> lab.v1.Report
-	11, // 40: lab.v1.ViewHoldoutResponse.holdout:type_name -> lab.v1.RunView
-	42, // 41: lab.v1.TradeRow.qty:type_name -> lab.v1.Decimal
-	41, // 42: lab.v1.TradeRow.entry_ref:type_name -> lab.v1.Money
-	41, // 43: lab.v1.TradeRow.exit_ref:type_name -> lab.v1.Money
-	41, // 44: lab.v1.TradeRow.gross:type_name -> lab.v1.Money
-	41, // 45: lab.v1.TradeRow.slippage:type_name -> lab.v1.Money
-	41, // 46: lab.v1.TradeRow.fees:type_name -> lab.v1.Money
-	41, // 47: lab.v1.TradeRow.net:type_name -> lab.v1.Money
-	42, // 48: lab.v1.TradeRow.open_qty:type_name -> lab.v1.Decimal
-	41, // 49: lab.v1.TradeRow.mark_value:type_name -> lab.v1.Money
-	26, // 50: lab.v1.ListTradesResponse.trades:type_name -> lab.v1.TradeRow
-	42, // 51: lab.v1.DecisionRow.target:type_name -> lab.v1.Decimal
-	42, // 52: lab.v1.DecisionRow.stop_loss:type_name -> lab.v1.Decimal
-	42, // 53: lab.v1.DecisionRow.take_profit:type_name -> lab.v1.Decimal
-	29, // 54: lab.v1.ListDecisionsResponse.decisions:type_name -> lab.v1.DecisionRow
-	43, // 55: lab.v1.CompareColumn.metrics:type_name -> lab.v1.Metric
-	44, // 56: lab.v1.CompareColumn.equity:type_name -> lab.v1.EquityPoint
-	32, // 57: lab.v1.CompareResponse.assumptions:type_name -> lab.v1.Assumption
-	34, // 58: lab.v1.CompareResponse.columns:type_name -> lab.v1.CompareColumn
-	2,  // 59: lab.v1.ReportService.ListStrategies:input_type -> lab.v1.ListStrategiesRequest
-	5,  // 60: lab.v1.ReportService.CreateReport:input_type -> lab.v1.CreateReportRequest
-	8,  // 61: lab.v1.ReportService.ListReports:input_type -> lab.v1.ListReportsRequest
-	22, // 62: lab.v1.ReportService.GetReport:input_type -> lab.v1.GetReportRequest
-	24, // 63: lab.v1.ReportService.ViewHoldout:input_type -> lab.v1.ViewHoldoutRequest
-	27, // 64: lab.v1.ReportService.ListTrades:input_type -> lab.v1.ListTradesRequest
-	30, // 65: lab.v1.ReportService.ListDecisions:input_type -> lab.v1.ListDecisionsRequest
-	33, // 66: lab.v1.ReportService.Compare:input_type -> lab.v1.CompareRequest
-	36, // 67: lab.v1.ReportService.Export:input_type -> lab.v1.ExportRequest
-	38, // 68: lab.v1.ReportService.Reproduce:input_type -> lab.v1.ReproduceRequest
-	3,  // 69: lab.v1.ReportService.ListStrategies:output_type -> lab.v1.ListStrategiesResponse
-	6,  // 70: lab.v1.ReportService.CreateReport:output_type -> lab.v1.CreateReportResponse
-	9,  // 71: lab.v1.ReportService.ListReports:output_type -> lab.v1.ListReportsResponse
-	23, // 72: lab.v1.ReportService.GetReport:output_type -> lab.v1.GetReportResponse
-	25, // 73: lab.v1.ReportService.ViewHoldout:output_type -> lab.v1.ViewHoldoutResponse
-	28, // 74: lab.v1.ReportService.ListTrades:output_type -> lab.v1.ListTradesResponse
-	31, // 75: lab.v1.ReportService.ListDecisions:output_type -> lab.v1.ListDecisionsResponse
-	35, // 76: lab.v1.ReportService.Compare:output_type -> lab.v1.CompareResponse
-	37, // 77: lab.v1.ReportService.Export:output_type -> lab.v1.ExportResponse
-	39, // 78: lab.v1.ReportService.Reproduce:output_type -> lab.v1.ReproduceResponse
-	69, // [69:79] is the sub-list for method output_type
-	59, // [59:69] is the sub-list for method input_type
-	59, // [59:59] is the sub-list for extension type_name
-	59, // [59:59] is the sub-list for extension extendee
-	0,  // [0:59] is the sub-list for field type_name
+	41, // 1: lab.v1.StrategyInfo.capability:type_name -> lab.v1.StrategyCapability
+	1,  // 2: lab.v1.ListStrategiesResponse.strategies:type_name -> lab.v1.StrategyInfo
+	40, // 3: lab.v1.ReportSpec.params:type_name -> lab.v1.ReportSpec.ParamsEntry
+	42, // 4: lab.v1.ReportSpec.capital:type_name -> lab.v1.Money
+	43, // 5: lab.v1.ReportSpec.fee:type_name -> lab.v1.Decimal
+	43, // 6: lab.v1.ReportSpec.slippage:type_name -> lab.v1.Decimal
+	42, // 7: lab.v1.ReportSpec.fixed_usdt:type_name -> lab.v1.Money
+	43, // 8: lab.v1.ReportSpec.holdout:type_name -> lab.v1.Decimal
+	4,  // 9: lab.v1.CreateReportRequest.spec:type_name -> lab.v1.ReportSpec
+	42, // 10: lab.v1.ReportListItem.net:type_name -> lab.v1.Money
+	43, // 11: lab.v1.ReportListItem.total_return:type_name -> lab.v1.Decimal
+	7,  // 12: lab.v1.ListReportsResponse.reports:type_name -> lab.v1.ReportListItem
+	10, // 13: lab.v1.RunView.window:type_name -> lab.v1.Window
+	44, // 14: lab.v1.RunView.metrics:type_name -> lab.v1.Metric
+	45, // 15: lab.v1.RunView.equity:type_name -> lab.v1.EquityPoint
+	10, // 16: lab.v1.FoldView.train:type_name -> lab.v1.Window
+	10, // 17: lab.v1.FoldView.test:type_name -> lab.v1.Window
+	44, // 18: lab.v1.FoldView.metrics:type_name -> lab.v1.Metric
+	44, // 19: lab.v1.StressView.metrics:type_name -> lab.v1.Metric
+	44, // 20: lab.v1.GridCell.total_return:type_name -> lab.v1.Metric
+	14, // 21: lab.v1.GridRow.cells:type_name -> lab.v1.GridCell
+	15, // 22: lab.v1.Grid.rows:type_name -> lab.v1.GridRow
+	17, // 23: lab.v1.Summary.badges:type_name -> lab.v1.Badge
+	45, // 24: lab.v1.Benchmark.equity:type_name -> lab.v1.EquityPoint
+	44, // 25: lab.v1.Benchmark.total_return:type_name -> lab.v1.Metric
+	4,  // 26: lab.v1.Report.spec:type_name -> lab.v1.ReportSpec
+	10, // 27: lab.v1.Report.range:type_name -> lab.v1.Window
+	10, // 28: lab.v1.Report.oos_window:type_name -> lab.v1.Window
+	10, // 29: lab.v1.Report.holdout_window:type_name -> lab.v1.Window
+	18, // 30: lab.v1.Report.summary:type_name -> lab.v1.Summary
+	11, // 31: lab.v1.Report.oos:type_name -> lab.v1.RunView
+	12, // 32: lab.v1.Report.folds:type_name -> lab.v1.FoldView
+	13, // 33: lab.v1.Report.stress:type_name -> lab.v1.StressView
+	16, // 34: lab.v1.Report.grid:type_name -> lab.v1.Grid
+	19, // 35: lab.v1.Report.benchmarks:type_name -> lab.v1.Benchmark
+	43, // 36: lab.v1.Report.break_even_fee:type_name -> lab.v1.Decimal
+	20, // 37: lab.v1.Report.groups:type_name -> lab.v1.MetricGroup
+	42, // 38: lab.v1.Report.final_equity_toman:type_name -> lab.v1.Money
+	42, // 39: lab.v1.Report.net_toman:type_name -> lab.v1.Money
+	21, // 40: lab.v1.GetReportResponse.report:type_name -> lab.v1.Report
+	11, // 41: lab.v1.ViewHoldoutResponse.holdout:type_name -> lab.v1.RunView
+	43, // 42: lab.v1.TradeRow.qty:type_name -> lab.v1.Decimal
+	42, // 43: lab.v1.TradeRow.entry_ref:type_name -> lab.v1.Money
+	42, // 44: lab.v1.TradeRow.exit_ref:type_name -> lab.v1.Money
+	42, // 45: lab.v1.TradeRow.gross:type_name -> lab.v1.Money
+	42, // 46: lab.v1.TradeRow.slippage:type_name -> lab.v1.Money
+	42, // 47: lab.v1.TradeRow.fees:type_name -> lab.v1.Money
+	42, // 48: lab.v1.TradeRow.net:type_name -> lab.v1.Money
+	43, // 49: lab.v1.TradeRow.open_qty:type_name -> lab.v1.Decimal
+	42, // 50: lab.v1.TradeRow.mark_value:type_name -> lab.v1.Money
+	26, // 51: lab.v1.ListTradesResponse.trades:type_name -> lab.v1.TradeRow
+	43, // 52: lab.v1.DecisionRow.target:type_name -> lab.v1.Decimal
+	43, // 53: lab.v1.DecisionRow.stop_loss:type_name -> lab.v1.Decimal
+	43, // 54: lab.v1.DecisionRow.take_profit:type_name -> lab.v1.Decimal
+	29, // 55: lab.v1.ListDecisionsResponse.decisions:type_name -> lab.v1.DecisionRow
+	44, // 56: lab.v1.CompareColumn.metrics:type_name -> lab.v1.Metric
+	45, // 57: lab.v1.CompareColumn.equity:type_name -> lab.v1.EquityPoint
+	32, // 58: lab.v1.CompareResponse.assumptions:type_name -> lab.v1.Assumption
+	34, // 59: lab.v1.CompareResponse.columns:type_name -> lab.v1.CompareColumn
+	2,  // 60: lab.v1.ReportService.ListStrategies:input_type -> lab.v1.ListStrategiesRequest
+	5,  // 61: lab.v1.ReportService.CreateReport:input_type -> lab.v1.CreateReportRequest
+	8,  // 62: lab.v1.ReportService.ListReports:input_type -> lab.v1.ListReportsRequest
+	22, // 63: lab.v1.ReportService.GetReport:input_type -> lab.v1.GetReportRequest
+	24, // 64: lab.v1.ReportService.ViewHoldout:input_type -> lab.v1.ViewHoldoutRequest
+	27, // 65: lab.v1.ReportService.ListTrades:input_type -> lab.v1.ListTradesRequest
+	30, // 66: lab.v1.ReportService.ListDecisions:input_type -> lab.v1.ListDecisionsRequest
+	33, // 67: lab.v1.ReportService.Compare:input_type -> lab.v1.CompareRequest
+	36, // 68: lab.v1.ReportService.Export:input_type -> lab.v1.ExportRequest
+	38, // 69: lab.v1.ReportService.Reproduce:input_type -> lab.v1.ReproduceRequest
+	3,  // 70: lab.v1.ReportService.ListStrategies:output_type -> lab.v1.ListStrategiesResponse
+	6,  // 71: lab.v1.ReportService.CreateReport:output_type -> lab.v1.CreateReportResponse
+	9,  // 72: lab.v1.ReportService.ListReports:output_type -> lab.v1.ListReportsResponse
+	23, // 73: lab.v1.ReportService.GetReport:output_type -> lab.v1.GetReportResponse
+	25, // 74: lab.v1.ReportService.ViewHoldout:output_type -> lab.v1.ViewHoldoutResponse
+	28, // 75: lab.v1.ReportService.ListTrades:output_type -> lab.v1.ListTradesResponse
+	31, // 76: lab.v1.ReportService.ListDecisions:output_type -> lab.v1.ListDecisionsResponse
+	35, // 77: lab.v1.ReportService.Compare:output_type -> lab.v1.CompareResponse
+	37, // 78: lab.v1.ReportService.Export:output_type -> lab.v1.ExportResponse
+	39, // 79: lab.v1.ReportService.Reproduce:output_type -> lab.v1.ReproduceResponse
+	70, // [70:80] is the sub-list for method output_type
+	60, // [60:70] is the sub-list for method input_type
+	60, // [60:60] is the sub-list for extension type_name
+	60, // [60:60] is the sub-list for extension extendee
+	0,  // [0:60] is the sub-list for field type_name
 }
 
 func init() { file_lab_v1_report_proto_init() }
@@ -3102,6 +3115,7 @@ func file_lab_v1_report_proto_init() {
 		return
 	}
 	file_lab_v1_common_proto_init()
+	file_lab_v1_workspace_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

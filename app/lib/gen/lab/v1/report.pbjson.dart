@@ -15,7 +15,8 @@ import 'dart:convert' as $convert;
 import 'dart:core' as $core;
 import 'dart:typed_data' as $typed_data;
 
-import 'common.pbjson.dart' as $0;
+import 'common.pbjson.dart' as $1;
+import 'workspace.pbjson.dart' as $0;
 
 @$core.Deprecated('Use paramSpecDescriptor instead')
 const ParamSpec$json = {
@@ -45,13 +46,22 @@ const StrategyInfo$json = {
       '6': '.lab.v1.ParamSpec',
       '10': 'params'
     },
+    {
+      '1': 'capability',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.StrategyCapability',
+      '10': 'capability'
+    },
   ],
 };
 
 /// Descriptor for `StrategyInfo`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List strategyInfoDescriptor = $convert.base64Decode(
     'CgxTdHJhdGVneUluZm8SEgoEbmFtZRgBIAEoCVIEbmFtZRIpCgZwYXJhbXMYAiADKAsyES5sYW'
-    'IudjEuUGFyYW1TcGVjUgZwYXJhbXM=');
+    'IudjEuUGFyYW1TcGVjUgZwYXJhbXMSOgoKY2FwYWJpbGl0eRgDIAEoCzIaLmxhYi52MS5TdHJh'
+    'dGVneUNhcGFiaWxpdHlSCmNhcGFiaWxpdHk=');
 
 @$core.Deprecated('Use listStrategiesRequestDescriptor instead')
 const ListStrategiesRequest$json = {
@@ -1133,11 +1143,12 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
   '.lab.v1.ListStrategiesResponse': ListStrategiesResponse$json,
   '.lab.v1.StrategyInfo': StrategyInfo$json,
   '.lab.v1.ParamSpec': ParamSpec$json,
+  '.lab.v1.StrategyCapability': $0.StrategyCapability$json,
   '.lab.v1.CreateReportRequest': CreateReportRequest$json,
   '.lab.v1.ReportSpec': ReportSpec$json,
   '.lab.v1.ReportSpec.ParamsEntry': ReportSpec_ParamsEntry$json,
-  '.lab.v1.Money': $0.Money$json,
-  '.lab.v1.Decimal': $0.Decimal$json,
+  '.lab.v1.Money': $1.Money$json,
+  '.lab.v1.Decimal': $1.Decimal$json,
   '.lab.v1.CreateReportResponse': CreateReportResponse$json,
   '.lab.v1.ListReportsRequest': ListReportsRequest$json,
   '.lab.v1.ListReportsResponse': ListReportsResponse$json,
@@ -1149,8 +1160,8 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
   '.lab.v1.Summary': Summary$json,
   '.lab.v1.Badge': Badge$json,
   '.lab.v1.RunView': RunView$json,
-  '.lab.v1.Metric': $0.Metric$json,
-  '.lab.v1.EquityPoint': $0.EquityPoint$json,
+  '.lab.v1.Metric': $1.Metric$json,
+  '.lab.v1.EquityPoint': $1.EquityPoint$json,
   '.lab.v1.FoldView': FoldView$json,
   '.lab.v1.StressView': StressView$json,
   '.lab.v1.Grid': Grid$json,

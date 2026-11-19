@@ -16,7 +16,8 @@ import 'dart:core' as $core;
 import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import 'common.pb.dart' as $0;
+import 'common.pb.dart' as $1;
+import 'workspace.pb.dart' as $0;
 
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
@@ -103,10 +104,12 @@ class StrategyInfo extends $pb.GeneratedMessage {
   factory StrategyInfo({
     $core.String? name,
     $core.Iterable<ParamSpec>? params,
+    $0.StrategyCapability? capability,
   }) {
     final result = StrategyInfo._();
     if (name != null) result.name = name;
     if (params != null) result.params.addAll(params);
+    if (capability != null) result.capability = capability;
     return result;
   }
 
@@ -126,6 +129,8 @@ class StrategyInfo extends $pb.GeneratedMessage {
     ..aOS(1, _omitFieldNames ? '' : 'name')
     ..pPM<ParamSpec>(2, _omitFieldNames ? '' : 'params',
         subBuilder: ParamSpec.$_createMessage)
+    ..aOM<$0.StrategyCapability>(3, _omitFieldNames ? '' : 'capability',
+        subBuilder: $0.StrategyCapability.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -161,6 +166,17 @@ class StrategyInfo extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(2)
   $pb.PbList<ParamSpec> get params => $_getList(1);
+
+  @$pb.TagNumber(3)
+  $0.StrategyCapability get capability => $_getN(2);
+  @$pb.TagNumber(3)
+  set capability($0.StrategyCapability value) => $_setField(3, value);
+  @$pb.TagNumber(3)
+  $core.bool hasCapability() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearCapability() => $_clearField(3);
+  @$pb.TagNumber(3)
+  $0.StrategyCapability ensureCapability() => $_ensure(2);
 }
 
 class ListStrategiesRequest extends $pb.GeneratedMessage {
@@ -266,15 +282,15 @@ class ReportSpec extends $pb.GeneratedMessage {
     $core.String? timeframe,
     $core.String? strategy,
     $core.Iterable<$core.MapEntry<$core.String, $core.double>>? params,
-    $0.Money? capital,
-    $0.Decimal? fee,
-    $0.Decimal? slippage,
+    $1.Money? capital,
+    $1.Decimal? fee,
+    $1.Decimal? slippage,
     $core.String? sizing,
-    $0.Money? fixedUsdt,
+    $1.Money? fixedUsdt,
     $core.int? latencyBars,
     $core.int? folds,
     $core.bool? rolling,
-    $0.Decimal? holdout,
+    $1.Decimal? holdout,
     $fixnum.Int64? embargoSeconds,
     $core.String? engineVersion,
   }) {
@@ -318,20 +334,20 @@ class ReportSpec extends $pb.GeneratedMessage {
         keyFieldType: $pb.PbFieldType.OS,
         valueFieldType: $pb.PbFieldType.OD,
         packageName: const $pb.PackageName('lab.v1'))
-    ..aOM<$0.Money>(5, _omitFieldNames ? '' : 'capital',
-        subBuilder: $0.Money.$_createMessage)
-    ..aOM<$0.Decimal>(6, _omitFieldNames ? '' : 'fee',
-        subBuilder: $0.Decimal.$_createMessage)
-    ..aOM<$0.Decimal>(7, _omitFieldNames ? '' : 'slippage',
-        subBuilder: $0.Decimal.$_createMessage)
+    ..aOM<$1.Money>(5, _omitFieldNames ? '' : 'capital',
+        subBuilder: $1.Money.$_createMessage)
+    ..aOM<$1.Decimal>(6, _omitFieldNames ? '' : 'fee',
+        subBuilder: $1.Decimal.$_createMessage)
+    ..aOM<$1.Decimal>(7, _omitFieldNames ? '' : 'slippage',
+        subBuilder: $1.Decimal.$_createMessage)
     ..aOS(8, _omitFieldNames ? '' : 'sizing')
-    ..aOM<$0.Money>(9, _omitFieldNames ? '' : 'fixedUsdt',
-        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$1.Money>(9, _omitFieldNames ? '' : 'fixedUsdt',
+        subBuilder: $1.Money.$_createMessage)
     ..aI(10, _omitFieldNames ? '' : 'latencyBars')
     ..aI(11, _omitFieldNames ? '' : 'folds')
     ..aOB(12, _omitFieldNames ? '' : 'rolling')
-    ..aOM<$0.Decimal>(13, _omitFieldNames ? '' : 'holdout',
-        subBuilder: $0.Decimal.$_createMessage)
+    ..aOM<$1.Decimal>(13, _omitFieldNames ? '' : 'holdout',
+        subBuilder: $1.Decimal.$_createMessage)
     ..aInt64(14, _omitFieldNames ? '' : 'embargoSeconds')
     ..aOS(15, _omitFieldNames ? '' : 'engineVersion')
     ..hasRequiredFields = false;
@@ -381,37 +397,37 @@ class ReportSpec extends $pb.GeneratedMessage {
   $pb.PbMap<$core.String, $core.double> get params => $_getMap(3);
 
   @$pb.TagNumber(5)
-  $0.Money get capital => $_getN(4);
+  $1.Money get capital => $_getN(4);
   @$pb.TagNumber(5)
-  set capital($0.Money value) => $_setField(5, value);
+  set capital($1.Money value) => $_setField(5, value);
   @$pb.TagNumber(5)
   $core.bool hasCapital() => $_has(4);
   @$pb.TagNumber(5)
   void clearCapital() => $_clearField(5);
   @$pb.TagNumber(5)
-  $0.Money ensureCapital() => $_ensure(4);
+  $1.Money ensureCapital() => $_ensure(4);
 
   @$pb.TagNumber(6)
-  $0.Decimal get fee => $_getN(5);
+  $1.Decimal get fee => $_getN(5);
   @$pb.TagNumber(6)
-  set fee($0.Decimal value) => $_setField(6, value);
+  set fee($1.Decimal value) => $_setField(6, value);
   @$pb.TagNumber(6)
   $core.bool hasFee() => $_has(5);
   @$pb.TagNumber(6)
   void clearFee() => $_clearField(6);
   @$pb.TagNumber(6)
-  $0.Decimal ensureFee() => $_ensure(5);
+  $1.Decimal ensureFee() => $_ensure(5);
 
   @$pb.TagNumber(7)
-  $0.Decimal get slippage => $_getN(6);
+  $1.Decimal get slippage => $_getN(6);
   @$pb.TagNumber(7)
-  set slippage($0.Decimal value) => $_setField(7, value);
+  set slippage($1.Decimal value) => $_setField(7, value);
   @$pb.TagNumber(7)
   $core.bool hasSlippage() => $_has(6);
   @$pb.TagNumber(7)
   void clearSlippage() => $_clearField(7);
   @$pb.TagNumber(7)
-  $0.Decimal ensureSlippage() => $_ensure(6);
+  $1.Decimal ensureSlippage() => $_ensure(6);
 
   @$pb.TagNumber(8)
   $core.String get sizing => $_getSZ(7);
@@ -423,15 +439,15 @@ class ReportSpec extends $pb.GeneratedMessage {
   void clearSizing() => $_clearField(8);
 
   @$pb.TagNumber(9)
-  $0.Money get fixedUsdt => $_getN(8);
+  $1.Money get fixedUsdt => $_getN(8);
   @$pb.TagNumber(9)
-  set fixedUsdt($0.Money value) => $_setField(9, value);
+  set fixedUsdt($1.Money value) => $_setField(9, value);
   @$pb.TagNumber(9)
   $core.bool hasFixedUsdt() => $_has(8);
   @$pb.TagNumber(9)
   void clearFixedUsdt() => $_clearField(9);
   @$pb.TagNumber(9)
-  $0.Money ensureFixedUsdt() => $_ensure(8);
+  $1.Money ensureFixedUsdt() => $_ensure(8);
 
   @$pb.TagNumber(10)
   $core.int get latencyBars => $_getIZ(9);
@@ -461,15 +477,15 @@ class ReportSpec extends $pb.GeneratedMessage {
   void clearRolling() => $_clearField(12);
 
   @$pb.TagNumber(13)
-  $0.Decimal get holdout => $_getN(12);
+  $1.Decimal get holdout => $_getN(12);
   @$pb.TagNumber(13)
-  set holdout($0.Decimal value) => $_setField(13, value);
+  set holdout($1.Decimal value) => $_setField(13, value);
   @$pb.TagNumber(13)
   $core.bool hasHoldout() => $_has(12);
   @$pb.TagNumber(13)
   void clearHoldout() => $_clearField(13);
   @$pb.TagNumber(13)
-  $0.Decimal ensureHoldout() => $_ensure(12);
+  $1.Decimal ensureHoldout() => $_ensure(12);
 
   @$pb.TagNumber(14)
   $fixnum.Int64 get embargoSeconds => $_getI64(13);
@@ -614,8 +630,8 @@ class ReportListItem extends $pb.GeneratedMessage {
     $core.String? id,
     $core.String? title,
     $fixnum.Int64? createdUnixMs,
-    $0.Money? net,
-    $0.Decimal? totalReturn,
+    $1.Money? net,
+    $1.Decimal? totalReturn,
     $core.int? closedTrades,
     $core.String? verdict,
     $core.String? tone,
@@ -650,10 +666,10 @@ class ReportListItem extends $pb.GeneratedMessage {
     ..aOS(1, _omitFieldNames ? '' : 'id')
     ..aOS(2, _omitFieldNames ? '' : 'title')
     ..aInt64(3, _omitFieldNames ? '' : 'createdUnixMs')
-    ..aOM<$0.Money>(4, _omitFieldNames ? '' : 'net',
-        subBuilder: $0.Money.$_createMessage)
-    ..aOM<$0.Decimal>(5, _omitFieldNames ? '' : 'totalReturn',
-        subBuilder: $0.Decimal.$_createMessage)
+    ..aOM<$1.Money>(4, _omitFieldNames ? '' : 'net',
+        subBuilder: $1.Money.$_createMessage)
+    ..aOM<$1.Decimal>(5, _omitFieldNames ? '' : 'totalReturn',
+        subBuilder: $1.Decimal.$_createMessage)
     ..aI(6, _omitFieldNames ? '' : 'closedTrades')
     ..aOS(7, _omitFieldNames ? '' : 'verdict')
     ..aOS(8, _omitFieldNames ? '' : 'tone')
@@ -710,26 +726,26 @@ class ReportListItem extends $pb.GeneratedMessage {
   void clearCreatedUnixMs() => $_clearField(3);
 
   @$pb.TagNumber(4)
-  $0.Money get net => $_getN(3);
+  $1.Money get net => $_getN(3);
   @$pb.TagNumber(4)
-  set net($0.Money value) => $_setField(4, value);
+  set net($1.Money value) => $_setField(4, value);
   @$pb.TagNumber(4)
   $core.bool hasNet() => $_has(3);
   @$pb.TagNumber(4)
   void clearNet() => $_clearField(4);
   @$pb.TagNumber(4)
-  $0.Money ensureNet() => $_ensure(3);
+  $1.Money ensureNet() => $_ensure(3);
 
   @$pb.TagNumber(5)
-  $0.Decimal get totalReturn => $_getN(4);
+  $1.Decimal get totalReturn => $_getN(4);
   @$pb.TagNumber(5)
-  set totalReturn($0.Decimal value) => $_setField(5, value);
+  set totalReturn($1.Decimal value) => $_setField(5, value);
   @$pb.TagNumber(5)
   $core.bool hasTotalReturn() => $_has(4);
   @$pb.TagNumber(5)
   void clearTotalReturn() => $_clearField(5);
   @$pb.TagNumber(5)
-  $0.Decimal ensureTotalReturn() => $_ensure(4);
+  $1.Decimal ensureTotalReturn() => $_ensure(4);
 
   @$pb.TagNumber(6)
   $core.int get closedTrades => $_getIZ(5);
@@ -972,8 +988,8 @@ class Window extends $pb.GeneratedMessage {
 class RunView extends $pb.GeneratedMessage {
   factory RunView({
     Window? window,
-    $core.Iterable<$0.Metric>? metrics,
-    $core.Iterable<$0.EquityPoint>? equity,
+    $core.Iterable<$1.Metric>? metrics,
+    $core.Iterable<$1.EquityPoint>? equity,
     $core.int? ambiguousBars,
   }) {
     final result = RunView._();
@@ -999,10 +1015,10 @@ class RunView extends $pb.GeneratedMessage {
       createEmptyInstance: RunView.$_createMessage)
     ..aOM<Window>(1, _omitFieldNames ? '' : 'window',
         subBuilder: Window.$_createMessage)
-    ..pPM<$0.Metric>(2, _omitFieldNames ? '' : 'metrics',
-        subBuilder: $0.Metric.$_createMessage)
-    ..pPM<$0.EquityPoint>(3, _omitFieldNames ? '' : 'equity',
-        subBuilder: $0.EquityPoint.$_createMessage)
+    ..pPM<$1.Metric>(2, _omitFieldNames ? '' : 'metrics',
+        subBuilder: $1.Metric.$_createMessage)
+    ..pPM<$1.EquityPoint>(3, _omitFieldNames ? '' : 'equity',
+        subBuilder: $1.EquityPoint.$_createMessage)
     ..aI(4, _omitFieldNames ? '' : 'ambiguousBars')
     ..hasRequiredFields = false;
 
@@ -1038,10 +1054,10 @@ class RunView extends $pb.GeneratedMessage {
   Window ensureWindow() => $_ensure(0);
 
   @$pb.TagNumber(2)
-  $pb.PbList<$0.Metric> get metrics => $_getList(1);
+  $pb.PbList<$1.Metric> get metrics => $_getList(1);
 
   @$pb.TagNumber(3)
-  $pb.PbList<$0.EquityPoint> get equity => $_getList(2);
+  $pb.PbList<$1.EquityPoint> get equity => $_getList(2);
 
   @$pb.TagNumber(4)
   $core.int get ambiguousBars => $_getIZ(3);
@@ -1058,7 +1074,7 @@ class FoldView extends $pb.GeneratedMessage {
     $core.int? index,
     Window? train,
     Window? test,
-    $core.Iterable<$0.Metric>? metrics,
+    $core.Iterable<$1.Metric>? metrics,
   }) {
     final result = FoldView._();
     if (index != null) result.index = index;
@@ -1086,8 +1102,8 @@ class FoldView extends $pb.GeneratedMessage {
         subBuilder: Window.$_createMessage)
     ..aOM<Window>(3, _omitFieldNames ? '' : 'test',
         subBuilder: Window.$_createMessage)
-    ..pPM<$0.Metric>(4, _omitFieldNames ? '' : 'metrics',
-        subBuilder: $0.Metric.$_createMessage)
+    ..pPM<$1.Metric>(4, _omitFieldNames ? '' : 'metrics',
+        subBuilder: $1.Metric.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1142,13 +1158,13 @@ class FoldView extends $pb.GeneratedMessage {
   Window ensureTest() => $_ensure(2);
 
   @$pb.TagNumber(4)
-  $pb.PbList<$0.Metric> get metrics => $_getList(3);
+  $pb.PbList<$1.Metric> get metrics => $_getList(3);
 }
 
 class StressView extends $pb.GeneratedMessage {
   factory StressView({
     $core.String? key,
-    $core.Iterable<$0.Metric>? metrics,
+    $core.Iterable<$1.Metric>? metrics,
     $core.String? error,
   }) {
     final result = StressView._();
@@ -1172,8 +1188,8 @@ class StressView extends $pb.GeneratedMessage {
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: StressView.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'key')
-    ..pPM<$0.Metric>(2, _omitFieldNames ? '' : 'metrics',
-        subBuilder: $0.Metric.$_createMessage)
+    ..pPM<$1.Metric>(2, _omitFieldNames ? '' : 'metrics',
+        subBuilder: $1.Metric.$_createMessage)
     ..aOS(3, _omitFieldNames ? '' : 'error')
     ..hasRequiredFields = false;
 
@@ -1207,7 +1223,7 @@ class StressView extends $pb.GeneratedMessage {
   void clearKey() => $_clearField(1);
 
   @$pb.TagNumber(2)
-  $pb.PbList<$0.Metric> get metrics => $_getList(1);
+  $pb.PbList<$1.Metric> get metrics => $_getList(1);
 
   @$pb.TagNumber(3)
   $core.String get error => $_getSZ(2);
@@ -1221,7 +1237,7 @@ class StressView extends $pb.GeneratedMessage {
 
 class GridCell extends $pb.GeneratedMessage {
   factory GridCell({
-    $0.Metric? totalReturn,
+    $1.Metric? totalReturn,
     $core.bool? center,
     $core.String? invalid,
   }) {
@@ -1245,8 +1261,8 @@ class GridCell extends $pb.GeneratedMessage {
       _omitMessageNames ? '' : 'GridCell',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: GridCell.$_createMessage)
-    ..aOM<$0.Metric>(1, _omitFieldNames ? '' : 'totalReturn',
-        subBuilder: $0.Metric.$_createMessage)
+    ..aOM<$1.Metric>(1, _omitFieldNames ? '' : 'totalReturn',
+        subBuilder: $1.Metric.$_createMessage)
     ..aOB(2, _omitFieldNames ? '' : 'center')
     ..aOS(3, _omitFieldNames ? '' : 'invalid')
     ..hasRequiredFields = false;
@@ -1272,15 +1288,15 @@ class GridCell extends $pb.GeneratedMessage {
   static GridCell? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $0.Metric get totalReturn => $_getN(0);
+  $1.Metric get totalReturn => $_getN(0);
   @$pb.TagNumber(1)
-  set totalReturn($0.Metric value) => $_setField(1, value);
+  set totalReturn($1.Metric value) => $_setField(1, value);
   @$pb.TagNumber(1)
   $core.bool hasTotalReturn() => $_has(0);
   @$pb.TagNumber(1)
   void clearTotalReturn() => $_clearField(1);
   @$pb.TagNumber(1)
-  $0.Metric ensureTotalReturn() => $_ensure(0);
+  $1.Metric ensureTotalReturn() => $_ensure(0);
 
   @$pb.TagNumber(2)
   $core.bool get center => $_getBF(1);
@@ -1605,8 +1621,8 @@ class Summary extends $pb.GeneratedMessage {
 class Benchmark extends $pb.GeneratedMessage {
   factory Benchmark({
     $core.String? key,
-    $core.Iterable<$0.EquityPoint>? equity,
-    $0.Metric? totalReturn,
+    $core.Iterable<$1.EquityPoint>? equity,
+    $1.Metric? totalReturn,
   }) {
     final result = Benchmark._();
     if (key != null) result.key = key;
@@ -1629,10 +1645,10 @@ class Benchmark extends $pb.GeneratedMessage {
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: Benchmark.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'key')
-    ..pPM<$0.EquityPoint>(2, _omitFieldNames ? '' : 'equity',
-        subBuilder: $0.EquityPoint.$_createMessage)
-    ..aOM<$0.Metric>(3, _omitFieldNames ? '' : 'totalReturn',
-        subBuilder: $0.Metric.$_createMessage)
+    ..pPM<$1.EquityPoint>(2, _omitFieldNames ? '' : 'equity',
+        subBuilder: $1.EquityPoint.$_createMessage)
+    ..aOM<$1.Metric>(3, _omitFieldNames ? '' : 'totalReturn',
+        subBuilder: $1.Metric.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1665,18 +1681,18 @@ class Benchmark extends $pb.GeneratedMessage {
   void clearKey() => $_clearField(1);
 
   @$pb.TagNumber(2)
-  $pb.PbList<$0.EquityPoint> get equity => $_getList(1);
+  $pb.PbList<$1.EquityPoint> get equity => $_getList(1);
 
   @$pb.TagNumber(3)
-  $0.Metric get totalReturn => $_getN(2);
+  $1.Metric get totalReturn => $_getN(2);
   @$pb.TagNumber(3)
-  set totalReturn($0.Metric value) => $_setField(3, value);
+  set totalReturn($1.Metric value) => $_setField(3, value);
   @$pb.TagNumber(3)
   $core.bool hasTotalReturn() => $_has(2);
   @$pb.TagNumber(3)
   void clearTotalReturn() => $_clearField(3);
   @$pb.TagNumber(3)
-  $0.Metric ensureTotalReturn() => $_ensure(2);
+  $1.Metric ensureTotalReturn() => $_ensure(2);
 }
 
 class MetricGroup extends $pb.GeneratedMessage {
@@ -1763,11 +1779,11 @@ class Report extends $pb.GeneratedMessage {
     $core.Iterable<StressView>? stress,
     Grid? grid,
     $core.Iterable<Benchmark>? benchmarks,
-    $0.Decimal? breakEvenFee,
+    $1.Decimal? breakEvenFee,
     $core.int? holdoutViews,
     $core.Iterable<MetricGroup>? groups,
-    $0.Money? finalEquityToman,
-    $0.Money? netToman,
+    $1.Money? finalEquityToman,
+    $1.Money? netToman,
   }) {
     final result = Report._();
     if (id != null) result.id = id;
@@ -1827,15 +1843,15 @@ class Report extends $pb.GeneratedMessage {
         subBuilder: Grid.$_createMessage)
     ..pPM<Benchmark>(13, _omitFieldNames ? '' : 'benchmarks',
         subBuilder: Benchmark.$_createMessage)
-    ..aOM<$0.Decimal>(14, _omitFieldNames ? '' : 'breakEvenFee',
-        subBuilder: $0.Decimal.$_createMessage)
+    ..aOM<$1.Decimal>(14, _omitFieldNames ? '' : 'breakEvenFee',
+        subBuilder: $1.Decimal.$_createMessage)
     ..aI(15, _omitFieldNames ? '' : 'holdoutViews')
     ..pPM<MetricGroup>(16, _omitFieldNames ? '' : 'groups',
         subBuilder: MetricGroup.$_createMessage)
-    ..aOM<$0.Money>(17, _omitFieldNames ? '' : 'finalEquityToman',
-        subBuilder: $0.Money.$_createMessage)
-    ..aOM<$0.Money>(18, _omitFieldNames ? '' : 'netToman',
-        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$1.Money>(17, _omitFieldNames ? '' : 'finalEquityToman',
+        subBuilder: $1.Money.$_createMessage)
+    ..aOM<$1.Money>(18, _omitFieldNames ? '' : 'netToman',
+        subBuilder: $1.Money.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1972,15 +1988,15 @@ class Report extends $pb.GeneratedMessage {
   $pb.PbList<Benchmark> get benchmarks => $_getList(12);
 
   @$pb.TagNumber(14)
-  $0.Decimal get breakEvenFee => $_getN(13);
+  $1.Decimal get breakEvenFee => $_getN(13);
   @$pb.TagNumber(14)
-  set breakEvenFee($0.Decimal value) => $_setField(14, value);
+  set breakEvenFee($1.Decimal value) => $_setField(14, value);
   @$pb.TagNumber(14)
   $core.bool hasBreakEvenFee() => $_has(13);
   @$pb.TagNumber(14)
   void clearBreakEvenFee() => $_clearField(14);
   @$pb.TagNumber(14)
-  $0.Decimal ensureBreakEvenFee() => $_ensure(13);
+  $1.Decimal ensureBreakEvenFee() => $_ensure(13);
 
   @$pb.TagNumber(15)
   $core.int get holdoutViews => $_getIZ(14);
@@ -1996,26 +2012,26 @@ class Report extends $pb.GeneratedMessage {
 
   /// Display only, when GetReportRequest.fx_rate_id is set.
   @$pb.TagNumber(17)
-  $0.Money get finalEquityToman => $_getN(16);
+  $1.Money get finalEquityToman => $_getN(16);
   @$pb.TagNumber(17)
-  set finalEquityToman($0.Money value) => $_setField(17, value);
+  set finalEquityToman($1.Money value) => $_setField(17, value);
   @$pb.TagNumber(17)
   $core.bool hasFinalEquityToman() => $_has(16);
   @$pb.TagNumber(17)
   void clearFinalEquityToman() => $_clearField(17);
   @$pb.TagNumber(17)
-  $0.Money ensureFinalEquityToman() => $_ensure(16);
+  $1.Money ensureFinalEquityToman() => $_ensure(16);
 
   @$pb.TagNumber(18)
-  $0.Money get netToman => $_getN(17);
+  $1.Money get netToman => $_getN(17);
   @$pb.TagNumber(18)
-  set netToman($0.Money value) => $_setField(18, value);
+  set netToman($1.Money value) => $_setField(18, value);
   @$pb.TagNumber(18)
   $core.bool hasNetToman() => $_has(17);
   @$pb.TagNumber(18)
   void clearNetToman() => $_clearField(18);
   @$pb.TagNumber(18)
-  $0.Money ensureNetToman() => $_ensure(17);
+  $1.Money ensureNetToman() => $_ensure(17);
 }
 
 class GetReportRequest extends $pb.GeneratedMessage {
@@ -2283,17 +2299,17 @@ class TradeRow extends $pb.GeneratedMessage {
     $core.String? instrument,
     $fixnum.Int64? openedUnixMs,
     $fixnum.Int64? closedUnixMs,
-    $0.Decimal? qty,
-    $0.Money? entryRef,
-    $0.Money? exitRef,
-    $0.Money? gross,
-    $0.Money? slippage,
-    $0.Money? fees,
-    $0.Money? net,
+    $1.Decimal? qty,
+    $1.Money? entryRef,
+    $1.Money? exitRef,
+    $1.Money? gross,
+    $1.Money? slippage,
+    $1.Money? fees,
+    $1.Money? net,
     $core.String? exitReason,
     $core.int? ambiguousBars,
-    $0.Decimal? openQty,
-    $0.Money? markValue,
+    $1.Decimal? openQty,
+    $1.Money? markValue,
   }) {
     final result = TradeRow._();
     if (seq != null) result.seq = seq;
@@ -2331,26 +2347,26 @@ class TradeRow extends $pb.GeneratedMessage {
     ..aOS(2, _omitFieldNames ? '' : 'instrument')
     ..aInt64(3, _omitFieldNames ? '' : 'openedUnixMs')
     ..aInt64(4, _omitFieldNames ? '' : 'closedUnixMs')
-    ..aOM<$0.Decimal>(5, _omitFieldNames ? '' : 'qty',
-        subBuilder: $0.Decimal.$_createMessage)
-    ..aOM<$0.Money>(6, _omitFieldNames ? '' : 'entryRef',
-        subBuilder: $0.Money.$_createMessage)
-    ..aOM<$0.Money>(7, _omitFieldNames ? '' : 'exitRef',
-        subBuilder: $0.Money.$_createMessage)
-    ..aOM<$0.Money>(8, _omitFieldNames ? '' : 'gross',
-        subBuilder: $0.Money.$_createMessage)
-    ..aOM<$0.Money>(9, _omitFieldNames ? '' : 'slippage',
-        subBuilder: $0.Money.$_createMessage)
-    ..aOM<$0.Money>(10, _omitFieldNames ? '' : 'fees',
-        subBuilder: $0.Money.$_createMessage)
-    ..aOM<$0.Money>(11, _omitFieldNames ? '' : 'net',
-        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$1.Decimal>(5, _omitFieldNames ? '' : 'qty',
+        subBuilder: $1.Decimal.$_createMessage)
+    ..aOM<$1.Money>(6, _omitFieldNames ? '' : 'entryRef',
+        subBuilder: $1.Money.$_createMessage)
+    ..aOM<$1.Money>(7, _omitFieldNames ? '' : 'exitRef',
+        subBuilder: $1.Money.$_createMessage)
+    ..aOM<$1.Money>(8, _omitFieldNames ? '' : 'gross',
+        subBuilder: $1.Money.$_createMessage)
+    ..aOM<$1.Money>(9, _omitFieldNames ? '' : 'slippage',
+        subBuilder: $1.Money.$_createMessage)
+    ..aOM<$1.Money>(10, _omitFieldNames ? '' : 'fees',
+        subBuilder: $1.Money.$_createMessage)
+    ..aOM<$1.Money>(11, _omitFieldNames ? '' : 'net',
+        subBuilder: $1.Money.$_createMessage)
     ..aOS(12, _omitFieldNames ? '' : 'exitReason')
     ..aI(13, _omitFieldNames ? '' : 'ambiguousBars')
-    ..aOM<$0.Decimal>(14, _omitFieldNames ? '' : 'openQty',
-        subBuilder: $0.Decimal.$_createMessage)
-    ..aOM<$0.Money>(15, _omitFieldNames ? '' : 'markValue',
-        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$1.Decimal>(14, _omitFieldNames ? '' : 'openQty',
+        subBuilder: $1.Decimal.$_createMessage)
+    ..aOM<$1.Money>(15, _omitFieldNames ? '' : 'markValue',
+        subBuilder: $1.Money.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -2410,81 +2426,81 @@ class TradeRow extends $pb.GeneratedMessage {
   void clearClosedUnixMs() => $_clearField(4);
 
   @$pb.TagNumber(5)
-  $0.Decimal get qty => $_getN(4);
+  $1.Decimal get qty => $_getN(4);
   @$pb.TagNumber(5)
-  set qty($0.Decimal value) => $_setField(5, value);
+  set qty($1.Decimal value) => $_setField(5, value);
   @$pb.TagNumber(5)
   $core.bool hasQty() => $_has(4);
   @$pb.TagNumber(5)
   void clearQty() => $_clearField(5);
   @$pb.TagNumber(5)
-  $0.Decimal ensureQty() => $_ensure(4);
+  $1.Decimal ensureQty() => $_ensure(4);
 
   @$pb.TagNumber(6)
-  $0.Money get entryRef => $_getN(5);
+  $1.Money get entryRef => $_getN(5);
   @$pb.TagNumber(6)
-  set entryRef($0.Money value) => $_setField(6, value);
+  set entryRef($1.Money value) => $_setField(6, value);
   @$pb.TagNumber(6)
   $core.bool hasEntryRef() => $_has(5);
   @$pb.TagNumber(6)
   void clearEntryRef() => $_clearField(6);
   @$pb.TagNumber(6)
-  $0.Money ensureEntryRef() => $_ensure(5);
+  $1.Money ensureEntryRef() => $_ensure(5);
 
   @$pb.TagNumber(7)
-  $0.Money get exitRef => $_getN(6);
+  $1.Money get exitRef => $_getN(6);
   @$pb.TagNumber(7)
-  set exitRef($0.Money value) => $_setField(7, value);
+  set exitRef($1.Money value) => $_setField(7, value);
   @$pb.TagNumber(7)
   $core.bool hasExitRef() => $_has(6);
   @$pb.TagNumber(7)
   void clearExitRef() => $_clearField(7);
   @$pb.TagNumber(7)
-  $0.Money ensureExitRef() => $_ensure(6);
+  $1.Money ensureExitRef() => $_ensure(6);
 
   @$pb.TagNumber(8)
-  $0.Money get gross => $_getN(7);
+  $1.Money get gross => $_getN(7);
   @$pb.TagNumber(8)
-  set gross($0.Money value) => $_setField(8, value);
+  set gross($1.Money value) => $_setField(8, value);
   @$pb.TagNumber(8)
   $core.bool hasGross() => $_has(7);
   @$pb.TagNumber(8)
   void clearGross() => $_clearField(8);
   @$pb.TagNumber(8)
-  $0.Money ensureGross() => $_ensure(7);
+  $1.Money ensureGross() => $_ensure(7);
 
   @$pb.TagNumber(9)
-  $0.Money get slippage => $_getN(8);
+  $1.Money get slippage => $_getN(8);
   @$pb.TagNumber(9)
-  set slippage($0.Money value) => $_setField(9, value);
+  set slippage($1.Money value) => $_setField(9, value);
   @$pb.TagNumber(9)
   $core.bool hasSlippage() => $_has(8);
   @$pb.TagNumber(9)
   void clearSlippage() => $_clearField(9);
   @$pb.TagNumber(9)
-  $0.Money ensureSlippage() => $_ensure(8);
+  $1.Money ensureSlippage() => $_ensure(8);
 
   @$pb.TagNumber(10)
-  $0.Money get fees => $_getN(9);
+  $1.Money get fees => $_getN(9);
   @$pb.TagNumber(10)
-  set fees($0.Money value) => $_setField(10, value);
+  set fees($1.Money value) => $_setField(10, value);
   @$pb.TagNumber(10)
   $core.bool hasFees() => $_has(9);
   @$pb.TagNumber(10)
   void clearFees() => $_clearField(10);
   @$pb.TagNumber(10)
-  $0.Money ensureFees() => $_ensure(9);
+  $1.Money ensureFees() => $_ensure(9);
 
   @$pb.TagNumber(11)
-  $0.Money get net => $_getN(10);
+  $1.Money get net => $_getN(10);
   @$pb.TagNumber(11)
-  set net($0.Money value) => $_setField(11, value);
+  set net($1.Money value) => $_setField(11, value);
   @$pb.TagNumber(11)
   $core.bool hasNet() => $_has(10);
   @$pb.TagNumber(11)
   void clearNet() => $_clearField(11);
   @$pb.TagNumber(11)
-  $0.Money ensureNet() => $_ensure(10);
+  $1.Money ensureNet() => $_ensure(10);
 
   @$pb.TagNumber(12)
   $core.String get exitReason => $_getSZ(11);
@@ -2505,26 +2521,26 @@ class TradeRow extends $pb.GeneratedMessage {
   void clearAmbiguousBars() => $_clearField(13);
 
   @$pb.TagNumber(14)
-  $0.Decimal get openQty => $_getN(13);
+  $1.Decimal get openQty => $_getN(13);
   @$pb.TagNumber(14)
-  set openQty($0.Decimal value) => $_setField(14, value);
+  set openQty($1.Decimal value) => $_setField(14, value);
   @$pb.TagNumber(14)
   $core.bool hasOpenQty() => $_has(13);
   @$pb.TagNumber(14)
   void clearOpenQty() => $_clearField(14);
   @$pb.TagNumber(14)
-  $0.Decimal ensureOpenQty() => $_ensure(13);
+  $1.Decimal ensureOpenQty() => $_ensure(13);
 
   @$pb.TagNumber(15)
-  $0.Money get markValue => $_getN(14);
+  $1.Money get markValue => $_getN(14);
   @$pb.TagNumber(15)
-  set markValue($0.Money value) => $_setField(15, value);
+  set markValue($1.Money value) => $_setField(15, value);
   @$pb.TagNumber(15)
   $core.bool hasMarkValue() => $_has(14);
   @$pb.TagNumber(15)
   void clearMarkValue() => $_clearField(15);
   @$pb.TagNumber(15)
-  $0.Money ensureMarkValue() => $_ensure(14);
+  $1.Money ensureMarkValue() => $_ensure(14);
 }
 
 class ListTradesRequest extends $pb.GeneratedMessage {
@@ -2679,9 +2695,9 @@ class DecisionRow extends $pb.GeneratedMessage {
     $core.String? inputSymbol,
     $fixnum.Int64? inputBarOpenUnixMs,
     $core.String? instrument,
-    $0.Decimal? target,
-    $0.Decimal? stopLoss,
-    $0.Decimal? takeProfit,
+    $1.Decimal? target,
+    $1.Decimal? stopLoss,
+    $1.Decimal? takeProfit,
     $core.String? reason,
     $core.String? modelId,
     $core.String? recipeVersion,
@@ -2724,12 +2740,12 @@ class DecisionRow extends $pb.GeneratedMessage {
     ..aOS(3, _omitFieldNames ? '' : 'inputSymbol')
     ..aInt64(4, _omitFieldNames ? '' : 'inputBarOpenUnixMs')
     ..aOS(5, _omitFieldNames ? '' : 'instrument')
-    ..aOM<$0.Decimal>(6, _omitFieldNames ? '' : 'target',
-        subBuilder: $0.Decimal.$_createMessage)
-    ..aOM<$0.Decimal>(7, _omitFieldNames ? '' : 'stopLoss',
-        subBuilder: $0.Decimal.$_createMessage)
-    ..aOM<$0.Decimal>(8, _omitFieldNames ? '' : 'takeProfit',
-        subBuilder: $0.Decimal.$_createMessage)
+    ..aOM<$1.Decimal>(6, _omitFieldNames ? '' : 'target',
+        subBuilder: $1.Decimal.$_createMessage)
+    ..aOM<$1.Decimal>(7, _omitFieldNames ? '' : 'stopLoss',
+        subBuilder: $1.Decimal.$_createMessage)
+    ..aOM<$1.Decimal>(8, _omitFieldNames ? '' : 'takeProfit',
+        subBuilder: $1.Decimal.$_createMessage)
     ..aOS(9, _omitFieldNames ? '' : 'reason')
     ..aOS(10, _omitFieldNames ? '' : 'modelId')
     ..aOS(11, _omitFieldNames ? '' : 'recipeVersion')
@@ -2805,37 +2821,37 @@ class DecisionRow extends $pb.GeneratedMessage {
   void clearInstrument() => $_clearField(5);
 
   @$pb.TagNumber(6)
-  $0.Decimal get target => $_getN(5);
+  $1.Decimal get target => $_getN(5);
   @$pb.TagNumber(6)
-  set target($0.Decimal value) => $_setField(6, value);
+  set target($1.Decimal value) => $_setField(6, value);
   @$pb.TagNumber(6)
   $core.bool hasTarget() => $_has(5);
   @$pb.TagNumber(6)
   void clearTarget() => $_clearField(6);
   @$pb.TagNumber(6)
-  $0.Decimal ensureTarget() => $_ensure(5);
+  $1.Decimal ensureTarget() => $_ensure(5);
 
   @$pb.TagNumber(7)
-  $0.Decimal get stopLoss => $_getN(6);
+  $1.Decimal get stopLoss => $_getN(6);
   @$pb.TagNumber(7)
-  set stopLoss($0.Decimal value) => $_setField(7, value);
+  set stopLoss($1.Decimal value) => $_setField(7, value);
   @$pb.TagNumber(7)
   $core.bool hasStopLoss() => $_has(6);
   @$pb.TagNumber(7)
   void clearStopLoss() => $_clearField(7);
   @$pb.TagNumber(7)
-  $0.Decimal ensureStopLoss() => $_ensure(6);
+  $1.Decimal ensureStopLoss() => $_ensure(6);
 
   @$pb.TagNumber(8)
-  $0.Decimal get takeProfit => $_getN(7);
+  $1.Decimal get takeProfit => $_getN(7);
   @$pb.TagNumber(8)
-  set takeProfit($0.Decimal value) => $_setField(8, value);
+  set takeProfit($1.Decimal value) => $_setField(8, value);
   @$pb.TagNumber(8)
   $core.bool hasTakeProfit() => $_has(7);
   @$pb.TagNumber(8)
   void clearTakeProfit() => $_clearField(8);
   @$pb.TagNumber(8)
-  $0.Decimal ensureTakeProfit() => $_ensure(7);
+  $1.Decimal ensureTakeProfit() => $_ensure(7);
 
   @$pb.TagNumber(9)
   $core.String get reason => $_getSZ(8);
@@ -3185,8 +3201,8 @@ class CompareColumn extends $pb.GeneratedMessage {
     $core.String? title,
     $core.bool? eligible,
     $core.Iterable<$core.String>? reasons,
-    $core.Iterable<$0.Metric>? metrics,
-    $core.Iterable<$0.EquityPoint>? equity,
+    $core.Iterable<$1.Metric>? metrics,
+    $core.Iterable<$1.EquityPoint>? equity,
   }) {
     final result = CompareColumn._();
     if (reportId != null) result.reportId = reportId;
@@ -3215,10 +3231,10 @@ class CompareColumn extends $pb.GeneratedMessage {
     ..aOS(2, _omitFieldNames ? '' : 'title')
     ..aOB(3, _omitFieldNames ? '' : 'eligible')
     ..pPS(4, _omitFieldNames ? '' : 'reasons')
-    ..pPM<$0.Metric>(5, _omitFieldNames ? '' : 'metrics',
-        subBuilder: $0.Metric.$_createMessage)
-    ..pPM<$0.EquityPoint>(6, _omitFieldNames ? '' : 'equity',
-        subBuilder: $0.EquityPoint.$_createMessage)
+    ..pPM<$1.Metric>(5, _omitFieldNames ? '' : 'metrics',
+        subBuilder: $1.Metric.$_createMessage)
+    ..pPM<$1.EquityPoint>(6, _omitFieldNames ? '' : 'equity',
+        subBuilder: $1.EquityPoint.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -3274,10 +3290,10 @@ class CompareColumn extends $pb.GeneratedMessage {
   $pb.PbList<$core.String> get reasons => $_getList(3);
 
   @$pb.TagNumber(5)
-  $pb.PbList<$0.Metric> get metrics => $_getList(4);
+  $pb.PbList<$1.Metric> get metrics => $_getList(4);
 
   @$pb.TagNumber(6)
-  $pb.PbList<$0.EquityPoint> get equity => $_getList(5);
+  $pb.PbList<$1.EquityPoint> get equity => $_getList(5);
 }
 
 class CompareResponse extends $pb.GeneratedMessage {

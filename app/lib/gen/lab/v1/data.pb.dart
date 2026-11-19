@@ -16,6 +16,8 @@ import 'dart:core' as $core;
 import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
+import 'workspace.pb.dart' as $0;
+
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
 class GetOverviewRequest extends $pb.GeneratedMessage {
@@ -186,11 +188,13 @@ class ResearchCapability extends $pb.GeneratedMessage {
     $core.String? symbol,
     $core.bool? supported,
     $core.String? reason,
+    $0.InstrumentKey? instrument,
   }) {
     final result = ResearchCapability._();
     if (symbol != null) result.symbol = symbol;
     if (supported != null) result.supported = supported;
     if (reason != null) result.reason = reason;
+    if (instrument != null) result.instrument = instrument;
     return result;
   }
 
@@ -210,6 +214,8 @@ class ResearchCapability extends $pb.GeneratedMessage {
     ..aOS(1, _omitFieldNames ? '' : 'symbol')
     ..aOB(2, _omitFieldNames ? '' : 'supported')
     ..aOS(3, _omitFieldNames ? '' : 'reason')
+    ..aOM<$0.InstrumentKey>(4, _omitFieldNames ? '' : 'instrument',
+        subBuilder: $0.InstrumentKey.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -260,6 +266,17 @@ class ResearchCapability extends $pb.GeneratedMessage {
   $core.bool hasReason() => $_has(2);
   @$pb.TagNumber(3)
   void clearReason() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $0.InstrumentKey get instrument => $_getN(3);
+  @$pb.TagNumber(4)
+  set instrument($0.InstrumentKey value) => $_setField(4, value);
+  @$pb.TagNumber(4)
+  $core.bool hasInstrument() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearInstrument() => $_clearField(4);
+  @$pb.TagNumber(4)
+  $0.InstrumentKey ensureInstrument() => $_ensure(3);
 }
 
 class Dataset extends $pb.GeneratedMessage {

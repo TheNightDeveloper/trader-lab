@@ -45,6 +45,10 @@ func TestCapabilitiesKeepCrossDataReadableAndRejectExecution(t *testing.T) {
 		caps[c.Symbol] = c
 	}
 	require.True(t, caps["BTCUSDT"].Supported)
+	require.Equal(t, "binance", caps["BTCUSDT"].GetInstrument().GetVenue())
+	require.Equal(t, labv1.MarketProduct_MARKET_PRODUCT_SPOT, caps["BTCUSDT"].GetInstrument().GetProduct())
+	require.Equal(t, "BTCUSDT", caps["BTCUSDT"].GetInstrument().GetSymbol())
+	require.Regexp(t, `^sha256:[0-9a-f]{64}$`, caps["BTCUSDT"].GetInstrument().GetSpecRevision())
 	require.False(t, caps["ETHBTC"].Supported)
 	require.Contains(t, caps["ETHBTC"].Reason, "USDT")
 	list, err := client.ListDatasets(ctx, connect.NewRequest(&labv1.ListDatasetsRequest{}))
