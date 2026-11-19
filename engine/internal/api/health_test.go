@@ -35,12 +35,36 @@ func TestHealthWatchStreams(t *testing.T) {
 		require.True(t, stream.Receive(), "message %d: %v", i, stream.Err())
 		st := stream.Msg().GetStatus()
 		require.Equal(t, labv1.RunMode_RUN_MODE_RESEARCH, st.GetMode())
+		require.Equal(t, labv1.Environment_ENVIRONMENT_RESEARCH, st.GetEnvironment())
+		require.Equal(t, []labv1.Environment{labv1.Environment_ENVIRONMENT_RESEARCH}, st.GetCapabilities().GetEnvironments())
+		require.True(t, st.GetCapabilities().GetLiveMarketData())
 		require.Equal(t, "USDT", st.GetAccountingAsset())
 		require.EqualValues(t, 8, st.GetWorkers().GetCount())
 		require.Equal(t, t0.UnixMilli(), st.GetServerTimeUnixMs())
 		require.Nil(t, st.GetDisplayRate(), "no rate entered yet")
 		require.Equal(t, labv1.LiveState_LIVE_STATE_FRESH, st.GetLive().GetState())
 		require.EqualValues(t, 4, st.GetLive().GetLastBarAgeSeconds())
+		require.Equal(t, t0.Add(-4*time.Second).UnixMilli(), st.GetLive().GetLastBarClosedAtUnixMs())
+	}
+}
+
+func TestHealthDistinguishesMissingCloseFromFreshClose(t *testing.T) {
+	clk := clock.NewVirtual(time.Unix(1000, 0))
+	for _, tc := range []struct {
+		name     string
+		live     LiveSource
+		hasClose bool
+	}{
+		{name: "feed disabled"},
+		{name: "feed waiting for data", live: fakeLive{data.LiveStatus{State: data.LiveReconnecting}}},
+		{name: "fresh close with zero age", live: fakeLive{data.LiveStatus{State: data.LiveFresh, LastClose: clk.Now()}}, hasClose: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			st := (&Health{Clock: clk, Live: tc.live}).status(t.Context())
+			require.Equal(t, tc.live != nil, st.GetCapabilities().GetLiveMarketData())
+			require.Zero(t, st.GetLive().GetLastBarAgeSeconds())
+			require.Equal(t, tc.hasClose, st.GetLive().LastBarClosedAtUnixMs != nil)
+		})
 	}
 }
 

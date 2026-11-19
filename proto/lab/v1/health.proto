@@ -3,6 +3,7 @@ syntax = "proto3";
 package lab.v1;
 
 import "lab/v1/common.proto";
+import "lab/v1/workspace.proto";
 
 // HealthService feeds the sidebar status block.
 service HealthService {
@@ -24,6 +25,15 @@ message EngineStatus {
   Workers workers = 5;
   DisplayRate display_rate = 6; // unset when no USDT/TOMAN rate has been entered
   int64 server_time_unix_ms = 7;
+  Environment environment = 8; // active workspace environment; mode remains for older clients
+  WorkspaceCapabilities capabilities = 9;
+}
+
+// WorkspaceCapabilities are published by the running server. Feed availability
+// is independent of whether an execution environment is supported.
+message WorkspaceCapabilities {
+  repeated Environment environments = 1; // affirmative list of supported environments
+  bool live_market_data = 2; // a live market data feed is configured
 }
 
 enum RunMode {
@@ -33,7 +43,8 @@ enum RunMode {
 
 message LiveData {
   LiveState state = 1;
-  int64 last_bar_age_seconds = 2; // 0 when state is OFF
+  int64 last_bar_age_seconds = 2; // meaningful when a last close is known
+  optional int64 last_bar_closed_at_unix_ms = 3; // absent until a bar has closed
 }
 
 enum LiveState {

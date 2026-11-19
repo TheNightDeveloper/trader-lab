@@ -51,6 +51,7 @@ func (h *Health) Watch(ctx context.Context, _ *connect.Request[labv1.WatchReques
 // status is the current snapshot. The worker pool (M4) fills in busy/paused later.
 func (h *Health) status(ctx context.Context) *labv1.EngineStatus {
 	now := h.Clock.Now()
+	environment := labv1.Environment_ENVIRONMENT_RESEARCH
 	st := &labv1.EngineStatus{
 		Version:          h.Version,
 		Mode:             labv1.RunMode_RUN_MODE_RESEARCH,
@@ -58,6 +59,11 @@ func (h *Health) status(ctx context.Context) *labv1.EngineStatus {
 		Live:             h.liveData(now),
 		Workers:          &labv1.Workers{State: labv1.WorkerState_WORKER_STATE_RUNNING, Count: h.Workers},
 		ServerTimeUnixMs: now.UnixMilli(),
+		Environment:      environment,
+		Capabilities: &labv1.WorkspaceCapabilities{
+			Environments:   []labv1.Environment{environment},
+			LiveMarketData: h.Live != nil,
+		},
 	}
 	if h.Rates != nil {
 		r, err := h.Rates.LatestDisplayRate(ctx)
@@ -76,6 +82,8 @@ func (h *Health) liveData(now time.Time) *labv1.LiveData {
 	st := h.Live.Status()
 	d := &labv1.LiveData{State: liveStates[st.State]}
 	if !st.LastClose.IsZero() {
+		closedAt := st.LastClose.UnixMilli()
+		d.LastBarClosedAtUnixMs = &closedAt
 		d.LastBarAgeSeconds = int64(max(0, now.Sub(st.LastClose)/time.Second))
 	}
 	return d

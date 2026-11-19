@@ -138,6 +138,22 @@ const EngineStatus$json = {
       '5': 3,
       '10': 'serverTimeUnixMs'
     },
+    {
+      '1': 'environment',
+      '3': 8,
+      '4': 1,
+      '5': 14,
+      '6': '.lab.v1.Environment',
+      '10': 'environment'
+    },
+    {
+      '1': 'capabilities',
+      '3': 9,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.WorkspaceCapabilities',
+      '10': 'capabilities'
+    },
   ],
 };
 
@@ -148,7 +164,31 @@ final $typed_data.Uint8List engineStatusDescriptor = $convert.base64Decode(
     'dGluZ0Fzc2V0EiQKBGxpdmUYBCABKAsyEC5sYWIudjEuTGl2ZURhdGFSBGxpdmUSKQoHd29ya2'
     'VycxgFIAEoCzIPLmxhYi52MS5Xb3JrZXJzUgd3b3JrZXJzEjYKDGRpc3BsYXlfcmF0ZRgGIAEo'
     'CzITLmxhYi52MS5EaXNwbGF5UmF0ZVILZGlzcGxheVJhdGUSLQoTc2VydmVyX3RpbWVfdW5peF'
-    '9tcxgHIAEoA1IQc2VydmVyVGltZVVuaXhNcw==');
+    '9tcxgHIAEoA1IQc2VydmVyVGltZVVuaXhNcxI1CgtlbnZpcm9ubWVudBgIIAEoDjITLmxhYi52'
+    'MS5FbnZpcm9ubWVudFILZW52aXJvbm1lbnQSQQoMY2FwYWJpbGl0aWVzGAkgASgLMh0ubGFiLn'
+    'YxLldvcmtzcGFjZUNhcGFiaWxpdGllc1IMY2FwYWJpbGl0aWVz');
+
+@$core.Deprecated('Use workspaceCapabilitiesDescriptor instead')
+const WorkspaceCapabilities$json = {
+  '1': 'WorkspaceCapabilities',
+  '2': [
+    {
+      '1': 'environments',
+      '3': 1,
+      '4': 3,
+      '5': 14,
+      '6': '.lab.v1.Environment',
+      '10': 'environments'
+    },
+    {'1': 'live_market_data', '3': 2, '4': 1, '5': 8, '10': 'liveMarketData'},
+  ],
+};
+
+/// Descriptor for `WorkspaceCapabilities`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List workspaceCapabilitiesDescriptor = $convert.base64Decode(
+    'ChVXb3Jrc3BhY2VDYXBhYmlsaXRpZXMSNwoMZW52aXJvbm1lbnRzGAEgAygOMhMubGFiLnYxLk'
+    'Vudmlyb25tZW50UgxlbnZpcm9ubWVudHMSKAoQbGl2ZV9tYXJrZXRfZGF0YRgCIAEoCFIObGl2'
+    'ZU1hcmtldERhdGE=');
 
 @$core.Deprecated('Use liveDataDescriptor instead')
 const LiveData$json = {
@@ -169,13 +209,27 @@ const LiveData$json = {
       '5': 3,
       '10': 'lastBarAgeSeconds'
     },
+    {
+      '1': 'last_bar_closed_at_unix_ms',
+      '3': 3,
+      '4': 1,
+      '5': 3,
+      '9': 0,
+      '10': 'lastBarClosedAtUnixMs',
+      '17': true
+    },
+  ],
+  '8': [
+    {'1': '_last_bar_closed_at_unix_ms'},
   ],
 };
 
 /// Descriptor for `LiveData`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List liveDataDescriptor = $convert.base64Decode(
     'CghMaXZlRGF0YRInCgVzdGF0ZRgBIAEoDjIRLmxhYi52MS5MaXZlU3RhdGVSBXN0YXRlEi8KFG'
-    'xhc3RfYmFyX2FnZV9zZWNvbmRzGAIgASgDUhFsYXN0QmFyQWdlU2Vjb25kcw==');
+    'xhc3RfYmFyX2FnZV9zZWNvbmRzGAIgASgDUhFsYXN0QmFyQWdlU2Vjb25kcxI+ChpsYXN0X2Jh'
+    'cl9jbG9zZWRfYXRfdW5peF9tcxgDIAEoA0gAUhVsYXN0QmFyQ2xvc2VkQXRVbml4TXOIAQFCHQ'
+    'obX2xhc3RfYmFyX2Nsb3NlZF9hdF91bml4X21z');
 
 @$core.Deprecated('Use workersDescriptor instead')
 const Workers$json = {
@@ -245,6 +299,7 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
   '.lab.v1.Workers': Workers$json,
   '.lab.v1.DisplayRate': DisplayRate$json,
   '.lab.v1.Money': $0.Money$json,
+  '.lab.v1.WorkspaceCapabilities': WorkspaceCapabilities$json,
 };
 
 /// Descriptor for `HealthService`. Decode as a `google.protobuf.ServiceDescriptorProto`.
