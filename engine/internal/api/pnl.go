@@ -54,22 +54,17 @@ func (h *Pnl) Recalculate(ctx context.Context, req *connect.Request[labv1.Recalc
 		size = v
 	}
 
-	// Keep an outer reservation while projecting the returned run into the RPC response.
-	release, err := h.Svc.ReserveWork(ctx, st.Spec.DatasetIDs, 1)
-	if err != nil {
-		return nil, reportErr(err)
-	}
-	defer release()
 	if h.Limiter != nil {
 		if err := h.Limiter.Acquire(ctx); err != nil {
 			return nil, err
 		}
 		defer h.Limiter.Release()
 	}
-	view, res, err := h.Svc.Recalculate(ctx, m.GetReportId(), cfg, size)
+	view, res, release, err := h.Svc.Recalculate(ctx, st, cfg, size)
 	if err != nil {
 		return nil, reportErr(err)
 	}
+	defer release()
 	// The waterfall intentionally contains amounts only, without validity metadata.
 	if err := metrics.Require(view.Metrics, "gross_pnl", "fees", "slippage", "net_pnl"); err != nil {
 		return nil, reportErr(err)

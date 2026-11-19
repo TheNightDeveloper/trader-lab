@@ -49,7 +49,7 @@ func TestReportMemoryAdmissionCoversEveryExecutionPath(t *testing.T) {
 	require.Zero(t, memory.InUse())
 	before, err := svc.Load(ctx, id)
 	require.NoError(t, err)
-	release, err := svc.ReserveWork(ctx, []string{ds}, 1)
+	release, err := memory.Reserve(ctx, n)
 	require.NoError(t, err)
 	other := svc // separate handler, same process-wide pool
 	_, err = other.Create(ctx, spec(ds))
@@ -57,7 +57,7 @@ func TestReportMemoryAdmissionCoversEveryExecutionPath(t *testing.T) {
 	require.ErrorIs(t, other.CreateWithID(ctx, "another", spec(ds)), jobs.ErrMemory)
 	_, err = other.Reproduce(ctx, id)
 	require.ErrorIs(t, err, jobs.ErrMemory)
-	_, _, err = other.Recalculate(ctx, id, before.Spec.Sim, money.RatioOne)
+	_, _, _, err = other.Recalculate(ctx, before, before.Spec.Sim, money.RatioOne)
 	require.ErrorIs(t, err, jobs.ErrMemory)
 	require.Equal(t, n, memory.InUse(), "no rejected call releases the admitted owner's reservation")
 	// Idempotent completion and historical reads do not require a new simulation.
@@ -75,6 +75,15 @@ func TestReportMemoryAdmissionCoversEveryExecutionPath(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, same)
 	require.Zero(t, memory.InUse())
+	budget, err := jobs.SimulationBytes(10_000, 10_000)
+	require.NoError(t, err)
+	replay := svc
+	replay.Memory = jobs.NewMemory(budget)
+	_, _, releaseReplay, err := replay.Recalculate(ctx, before, before.Spec.Sim, money.RatioOne)
+	require.NoError(t, err)
+	require.Equal(t, budget, replay.Memory.InUse(), "the caller owns the budget while projecting the replay")
+	releaseReplay()
+	require.Zero(t, replay.Memory.InUse())
 	// Incomplete metadata is enough for admission; a rejected job must never parse its manifest.
 	require.NoError(t, st.InsertDataset(ctx, db.InsertDatasetParams{ID: "invalid-manifest", Symbol: "BTCUSDT", Timeframe: "1m", RangeFrom: t0, RangeTo: t0.Add(10_000 * time.Minute), GapPolicy: string(data.GapFlag), KnownAt: t0, Manifest: []byte(`{}`)}))
 	blocked := svc

@@ -44,15 +44,25 @@ func WorkBytes(raw, bars, parallel int64) (int64, error) {
 // Side runs reduce their results before releasing a worker slot. The dense-ledger
 // calibration in PERFORMANCE.md separates process peak from retained array size.
 func EvaluationBytes(raw, bars, parallel int64) (int64, error) {
+	return simulationBytes(raw, bars, parallel, 2)
+}
+
+// SimulationBytes covers a single search or replay ledger and its projection.
+func SimulationBytes(raw, bars int64) (int64, error) {
+	return simulationBytes(raw, bars, 1, 0)
+}
+
+func simulationBytes(raw, bars, parallel, retainedLedgers int64) (int64, error) {
 	const active, retained = int64(5120), int64(2048)
-	if bars < 0 || parallel < 1 || parallel > (math.MaxInt64-2*retained)/active {
+	held := retained * retainedLedgers
+	if bars < 0 || parallel < 1 || parallel > (math.MaxInt64-held)/active {
 		return 0, ErrMemory
 	}
 	rawBytes, err := WorkBytes(raw, 0, 1)
 	if err != nil {
 		return 0, err
 	}
-	perBar := active*parallel + 2*retained
+	perBar := active*parallel + held
 	if bars > (math.MaxInt64-rawBytes)/perBar {
 		return 0, ErrMemory
 	}

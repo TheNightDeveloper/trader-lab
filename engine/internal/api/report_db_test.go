@@ -18,6 +18,7 @@ import (
 	"tradinglab/engine/internal/eval"
 	labv1 "tradinglab/engine/internal/gen/lab/v1"
 	"tradinglab/engine/internal/gen/lab/v1/labv1connect"
+	"tradinglab/engine/internal/jobs"
 	"tradinglab/engine/internal/money"
 	"tradinglab/engine/internal/report"
 	"tradinglab/engine/internal/store/storetest"
@@ -83,10 +84,15 @@ func TestReportAndPnlServices(t *testing.T) {
 	require.NoError(t, err)
 
 	svc := report.Service{Store: st, Version: "test"}
+	replayBudget, err := jobs.SimulationBytes(int64(len(bars)), int64(len(bars)))
+	require.NoError(t, err)
+	pnlSvc := svc
+	// The entire request must fit a single reservation, including the response projection.
+	pnlSvc.Memory = jobs.NewMemory(replayBudget)
 	fxSvc := &Fx{Store: st, Clock: clock.NewVirtual(time.Date(2026, 10, 27, 0, 0, 0, 0, time.UTC))}
 	srv := serve(t,
 		func(m *http.ServeMux) { m.Handle(labv1connect.NewReportServiceHandler(&Report{Svc: svc})) },
-		func(m *http.ServeMux) { m.Handle(labv1connect.NewPnlServiceHandler(&Pnl{Svc: svc})) },
+		func(m *http.ServeMux) { m.Handle(labv1connect.NewPnlServiceHandler(&Pnl{Svc: pnlSvc})) },
 		func(m *http.ServeMux) { m.Handle(labv1connect.NewFxServiceHandler(fxSvc)) })
 	rc := labv1connect.NewReportServiceClient(srv.Client(), srv.URL)
 	pc := labv1connect.NewPnlServiceClient(srv.Client(), srv.URL)
@@ -220,6 +226,7 @@ func TestReportAndPnlServices(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEqual(t, rec.Msg.GetWaterfall().GetNet().GetUnits(), cheaper.Msg.GetWaterfall().GetNet().GetUnits())
 	require.Equal(t, "0", cheaper.Msg.GetWaterfall().GetFees().GetUnits())
+	require.Zero(t, pnlSvc.Memory.InUse())
 
 	// Single trade.
 	tr, err := pc.CalculateTrade(ctx, connect.NewRequest(&labv1.CalculateTradeRequest{

@@ -687,6 +687,22 @@ workers and the main and holdout ledgers at separate rates calibrated with
 the dense fixture. The production engine created a 100,000-bar report at
 the default budget in 1.26 s with a 158,601,216-byte peak working set. See
 [PERFORMANCE.md](PERFORMANCE.md) for counter scope and local evidence.
+The full PostgreSQL-mandatory race run passed 362 tests/subtests without
+failures or skips. GetChart p95 was 478 ms. Evidence is in
+`artifacts/p0-calibrated-report-race.jsonl`.
+
+## F07 single-run admission (2026-11-19)
+
+Search and replay each reserve one simulation ledger. The calculator holds its
+reservation through response projection and uses the report it already loaded.
+A completed search wakes the dispatcher when it releases capacity so waiting
+claims can resume. The 100,000-bar default-budget replay initially failed at
+2,561,048,576 requested bytes. It now returns the identical net in 61.18 ms.
+A separate mixed run confirmed the remaining chart issue. Under the same budget,
+100,000-bar search made progress, but concurrent chart requests were charged
+for reconstructing the same warm dataset and exceeded available capacity.
+Evidence is in `artifacts/p0-recalc-100k-before.txt`, `p0-recalc-100k-after.txt`
+and `p0-chart-pressure-before.txt`.
 
 ## Remaining P0 work / next batch
 

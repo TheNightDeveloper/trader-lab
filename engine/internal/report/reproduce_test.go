@@ -132,8 +132,11 @@ func TestRecalculateUsesRecordedInstrumentsAndLegacyStaysReadable(t *testing.T) 
 	same, err := svc.Reproduce(ctx, id)
 	require.NoError(t, err)
 	require.True(t, same, "use recorded rules even when today's registry permits fills")
-	_, run, err := svc.Recalculate(ctx, id, ev.Spec.Sim, money.RatioOne)
+	persisted, err := svc.Load(ctx, id)
 	require.NoError(t, err)
+	_, run, release, err := svc.Recalculate(ctx, persisted, ev.Spec.Sim, money.RatioOne)
+	require.NoError(t, err)
+	defer release()
 	require.Empty(t, run.Fills)
 
 	// Legacy JSON is read without backfilling today's build or instrument metadata.

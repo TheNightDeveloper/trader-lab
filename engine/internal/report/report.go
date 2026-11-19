@@ -445,33 +445,40 @@ func (s Service) Decisions(ctx context.Context, id, run string) ([]sim.Decision,
 	return out, nil
 }
 
-// Recalculate replays a report's recorded out-of-sample intents with cfg.
-func (s Service) Recalculate(ctx context.Context, id string, cfg sim.Config, scale money.Ratio) (eval.RunView, *sim.Result, error) {
-	st, err := s.Load(ctx, id)
-	if err != nil {
-		return eval.RunView{}, nil, err
-	}
+// Recalculate replays the loaded report. The caller releases the reservation
+// after projecting the result into its response.
+func (s Service) Recalculate(ctx context.Context, st Stored, cfg sim.Config, scale money.Ratio) (eval.RunView, *sim.Result, func(), error) {
 	if err := s.ValidateResearch(ctx, st.Spec.DatasetIDs); err != nil {
-		return eval.RunView{}, nil, err
+		return eval.RunView{}, nil, nil, err
 	}
-	release, err := s.ReserveWork(ctx, st.Spec.DatasetIDs, 1)
+	release, err := s.ReserveSimulation(ctx, st.Spec.DatasetIDs)
 	if err != nil {
-		return eval.RunView{}, nil, err
+		return eval.RunView{}, nil, nil, err
 	}
-	defer release()
-	ds, err := s.Decisions(ctx, id, RunMain)
+	retained := false
+	defer func() {
+		if !retained {
+			release()
+		}
+	}()
+	ds, err := s.Decisions(ctx, st.Row.ID, RunMain)
 	if err != nil {
-		return eval.RunView{}, nil, err
+		return eval.RunView{}, nil, nil, err
 	}
 	bars, _, err := s.Bars(ctx, st.Spec.DatasetIDs)
 	if err != nil {
-		return eval.RunView{}, nil, err
+		return eval.RunView{}, nil, nil, err
 	}
 	specs, err := recordedSpecs(st.Spec.Provenance)
 	if err != nil {
-		return eval.RunView{}, nil, err
+		return eval.RunView{}, nil, nil, err
 	}
-	return eval.Replay(ctx, st.Split, ds, cfg, scale, bars, specs)
+	view, result, err := eval.Replay(ctx, st.Split, ds, cfg, scale, bars, specs)
+	if err != nil {
+		return eval.RunView{}, nil, nil, err
+	}
+	retained = true
+	return view, result, release, nil
 }
 
 // DatasetCache keeps the most recently loaded dataset versions in memory. A

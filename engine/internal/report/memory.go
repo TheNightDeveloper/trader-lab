@@ -31,14 +31,17 @@ func (s Service) admitEvaluation(ctx context.Context, ids []string) (Service, fu
 	}
 }
 
-// ReserveWork uses immutable range metadata before any dataset reconstruction.
-// The owner keeps the reservation until evaluation, persistence or response projection ends.
-func (s Service) ReserveWork(ctx context.Context, ids []string, parallel int) (func(), error) {
+// ReserveSimulation uses immutable range metadata before reconstructing a single run.
+func (s Service) ReserveSimulation(ctx context.Context, ids []string) (func(), error) {
 	raw, bars, err := s.inputCounts(ctx, ids)
 	if err != nil {
 		return nil, err
 	}
-	return s.reserve(ctx, raw, bars, parallel)
+	bytes, err := jobs.SimulationBytes(raw, bars)
+	if err != nil {
+		return nil, err
+	}
+	return s.Memory.Reserve(ctx, bytes)
 }
 
 // ReserveChart counts reconstruction for the entire input and output only for
@@ -48,7 +51,11 @@ func (s Service) ReserveChart(ctx context.Context, ids []string, visible int) (f
 	if err != nil {
 		return nil, err
 	}
-	return s.reserve(ctx, raw, min(bars, int64(visible)), 1)
+	bytes, err := jobs.WorkBytes(raw, min(bars, int64(visible)), 1)
+	if err != nil {
+		return nil, err
+	}
+	return s.Memory.Reserve(ctx, bytes)
 }
 
 func (s Service) inputCounts(ctx context.Context, ids []string) (raw, bars int64, err error) {
@@ -73,14 +80,6 @@ func (s Service) inputCounts(ctx context.Context, ids []string) (raw, bars int64
 		bars += (int64(n) + minutes - 1) / minutes
 	}
 	return raw, bars, nil
-}
-
-func (s Service) reserve(ctx context.Context, raw, bars int64, parallel int) (func(), error) {
-	n, err := jobs.WorkBytes(raw, bars, int64(max(1, parallel)))
-	if err != nil {
-		return nil, err
-	}
-	return s.Memory.Reserve(ctx, n)
 }
 
 func (s Service) parallelism() int {

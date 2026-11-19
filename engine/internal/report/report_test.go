@@ -120,8 +120,9 @@ func TestCreateLoadViewRecalculate(t *testing.T) {
 	require.EqualValues(t, 2, views)
 
 	// Plan M3 acceptance: the calculator with default inputs reproduces the net exactly.
-	v, _, err := svc.Recalculate(ctx, id, got.Spec.Sim, money.RatioOne)
+	v, _, release, err := svc.Recalculate(ctx, got, got.Spec.Sim, money.RatioOne)
 	require.NoError(t, err)
+	defer release()
 	re, _ := metrics.Get(v.Metrics, "net_pnl")
 	require.Equal(t, net.V, re.V)
 
@@ -185,10 +186,10 @@ func TestReportRejectsNonUSDTBeforeMaterializing(t *testing.T) {
 	require.NoError(t, err)
 	_, err = svc.Reproduce(ctx, id)
 	require.ErrorIs(t, err, instrument.ErrResearchUnsupported)
-	_, _, err = svc.Recalculate(ctx, id, before.Spec.Sim, money.RatioOne)
-	require.ErrorIs(t, err, instrument.ErrResearchUnsupported)
 	after, err := svc.Load(ctx, id)
 	require.NoError(t, err)
+	_, _, _, err = svc.Recalculate(ctx, after, before.Spec.Sim, money.RatioOne)
+	require.ErrorIs(t, err, instrument.ErrResearchUnsupported)
 	require.Equal(t, before.Row.Evaluation, after.Row.Evaluation)
 	require.Equal(t, before.Row.Holdout, after.Row.Holdout)
 }

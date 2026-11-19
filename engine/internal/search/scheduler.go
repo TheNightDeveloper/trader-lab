@@ -113,6 +113,7 @@ func (s *Scheduler) Run(ctx context.Context) error {
 				s.Limiter.Release()
 				select {
 				case <-ctx.Done():
+				case <-s.wake:
 				case <-time.After(delay):
 				}
 				continue
@@ -152,8 +153,10 @@ func (s *Scheduler) Run(ctx context.Context) error {
 			if s.run(ctx, a) {
 				at := time.Now().Add(s.Poll)
 				retryAt.Store(&at)
+			} else {
+				retryAt.Store(nil)
+				s.Wake()
 			}
-			s.Wake()
 		}()
 	}
 	return nil
@@ -351,7 +354,7 @@ func (s *Scheduler) evaluate(ctx context.Context, a db.Attempt) ([]metrics.Metri
 	if err := s.Reports.ValidateResearch(ctx, []string{a.DatasetID}); err != nil {
 		return nil, "", "", err
 	}
-	release, err := s.Reports.ReserveWork(ctx, []string{a.DatasetID}, 1)
+	release, err := s.Reports.ReserveSimulation(ctx, []string{a.DatasetID})
 	if err != nil {
 		return nil, "", "", err
 	}
