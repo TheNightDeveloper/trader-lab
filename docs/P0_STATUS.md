@@ -663,6 +663,19 @@ recalculation ran alongside the 500-attempt search. OS counters and the dense
 ledger benchmark are recorded in [PERFORMANCE.md](PERFORMANCE.md). Admission
 calibration for the larger fixture remains open.
 
+## Browser chart interop (2026-11-19)
+
+Chrome reproduced an empty Flutter candle-detail row while the KLineChart
+crosshair was visible. The vendored chart emits the pointer coordinate. Flutter
+now converts that coordinate to a candle index, clears the row when the pointer
+leaves, and uses the same UTC timezone for axis labels and the detail row.
+The release build rendered 2,000 real fixture candles on the browser chart.
+Pointer movement produced four valid selections, and the chart resized from
+750 to 320 pixels when the viewport changed from 1,440 to 390 pixels.
+Dart analysis and the 54 existing Flutter tests passed.
+Evidence: `artifacts/p0-browser-verified.txt` and the captured desktop/narrow
+screens. Focus and delayed-response interop are still open.
+
 ## Remaining P0 work / next batch
 
 The analytics/learning review after FIX-02 fixed dependency readiness, fit/model validation,
@@ -675,7 +688,7 @@ That historical review preceded FIX-04/FIX-05 above. These batches do not comple
 1. Finish F07 process-wide CPU/RSS/load acceptance. Archive/import bounds, shared
    active-work byte admission, cooperative fitting cancellation and conservative slot-time
    deadlines are implemented in the scopes above; they are not OS resource quotas.
-2. Run the hosted workflow and finish real-browser chart/async/focus checks and the P0 UX gate.
+2. Run the hosted workflow and finish real-browser async/focus checks and the P0 UX gate.
 
 The existing passing suite does **not** establish process-wide resource or accounting-overflow
 acceptance criteria. Do not use this checkpoint as a P0 release pass.

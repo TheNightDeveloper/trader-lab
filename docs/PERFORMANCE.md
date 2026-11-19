@@ -36,6 +36,15 @@ Local evidence is in `artifacts/p0-mixed-runtime.txt`,
 `p0-mixed-runtime-diagnostic.txt`, `p0-mixed-runtime-projections.txt` and
 `p0-dense-ledger.txt`.
 
+At the default 1 GiB admission budget, `14207df` completed a real-process mixed
+run over 3,500 synthetic bars. The five read workers started during the search,
+which completed all 500 attempts. The fixture measured a 13.55 ms queue receipt,
+29.75 ms GetReport p95, 34.67 ms GetChart p95 and one 57.57 ms recalculation.
+Three health heartbeats arrived with 0.25 ms worst additional delay. The engine
+used 4.22 s of CPU over 2.02 s of elapsed time and peaked at 94,019,584 resident
+bytes. Evidence is in `artifacts/p0-runtime-default.txt`. This measurement
+covers the smaller fixture. The 100,000-bar default-admission case remains open.
+
 ## P0 F07 chart read latency (2026-11-18)
 
 Go 1.26.4 Linux amd64 in Docker Desktop on Windows with local PostgreSQL and race enabled.

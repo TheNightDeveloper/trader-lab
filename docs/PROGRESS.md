@@ -2,6 +2,16 @@
 
 Update at the end of every session.
 
+## P0 F07 runtime and chart interop (2026-11-19)
+
+- Project report side runs before releasing their worker slots and safely return
+  memory-contended search claims to the queue.
+- The real engine completed 500 attempts alongside five read clients and a
+  recalculation at the default 1 GiB budget over 3,500 bars. Larger 100,000-bar
+  jobs still need admission calibration. See [performance](PERFORMANCE.md).
+- Fixed browser candle details for pointer movement and aligned axis timestamps
+  with UTC. Chrome verified the release chart at 1,440 and 390 pixels.
+
 ## P0 metric validity at publication (2026-11-19)
 
 - Prevent invalid metrics from becoming zero-valued report indexes, calculator
