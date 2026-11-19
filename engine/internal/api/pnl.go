@@ -28,6 +28,9 @@ func (h *Pnl) Recalculate(ctx context.Context, req *connect.Request[labv1.Recalc
 	if err != nil {
 		return nil, reportErr(err)
 	}
+	if err := metrics.Require(st.Evaluation.OOS.Metrics, "net_pnl"); err != nil {
+		return nil, reportErr(err)
+	}
 	cfg := st.Spec.Sim
 	if v, ok, err := usdtIn(m.GetCapital(), "capital"); err != nil {
 		return nil, invalid(err.Error())
@@ -65,6 +68,10 @@ func (h *Pnl) Recalculate(ctx context.Context, req *connect.Request[labv1.Recalc
 	}
 	view, res, err := h.Svc.Recalculate(ctx, m.GetReportId(), cfg, size)
 	if err != nil {
+		return nil, reportErr(err)
+	}
+	// The waterfall intentionally contains amounts only, without validity metadata.
+	if err := metrics.Require(view.Metrics, "gross_pnl", "fees", "slippage", "net_pnl"); err != nil {
 		return nil, reportErr(err)
 	}
 	get := func(k string) int64 { x, _ := metrics.Get(view.Metrics, k); return x.V }

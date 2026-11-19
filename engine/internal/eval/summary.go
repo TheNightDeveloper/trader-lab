@@ -65,6 +65,16 @@ func m(ms []metrics.Metric, key string) metrics.Metric {
 	return x
 }
 
+func metricText(x metrics.Metric, format func(int64) string) string {
+	if x.Valid {
+		return ltr(format(x.V))
+	}
+	if x.Invalid != "" {
+		return x.Invalid
+	}
+	return "نامعتبر"
+}
+
 func summarize(ev *Evaluation) Summary {
 	oos := ev.OOS.Metrics
 	net, ret, dd := m(oos, "net_pnl"), m(oos, "total_return"), m(oos, "max_drawdown")
@@ -74,7 +84,7 @@ func summarize(ev *Evaluation) Summary {
 	var b strings.Builder
 	fmt.Fprintf(&b, "در دوره خارج از نمونه %s تا %s، این راهبرد پس از کسر کارمزد و لغزش %s بازده خالص داشت (%s USDT)؛ بیشترین افت سرمایه %s بود",
 		ltr(w.From.Format("2006-01-02")), ltr(w.To.Add(-1).Format("2006-01-02")),
-		ltr(Pct(ret.V)), ltr(USDTText(net.V)), ltr(Pct(-dd.V)))
+		metricText(ret, Pct), metricText(net, USDTText), metricText(dd, func(v int64) string { return Pct(-v) }))
 	if win.Valid {
 		fmt.Fprintf(&b, " و از %s معامله بسته %s سودده بود.", ltr(fmt.Sprint(closed.V)), ltr(strings.TrimPrefix(Pct(win.V), "+")))
 	} else {
@@ -83,6 +93,8 @@ func summarize(ev *Evaluation) Summary {
 
 	s := Summary{Sentence: b.String()}
 	switch {
+	case !net.Valid || !ret.Valid || !dd.Valid:
+		s.Verdict, s.Tone = "شاخص نتیجه نامعتبر است", Warning
 	case closed.V < MinReliableTrades:
 		s.Verdict, s.Tone = "هنوز قابل اتکا نیست", Warning
 	case net.V > 0:
@@ -96,7 +108,7 @@ func summarize(ev *Evaluation) Summary {
 	}
 	var positive int
 	for _, f := range ev.Folds {
-		if m(f.Metrics, "net_pnl").V > 0 {
+		if net := m(f.Metrics, "net_pnl"); net.Valid && net.V > 0 {
 			positive++
 		}
 	}
@@ -109,7 +121,8 @@ func summarize(ev *Evaluation) Summary {
 		s.Badges = append(s.Badges, Badge{"ambiguous", fmt.Sprintf("%s کندل مبهم؛ حد ضرر فرض شد", ltr(fmt.Sprint(ev.OOS.AmbiguousBars))), Warning})
 	}
 	for _, st := range ev.Stress {
-		if st.Key == "fee_x2" && net.V > 0 && st.Error == "" && m(st.Metrics, "net_pnl").V <= 0 {
+		stressed := m(st.Metrics, "net_pnl")
+		if st.Key == "fee_x2" && net.Valid && net.V > 0 && st.Error == "" && stressed.Valid && stressed.V <= 0 {
 			s.Badges = append(s.Badges, Badge{"fragile_costs", "با کارمزد دو برابر زیان‌ده می‌شود", Warning})
 		}
 	}
@@ -117,7 +130,7 @@ func summarize(ev *Evaluation) Summary {
 		var pos, n int
 		for _, row := range g.Cells {
 			for _, c := range row {
-				if c.Invalid == "" {
+				if c.Invalid == "" && c.Return.Valid {
 					n++
 					if c.Return.V > 0 {
 						pos++
@@ -143,9 +156,13 @@ func RecalcSummary(capital int64, size money.Ratio, ms []metrics.Metric) Summary
 	if net.V <= 0 {
 		s.Verdict, s.Tone, word = "زیان‌ده پس از هزینه‌ها", Negative, "زیان خالص"
 	}
-	s.Sentence = fmt.Sprintf("با سرمایه %s USDT و %s اندازه ثبت‌شده هر موقعیت، این الگوریتم در %s معامله %s %s USDT ساخت؛ %s USDT صرف کارمزد و لغزش شد.",
+	costText := "مجموع کارمزد و لغزش " + metrics.OverflowReason + " است."
+	if costs, err := money.AddInt64(fees.V, slip.V); err == nil && fees.Valid && slip.Valid {
+		costText = fmt.Sprintf("%s USDT صرف کارمزد و لغزش شد.", ltr(strings.TrimPrefix(USDTText(costs), "+")))
+	}
+	s.Sentence = fmt.Sprintf("با سرمایه %s USDT و %s اندازه ثبت‌شده هر موقعیت، این الگوریتم در %s معامله %s %s USDT ساخت؛ %s",
 		ltr(strings.TrimPrefix(USDTText(capital), "+")), ltr(strings.TrimPrefix(Pct(int64(size)), "+")), ltr(fmt.Sprint(trades.V)),
-		word, ltr(strings.TrimPrefix(strings.TrimPrefix(USDTText(net.V), "+"), "−")), ltr(strings.TrimPrefix(USDTText(fees.V+slip.V), "+")))
+		word, ltr(strings.TrimPrefix(strings.TrimPrefix(USDTText(net.V), "+"), "−")), costText)
 	return s
 }
 

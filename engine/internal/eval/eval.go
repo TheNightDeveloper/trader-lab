@@ -459,7 +459,7 @@ func window(r *sim.Result, w Window, capital int64) []metrics.Metric {
 	values := map[string]*big.Int{"net_pnl": net, "gross_pnl": gross, "fees": fees, "slippage": slip, "unrealized_pnl": big.NewInt(unrealized)}
 	assign := func(m *metrics.Metric, v *big.Int) {
 		if !v.IsInt64() {
-			m.V, m.Valid, m.Invalid = 0, false, "خارج از محدوده عددی"
+			m.V, m.Valid, m.Invalid = 0, false, metrics.OverflowReason
 		} else {
 			// Period metrics replace the cohort's aggregate and its validity.
 			m.V, m.Valid, m.Invalid = v.Int64(), true, ""

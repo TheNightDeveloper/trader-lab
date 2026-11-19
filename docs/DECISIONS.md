@@ -495,3 +495,16 @@ The training version and costs participate in the artifact ID. Keep existing mod
 reports and serving pointers intact. Previous cycles remain readable and may be
 rejected. Forward and approval require a cycle using the current training contract.
 The fill and evaluation versions are unchanged, and no migration is needed.
+
+## ADR-061 Carry metric validity through report publication
+
+The report list and strategy library project fixed-width values without validity
+flags. Reject a new report before persistence when one of those required values
+is invalid. Apply the same check to the calculator's amount-only waterfall.
+Metrics that already carry a validity flag retain their reason. Numeric range
+errors use OutOfRange. Report summaries omit the numeric fallback for an invalid
+value, and the combined calculator cost is checked before formatting.
+
+Learning comparisons require a valid champion return. A relative margin that
+overflows int64 is still ordered exactly against a representable threshold. Its
+explanation states the numeric range failure.

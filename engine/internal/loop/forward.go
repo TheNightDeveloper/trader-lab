@@ -1,6 +1,7 @@
 package loop
 
 import (
+	"cmp"
 	"context"
 	"fmt"
 	"time"
@@ -11,6 +12,7 @@ import (
 	"tradinglab/engine/internal/jobs"
 	"tradinglab/engine/internal/metrics"
 	"tradinglab/engine/internal/model"
+	"tradinglab/engine/internal/money"
 	"tradinglab/engine/internal/report"
 	"tradinglab/engine/internal/strategy"
 )
@@ -233,13 +235,19 @@ func ltr(s string) string { return "\u2066" + s + "\u2069" }
 // pct formats a ratio at scale 6 (ppm) as a percent with two decimals.
 func pct(ppm int64, signed bool) string {
 	sign := ""
+	h, rest := ppm/100, ppm%100
+	// Round the remainder before taking the magnitude, which fits even for MinInt64.
 	switch {
-	case ppm < 0:
-		sign, ppm = "−", -ppm
-	case signed && ppm > 0:
+	case rest <= -50:
+		h--
+	case rest >= 50:
+		h++
+	}
+	if ppm < 0 {
+		sign, h = "−", -h
+	} else if signed && ppm > 0 {
 		sign = "+"
 	}
-	h := (ppm + 50) / 100 // hundredths of a percent, half up
 	return fmt.Sprintf("%s%d.%02d%%", sign, h/100, h%100)
 }
 
@@ -247,6 +255,18 @@ func pct(ppm int64, signed bool) string {
 func points(ppm int64, signed bool) string {
 	s := pct(ppm, signed)
 	return s[:len(s)-1]
+}
+
+// A difference that overflows is beyond every representable threshold on that side.
+func compareDelta(value, baseline, limit int64) (int, string) {
+	delta, err := money.SubInt64(value, baseline)
+	if err == nil {
+		return cmp.Compare(delta, limit), ltr(points(delta, true))
+	}
+	if value >= 0 {
+		return 1, metrics.OverflowReason
+	}
+	return -1, metrics.OverflowReason
 }
 
 // gate evaluates the pre-registered conditions. Before the forward test is
@@ -281,17 +301,23 @@ func gate(g Gate, d *Doc, final bool) []GateItem {
 	rc, ok1 := metricOK(fc, "total_return")
 	rp, ok2 := metricOK(fp, "total_return")
 	t = fmt.Sprintf("بازده خالص پیشرو ≥ قهرمان + %s واحد درصد", ltr(points(int64(g.MinImprovement), false)))
+	improved := false
 	if ok1 && ok2 {
-		t += fmt.Sprintf(" (اکنون %s)", ltr(points(rc-rp, true)))
+		order, display := compareDelta(rc, rp, int64(g.MinImprovement))
+		improved = order >= 0
+		t += fmt.Sprintf(" (اکنون %s)", display)
 	}
-	out = append(out, GateItem{"improvement", status(rc-rp >= int64(g.MinImprovement), ok1 && ok2), t})
+	out = append(out, GateItem{"improvement", status(improved, ok1 && ok2), t})
 
 	dp, ok3 := metricOK(fp, "max_drawdown")
 	t = fmt.Sprintf("افت سرمایه حداکثر %s واحد درصد بدتر از قهرمان", ltr(points(int64(g.MaxDDDegradation), false)))
+	withinDrawdown := false
 	if okDD && ok3 {
-		t += fmt.Sprintf(" (اکنون %s)", ltr(points(dd-dp, true)))
+		order, display := compareDelta(dd, dp, int64(g.MaxDDDegradation))
+		withinDrawdown = order <= 0
+		t += fmt.Sprintf(" (اکنون %s)", display)
 	}
-	out = append(out, GateItem{"drawdown", status(dd-dp <= int64(g.MaxDDDegradation), okDD && ok3), t})
+	out = append(out, GateItem{"drawdown", status(withinDrawdown, okDD && ok3), t})
 
 	trades := int(metricV(fc, "trades"))
 	out = append(out, GateItem{"trades", status(true, trades >= g.MinForwardTrades),

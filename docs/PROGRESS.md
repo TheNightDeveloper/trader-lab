@@ -2,6 +2,13 @@
 
 Update at the end of every session.
 
+## P0 metric validity at publication (2026-11-19)
+
+- Prevent invalid metrics from becoming zero-valued report indexes, calculator
+  waterfall data or learning baselines. Preserve exact gate ordering at int64 limits.
+- Full PostgreSQL-mandatory Linux race verification passed 358 tests and subtests.
+  See [P0 status](P0_STATUS.md) for evidence and remaining release checks.
+
 ## P0 training labels and F10 dataset selection (2026-11-18)
 
 - Learning artifacts use causal entry and exit opens with the cycle's per-side costs.

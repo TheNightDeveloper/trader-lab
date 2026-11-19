@@ -629,6 +629,22 @@ All 54 existing Flutter tests, Dart analysis and the release Web build passed.
 The build still reports the pre-existing CupertinoIcons font warning.
 Evidence is in artifacts/p0-catalog-flutter.txt and p0-catalog-flutter-web.txt.
 
+## Metric validity at publication (2026-11-19)
+
+New reports check the required list values before writing a row. The calculator
+checks its amount-only waterfall. Invalid values in summary text carry their
+reason, and a combined cost outside int64 cannot wrap into a loss or credit.
+Learning requires a valid champion return and compares relative margins exactly
+even when their difference exceeds int64. See ADR-061.
+
+Before editing, focused regressions reproduced a positive verdict with a zero
+placeholder for invalid return and a negative combined fee after wraparound.
+The PostgreSQL-mandatory Linux race run passed **358 tests/subtests across 22
+packages**, with zero test failures or skips. GetReport p95 was 146 ms, GetChart
+p95 was 461 ms, and the 500-attempt search reported a worst heartbeat delay of
+7.73 ms. Evidence: artifacts/p0-invalid-output-before.txt and
+artifacts/p0-invalid-output-race.jsonl.
+
 ## Remaining P0 work / next batch
 
 The analytics/learning review after FIX-02 fixed dependency readiness, fit/model validation,
@@ -641,9 +657,7 @@ That historical review preceded FIX-04/FIX-05 above. These batches do not comple
 1. Finish F07 process-wide CPU/RSS/load acceptance. Archive/import bounds, shared
    active-work byte admission, cooperative fitting cancellation and conservative slot-time
    deadlines are implemented in the scopes above; they are not OS resource quotas.
-2. Finish report presentation of unrepresentable metrics and the remaining accounting
-   stress cases.
-3. Run the hosted workflow, real-browser chart/async/focus checks and P0 UX gate.
+2. Run the hosted workflow and finish real-browser chart/async/focus checks and the P0 UX gate.
 
 The existing passing suite does **not** establish process-wide resource or accounting-overflow
 acceptance criteria. Do not use this checkpoint as a P0 release pass.

@@ -4,6 +4,8 @@
 package metrics
 
 import (
+	"errors"
+	"fmt"
 	"math/big"
 	"slices"
 	"time"
@@ -72,7 +74,10 @@ const (
 	GroupTrades = "trades"
 )
 
-const overflowReason = "خارج از محدوده عددی"
+// OverflowReason is the display reason shared by checked metric producers.
+const OverflowReason = "خارج از محدوده عددی"
+
+var ErrInvalid = errors.New("metrics: required value unavailable")
 
 func (in *Input) defaults() {
 	if in.Period == 0 {
@@ -122,7 +127,7 @@ func Compute(in Input) []Metric {
 		if total.v.IsInt64() {
 			m.V = total.v.Int64()
 		} else {
-			m.Valid, m.Invalid = false, overflowReason
+			m.Valid, m.Invalid = false, OverflowReason
 		}
 		add(m)
 	}
@@ -137,7 +142,7 @@ func Compute(in Input) []Metric {
 	case in.Initial == 0:
 		ret.Invalid = "مخرج صفر است"
 	case err != nil:
-		ret.Invalid = overflowReason
+		ret.Invalid = OverflowReason
 	default:
 		ret.V, ret.Valid = v, true
 	}
@@ -193,6 +198,22 @@ func Get(ms []Metric, key string) (Metric, bool) {
 	return ms[i], true
 }
 
+// Require checks metrics destined for fields that cannot convey validity.
+func Require(ms []Metric, keys ...string) error {
+	for _, key := range keys {
+		m, ok := Get(ms, key)
+		if ok && m.Valid {
+			continue
+		}
+		err := ErrInvalid
+		if m.Invalid == OverflowReason {
+			err = money.ErrOverflow
+		}
+		return fmt.Errorf("%w: %s %s", err, key, m.Invalid)
+	}
+	return nil
+}
+
 func ratio(key, group string, num, den int64, invalid string) Metric {
 	m := Metric{Key: key, Group: group, Scale: 6, Unit: Ratio}
 	if invalid != "" {
@@ -231,7 +252,7 @@ func drawdown(in Input) (Metric, time.Duration) {
 		if peak > 0 && m.Valid {
 			d, err := scaledDelta(peak, p.Equity, peak, int64(money.RatioOne))
 			if err != nil {
-				m.V, m.Valid, m.Invalid = 0, false, overflowReason
+				m.V, m.Valid, m.Invalid = 0, false, OverflowReason
 			} else {
 				m.V = max(m.V, d)
 			}
@@ -252,7 +273,7 @@ func exposure(in Input) Metric {
 		return m
 	}
 	if !in.Start.Add(span).Equal(in.End) {
-		m.Invalid = overflowReason
+		m.Invalid = OverflowReason
 		return m
 	}
 	type iv struct{ a, b time.Time }
@@ -330,7 +351,7 @@ func tradeStats(in Input, closed []Trade) []Metric {
 			m.Invalid = emptyWhy
 		default:
 			if v, err := scaledBig(total, big.NewInt(count), 1); err != nil {
-				m.Invalid = overflowReason
+				m.Invalid = OverflowReason
 			} else {
 				m.V, m.Valid = v, true
 			}
@@ -347,7 +368,7 @@ func tradeStats(in Input, closed []Trade) []Metric {
 		pf.Invalid = "مخرج صفر است"
 	default:
 		if v, err := scaledBig(&wins, term.Neg(&losses), int64(money.RatioOne)); err != nil {
-			pf.Invalid = overflowReason
+			pf.Invalid = OverflowReason
 		} else {
 			pf.V, pf.Valid = v, true
 		}
@@ -356,7 +377,7 @@ func tradeStats(in Input, closed []Trade) []Metric {
 	if n == 0 {
 		holdM.Invalid = "معامله بسته‌شده‌ای نیست"
 	} else if !holdRepresentable {
-		holdM.Invalid = overflowReason
+		holdM.Invalid = OverflowReason
 	} else {
 		hold.Quo(&hold, term.SetInt64(int64(time.Second)))
 		hold.Quo(&hold, term.SetInt64(int64(n)))

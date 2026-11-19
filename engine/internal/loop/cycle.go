@@ -539,7 +539,10 @@ func (l *Loop) run(ctx context.Context, c *cycle) (err error) {
 	}
 	c.doc.Usage.CPUMillis = used.Load()
 	c.doc.Champion.Walk = results[0].view.Metrics
-	champRet := metricV(results[0].view.Metrics, "total_return")
+	if err := metrics.Require(c.doc.Champion.Walk, "total_return"); err != nil {
+		return fmt.Errorf("champion walk-forward: %w", err)
+	}
+	champRet := metricV(c.doc.Champion.Walk, "total_return")
 	best, bestRet := 0, int64(0)
 	for i := 1; i < len(recipes); i++ {
 		status, failure := "done", ""

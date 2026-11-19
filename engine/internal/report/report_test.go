@@ -2,6 +2,7 @@ package report
 
 import (
 	"context"
+	"math"
 	"testing"
 	"time"
 
@@ -18,6 +19,21 @@ import (
 	"tradinglab/engine/internal/store/storetest"
 	"tradinglab/engine/internal/strategy"
 )
+
+func TestPersistRejectsUnrepresentableListMetrics(t *testing.T) {
+	st := storetest.Open(t)
+	ctx := context.Background()
+	ev := &eval.Evaluation{
+		OOS:  eval.RunView{Metrics: metrics.Compute(metrics.Input{Initial: 1, Equity: []metrics.Point{{Equity: math.MaxInt64}}})},
+		Main: &sim.Result{}, HoldoutRun: &sim.Result{},
+	}
+	err := (Service{Store: st}).persist(ctx, "rp_unrepresentable", nil, ev)
+	require.ErrorIs(t, err, money.ErrOverflow)
+	require.Contains(t, err.Error(), "total_return")
+	n, err := st.CountReports(ctx)
+	require.NoError(t, err)
+	require.Zero(t, n)
+}
 
 var t0 = time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)
 

@@ -290,6 +290,10 @@ func newID() (string, error) {
 }
 
 func (s Service) persist(ctx context.Context, id string, bars map[string][]data.Bar, ev *eval.Evaluation) error {
+	// List and library projections store these metrics without validity flags.
+	if err := metrics.Require(ev.OOS.Metrics, "net_pnl", "total_return", "closed_trades"); err != nil {
+		return err
+	}
 	specJ, err := json.Marshal(ev.Spec)
 	if err != nil {
 		return err
