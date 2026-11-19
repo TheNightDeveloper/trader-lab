@@ -148,7 +148,7 @@ func (s Service) Create(ctx context.Context, spec eval.Spec) (string, error) {
 	if err := s.ValidateResearch(ctx, spec.DatasetIDs); err != nil {
 		return "", err
 	}
-	release, err := s.ReserveWork(ctx, spec.DatasetIDs, s.parallelism())
+	s, release, err := s.admitEvaluation(ctx, spec.DatasetIDs)
 	if err != nil {
 		return "", err
 	}
@@ -175,7 +175,7 @@ func (s Service) CreateWithID(ctx context.Context, id string, spec eval.Spec) er
 	if err := s.ValidateResearch(ctx, spec.DatasetIDs); err != nil {
 		return err
 	}
-	release, err := s.ReserveWork(ctx, spec.DatasetIDs, s.parallelism())
+	s, release, err := s.admitEvaluation(ctx, spec.DatasetIDs)
 	if err != nil {
 		return err
 	}
@@ -230,7 +230,7 @@ func (s Service) Reproduce(ctx context.Context, id string) (bool, error) {
 	if err := s.ValidateResearch(ctx, spec.DatasetIDs); err != nil {
 		return false, err
 	}
-	release, err := s.ReserveWork(ctx, spec.DatasetIDs, s.parallelism())
+	s, release, err := s.admitEvaluation(ctx, spec.DatasetIDs)
 	if err != nil {
 		return false, err
 	}

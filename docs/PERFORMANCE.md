@@ -42,8 +42,22 @@ which completed all 500 attempts. The fixture measured a 13.55 ms queue receipt,
 29.75 ms GetReport p95, 34.67 ms GetChart p95 and one 57.57 ms recalculation.
 Three health heartbeats arrived with 0.25 ms worst additional delay. The engine
 used 4.22 s of CPU over 2.02 s of elapsed time and peaked at 94,019,584 resident
-bytes. Evidence is in `artifacts/p0-runtime-default.txt`. This measurement
-covers the smaller fixture. The 100,000-bar default-admission case remains open.
+bytes. Evidence is in `artifacts/p0-runtime-default.txt`.
+
+A second dense-ledger probe measured 156,892,896 bytes in retained ledger
+arrays and 424,775,680 bytes in peak process working set. It used the same
+100,000 bars, 199,998 fills and three iterations. The Windows OS counter was
+sampled 110 times. This gave separate inputs for the report estimate of 5,120
+bytes per simulated bar per active worker and 2,048 bytes per retained ledger
+bar. Reconstruction keeps the existing 1,024-byte raw-minute estimate.
+
+Full reports now reduce worker count until the evaluation fits. The 100,000-bar
+fixture was admitted with one worker and an estimate of 1,025,048,576 bytes
+under the default 1 GiB budget. The engine created and stored its report in
+1.26 s, with 158,601,216 bytes in peak working set. Evidence is in
+`artifacts/p0-dense-ledger-resident.txt`, `p0-dense-ledger-resident-metrics.txt`
+and `p0-report-100k-default.txt`. The 100,000-bar mixed case including concurrent
+search and recalculation still needs verification.
 
 ## P0 F07 chart read latency (2026-11-18)
 

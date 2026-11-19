@@ -68,3 +68,18 @@ func TestWorkBytesChecksOverflowAndRetainedResults(t *testing.T) {
 		require.ErrorIs(t, err, ErrMemory, v)
 	}
 }
+
+func TestEvaluationBytesBoundsDenseReport(t *testing.T) {
+	const raw, bars = 100_000, 100_000
+	serial, err := EvaluationBytes(raw, bars, 1)
+	require.NoError(t, err)
+	require.EqualValues(t, 1<<20+raw*1024+bars*(5120+2*2048), serial)
+	require.Less(t, serial, int64(1<<30))
+	parallel, err := EvaluationBytes(raw, bars, 2)
+	require.NoError(t, err)
+	require.Greater(t, parallel, int64(1<<30))
+	for _, v := range [][3]int64{{-1, 0, 1}, {0, -1, 1}, {0, 0, 0}, {math.MaxInt64, 0, 1}, {0, math.MaxInt64, 1}, {0, 0, math.MaxInt64}} {
+		_, err := EvaluationBytes(v[0], v[1], v[2])
+		require.ErrorIs(t, err, ErrMemory)
+	}
+}

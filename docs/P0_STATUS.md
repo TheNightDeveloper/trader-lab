@@ -672,9 +672,21 @@ leaves, and uses the same UTC timezone for axis labels and the detail row.
 The release build rendered 2,000 real fixture candles on the browser chart.
 Pointer movement produced four valid selections, and the chart resized from
 750 to 320 pixels when the viewport changed from 1,440 to 390 pixels.
-Dart analysis and the 54 existing Flutter tests passed.
-Evidence: `artifacts/p0-browser-verified.txt` and the captured desktop/narrow
-screens. Focus and delayed-response interop are still open.
+Dart analysis and the 54 existing Flutter tests passed. Keyboard Tab reached
+the report selector, pair and all five indicator choices in Chrome. In the
+calculator, a held response for capital 1,234 was cancelled after a second
+edit. Capital 2,345 remained visible after the held response was released.
+Evidence is in `artifacts/p0-browser-verified.txt`, `p0-browser-focus.txt`,
+`p0-browser-calculator.txt` and the captured screens.
+
+## F07 report admission calibration (2026-11-19)
+
+Full report creation, winner-report finalization and reproduction can reduce
+their worker count under memory pressure. They account for active simulation
+workers and the main and holdout ledgers at separate rates calibrated with
+the dense fixture. The production engine created a 100,000-bar report at
+the default budget in 1.26 s with a 158,601,216-byte peak working set. See
+[PERFORMANCE.md](PERFORMANCE.md) for counter scope and local evidence.
 
 ## Remaining P0 work / next batch
 
@@ -688,7 +700,7 @@ That historical review preceded FIX-04/FIX-05 above. These batches do not comple
 1. Finish F07 process-wide CPU/RSS/load acceptance. Archive/import bounds, shared
    active-work byte admission, cooperative fitting cancellation and conservative slot-time
    deadlines are implemented in the scopes above; they are not OS resource quotas.
-2. Run the hosted workflow and finish real-browser async/focus checks and the P0 UX gate.
+2. Run the hosted workflow and finish the broad P0 UX gate.
 
 The existing passing suite does **not** establish process-wide resource or accounting-overflow
 acceptance criteria. Do not use this checkpoint as a P0 release pass.

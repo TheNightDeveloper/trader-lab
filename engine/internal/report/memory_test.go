@@ -14,6 +14,28 @@ import (
 	"tradinglab/engine/internal/strategy"
 )
 
+func TestReportAdmitsWithFewerWorkers(t *testing.T) {
+	st, ds := setup(t)
+	ctx := t.Context()
+	budget, err := jobs.EvaluationBytes(10_000, 10_000, 2)
+	require.NoError(t, err)
+	memory := jobs.NewMemory(budget)
+	service := Service{Store: st, Parallel: 6, Memory: memory}
+	admitted, release, err := service.admitEvaluation(ctx, []string{ds})
+	require.NoError(t, err)
+	require.Equal(t, 2, admitted.Parallel)
+	require.Equal(t, budget, memory.InUse())
+	release()
+
+	id, err := service.Create(ctx, spec(ds))
+	require.NoError(t, err)
+	require.NoError(t, service.CreateWithID(ctx, id, spec(ds)))
+	same, err := service.Reproduce(ctx, id)
+	require.NoError(t, err)
+	require.True(t, same)
+	require.Zero(t, memory.InUse())
+}
+
 // A shared budget must protect cached and uncached work, without changing saved evidence.
 func TestReportMemoryAdmissionCoversEveryExecutionPath(t *testing.T) {
 	st, ds := setup(t)

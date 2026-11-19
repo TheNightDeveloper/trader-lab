@@ -2,12 +2,34 @@ package report
 
 import (
 	"context"
+	"errors"
 	"runtime"
 	"time"
 
 	"tradinglab/engine/internal/data"
 	"tradinglab/engine/internal/jobs"
 )
+
+// admitEvaluation reduces concurrency before rejecting a report that can fit with fewer workers.
+// The caller still owns the reservation through persistence or canonical comparison.
+func (s Service) admitEvaluation(ctx context.Context, ids []string) (Service, func(), error) {
+	raw, bars, err := s.inputCounts(ctx, ids)
+	if err != nil {
+		return s, nil, err
+	}
+	for workers := s.parallelism(); ; workers-- {
+		bytes, err := jobs.EvaluationBytes(raw, bars, int64(workers))
+		if err != nil {
+			return s, nil, err
+		}
+		if release, err := s.Memory.Reserve(ctx, bytes); err == nil {
+			s.Parallel = workers
+			return s, release, nil
+		} else if workers == 1 || !errors.Is(err, jobs.ErrMemory) {
+			return s, nil, err
+		}
+	}
+}
 
 // ReserveWork uses immutable range metadata before any dataset reconstruction.
 // The owner keeps the reservation until evaluation, persistence or response projection ends.

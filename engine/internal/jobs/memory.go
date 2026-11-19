@@ -40,6 +40,25 @@ func WorkBytes(raw, bars, parallel int64) (int64, error) {
 	return n + bars*runBytes*workers, nil
 }
 
+// EvaluationBytes budgets active simulations and the two ledgers kept for publication.
+// Side runs reduce their results before releasing a worker slot. The dense-ledger
+// calibration in PERFORMANCE.md separates process peak from retained array size.
+func EvaluationBytes(raw, bars, parallel int64) (int64, error) {
+	const active, retained = int64(5120), int64(2048)
+	if bars < 0 || parallel < 1 || parallel > (math.MaxInt64-2*retained)/active {
+		return 0, ErrMemory
+	}
+	rawBytes, err := WorkBytes(raw, 0, 1)
+	if err != nil {
+		return 0, err
+	}
+	perBar := active*parallel + 2*retained
+	if bars > (math.MaxInt64-rawBytes)/perBar {
+		return 0, ErrMemory
+	}
+	return rawBytes + bars*perBar, nil
+}
+
 // Reserve never waits while holding CPU slots or a cycle's retained inputs.
 // Failing atomically avoids a memory/CPU lock inversion between these services.
 func (m *Memory) Reserve(ctx context.Context, bytes int64) (func(), error) {
