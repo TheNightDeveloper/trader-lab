@@ -101,6 +101,17 @@ clients and a 1 s p95 limit.
 Evidence is in `artifacts/p0-hosted-chart-profile-before.txt`,
 `p0-hosted-chart-profile-top.txt` and `p0-chart-fast-gzip-race.txt`.
 
+The [hosted run for `8a5e23f`](https://github.com/TheNightDeveloper/trader-lab/actions/runs/44528275549)
+passed with GetChart p95 at 338 ms and GetReport p95 at 191 ms. It recorded 363
+passing Go tests and subtests, with zero failures or skips.
+
+The production build with the same engine source repeated the 100,000-bar mixed
+workload and completed all 500 attempts and 200 reads. GetChart p95 was 21.69 ms,
+GetReport p95 was 18.45 ms, and the worst additional heartbeat delay was 3.28 ms.
+The engine used 32.84 CPU seconds over 25.74 seconds of wall time and peaked
+at 231,280,640 bytes of working set. Recalculation returned the saved net after
+1.67 s including transient retries. Evidence is in `artifacts/p0-runtime-final-100k.txt`.
+
 ## P0 F07 chart read latency (2026-11-18)
 
 Go 1.26.4 Linux amd64 in Docker Desktop on Windows with local PostgreSQL and race enabled.

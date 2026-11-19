@@ -15,6 +15,12 @@ Update at the end of every session.
 - Standard button density preserves the 44 px action target on narrow Web.
   Chrome measured the report action at 44 px at normal and 200% text size.
   Dart analysis, the 54 existing tests and the Flutter Web build passed.
+- GitHub CI passed for `8a5e23f`, including all 363 Go tests and subtests.
+  On the 100,000-bar production case, GetChart p95 was 21.69 ms while all
+  500 search attempts and 200 reads completed.
+- The Web chart now keeps zoom, scroll and the selected decision when changing
+  an overlay on the same series. Chrome verified a delayed response and zero
+  marker animation duration with reduced motion. Firefox rechecked rendering.
 
 ## P0 F07 warm chart admission (2026-11-19)
 

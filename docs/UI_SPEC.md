@@ -93,6 +93,23 @@ unreachable: banner, last data kept visible).
 - Contrast ≥ 4.5:1 for text (tokens already satisfy this on surface colors).
 - Status always has text, not only color; P&L always has a sign.
 
+## P0 browser acceptance
+
+Serve the release Flutter Web build from the engine in a disposable workspace with a
+BTCUSDT report. Use viewport widths of 390, 768, 1,024 and 1,440 px in Chrome and Firefox.
+
+| Step | Expected result |
+|---|---|
+| Open the report's chart and move the pointer across candles | Visible candles and details update together in UTC at each width |
+| Tab through the chart controls | Focus reaches the labeled report selector, pair and indicator choices |
+| Zoom into an earlier candle range and toggle an indicator | The new overlay loads with the same candle range and decision selection |
+| Scroll the report table horizontally at 390 px | More columns appear and each title stays under its heading |
+| Set browser text to 200% and open Reports at 390 px | The primary action fits and retains a 44 px target |
+| Search for a missing symbol, then BTCUSDT, and run a new report | Empty search has feedback, the dataset can be selected and the result opens |
+| Open the holdout confirmation and press Escape | The dialog closes with no new holdout view |
+| Interrupt the health stream, then restore it | The stale banner appears, keeps the open report visible and clears after reconnect |
+| Delay an older calculator response while submitting a newer edit | The latest result remains visible |
+
 ## 6. Verifying the build matches the design
 
 1. Widget golden tests (`matchesGoldenFile`) for each shared widget in default, selected,

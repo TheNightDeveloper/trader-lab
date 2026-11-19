@@ -120,7 +120,7 @@ class _CandleChartViewState extends State<CandleChartView> {
     }).toJS;
     chart.setDataLoader(loader);
     _indicators();
-    _marks();
+    _marks(centerSelected: true);
   }
 
   void _indicators() {
@@ -182,7 +182,7 @@ class _CandleChartViewState extends State<CandleChartView> {
     }
   }
 
-  void _marks() {
+  void _marks({required bool centerSelected}) {
     final chart = _chart!;
     chart.removeOverlay({'groupId': 'lab_marks'}.jsify()! as JSObject);
     final c = widget.chart;
@@ -204,19 +204,27 @@ class _CandleChartViewState extends State<CandleChartView> {
       }).toJS;
       chart.createOverlay(o);
     }
-    final sel = c.marks.where((m) => m.index == c.selected).firstOrNull;
-    if (sel != null) chart.scrollToTimestamp(sel.time.millisecondsSinceEpoch, 200);
+    if (centerSelected) {
+      final sel = c.marks.where((m) => m.index == c.selected).firstOrNull;
+      if (sel != null) {
+        final duration = AppMotion.of(context, const Duration(milliseconds: 200));
+        chart.scrollToTimestamp(sel.time.millisecondsSinceEpoch, duration.inMilliseconds);
+      }
+    }
   }
 
   @override
   void didUpdateWidget(CandleChartView old) {
     super.didUpdateWidget(old);
+    if (_chart == null) return; // The first resize loads the latest widget data.
     final o = old.chart, n = widget.chart;
     if (!identical(o.bars, n.bars) || o.ticker != n.ticker || o.timeframe != n.timeframe) {
       _load();
     } else {
       if (!identical(o.indicators, n.indicators)) _indicators();
-      if (!identical(o.marks, n.marks) || o.selected != n.selected) _marks();
+      if (!identical(o.marks, n.marks) || o.selected != n.selected) {
+        _marks(centerSelected: o.selected != n.selected);
+      }
     }
   }
 

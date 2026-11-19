@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:decimal/decimal.dart';
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -29,6 +30,7 @@ const _timeframes = ['1m', '15m', '1h', '4h', '1d'];
 const indicatorKeys = {'MA': 'ma:20', 'EMA': 'ema:48', 'BB': 'bb:20:2', 'RSI': 'rsi:14', 'MACD': 'macd:12:26:9'};
 
 typedef ChartQuery = ({String report, String symbol, String timeframe, String indicators});
+typedef _ChartSource = ({String report, String symbol, String timeframe});
 
 final chartProvider = FutureProvider.family<GetChartResponse, ChartQuery>(
   (ref, q) => ref
@@ -75,6 +77,7 @@ class _ChartScreenState extends ConsumerState<ChartScreen> {
   String _report = '', _symbol = 'BTCUSDT', _tf = '1h';
   Set<String> _inds = {'EMA'};
   int? _sel;
+  ({_ChartSource source, GetChartResponse data})? _displayed;
   final _hover = ValueNotifier<CandleBar?>(null);
 
   @override
@@ -101,10 +104,10 @@ class _ChartScreenState extends ConsumerState<ChartScreen> {
     super.dispose();
   }
 
-  void _set(VoidCallback f) {
+  void _set(VoidCallback f, {bool keepDecision = false}) {
     setState(() {
       f();
-      _sel = null;
+      if (!keepDecision) _sel = null;
     });
     localSet(layoutKey, jsonEncode({'report': _report, 'symbol': _symbol, 'tf': _tf, 'inds': _inds.toList()}));
   }
@@ -116,7 +119,15 @@ class _ChartScreenState extends ConsumerState<ChartScreen> {
     final own = rep == null ? const <String>[] : strategyLines(rep);
     final keys = {...own, for (final k in _inds) indicatorKeys[k]!}.toList();
     final q = (report: _report, symbol: _symbol, timeframe: _tf, indicators: keys.join(','));
-    final chart = ref.watch(chartProvider(q));
+    final source = (report: _report, symbol: _symbol, timeframe: _tf);
+    final request = ref.watch(chartProvider(q));
+    final current = request.asData;
+    if (current != null) _displayed = (source: source, data: current.value);
+    final previous = _displayed;
+    // Keep the platform view mounted while overlays for the same series load.
+    final chart = request.isLoading && previous != null && previous.source == source
+        ? AsyncData(previous.data)
+        : request;
     final c = chart.value;
     final pair = c == null ? _symbol : '${c.symbol} ${c.timeframe}';
     final reports = ref.watch(reportsProvider(0)).value?.reports ?? const [];
@@ -193,7 +204,7 @@ class _ChartScreenState extends ConsumerState<ChartScreen> {
                   ltr: true,
                   options: [for (final k in indicatorKeys.keys) (k, k)],
                   selected: _inds,
-                  onChanged: (v) => _set(() => _inds = v),
+                  onChanged: (v) => _set(() => _inds = v, keepDecision: true),
                 ),
               ),
               if (own.isNotEmpty) Text('${l.chartStrategyLines}: ${own.join(' · ')}', style: AppText.caption),
@@ -264,7 +275,7 @@ class _ChartScreenState extends ConsumerState<ChartScreen> {
   );
 }
 
-class _ChartBody extends StatelessWidget {
+class _ChartBody extends StatefulWidget {
   const _ChartBody({
     required this.r,
     required this.marks,
@@ -279,30 +290,51 @@ class _ChartBody extends StatelessWidget {
   final ValueChanged<ChartMark> onMark;
 
   @override
+  State<_ChartBody> createState() => _ChartBodyState();
+}
+
+class _ChartBodyState extends State<_ChartBody> {
+  late var _bars = _readBars(widget.r);
+  late var _indicators = _readIndicators(widget.r);
+
+  @override
+  void didUpdateWidget(_ChartBody oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Overlay requests return new protobuf objects for the same candles.
+    if (!listEquals(oldWidget.r.bars, widget.r.bars)) {
+      _bars = _readBars(widget.r);
+    }
+    if (!listEquals(oldWidget.r.indicators, widget.r.indicators)) {
+      _indicators = _readIndicators(widget.r);
+    }
+  }
+
+  static List<CandleBar> _readBars(GetChartResponse r) => [
+    for (final b in r.bars)
+      CandleBar(
+        utcMs(b.openUnixMs),
+        decValue(b.open),
+        decValue(b.high),
+        decValue(b.low),
+        decValue(b.close),
+        decValue(b.volume),
+      ),
+  ];
+  static List<EngineIndicator> _readIndicators(GetChartResponse r) => [
+    for (final i in r.indicators)
+      EngineIndicator(
+        key: i.key,
+        label: i.label,
+        main: i.pane == 'main',
+        lines: [
+          for (final ln in i.lines) EngineLine(ln.name, [for (final v in ln.values) _dec(v)]),
+        ],
+      ),
+  ];
+  @override
   Widget build(BuildContext context) {
     final l = L10n.of(context);
-    final bars = [
-      for (final b in r.bars)
-        CandleBar(
-          utcMs(b.openUnixMs),
-          decValue(b.open),
-          decValue(b.high),
-          decValue(b.low),
-          decValue(b.close),
-          decValue(b.volume),
-        ),
-    ];
-    final inds = [
-      for (final i in r.indicators)
-        EngineIndicator(
-          key: i.key,
-          label: i.label,
-          main: i.pane == 'main',
-          lines: [
-            for (final ln in i.lines) EngineLine(ln.name, [for (final v in ln.values) _dec(v)]),
-          ],
-        ),
-    ];
+    final r = widget.r;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -313,19 +345,19 @@ class _ChartBody extends StatelessWidget {
             child: CandleChart(
               ticker: r.symbol,
               timeframe: r.timeframe,
-              bars: bars,
-              indicators: inds,
-              marks: marks,
-              selected: selected,
-              onMarkTap: onMark,
+              bars: _bars,
+              indicators: _indicators,
+              marks: widget.marks,
+              selected: widget.selected,
+              onMarkTap: widget.onMark,
               pricePrecision: r.pricePrecision,
-              onCrosshair: (b) => hover.value = b,
+              onCrosshair: (b) => widget.hover.value = b,
             ),
           ),
         ),
         const SizedBox(height: AppSpace.md),
         ValueListenableBuilder(
-          valueListenable: hover,
+          valueListenable: widget.hover,
           builder: (context, b, _) => AnimatedSwitcher(
             duration: AppMotion.of(context, AppMotion.fast),
             child: b == null

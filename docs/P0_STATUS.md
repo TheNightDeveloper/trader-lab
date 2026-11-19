@@ -758,6 +758,44 @@ Dart analysis, 54 existing Flutter tests and the release web build passed.
 The browser measurements are in `artifacts/p0-browser-final-touch.txt` and
 `artifacts/p0-reports-390-text-200.png`.
 
+### Release candidate `8a5e23f`
+
+- [GitHub Actions](https://github.com/TheNightDeveloper/trader-lab/actions/runs/44528275549)
+  passed pinned toolchain setup, generated-code parity, architecture checks,
+  lint, PostgreSQL race tests, goldens and Flutter analysis and tests. Its
+  uploaded Go log records 363 passes with zero failures and zero skips.
+  GetChart p95 was 338 ms and GetReport p95 was 191 ms.
+- Chrome's new-report flow searched for a missing symbol and a matching dataset,
+  created a report and opened its summary. Escape closed the holdout confirmation
+  before a view was recorded. The calculator discarded the delayed response for
+  capital 1,234 and kept the result for 2,345 after the second edit.
+- Firefox repeated the four chart sizes and pointer check on the final web build.
+  Evidence is in `artifacts/p0-browser-report-flow.txt`,
+  `p0-browser-calculator-final.txt` and `p0-firefox-final.txt`.
+- At 390 px and 200% text, the report summary and the calculator's original-net
+  label stayed within the viewport and could be reached by scrolling. Evidence
+  is in `artifacts/p0-browser-text-scale.txt`.
+- On the production engine with the default 1 GiB admission budget, the 100,000-bar
+  case completed 500 search attempts and 200 reads. GetChart and GetReport p95
+  were 21.69 and 18.45 ms. The calculator matched the original result, the worst
+  additional heartbeat delay was 3.28 ms and engine peak working set was
+  231,280,640 bytes. See `artifacts/p0-runtime-final-100k.txt`.
+
+### Chart viewport and selection on indicator changes
+
+Chrome reproduced an indicator toggle moving a zoomed section of the report
+from candle indexes 1451–1502 to 1944–1995. The Web chart now keeps its current
+view during indicator requests for the same series. The chart body reuses its
+candle projection when the API returns equal candles. Selecting another marker
+centers the chart using the user's motion preference.
+
+With a 650 ms delayed indicator response, Chrome kept 1451–1502 visible, rendered
+the new overlay and kept the selected decision. Under reduced motion, the marker
+center animation used zero duration. Firefox rechecked chart rendering, pointer
+interop and the four widths on the release build. Dart analysis, all 54 existing
+Flutter tests and the Web build passed. Evidence is in `artifacts/p0-chart-zoom-before.txt`,
+`p0-chart-zoom-after.txt` and `p0-firefox-chart-state.txt`.
+
 ## Remaining P0 work / next batch
 
 The analytics/learning review after FIX-02 fixed dependency readiness, fit/model validation,
@@ -771,11 +809,10 @@ That historical review preceded FIX-04/FIX-05 above. These batches do not comple
    Archive/import bounds, shared active-work byte admission, cooperative fitting
    cancellation and conservative slot-time deadlines cover the scopes above.
    Hard OS-level resource quotas and other workload shapes remain unverified.
-2. Re-run hosted CI with the faster chart gzip profile and sequential race-test
-   packages. The full local PostgreSQL-mandatory race run passed all 363 tests
-   and subtests with 286 ms GetChart p95. The separate golden check, Go vet
-   and Go lint passed. See [PERFORMANCE.md](PERFORMANCE.md).
-3. Complete the remaining P0 UX acceptance and record its evidence.
+2. The hosted run for `8a5e23f` passed the PostgreSQL race suite, goldens,
+   code generation checks and Flutter suite. The chart viewport follow-up
+   has local browser and Flutter evidence above. Run hosted CI on the
+   candidate containing that follow-up before recording the P0 gate.
 
 The existing passing suite does **not** establish process-wide resource or accounting-overflow
 acceptance criteria. Do not use this checkpoint as a P0 release pass.
