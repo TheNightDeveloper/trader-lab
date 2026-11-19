@@ -1,7 +1,7 @@
 # P0 — stabilization and release evidence
 
-Status: **in progress**, 2026-11-19. This continues the new master plan, not
-completion of P0 and not approval to begin P1 or any execution feature.
+Status: **P0 passed**, 2026-11-19. The research release candidate is `e34975a`.
+See the [acceptance evidence](#p0-acceptance-evidence-for-e34975a).
 
 ## First batch scope
 
@@ -796,26 +796,37 @@ interop and the four widths on the release build. Dart analysis, all 54 existing
 Flutter tests and the Web build passed. Evidence is in `artifacts/p0-chart-zoom-before.txt`,
 `p0-chart-zoom-after.txt` and `p0-firefox-chart-state.txt`.
 
-## Remaining P0 work / next batch
+## P0 acceptance evidence for `e34975a`
 
-The analytics/learning review after FIX-02 fixed dependency readiness, fit/model validation,
-complete/deterministic search selection and unnecessary per-bar explanation work. New model
-artifacts record `causal-features/v1`; that review used evaluation `p0.2`. Verified: 197 Go tests/subtests,
-zero skip with DB mandatory, 48 existing Flutter tests, lint/vet, Dart analysis and depguard. See
-[P0_LEARNING_REVIEW_FA.md](P0_LEARNING_REVIEW_FA.md) for evidence, measured scope and compatibility.
-That historical review preceded FIX-04/FIX-05 above. These batches do not complete all of P0.
+The browser and local performance checks above use the same engine source as
+this candidate. The [hosted workflow](https://github.com/TheNightDeveloper/trader-lab/actions/runs/44530856883)
+for this exact commit passed. It recorded 363 Go tests and subtests passed with
+zero failures and skips in 22 test packages. GetChart and GetReport p95 were
+402 ms and 237 ms with five concurrent clients. The 500-attempt search finished
+with a 12.68 ms maximum additional heartbeat delay. The workflow also passed
+the separate golden check and the Flutter suite. The downloadable
+`test-evidence` artifact contains `go-tests.jsonl`. The local copy is in
+`artifacts/p0-hosted-44530856883/`.
 
-1. The reference mixed load passed with measured engine CPU and working set.
-   Archive/import bounds, shared active-work byte admission, cooperative fitting
-   cancellation and conservative slot-time deadlines cover the scopes above.
-   Hard OS-level resource quotas and other workload shapes remain unverified.
-2. The hosted run for `8a5e23f` passed the PostgreSQL race suite, goldens,
-   code generation checks and Flutter suite. The chart viewport follow-up
-   has local browser and Flutter evidence above. Run hosted CI on the
-   candidate containing that follow-up before recording the P0 gate.
+| Scope | Evidence |
+|---|---|
+| F01–F02, causal fills and warm-up | `TestSignalFillsRespectDecisionTime`, `TestLateBarNeverFillsInThePast`, `TestResampleWaitsForLateConstituent`, `TestBuyAndHoldSurvivesWarmup` |
+| F03 and F07, bounded resources | `TestExclusiveAdmissionIsAtomic`, `TestReproduceRespectsAdmission`, `TestTrainingDeadlineBoundsAllSlotsAndPreservesCancellation`, and the measured 100,000-bar mixed run |
+| F04–F06, evidence periods and terminal state | `TestActualFreezeAndIncompleteForwardCannotRecommend`, `TestPeriodMetricsDoNotChangeWhenFutureExitsArrive`, `TestTerminalCycleAndCandidatesCommitTogether`, `TestOldClaimCannotCompleteOrCancelNewExecution` |
+| F08–F11, capabilities and frontend correctness | `TestCapabilitiesKeepCrossDataReadableAndRejectExecution`, `TestProtectionMarkersUseFillUnitPrice`, `TestDatasetCatalogSearchAndSavedSelection`, the real report form and delayed calculator checks |
+| F12, reproducible CI | PostgreSQL is mandatory. Race, lint, generator parity, architecture checks, goldens, Dart analysis and the existing Flutter suite passed in the exact candidate run. |
+| F13–F15, provenance, equality and lifecycle | `TestReproduceChecksCanonicalRecordsWithUnchangedPnL`, `TestCompareUsesExactAssumptions`, `TestServingSnapshotsDuringConcurrentSwitches` |
+| F16, release evidence | This status, [performance measurements](PERFORMANCE.md), the [UI acceptance steps](UI_SPEC.md#p0-browser-acceptance), the README and the [accounting contract](METRICS.md) |
+| Data compatibility and overflow | `TestSnapshotMembershipSurvivesLateCommit`, `TestSnapshotMigrationPreservesLegacyRecords`, `TestRecalculateUsesRecordedInstrumentsAndLegacyStaysReadable`, `TestSimulationDiscardsOverflowingLedger`, `TestPeriodAggregatesRejectOverflow`; 10,000 fixed-point property cases each for sum and multiply/divide, and 1,000 ledger reconciliation cases |
 
-The existing passing suite does **not** establish process-wide resource or accounting-overflow
-acceptance criteria. Do not use this checkpoint as a P0 release pass.
+The 390 px browser path verified the report table, 200% text and the 44 px
+primary action. The holdout dialog opened with Enter. Escape returned focus to
+its opener without recording a view. See `artifacts/p0-browser-dialog-focus.txt`.
+
+Resource measurements cover the synthetic reference workloads and the engine
+process. PostgreSQL and browser memory are outside the engine working-set sample.
+See [P0_LEARNING_REVIEW_FA.md](P0_LEARNING_REVIEW_FA.md) for the earlier analytics
+review and its evaluation-version context.
 
 ## Rollback / compatibility
 

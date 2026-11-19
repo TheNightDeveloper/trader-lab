@@ -5,8 +5,8 @@ market data, runs deterministic simulations and evaluates strategies. A Flutter 
 (Persian, RTL) shows the results. **No real orders exist in v1.** There is no account and
 no API key.
 
-> Status: M0–M6 are implemented. The new **P0 stabilization phase is in progress**;
-> its release gate has not passed. See [P0 status and verification](docs/P0_STATUS.md)
+> Status: M0–M6 are implemented. The **P0 stabilization gate passed** for
+> research candidate `e34975a`. See [P0 status and verification](docs/P0_STATUS.md)
 > and [the master plan](docs/Trading_Lab_Master_Plan_FA.md).
 
 ## What works today

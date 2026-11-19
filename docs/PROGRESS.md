@@ -2,6 +2,15 @@
 
 Update at the end of every session.
 
+## P0 gate passed (2026-11-19)
+
+- Candidate `e34975a` passed [hosted CI](https://github.com/TheNightDeveloper/trader-lab/actions/runs/44530856883).
+  PostgreSQL race verification recorded 363 passes with zero failures or skips.
+  The separate golden and Flutter checks passed. Hosted chart p95 was 402 ms.
+- The browser and mixed-load evidence includes the 100,000-bar reference run,
+  four chart widths in Chrome and Firefox, the narrow report table, the report
+  form, and recovery after a dropped stream. See [P0 acceptance](P0_STATUS.md#p0-acceptance-evidence-for-e34975a).
+
 ## P0 browser baseline and hosted CI (2026-11-19)
 
 - Chrome and Firefox rendered the release chart with real API data at 390,
