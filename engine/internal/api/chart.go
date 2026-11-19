@@ -57,15 +57,11 @@ func (h *Chart) GetChart(ctx context.Context, req *connect.Request[labv1.GetChar
 		if err != nil {
 			return nil, reportErr(err)
 		}
-		release, err := h.Svc.ReserveChart(ctx, st.datasetIDs, limit)
+		all, tf, release, err := h.Svc.ChartBars(ctx, st.datasetIDs, limit)
 		if err != nil {
 			return nil, reportErr(err)
 		}
 		defer release()
-		all, tf, err := h.Svc.Bars(ctx, st.datasetIDs)
-		if err != nil {
-			return nil, err
-		}
 		for s := range all {
 			res.Symbols = append(res.Symbols, s)
 		}
@@ -187,11 +183,6 @@ func (h *Chart) GetDecision(ctx context.Context, req *connect.Request[labv1.GetD
 	if err != nil {
 		return nil, reportErr(err)
 	}
-	release, err := h.Svc.ReserveChart(ctx, st.datasetIDs, 1)
-	if err != nil {
-		return nil, reportErr(err)
-	}
-	defer release()
 	d, err := h.Svc.Store.GetMainDecision(ctx, db.GetMainDecisionParams{ReportID: m.GetReportId(), ID: m.GetDecisionId()})
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("decision %d not found", m.GetDecisionId()))
@@ -204,10 +195,11 @@ func (h *Chart) GetDecision(ctx context.Context, req *connect.Request[labv1.GetD
 		Target: decP(d.Target, 6), StopLoss: decP(d.StopLoss, 6), TakeProfit: decP(d.TakeProfit, 6), Reason: d.Reason,
 		ModelId: d.ModelID, RecipeVersion: d.RecipeVersion, Outcome: d.Outcome, Detail: d.Detail,
 	}}
-	all, _, err := h.Svc.Bars(ctx, st.datasetIDs)
+	all, _, release, err := h.Svc.ChartBars(ctx, st.datasetIDs, 1)
 	if err != nil {
-		return nil, err
+		return nil, reportErr(err)
 	}
+	defer release()
 	bs := all[d.InputSymbol]
 	if j := firstOpenAtOrAfter(bs, d.InputBarOpen); j < len(bs) && bs[j].OpenTime.Equal(d.InputBarOpen) {
 		res.RefPrice = moneyP(money.Amount{V: bs[j].C.V, Asset: report.Specs()[d.InputSymbol].Quote})

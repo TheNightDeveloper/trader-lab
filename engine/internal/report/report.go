@@ -119,9 +119,7 @@ func (s Service) bars(ctx context.Context, ids []string) (map[string][]data.Bar,
 			return nil, "", 0, data.ErrLimit
 		}
 	}
-	gaps := 0
-	bars := map[string][]data.Bar{}
-	var tf data.Timeframe
+	loaded := make([]cachedDataset, 0, len(ids))
 	for _, id := range ids {
 		ds, bs, err := s.Cache.load(ctx, s, id)
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -130,6 +128,17 @@ func (s Service) bars(ctx context.Context, ids []string) (map[string][]data.Bar,
 		if err != nil {
 			return nil, "", 0, err
 		}
+		loaded = append(loaded, cachedDataset{ds, bs})
+	}
+	return assembleBars(loaded)
+}
+
+func assembleBars(loaded []cachedDataset) (map[string][]data.Bar, data.Timeframe, int, error) {
+	gaps := 0
+	bars := make(map[string][]data.Bar, len(loaded))
+	var tf data.Timeframe
+	for _, item := range loaded {
+		ds, bs := item.ds, item.bars
 		if tf != "" && ds.Spec.Timeframe != tf {
 			return nil, "", 0, fmt.Errorf("%w: datasets must share one timeframe (%s vs %s)", ErrInput, tf, ds.Spec.Timeframe)
 		}
@@ -501,6 +510,32 @@ func NewDatasetCache(size int) *DatasetCache {
 	return &DatasetCache{size: max(1, size), m: map[string]cachedDataset{}}
 }
 
+// pin collects every requested immutable array while the cache lock protects lookup.
+func (c *DatasetCache) pin(ids []string) []cachedDataset {
+	if c == nil {
+		return nil
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	pinned := make([]cachedDataset, 0, len(ids))
+	for _, id := range ids {
+		entry, ok := c.m[id]
+		if !ok {
+			return nil
+		}
+		pinned = append(pinned, entry)
+	}
+	for _, id := range ids {
+		c.touch(id)
+	}
+	return pinned
+}
+
+// touch updates the least-recently-used order with the cache lock held.
+func (c *DatasetCache) touch(id string) {
+	c.order = append(slices.DeleteFunc(c.order, func(x string) bool { return x == id }), id)
+}
+
 // load returns the version from the cache, or loads and verifies it (content
 // hash checked) and keeps it. A nil cache always loads.
 func (c *DatasetCache) load(ctx context.Context, s Service, id string) (data.Dataset, []data.Bar, error) {
@@ -510,7 +545,7 @@ func (c *DatasetCache) load(ctx context.Context, s Service, id string) (data.Dat
 	c.mu.Lock()
 	hit, ok := c.m[id]
 	if ok {
-		c.order = append(slices.DeleteFunc(c.order, func(x string) bool { return x == id }), id)
+		c.touch(id)
 	}
 	c.mu.Unlock()
 	if ok {

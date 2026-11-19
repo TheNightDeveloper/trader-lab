@@ -31,7 +31,7 @@ These are diagnostic samples with an elevated admission budget.
 
 A separate 100,000-bar simulator stress fixture reached 199,998 fills
 and 798,780,098 allocated B/op over three iterations. Total allocations measure
-allocation volume. The default large-job admission failure remains open.
+allocation volume. These runs preceded the default-budget fixes below.
 Local evidence is in `artifacts/p0-mixed-runtime.txt`,
 `p0-mixed-runtime-diagnostic.txt`, `p0-mixed-runtime-projections.txt` and
 `p0-dense-ledger.txt`.
@@ -56,8 +56,27 @@ fixture was admitted with one worker and an estimate of 1,025,048,576 bytes
 under the default 1 GiB budget. The engine created and stored its report in
 1.26 s, with 158,601,216 bytes in peak working set. Evidence is in
 `artifacts/p0-dense-ledger-resident.txt`, `p0-dense-ledger-resident-metrics.txt`
-and `p0-report-100k-default.txt`. The 100,000-bar mixed case including concurrent
-search and recalculation still needs verification.
+and `p0-report-100k-default.txt`.
+
+The warm-chart change passed the 100,000-bar mixed workload at the default
+1 GiB budget with six research slots. Five clients alternated 100 chart and
+100 report requests in total while a 500-attempt search ran. All requests and
+attempts completed. Recalculation retried 15 transient admission denials at
+100 ms intervals and returned the same net as the saved report.
+
+| Measurement | Default budget, 100,000 bars |
+|---|---:|
+| Queue receipt, 500 attempts | 11.91 ms |
+| GetReport p95 / maximum | 20.01 / 53.84 ms |
+| GetChart p95 / maximum | 28.44 / 35.51 ms |
+| Recalculate including retries | 1.67 s |
+| Worst additional health heartbeat delay, 27 heartbeats | 6.53 ms |
+| Engine peak working set | 210,264,064 B |
+| Engine CPU time / elapsed wall time | 35.44 / 26.24 s |
+
+CPU time was 16.9% of the host's eight logical CPUs over the sampled interval.
+The working-set counter covers the engine process through the end of that
+interval. Evidence is in `artifacts/p0-runtime-mixed-100k.txt`.
 
 ## P0 F07 chart read latency (2026-11-18)
 
@@ -76,7 +95,8 @@ The final rows use the real 1 GiB chart admission pool. Report fixture creation 
 pool. These are individual runs with variable background load and race overhead. The
 last run passed the existing 1 s p95 requirement without changing the threshold.
 Evidence: artifacts/p0-network-race-go-tests.jsonl, p0-chart-window-race-go-tests.jsonl
-and p0-chart-db-race-go-tests.jsonl. Mixed workload resource acceptance remains open.
+and p0-chart-db-race-go-tests.jsonl. The separate production mixed workload is
+measured above.
 
 ## P0 F07 import fixture calibration (2026-11-05)
 

@@ -2,13 +2,20 @@
 
 Update at the end of every session.
 
+## P0 F07 warm chart admission (2026-11-19)
+
+- Reserve retained cache arrays for chart and decision reads. Cold reads still
+  reserve reconstruction. A regression covers eviction during projection.
+- At the default 1 GiB budget, the real engine completed the 100,000-bar test
+  with 500 search attempts, five concurrent readers and a matching recalculation.
+  Chart p95 was 28.44 ms. See [performance](PERFORMANCE.md).
+
 ## P0 F07 runtime and chart interop (2026-11-19)
 
 - Project report side runs before releasing their worker slots and safely return
   memory-contended search claims to the queue.
-- The real engine completed 500 attempts alongside five read clients and a
-  recalculation at the default 1 GiB budget over 3,500 bars. Larger 100,000-bar
-  jobs still need admission calibration. See [performance](PERFORMANCE.md).
+- The first real-engine mixed run at the default 1 GiB budget used 3,500 bars
+  and completed 500 attempts alongside five read clients and a recalculation.
 - Fixed browser candle details for pointer movement and aligned axis timestamps
   with UTC. Chrome verified the release chart at 1,440 and 390 pixels.
 

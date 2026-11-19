@@ -1,6 +1,6 @@
 # P0 — stabilization and release evidence
 
-Status: **in progress**, 2026-11-18. This continues the new master plan, not
+Status: **in progress**, 2026-11-19. This continues the new master plan, not
 completion of P0 and not approval to begin P1 or any execution feature.
 
 ## First batch scope
@@ -704,6 +704,19 @@ for reconstructing the same warm dataset and exceeded available capacity.
 Evidence is in `artifacts/p0-recalc-100k-before.txt`, `p0-recalc-100k-after.txt`
 and `p0-chart-pressure-before.txt`.
 
+## F07 warm chart admission (2026-11-19)
+
+Chart and decision reads pin verified cache arrays and reserve their retained
+capacity plus the projected response. Cold reads reserve full reconstruction.
+The production engine passed the 100,000-bar mixed workload at the default
+1 GiB budget. All 500 attempts and all 200 read requests completed. GetChart
+and GetReport p95 were 28.44 ms and 20.01 ms. Recalculation returned the
+original net after retrying for 1.67 s. Peak engine working set was 210,264,064
+bytes. See [PERFORMANCE.md](PERFORMANCE.md) for measurement scope.
+The full Linux Go suite with the race detector and mandatory PostgreSQL passed
+363 tests and subtests, with zero failures or skips. Its GetChart p95 was
+787 ms. Go vet passed. Evidence is in `artifacts/p0-warm-chart-race.jsonl`.
+
 ## Remaining P0 work / next batch
 
 The analytics/learning review after FIX-02 fixed dependency readiness, fit/model validation,
@@ -713,9 +726,10 @@ zero skip with DB mandatory, 48 existing Flutter tests, lint/vet, Dart analysis 
 [P0_LEARNING_REVIEW_FA.md](P0_LEARNING_REVIEW_FA.md) for evidence, measured scope and compatibility.
 That historical review preceded FIX-04/FIX-05 above. These batches do not complete all of P0.
 
-1. Finish F07 process-wide CPU/RSS/load acceptance. Archive/import bounds, shared
-   active-work byte admission, cooperative fitting cancellation and conservative slot-time
-   deadlines are implemented in the scopes above; they are not OS resource quotas.
+1. The reference mixed load passed with measured engine CPU and working set.
+   Archive/import bounds, shared active-work byte admission, cooperative fitting
+   cancellation and conservative slot-time deadlines cover the scopes above.
+   Hard OS-level resource quotas and other workload shapes remain unverified.
 2. Run the hosted workflow and finish the broad P0 UX gate.
 
 The existing passing suite does **not** establish process-wide resource or accounting-overflow

@@ -36,6 +36,38 @@ func TestReportAdmitsWithFewerWorkers(t *testing.T) {
 	require.Zero(t, memory.InUse())
 }
 
+func TestChartPinsWarmArraysWithinOutputBudget(t *testing.T) {
+	st, ds := setup(t)
+	ctx := t.Context()
+	const visible = 2000
+	ids := []string{ds}
+	cache := NewDatasetCache(1)
+	svc := Service{Store: st, Cache: cache}
+	warmed, tf, err := svc.Bars(ctx, ids)
+	require.NoError(t, err)
+	output, err := jobs.WorkBytes(0, visible, 1)
+	require.NoError(t, err)
+	budget := output + int64(cap(warmed["BTCUSDT"]))*256
+	svc.Memory = jobs.NewMemory(budget)
+
+	cold := svc
+	cold.Cache = nil
+	_, _, _, err = cold.ChartBars(ctx, ids, visible)
+	require.ErrorIs(t, err, jobs.ErrMemory, "reconstruction requires a larger reservation")
+
+	pinned, chartTF, release, err := svc.ChartBars(ctx, ids, visible)
+	require.NoError(t, err)
+	require.Equal(t, tf, chartTF)
+	require.Equal(t, budget, svc.Memory.InUse())
+	cache.mu.Lock()
+	delete(cache.m, ds)
+	cache.order, cache.bars = nil, 0
+	cache.mu.Unlock()
+	require.Equal(t, warmed, pinned, "an in-flight chart still owns its exact snapshot after eviction")
+	release()
+	require.Zero(t, svc.Memory.InUse())
+}
+
 // A shared budget must protect cached and uncached work, without changing saved evidence.
 func TestReportMemoryAdmissionCoversEveryExecutionPath(t *testing.T) {
 	st, ds := setup(t)
