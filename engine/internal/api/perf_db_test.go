@@ -40,7 +40,7 @@ func TestReportReadLatency(t *testing.T) {
 	srv := serve(t,
 		func(m *http.ServeMux) { m.Handle(labv1connect.NewReportServiceHandler(&Report{Svc: svc})) },
 		func(m *http.ServeMux) {
-			m.Handle(labv1connect.NewChartServiceHandler(&Chart{Svc: chartSvc, Clock: clock.NewVirtual(time.Now())}))
+			m.Handle((&Chart{Svc: chartSvc, Clock: clock.NewVirtual(time.Now())}).Handler())
 		})
 	rc := labv1connect.NewReportServiceClient(srv.Client(), srv.URL)
 	cc := labv1connect.NewChartServiceClient(srv.Client(), srv.URL)

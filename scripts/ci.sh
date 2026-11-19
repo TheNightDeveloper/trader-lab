@@ -21,8 +21,9 @@ sh scripts/check-depguard.sh
 (cd app && dart analyze --fatal-infos)
 
 # Save JSON before summarizing so a failed pipeline cannot hide the Go exit status.
+# Packages share this runner and PostgreSQL. The latency test starts its own five clients.
 status=0
-(cd engine && go test -count=1 -race -json ./...) > artifacts/go-tests.jsonl || status=$?
+(cd engine && go test -count=1 -race -p=1 -json ./...) > artifacts/go-tests.jsonl || status=$?
 python3 scripts/test_summary.py artifacts/go-tests.jsonl || status=1
 [ "$status" -eq 0 ] || exit "$status"
 (cd engine && go test -count=1 -race -run Golden ./...)

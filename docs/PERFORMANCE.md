@@ -78,6 +78,29 @@ CPU time was 16.9% of the host's eight logical CPUs over the sampled interval.
 The working-set counter covers the engine process through the end of that
 interval. Evidence is in `artifacts/p0-runtime-mixed-100k.txt`.
 
+## P0 hosted chart latency (2026-11-19)
+
+For `ec46b4e`, [hosted CI](https://github.com/TheNightDeveloper/trader-lab/actions/runs/44523816947)
+measured GetChart p95 at 2.500 s while the loop, search and report test packages
+shared the runner and PostgreSQL. GetReport p95 was 656 ms.
+
+An isolated Linux Docker run limited to two CPUs used the same 100,000-bar
+fixture, mandatory PostgreSQL, race instrumentation and five concurrent clients.
+Its CPU profile recorded 6.70 s in response compression across the test and
+0.91 s inside the chart service method. The chart handler now uses gzip
+BestSpeed. The Connect codec and compression negotiation are unchanged.
+
+| Profile run | GetChart p50 | GetChart p95 | GetChart maximum |
+|---|---:|---:|---:|
+| Default gzip | 743 ms | 837 ms | 890 ms |
+| gzip BestSpeed | 366 ms | 438 ms | 518 ms |
+
+CI runs Go race-test packages one at a time to keep the timed test's CPU and
+database load reproducible. GetChart and GetReport run with five concurrent
+clients and a 1 s p95 limit.
+Evidence is in `artifacts/p0-hosted-chart-profile-before.txt`,
+`p0-hosted-chart-profile-top.txt` and `p0-chart-fast-gzip-race.txt`.
+
 ## P0 F07 chart read latency (2026-11-18)
 
 Go 1.26.4 Linux amd64 in Docker Desktop on Windows with local PostgreSQL and race enabled.

@@ -1,11 +1,14 @@
 package api
 
 import (
+	"compress/gzip"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"math"
+	"net/http"
 	"slices"
 	"strconv"
 	"time"
@@ -17,6 +20,7 @@ import (
 	"tradinglab/engine/internal/data"
 	"tradinglab/engine/internal/eval"
 	labv1 "tradinglab/engine/internal/gen/lab/v1"
+	"tradinglab/engine/internal/gen/lab/v1/labv1connect"
 	"tradinglab/engine/internal/instrument"
 	"tradinglab/engine/internal/jobs"
 	"tradinglab/engine/internal/money"
@@ -29,6 +33,17 @@ import (
 type Chart struct {
 	Svc   report.Service
 	Clock clock.Clock
+}
+
+// Handler uses faster gzip for the repeated candle and indicator payloads.
+func (h *Chart) Handler() (string, http.Handler) {
+	return labv1connect.NewChartServiceHandler(h, connect.WithCompression("gzip",
+		func() connect.Decompressor { return &gzip.Reader{} },
+		func() connect.Compressor {
+			w, _ := gzip.NewWriterLevel(io.Discard, gzip.BestSpeed)
+			return w
+		},
+	))
 }
 
 const (

@@ -35,7 +35,7 @@ func TestCapabilitiesKeepCrossDataReadableAndRejectExecution(t *testing.T) {
 	srv := serve(t,
 		func(m *http.ServeMux) { m.Handle(labv1connect.NewDataServiceHandler(&Data{Store: st, Clock: clk})) },
 		func(m *http.ServeMux) { m.Handle(labv1connect.NewReportServiceHandler(&Report{Svc: svc})) },
-		func(m *http.ServeMux) { m.Handle(labv1connect.NewChartServiceHandler(&Chart{Svc: svc, Clock: clk})) })
+		func(m *http.ServeMux) { m.Handle((&Chart{Svc: svc, Clock: clk}).Handler()) })
 	client := labv1connect.NewDataServiceClient(srv.Client(), srv.URL)
 	ov, err := client.GetOverview(ctx, connect.NewRequest(&labv1.GetOverviewRequest{}))
 	require.NoError(t, err)

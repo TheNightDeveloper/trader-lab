@@ -2,6 +2,17 @@
 
 Update at the end of every session.
 
+## P0 browser baseline and hosted CI (2026-11-19)
+
+- Chrome and Firefox rendered the release chart with real API data at 390,
+  768, 1,024 and 1,440 px. Chrome verified table alignment, horizontal scrolling,
+  legacy and error states, retry, and recovery from a disconnected health stream.
+- The first hosted CI run for `ec46b4e` uploaded evidence of 362 Go passes and
+  one failure. GetChart p95 was 2.500 s against the 1 s target. See [P0 status](P0_STATUS.md).
+- A two-CPU Linux race profile identified response compression as the main
+  chart server cost. Faster gzip brought the same test to 438 ms p95 from
+  837 ms. CI serializes test packages and keeps the five-client latency gate.
+
 ## P0 F07 warm chart admission (2026-11-19)
 
 - Reserve retained cache arrays for chart and decision reads. Cold reads still

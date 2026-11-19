@@ -34,7 +34,7 @@ func TestChartService(t *testing.T) {
 	srv := serve(t,
 		func(m *http.ServeMux) { m.Handle(labv1connect.NewReportServiceHandler(&Report{Svc: svc})) },
 		func(m *http.ServeMux) {
-			m.Handle(labv1connect.NewChartServiceHandler(&Chart{Svc: svc, Clock: clock.NewVirtual(bars[len(bars)-1].CloseTime.Add(time.Minute))}))
+			m.Handle((&Chart{Svc: svc, Clock: clock.NewVirtual(bars[len(bars)-1].CloseTime.Add(time.Minute))}).Handler())
 		})
 	rc := labv1connect.NewReportServiceClient(srv.Client(), srv.URL)
 	cc := labv1connect.NewChartServiceClient(srv.Client(), srv.URL)

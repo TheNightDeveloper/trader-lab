@@ -717,6 +717,34 @@ The full Linux Go suite with the race detector and mandatory PostgreSQL passed
 363 tests and subtests, with zero failures or skips. Its GetChart p95 was
 787 ms. Go vet passed. Evidence is in `artifacts/p0-warm-chart-race.jsonl`.
 
+## Browser baseline and first hosted check (2026-11-19)
+
+Candidate `ec46b4e` was pushed after approval. Its [GitHub Actions run](https://github.com/TheNightDeveloper/trader-lab/actions/runs/44523816947)
+installed the pinned tools, resolved the Flutter lockfile, uploaded test evidence
+and reported 362 Go passes, one failure and zero skips. `TestReportReadLatency`
+measured GetReport p95 at 656 ms and GetChart p95 at 2.500 s. The chart gate is
+1 s. The hosted run failed before its separate golden and Flutter test steps.
+The downloaded JSON log is in `artifacts/p0-hosted-44523816947/go-tests.jsonl`.
+
+The Flutter release build was exercised against the production engine with a
+disposable PostgreSQL fixture of 3,500 synthetic BTCUSDT candles. Chrome
+157.0.8103.79 and Firefox 159.0 loaded 2,000 visible candles. At viewport widths
+390, 768, 1,024 and 1,440 px, the chart widths were 320, 434, 690 and 750 px.
+Both browsers mapped real pointer events to candle indexes and used UTC.
+
+| Chrome state or interaction | Observed result |
+|---|---|
+| Report table at all four widths | Title link aligned within the title column; horizontal wheel at 390 px revealed the other columns |
+| Keyboard on the chart | Tab reached the labeled report selector, pair and five indicator controls |
+| Compare with no selection | Displayed the instruction to select two reports |
+| Report with old evaluation version | Preserved the saved summary and displayed the legacy warning |
+| Failed report request and Retry | Showed an error; Retry restored the report without navigating |
+| Interrupted health stream | Showed a stale banner, preserved the open report and reconnected without reload |
+
+Browser logs are in `artifacts/p0-browser-baseline-full.txt` and
+`artifacts/p0-firefox.txt`. Screenshots use the `p0-chart-`, `p0-reports-`,
+`p0-report-` and `p0-firefox-chart-` prefixes under `artifacts/`.
+
 ## Remaining P0 work / next batch
 
 The analytics/learning review after FIX-02 fixed dependency readiness, fit/model validation,
@@ -730,7 +758,11 @@ That historical review preceded FIX-04/FIX-05 above. These batches do not comple
    Archive/import bounds, shared active-work byte admission, cooperative fitting
    cancellation and conservative slot-time deadlines cover the scopes above.
    Hard OS-level resource quotas and other workload shapes remain unverified.
-2. Run the hosted workflow and finish the broad P0 UX gate.
+2. Re-run hosted CI with the faster chart gzip profile and sequential race-test
+   packages. The full local PostgreSQL-mandatory race run passed all 363 tests
+   and subtests with 286 ms GetChart p95. The separate golden check, Go vet
+   and Go lint passed. See [PERFORMANCE.md](PERFORMANCE.md).
+3. Complete the remaining P0 UX acceptance and record its evidence.
 
 The existing passing suite does **not** establish process-wide resource or accounting-overflow
 acceptance criteria. Do not use this checkpoint as a P0 release pass.
@@ -747,7 +779,8 @@ New report JSON fields are optional to older readers, but old binaries do not im
 version-2 resampling: they may fail a new dataset's hash check if its availability changed.
 Keep this engine version available when retaining new version-2 datasets; do not rewrite
 hashes or manifests to force an older binary to accept them. Older dataset versions remain
-readable by this engine using legacy reconstruction. No push is performed by this work.
+readable by this engine using legacy reconstruction. The hosted evidence above
+records the exact candidate under test.
 
 ## Historical toolchain blocker (2026-11-01; resolved for FIX-02 above)
 
