@@ -25,8 +25,8 @@ implemented. Learning includes bounded retraining, forward tests and human-appro
 promotion/rollback. These remain research tools; no account or real execution exists.
 
 The first P0 batch fixes research admission, baseline warm-up, exact comparison, protection
-markers and calculator request races. Imported datasets refresh shared pickers, including
-versions beyond the first 200. Larger-catalog server search is still pending.
+markers and calculator request races. Shared dataset pickers search and page the server
+catalog, refresh after import and restore saved selections by dataset ID.
 The second P0 batch enforces causal fills and availability-safe history/resampling.
 The FIX-04 batch separates period PnL from opening-cohort lifetime PnL, records actual
 model creation/freeze/trade-start, and requires complete per-symbol forward coverage.

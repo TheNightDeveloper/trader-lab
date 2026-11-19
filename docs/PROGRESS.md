@@ -12,6 +12,9 @@ Update at the end of every session.
 - A two-CPU Linux race profile identified response compression as the main
   chart server cost. Faster gzip brought the same test to 438 ms p95 from
   837 ms. CI serializes test packages and keeps the five-client latency gate.
+- Standard button density preserves the 44 px action target on narrow Web.
+  Chrome measured the report action at 44 px at normal and 200% text size.
+  Dart analysis, the 54 existing tests and the Flutter Web build passed.
 
 ## P0 F07 warm chart admission (2026-11-19)
 

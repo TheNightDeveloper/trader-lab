@@ -745,6 +745,19 @@ Browser logs are in `artifacts/p0-browser-baseline-full.txt` and
 `artifacts/p0-firefox.txt`. Screenshots use the `p0-chart-`, `p0-reports-`,
 `p0-report-` and `p0-firefox-chart-` prefixes under `artifacts/`.
 
+### Primary actions and enlarged text
+
+On Chrome at 390 px, compact desktop density rendered the primary report action
+36 px tall. Filled and outlined actions now use standard density to preserve their
+44 px minimum. The same report action measured 44 px at 100% and 200% text size,
+and remained inside the viewport. The report table stayed horizontally scrollable.
+Seven foreground and background pairs used for report text, statuses, links and
+actions measured contrast ratios from 6.92:1 to 15.93:1.
+
+Dart analysis, 54 existing Flutter tests and the release web build passed.
+The browser measurements are in `artifacts/p0-browser-final-touch.txt` and
+`artifacts/p0-reports-390-text-200.png`.
+
 ## Remaining P0 work / next batch
 
 The analytics/learning review after FIX-02 fixed dependency readiness, fit/model validation,

@@ -87,6 +87,8 @@ unreachable: banner, last data kept visible).
 
 - Every interactive element is a real button/link/field with a semantic label; icon-only
   buttons have tooltips and `Semantics(label:)`.
+- Filled and outlined actions use standard visual density to preserve the 44 px minimum.
+  The report action was verified in Chrome at 390 px and 200% text size.
 - Tab order follows visual RTL order: header actions → filters → content → panel.
 - Contrast ≥ 4.5:1 for text (tokens already satisfy this on surface colors).
 - Status always has text, not only color; P&L always has a sign.
