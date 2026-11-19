@@ -11,6 +11,9 @@ import (
 
 var ErrMemory = errors.New("jobs: بودجهٔ حافظهٔ پژوهش کافی نیست؛ بازه یا هم‌زمانی را کاهش دهید و دوباره تلاش کنید")
 
+// ErrMemoryBusy distinguishes temporary contention from a job too large to fit.
+var ErrMemoryBusy = fmt.Errorf("%w: ظرفیت در حال استفاده است", ErrMemory)
+
 // Memory accounts for conservative active-work reservations across research services.
 // Cached bars have separate retention caps; this counter does not measure process RSS.
 type Memory struct {
@@ -52,7 +55,7 @@ func (m *Memory) Reserve(ctx context.Context, bytes int64) (func(), error) {
 	for {
 		used := m.used.Load()
 		if bytes > m.limit-used {
-			return nil, fmt.Errorf("%w: requested=%d, available=%d bytes", ErrMemory, bytes, m.limit-used)
+			return nil, fmt.Errorf("%w: requested=%d, available=%d bytes", ErrMemoryBusy, bytes, m.limit-used)
 		}
 		if m.used.CompareAndSwap(used, used+bytes) {
 			var once sync.Once

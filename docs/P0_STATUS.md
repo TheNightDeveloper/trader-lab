@@ -645,6 +645,24 @@ p95 was 461 ms, and the 500-attempt search reported a worst heartbeat delay of
 7.73 ms. Evidence: artifacts/p0-invalid-output-before.txt and
 artifacts/p0-invalid-output-race.jsonl.
 
+## F07 side-run memory and search contention (2026-11-19)
+
+Workers reduce stress runs, benchmarks and grid cells to their public results
+before releasing a simulation slot. Main and holdout ledgers remain available
+for report persistence. The serial and six-worker evaluations match exactly.
+
+The search scheduler distinguishes a request above the total budget from temporary
+contention. The latter returns the attempt to its queue using its current claim
+token. It clears the prior cancel handler before handing back the attempt and
+retries without counting it as an evaluation. A winner report that encounters
+temporary contention stays eligible for idempotent finalization.
+
+The real engine rejected a 100,000-bar report under default admission. On the
+diagnostic runs with an elevated reservation budget, five read clients and a
+recalculation ran alongside the 500-attempt search. OS counters and the dense
+ledger benchmark are recorded in [PERFORMANCE.md](PERFORMANCE.md). Admission
+calibration for the larger fixture remains open.
+
 ## Remaining P0 work / next batch
 
 The analytics/learning review after FIX-02 fixed dependency readiness, fit/model validation,

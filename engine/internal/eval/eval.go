@@ -286,7 +286,8 @@ func EvaluateWith(ctx context.Context, spec Spec, bars map[string][]data.Bar, sp
 		jobs = append(jobs, job{cfg, p, oosBars, split.OOS.From, ""})
 	}
 
-	results := make([]*sim.Result, len(jobs))
+	var primary [2]*sim.Result
+	reduced := make([]RunView, len(jobs))
 	errs := make([]error, len(jobs))
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, max(1, parallel))
@@ -298,7 +299,12 @@ func EvaluateWith(ctx context.Context, spec Spec, bars map[string][]data.Bar, sp
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			sem <- struct{}{}
+			select {
+			case sem <- struct{}{}:
+			case <-ctx.Done():
+				errs[i] = ctx.Err()
+				return
+			}
 			defer func() { <-sem }()
 			name := spec.Strategy
 			if j.strategy != "" {
@@ -309,7 +315,23 @@ func EvaluateWith(ctx context.Context, spec Spec, bars map[string][]data.Bar, sp
 				errs[i] = err
 				return
 			}
-			results[i], errs[i] = sim.Run(ctx, j.cfg, specs, j.bars, gated{s, j.from})
+			result, err := sim.Run(ctx, j.cfg, specs, j.bars, gated{s, j.from})
+			if err != nil {
+				errs[i] = err
+				return
+			}
+			// Keep a full run only when it will be persisted. Other results must
+			// release their ledger before another worker takes the slot.
+			switch {
+			case i < len(primary):
+				primary[i] = result
+			case i < 5:
+				reduced[i].Metrics = pick(window(result, split.OOS, cfg.Capital.V), "net_pnl", "total_return", "max_drawdown", "trades")
+			case i < 7:
+				reduced[i] = view(result, split.OOS, cfg.Capital.V)
+			default:
+				reduced[i].Metrics = pick(window(result, split.OOS, cfg.Capital.V), "total_return")
+			}
 		}()
 	}
 	wg.Wait()
@@ -322,11 +344,11 @@ func EvaluateWith(ctx context.Context, spec Spec, bars map[string][]data.Bar, sp
 		return nil, err
 	}
 
-	ev.Main, ev.HoldoutRun = results[0], results[1]
-	ev.OOS = view(results[0], split.OOS, cfg.Capital.V)
-	ev.Holdout = view(results[1], split.Holdout, cfg.Capital.V)
+	ev.Main, ev.HoldoutRun = primary[0], primary[1]
+	ev.OOS = view(ev.Main, split.OOS, cfg.Capital.V)
+	ev.Holdout = view(ev.HoldoutRun, split.Holdout, cfg.Capital.V)
 	for _, f := range split.Folds {
-		full := window(results[0], f.Test, cfg.Capital.V)
+		full := window(ev.Main, f.Test, cfg.Capital.V)
 		ev.Folds = append(ev.Folds, FoldView{Fold: f, Metrics: pick(full, "net_pnl", "period_pnl", "cohort_lifetime_pnl", "total_return", "max_drawdown", "trades", "win_rate")})
 	}
 	for k, key := range []string{"fee_x2", "slippage_x3", "latency_plus_1"} {
@@ -334,7 +356,7 @@ func EvaluateWith(ctx context.Context, spec Spec, bars map[string][]data.Bar, sp
 		if errs[2+k] != nil {
 			sv.Error = errs[2+k].Error()
 		} else {
-			sv.Metrics = pick(window(results[2+k], split.OOS, cfg.Capital.V), "net_pnl", "total_return", "max_drawdown", "trades")
+			sv.Metrics = reduced[2+k].Metrics
 		}
 		ev.Stress = append(ev.Stress, sv)
 	}
@@ -349,7 +371,7 @@ func EvaluateWith(ctx context.Context, spec Spec, bars map[string][]data.Bar, sp
 				case errs[i] != nil:
 					c.Invalid = errs[i].Error()
 				default:
-					c.Return, _ = metrics.Get(window(results[i], split.OOS, cfg.Capital.V), "total_return")
+					c.Return, _ = metrics.Get(reduced[i].Metrics, "total_return")
 				}
 			}
 		}
@@ -359,11 +381,11 @@ func EvaluateWith(ctx context.Context, spec Spec, bars map[string][]data.Bar, sp
 		if errs[5+k] != nil {
 			continue // a benchmark that cannot run (e.g. no rate yet) is simply not drawn
 		}
-		bv := view(results[5+k], split.OOS, cfg.Capital.V)
+		bv := reduced[5+k]
 		ret, _ := metrics.Get(bv.Metrics, "total_return")
 		ev.Benchmarks = append(ev.Benchmarks, Benchmark{Key: key, Equity: bv.Equity, Return: ret})
 	}
-	if f, ok := sim.BreakEvenFee(results[0]); ok {
+	if f, ok := sim.BreakEvenFee(ev.Main); ok {
 		ev.BreakEvenFee = &f
 	}
 	ev.Summary = summarize(ev)

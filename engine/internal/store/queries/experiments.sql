@@ -101,6 +101,14 @@ WHERE experiment_id = @experiment_id AND seq = @seq AND status = 'running' AND c
 UPDATE attempts SET status = @status, failure = @failure, finished_at = now()
 WHERE experiment_id = @experiment_id AND seq = @seq AND status = 'running' AND claim_token = @claim_token;
 
+-- A claim deferred before evaluation is still pending work, not a failed run.
+-- name: DeferAttemptForMemory :exec
+UPDATE attempts a
+SET status = 'queued', started_at = NULL, claim_token = '', runs = a.runs - 1
+FROM experiments e
+WHERE a.experiment_id = @experiment_id AND a.seq = @seq AND a.claim_token = @claim_token
+  AND a.status = 'running' AND e.id = a.experiment_id AND e.status IN ('running', 'paused');
+
 -- With the exclusive scheduler session held, recover dead claims. Paused work
 -- stays queued, and terminal experiments cannot regain runnable attempts.
 -- name: RequeueRunning :execrows

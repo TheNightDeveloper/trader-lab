@@ -65,6 +65,16 @@ func get(t *testing.T, ms []metrics.Metric, key string) metrics.Metric {
 	return x
 }
 
+func TestEvaluateSideRunsMatchAcrossWorkerCounts(t *testing.T) {
+	ctx := context.Background()
+	bars := map[string][]data.Bar{"BTCUSDT": walk("BTCUSDT", 2_000, 3)}
+	serial, err := EvaluateWith(ctx, testSpec(), bars, specs(), 1)
+	require.NoError(t, err)
+	parallel, err := EvaluateWith(ctx, testSpec(), bars, specs(), 6)
+	require.NoError(t, err)
+	require.Equal(t, serial, parallel, "projecting side runs must preserve result order and values")
+}
+
 func TestEvaluateIdentitiesAndIsolation(t *testing.T) {
 	bars := map[string][]data.Bar{"BTCUSDT": walk("BTCUSDT", 20_000, 3)}
 	ev, err := Evaluate(context.Background(), testSpec(), bars, specs())

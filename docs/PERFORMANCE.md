@@ -1,5 +1,41 @@
 # Performance
 
+## P0 F07 runtime and memory calibration (2026-11-19)
+
+The production binary `4a438f5` rejected a 100,000-bar report at the default
+1 GiB reservation budget. The request estimate was 6,657,048,576 bytes. A second
+run used a temporary 32 GiB reservation budget to measure the same workload.
+The setting changes accounting admission and does not allocate that amount.
+The reference host is Windows amd64, Core i3-12100F with eight logical CPUs,
+Go 1.26.4 and a separate local PostgreSQL process. The fixture uses synthetic
+BTCUSDT data in a disposable schema and disables live feeds and backups.
+
+| Measurement | Original runtime | Side-run projection |
+|---|---:|---:|
+| Queue receipt, 500 attempts | 12.99 ms | 12.26 ms |
+| GetReport p95, 100 requests | 63.76 ms | 69.65 ms |
+| GetChart p95, 100 requests | 116.58 ms | 111.19 ms |
+| Recalculate, one request | 1.06 s | 1.02 s |
+| Worst additional health heartbeat delay | 4.28 ms | 9.12 ms |
+| Engine peak working set | 456,986,624 B | 446,603,264 B |
+| Engine CPU time during the mixed interval | 51.92 s | 54.14 s |
+| Mixed elapsed wall time | 10.22 s | 11.50 s |
+
+Five read workers alternated chart and report calls during the same search.
+There were 53 and 46 completed attempts when the reads ended, respectively,
+and all 500 attempts eventually completed in both runs. The CPU time corresponds
+to approximately 63.5% and 58.8% of the host's logical-CPU capacity over the
+measured interval. Peak working set covers the engine's lifetime through the
+end of that interval. PostgreSQL and browser memory are outside that counter.
+These are diagnostic samples with an elevated admission budget.
+
+A separate 100,000-bar simulator stress fixture reached 199,998 fills
+and 798,780,098 allocated B/op over three iterations. Total allocations measure
+allocation volume. The default large-job admission failure remains open.
+Local evidence is in `artifacts/p0-mixed-runtime.txt`,
+`p0-mixed-runtime-diagnostic.txt`, `p0-mixed-runtime-projections.txt` and
+`p0-dense-ledger.txt`.
+
 ## P0 F07 chart read latency (2026-11-18)
 
 Go 1.26.4 Linux amd64 in Docker Desktop on Windows with local PostgreSQL and race enabled.

@@ -292,6 +292,26 @@ func (q *Queries) CountExperiments(ctx context.Context) (int64, error) {
 	return count, err
 }
 
+const deferAttemptForMemory = `-- name: DeferAttemptForMemory :exec
+UPDATE attempts a
+SET status = 'queued', started_at = NULL, claim_token = '', runs = a.runs - 1
+FROM experiments e
+WHERE a.experiment_id = $1 AND a.seq = $2 AND a.claim_token = $3
+  AND a.status = 'running' AND e.id = a.experiment_id AND e.status IN ('running', 'paused')
+`
+
+type DeferAttemptForMemoryParams struct {
+	ExperimentID string
+	Seq          int32
+	ClaimToken   string
+}
+
+// A claim deferred before evaluation is still pending work, not a failed run.
+func (q *Queries) DeferAttemptForMemory(ctx context.Context, arg DeferAttemptForMemoryParams) error {
+	_, err := q.db.Exec(ctx, deferAttemptForMemory, arg.ExperimentID, arg.Seq, arg.ClaimToken)
+	return err
+}
+
 const endAttempt = `-- name: EndAttempt :exec
 UPDATE attempts SET status = $1, failure = $2, finished_at = now()
 WHERE experiment_id = $3 AND seq = $4 AND status = 'running' AND claim_token = $5

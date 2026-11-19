@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log/slog"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -98,6 +99,7 @@ func (s *Scheduler) Run(ctx context.Context) error {
 	ctx, stop := context.WithCancel(ctx)
 	defer func() { stop(); wg.Wait() }()
 	lastHouse := time.Time{}
+	var retryAt atomic.Pointer[time.Time]
 	for ctx.Err() == nil {
 		if time.Since(lastHouse) >= s.Poll {
 			s.housekeep(ctx, owner)
@@ -105,6 +107,16 @@ func (s *Scheduler) Run(ctx context.Context) error {
 		}
 		if err := s.Limiter.Acquire(ctx); err != nil {
 			return nil
+		}
+		if at := retryAt.Load(); at != nil {
+			if delay := time.Until(*at); delay > 0 {
+				s.Limiter.Release()
+				select {
+				case <-ctx.Done():
+				case <-time.After(delay):
+				}
+				continue
+			}
 		}
 		var token [16]byte
 		if _, err := rand.Read(token[:]); err != nil {
@@ -137,7 +149,10 @@ func (s *Scheduler) Run(ctx context.Context) error {
 		go func() {
 			defer wg.Done()
 			defer s.Limiter.Release()
-			s.run(ctx, a)
+			if s.run(ctx, a) {
+				at := time.Now().Add(s.Poll)
+				retryAt.Store(&at)
+			}
 			s.Wake()
 		}()
 	}
@@ -213,8 +228,8 @@ func (s *Scheduler) dataset(ctx context.Context, id string) (datasetBars, error)
 	return d, nil
 }
 
-// run executes one claimed attempt and records the outcome.
-func (s *Scheduler) run(ctx context.Context, a db.Attempt) {
+// run executes one claimed attempt and reports whether memory contention deferred it.
+func (s *Scheduler) run(ctx context.Context, a db.Attempt) bool {
 	actx, cancel := context.WithCancelCause(ctx)
 	s.mu.Lock()
 	if s.running[a.ExperimentID] == nil {
@@ -222,12 +237,13 @@ func (s *Scheduler) run(ctx context.Context, a db.Attempt) {
 	}
 	s.running[a.ExperimentID][a.Seq] = cancel
 	s.mu.Unlock()
-	defer func() {
+	unregister := sync.OnceFunc(func() {
 		cancel(nil)
 		s.mu.Lock()
 		delete(s.running[a.ExperimentID], a.Seq)
 		s.mu.Unlock()
-	}()
+	})
+	defer unregister()
 
 	// Outcomes are written with their own short context: a result computed just
 	// before shutdown is still recorded.
@@ -249,24 +265,31 @@ func (s *Scheduler) run(ctx context.Context, a db.Attempt) {
 		if !errors.Is(err, pgx.ErrNoRows) && ctx.Err() == nil {
 			end("failed", failure(err))
 		}
-		return
+		return false
 	}
 
 	ms, cacheState, key, err := s.evaluate(actx, a)
 	switch {
 	case errors.Is(context.Cause(actx), errCancelled):
 		end("cancelled", "لغو به درخواست کاربر")
-		return
+		return false
 	case ctx.Err() != nil:
-		return // shutdown: stays running, re-queued on the next start
+		return false // shutdown: stays running, re-queued on the next start
+	case errors.Is(err, jobs.ErrMemoryBusy):
+		// Clear this handler before another worker can reclaim the same attempt.
+		unregister()
+		write(func(c context.Context) error {
+			return s.Store.DeferAttemptForMemory(c, db.DeferAttemptForMemoryParams{ExperimentID: a.ExperimentID, Seq: a.Seq, ClaimToken: a.ClaimToken})
+		})
+		return true
 	case err != nil:
 		end("failed", failure(err))
-		return
+		return false
 	}
 	def, err := s.definition(ctx, a.ExperimentID)
 	if err != nil {
 		end("failed", failure(err))
-		return
+		return false
 	}
 	ok, violations := Check(def.Constraints, ms)
 	msJ, _ := json.Marshal(ms)
@@ -276,6 +299,7 @@ func (s *Scheduler) run(ctx context.Context, a db.Attempt) {
 			ExperimentID: a.ExperimentID, Seq: a.Seq, ClaimToken: a.ClaimToken, Metrics: msJ, Eligible: &ok, Violations: vJ, Cache: cacheState, CacheKey: key,
 		})
 	})
+	return false
 }
 
 // The local engine has one scheduler per database schema. A dedicated session
@@ -453,6 +477,9 @@ func (s *Scheduler) finalize(ctx context.Context, owner *db.Queries, id string) 
 		s.Limiter.ReleaseN(s.Limiter.Size())
 		if ctx.Err() != nil {
 			return
+		}
+		if errors.Is(err, jobs.ErrMemoryBusy) {
+			return // the next poll retries finalization with the same report IDs
 		}
 		if err != nil {
 			status, errText = "failed", "ساخت گزارش نامزد برگزیده: "+err.Error()
