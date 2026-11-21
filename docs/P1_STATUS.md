@@ -45,7 +45,8 @@ independently of the event records.
 - The report RPC test verifies the recorded dataset and instrument keys and the legacy status without rewriting either the stored specification or evaluation. The focused Dart report and contract suite passed.
 - Go and Dart decode the same account fixture. The tests check the distinction between an exact zero and unavailable money, and preserve a revision above JavaScript's safe integer range.
 - The lifecycle RPC regression verifies cursor scope, the original full-history response and paging after a newer event arrives between reads. Chrome paged back and forth through a temporary history of more than 20 events at 390 px.
-- Hosted CI and representative-user acceptance remain open. The fresh 200% Flutter shell check was blocked by Windows executable policy. The 200% result above covers the standalone Paper prototype.
+- Chrome also checked the Flutter shell with 200% text at 390, 768, 1024 and 1440 px against a local Linux engine. At 390 px the menu control measured 44 × 44 px. Tab, Enter and Escape reached, opened and closed the drawer and restored focus. The connection banner preserved the deep link and last heartbeat and cleared after reconnect.
+- Hosted CI and representative-user acceptance remain open.
 
 ## Remaining acceptance work
 
