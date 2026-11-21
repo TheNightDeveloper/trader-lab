@@ -7,8 +7,8 @@ on `127.0.0.1`; it refuses any other address.
 
 | Tool | Needed for | Notes |
 |---|---|---|
-| Go 1.26+ | engine | `go version` |
-| Flutter (Dart 3.12+) | web app | `flutter doctor`; enable web with `flutter config --enable-web` |
+| Go 1.26.4+ | engine | See `engine/go.mod` |
+| Flutter 3.47+ with Dart 3.13+ | web app | CI uses Flutter 3.47.4. See `app/pubspec.yaml` for SDK constraints. |
 | PostgreSQL 17+ | all data | Docker (below) or a local install |
 | Docker | optional DB | only for `make dev-db` |
 | `make` | shortcuts | optional on Windows; each step has a plain command |
@@ -38,11 +38,15 @@ Data persists in the `pgdata` volume.
 make run
 ```
 
-This is the same as:
+To run without `make`, start from the repository root and use these commands in
+PowerShell:
 
-```sh
-cd app && flutter build web --release --no-web-resources-cdn
-cd ../engine && go run ./cmd/engine
+```powershell
+Set-Location .\app
+flutter pub get
+flutter build web --release --no-web-resources-cdn
+Set-Location ..\engine
+go run ./cmd/engine
 ```
 
 Wait for the log line `engine listening addr=http://127.0.0.1:8080`, then open
@@ -128,11 +132,17 @@ Database tests need the running PostgreSQL from section 2.
 
 **Without `make` (Windows)**
 
-```sh
-cd engine && go test ./...
-cd app && flutter test
-cd app && dart analyze --fatal-infos
-cd engine && go test -run Golden ./...
+Run from the repository root with PostgreSQL running. `REQUIRE_DB=1` turns an
+unreachable database into a test failure.
+
+```powershell
+$env:REQUIRE_DB = '1'
+Set-Location .\engine
+go test -count=1 -p=1 ./...
+go test -run Golden ./...
+Set-Location ..\app
+flutter test
+dart analyze --fatal-infos
 ```
 
 ## 7. Troubleshooting
