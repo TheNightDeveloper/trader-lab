@@ -12,6 +12,7 @@ The [master plan](Trading_Lab_Master_Plan_FA.md#p1-پایه-محصول-و-طرا
 | Workspace shell | The environment stays visible above the active route. The right sidebar docks at 1200 px. The drawer is available below that width. Unreleased destinations are omitted from navigation. |
 | UX-01 | The [clickable Paper prototype](../design/p1/workspace.html) covers setup, opportunity review and reconnect with sample data. |
 | Report evidence | `GetReport` publishes the stored build, policy, dataset and instrument revisions with a typed evidence status. The report UI displays that status and retains compatibility with older engines. |
+| Account contract | The account snapshot DTO identifies the account, environment, revision and effective risk policy. Money readings carry an exact value or a typed reason for unavailability. |
 
 The runtime keeps the research-only deployment and the existing deep links. Older
 clients can still use `RunMode` and symbol strings. The new UI reads legacy research
@@ -35,10 +36,11 @@ contracts confer no execution authority. No migration or dependency is required.
 - Chrome checked the runtime shell at 390, 768, 1024 and 1440 px. Tab reached the 44 × 44 px menu control, Enter opened the RTL drawer, and Escape closed it and restored focus. Dropping `HealthService.Watch` left the active route and last heartbeat visible. Reconnect cleared the banner in place.
 - Chrome ran J1, J2 and J5 in the prototype. It checked heading focus, the sample receipt, blocked actions across routes during disconnect, and layout at the same four widths.
 - The report RPC test verifies the recorded dataset and instrument keys and the legacy status without rewriting either the stored specification or evaluation. The focused Dart report and contract suite passed.
+- Go and Dart decode the same account fixture. The tests check the distinction between an exact zero and unavailable money, and preserve a revision above JavaScript's safe integer range.
 - Hosted CI, the Go race detector, Firefox and representative-user acceptance remain unverified for P1.
 
 ## Remaining acceptance work
 
-- Publish audit and cursor contracts, and the account snapshot and risk policy DTOs.
+- Publish audit and cursor contracts.
 - Connect Paper risk presentation to server-owned values when account data is available.
 - Review the Paper prototype with representative users and record results. Its sample receipt demonstrates the proposed flow. Paper execution belongs to P3.

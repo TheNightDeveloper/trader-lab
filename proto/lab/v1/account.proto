@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package lab.v1;
+
+import "lab/v1/common.proto";
+import "lab/v1/workspace.proto";
+
+// MoneyReading preserves an exact zero separately from an unavailable valuation.
+message MoneyReading {
+  oneof result {
+    Money value = 1;
+    UnavailableMoney unavailable = 2;
+  }
+}
+
+enum MoneyAvailability {
+  MONEY_AVAILABILITY_UNSPECIFIED = 0;
+  MONEY_AVAILABILITY_MISSING = 1;
+  MONEY_AVAILABILITY_INVALID = 2;
+  MONEY_AVAILABILITY_STALE = 3;
+}
+
+message UnavailableMoney {
+  MoneyAvailability reason = 1;
+  string detail = 2; // user-facing explanation when one is available
+}
+
+// RiskPolicyVersion references the effective policy used for this snapshot.
+message RiskPolicyVersion {
+  string policy_id = 1;
+  int64 revision = 2;
+  int64 effective_from_unix_ms = 3;
+}
+
+// AccountSnapshot is a server-owned view keyed by account scope and revision.
+// Amounts are denominated in the accounting asset and carry their own availability.
+message AccountSnapshot {
+  AccountRef account = 1;
+  int64 revision = 2;
+  int64 as_of_unix_ms = 3;
+  string accounting_asset = 4;
+  MoneyReading equity = 5;
+  MoneyReading available_balance = 6;
+  RiskPolicyVersion risk_policy = 7; // absent when a policy has not been assigned
+}
