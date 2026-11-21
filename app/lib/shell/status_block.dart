@@ -1,17 +1,17 @@
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_animate/flutter_animate.dart' hide ShimmerEffect;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 import '../core/api/engine.dart';
 import '../core/money.dart';
 import '../core/theme/tokens.dart';
 import '../core/widgets/num.dart';
+import '../core/widgets/status.dart';
+import '../core/widgets/workspace_status.dart';
 import '../gen/lab/v1/health.pb.dart';
 import '../l10n/app_localizations.dart';
 
-/// Sidebar engine status, fed by HealthService.Watch. Status is always text plus
-/// color, never color alone.
+/// Sidebar details from the last heartbeat, with connection and feed status kept distinct.
 class StatusBlock extends ConsumerWidget {
   const StatusBlock({super.key});
 
@@ -19,181 +19,101 @@ class StatusBlock extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = L10n.of(context);
     final async = ref.watch(engineStatusProvider);
-    final s = async.value; // last known status, kept while disconnected
-    final down = async.hasError;
-
+    final status = async.value;
+    final accountingAsset = status?.accountingAsset ?? '';
     return Skeletonizer(
-      enabled: s == null && !down,
+      enabled: status == null && !async.hasError,
       effect: const ShimmerEffect(baseColor: AppColors.surfaceRaised, highlightColor: AppColors.borderStrong),
-      child: AnimatedOpacity(
-        opacity: down && s != null ? 0.6 : 1,
-        duration: AppMotion.of(context, AppMotion.normal),
-        child: Container(
-          padding: const EdgeInsets.all(AppSpace.md),
-          decoration: BoxDecoration(
-            color: AppColors.statusPanelBg,
-            border: Border.all(color: AppColors.sidebarBorder),
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-          ),
-          child: DefaultTextStyle(
-            style: AppText.caption.copyWith(color: AppColors.textPrimary, height: 1.5),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _Row(
-                  l.statusMode,
-                  Text(
-                    l.statusModeResearch,
-                    textAlign: TextAlign.end,
-                    style: const TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                ),
-                _Row(l.statusAccounting, Mono(s?.accountingAsset ?? 'USDT', style: _mono)),
-                _Row(l.statusLive, _live(context, l, s?.live, down)),
-                _Row(l.statusEngine, _engine(context, l, s?.workers, down)),
-                const Divider(height: 18, color: AppColors.sidebarBorder),
-                Text(l.statusFx, style: AppText.caption),
-                const SizedBox(height: 3),
-                _swap(context, _fx(l, s?.displayRate)),
-              ],
-            ),
-          ),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpace.md),
+        decoration: BoxDecoration(
+          color: AppColors.statusPanelBg,
+          border: Border.all(color: AppColors.sidebarBorder),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
         ),
-      ),
-    );
-  }
-
-  static final _mono = AppText.mono.copyWith(fontSize: 12);
-
-  Widget _live(BuildContext context, L10n l, LiveData? live, bool down) {
-    final (text, color, pulse) = switch (live?.state) {
-      _ when down => (l.statusLiveOff, AppColors.textMuted, false),
-      LiveState.LIVE_STATE_FRESH => (l.statusLiveFresh, AppColors.positive, true),
-      LiveState.LIVE_STATE_STALE => (l.statusLiveStale, AppColors.warning, false),
-      LiveState.LIVE_STATE_RECONNECTING => (l.statusLiveReconnecting, AppColors.warning, true),
-      _ => (l.statusLiveOff, AppColors.textMuted, false),
-    };
-    final age = live != null && live.state != LiveState.LIVE_STATE_OFF && !down;
-    return _swap(
-      context,
-      _DotLine(
-        key: ValueKey('$text$age'),
-        dot: _Dot(color: color, pulse: pulse),
-        text: TextSpan(
-          text: text,
-          style: TextStyle(color: color),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (age) ...[
-              const TextSpan(text: ' · '),
-              // Latin digits + unit; bidi keeps "4s" intact inside the RTL line.
-              TextSpan(
-                text: '${live.lastBarAgeSeconds}s',
-                style: _mono.copyWith(color: color),
-              ),
-            ],
+            _StatusRow(l.statusEngine, _EngineStatus(workers: status?.workers, disconnected: async.hasError)),
+            _StatusRow(l.statusLive, FreshnessBadge(live: status?.live, disconnected: async.hasError)),
+            _StatusRow(l.statusAccounting, Mono(accountingAsset.isEmpty ? '—' : accountingAsset)),
+            const Divider(height: AppSpace.lg, color: AppColors.sidebarBorder),
+            Text(l.statusFx, style: AppText.caption),
+            _DisplayRateStatus(rate: status?.displayRate),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _engine(BuildContext context, L10n l, Workers? w, bool down) {
-    final (text, color) = switch (w?.state) {
-      _ when down => (l.statusEngineDown, AppColors.negativeText),
-      WorkerState.WORKER_STATE_PAUSED => (l.statusEnginePaused, AppColors.warning),
-      _ => (l.statusEngineRunning, AppColors.positive),
-    };
-    return _swap(
-      context,
-      _DotLine(
-        key: ValueKey('$text${w?.count}'),
-        dot: _Dot(color: color, pulse: !down),
-        text: TextSpan(
-          text: down || w == null ? text : '$text · ${l.statusWorkers(w.count)}',
-          style: TextStyle(color: color),
-        ),
+class _EngineStatus extends StatelessWidget {
+  const _EngineStatus({required this.workers, required this.disconnected});
+
+  final Workers? workers;
+  final bool disconnected;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L10n.of(context);
+    return StatusText(switch (workers?.state) {
+      _ when disconnected => (l.statusEngineDown, AppColors.negativeText),
+      WorkerState.WORKER_STATE_RUNNING => (
+        '${l.statusEngineRunning} · ${l.statusWorkers(workers!.count)}',
+        AppColors.positive,
       ),
-    );
+      WorkerState.WORKER_STATE_PAUSED => (l.statusEnginePaused, AppColors.warning),
+      _ => (l.statusEngineUnknown, AppColors.textMuted),
+    });
   }
+}
 
-  Widget _fx(L10n l, DisplayRate? r) {
-    if (r == null || !r.hasTomanPerUsdt()) {
-      return Text(l.statusFxNone, key: const ValueKey('none'), style: AppText.caption);
+class _DisplayRateStatus extends StatelessWidget {
+  const _DisplayRateStatus({required this.rate});
+
+  final DisplayRate? rate;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L10n.of(context);
+    final value = rate;
+    if (value == null || !value.hasTomanPerUsdt()) {
+      return Text(l.statusFxNone, style: AppText.caption);
     }
-    // One LTR line for the equation; LTR fragments inside an RTL Wrap get scrambled.
+
+    final amount = formatDecimal(moneyValue(value.tomanPerUsdt), fractionDigits: 0);
     return Column(
-      key: ValueKey(r.rateId),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Mono('1 USDT = ${formatDecimal(moneyValue(r.tomanPerUsdt), fractionDigits: 0)} TOMAN', style: _mono),
-        Text('${r.source == 'manual' ? l.statusFxManual : r.source} · ${r.asOfDate}', style: AppText.caption),
+        // Keep the equation as one LTR span within the RTL sidebar.
+        Mono('1 USDT = $amount TOMAN', style: AppText.mono.copyWith(fontSize: 12)),
+        Text(
+          '${value.source == 'manual' ? l.statusFxManual : value.source} · ${value.asOfDate}',
+          style: AppText.caption,
+        ),
       ],
     );
   }
-
-  /// Cross-fades a value when it changes.
-  Widget _swap(BuildContext context, Widget child) => AnimatedSwitcher(
-    duration: AppMotion.of(context, AppMotion.normal),
-    layoutBuilder: (current, previous) =>
-        Stack(alignment: AlignmentDirectional.centerStart, children: [...previous, ?current]),
-    child: child,
-  );
 }
 
-class _Row extends StatelessWidget {
-  const _Row(this.label, this.value);
+class _StatusRow extends StatelessWidget {
+  const _StatusRow(this.label, this.value);
+
   final String label;
   final Widget value;
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 4),
+    padding: const EdgeInsets.symmetric(vertical: AppSpace.xs),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: AppText.caption),
+        Flexible(child: Text(label, style: AppText.caption)),
         const SizedBox(width: AppSpace.sm),
-        // Values wrap rather than overflow or truncate on narrow sidebars.
         Expanded(
           child: Align(alignment: AlignmentDirectional.centerEnd, child: value),
         ),
       ],
     ),
   );
-}
-
-class _DotLine extends StatelessWidget {
-  const _DotLine({super.key, required this.dot, required this.text});
-  final Widget dot;
-  final TextSpan text;
-
-  @override
-  Widget build(BuildContext context) => Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      dot,
-      const SizedBox(width: 6),
-      Flexible(child: Text.rich(text, textAlign: TextAlign.end)),
-    ],
-  );
-}
-
-class _Dot extends StatelessWidget {
-  const _Dot({required this.color, required this.pulse});
-  final Color color;
-  final bool pulse;
-
-  @override
-  Widget build(BuildContext context) {
-    final dot = Container(
-      width: 7,
-      height: 7,
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-    );
-    if (!pulse || AppMotion.of(context, AppMotion.slow) == Duration.zero) return dot;
-    return dot
-        .animate(onPlay: (c) => c.repeat(reverse: true))
-        .fade(begin: 1, end: 0.35, duration: 1200.ms, curve: Curves.easeInOut)
-        .scaleXY(begin: 1, end: 0.8, duration: 1200.ms, curve: Curves.easeInOut);
-  }
 }

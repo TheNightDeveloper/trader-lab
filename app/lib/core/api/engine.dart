@@ -14,6 +14,7 @@ import '../../gen/lab/v1/library.connect.client.dart';
 import '../../gen/lab/v1/pnl.connect.client.dart';
 import '../../gen/lab/v1/report.connect.client.dart';
 import '../../gen/lab/v1/health.pb.dart';
+import '../../gen/lab/v1/workspace.pbenum.dart';
 import 'http_client_io.dart' if (dart.library.js_interop) 'http_client_web.dart';
 
 /// Engine origin. `--dart-define=ENGINE_URL=…` wins. A release build is served by
@@ -41,6 +42,15 @@ final engineStatusProvider = StreamProvider<EngineStatus>((ref) async* {
   }
   throw const EngineDisconnected();
 }, retry: reconnectForever);
+
+/// Older research engines report only RunMode. A current server can explicitly leave its environment unknown.
+Environment workspaceEnvironment(EngineStatus? status) {
+  if (status == null) return Environment.ENVIRONMENT_UNSPECIFIED;
+  if (status.hasEnvironment() || status.hasCapabilities()) return status.environment;
+  return status.mode == RunMode.RUN_MODE_RESEARCH
+      ? Environment.ENVIRONMENT_RESEARCH
+      : Environment.ENVIRONMENT_UNSPECIFIED;
+}
 
 class EngineDisconnected implements Exception {
   const EngineDisconnected();

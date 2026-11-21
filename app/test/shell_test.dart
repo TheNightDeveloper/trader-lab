@@ -47,7 +47,7 @@ void main() {
     for (final label in ['کتابخانه الگوریتم', 'چرخه یادگیری', 'داده', 'تنظیمات']) {
       expect(find.text(label), findsWidgets, reason: label);
     }
-    expect(find.text('فاز ۲'), findsNWidgets(4), reason: 'Phase 2 items are badged');
+    expect(find.text('فاز ۲'), findsNothing, reason: 'unreleased destinations are hidden');
     expect(find.byTooltip('باز کردن منو'), findsNothing, reason: 'no drawer at desktop width');
 
     health.add(_status());

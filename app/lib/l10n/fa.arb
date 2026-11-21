@@ -19,31 +19,38 @@
   "navReports": "گزارش‌ها",
   "navCompare": "مقایسه",
   "navPnl": "ماشین‌حساب سود و زیان",
-  "navGroupLearning": "یادگیری و تحلیل",
+  "navGroupLearning": "یادگیری",
   "navLearning": "چرخه یادگیری",
   "navChart": "نمودار",
   "navData": "داده",
-  "navGroupLater": "بعداً",
-  "navPaper": "حساب مجازی و سفارش",
-  "navRisk": "ریسک و انضباط",
-  "navJournal": "ژورنال",
-  "navMarket": "بازار و رویداد",
-  "navGroupSystem": "سیستم",
+  "navGroupReview": "بررسی",
+  "navGroupControl": "کنترل",
   "navSettings": "تنظیمات",
-  "phase2": "فاز ۲",
   "openMenu": "باز کردن منو",
-  "statusMode": "حالت اجرا",
   "statusModeResearch": "پژوهش · بدون سفارش واقعی",
+  "statusModePaper": "معاملهٔ مجازی",
+  "statusModeLive": "معاملهٔ واقعی",
+  "statusModeUnknown": "حالت اجرا نامشخص",
   "statusAccounting": "ارز مبنا",
   "statusLive": "داده زنده",
   "statusLiveOff": "خاموش",
   "statusLiveFresh": "تازه",
   "statusLiveStale": "کهنه",
   "statusLiveReconnecting": "در حال اتصال دوباره",
+  "statusLiveUnknown": "نامشخص",
+  "statusLiveUnavailable": "در دسترس نیست",
+  "statusBarAge": "{state} · {seconds} ثانیه از آخرین شمع",
+  "@statusBarAge": {
+    "placeholders": {
+      "state": {"type": "String"},
+      "seconds": {"type": "int"}
+    }
+  },
   "statusEngine": "موتور Go",
   "statusEngineRunning": "فعال",
   "statusEnginePaused": "متوقف",
   "statusEngineDown": "قطع",
+  "statusEngineUnknown": "نامشخص",
   "statusWorkers": "{count} کارگر",
   "@statusWorkers": {
     "placeholders": {
@@ -55,7 +62,13 @@
   "statusFx": "نرخ تبدیل نمایشی",
   "statusFxNone": "هنوز نرخی ثبت نشده",
   "statusFxManual": "دستی",
-  "engineUnreachable": "موتور در دسترس نیست. آخرین وضعیت نمایش داده می‌شود؛ دوباره تلاش می‌کنیم…",
+  "engineUnreachable": "موتور در دسترس نیست. در حال تلاش برای اتصال دوباره…",
+  "engineLastSeen": "موتور در دسترس نیست. آخرین وضعیت در {time} دریافت شد. در حال تلاش برای اتصال دوباره…",
+  "@engineLastSeen": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
   "screenHomeSub": "وضعیت موتور، آخرین چرخه یادگیری و آزمایش‌های اخیر",
   "screenLibrarySub": "الگوریتم‌ها، نسخه‌ها و دستورالعمل‌ها",
   "screenBuilderSub": "فرضیه، داده، الگوریتم، هزینه‌ها و برنامه اعتبارسنجی در شش گام",

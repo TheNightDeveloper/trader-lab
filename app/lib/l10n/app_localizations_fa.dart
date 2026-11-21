@@ -72,7 +72,7 @@ class L10nFa extends L10n {
   String get navPnl => 'ماشین‌حساب سود و زیان';
 
   @override
-  String get navGroupLearning => 'یادگیری و تحلیل';
+  String get navGroupLearning => 'یادگیری';
 
   @override
   String get navLearning => 'چرخه یادگیری';
@@ -84,37 +84,28 @@ class L10nFa extends L10n {
   String get navData => 'داده';
 
   @override
-  String get navGroupLater => 'بعداً';
+  String get navGroupReview => 'بررسی';
 
   @override
-  String get navPaper => 'حساب مجازی و سفارش';
-
-  @override
-  String get navRisk => 'ریسک و انضباط';
-
-  @override
-  String get navJournal => 'ژورنال';
-
-  @override
-  String get navMarket => 'بازار و رویداد';
-
-  @override
-  String get navGroupSystem => 'سیستم';
+  String get navGroupControl => 'کنترل';
 
   @override
   String get navSettings => 'تنظیمات';
 
   @override
-  String get phase2 => 'فاز ۲';
-
-  @override
   String get openMenu => 'باز کردن منو';
 
   @override
-  String get statusMode => 'حالت اجرا';
+  String get statusModeResearch => 'پژوهش · بدون سفارش واقعی';
 
   @override
-  String get statusModeResearch => 'پژوهش · بدون سفارش واقعی';
+  String get statusModePaper => 'معاملهٔ مجازی';
+
+  @override
+  String get statusModeLive => 'معاملهٔ واقعی';
+
+  @override
+  String get statusModeUnknown => 'حالت اجرا نامشخص';
 
   @override
   String get statusAccounting => 'ارز مبنا';
@@ -135,6 +126,17 @@ class L10nFa extends L10n {
   String get statusLiveReconnecting => 'در حال اتصال دوباره';
 
   @override
+  String get statusLiveUnknown => 'نامشخص';
+
+  @override
+  String get statusLiveUnavailable => 'در دسترس نیست';
+
+  @override
+  String statusBarAge(String state, int seconds) {
+    return '$state · $seconds ثانیه از آخرین شمع';
+  }
+
+  @override
   String get statusEngine => 'موتور Go';
 
   @override
@@ -145,6 +147,9 @@ class L10nFa extends L10n {
 
   @override
   String get statusEngineDown => 'قطع';
+
+  @override
+  String get statusEngineUnknown => 'نامشخص';
 
   @override
   String statusWorkers(int count) {
@@ -162,7 +167,12 @@ class L10nFa extends L10n {
 
   @override
   String get engineUnreachable =>
-      'موتور در دسترس نیست. آخرین وضعیت نمایش داده می‌شود؛ دوباره تلاش می‌کنیم…';
+      'موتور در دسترس نیست. در حال تلاش برای اتصال دوباره…';
+
+  @override
+  String engineLastSeen(String time) {
+    return 'موتور در دسترس نیست. آخرین وضعیت در $time دریافت شد. در حال تلاش برای اتصال دوباره…';
+  }
 
   @override
   String get screenHomeSub =>

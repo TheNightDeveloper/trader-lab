@@ -27,8 +27,8 @@ Rules for implementing from the design:
 
 | Element | Design source | Flutter |
 |---|---|---|
-| App layout | every screen: sidebar + `main` | `AppShell` with `Row` (≥600 px) or sidebar as `Drawer` (<600 px). Page padding `AppSpace.page`, section gap `AppSpace.xl`. |
-| Sidebar | `Sidebar.dc.html` | `AppSidebar(active: Route)`; nav items with group headers; Phase 2 items disabled with a “فاز ۲” badge; status block bound to `HealthService` stream. |
+| App layout | every screen: workspace header + `main` | `AppShell` docks navigation at ≥1200 px and uses an RTL drawer at smaller widths. The environment label stays visible above the current route. |
+| Sidebar | `Sidebar.dc.html` | `AppSidebar` groups released routes under Research, Learning, Review and Control. The status block reads `HealthService.Watch`. |
 | Page header | `h1` + subtitle + action buttons | `PageHeader(title, subtitle, actions)`; actions wrap on narrow widths. |
 
 Direction: `Directionality(textDirection: TextDirection.rtl)` at the root. Wrap every number,
@@ -80,8 +80,8 @@ unreachable: banner, last data kept visible).
 | Width | Behavior |
 |---|---|
 | ≥ 1200 | Sidebar fixed; two-column screens side by side (form + summary, table + panel). |
-| 600–1199 | Sidebar fixed; secondary columns wrap below primary. |
-| < 600 | Sidebar becomes a drawer; all columns stack; tables scroll horizontally; stat grids become 2 columns. Monitoring and reading must work; building experiments is desktop-first. |
+| 600–1199 | Navigation uses a drawer, leaving the full width available for content. Secondary columns wrap below primary. |
+| < 600 | Navigation uses a drawer. Columns stack, tables scroll horizontally, and stat grids become 2 columns. Building experiments is desktop-first. |
 
 ## 5. Accessibility
 

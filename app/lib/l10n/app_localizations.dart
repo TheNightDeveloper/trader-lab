@@ -210,7 +210,7 @@ abstract class L10n {
   /// No description provided for @navGroupLearning.
   ///
   /// In fa, this message translates to:
-  /// **'یادگیری و تحلیل'**
+  /// **'یادگیری'**
   String get navGroupLearning;
 
   /// No description provided for @navLearning.
@@ -231,41 +231,17 @@ abstract class L10n {
   /// **'داده'**
   String get navData;
 
-  /// No description provided for @navGroupLater.
+  /// No description provided for @navGroupReview.
   ///
   /// In fa, this message translates to:
-  /// **'بعداً'**
-  String get navGroupLater;
+  /// **'بررسی'**
+  String get navGroupReview;
 
-  /// No description provided for @navPaper.
+  /// No description provided for @navGroupControl.
   ///
   /// In fa, this message translates to:
-  /// **'حساب مجازی و سفارش'**
-  String get navPaper;
-
-  /// No description provided for @navRisk.
-  ///
-  /// In fa, this message translates to:
-  /// **'ریسک و انضباط'**
-  String get navRisk;
-
-  /// No description provided for @navJournal.
-  ///
-  /// In fa, this message translates to:
-  /// **'ژورنال'**
-  String get navJournal;
-
-  /// No description provided for @navMarket.
-  ///
-  /// In fa, this message translates to:
-  /// **'بازار و رویداد'**
-  String get navMarket;
-
-  /// No description provided for @navGroupSystem.
-  ///
-  /// In fa, this message translates to:
-  /// **'سیستم'**
-  String get navGroupSystem;
+  /// **'کنترل'**
+  String get navGroupControl;
 
   /// No description provided for @navSettings.
   ///
@@ -273,29 +249,35 @@ abstract class L10n {
   /// **'تنظیمات'**
   String get navSettings;
 
-  /// No description provided for @phase2.
-  ///
-  /// In fa, this message translates to:
-  /// **'فاز ۲'**
-  String get phase2;
-
   /// No description provided for @openMenu.
   ///
   /// In fa, this message translates to:
   /// **'باز کردن منو'**
   String get openMenu;
 
-  /// No description provided for @statusMode.
-  ///
-  /// In fa, this message translates to:
-  /// **'حالت اجرا'**
-  String get statusMode;
-
   /// No description provided for @statusModeResearch.
   ///
   /// In fa, this message translates to:
   /// **'پژوهش · بدون سفارش واقعی'**
   String get statusModeResearch;
+
+  /// No description provided for @statusModePaper.
+  ///
+  /// In fa, this message translates to:
+  /// **'معاملهٔ مجازی'**
+  String get statusModePaper;
+
+  /// No description provided for @statusModeLive.
+  ///
+  /// In fa, this message translates to:
+  /// **'معاملهٔ واقعی'**
+  String get statusModeLive;
+
+  /// No description provided for @statusModeUnknown.
+  ///
+  /// In fa, this message translates to:
+  /// **'حالت اجرا نامشخص'**
+  String get statusModeUnknown;
 
   /// No description provided for @statusAccounting.
   ///
@@ -333,6 +315,24 @@ abstract class L10n {
   /// **'در حال اتصال دوباره'**
   String get statusLiveReconnecting;
 
+  /// No description provided for @statusLiveUnknown.
+  ///
+  /// In fa, this message translates to:
+  /// **'نامشخص'**
+  String get statusLiveUnknown;
+
+  /// No description provided for @statusLiveUnavailable.
+  ///
+  /// In fa, this message translates to:
+  /// **'در دسترس نیست'**
+  String get statusLiveUnavailable;
+
+  /// No description provided for @statusBarAge.
+  ///
+  /// In fa, this message translates to:
+  /// **'{state} · {seconds} ثانیه از آخرین شمع'**
+  String statusBarAge(String state, int seconds);
+
   /// No description provided for @statusEngine.
   ///
   /// In fa, this message translates to:
@@ -356,6 +356,12 @@ abstract class L10n {
   /// In fa, this message translates to:
   /// **'قطع'**
   String get statusEngineDown;
+
+  /// No description provided for @statusEngineUnknown.
+  ///
+  /// In fa, this message translates to:
+  /// **'نامشخص'**
+  String get statusEngineUnknown;
 
   /// No description provided for @statusWorkers.
   ///
@@ -384,8 +390,14 @@ abstract class L10n {
   /// No description provided for @engineUnreachable.
   ///
   /// In fa, this message translates to:
-  /// **'موتور در دسترس نیست. آخرین وضعیت نمایش داده می‌شود؛ دوباره تلاش می‌کنیم…'**
+  /// **'موتور در دسترس نیست. در حال تلاش برای اتصال دوباره…'**
   String get engineUnreachable;
+
+  /// No description provided for @engineLastSeen.
+  ///
+  /// In fa, this message translates to:
+  /// **'موتور در دسترس نیست. آخرین وضعیت در {time} دریافت شد. در حال تلاش برای اتصال دوباره…'**
+  String engineLastSeen(String time);
 
   /// No description provided for @screenHomeSub.
   ///
