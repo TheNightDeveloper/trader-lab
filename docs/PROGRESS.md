@@ -2,6 +2,14 @@
 
 Update at the end of every session.
 
+## P1 started (2026-11-19)
+
+CORE-01 adds the source-qualified instrument key, environment and versioned signal
+contracts. The health stream publishes workspace capabilities and freshness. The RTL
+workspace shell groups released routes and keeps the execution mode in view. The Paper
+prototype covers J1, J2 and J5. See [P1 status](P1_STATUS.md) for compatibility, the state
+matrix and pending acceptance work.
+
 ## P0 gate passed (2026-11-19)
 
 - Candidate `e34975a` passed [hosted CI](https://github.com/TheNightDeveloper/trader-lab/actions/runs/44530856883).
@@ -332,7 +340,7 @@ Update at the end of every session.
   Dart analysis and depguard passed. Race/hosted CI/browser review remain unverified.
 - Next: FIX-04 actual freeze/forward coverage and period/cohort metrics. See P0_STATUS.md.
 
-## Current phase
+## P0 checkpoint (historical)
 P0 — correctness and evidence stabilization: **in progress** (2026-11-05).
 The new P0–P8 phases are defined in `Trading_Lab_Master_Plan_FA.md`; M0–M6 below
 are historical implementation milestones, not evidence that the P0 release gate passed.
@@ -352,7 +360,7 @@ provenance/canonical reproduction and F08 capability restrictions are implemente
 recorded scopes. F15 lifecycle locking/revision checks are implemented; next is remaining F07.
 Server-side dataset search and remaining
 P0 resource/accounting/network/label and stress/UX gates are still open.
-**Do not start P1 yet.**
+P1 remained gated at this checkpoint. See the later P0 acceptance entry above.
 
 ## M6 done (2026-10-28)
 - ChartService: bars, engine-computed indicators (MA, EMA, BB, RSI, MACD), decision markers (entry, exit, rejected, stop/take), decision record; report charts end at the out-of-sample end.

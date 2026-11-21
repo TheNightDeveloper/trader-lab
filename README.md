@@ -6,8 +6,8 @@ market data, runs deterministic simulations and evaluates strategies. A Flutter 
 no API key.
 
 > Status: M0–M6 are implemented. The **P0 stabilization gate passed** for
-> research candidate `e34975a`. See [P0 status and verification](docs/P0_STATUS.md)
-> and [the master plan](docs/Trading_Lab_Master_Plan_FA.md).
+> research candidate `e34975a`. **P1 is underway.** See [P1 progress](docs/P1_STATUS.md),
+> [P0 verification](docs/P0_STATUS.md) and [the master plan](docs/Trading_Lab_Master_Plan_FA.md).
 
 ## What works today
 

@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>طرح تعاملی حساب مجازی</title>
+  <style>
+    @font-face { font-family: Vazirmatn; src: url(../../app/assets/fonts/Vazirmatn-Regular.ttf); font-display: swap; }
+    @font-face { font-family: Vazirmatn; src: url(../../app/assets/fonts/Vazirmatn-Bold.ttf); font-weight: 700; font-display: swap; }
+    /* Mirror the workspace colors in design/tokens.json for an offline preview. */
+    :root {
+      color-scheme: dark;
+      --bg: #0d1015;
+      --panel: #141922;
+      --border: #2c3542;
+      --text: #e7ebf1;
+      --muted: #9aa3b1;
+      --accent: #6fa8ff;
+      --positive: #3ecfae;
+      --warning: #f3d98a;
+      --warning-bg: #2a2416;
+      font: 100%/1.75 Vazirmatn, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    header, nav, article { padding: 1rem; }
+    header {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .5rem 1rem;
+      background: var(--panel); border-block-end: 1px solid var(--border);
+    }
+    .mode { color: var(--positive); border: 1px solid #2a4a43; border-radius: .5rem; padding: .125rem .5rem; }
+    .layout { display: grid; grid-template-columns: 14.5rem minmax(0, 1fr); }
+    nav { display: flex; flex-direction: column; gap: .5rem; border-inline-end: 1px solid var(--border); }
+    main { max-inline-size: 66rem; padding: clamp(.75rem, 3vw, 2rem); }
+    h1, h2, p { margin-block: 0 .75rem; }
+    h1 { font-size: 1.5rem; line-height: 1.45; }
+    h2 { font-size: 1.125rem; }
+    p, dd { overflow-wrap: anywhere; }
+    article { background: var(--panel); border: 1px solid var(--border); border-radius: .75rem; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+    .meta, dt { color: var(--muted); }
+    .actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-block-start: 1rem; }
+    dl { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: .5rem 1rem; margin: 0; }
+    dd { margin: 0; }
+    button {
+      min-block-size: 44px; min-inline-size: 44px; padding: .5rem .75rem;
+      border: 1px solid var(--border); border-radius: .5rem;
+      background: var(--panel); color: var(--text); text-align: start; font: inherit; cursor: pointer;
+    }
+    button:hover, button[aria-current] { border-color: var(--accent); }
+    .primary { color: var(--bg); background: var(--accent); border-color: var(--accent); font-weight: 700; }
+    button:disabled { color: var(--muted); background: var(--panel); border-color: var(--border); cursor: default; }
+    button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    .notice { padding: .625rem .75rem; border-radius: .5rem; background: var(--warning-bg); color: var(--warning); }
+    .notice[data-state="ready"] { background: var(--panel); color: var(--positive); }
+    [hidden] { display: none !important; }
+    @media (max-width: 62rem) {
+      .layout { grid-template-columns: minmax(0, 1fr); }
+      nav { flex-direction: row; flex-wrap: wrap; border-inline-end: 0; border-block-end: 1px solid var(--border); }
+    }
+    @media (max-width: 38rem) {
+      .grid { grid-template-columns: minmax(0, 1fr); }
+      nav, header, article { padding: .75rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <strong>طرح تعاملی آزمایشگاه الگوریتم</strong>
+    <span class="mode">معاملهٔ مجازی · دادهٔ نمونه</span>
+  </header>
+  <div class="layout">
+    <nav aria-label="مسیرهای نمونه">
+      <button type="button" data-next="start" data-flow="start" aria-current="step">راه‌اندازی حساب مجازی</button>
+      <button type="button" data-next="opportunities" data-flow="trade">مرور فرصت و سفارش</button>
+      <button type="button" data-next="connection" data-flow="connection">قطع اتصال و بازیابی</button>
+    </nav>
+    <main>
+      <section id="start" data-flow="start">
+        <h1 tabindex="-1">راه‌اندازی در حالت معاملهٔ مجازی</h1>
+        <p>داده و الگو را انتخاب کنید و شواهد آزمون را قبل از فعال‌سازی مرور کنید.</p>
+        <button class="primary" type="button" data-next="data">انتخاب حساب مجازی</button>
+      </section>
+      <section id="data" data-flow="start" hidden>
+        <h1 tabindex="-1">بررسی پوشش داده</h1>
+        <article>
+          <h2><bdi>BTCUSDT · 1h</bdi></h2>
+          <p class="meta">پوشش دادهٔ نمونه برای آزمون الگوی روند کامل است.</p>
+          <button class="primary" type="button" data-next="strategy">استفاده از این داده</button>
+        </article>
+      </section>
+      <section id="strategy" data-flow="start" hidden>
+        <h1 tabindex="-1">انتخاب الگو</h1>
+        <article>
+          <h2>روند میانگین متحرک</h2>
+          <p class="meta">نسخهٔ نمونه <bdi>trend-ema@v1</bdi></p>
+          <button class="primary" type="button" data-next="evidence">اجرای آزمون نمونه</button>
+        </article>
+      </section>
+      <section id="evidence" data-flow="start" hidden>
+        <h1 tabindex="-1">مرور شواهد آزمون</h1>
+        <article>
+          <h2>آزمون خارج از نمونه</h2>
+          <p>نسخهٔ الگو و داده ثبت شده‌اند. تعداد معاملات نمونه برای اجرای واقعی کافی نیست.</p>
+          <p class="notice" data-stale-note hidden>فعال‌سازی پس از دریافت وضعیت تازهٔ حساب در دسترس قرار می‌گیرد.</p>
+          <button class="primary" type="button" data-next="deployment" data-needs-snapshot>فعال‌سازی آزمایشی</button>
+        </article>
+      </section>
+      <section id="deployment" data-flow="start" hidden>
+        <h1 tabindex="-1">اجرای مجازی نمونه فعال شد</h1>
+        <p class="meta">الگوی روند روی دادهٔ ساعتی نمونه در حساب مجازی قابل مشاهده است.</p>
+        <button class="primary" type="button" data-next="opportunities">مشاهدهٔ فرصت‌ها</button>
+      </section>
+      <section id="opportunities" data-flow="trade" hidden>
+        <h1 tabindex="-1">فرصت‌های نمونه</h1>
+        <div class="grid">
+          <article>
+            <h2><bdi>BTCUSDT</bdi></h2>
+            <p>شرط ورود تأیید شده و داده تازه است.</p>
+            <button class="primary" type="button" data-next="plan">بررسی فرصت بیت‌کوین</button>
+          </article>
+          <article>
+            <h2><bdi>ETHUSDT</bdi></h2>
+            <p class="notice">آخرین داده کهنه است. فرصت فعلاً آمادهٔ مرور سفارش نیست.</p>
+          </article>
+        </div>
+      </section>
+      <section id="plan" data-flow="trade" hidden>
+        <h1 tabindex="-1">طرح ورود <bdi>BTCUSDT</bdi></h1>
+        <article>
+          <h2>ریسک و هزینه برای حساب مجازی</h2>
+          <dl>
+            <dt>شرط ورود</dt><dd>بسته‌شدن شمع بالای میانگین</dd>
+            <dt>زیان برنامه‌ریزی‌شده</dt><dd><bdi>5.00 USDT</bdi></dd>
+            <dt>هزینهٔ تخمینی</dt><dd><bdi>0.10 USDT</bdi></dd>
+            <dt>اعتبار طرح</dt><dd>تا بسته‌شدن شمع بعدی</dd>
+          </dl>
+        </article>
+        <p class="notice" data-stale-note hidden>داده کهنه است. برای مرور سفارش ابتدا اتصال را بازیابی کنید.</p>
+        <div class="actions">
+          <button class="primary" type="button" data-next="review" data-needs-snapshot>مرور سفارش مجازی</button>
+          <button type="button" data-next="opportunities">بازگشت به فرصت‌ها</button>
+        </div>
+      </section>
+      <section id="review" data-flow="trade" hidden>
+        <h1 tabindex="-1">مرور سفارش مجازی</h1>
+        <article>
+          <dl>
+            <dt>حساب</dt><dd>حساب مجازی نمونه</dd>
+            <dt>بازار و جهت</dt><dd>خرید اسپات <bdi>BTCUSDT</bdi></dd>
+            <dt>ارزش سفارش</dt><dd><bdi>100.00 USDT</bdi></dd>
+            <dt>ریسک طرح</dt><dd><bdi>5.00 USDT</bdi></dd>
+          </dl>
+        </article>
+        <p class="notice" data-stale-note hidden>داده کهنه است. تأیید سفارش به وضعیت تازهٔ حساب نیاز دارد.</p>
+        <div class="actions">
+          <button class="primary" type="button" data-next="receipt" data-needs-snapshot>تأیید سفارش نمونه</button>
+          <button type="button" data-next="plan">بازگشت به طرح ورود</button>
+        </div>
+      </section>
+      <section id="receipt" data-flow="trade" hidden>
+        <h1 tabindex="-1">رسید نمونه</h1>
+        <article>
+          <dl>
+            <dt>شناسهٔ رسید</dt><dd><bdi>DEMO-001</bdi></dd>
+            <dt>وضعیت</dt><dd>پذیرفته‌شده در شبیه‌سازی</dd>
+          </dl>
+        </article>
+        <div class="actions"><button type="button" data-next="opportunities">بازگشت به فرصت‌ها</button></div>
+      </section>
+      <section id="connection" data-flow="connection" hidden>
+        <h1 tabindex="-1">وضعیت اتصال حساب مجازی</h1>
+        <article>
+          <h2>آخرین وضعیت ثبت‌شدهٔ حساب</h2>
+          <p>آخرین دریافت <time id="snapshot-time" dir="ltr" datetime="2026-11-19T11:30:00Z">11:30 UTC</time></p>
+          <p class="notice" id="connection-status" role="status" data-state="ready">اتصال برقرار است. مرور سفارش در دسترس است.</p>
+          <div class="actions">
+            <button id="review-after-sync" type="button" data-next="review" data-needs-snapshot>مرور سفارش مجازی</button>
+            <button id="connection-control" class="primary" type="button">شبیه‌سازی قطع اتصال</button>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+  <script>
+    const steps = [...document.querySelectorAll('main section')];
+    const navigation = [...document.querySelectorAll('nav button')];
+    const protectedActions = document.querySelectorAll('[data-needs-snapshot]');
+    const staleNotes = document.querySelectorAll('[data-stale-note]');
+
+    // Each route has a stable heading for keyboard and screen-reader navigation.
+    function showStep(id) {
+      const active = steps.find(step => step.id === id);
+      for (const step of steps) step.hidden = step !== active;
+      for (const button of navigation) {
+        if (button.dataset.flow === active.dataset.flow) button.setAttribute('aria-current', 'step');
+        else button.removeAttribute('aria-current');
+      }
+      active.querySelector('h1').focus();
+    }
+
+    const connectionStates = {
+      ready: { next: 'offline', label: 'شبیه‌سازی قطع اتصال', status: 'اتصال برقرار است. مرور سفارش در دسترس است.' },
+      offline: { next: 'recovering', label: 'بازیابی اتصال', status: 'اتصال قطع است. آخرین وضعیت حساب حفظ شده و ورود جدید موقتاً غیرفعال است.' },
+      recovering: { next: 'ready', label: 'تأیید دریافت وضعیت تازه', status: 'اتصال برقرار شد. مرور سفارش پس از دریافت وضعیت تازهٔ حساب فعال می‌شود.' },
+    };
+    let connection = 'ready';
+
+    function advanceConnection() {
+      connection = connectionStates[connection].next;
+      const {label, status} = connectionStates[connection];
+      document.querySelector('#connection-control').textContent = label;
+      const announcement = document.querySelector('#connection-status');
+      announcement.dataset.state = connection;
+      announcement.textContent = status;
+      const ready = connection === 'ready';
+      for (const button of protectedActions) button.disabled = !ready;
+      for (const note of staleNotes) note.hidden = ready;
+      // A transport reconnect alone cannot advance the last confirmed snapshot.
+      if (ready) {
+        const time = document.querySelector('#snapshot-time');
+        time.dateTime = '2026-11-19T11:32:00Z';
+        time.textContent = '11:32 UTC';
+      }
+    }
+
+    document.addEventListener('click', event => {
+      const button = event.target.closest('button');
+      if (button?.dataset.next) showStep(button.dataset.next);
+      if (button?.id === 'connection-control') advanceConnection();
+    });
+  </script>
+</body>
+</html>
