@@ -2,6 +2,14 @@
 
 Update at the end of every session.
 
+## P1 acceptance checks (2026-11-21)
+
+The full Linux Go race suite passed on `f93f48b` with PostgreSQL required.
+Chrome checked the three Paper prototype journeys at 390 px with 200% text and
+keyboard activation. The snapshot timestamp keeps its UTC label on the same line.
+The [P1 status](P1_STATUS.md) includes tasks and scoring for representative-user
+review. Hosted CI and that review are still open.
+
 ## P1 contracts extended (2026-11-21)
 
 Report evidence now exposes the saved build, dataset, market and policy inputs.

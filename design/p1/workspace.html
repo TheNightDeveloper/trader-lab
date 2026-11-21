@@ -38,6 +38,8 @@
     h1 { font-size: 1.5rem; line-height: 1.45; }
     h2 { font-size: 1.125rem; }
     p, dd { overflow-wrap: anywhere; }
+    /* Keep the zone beside the snapshot time when the surrounding text wraps. */
+    time { white-space: nowrap; }
     article { background: var(--panel); border: 1px solid var(--border); border-radius: .75rem; }
     .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
     .meta, dt { color: var(--muted); }
