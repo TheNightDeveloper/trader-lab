@@ -35,6 +35,11 @@ INSERT INTO lifecycle_events (version_id, from_state, to_state, note, actor) VAL
 -- name: ListLifecycleEvents :many
 SELECT * FROM lifecycle_events WHERE version_id = $1 ORDER BY at DESC, id DESC;
 
+-- name: ListLifecycleEventsPage :many
+SELECT * FROM lifecycle_events
+WHERE version_id = sqlc.arg(version_id) AND id <= sqlc.arg(through_id)
+ORDER BY id DESC LIMIT sqlc.arg(page_limit);
+
 -- name: InsertExperiment :exec
 INSERT INTO experiments (id, name, definition, status) VALUES ($1, $2, $3, 'running');
 

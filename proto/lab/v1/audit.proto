@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package lab.v1;
+
+import "lab/v1/workspace.proto";
+
+// AuditCursor is valid only in its stream. Sequence is ordered within that stream.
+message AuditCursor {
+  oneof scope {
+    AccountRef account = 1;
+    string strategy_version_id = 2;
+  }
+  int64 sequence = 3;
+}
+
+enum AuditActor {
+  AUDIT_ACTOR_UNSPECIFIED = 0;
+  AUDIT_ACTOR_USER = 1;
+  AUDIT_ACTOR_SYSTEM = 2;
+}
+
+// AuditEvent supplies the shared identity, actor and timestamp for a domain event.
+message AuditEvent {
+  AuditCursor cursor = 1;
+  AuditActor actor = 2;
+  int64 recorded_at_unix_ms = 3;
+}

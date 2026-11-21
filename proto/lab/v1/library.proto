@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package lab.v1;
 
+import "lab/v1/audit.proto";
 import "lab/v1/common.proto";
 import "lab/v1/report.proto";
 
@@ -66,12 +67,16 @@ message LifecycleEvent {
   string note = 3;
   string actor = 4; // user | system
   int64 at_unix_ms = 5;
+  AuditEvent audit = 6;
 }
 
 message ListLifecycleEventsRequest {
   string version_id = 1;
+  int32 page_size = 2; // positive opts in to sequence-ordered paging
+  AuditCursor before = 3; // exclusive bound in the requested strategy version
 }
 
 message ListLifecycleEventsResponse {
   repeated LifecycleEvent events = 1;
+  AuditCursor next_cursor = 2; // absent on the last page
 }

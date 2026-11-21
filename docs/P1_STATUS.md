@@ -13,11 +13,15 @@ The [master plan](Trading_Lab_Master_Plan_FA.md#p1-پایه-محصول-و-طرا
 | UX-01 | The [clickable Paper prototype](../design/p1/workspace.html) covers setup, opportunity review and reconnect with sample data. |
 | Report evidence | `GetReport` publishes the stored build, policy, dataset and instrument revisions with a typed evidence status. The report UI displays that status and retains compatibility with older engines. |
 | Account contract | The account snapshot DTO identifies the account, environment, revision and effective risk policy. Money readings carry an exact value or a typed reason for unavailability. |
+| Lifecycle audit | The Library reads 20 audit events per page. Each event includes its typed actor, timestamp and version-scoped sequence. Older clients retain the original full-history response. |
 
 The runtime keeps the research-only deployment and the existing deep links. Older
 clients can still use `RunMode` and symbol strings. The new UI reads legacy research
 mode when a server predates the workspace fields. The signal and account reference
-contracts confer no execution authority. No migration or dependency is required.
+contracts confer no execution authority. Migration `00008` adds the lifecycle
+audit index. Before reverting to a binary that predates this migration, roll
+back `00008` with the current migration set. The rollback drops the index
+independently of the event records.
 
 ## State matrix
 
@@ -31,16 +35,17 @@ contracts confer no execution authority. No migration or dependency is required.
 
 ## Local verification
 
-- PostgreSQL was required for the Go suite. It passed 369 tests and subtests with zero failures or skips, including all 11 simulator goldens. `golangci-lint` and `go vet` passed.
-- Buf lint, compatibility against the P0 contract, and regeneration parity passed. Dart analysis was clean, all 56 Flutter tests passed, and the release web build succeeded with the existing CupertinoIcons warning.
+- PostgreSQL was required for the final Go suite. It passed 372 tests and subtests with zero failures or skips, including all 11 simulator goldens. `golangci-lint` and `go vet` passed.
+- Buf lint and compatibility against the P0 contract passed. Dart analysis was clean, all 57 Flutter tests passed, and the release web build succeeded with the existing CupertinoIcons warning.
 - Chrome checked the runtime shell at 390, 768, 1024 and 1440 px. Tab reached the 44 × 44 px menu control, Enter opened the RTL drawer, and Escape closed it and restored focus. Dropping `HealthService.Watch` left the active route and last heartbeat visible. Reconnect cleared the banner in place.
+- Firefox 159 rendered the same four widths and opened and dismissed the drawer at 390 px.
 - Chrome ran J1, J2 and J5 in the prototype. It checked heading focus, the sample receipt, blocked actions across routes during disconnect, and layout at the same four widths.
 - The report RPC test verifies the recorded dataset and instrument keys and the legacy status without rewriting either the stored specification or evaluation. The focused Dart report and contract suite passed.
 - Go and Dart decode the same account fixture. The tests check the distinction between an exact zero and unavailable money, and preserve a revision above JavaScript's safe integer range.
-- Hosted CI, the Go race detector, Firefox and representative-user acceptance remain unverified for P1.
+- The lifecycle RPC regression verifies cursor scope, the original full-history response and paging after a newer event arrives between reads. Chrome paged back and forth through a temporary history of more than 20 events at 390 px.
+- Hosted CI, the Go race detector and representative-user acceptance remain unverified for P1.
 
 ## Remaining acceptance work
 
-- Publish audit and cursor contracts.
 - Connect Paper risk presentation to server-owned values when account data is available.
 - Review the Paper prototype with representative users and record results. Its sample receipt demonstrates the proposed flow. Paper execution belongs to P3.

@@ -2595,6 +2595,18 @@ abstract class L10n {
   /// **'رویدادها'**
   String get libHistory;
 
+  /// No description provided for @libHistoryNewer.
+  ///
+  /// In fa, this message translates to:
+  /// **'رویدادهای جدیدتر'**
+  String get libHistoryNewer;
+
+  /// No description provided for @libHistoryOlder.
+  ///
+  /// In fa, this message translates to:
+  /// **'رویدادهای قدیمی‌تر'**
+  String get libHistoryOlder;
+
   /// No description provided for @actorUser.
   ///
   /// In fa, this message translates to:
@@ -2606,6 +2618,12 @@ abstract class L10n {
   /// In fa, this message translates to:
   /// **'سیستم'**
   String get actorSystem;
+
+  /// No description provided for @actorUnknown.
+  ///
+  /// In fa, this message translates to:
+  /// **'ثبت‌کننده نامشخص'**
+  String get actorUnknown;
 
   /// No description provided for @lSubtitle.
   ///

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"slices"
 	"strings"
 
@@ -15,6 +16,7 @@ import (
 	labv1 "tradinglab/engine/internal/gen/lab/v1"
 	"tradinglab/engine/internal/model"
 	"tradinglab/engine/internal/store"
+	"tradinglab/engine/internal/store/db"
 )
 
 type Library struct {
@@ -77,15 +79,52 @@ func (h *Library) SetVersionState(ctx context.Context, req *connect.Request[labv
 }
 
 func (h *Library) ListLifecycleEvents(ctx context.Context, req *connect.Request[labv1.ListLifecycleEventsRequest]) (*connect.Response[labv1.ListLifecycleEventsResponse], error) {
-	rows, err := h.Store.ListLifecycleEvents(ctx, req.Msg.GetVersionId())
+	versionID := req.Msg.GetVersionId()
+	var rows []db.LifecycleEvent
+	var err error
+	res := &labv1.ListLifecycleEventsResponse{}
+	if req.Msg.GetPageSize() == 0 && req.Msg.GetBefore() == nil {
+		// Existing clients get the complete chronological history they requested before paging existed.
+		rows, err = h.Store.ListLifecycleEvents(ctx, versionID)
+	} else {
+		if versionID == "" || req.Msg.GetPageSize() < 0 {
+			return nil, invalid("شناسهٔ نسخه و اندازهٔ صفحهٔ رویدادها نامعتبر است")
+		}
+		throughID := int64(math.MaxInt64)
+		if before := req.Msg.GetBefore(); before != nil {
+			if before.GetStrategyVersionId() != versionID || before.GetSequence() < 1 {
+				return nil, invalid("نشانگر رویدادها به این نسخه تعلق ندارد")
+			}
+			throughID = before.GetSequence() - 1
+		}
+		limit := pageSize(req.Msg.GetPageSize())
+		rows, err = h.Store.ListLifecycleEventsPage(ctx, db.ListLifecycleEventsPageParams{
+			VersionID: versionID, ThroughID: throughID, PageLimit: limit + 1,
+		})
+		if len(rows) > int(limit) {
+			rows = rows[:limit]
+			res.NextCursor = lifecycleCursor(rows[len(rows)-1])
+		}
+	}
 	if err != nil {
 		return nil, err
 	}
-	res := &labv1.ListLifecycleEventsResponse{}
 	for _, r := range rows {
-		res.Events = append(res.Events, &labv1.LifecycleEvent{FromState: r.FromState, ToState: r.ToState, Note: r.Note, Actor: r.Actor, AtUnixMs: ms(r.At)})
+		res.Events = append(res.Events, &labv1.LifecycleEvent{
+			FromState: r.FromState, ToState: r.ToState, Note: r.Note, Actor: r.Actor, AtUnixMs: ms(r.At),
+			Audit: &labv1.AuditEvent{Cursor: lifecycleCursor(r), Actor: auditActors[r.Actor], RecordedAtUnixMs: ms(r.At)},
+		})
 	}
 	return connect.NewResponse(res), nil
+}
+
+func lifecycleCursor(row db.LifecycleEvent) *labv1.AuditCursor {
+	return &labv1.AuditCursor{Scope: &labv1.AuditCursor_StrategyVersionId{StrategyVersionId: row.VersionID}, Sequence: row.ID}
+}
+
+var auditActors = map[string]labv1.AuditActor{
+	"user":   labv1.AuditActor_AUDIT_ACTOR_USER,
+	"system": labv1.AuditActor_AUDIT_ACTOR_SYSTEM,
 }
 
 // recipeItems describes a recipe for the library's detail panel.

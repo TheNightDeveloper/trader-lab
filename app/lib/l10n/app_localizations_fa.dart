@@ -1363,10 +1363,19 @@ class L10nFa extends L10n {
   String get libHistory => 'رویدادها';
 
   @override
+  String get libHistoryNewer => 'رویدادهای جدیدتر';
+
+  @override
+  String get libHistoryOlder => 'رویدادهای قدیمی‌تر';
+
+  @override
   String get actorUser => 'کاربر';
 
   @override
   String get actorSystem => 'سیستم';
+
+  @override
+  String get actorUnknown => 'ثبت‌کننده نامشخص';
 
   @override
   String lSubtitle(String hour, int bars) {

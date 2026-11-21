@@ -516,6 +516,7 @@ type LifecycleEvent struct {
 	Note          string                 `protobuf:"bytes,3,opt,name=note,proto3" json:"note,omitempty"`
 	Actor         string                 `protobuf:"bytes,4,opt,name=actor,proto3" json:"actor,omitempty"` // user | system
 	AtUnixMs      int64                  `protobuf:"varint,5,opt,name=at_unix_ms,json=atUnixMs,proto3" json:"at_unix_ms,omitempty"`
+	Audit         *AuditEvent            `protobuf:"bytes,6,opt,name=audit,proto3" json:"audit,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -585,9 +586,18 @@ func (x *LifecycleEvent) GetAtUnixMs() int64 {
 	return 0
 }
 
+func (x *LifecycleEvent) GetAudit() *AuditEvent {
+	if x != nil {
+		return x.Audit
+	}
+	return nil
+}
+
 type ListLifecycleEventsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	VersionId     string                 `protobuf:"bytes,1,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"` // positive opts in to sequence-ordered paging
+	Before        *AuditCursor           `protobuf:"bytes,3,opt,name=before,proto3" json:"before,omitempty"`                      // exclusive bound in the requested strategy version
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -629,9 +639,24 @@ func (x *ListLifecycleEventsRequest) GetVersionId() string {
 	return ""
 }
 
+func (x *ListLifecycleEventsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListLifecycleEventsRequest) GetBefore() *AuditCursor {
+	if x != nil {
+		return x.Before
+	}
+	return nil
+}
+
 type ListLifecycleEventsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Events        []*LifecycleEvent      `protobuf:"bytes,1,rep,name=events,proto3" json:"events,omitempty"`
+	NextCursor    *AuditCursor           `protobuf:"bytes,2,opt,name=next_cursor,json=nextCursor,proto3" json:"next_cursor,omitempty"` // absent on the last page
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -673,11 +698,18 @@ func (x *ListLifecycleEventsResponse) GetEvents() []*LifecycleEvent {
 	return nil
 }
 
+func (x *ListLifecycleEventsResponse) GetNextCursor() *AuditCursor {
+	if x != nil {
+		return x.NextCursor
+	}
+	return nil
+}
+
 var File_lab_v1_library_proto protoreflect.FileDescriptor
 
 const file_lab_v1_library_proto_rawDesc = "" +
 	"\n" +
-	"\x14lab/v1/library.proto\x12\x06lab.v1\x1a\x13lab/v1/common.proto\x1a\x13lab/v1/report.proto\"\x95\x02\n" +
+	"\x14lab/v1/library.proto\x12\x06lab.v1\x1a\x12lab/v1/audit.proto\x1a\x13lab/v1/common.proto\x1a\x13lab/v1/report.proto\"\x95\x02\n" +
 	"\x10AlgorithmVersion\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
 	"\aversion\x18\x02 \x01(\x05R\aversion\x12\x14\n" +
@@ -716,7 +748,7 @@ const file_lab_v1_library_proto_rawDesc = "" +
 	"\x04note\x18\x03 \x01(\tR\x04note\x120\n" +
 	"\x11expected_revision\x18\x04 \x01(\x03H\x00R\x10expectedRevision\x88\x01\x01B\x14\n" +
 	"\x12_expected_revision\"\x19\n" +
-	"\x17SetVersionStateResponse\"\x92\x01\n" +
+	"\x17SetVersionStateResponse\"\xbc\x01\n" +
 	"\x0eLifecycleEvent\x12\x1d\n" +
 	"\n" +
 	"from_state\x18\x01 \x01(\tR\tfromState\x12\x19\n" +
@@ -724,12 +756,17 @@ const file_lab_v1_library_proto_rawDesc = "" +
 	"\x04note\x18\x03 \x01(\tR\x04note\x12\x14\n" +
 	"\x05actor\x18\x04 \x01(\tR\x05actor\x12\x1c\n" +
 	"\n" +
-	"at_unix_ms\x18\x05 \x01(\x03R\batUnixMs\";\n" +
+	"at_unix_ms\x18\x05 \x01(\x03R\batUnixMs\x12(\n" +
+	"\x05audit\x18\x06 \x01(\v2\x12.lab.v1.AuditEventR\x05audit\"\x85\x01\n" +
 	"\x1aListLifecycleEventsRequest\x12\x1d\n" +
 	"\n" +
-	"version_id\x18\x01 \x01(\tR\tversionId\"M\n" +
+	"version_id\x18\x01 \x01(\tR\tversionId\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12+\n" +
+	"\x06before\x18\x03 \x01(\v2\x13.lab.v1.AuditCursorR\x06before\"\x83\x01\n" +
 	"\x1bListLifecycleEventsResponse\x12.\n" +
-	"\x06events\x18\x01 \x03(\v2\x16.lab.v1.LifecycleEventR\x06events2\x95\x02\n" +
+	"\x06events\x18\x01 \x03(\v2\x16.lab.v1.LifecycleEventR\x06events\x124\n" +
+	"\vnext_cursor\x18\x02 \x01(\v2\x13.lab.v1.AuditCursorR\n" +
+	"nextCursor2\x95\x02\n" +
 	"\x0eLibraryService\x12O\n" +
 	"\x0eListAlgorithms\x12\x1d.lab.v1.ListAlgorithmsRequest\x1a\x1e.lab.v1.ListAlgorithmsResponse\x12R\n" +
 	"\x0fSetVersionState\x12\x1e.lab.v1.SetVersionStateRequest\x1a\x1f.lab.v1.SetVersionStateResponse\x12^\n" +
@@ -764,6 +801,8 @@ var file_lab_v1_library_proto_goTypes = []any{
 	(*ListLifecycleEventsResponse)(nil), // 10: lab.v1.ListLifecycleEventsResponse
 	(*ParamSpec)(nil),                   // 11: lab.v1.ParamSpec
 	(*Decimal)(nil),                     // 12: lab.v1.Decimal
+	(*AuditEvent)(nil),                  // 13: lab.v1.AuditEvent
+	(*AuditCursor)(nil),                 // 14: lab.v1.AuditCursor
 }
 var file_lab_v1_library_proto_depIdxs = []int32{
 	11, // 0: lab.v1.AlgorithmVersion.params:type_name -> lab.v1.ParamSpec
@@ -772,18 +811,21 @@ var file_lab_v1_library_proto_depIdxs = []int32{
 	0,  // 3: lab.v1.Algorithm.versions:type_name -> lab.v1.AlgorithmVersion
 	2,  // 4: lab.v1.Algorithm.latest_report:type_name -> lab.v1.LatestReport
 	3,  // 5: lab.v1.ListAlgorithmsResponse.algorithms:type_name -> lab.v1.Algorithm
-	8,  // 6: lab.v1.ListLifecycleEventsResponse.events:type_name -> lab.v1.LifecycleEvent
-	4,  // 7: lab.v1.LibraryService.ListAlgorithms:input_type -> lab.v1.ListAlgorithmsRequest
-	6,  // 8: lab.v1.LibraryService.SetVersionState:input_type -> lab.v1.SetVersionStateRequest
-	9,  // 9: lab.v1.LibraryService.ListLifecycleEvents:input_type -> lab.v1.ListLifecycleEventsRequest
-	5,  // 10: lab.v1.LibraryService.ListAlgorithms:output_type -> lab.v1.ListAlgorithmsResponse
-	7,  // 11: lab.v1.LibraryService.SetVersionState:output_type -> lab.v1.SetVersionStateResponse
-	10, // 12: lab.v1.LibraryService.ListLifecycleEvents:output_type -> lab.v1.ListLifecycleEventsResponse
-	10, // [10:13] is the sub-list for method output_type
-	7,  // [7:10] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	13, // 6: lab.v1.LifecycleEvent.audit:type_name -> lab.v1.AuditEvent
+	14, // 7: lab.v1.ListLifecycleEventsRequest.before:type_name -> lab.v1.AuditCursor
+	8,  // 8: lab.v1.ListLifecycleEventsResponse.events:type_name -> lab.v1.LifecycleEvent
+	14, // 9: lab.v1.ListLifecycleEventsResponse.next_cursor:type_name -> lab.v1.AuditCursor
+	4,  // 10: lab.v1.LibraryService.ListAlgorithms:input_type -> lab.v1.ListAlgorithmsRequest
+	6,  // 11: lab.v1.LibraryService.SetVersionState:input_type -> lab.v1.SetVersionStateRequest
+	9,  // 12: lab.v1.LibraryService.ListLifecycleEvents:input_type -> lab.v1.ListLifecycleEventsRequest
+	5,  // 13: lab.v1.LibraryService.ListAlgorithms:output_type -> lab.v1.ListAlgorithmsResponse
+	7,  // 14: lab.v1.LibraryService.SetVersionState:output_type -> lab.v1.SetVersionStateResponse
+	10, // 15: lab.v1.LibraryService.ListLifecycleEvents:output_type -> lab.v1.ListLifecycleEventsResponse
+	13, // [13:16] is the sub-list for method output_type
+	10, // [10:13] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_lab_v1_library_proto_init() }
@@ -791,6 +833,7 @@ func file_lab_v1_library_proto_init() {
 	if File_lab_v1_library_proto != nil {
 		return
 	}
+	file_lab_v1_audit_proto_init()
 	file_lab_v1_common_proto_init()
 	file_lab_v1_report_proto_init()
 	file_lab_v1_library_proto_msgTypes[6].OneofWrappers = []any{}

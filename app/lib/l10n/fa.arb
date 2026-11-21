@@ -676,8 +676,11 @@
   "libConfirmActive": " اگر نسخه فعال دیگری از همین الگوریتم باشد، متوقف می‌شود.",
   "libNote": "یادداشت (چرا؟)",
   "libHistory": "رویدادها",
+  "libHistoryNewer": "رویدادهای جدیدتر",
+  "libHistoryOlder": "رویدادهای قدیمی‌تر",
   "actorUser": "کاربر",
   "actorSystem": "سیستم",
+  "actorUnknown": "ثبت‌کننده نامشخص",
   "lSubtitle": "بازآموزی روزانه {hour} UTC · حداقل داده تازه {bars} کندل · ارتقا فقط با تأیید شما",
   "@lSubtitle": {
     "placeholders": {

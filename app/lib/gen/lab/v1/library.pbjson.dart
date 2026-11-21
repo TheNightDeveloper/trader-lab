@@ -15,8 +15,10 @@ import 'dart:convert' as $convert;
 import 'dart:core' as $core;
 import 'dart:typed_data' as $typed_data;
 
+import 'audit.pbjson.dart' as $2;
 import 'common.pbjson.dart' as $1;
 import 'report.pbjson.dart' as $0;
+import 'workspace.pbjson.dart' as $3;
 
 @$core.Deprecated('Use algorithmVersionDescriptor instead')
 const AlgorithmVersion$json = {
@@ -212,6 +214,14 @@ const LifecycleEvent$json = {
     {'1': 'note', '3': 3, '4': 1, '5': 9, '10': 'note'},
     {'1': 'actor', '3': 4, '4': 1, '5': 9, '10': 'actor'},
     {'1': 'at_unix_ms', '3': 5, '4': 1, '5': 3, '10': 'atUnixMs'},
+    {
+      '1': 'audit',
+      '3': 6,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.AuditEvent',
+      '10': 'audit'
+    },
   ],
 };
 
@@ -219,13 +229,23 @@ const LifecycleEvent$json = {
 final $typed_data.Uint8List lifecycleEventDescriptor = $convert.base64Decode(
     'Cg5MaWZlY3ljbGVFdmVudBIdCgpmcm9tX3N0YXRlGAEgASgJUglmcm9tU3RhdGUSGQoIdG9fc3'
     'RhdGUYAiABKAlSB3RvU3RhdGUSEgoEbm90ZRgDIAEoCVIEbm90ZRIUCgVhY3RvchgEIAEoCVIF'
-    'YWN0b3ISHAoKYXRfdW5peF9tcxgFIAEoA1IIYXRVbml4TXM=');
+    'YWN0b3ISHAoKYXRfdW5peF9tcxgFIAEoA1IIYXRVbml4TXMSKAoFYXVkaXQYBiABKAsyEi5sYW'
+    'IudjEuQXVkaXRFdmVudFIFYXVkaXQ=');
 
 @$core.Deprecated('Use listLifecycleEventsRequestDescriptor instead')
 const ListLifecycleEventsRequest$json = {
   '1': 'ListLifecycleEventsRequest',
   '2': [
     {'1': 'version_id', '3': 1, '4': 1, '5': 9, '10': 'versionId'},
+    {'1': 'page_size', '3': 2, '4': 1, '5': 5, '10': 'pageSize'},
+    {
+      '1': 'before',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.AuditCursor',
+      '10': 'before'
+    },
   ],
 };
 
@@ -233,7 +253,8 @@ const ListLifecycleEventsRequest$json = {
 final $typed_data.Uint8List listLifecycleEventsRequestDescriptor =
     $convert.base64Decode(
         'ChpMaXN0TGlmZWN5Y2xlRXZlbnRzUmVxdWVzdBIdCgp2ZXJzaW9uX2lkGAEgASgJUgl2ZXJzaW'
-        '9uSWQ=');
+        '9uSWQSGwoJcGFnZV9zaXplGAIgASgFUghwYWdlU2l6ZRIrCgZiZWZvcmUYAyABKAsyEy5sYWIu'
+        'djEuQXVkaXRDdXJzb3JSBmJlZm9yZQ==');
 
 @$core.Deprecated('Use listLifecycleEventsResponseDescriptor instead')
 const ListLifecycleEventsResponse$json = {
@@ -247,6 +268,14 @@ const ListLifecycleEventsResponse$json = {
       '6': '.lab.v1.LifecycleEvent',
       '10': 'events'
     },
+    {
+      '1': 'next_cursor',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.AuditCursor',
+      '10': 'nextCursor'
+    },
   ],
 };
 
@@ -254,7 +283,8 @@ const ListLifecycleEventsResponse$json = {
 final $typed_data.Uint8List listLifecycleEventsResponseDescriptor =
     $convert.base64Decode(
         'ChtMaXN0TGlmZWN5Y2xlRXZlbnRzUmVzcG9uc2USLgoGZXZlbnRzGAEgAygLMhYubGFiLnYxLk'
-        'xpZmVjeWNsZUV2ZW50UgZldmVudHM=');
+        'xpZmVjeWNsZUV2ZW50UgZldmVudHMSNAoLbmV4dF9jdXJzb3IYAiABKAsyEy5sYWIudjEuQXVk'
+        'aXRDdXJzb3JSCm5leHRDdXJzb3I=');
 
 const $core.Map<$core.String, $core.dynamic> LibraryServiceBase$json = {
   '1': 'LibraryService',
@@ -291,8 +321,11 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
   '.lab.v1.SetVersionStateRequest': SetVersionStateRequest$json,
   '.lab.v1.SetVersionStateResponse': SetVersionStateResponse$json,
   '.lab.v1.ListLifecycleEventsRequest': ListLifecycleEventsRequest$json,
+  '.lab.v1.AuditCursor': $2.AuditCursor$json,
+  '.lab.v1.AccountRef': $3.AccountRef$json,
   '.lab.v1.ListLifecycleEventsResponse': ListLifecycleEventsResponse$json,
   '.lab.v1.LifecycleEvent': LifecycleEvent$json,
+  '.lab.v1.AuditEvent': $2.AuditEvent$json,
 };
 
 /// Descriptor for `LibraryService`. Decode as a `google.protobuf.ServiceDescriptorProto`.

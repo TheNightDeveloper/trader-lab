@@ -16,6 +16,7 @@ import 'dart:core' as $core;
 import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
+import 'audit.pb.dart' as $2;
 import 'common.pb.dart' as $1;
 import 'report.pb.dart' as $0;
 
@@ -664,6 +665,7 @@ class LifecycleEvent extends $pb.GeneratedMessage {
     $core.String? note,
     $core.String? actor,
     $fixnum.Int64? atUnixMs,
+    $2.AuditEvent? audit,
   }) {
     final result = LifecycleEvent._();
     if (fromState != null) result.fromState = fromState;
@@ -671,6 +673,7 @@ class LifecycleEvent extends $pb.GeneratedMessage {
     if (note != null) result.note = note;
     if (actor != null) result.actor = actor;
     if (atUnixMs != null) result.atUnixMs = atUnixMs;
+    if (audit != null) result.audit = audit;
     return result;
   }
 
@@ -692,6 +695,8 @@ class LifecycleEvent extends $pb.GeneratedMessage {
     ..aOS(3, _omitFieldNames ? '' : 'note')
     ..aOS(4, _omitFieldNames ? '' : 'actor')
     ..aInt64(5, _omitFieldNames ? '' : 'atUnixMs')
+    ..aOM<$2.AuditEvent>(6, _omitFieldNames ? '' : 'audit',
+        subBuilder: $2.AuditEvent.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -760,14 +765,29 @@ class LifecycleEvent extends $pb.GeneratedMessage {
   $core.bool hasAtUnixMs() => $_has(4);
   @$pb.TagNumber(5)
   void clearAtUnixMs() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  $2.AuditEvent get audit => $_getN(5);
+  @$pb.TagNumber(6)
+  set audit($2.AuditEvent value) => $_setField(6, value);
+  @$pb.TagNumber(6)
+  $core.bool hasAudit() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearAudit() => $_clearField(6);
+  @$pb.TagNumber(6)
+  $2.AuditEvent ensureAudit() => $_ensure(5);
 }
 
 class ListLifecycleEventsRequest extends $pb.GeneratedMessage {
   factory ListLifecycleEventsRequest({
     $core.String? versionId,
+    $core.int? pageSize,
+    $2.AuditCursor? before,
   }) {
     final result = ListLifecycleEventsRequest._();
     if (versionId != null) result.versionId = versionId;
+    if (pageSize != null) result.pageSize = pageSize;
+    if (before != null) result.before = before;
     return result;
   }
 
@@ -785,6 +805,9 @@ class ListLifecycleEventsRequest extends $pb.GeneratedMessage {
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: ListLifecycleEventsRequest.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'versionId')
+    ..aI(2, _omitFieldNames ? '' : 'pageSize')
+    ..aOM<$2.AuditCursor>(3, _omitFieldNames ? '' : 'before',
+        subBuilder: $2.AuditCursor.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -822,14 +845,36 @@ class ListLifecycleEventsRequest extends $pb.GeneratedMessage {
   $core.bool hasVersionId() => $_has(0);
   @$pb.TagNumber(1)
   void clearVersionId() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get pageSize => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set pageSize($core.int value) => $_setSignedInt32(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasPageSize() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearPageSize() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $2.AuditCursor get before => $_getN(2);
+  @$pb.TagNumber(3)
+  set before($2.AuditCursor value) => $_setField(3, value);
+  @$pb.TagNumber(3)
+  $core.bool hasBefore() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearBefore() => $_clearField(3);
+  @$pb.TagNumber(3)
+  $2.AuditCursor ensureBefore() => $_ensure(2);
 }
 
 class ListLifecycleEventsResponse extends $pb.GeneratedMessage {
   factory ListLifecycleEventsResponse({
     $core.Iterable<LifecycleEvent>? events,
+    $2.AuditCursor? nextCursor,
   }) {
     final result = ListLifecycleEventsResponse._();
     if (events != null) result.events.addAll(events);
+    if (nextCursor != null) result.nextCursor = nextCursor;
     return result;
   }
 
@@ -848,6 +893,8 @@ class ListLifecycleEventsResponse extends $pb.GeneratedMessage {
       createEmptyInstance: ListLifecycleEventsResponse.$_createMessage)
     ..pPM<LifecycleEvent>(1, _omitFieldNames ? '' : 'events',
         subBuilder: LifecycleEvent.$_createMessage)
+    ..aOM<$2.AuditCursor>(2, _omitFieldNames ? '' : 'nextCursor',
+        subBuilder: $2.AuditCursor.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -880,6 +927,17 @@ class ListLifecycleEventsResponse extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(1)
   $pb.PbList<LifecycleEvent> get events => $_getList(0);
+
+  @$pb.TagNumber(2)
+  $2.AuditCursor get nextCursor => $_getN(1);
+  @$pb.TagNumber(2)
+  set nextCursor($2.AuditCursor value) => $_setField(2, value);
+  @$pb.TagNumber(2)
+  $core.bool hasNextCursor() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearNextCursor() => $_clearField(2);
+  @$pb.TagNumber(2)
+  $2.AuditCursor ensureNextCursor() => $_ensure(1);
 }
 
 /// LibraryService: algorithms, their versions and lifecycle. Only a user action

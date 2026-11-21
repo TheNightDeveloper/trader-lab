@@ -2,6 +2,13 @@
 
 Update at the end of every session.
 
+## P1 contracts extended (2026-11-21)
+
+Report evidence now exposes the saved build, dataset, market and policy inputs.
+The account contract models exact and unavailable financial values and the active
+risk policy revision. Library history uses a cursor scoped to the selected version.
+See [P1 status](P1_STATUS.md) for the local verification and remaining design gate.
+
 ## P1 started (2026-11-19)
 
 CORE-01 adds the source-qualified instrument key, environment and versioned signal

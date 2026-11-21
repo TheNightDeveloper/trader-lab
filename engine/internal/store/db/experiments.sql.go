@@ -743,6 +743,46 @@ func (q *Queries) ListLifecycleEvents(ctx context.Context, versionID string) ([]
 	return items, nil
 }
 
+const listLifecycleEventsPage = `-- name: ListLifecycleEventsPage :many
+SELECT id, version_id, from_state, to_state, note, actor, at FROM lifecycle_events
+WHERE version_id = $1 AND id <= $2
+ORDER BY id DESC LIMIT $3
+`
+
+type ListLifecycleEventsPageParams struct {
+	VersionID string
+	ThroughID int64
+	PageLimit int32
+}
+
+func (q *Queries) ListLifecycleEventsPage(ctx context.Context, arg ListLifecycleEventsPageParams) ([]LifecycleEvent, error) {
+	rows, err := q.db.Query(ctx, listLifecycleEventsPage, arg.VersionID, arg.ThroughID, arg.PageLimit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []LifecycleEvent
+	for rows.Next() {
+		var i LifecycleEvent
+		if err := rows.Scan(
+			&i.ID,
+			&i.VersionID,
+			&i.FromState,
+			&i.ToState,
+			&i.Note,
+			&i.Actor,
+			&i.At,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listStartedExperiments = `-- name: ListStartedExperiments :many
 SELECT id, definition, created_at FROM experiments WHERE status = 'running'
 `
