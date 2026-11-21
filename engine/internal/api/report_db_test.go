@@ -22,6 +22,7 @@ import (
 	"tradinglab/engine/internal/money"
 	"tradinglab/engine/internal/report"
 	"tradinglab/engine/internal/store/storetest"
+	"tradinglab/engine/internal/strategy"
 )
 
 func waveBars(n int) []data.Bar {
@@ -101,6 +102,16 @@ func TestReportAndPnlServices(t *testing.T) {
 	strategies, err := rc.ListStrategies(ctx, connect.NewRequest(&labv1.ListStrategiesRequest{}))
 	require.NoError(t, err)
 	require.Len(t, strategies.Msg.GetStrategies(), 4)
+	for _, item := range strategies.Msg.GetStrategies() {
+		params := strategy.Params{}
+		for _, published := range item.GetParams() {
+			params[published.GetName()] = published.GetDefault()
+		}
+		definition := strategy.NativeDefinition{Format: item.GetNativeDefinitionFormat(), Name: item.GetName(), Params: params}
+		hash, err := definition.ContentHash()
+		require.NoError(t, err)
+		require.Equal(t, hash, item.GetNativeDefinitionHash())
+	}
 
 	spec := func(fee string) *labv1.ReportSpec {
 		return &labv1.ReportSpec{

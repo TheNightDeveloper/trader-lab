@@ -73,6 +73,20 @@ const StrategyInfo$json = {
       '6': '.lab.v1.StrategyCapability',
       '10': 'capability'
     },
+    {
+      '1': 'native_definition_format',
+      '3': 4,
+      '4': 1,
+      '5': 9,
+      '10': 'nativeDefinitionFormat'
+    },
+    {
+      '1': 'native_definition_hash',
+      '3': 5,
+      '4': 1,
+      '5': 9,
+      '10': 'nativeDefinitionHash'
+    },
   ],
 };
 
@@ -80,7 +94,9 @@ const StrategyInfo$json = {
 final $typed_data.Uint8List strategyInfoDescriptor = $convert.base64Decode(
     'CgxTdHJhdGVneUluZm8SEgoEbmFtZRgBIAEoCVIEbmFtZRIpCgZwYXJhbXMYAiADKAsyES5sYW'
     'IudjEuUGFyYW1TcGVjUgZwYXJhbXMSOgoKY2FwYWJpbGl0eRgDIAEoCzIaLmxhYi52MS5TdHJh'
-    'dGVneUNhcGFiaWxpdHlSCmNhcGFiaWxpdHk=');
+    'dGVneUNhcGFiaWxpdHlSCmNhcGFiaWxpdHkSOAoYbmF0aXZlX2RlZmluaXRpb25fZm9ybWF0GA'
+    'QgASgJUhZuYXRpdmVEZWZpbml0aW9uRm9ybWF0EjQKFm5hdGl2ZV9kZWZpbml0aW9uX2hhc2gY'
+    'BSABKAlSFG5hdGl2ZURlZmluaXRpb25IYXNo');
 
 @$core.Deprecated('Use listStrategiesRequestDescriptor instead')
 const ListStrategiesRequest$json = {

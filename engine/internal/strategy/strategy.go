@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"math"
 	"slices"
-	"strings"
 
 	"tradinglab/engine/internal/data"
 	"tradinglab/engine/internal/money"
@@ -60,16 +59,7 @@ func Names() []string {
 // New builds a registered strategy. Unknown parameters are an error, so a typo
 // never silently falls back to a default.
 func New(name string, p Params) (Strategy, error) {
-	for key, v := range p {
-		if math.IsNaN(v) || math.IsInf(v, 0) {
-			return nil, fmt.Errorf("strategy: %s must be finite", key)
-		}
-	}
-	f, ok := registry[name]
-	if !ok {
-		return nil, fmt.Errorf("%w %q (have %s)", ErrUnknown, name, strings.Join(Names(), ", "))
-	}
-	return f(p)
+	return NativeDefinition{Format: NativeFormatV1, Name: name, Params: p}.Build()
 }
 
 var registry = map[string]func(Params) (Strategy, error){

@@ -32,6 +32,8 @@ message StrategyInfo {
   string name = 1;
   repeated ParamSpec params = 2;
   StrategyCapability capability = 3;
+  string native_definition_format = 4;
+  string native_definition_hash = 5; // canonical identity with the published default parameters
 }
 
 message ListStrategiesRequest {}

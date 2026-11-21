@@ -2,6 +2,23 @@
 
 Update at the end of every session.
 
+## P2 native definitions (2026-11-21)
+
+The four built-in strategies now build through `native/v1`. `ListStrategies`
+publishes the format and canonical SHA-256 identity of each default definition.
+The hash covers the registered name and effective parameter values. The engine
+build records the implementation used to evaluate a strategy. Native strategy
+instances still supply their original signal and warm-up behavior.
+
+The strategy, evaluation and simulator suites passed with `-race`. The
+PostgreSQL-backed report API test verified that the published defaults reproduce
+the advertised hashes. `go vet`, Dart analysis and Buf's compatibility check
+against P0 passed.
+
+This is the first part of STR-01. The rule AST, learned-model adapters and
+custom strategy drafts remain subsequent P2 work. P1's hosted CI and
+representative-user acceptance remain open.
+
 ## P1 acceptance checks (2026-11-21)
 
 The full Linux Go race suite passed on `f93f48b` with PostgreSQL required.

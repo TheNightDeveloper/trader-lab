@@ -137,12 +137,14 @@ func (x *ParamSpec) GetInteger() bool {
 }
 
 type StrategyInfo struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Params        []*ParamSpec           `protobuf:"bytes,2,rep,name=params,proto3" json:"params,omitempty"`
-	Capability    *StrategyCapability    `protobuf:"bytes,3,opt,name=capability,proto3" json:"capability,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"open.v1"`
+	Name                   string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Params                 []*ParamSpec           `protobuf:"bytes,2,rep,name=params,proto3" json:"params,omitempty"`
+	Capability             *StrategyCapability    `protobuf:"bytes,3,opt,name=capability,proto3" json:"capability,omitempty"`
+	NativeDefinitionFormat string                 `protobuf:"bytes,4,opt,name=native_definition_format,json=nativeDefinitionFormat,proto3" json:"native_definition_format,omitempty"`
+	NativeDefinitionHash   string                 `protobuf:"bytes,5,opt,name=native_definition_hash,json=nativeDefinitionHash,proto3" json:"native_definition_hash,omitempty"` // canonical identity with the published default parameters
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *StrategyInfo) Reset() {
@@ -194,6 +196,20 @@ func (x *StrategyInfo) GetCapability() *StrategyCapability {
 		return x.Capability
 	}
 	return nil
+}
+
+func (x *StrategyInfo) GetNativeDefinitionFormat() string {
+	if x != nil {
+		return x.NativeDefinitionFormat
+	}
+	return ""
+}
+
+func (x *StrategyInfo) GetNativeDefinitionHash() string {
+	if x != nil {
+		return x.NativeDefinitionHash
+	}
+	return ""
 }
 
 type ListStrategiesRequest struct {
@@ -2967,13 +2983,15 @@ const file_lab_v1_report_proto_rawDesc = "" +
 	"\tParamSpec\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n" +
 	"\adefault\x18\x02 \x01(\x01R\adefault\x12\x18\n" +
-	"\ainteger\x18\x03 \x01(\bR\ainteger\"\x89\x01\n" +
+	"\ainteger\x18\x03 \x01(\bR\ainteger\"\xf9\x01\n" +
 	"\fStrategyInfo\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12)\n" +
 	"\x06params\x18\x02 \x03(\v2\x11.lab.v1.ParamSpecR\x06params\x12:\n" +
 	"\n" +
 	"capability\x18\x03 \x01(\v2\x1a.lab.v1.StrategyCapabilityR\n" +
-	"capability\"\x17\n" +
+	"capability\x128\n" +
+	"\x18native_definition_format\x18\x04 \x01(\tR\x16nativeDefinitionFormat\x124\n" +
+	"\x16native_definition_hash\x18\x05 \x01(\tR\x14nativeDefinitionHash\"\x17\n" +
 	"\x15ListStrategiesRequest\"N\n" +
 	"\x16ListStrategiesResponse\x124\n" +
 	"\n" +

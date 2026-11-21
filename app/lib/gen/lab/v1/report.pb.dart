@@ -108,11 +108,17 @@ class StrategyInfo extends $pb.GeneratedMessage {
     $core.String? name,
     $core.Iterable<ParamSpec>? params,
     $0.StrategyCapability? capability,
+    $core.String? nativeDefinitionFormat,
+    $core.String? nativeDefinitionHash,
   }) {
     final result = StrategyInfo._();
     if (name != null) result.name = name;
     if (params != null) result.params.addAll(params);
     if (capability != null) result.capability = capability;
+    if (nativeDefinitionFormat != null)
+      result.nativeDefinitionFormat = nativeDefinitionFormat;
+    if (nativeDefinitionHash != null)
+      result.nativeDefinitionHash = nativeDefinitionHash;
     return result;
   }
 
@@ -134,6 +140,8 @@ class StrategyInfo extends $pb.GeneratedMessage {
         subBuilder: ParamSpec.$_createMessage)
     ..aOM<$0.StrategyCapability>(3, _omitFieldNames ? '' : 'capability',
         subBuilder: $0.StrategyCapability.$_createMessage)
+    ..aOS(4, _omitFieldNames ? '' : 'nativeDefinitionFormat')
+    ..aOS(5, _omitFieldNames ? '' : 'nativeDefinitionHash')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -180,6 +188,24 @@ class StrategyInfo extends $pb.GeneratedMessage {
   void clearCapability() => $_clearField(3);
   @$pb.TagNumber(3)
   $0.StrategyCapability ensureCapability() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  $core.String get nativeDefinitionFormat => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set nativeDefinitionFormat($core.String value) => $_setString(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasNativeDefinitionFormat() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearNativeDefinitionFormat() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.String get nativeDefinitionHash => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set nativeDefinitionHash($core.String value) => $_setString(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasNativeDefinitionHash() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearNativeDefinitionHash() => $_clearField(5);
 }
 
 class ListStrategiesRequest extends $pb.GeneratedMessage {
