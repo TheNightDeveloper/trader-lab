@@ -85,7 +85,10 @@ class _ReportBody extends ConsumerWidget {
             BadgeChip(l.badgeDatasets(r.spec.datasetIds.map(shortHash).join(', '))),
             if (r.spec.engineVersion.isNotEmpty) BadgeChip(l.badgeEngine(r.spec.engineVersion)),
             if (r.holdoutViews > 0) BadgeChip(l.reportHoldoutViews(r.holdoutViews), tone: 'warning'),
-            for (final b in r.summary.badges) BadgeChip(b.text, tone: b.tone),
+            // Older engines send the localized evidence only in Summary.badges.
+            for (final b in r.summary.badges)
+              if (!r.hasProvenance() || b.kind != 'provenance') BadgeChip(b.text, tone: b.tone),
+            if (r.hasProvenance()) EvidenceBadge(r.provenance),
           ],
         ),
         pair(_Summary(r: r), _Waterfall(r: r)),

@@ -17,9 +17,12 @@ import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'common.pb.dart' as $1;
+import 'report.pbenum.dart';
 import 'workspace.pb.dart' as $0;
 
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
+
+export 'report.pbenum.dart';
 
 class ParamSpec extends $pb.GeneratedMessage {
   factory ParamSpec({
@@ -1764,6 +1767,257 @@ class MetricGroup extends $pb.GeneratedMessage {
   void clearLabel() => $_clearField(2);
 }
 
+class DatasetProvenance extends $pb.GeneratedMessage {
+  factory DatasetProvenance({
+    $core.String? id,
+    $core.int? snapshotFormat,
+    $core.int? resampleVersion,
+  }) {
+    final result = DatasetProvenance._();
+    if (id != null) result.id = id;
+    if (snapshotFormat != null) result.snapshotFormat = snapshotFormat;
+    if (resampleVersion != null) result.resampleVersion = resampleVersion;
+    return result;
+  }
+
+  DatasetProvenance._();
+
+  factory DatasetProvenance.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      DatasetProvenance()..mergeFromBuffer(data, registry);
+  factory DatasetProvenance.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      DatasetProvenance()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'DatasetProvenance',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: DatasetProvenance.$_createMessage)
+    ..aOS(1, _omitFieldNames ? '' : 'id')
+    ..aI(2, _omitFieldNames ? '' : 'snapshotFormat')
+    ..aI(3, _omitFieldNames ? '' : 'resampleVersion')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  DatasetProvenance clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  DatasetProvenance copyWith(void Function(DatasetProvenance) updates) =>
+      super.copyWith((message) => updates(message as DatasetProvenance))
+          as DatasetProvenance;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use DatasetProvenance() / DatasetProvenance.new instead')
+  static DatasetProvenance create() => DatasetProvenance._();
+  static $pb.GeneratedMessage $_createMessage() => DatasetProvenance._();
+  @$core.override
+  DatasetProvenance createEmptyInstance() => DatasetProvenance._();
+  @$core.pragma('dart2js:noInline')
+  static DatasetProvenance getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<DatasetProvenance>(
+          DatasetProvenance.$_createMessage);
+  static DatasetProvenance? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get id => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set id($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get snapshotFormat => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set snapshotFormat($core.int value) => $_setSignedInt32(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasSnapshotFormat() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearSnapshotFormat() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.int get resampleVersion => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set resampleVersion($core.int value) => $_setSignedInt32(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasResampleVersion() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearResampleVersion() => $_clearField(3);
+}
+
+/// RunProvenance projects inputs recorded at creation. Evidence status describes
+/// the recorded inputs, independently of performance or reproduction success.
+class RunProvenance extends $pb.GeneratedMessage {
+  factory RunProvenance({
+    EvidenceStatus? status,
+    $core.String? detail,
+    $core.int? schemaVersion,
+    $core.String? binarySha256,
+    $core.String? sourceCommit,
+    $core.String? evaluationPolicy,
+    $core.String? fillPolicy,
+    $core.String? accountingPolicy,
+    $core.String? researchPolicy,
+    $core.Iterable<DatasetProvenance>? datasets,
+    $core.Iterable<$0.InstrumentKey>? instruments,
+  }) {
+    final result = RunProvenance._();
+    if (status != null) result.status = status;
+    if (detail != null) result.detail = detail;
+    if (schemaVersion != null) result.schemaVersion = schemaVersion;
+    if (binarySha256 != null) result.binarySha256 = binarySha256;
+    if (sourceCommit != null) result.sourceCommit = sourceCommit;
+    if (evaluationPolicy != null) result.evaluationPolicy = evaluationPolicy;
+    if (fillPolicy != null) result.fillPolicy = fillPolicy;
+    if (accountingPolicy != null) result.accountingPolicy = accountingPolicy;
+    if (researchPolicy != null) result.researchPolicy = researchPolicy;
+    if (datasets != null) result.datasets.addAll(datasets);
+    if (instruments != null) result.instruments.addAll(instruments);
+    return result;
+  }
+
+  RunProvenance._();
+
+  factory RunProvenance.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      RunProvenance()..mergeFromBuffer(data, registry);
+  factory RunProvenance.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      RunProvenance()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'RunProvenance',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: RunProvenance.$_createMessage)
+    ..aE<EvidenceStatus>(1, _omitFieldNames ? '' : 'status',
+        enumValues: EvidenceStatus.values)
+    ..aOS(2, _omitFieldNames ? '' : 'detail')
+    ..aI(3, _omitFieldNames ? '' : 'schemaVersion')
+    ..aOS(4, _omitFieldNames ? '' : 'binarySha256')
+    ..aOS(5, _omitFieldNames ? '' : 'sourceCommit')
+    ..aOS(6, _omitFieldNames ? '' : 'evaluationPolicy')
+    ..aOS(7, _omitFieldNames ? '' : 'fillPolicy')
+    ..aOS(8, _omitFieldNames ? '' : 'accountingPolicy')
+    ..aOS(9, _omitFieldNames ? '' : 'researchPolicy')
+    ..pPM<DatasetProvenance>(10, _omitFieldNames ? '' : 'datasets',
+        subBuilder: DatasetProvenance.$_createMessage)
+    ..pPM<$0.InstrumentKey>(11, _omitFieldNames ? '' : 'instruments',
+        subBuilder: $0.InstrumentKey.$_createMessage)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RunProvenance clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RunProvenance copyWith(void Function(RunProvenance) updates) =>
+      super.copyWith((message) => updates(message as RunProvenance))
+          as RunProvenance;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use RunProvenance() / RunProvenance.new instead')
+  static RunProvenance create() => RunProvenance._();
+  static $pb.GeneratedMessage $_createMessage() => RunProvenance._();
+  @$core.override
+  RunProvenance createEmptyInstance() => RunProvenance._();
+  @$core.pragma('dart2js:noInline')
+  static RunProvenance getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RunProvenance>(
+          RunProvenance.$_createMessage);
+  static RunProvenance? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  EvidenceStatus get status => $_getN(0);
+  @$pb.TagNumber(1)
+  set status(EvidenceStatus value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasStatus() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearStatus() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get detail => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set detail($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasDetail() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearDetail() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.int get schemaVersion => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set schemaVersion($core.int value) => $_setSignedInt32(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasSchemaVersion() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearSchemaVersion() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.String get binarySha256 => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set binarySha256($core.String value) => $_setString(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasBinarySha256() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearBinarySha256() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.String get sourceCommit => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set sourceCommit($core.String value) => $_setString(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasSourceCommit() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearSourceCommit() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.String get evaluationPolicy => $_getSZ(5);
+  @$pb.TagNumber(6)
+  set evaluationPolicy($core.String value) => $_setString(5, value);
+  @$pb.TagNumber(6)
+  $core.bool hasEvaluationPolicy() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearEvaluationPolicy() => $_clearField(6);
+
+  @$pb.TagNumber(7)
+  $core.String get fillPolicy => $_getSZ(6);
+  @$pb.TagNumber(7)
+  set fillPolicy($core.String value) => $_setString(6, value);
+  @$pb.TagNumber(7)
+  $core.bool hasFillPolicy() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearFillPolicy() => $_clearField(7);
+
+  @$pb.TagNumber(8)
+  $core.String get accountingPolicy => $_getSZ(7);
+  @$pb.TagNumber(8)
+  set accountingPolicy($core.String value) => $_setString(7, value);
+  @$pb.TagNumber(8)
+  $core.bool hasAccountingPolicy() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearAccountingPolicy() => $_clearField(8);
+
+  @$pb.TagNumber(9)
+  $core.String get researchPolicy => $_getSZ(8);
+  @$pb.TagNumber(9)
+  set researchPolicy($core.String value) => $_setString(8, value);
+  @$pb.TagNumber(9)
+  $core.bool hasResearchPolicy() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearResearchPolicy() => $_clearField(9);
+
+  @$pb.TagNumber(10)
+  $pb.PbList<DatasetProvenance> get datasets => $_getList(9);
+
+  @$pb.TagNumber(11)
+  $pb.PbList<$0.InstrumentKey> get instruments => $_getList(10);
+}
+
 class Report extends $pb.GeneratedMessage {
   factory Report({
     $core.String? id,
@@ -1784,6 +2038,7 @@ class Report extends $pb.GeneratedMessage {
     $core.Iterable<MetricGroup>? groups,
     $1.Money? finalEquityToman,
     $1.Money? netToman,
+    RunProvenance? provenance,
   }) {
     final result = Report._();
     if (id != null) result.id = id;
@@ -1804,6 +2059,7 @@ class Report extends $pb.GeneratedMessage {
     if (groups != null) result.groups.addAll(groups);
     if (finalEquityToman != null) result.finalEquityToman = finalEquityToman;
     if (netToman != null) result.netToman = netToman;
+    if (provenance != null) result.provenance = provenance;
     return result;
   }
 
@@ -1852,6 +2108,8 @@ class Report extends $pb.GeneratedMessage {
         subBuilder: $1.Money.$_createMessage)
     ..aOM<$1.Money>(18, _omitFieldNames ? '' : 'netToman',
         subBuilder: $1.Money.$_createMessage)
+    ..aOM<RunProvenance>(19, _omitFieldNames ? '' : 'provenance',
+        subBuilder: RunProvenance.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -2032,6 +2290,17 @@ class Report extends $pb.GeneratedMessage {
   void clearNetToman() => $_clearField(18);
   @$pb.TagNumber(18)
   $1.Money ensureNetToman() => $_ensure(17);
+
+  @$pb.TagNumber(19)
+  RunProvenance get provenance => $_getN(18);
+  @$pb.TagNumber(19)
+  set provenance(RunProvenance value) => $_setField(19, value);
+  @$pb.TagNumber(19)
+  $core.bool hasProvenance() => $_has(18);
+  @$pb.TagNumber(19)
+  void clearProvenance() => $_clearField(19);
+  @$pb.TagNumber(19)
+  RunProvenance ensureProvenance() => $_ensure(18);
 }
 
 class GetReportRequest extends $pb.GeneratedMessage {

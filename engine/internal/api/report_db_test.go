@@ -134,6 +134,13 @@ func TestReportAndPnlServices(t *testing.T) {
 	require.NoError(t, err)
 	r := got.Msg.GetReport()
 	require.Equal(t, "test", r.GetSpec().GetEngineVersion())
+	p := r.GetProvenance()
+	require.Equal(t, labv1.EvidenceStatus_EVIDENCE_STATUS_INCOMPLETE, p.GetStatus(), "test engine has no recorded build identity")
+	require.Len(t, p.GetDatasets(), 1)
+	require.Equal(t, ds.ID, p.GetDatasets()[0].GetId())
+	require.Equal(t, eval.Version, p.GetEvaluationPolicy())
+	require.Len(t, p.GetInstruments(), 1)
+	require.Equal(t, "BTCUSDT", p.GetInstruments()[0].GetSymbol())
 	require.NotEmpty(t, r.GetSummary().GetSentence())
 	require.Len(t, r.GetFolds(), 3)
 	require.Len(t, r.GetBenchmarks(), 2)
@@ -246,6 +253,7 @@ func TestReportAndPnlServices(t *testing.T) {
 		require.NoError(t, err)
 		result, err := rc.GetReport(ctx, connect.NewRequest(&labv1.GetReportRequest{ReportId: id}))
 		require.NoError(t, err)
+		require.Equal(t, labv1.EvidenceStatus_EVIDENCE_STATUS_LEGACY, result.Msg.GetReport().GetProvenance().GetStatus())
 		found, provenanceWarning := false, false
 		for _, badge := range result.Msg.Report.Summary.Badges {
 			if badge.Kind == "legacy" {

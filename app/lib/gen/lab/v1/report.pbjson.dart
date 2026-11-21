@@ -18,6 +18,25 @@ import 'dart:typed_data' as $typed_data;
 import 'common.pbjson.dart' as $1;
 import 'workspace.pbjson.dart' as $0;
 
+@$core.Deprecated('Use evidenceStatusDescriptor instead')
+const EvidenceStatus$json = {
+  '1': 'EvidenceStatus',
+  '2': [
+    {'1': 'EVIDENCE_STATUS_UNSPECIFIED', '2': 0},
+    {'1': 'EVIDENCE_STATUS_RECORDED', '2': 1},
+    {'1': 'EVIDENCE_STATUS_INCOMPLETE', '2': 2},
+    {'1': 'EVIDENCE_STATUS_LEGACY', '2': 3},
+    {'1': 'EVIDENCE_STATUS_LOCAL_BUILD', '2': 4},
+  ],
+};
+
+/// Descriptor for `EvidenceStatus`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List evidenceStatusDescriptor = $convert.base64Decode(
+    'Cg5FdmlkZW5jZVN0YXR1cxIfChtFVklERU5DRV9TVEFUVVNfVU5TUEVDSUZJRUQQABIcChhFVk'
+    'lERU5DRV9TVEFUVVNfUkVDT1JERUQQARIeChpFVklERU5DRV9TVEFUVVNfSU5DT01QTEVURRAC'
+    'EhoKFkVWSURFTkNFX1NUQVRVU19MRUdBQ1kQAxIfChtFVklERU5DRV9TVEFUVVNfTE9DQUxfQl'
+    'VJTEQQBA==');
+
 @$core.Deprecated('Use paramSpecDescriptor instead')
 const ParamSpec$json = {
   '1': 'ParamSpec',
@@ -529,6 +548,85 @@ const MetricGroup$json = {
 final $typed_data.Uint8List metricGroupDescriptor = $convert.base64Decode(
     'CgtNZXRyaWNHcm91cBIQCgNrZXkYASABKAlSA2tleRIUCgVsYWJlbBgCIAEoCVIFbGFiZWw=');
 
+@$core.Deprecated('Use datasetProvenanceDescriptor instead')
+const DatasetProvenance$json = {
+  '1': 'DatasetProvenance',
+  '2': [
+    {'1': 'id', '3': 1, '4': 1, '5': 9, '10': 'id'},
+    {'1': 'snapshot_format', '3': 2, '4': 1, '5': 5, '10': 'snapshotFormat'},
+    {'1': 'resample_version', '3': 3, '4': 1, '5': 5, '10': 'resampleVersion'},
+  ],
+};
+
+/// Descriptor for `DatasetProvenance`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List datasetProvenanceDescriptor = $convert.base64Decode(
+    'ChFEYXRhc2V0UHJvdmVuYW5jZRIOCgJpZBgBIAEoCVICaWQSJwoPc25hcHNob3RfZm9ybWF0GA'
+    'IgASgFUg5zbmFwc2hvdEZvcm1hdBIpChByZXNhbXBsZV92ZXJzaW9uGAMgASgFUg9yZXNhbXBs'
+    'ZVZlcnNpb24=');
+
+@$core.Deprecated('Use runProvenanceDescriptor instead')
+const RunProvenance$json = {
+  '1': 'RunProvenance',
+  '2': [
+    {
+      '1': 'status',
+      '3': 1,
+      '4': 1,
+      '5': 14,
+      '6': '.lab.v1.EvidenceStatus',
+      '10': 'status'
+    },
+    {'1': 'detail', '3': 2, '4': 1, '5': 9, '10': 'detail'},
+    {'1': 'schema_version', '3': 3, '4': 1, '5': 5, '10': 'schemaVersion'},
+    {'1': 'binary_sha256', '3': 4, '4': 1, '5': 9, '10': 'binarySha256'},
+    {'1': 'source_commit', '3': 5, '4': 1, '5': 9, '10': 'sourceCommit'},
+    {
+      '1': 'evaluation_policy',
+      '3': 6,
+      '4': 1,
+      '5': 9,
+      '10': 'evaluationPolicy'
+    },
+    {'1': 'fill_policy', '3': 7, '4': 1, '5': 9, '10': 'fillPolicy'},
+    {
+      '1': 'accounting_policy',
+      '3': 8,
+      '4': 1,
+      '5': 9,
+      '10': 'accountingPolicy'
+    },
+    {'1': 'research_policy', '3': 9, '4': 1, '5': 9, '10': 'researchPolicy'},
+    {
+      '1': 'datasets',
+      '3': 10,
+      '4': 3,
+      '5': 11,
+      '6': '.lab.v1.DatasetProvenance',
+      '10': 'datasets'
+    },
+    {
+      '1': 'instruments',
+      '3': 11,
+      '4': 3,
+      '5': 11,
+      '6': '.lab.v1.InstrumentKey',
+      '10': 'instruments'
+    },
+  ],
+};
+
+/// Descriptor for `RunProvenance`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List runProvenanceDescriptor = $convert.base64Decode(
+    'Cg1SdW5Qcm92ZW5hbmNlEi4KBnN0YXR1cxgBIAEoDjIWLmxhYi52MS5FdmlkZW5jZVN0YXR1c1'
+    'IGc3RhdHVzEhYKBmRldGFpbBgCIAEoCVIGZGV0YWlsEiUKDnNjaGVtYV92ZXJzaW9uGAMgASgF'
+    'Ug1zY2hlbWFWZXJzaW9uEiMKDWJpbmFyeV9zaGEyNTYYBCABKAlSDGJpbmFyeVNoYTI1NhIjCg'
+    '1zb3VyY2VfY29tbWl0GAUgASgJUgxzb3VyY2VDb21taXQSKwoRZXZhbHVhdGlvbl9wb2xpY3kY'
+    'BiABKAlSEGV2YWx1YXRpb25Qb2xpY3kSHwoLZmlsbF9wb2xpY3kYByABKAlSCmZpbGxQb2xpY3'
+    'kSKwoRYWNjb3VudGluZ19wb2xpY3kYCCABKAlSEGFjY291bnRpbmdQb2xpY3kSJwoPcmVzZWFy'
+    'Y2hfcG9saWN5GAkgASgJUg5yZXNlYXJjaFBvbGljeRI1CghkYXRhc2V0cxgKIAMoCzIZLmxhYi'
+    '52MS5EYXRhc2V0UHJvdmVuYW5jZVIIZGF0YXNldHMSNwoLaW5zdHJ1bWVudHMYCyADKAsyFS5s'
+    'YWIudjEuSW5zdHJ1bWVudEtleVILaW5zdHJ1bWVudHM=');
+
 @$core.Deprecated('Use reportDescriptor instead')
 const Report$json = {
   '1': 'Report',
@@ -635,6 +733,14 @@ const Report$json = {
       '6': '.lab.v1.Money',
       '10': 'netToman'
     },
+    {
+      '1': 'provenance',
+      '3': 19,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.RunProvenance',
+      '10': 'provenance'
+    },
   ],
 };
 
@@ -653,7 +759,8 @@ final $typed_data.Uint8List reportDescriptor = $convert.base64Decode(
     'DGJyZWFrRXZlbkZlZRIjCg1ob2xkb3V0X3ZpZXdzGA8gASgFUgxob2xkb3V0Vmlld3MSKwoGZ3'
     'JvdXBzGBAgAygLMhMubGFiLnYxLk1ldHJpY0dyb3VwUgZncm91cHMSOwoSZmluYWxfZXF1aXR5'
     'X3RvbWFuGBEgASgLMg0ubGFiLnYxLk1vbmV5UhBmaW5hbEVxdWl0eVRvbWFuEioKCW5ldF90b2'
-    '1hbhgSIAEoCzINLmxhYi52MS5Nb25leVIIbmV0VG9tYW4=');
+    '1hbhgSIAEoCzINLmxhYi52MS5Nb25leVIIbmV0VG9tYW4SNQoKcHJvdmVuYW5jZRgTIAEoCzIV'
+    'LmxhYi52MS5SdW5Qcm92ZW5hbmNlUgpwcm92ZW5hbmNl');
 
 @$core.Deprecated('Use getReportRequestDescriptor instead')
 const GetReportRequest$json = {
@@ -1169,6 +1276,9 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
   '.lab.v1.GridCell': GridCell$json,
   '.lab.v1.Benchmark': Benchmark$json,
   '.lab.v1.MetricGroup': MetricGroup$json,
+  '.lab.v1.RunProvenance': RunProvenance$json,
+  '.lab.v1.DatasetProvenance': DatasetProvenance$json,
+  '.lab.v1.InstrumentKey': $0.InstrumentKey$json,
   '.lab.v1.ViewHoldoutRequest': ViewHoldoutRequest$json,
   '.lab.v1.ViewHoldoutResponse': ViewHoldoutResponse$json,
   '.lab.v1.ListTradesRequest': ListTradesRequest$json,

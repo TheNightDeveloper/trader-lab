@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"crypto/sha256"
 	"errors"
 	"fmt"
 	"slices"
@@ -63,16 +62,6 @@ func (d *Data) GetOverview(ctx context.Context, _ *connect.Request[labv1.GetOver
 		res.ResearchCapabilities = append(res.ResearchCapabilities, capability)
 	}
 	return connect.NewResponse(res), nil
-}
-
-// spotKey fingerprints the canonical engine spec, independently of database row order.
-func spotKey(s instrument.Spec) *labv1.InstrumentKey {
-	revision := sha256.Sum256(fmt.Appendf(nil, "binance/spot/v1\n%s\n%s/%d\n%s/%d\n%s\n%s\n%s",
-		s.Symbol, s.Base.Code, s.Base.Scale, s.Quote.Code, s.Quote.Scale, s.Tick, s.Lot, s.MinNotional))
-	return &labv1.InstrumentKey{
-		Venue: "binance", Product: labv1.MarketProduct_MARKET_PRODUCT_SPOT,
-		Symbol: s.Symbol, SpecRevision: fmt.Sprintf("sha256:%x", revision),
-	}
 }
 
 func (d *Data) ListDatasets(ctx context.Context, req *connect.Request[labv1.ListDatasetsRequest]) (*connect.Response[labv1.ListDatasetsResponse], error) {
