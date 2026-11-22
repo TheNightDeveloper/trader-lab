@@ -48,11 +48,19 @@ independently of the event records.
 - Go and Dart decode the same account fixture. The tests check the distinction between an exact zero and unavailable money, and preserve a revision above JavaScript's safe integer range.
 - The lifecycle RPC regression verifies cursor scope, the original full-history response and paging after a newer event arrives between reads. Chrome paged back and forth through a temporary history of more than 20 events at 390 px.
 - Chrome also checked the Flutter shell with 200% text at 390, 768, 1024 and 1440 px against a local Linux engine. At 390 px the menu control measured 44 × 44 px. Tab, Enter and Escape reached, opened and closed the drawer and restored focus. The connection banner preserved the deep link and last heartbeat and cleared after reconnect.
-- Hosted CI and representative-user acceptance remain open.
+
+## Hosted CI
+
+The candidate `3e56f08` passed the `verify` job on Ubuntu 24.04 with PostgreSQL
+17 on 2026-11-22. The uploaded Go report records 378 passed tests and subtests
+across 22 packages, with zero failed or skipped tests. It includes all 11
+simulator golden scenarios and the strategy discovery contract. The job also
+passed generation, lint, the dependency guard, Dart analysis and Flutter tests.
+[GitHub Actions run](https://github.com/TheNightDeveloper/trader-lab/actions/runs/45025571193)
+· [Test evidence](https://github.com/TheNightDeveloper/trader-lab/actions/runs/45025571193/artifacts/14754799388)
 
 ## Remaining acceptance work
 
-- Run hosted CI and record the result for the candidate commit.
 - Review the Paper prototype with representative users and record results.
 
 Server-owned Paper risk values and order execution are part of P3. The

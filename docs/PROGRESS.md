@@ -2,13 +2,19 @@
 
 Update at the end of every session.
 
+## P1 hosted CI passed (2026-11-22)
+
+Candidate `3e56f08` passed GitHub Actions. The hosted Go report records 378
+passes across 22 packages, including the 11 simulator golden scenarios.
+Representative-user review remains open. [P1 acceptance evidence](P1_STATUS.md#hosted-ci)
+
 ## P1 Paper review (2026-11-22)
 
 The Paper prototype keeps planned loss and estimated cost visible through
 confirmation. Narrow screens stack the risk labels above the values. Chrome
 and Firefox passed J1, J2 and J5 at the four target widths, including 200%
 text at 390 px. The [P1 review protocol](P1_STATUS.md#prototype-review) records
-how to score the remaining representative-user sessions. Hosted CI is pending.
+how to score the remaining representative-user sessions.
 
 ## Local P2 entry checks (2026-11-22)
 
