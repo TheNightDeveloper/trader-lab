@@ -10,6 +10,20 @@ and Firefox passed J1, J2 and J5 at the four target widths, including 200%
 text at 390 px. The [P1 review protocol](P1_STATUS.md#prototype-review) records
 how to score the remaining representative-user sessions. Hosted CI is pending.
 
+## Local P2 entry checks (2026-11-22)
+
+The runtime sources at the P1 review candidate `0b86564` match the runtime
+sources tested at `e4e5e44`. Linux Go 1.26.4 ran the full suite with
+`REQUIRE_DB=1`, `-race`, `-count=1` and `-p=1`. All 378 tests and subtests
+passed across 22 packages, with zero failed or skipped tests. This includes
+the 11 simulator golden scenarios and the PostgreSQL strategy-discovery test.
+The local log is `artifacts/p1-readiness-e4e5e44-go.jsonl`.
+
+Lint and the dependency guard passed. Buf lint and compatibility against P0
+passed, and regenerated Go, Dart and SQL matched the committed files. Dart
+analysis was clean, all 57 Flutter tests passed, and the Web release build
+succeeded with the existing CupertinoIcons warning.
+
 ## P2 native definitions (2026-11-21)
 
 The four built-in strategies now build through `native/v1`. `ListStrategies`
