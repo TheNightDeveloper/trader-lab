@@ -37,7 +37,7 @@
     h1, h2, p { margin-block: 0 .75rem; }
     h1 { font-size: 1.5rem; line-height: 1.45; }
     h2 { font-size: 1.125rem; }
-    p, dd { overflow-wrap: anywhere; }
+    p, dt, dd { overflow-wrap: anywhere; }
     /* Keep the zone beside the snapshot time when the surrounding text wraps. */
     time { white-space: nowrap; }
     article { background: var(--panel); border: 1px solid var(--border); border-radius: .75rem; }
@@ -64,6 +64,9 @@
     }
     @media (max-width: 38rem) {
       .grid { grid-template-columns: minmax(0, 1fr); }
+      /* Stack terms above values so enlarged labels cannot crowd the numbers. */
+      dl { grid-template-columns: minmax(0, 1fr); gap: 0; }
+      dd + dt { margin-block-start: .5rem; }
       nav, header, article { padding: .75rem; }
     }
   </style>
@@ -133,10 +136,8 @@
         <h1 tabindex="-1">طرح ورود <bdi>BTCUSDT</bdi></h1>
         <article>
           <h2>ریسک و هزینه برای حساب مجازی</h2>
-          <dl>
+          <dl data-risk-summary>
             <dt>شرط ورود</dt><dd>بسته‌شدن شمع بالای میانگین</dd>
-            <dt>زیان برنامه‌ریزی‌شده</dt><dd><bdi>5.00 USDT</bdi></dd>
-            <dt>هزینهٔ تخمینی</dt><dd><bdi>0.10 USDT</bdi></dd>
             <dt>اعتبار طرح</dt><dd>تا بسته‌شدن شمع بعدی</dd>
           </dl>
         </article>
@@ -149,11 +150,10 @@
       <section id="review" data-flow="trade" hidden>
         <h1 tabindex="-1">مرور سفارش مجازی</h1>
         <article>
-          <dl>
+          <dl data-risk-summary>
             <dt>حساب</dt><dd>حساب مجازی نمونه</dd>
             <dt>بازار و جهت</dt><dd>خرید اسپات <bdi>BTCUSDT</bdi></dd>
             <dt>ارزش سفارش</dt><dd><bdi>100.00 USDT</bdi></dd>
-            <dt>ریسک طرح</dt><dd><bdi>5.00 USDT</bdi></dd>
           </dl>
         </article>
         <p class="notice" data-stale-note hidden>داده کهنه است. تأیید سفارش به وضعیت تازهٔ حساب نیاز دارد.</p>
@@ -186,11 +186,21 @@
       </section>
     </main>
   </div>
+  <template id="risk-summary">
+    <dt>زیان برنامه‌ریزی‌شده</dt><dd><bdi>5.00 USDT</bdi></dd>
+    <dt>هزینهٔ تخمینی</dt><dd><bdi>0.10 USDT</bdi></dd>
+  </template>
   <script>
     const steps = [...document.querySelectorAll('main section')];
     const navigation = [...document.querySelectorAll('nav button')];
     const protectedActions = document.querySelectorAll('[data-needs-snapshot]');
     const staleNotes = document.querySelectorAll('[data-stale-note]');
+
+    // Reuse the demo quote so the plan and confirmation show the same risk and cost.
+    const riskSummary = document.querySelector('#risk-summary').content;
+    for (const summary of document.querySelectorAll('[data-risk-summary]')) {
+      summary.append(riskSummary.cloneNode(true));
+    }
 
     // Each route has a stable heading for keyboard and screen-reader navigation.
     function showStep(id) {

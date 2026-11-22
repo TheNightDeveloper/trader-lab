@@ -2,6 +2,14 @@
 
 Update at the end of every session.
 
+## P1 Paper review (2026-11-22)
+
+The Paper prototype keeps planned loss and estimated cost visible through
+confirmation. Narrow screens stack the risk labels above the values. Chrome
+and Firefox passed J1, J2 and J5 at the four target widths, including 200%
+text at 390 px. The [P1 review protocol](P1_STATUS.md#prototype-review) records
+how to score the remaining representative-user sessions. Hosted CI is pending.
+
 ## P2 native definitions (2026-11-21)
 
 The four built-in strategies now build through `native/v1`. `ListStrategies`
