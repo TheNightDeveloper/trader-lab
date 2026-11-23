@@ -1,7 +1,6 @@
 package strategy
 
 import (
-	"errors"
 	"fmt"
 	"slices"
 	"time"
@@ -27,29 +26,30 @@ type learned struct {
 
 // NewLearned builds a strategy from trained models of one recipe.
 func NewLearned(models []model.Artifact) (Strategy, error) {
-	if len(models) == 0 {
-		return nil, errors.New("strategy: no trained models")
-	}
+	return DescribeLearned(models).Build(models)
+}
+
+func buildLearned(models []model.Artifact) *learned {
 	r := models[0].Recipe
-	if err := r.Validate(); err != nil {
-		return nil, err
-	}
-	for _, m := range models {
-		if err := m.Validate(); err != nil {
-			return nil, err
-		}
-		if m.RecipeHash != models[0].RecipeHash {
-			return nil, fmt.Errorf("strategy: models %s and %s come from different recipes", models[0].ID, m.ID)
-		}
+	// Runtime inputs must stay frozen even if a caller edits the artifact afterward.
+	r.Features = slices.Clone(r.Features)
+	if r.Filter != nil {
+		filter := *r.Filter
+		r.Filter = &filter
 	}
 	ms := slices.Clone(models)
+	for i := range ms {
+		ms[i].Weights = slices.Clone(ms[i].Weights)
+		ms[i].Scaler.Mean = slices.Clone(ms[i].Scaler.Mean)
+		ms[i].Scaler.Std = slices.Clone(ms[i].Scaler.Std)
+	}
 	slices.SortStableFunc(ms, func(a, b model.Artifact) int { return a.AsOf.Compare(b.AsOf) })
 	ratio := func(f float64) money.Ratio { return money.Ratio(f*float64(money.RatioOne) + 0.5) }
 	s := &learned{models: ms, r: r, exposure: ratio(r.Exposure), stop: ratio(r.StopLoss), take: ratio(r.TakeProfit), filter: -1, long: map[string]bool{}}
 	if r.Filter != nil {
 		s.filter = slices.Index(r.Features, r.Filter.Feature)
 	}
-	return s, nil
+	return s
 }
 
 func (s *learned) OnBar(ctx RunContext, b data.Bar) ([]Intent, error) {

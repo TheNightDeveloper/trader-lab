@@ -2,6 +2,15 @@
 
 Update at the end of every session.
 
+## P2 learned strategy adapter (2026-11-23)
+
+The training loop and forward evaluation now build through `learned/v1`. The
+definition pins ordered artifact IDs, and the adapter verifies each resolved
+body against its ID before running the existing model schedule. Tests cover
+round-trip identity, artifact substitution, frozen inference state and the
+existing time-of-availability behavior. The strategy, model and PostgreSQL-required
+learning loop suites passed, along with focused Go vet.
+
 ## P2 rule engine started (2026-11-23)
 
 STR-01 adds `rules/v1`, a bounded JSON definition for single-timeframe spot

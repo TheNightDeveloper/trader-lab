@@ -2,8 +2,10 @@ package strategy_test
 
 import (
 	"context"
+	"encoding/json"
 	"math"
 	"math/rand/v2"
+	"slices"
 	"testing"
 	"time"
 
@@ -122,4 +124,44 @@ func TestModelServesOnlyFromItsAsOf(t *testing.T) {
 	require.NoError(t, err)
 	_, err = strategy.NewLearned(append(ms, om...))
 	require.Error(t, err, "one strategy, one recipe")
+}
+
+func TestLearnedDefinitionPinsArtifacts(t *testing.T) {
+	bs := bars(1200, 12)
+	split, err := eval.SplitPlan{Folds: 2, Holdout: 100_000, Embargo: time.Hour}.Make(t0, bs[len(bs)-1].CloseTime, time.Hour)
+	require.NoError(t, err)
+	models := schedule(t, bs, split)
+	d := strategy.DescribeLearned(models)
+	wire, err := json.Marshal(d)
+	require.NoError(t, err)
+	var decoded strategy.LearnedDefinition
+	require.NoError(t, json.Unmarshal(wire, &decoded))
+	hash, err := d.ContentHash()
+	require.NoError(t, err)
+	got, err := decoded.ContentHash()
+	require.NoError(t, err)
+	require.Equal(t, hash, got)
+
+	s, err := decoded.Build(models)
+	require.NoError(t, err)
+	control, err := strategy.NewLearned(models)
+	require.NoError(t, err)
+	slices.Reverse(models)
+	_, err = decoded.Build(models)
+	require.ErrorContains(t, err, "does not match reference")
+	reorderedHash, err := strategy.DescribeLearned(models).ContentHash()
+	require.NoError(t, err)
+	require.NotEqual(t, hash, reorderedHash)
+	slices.Reverse(models)
+
+	// Editing a resolved artifact after compilation neither changes its ID nor mutates a run.
+	models[0].Weights[0] += 1000
+	_, err = decoded.Build(models)
+	require.ErrorContains(t, err, "does not match reference")
+	_, _, want, err := eval.RunSplit(t.Context(), control, cfg(), specs(), map[string][]data.Bar{"BTCUSDT": bs}, split)
+	require.NoError(t, err)
+	_, _, result, err := eval.RunSplit(t.Context(), s, cfg(), specs(), map[string][]data.Bar{"BTCUSDT": bs}, split)
+	require.NoError(t, err)
+	require.NotEmpty(t, result.Decisions)
+	require.Equal(t, want, result)
 }
