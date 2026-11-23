@@ -2,6 +2,20 @@
 
 Update at the end of every session.
 
+## P2 rule engine started (2026-11-23)
+
+STR-01 adds `rules/v1`, a bounded JSON definition for single-timeframe spot
+rules. It validates the tree, hashes its canonical representation, and compiles
+entry and exit conditions into the existing simulator. Tests cover real fills
+with two-bar latency, exit precedence, replay and late candle availability.
+See [ADR-062](DECISIONS.md#adr-062-version-rule-strategies-at-the-engine-boundary).
+
+The full Go suite passed with PostgreSQL required on Windows and with `-race`
+on Linux. Simulator goldens, Go vet, lint and depguard passed. All 57 existing
+Flutter tests passed and Dart analysis was clean. Higher-timeframe inputs,
+learned-model definitions, drafts and Library integration are still open.
+Representative-user acceptance for P1 is pending.
+
 ## P1 hosted CI passed (2026-11-22)
 
 Candidate `3e56f08` passed GitHub Actions. The hosted Go report records 378

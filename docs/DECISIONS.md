@@ -508,3 +508,18 @@ value, and the combined calculator cost is checked before formatting.
 Learning comparisons require a valid champion return. A relative margin that
 overflows int64 is still ordered exactly against a representable threshold. Its
 explanation states the numeric range failure.
+
+## ADR-062 Version rule strategies at the engine boundary
+
+`rules/v1` describes one closed-bar stream per instrument with separate entry
+and exit predicates and a fixed-point exposure. The JSON hash covers the ordered
+tree and normalized field values. The engine compiles comparisons, crossings,
+AND/OR, closes and trailing close means before the run. Validation bounds the
+payload at 32 KiB, the predicate tree at 64 nodes and depth 8, and the SMA period
+at 1,000 bars. A crossing also reads one previous bar.
+
+Both predicates must have enough observed history before trading. A late older
+bar can enrich the history for the next decision. Exit wins on the same bar,
+and target transitions leave pending fills to the simulator's existing latency
+and expiry policy. This format is currently available inside the engine. Draft
+persistence, API exposure and higher-timeframe inputs are subsequent work.
