@@ -75,6 +75,47 @@ func TestEvaluateSideRunsMatchAcrossWorkerCounts(t *testing.T) {
 	require.Equal(t, serial, parallel, "projecting side runs must preserve result order and values")
 }
 
+func TestRuleCompositionUsesOneSharedSimulation(t *testing.T) {
+	makeRule := func(entry, exit float64) strategy.RuleDefinition {
+		compare := func(op string, limit float64) strategy.Rule {
+			return strategy.Rule{Op: op, Left: &strategy.RuleValue{Kind: "close"}, Right: &strategy.RuleValue{Kind: "constant", Number: &limit}}
+		}
+		return strategy.RuleDefinition{
+			Format: strategy.RuleFormatV1, Exposure: money.RatioOne,
+			Entry: compare("gt", entry), Exit: compare("lt", exit),
+		}
+	}
+	a, b := makeRule(103, 100), makeRule(107, 102)
+	ab, err := strategy.ComposeRules(a, b, "and", "a")
+	require.NoError(t, err)
+	prices := []int64{100, 102, 104, 106, 108, 110, 112, 111, 109, 107, 105, 103, 101, 99, 98, 100}
+	series := walk("BTCUSDT", 2_000, 3)
+	for i := range series {
+		p := money.Price{V: prices[i%len(prices)] * 1e8, Scale: 8}
+		series[i].O, series[i].H, series[i].L, series[i].C = p, p, p, p
+	}
+	bars := map[string][]data.Bar{"BTCUSDT": series}
+	run := func(d strategy.RuleDefinition) *Evaluation {
+		spec := testSpec()
+		spec.Strategy, spec.Params, spec.Rule = strategy.RuleFormatV1, nil, &d
+		out, err := EvaluateWith(t.Context(), spec, bars, specs(), 3)
+		require.NoError(t, err)
+		require.NotEmpty(t, out.Main.Trades)
+		require.NotEmpty(t, out.HoldoutRun.Trades)
+		require.Nil(t, out.Grid, "native parameter sweeps do not apply to rules")
+		return out
+	}
+	aRun, bRun, abRun := run(a), run(b), run(ab)
+	// Both entries and A's later exit govern a single shared position and ledger.
+	require.Equal(t, bRun.Main.Decisions[0].At, abRun.Main.Decisions[0].At)
+	require.NotEqual(t, aRun.Main.Decisions[0].At, abRun.Main.Decisions[0].At)
+	require.Equal(t, aRun.Main.Decisions[1].At, abRun.Main.Decisions[1].At)
+	require.NotEqual(t, bRun.Main.Decisions[1].At, abRun.Main.Decisions[1].At)
+	require.NotEqual(t, aRun.Main.Trades, abRun.Main.Trades)
+	require.NotEqual(t, bRun.Main.Trades, abRun.Main.Trades)
+	require.NotEqual(t, params(aRun.Spec), params(abRun.Spec))
+}
+
 func TestEvaluateIdentitiesAndIsolation(t *testing.T) {
 	bars := map[string][]data.Bar{"BTCUSDT": walk("BTCUSDT", 20_000, 3)}
 	ev, err := Evaluate(context.Background(), testSpec(), bars, specs())

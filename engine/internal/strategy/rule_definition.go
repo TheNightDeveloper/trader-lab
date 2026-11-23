@@ -108,3 +108,35 @@ func (d RuleDefinition) ContentHash() (string, error) {
 	}
 	return fmt.Sprintf("sha256:%x", sha256.Sum256(encoded)), nil
 }
+
+// ComposeRules combines entry predicates while pinning one exit and exposure owner.
+func ComposeRules(a, b RuleDefinition, entryMode, exitOwner string) (RuleDefinition, error) {
+	if entryMode != "and" && entryMode != "or" {
+		return RuleDefinition{}, fmt.Errorf("strategy: composition entry mode must be 'and' or 'or'")
+	}
+	owner := a
+	switch exitOwner {
+	case "a":
+	case "b":
+		owner = b
+	default:
+		return RuleDefinition{}, fmt.Errorf("strategy: composition exit owner must be a or b")
+	}
+	base := a.BaseTimeframe
+	if base == "" {
+		base = b.BaseTimeframe
+	} else if b.BaseTimeframe != "" && b.BaseTimeframe != base {
+		return RuleDefinition{}, fmt.Errorf("strategy: composition requires compatible base timeframes")
+	}
+	for _, component := range []RuleDefinition{a, b} {
+		if _, err := component.Build(); err != nil {
+			return RuleDefinition{}, err
+		}
+	}
+	d := RuleDefinition{Format: RuleFormatV1, BaseTimeframe: base, Exposure: owner.Exposure,
+		Entry: Rule{Op: entryMode, Args: []Rule{a.Entry, b.Entry}}, Exit: owner.Exit}
+	if _, err := d.Build(); err != nil {
+		return RuleDefinition{}, err
+	}
+	return d, nil
+}

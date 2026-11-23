@@ -26,20 +26,34 @@ var ErrSpec = errors.New("eval: invalid spec")
 
 // Spec is everything a report depends on besides the bars themselves.
 type Spec struct {
-	FillModel         string          `json:"fill_model,omitempty"`
-	EvaluationVersion string          `json:"evaluation_version,omitempty"`
-	DatasetIDs        []string        `json:"dataset_ids"`
-	Timeframe         data.Timeframe  `json:"timeframe"`
-	Strategy          string          `json:"strategy"`
-	Params            strategy.Params `json:"params"` // complete: defaults filled in
-	Sim               sim.Config      `json:"sim"`
-	Split             SplitPlan       `json:"split"`
+	FillModel         string                   `json:"fill_model,omitempty"`
+	EvaluationVersion string                   `json:"evaluation_version,omitempty"`
+	DatasetIDs        []string                 `json:"dataset_ids"`
+	Timeframe         data.Timeframe           `json:"timeframe"`
+	Strategy          string                   `json:"strategy"`
+	Params            strategy.Params          `json:"params"` // complete: defaults filled in
+	Rule              *strategy.RuleDefinition `json:"rule,omitempty"`
+	Sim               sim.Config               `json:"sim"`
+	Split             SplitPlan                `json:"split"`
 	// EngineVersion of the code that produced the report (reproducibility badge).
 	EngineVersion string      `json:"engine_version"`
 	Provenance    *Provenance `json:"provenance,omitempty"`
 	// Origin is set when the report is the chosen candidate of an experiment: the
 	// attempt count travels with it so every reader can discount for search.
 	Origin *Origin `json:"origin,omitempty"`
+}
+
+func (s Spec) build(params strategy.Params) (strategy.Strategy, error) {
+	if s.Rule == nil {
+		return strategy.New(s.Strategy, params)
+	}
+	if s.Strategy != strategy.RuleFormatV1 || len(params) != 0 {
+		return nil, fmt.Errorf("rule evaluation requires rules/v1 without native parameters")
+	}
+	if base := s.Rule.BaseTimeframe; base != "" && base != s.Timeframe {
+		return nil, fmt.Errorf("rule base timeframe %s does not match dataset timeframe %s", base, s.Timeframe)
+	}
+	return s.Rule.Build()
 }
 
 // Origin links a report to the search that produced it.
@@ -151,7 +165,7 @@ func Evaluate(ctx context.Context, spec Spec, bars map[string][]data.Bar, specs 
 // out-of-sample run, no holdout, stress, neighbourhood or benchmarks. The
 // holdout is never looked at while choosing a candidate.
 func EvaluateOOS(ctx context.Context, spec Spec, bars map[string][]data.Bar, specs map[string]instrument.Spec) ([]metrics.Metric, error) {
-	s, err := strategy.New(spec.Strategy, spec.Params)
+	s, err := spec.build(spec.Params)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrSpec, err)
 	}
@@ -215,7 +229,7 @@ func RunSplit(ctx context.Context, s strategy.Strategy, cfg sim.Config, specs ma
 // EvaluateWith is Evaluate with at most parallel simulator runs at once (the
 // research CPU share when called from the job queue).
 func EvaluateWith(ctx context.Context, spec Spec, bars map[string][]data.Bar, specs map[string]instrument.Spec, parallel int) (*Evaluation, error) {
-	if _, err := strategy.New(spec.Strategy, spec.Params); err != nil {
+	if _, err := spec.build(spec.Params); err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrSpec, err)
 	}
 	cfg, err := spec.Sim.Normalized()
@@ -292,7 +306,7 @@ func EvaluateWith(ctx context.Context, spec Spec, bars map[string][]data.Bar, sp
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, max(1, parallel))
 	for i, j := range jobs {
-		if j.params == nil {
+		if j.params == nil && spec.Rule == nil {
 			errs[i] = errInvalidCell
 			continue
 		}
@@ -306,11 +320,13 @@ func EvaluateWith(ctx context.Context, spec Spec, bars map[string][]data.Bar, sp
 				return
 			}
 			defer func() { <-sem }()
-			name := spec.Strategy
-			if j.strategy != "" {
-				name = j.strategy
+			var s strategy.Strategy
+			var err error
+			if j.strategy == "" {
+				s, err = spec.build(j.params)
+			} else {
+				s, err = strategy.New(j.strategy, j.params)
 			}
-			s, err := strategy.New(name, j.params)
 			if err != nil {
 				errs[i] = err
 				return

@@ -2,6 +2,14 @@
 
 Update at the end of every session.
 
+## P2 rule composition and evaluation (2026-11-23)
+
+The evaluator runs a `rules/v1` strategy through the main, holdout and stress
+simulations, with a fresh strategy instance for each run. Two rule definitions
+can share an AND/OR entry and a pinned exit and exposure owner. The comparison
+view identifies a rule definition by its hash. A deterministic series exercises
+separate A, B and A+B trades, and the strategy, simulator and evaluator suites passed.
+
 ## P2 closed higher-timeframe inputs (2026-11-23)
 
 `rules/v1` can use the close of a larger UTC-aligned bucket on a declared base

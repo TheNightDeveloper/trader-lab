@@ -149,6 +149,13 @@ func conclude(rs []Comparable, eligible []bool) string {
 func label(i int) string { return string(rune('A' + i)) }
 
 func params(s Spec) string {
+	if s.Rule != nil {
+		hash, err := s.Rule.ContentHash()
+		if err != nil {
+			return "نامعتبر"
+		}
+		return hash
+	}
 	keys := make([]string, 0, len(s.Params))
 	for k := range s.Params {
 		keys = append(keys, k)
