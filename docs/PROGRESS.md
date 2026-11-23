@@ -2,6 +2,13 @@
 
 Update at the end of every session.
 
+## P2 closed higher-timeframe inputs (2026-11-23)
+
+`rules/v1` can use the close of a larger UTC-aligned bucket on a declared base
+timeframe. A bucket needs every member to be available and complete. Simulator
+regressions cover partial buckets, delayed members, synthetic candles and the
+first eligible fill. Strategy, simulator and evaluation suites passed.
+
 ## P2 learned strategy adapter (2026-11-23)
 
 The training loop and forward evaluation now build through `learned/v1`. The

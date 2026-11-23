@@ -42,6 +42,7 @@ func TestRuleDefinitionRejectsUnsupportedInput(t *testing.T) {
 		{"operand", `"close"`, `"future"`},
 		{"invalid shape", `"kind":"close"`, `"kind":"close","period":2`},
 		{"unknown field", `"kind":"close"`, `"kind":"close","timeframe":"1h"`},
+		{"bucket requires base", `"kind":"close"`, `"kind":"bucket_close","timeframe":"1h"`},
 		{"oversized lookback", `"period":3`, `"period":1001`},
 		{"missing constant", `,"number":0`, ``},
 		{"overflowing constant", `"number":0`, `"number":1e999`},

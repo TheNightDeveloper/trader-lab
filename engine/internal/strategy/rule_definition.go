@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"tradinglab/engine/internal/data"
 	"tradinglab/engine/internal/money"
 )
 
@@ -20,10 +21,11 @@ const (
 
 // RuleDefinition describes a long/flat strategy on one closed-bar stream per instrument.
 type RuleDefinition struct {
-	Format   string      `json:"format"`
-	Exposure money.Ratio `json:"exposure"`
-	Entry    Rule        `json:"entry"`
-	Exit     Rule        `json:"exit"`
+	Format        string         `json:"format"`
+	Exposure      money.Ratio    `json:"exposure"`
+	Entry         Rule           `json:"entry"`
+	Exit          Rule           `json:"exit"`
+	BaseTimeframe data.Timeframe `json:"base_timeframe,omitempty"`
 }
 
 // Rule holds either boolean children or two numeric operands, depending on Op.
@@ -34,11 +36,12 @@ type Rule struct {
 	Right *RuleValue `json:"right,omitempty"`
 }
 
-// RuleValue selects a close, trailing mean, or finite nonnegative constant.
+// RuleValue selects a close, trailing mean, closed bucket or nonnegative constant.
 type RuleValue struct {
-	Kind   string   `json:"kind"`
-	Number *float64 `json:"number,omitempty"`
-	Period int      `json:"period,omitempty"`
+	Kind      string         `json:"kind"`
+	Number    *float64       `json:"number,omitempty"`
+	Period    int            `json:"period,omitempty"`
+	Timeframe data.Timeframe `json:"timeframe,omitempty"`
 }
 
 // UnmarshalJSON checks the wire format before assigning even a partially valid tree.
@@ -72,18 +75,25 @@ func (d RuleDefinition) Build() (Strategy, error) {
 	if d.Exposure <= 0 || d.Exposure > money.RatioOne {
 		return nil, fmt.Errorf("strategy: rule exposure must be in (0, 1]")
 	}
-	remaining := maxRuleNodes
-	entry, err := compileRule(d.Entry, 1, &remaining)
+	c := ruleCompiler{remaining: maxRuleNodes}
+	if d.BaseTimeframe != "" {
+		tf, err := data.ParseTimeframe(string(d.BaseTimeframe))
+		if err != nil {
+			return nil, err
+		}
+		c.base = tf.Duration()
+	}
+	entry, err := c.compile(d.Entry, 1)
 	if err != nil {
 		return nil, fmt.Errorf("strategy: entry: %w", err)
 	}
-	exit, err := compileRule(d.Exit, 1, &remaining)
+	exit, err := c.compile(d.Exit, 1)
 	if err != nil {
 		return nil, fmt.Errorf("strategy: exit: %w", err)
 	}
 	return &ruleStrategy{
 		entry: entry.test, exit: exit.test, bars: max(entry.bars, exit.bars),
-		exposure: d.Exposure, long: make(map[string]bool),
+		exposure: d.Exposure, base: c.base, long: make(map[string]bool),
 	}, nil
 }
 

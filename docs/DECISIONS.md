@@ -518,8 +518,9 @@ AND/OR, closes and trailing close means before the run. Validation bounds the
 payload at 32 KiB, the predicate tree at 64 nodes and depth 8, and the SMA period
 at 1,000 bars. A crossing also reads one previous bar.
 
-Both predicates must have enough observed history before trading. A late older
-bar can enrich the history for the next decision. Exit wins on the same bar,
-and target transitions leave pending fills to the simulator's existing latency
-and expiry policy. This format is currently available inside the engine. Draft
-persistence, API exposure and higher-timeframe inputs are subsequent work.
+Both predicates use observed history. With a declared base timeframe,
+`bucket_close` reads the last UTC-aligned higher-timeframe bucket only when all
+members are present and complete. Unknown values propagate through comparisons,
+and AND/OR can resolve when a known child determines the outcome. Exit wins on
+the same bar. Target transitions leave pending fills to the simulator's existing
+latency and expiry policy. Draft persistence and API exposure are subsequent work.

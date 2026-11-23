@@ -74,3 +74,35 @@ func TestRulesWaitForAvailableHistory(t *testing.T) {
 	require.Equal(t, bars[3].AvailableAt, res.Decisions[0].At)
 	require.Equal(t, bars[3].OpenTime, res.Decisions[0].InputBarOpen)
 }
+
+func TestRulesUseOnlyCompleteHigherTimeframeBuckets(t *testing.T) {
+	var d strategy.RuleDefinition
+	require.NoError(t, json.Unmarshal([]byte(`{
+		"format":"rules/v1", "base_timeframe":"1m", "exposure":"0.5",
+		"entry":{"op":"gt","left":{"kind":"bucket_close","timeframe":"15m"},"right":{"kind":"constant","number":105}},
+		"exit":{"op":"lt","left":{"kind":"close"},"right":{"kind":"constant","number":50}}
+	}`), &d))
+	const sym = "BTCUSDT"
+	for _, tt := range []struct {
+		name   string
+		change func([]data.Bar)
+		want   int
+	}{
+		{"complete", func(_ []data.Bar) {}, 14},
+		{"late member", func(b []data.Bar) { b[9].AvailableAt = b[15].AvailableAt.Add(time.Second) }, 16},
+		{"synthetic member", func(b []data.Bar) { b[9].Flags = data.FlagFilled }, 29},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			// Base candles already exceed the threshold before either higher bucket closes.
+			bars := flat(sym, 33, 110)
+			tt.change(bars)
+			s, err := d.Build()
+			require.NoError(t, err)
+			res, err := Run(t.Context(), cfg(), specs(), map[string][]data.Bar{sym: bars}, s)
+			require.NoError(t, err)
+			require.Len(t, res.Decisions, 1)
+			require.Equal(t, bars[tt.want].AvailableAt, res.Decisions[0].At)
+			require.Len(t, res.Fills, 1)
+		})
+	}
+}
