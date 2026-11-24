@@ -2,6 +2,14 @@
 
 Update at the end of every session.
 
+## P2 rule evidence and details (2026-11-24)
+
+The Library can filter versions with or without a backtest on the server. A
+version has tabs for its rules, performance, lineage and data requirements. The
+performance tab links to the latest run for the exact version ID and shows its
+out-of-sample return. Chrome verified the link, filtering and an A/B/A+B run
+using a regime period entered in Persian digits.
+
 ## P2 closed-bar regime routing (2026-11-24)
 
 The composer can route entries to A when the closed price is at or above a

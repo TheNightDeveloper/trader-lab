@@ -68,18 +68,42 @@ func (q *Queries) InsertRuleVersion(ctx context.Context, arg InsertRuleVersionPa
 	return i, err
 }
 
+const latestReportForRuleVersion = `-- name: LatestReportForRuleVersion :one
+SELECT id, created_at, oos_return FROM reports
+WHERE spec->>'rule_version_id' = $1::text
+ORDER BY created_at DESC, id
+LIMIT 1
+`
+
+type LatestReportForRuleVersionRow struct {
+	ID        string
+	CreatedAt time.Time
+	OosReturn int64
+}
+
+func (q *Queries) LatestReportForRuleVersion(ctx context.Context, ruleVersion string) (LatestReportForRuleVersionRow, error) {
+	row := q.db.QueryRow(ctx, latestReportForRuleVersion, ruleVersion)
+	var i LatestReportForRuleVersionRow
+	err := row.Scan(&i.ID, &i.CreatedAt, &i.OosReturn)
+	return i, err
+}
+
 const listRuleVersionsPage = `-- name: ListRuleVersionsPage :many
-SELECT id, title, content_hash, parent_id, other_parent_id, template_key, created_at
-FROM strategy_rule_versions
-WHERE id <= $1
-  AND strpos(lower(title), lower($2::text)) > 0
-ORDER BY id DESC
-LIMIT $3
+SELECT v.id, v.title, v.content_hash, v.parent_id, v.other_parent_id, v.template_key, v.created_at
+FROM strategy_rule_versions v
+WHERE v.id <= $1
+  AND strpos(lower(v.title), lower($2::text)) > 0
+  AND ($3::boolean IS NULL OR $3::boolean = EXISTS (
+    SELECT 1 FROM reports r WHERE r.spec->>'rule_version_id' = v.id::text
+  ))
+ORDER BY v.id DESC
+LIMIT $4
 `
 
 type ListRuleVersionsPageParams struct {
 	ThroughID int64
 	Query     string
+	HasReport *bool
 	PageLimit int32
 }
 
@@ -94,7 +118,12 @@ type ListRuleVersionsPageRow struct {
 }
 
 func (q *Queries) ListRuleVersionsPage(ctx context.Context, arg ListRuleVersionsPageParams) ([]ListRuleVersionsPageRow, error) {
-	rows, err := q.db.Query(ctx, listRuleVersionsPage, arg.ThroughID, arg.Query, arg.PageLimit)
+	rows, err := q.db.Query(ctx, listRuleVersionsPage,
+		arg.ThroughID,
+		arg.Query,
+		arg.HasReport,
+		arg.PageLimit,
+	)
 	if err != nil {
 		return nil, err
 	}

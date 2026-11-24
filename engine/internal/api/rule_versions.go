@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"strconv"
 	"strings"
 	"unicode/utf8"
 
@@ -30,8 +31,17 @@ func (h *Library) ListRuleVersions(ctx context.Context, req *connect.Request[lab
 	if m.GetBeforeId() > 0 {
 		through = m.GetBeforeId() - 1
 	}
+	var hasReport *bool
+	switch m.GetEvidenceFilter() {
+	case labv1.RuleEvidenceFilter_RULE_EVIDENCE_FILTER_UNSPECIFIED:
+	case labv1.RuleEvidenceFilter_RULE_EVIDENCE_FILTER_WITH_REPORT, labv1.RuleEvidenceFilter_RULE_EVIDENCE_FILTER_WITHOUT_REPORT:
+		include := m.GetEvidenceFilter() == labv1.RuleEvidenceFilter_RULE_EVIDENCE_FILTER_WITH_REPORT
+		hasReport = &include
+	default:
+		return nil, invalid("فیلتر گزارش ارزیابی نامعتبر است")
+	}
 	limit := pageSize(m.GetPageSize())
-	rows, err := h.Store.ListRuleVersionsPage(ctx, db.ListRuleVersionsPageParams{ThroughID: through, Query: query, PageLimit: limit + 1})
+	rows, err := h.Store.ListRuleVersionsPage(ctx, db.ListRuleVersionsPageParams{ThroughID: through, Query: query, HasReport: hasReport, PageLimit: limit + 1})
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +111,17 @@ func (h *Library) GetRuleVersion(ctx context.Context, req *connect.Request[labv1
 	if err != nil {
 		return nil, err
 	}
-	return connect.NewResponse(&labv1.GetRuleVersionResponse{Version: savedRuleSummary(row), DefinitionJson: string(encoded)}), nil
+	res := &labv1.GetRuleVersionResponse{Version: savedRuleSummary(row), DefinitionJson: string(encoded)}
+	// The newest report is scoped to the version ID because clones can share a hash.
+	latest, err := h.Store.LatestReportForRuleVersion(ctx, strconv.FormatInt(row.ID, 10))
+	switch {
+	case errors.Is(err, pgx.ErrNoRows):
+	case err != nil:
+		return nil, err
+	default:
+		res.LatestReport = &labv1.LatestReport{ReportId: latest.ID, TotalReturn: decP(latest.OosReturn, 6), CreatedUnixMs: ms(latest.CreatedAt)}
+	}
+	return connect.NewResponse(res), nil
 }
 
 func validRuleTitle(value string) bool {

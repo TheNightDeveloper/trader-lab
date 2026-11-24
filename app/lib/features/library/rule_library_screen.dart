@@ -5,9 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../core/format.dart';
+import '../../core/metric.dart';
 import '../../core/theme/tokens.dart';
 import '../../core/widgets/data.dart';
 import '../../core/widgets/layout.dart';
+import '../../core/widgets/num.dart';
 import '../../gen/lab/v1/library.pb.dart';
 import '../page_frame.dart';
 import 'rule_composer.dart';
@@ -65,6 +68,7 @@ class RuleLibraryScreen extends ConsumerWidget {
       SectionCard(
         title: 'نسخه‌های ذخیره‌شده',
         child: RuleVersionPicker(
+          showEvidence: true,
           onPick: (version) => context.go(ruleVersionPath(version.id)),
         ),
       ),
@@ -121,12 +125,20 @@ class RuleDetailsScreen extends ConsumerWidget {
   }
 }
 
-class _RuleDetails extends StatelessWidget {
+class _RuleDetails extends StatefulWidget {
   const _RuleDetails({required this.data});
 
   final GetRuleVersionResponse data;
 
+  @override
+  State<_RuleDetails> createState() => _RuleDetailsState();
+}
+
+class _RuleDetailsState extends State<_RuleDetails> {
+  int _tab = 0;
+
   Future<void> _clone(BuildContext context) async {
+    final data = widget.data;
     final copy = await showDialog<RuleVersionSummary>(
       context: context,
       barrierDismissible: false,
@@ -140,6 +152,7 @@ class _RuleDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final data = widget.data;
     final version = data.version;
     final definition = jsonDecode(data.definitionJson) as RuleJson;
     final base = definition['base_timeframe'] as String?;
@@ -153,39 +166,103 @@ class _RuleDetails extends StatelessWidget {
             icon: const Icon(Icons.copy_outlined),
             label: const Text('ساخت نسخه از این تعریف'),
           ),
-          child: _RuleSummary(definition: definition),
-        ),
-        const SizedBox(height: AppSpace.md),
-        _RuleBacktests(data: data),
-        const SizedBox(height: AppSpace.md),
-        SectionCard(
-          title: 'نیاز داده',
-          child: Text(
-            base == null
-                ? 'کندل بسته‌شده از هر بازهٔ پشتیبانی‌شده'
-                : 'کندل بسته‌شده در بازهٔ ${ruleTimeframes[base]}. بازهٔ داده باید با این نسخه هم‌خوان باشد.',
-          ),
-        ),
-        const SizedBox(height: AppSpace.md),
-        SectionCard(
-          title: 'تبار نسخه',
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('نسخهٔ ${version.id}'),
-              SelectableText(
-                version.contentHash,
-                textDirection: TextDirection.ltr,
-                style: AppText.mono,
+              DefaultTabController(
+                length: 4,
+                child: TabBar(
+                  isScrollable: true,
+                  tabAlignment: TabAlignment.start,
+                  onTap: (tab) => setState(() => _tab = tab),
+                  tabs: const [
+                    Tab(text: 'قواعد'),
+                    Tab(text: 'عملکرد'),
+                    Tab(text: 'نسخه‌ها'),
+                    Tab(text: 'نیاز داده'),
+                  ],
+                ),
               ),
-              if (version.templateKey.isNotEmpty)
-                Text('الگوی ${version.templateKey}'),
-              for (final parent in [
-                version.parentId,
-                version.otherParentId,
-              ].where((id) => id != Int64.ZERO))
-                _RuleParent(id: parent, current: definition),
+              const SizedBox(height: AppSpace.md),
+              switch (_tab) {
+                1 => _RuleEvidence(
+                  report: data.hasLatestReport() ? data.latestReport : null,
+                ),
+                2 => _RuleLineage(version: version, definition: definition),
+                3 => Text(
+                  base == null
+                      ? 'کندل بسته‌شده از هر بازهٔ پشتیبانی‌شده'
+                      : 'کندل بسته‌شده در بازهٔ ${ruleTimeframes[base]}. بازهٔ داده باید با این نسخه هم‌خوان باشد.',
+                ),
+                _ => _RuleSummary(definition: definition),
+              },
             ],
+          ),
+        ),
+        const SizedBox(height: AppSpace.md),
+        _RuleBacktests(data: data),
+      ],
+    );
+  }
+}
+
+class _RuleLineage extends StatelessWidget {
+  const _RuleLineage({required this.version, required this.definition});
+
+  final RuleVersionSummary version;
+  final RuleJson definition;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Text('نسخهٔ ${version.id}'),
+      SelectableText(
+        version.contentHash,
+        textDirection: TextDirection.ltr,
+        style: AppText.mono,
+      ),
+      if (version.templateKey.isNotEmpty) Text('الگوی ${version.templateKey}'),
+      for (final parent in [
+        version.parentId,
+        version.otherParentId,
+      ].where((id) => id != Int64.ZERO))
+        _RuleParent(id: parent, current: definition),
+    ],
+  );
+}
+
+class _RuleEvidence extends StatelessWidget {
+  const _RuleEvidence({required this.report});
+
+  final LatestReport? report;
+
+  @override
+  Widget build(BuildContext context) {
+    final latest = report;
+    if (latest == null) {
+      return const EmptyState('برای این نسخه هنوز بک‌تستی ثبت نشده است.');
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text('آخرین بک‌تست · ${fmtDateTime(utcMs(latest.createdUnixMs))}'),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          title: const Text('بازده خارج از نمونه'),
+          trailing: Num(
+            fractionToPct(latest.totalReturn),
+            signed: true,
+            fractionDigits: 2,
+            unit: '%',
+          ),
+        ),
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: OutlinedButton.icon(
+            onPressed: () => context.go('/reports/${latest.reportId}'),
+            icon: const Icon(Icons.assessment_outlined),
+            label: const Text('گزارش و شرایط اجرا'),
           ),
         ),
       ],

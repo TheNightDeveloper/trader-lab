@@ -21,6 +21,55 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type RuleEvidenceFilter int32
+
+const (
+	RuleEvidenceFilter_RULE_EVIDENCE_FILTER_UNSPECIFIED    RuleEvidenceFilter = 0 // all saved rule versions
+	RuleEvidenceFilter_RULE_EVIDENCE_FILTER_WITH_REPORT    RuleEvidenceFilter = 1
+	RuleEvidenceFilter_RULE_EVIDENCE_FILTER_WITHOUT_REPORT RuleEvidenceFilter = 2
+)
+
+// Enum value maps for RuleEvidenceFilter.
+var (
+	RuleEvidenceFilter_name = map[int32]string{
+		0: "RULE_EVIDENCE_FILTER_UNSPECIFIED",
+		1: "RULE_EVIDENCE_FILTER_WITH_REPORT",
+		2: "RULE_EVIDENCE_FILTER_WITHOUT_REPORT",
+	}
+	RuleEvidenceFilter_value = map[string]int32{
+		"RULE_EVIDENCE_FILTER_UNSPECIFIED":    0,
+		"RULE_EVIDENCE_FILTER_WITH_REPORT":    1,
+		"RULE_EVIDENCE_FILTER_WITHOUT_REPORT": 2,
+	}
+)
+
+func (x RuleEvidenceFilter) Enum() *RuleEvidenceFilter {
+	p := new(RuleEvidenceFilter)
+	*p = x
+	return p
+}
+
+func (x RuleEvidenceFilter) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (RuleEvidenceFilter) Descriptor() protoreflect.EnumDescriptor {
+	return file_lab_v1_library_proto_enumTypes[0].Descriptor()
+}
+
+func (RuleEvidenceFilter) Type() protoreflect.EnumType {
+	return &file_lab_v1_library_proto_enumTypes[0]
+}
+
+func (x RuleEvidenceFilter) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use RuleEvidenceFilter.Descriptor instead.
+func (RuleEvidenceFilter) EnumDescriptor() ([]byte, []int) {
+	return file_lab_v1_library_proto_rawDescGZIP(), []int{0}
+}
+
 type AlgorithmVersion struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"` // <algorithm>@v<n>
@@ -799,12 +848,13 @@ func (x *RuleVersionSummary) GetCreatedUnixMs() int64 {
 }
 
 type ListRuleVersionsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Query         string                 `protobuf:"bytes,1,opt,name=query,proto3" json:"query,omitempty"`
-	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	BeforeId      int64                  `protobuf:"varint,3,opt,name=before_id,json=beforeId,proto3" json:"before_id,omitempty"` // exclusive, zero starts at the newest version
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Query          string                 `protobuf:"bytes,1,opt,name=query,proto3" json:"query,omitempty"`
+	PageSize       int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	BeforeId       int64                  `protobuf:"varint,3,opt,name=before_id,json=beforeId,proto3" json:"before_id,omitempty"` // exclusive, zero starts at the newest version
+	EvidenceFilter RuleEvidenceFilter     `protobuf:"varint,4,opt,name=evidence_filter,json=evidenceFilter,proto3,enum=lab.v1.RuleEvidenceFilter" json:"evidence_filter,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *ListRuleVersionsRequest) Reset() {
@@ -856,6 +906,13 @@ func (x *ListRuleVersionsRequest) GetBeforeId() int64 {
 		return x.BeforeId
 	}
 	return 0
+}
+
+func (x *ListRuleVersionsRequest) GetEvidenceFilter() RuleEvidenceFilter {
+	if x != nil {
+		return x.EvidenceFilter
+	}
+	return RuleEvidenceFilter_RULE_EVIDENCE_FILTER_UNSPECIFIED
 }
 
 type ListRuleVersionsResponse struct {
@@ -958,6 +1015,7 @@ type GetRuleVersionResponse struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	Version        *RuleVersionSummary    `protobuf:"bytes,1,opt,name=version,proto3" json:"version,omitempty"`
 	DefinitionJson string                 `protobuf:"bytes,2,opt,name=definition_json,json=definitionJson,proto3" json:"definition_json,omitempty"` // validated rules/v1
+	LatestReport   *LatestReport          `protobuf:"bytes,3,opt,name=latest_report,json=latestReport,proto3" json:"latest_report,omitempty"`       // only reports for this exact version
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -1004,6 +1062,13 @@ func (x *GetRuleVersionResponse) GetDefinitionJson() string {
 		return x.DefinitionJson
 	}
 	return ""
+}
+
+func (x *GetRuleVersionResponse) GetLatestReport() *LatestReport {
+	if x != nil {
+		return x.LatestReport
+	}
+	return nil
 }
 
 type SaveRuleVersionRequest struct {
@@ -1463,19 +1528,21 @@ const file_lab_v1_library_proto_rawDesc = "" +
 	"\tparent_id\x18\x04 \x01(\x03R\bparentId\x12&\n" +
 	"\x0fother_parent_id\x18\x05 \x01(\x03R\rotherParentId\x12!\n" +
 	"\ftemplate_key\x18\x06 \x01(\tR\vtemplateKey\x12&\n" +
-	"\x0fcreated_unix_ms\x18\a \x01(\x03R\rcreatedUnixMs\"i\n" +
+	"\x0fcreated_unix_ms\x18\a \x01(\x03R\rcreatedUnixMs\"\xae\x01\n" +
 	"\x17ListRuleVersionsRequest\x12\x14\n" +
 	"\x05query\x18\x01 \x01(\tR\x05query\x12\x1b\n" +
 	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x1b\n" +
-	"\tbefore_id\x18\x03 \x01(\x03R\bbeforeId\"x\n" +
+	"\tbefore_id\x18\x03 \x01(\x03R\bbeforeId\x12C\n" +
+	"\x0fevidence_filter\x18\x04 \x01(\x0e2\x1a.lab.v1.RuleEvidenceFilterR\x0eevidenceFilter\"x\n" +
 	"\x18ListRuleVersionsResponse\x126\n" +
 	"\bversions\x18\x01 \x03(\v2\x1a.lab.v1.RuleVersionSummaryR\bversions\x12$\n" +
 	"\x0enext_before_id\x18\x02 \x01(\x03R\fnextBeforeId\"'\n" +
 	"\x15GetRuleVersionRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"w\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"\xb2\x01\n" +
 	"\x16GetRuleVersionResponse\x124\n" +
 	"\aversion\x18\x01 \x01(\v2\x1a.lab.v1.RuleVersionSummaryR\aversion\x12'\n" +
-	"\x0fdefinition_json\x18\x02 \x01(\tR\x0edefinitionJson\"\x97\x01\n" +
+	"\x0fdefinition_json\x18\x02 \x01(\tR\x0edefinitionJson\x129\n" +
+	"\rlatest_report\x18\x03 \x01(\v2\x14.lab.v1.LatestReportR\flatestReport\"\x97\x01\n" +
 	"\x16SaveRuleVersionRequest\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12'\n" +
 	"\x0fdefinition_json\x18\x02 \x01(\tR\x0edefinitionJson\x12\x1b\n" +
@@ -1500,7 +1567,11 @@ const file_lab_v1_library_proto_rawDesc = "" +
 	"\x0fdefinition_json\x18\x04 \x01(\tR\x0edefinitionJson\"\x1a\n" +
 	"\x18ListRuleTemplatesRequest\"O\n" +
 	"\x19ListRuleTemplatesResponse\x122\n" +
-	"\ttemplates\x18\x01 \x03(\v2\x14.lab.v1.RuleTemplateR\ttemplates2\xcb\x05\n" +
+	"\ttemplates\x18\x01 \x03(\v2\x14.lab.v1.RuleTemplateR\ttemplates*\x89\x01\n" +
+	"\x12RuleEvidenceFilter\x12$\n" +
+	" RULE_EVIDENCE_FILTER_UNSPECIFIED\x10\x00\x12$\n" +
+	" RULE_EVIDENCE_FILTER_WITH_REPORT\x10\x01\x12'\n" +
+	"#RULE_EVIDENCE_FILTER_WITHOUT_REPORT\x10\x022\xcb\x05\n" +
 	"\x0eLibraryService\x12O\n" +
 	"\x0eListAlgorithms\x12\x1d.lab.v1.ListAlgorithmsRequest\x1a\x1e.lab.v1.ListAlgorithmsResponse\x12R\n" +
 	"\x0fSetVersionState\x12\x1e.lab.v1.SetVersionStateRequest\x1a\x1f.lab.v1.SetVersionStateResponse\x12^\n" +
@@ -1525,73 +1596,77 @@ func file_lab_v1_library_proto_rawDescGZIP() []byte {
 	return file_lab_v1_library_proto_rawDescData
 }
 
+var file_lab_v1_library_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_lab_v1_library_proto_msgTypes = make([]protoimpl.MessageInfo, 23)
 var file_lab_v1_library_proto_goTypes = []any{
-	(*AlgorithmVersion)(nil),            // 0: lab.v1.AlgorithmVersion
-	(*RecipeItem)(nil),                  // 1: lab.v1.RecipeItem
-	(*LatestReport)(nil),                // 2: lab.v1.LatestReport
-	(*Algorithm)(nil),                   // 3: lab.v1.Algorithm
-	(*ListAlgorithmsRequest)(nil),       // 4: lab.v1.ListAlgorithmsRequest
-	(*ListAlgorithmsResponse)(nil),      // 5: lab.v1.ListAlgorithmsResponse
-	(*SetVersionStateRequest)(nil),      // 6: lab.v1.SetVersionStateRequest
-	(*SetVersionStateResponse)(nil),     // 7: lab.v1.SetVersionStateResponse
-	(*LifecycleEvent)(nil),              // 8: lab.v1.LifecycleEvent
-	(*ListLifecycleEventsRequest)(nil),  // 9: lab.v1.ListLifecycleEventsRequest
-	(*ListLifecycleEventsResponse)(nil), // 10: lab.v1.ListLifecycleEventsResponse
-	(*RuleVersionSummary)(nil),          // 11: lab.v1.RuleVersionSummary
-	(*ListRuleVersionsRequest)(nil),     // 12: lab.v1.ListRuleVersionsRequest
-	(*ListRuleVersionsResponse)(nil),    // 13: lab.v1.ListRuleVersionsResponse
-	(*GetRuleVersionRequest)(nil),       // 14: lab.v1.GetRuleVersionRequest
-	(*GetRuleVersionResponse)(nil),      // 15: lab.v1.GetRuleVersionResponse
-	(*SaveRuleVersionRequest)(nil),      // 16: lab.v1.SaveRuleVersionRequest
-	(*SaveRuleVersionResponse)(nil),     // 17: lab.v1.SaveRuleVersionResponse
-	(*ComposeRuleVersionsRequest)(nil),  // 18: lab.v1.ComposeRuleVersionsRequest
-	(*ComposeRuleVersionsResponse)(nil), // 19: lab.v1.ComposeRuleVersionsResponse
-	(*RuleTemplate)(nil),                // 20: lab.v1.RuleTemplate
-	(*ListRuleTemplatesRequest)(nil),    // 21: lab.v1.ListRuleTemplatesRequest
-	(*ListRuleTemplatesResponse)(nil),   // 22: lab.v1.ListRuleTemplatesResponse
-	(*ParamSpec)(nil),                   // 23: lab.v1.ParamSpec
-	(*Decimal)(nil),                     // 24: lab.v1.Decimal
-	(*AuditEvent)(nil),                  // 25: lab.v1.AuditEvent
-	(*AuditCursor)(nil),                 // 26: lab.v1.AuditCursor
+	(RuleEvidenceFilter)(0),             // 0: lab.v1.RuleEvidenceFilter
+	(*AlgorithmVersion)(nil),            // 1: lab.v1.AlgorithmVersion
+	(*RecipeItem)(nil),                  // 2: lab.v1.RecipeItem
+	(*LatestReport)(nil),                // 3: lab.v1.LatestReport
+	(*Algorithm)(nil),                   // 4: lab.v1.Algorithm
+	(*ListAlgorithmsRequest)(nil),       // 5: lab.v1.ListAlgorithmsRequest
+	(*ListAlgorithmsResponse)(nil),      // 6: lab.v1.ListAlgorithmsResponse
+	(*SetVersionStateRequest)(nil),      // 7: lab.v1.SetVersionStateRequest
+	(*SetVersionStateResponse)(nil),     // 8: lab.v1.SetVersionStateResponse
+	(*LifecycleEvent)(nil),              // 9: lab.v1.LifecycleEvent
+	(*ListLifecycleEventsRequest)(nil),  // 10: lab.v1.ListLifecycleEventsRequest
+	(*ListLifecycleEventsResponse)(nil), // 11: lab.v1.ListLifecycleEventsResponse
+	(*RuleVersionSummary)(nil),          // 12: lab.v1.RuleVersionSummary
+	(*ListRuleVersionsRequest)(nil),     // 13: lab.v1.ListRuleVersionsRequest
+	(*ListRuleVersionsResponse)(nil),    // 14: lab.v1.ListRuleVersionsResponse
+	(*GetRuleVersionRequest)(nil),       // 15: lab.v1.GetRuleVersionRequest
+	(*GetRuleVersionResponse)(nil),      // 16: lab.v1.GetRuleVersionResponse
+	(*SaveRuleVersionRequest)(nil),      // 17: lab.v1.SaveRuleVersionRequest
+	(*SaveRuleVersionResponse)(nil),     // 18: lab.v1.SaveRuleVersionResponse
+	(*ComposeRuleVersionsRequest)(nil),  // 19: lab.v1.ComposeRuleVersionsRequest
+	(*ComposeRuleVersionsResponse)(nil), // 20: lab.v1.ComposeRuleVersionsResponse
+	(*RuleTemplate)(nil),                // 21: lab.v1.RuleTemplate
+	(*ListRuleTemplatesRequest)(nil),    // 22: lab.v1.ListRuleTemplatesRequest
+	(*ListRuleTemplatesResponse)(nil),   // 23: lab.v1.ListRuleTemplatesResponse
+	(*ParamSpec)(nil),                   // 24: lab.v1.ParamSpec
+	(*Decimal)(nil),                     // 25: lab.v1.Decimal
+	(*AuditEvent)(nil),                  // 26: lab.v1.AuditEvent
+	(*AuditCursor)(nil),                 // 27: lab.v1.AuditCursor
 }
 var file_lab_v1_library_proto_depIdxs = []int32{
-	23, // 0: lab.v1.AlgorithmVersion.params:type_name -> lab.v1.ParamSpec
-	1,  // 1: lab.v1.AlgorithmVersion.recipe:type_name -> lab.v1.RecipeItem
-	24, // 2: lab.v1.LatestReport.total_return:type_name -> lab.v1.Decimal
-	0,  // 3: lab.v1.Algorithm.versions:type_name -> lab.v1.AlgorithmVersion
-	2,  // 4: lab.v1.Algorithm.latest_report:type_name -> lab.v1.LatestReport
-	3,  // 5: lab.v1.ListAlgorithmsResponse.algorithms:type_name -> lab.v1.Algorithm
-	25, // 6: lab.v1.LifecycleEvent.audit:type_name -> lab.v1.AuditEvent
-	26, // 7: lab.v1.ListLifecycleEventsRequest.before:type_name -> lab.v1.AuditCursor
-	8,  // 8: lab.v1.ListLifecycleEventsResponse.events:type_name -> lab.v1.LifecycleEvent
-	26, // 9: lab.v1.ListLifecycleEventsResponse.next_cursor:type_name -> lab.v1.AuditCursor
-	11, // 10: lab.v1.ListRuleVersionsResponse.versions:type_name -> lab.v1.RuleVersionSummary
-	11, // 11: lab.v1.GetRuleVersionResponse.version:type_name -> lab.v1.RuleVersionSummary
-	11, // 12: lab.v1.SaveRuleVersionResponse.version:type_name -> lab.v1.RuleVersionSummary
-	11, // 13: lab.v1.ComposeRuleVersionsResponse.version:type_name -> lab.v1.RuleVersionSummary
-	20, // 14: lab.v1.ListRuleTemplatesResponse.templates:type_name -> lab.v1.RuleTemplate
-	4,  // 15: lab.v1.LibraryService.ListAlgorithms:input_type -> lab.v1.ListAlgorithmsRequest
-	6,  // 16: lab.v1.LibraryService.SetVersionState:input_type -> lab.v1.SetVersionStateRequest
-	9,  // 17: lab.v1.LibraryService.ListLifecycleEvents:input_type -> lab.v1.ListLifecycleEventsRequest
-	12, // 18: lab.v1.LibraryService.ListRuleVersions:input_type -> lab.v1.ListRuleVersionsRequest
-	14, // 19: lab.v1.LibraryService.GetRuleVersion:input_type -> lab.v1.GetRuleVersionRequest
-	16, // 20: lab.v1.LibraryService.SaveRuleVersion:input_type -> lab.v1.SaveRuleVersionRequest
-	18, // 21: lab.v1.LibraryService.ComposeRuleVersions:input_type -> lab.v1.ComposeRuleVersionsRequest
-	21, // 22: lab.v1.LibraryService.ListRuleTemplates:input_type -> lab.v1.ListRuleTemplatesRequest
-	5,  // 23: lab.v1.LibraryService.ListAlgorithms:output_type -> lab.v1.ListAlgorithmsResponse
-	7,  // 24: lab.v1.LibraryService.SetVersionState:output_type -> lab.v1.SetVersionStateResponse
-	10, // 25: lab.v1.LibraryService.ListLifecycleEvents:output_type -> lab.v1.ListLifecycleEventsResponse
-	13, // 26: lab.v1.LibraryService.ListRuleVersions:output_type -> lab.v1.ListRuleVersionsResponse
-	15, // 27: lab.v1.LibraryService.GetRuleVersion:output_type -> lab.v1.GetRuleVersionResponse
-	17, // 28: lab.v1.LibraryService.SaveRuleVersion:output_type -> lab.v1.SaveRuleVersionResponse
-	19, // 29: lab.v1.LibraryService.ComposeRuleVersions:output_type -> lab.v1.ComposeRuleVersionsResponse
-	22, // 30: lab.v1.LibraryService.ListRuleTemplates:output_type -> lab.v1.ListRuleTemplatesResponse
-	23, // [23:31] is the sub-list for method output_type
-	15, // [15:23] is the sub-list for method input_type
-	15, // [15:15] is the sub-list for extension type_name
-	15, // [15:15] is the sub-list for extension extendee
-	0,  // [0:15] is the sub-list for field type_name
+	24, // 0: lab.v1.AlgorithmVersion.params:type_name -> lab.v1.ParamSpec
+	2,  // 1: lab.v1.AlgorithmVersion.recipe:type_name -> lab.v1.RecipeItem
+	25, // 2: lab.v1.LatestReport.total_return:type_name -> lab.v1.Decimal
+	1,  // 3: lab.v1.Algorithm.versions:type_name -> lab.v1.AlgorithmVersion
+	3,  // 4: lab.v1.Algorithm.latest_report:type_name -> lab.v1.LatestReport
+	4,  // 5: lab.v1.ListAlgorithmsResponse.algorithms:type_name -> lab.v1.Algorithm
+	26, // 6: lab.v1.LifecycleEvent.audit:type_name -> lab.v1.AuditEvent
+	27, // 7: lab.v1.ListLifecycleEventsRequest.before:type_name -> lab.v1.AuditCursor
+	9,  // 8: lab.v1.ListLifecycleEventsResponse.events:type_name -> lab.v1.LifecycleEvent
+	27, // 9: lab.v1.ListLifecycleEventsResponse.next_cursor:type_name -> lab.v1.AuditCursor
+	0,  // 10: lab.v1.ListRuleVersionsRequest.evidence_filter:type_name -> lab.v1.RuleEvidenceFilter
+	12, // 11: lab.v1.ListRuleVersionsResponse.versions:type_name -> lab.v1.RuleVersionSummary
+	12, // 12: lab.v1.GetRuleVersionResponse.version:type_name -> lab.v1.RuleVersionSummary
+	3,  // 13: lab.v1.GetRuleVersionResponse.latest_report:type_name -> lab.v1.LatestReport
+	12, // 14: lab.v1.SaveRuleVersionResponse.version:type_name -> lab.v1.RuleVersionSummary
+	12, // 15: lab.v1.ComposeRuleVersionsResponse.version:type_name -> lab.v1.RuleVersionSummary
+	21, // 16: lab.v1.ListRuleTemplatesResponse.templates:type_name -> lab.v1.RuleTemplate
+	5,  // 17: lab.v1.LibraryService.ListAlgorithms:input_type -> lab.v1.ListAlgorithmsRequest
+	7,  // 18: lab.v1.LibraryService.SetVersionState:input_type -> lab.v1.SetVersionStateRequest
+	10, // 19: lab.v1.LibraryService.ListLifecycleEvents:input_type -> lab.v1.ListLifecycleEventsRequest
+	13, // 20: lab.v1.LibraryService.ListRuleVersions:input_type -> lab.v1.ListRuleVersionsRequest
+	15, // 21: lab.v1.LibraryService.GetRuleVersion:input_type -> lab.v1.GetRuleVersionRequest
+	17, // 22: lab.v1.LibraryService.SaveRuleVersion:input_type -> lab.v1.SaveRuleVersionRequest
+	19, // 23: lab.v1.LibraryService.ComposeRuleVersions:input_type -> lab.v1.ComposeRuleVersionsRequest
+	22, // 24: lab.v1.LibraryService.ListRuleTemplates:input_type -> lab.v1.ListRuleTemplatesRequest
+	6,  // 25: lab.v1.LibraryService.ListAlgorithms:output_type -> lab.v1.ListAlgorithmsResponse
+	8,  // 26: lab.v1.LibraryService.SetVersionState:output_type -> lab.v1.SetVersionStateResponse
+	11, // 27: lab.v1.LibraryService.ListLifecycleEvents:output_type -> lab.v1.ListLifecycleEventsResponse
+	14, // 28: lab.v1.LibraryService.ListRuleVersions:output_type -> lab.v1.ListRuleVersionsResponse
+	16, // 29: lab.v1.LibraryService.GetRuleVersion:output_type -> lab.v1.GetRuleVersionResponse
+	18, // 30: lab.v1.LibraryService.SaveRuleVersion:output_type -> lab.v1.SaveRuleVersionResponse
+	20, // 31: lab.v1.LibraryService.ComposeRuleVersions:output_type -> lab.v1.ComposeRuleVersionsResponse
+	23, // 32: lab.v1.LibraryService.ListRuleTemplates:output_type -> lab.v1.ListRuleTemplatesResponse
+	25, // [25:33] is the sub-list for method output_type
+	17, // [17:25] is the sub-list for method input_type
+	17, // [17:17] is the sub-list for extension type_name
+	17, // [17:17] is the sub-list for extension extendee
+	0,  // [0:17] is the sub-list for field type_name
 }
 
 func init() { file_lab_v1_library_proto_init() }
@@ -1608,13 +1683,14 @@ func file_lab_v1_library_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_lab_v1_library_proto_rawDesc), len(file_lab_v1_library_proto_rawDesc)),
-			NumEnums:      0,
+			NumEnums:      1,
 			NumMessages:   23,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_lab_v1_library_proto_goTypes,
 		DependencyIndexes: file_lab_v1_library_proto_depIdxs,
+		EnumInfos:         file_lab_v1_library_proto_enumTypes,
 		MessageInfos:      file_lab_v1_library_proto_msgTypes,
 	}.Build()
 	File_lab_v1_library_proto = out.File

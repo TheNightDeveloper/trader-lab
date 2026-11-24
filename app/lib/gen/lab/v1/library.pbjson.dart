@@ -20,6 +20,22 @@ import 'common.pbjson.dart' as $1;
 import 'report.pbjson.dart' as $0;
 import 'workspace.pbjson.dart' as $3;
 
+@$core.Deprecated('Use ruleEvidenceFilterDescriptor instead')
+const RuleEvidenceFilter$json = {
+  '1': 'RuleEvidenceFilter',
+  '2': [
+    {'1': 'RULE_EVIDENCE_FILTER_UNSPECIFIED', '2': 0},
+    {'1': 'RULE_EVIDENCE_FILTER_WITH_REPORT', '2': 1},
+    {'1': 'RULE_EVIDENCE_FILTER_WITHOUT_REPORT', '2': 2},
+  ],
+};
+
+/// Descriptor for `RuleEvidenceFilter`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List ruleEvidenceFilterDescriptor = $convert.base64Decode(
+    'ChJSdWxlRXZpZGVuY2VGaWx0ZXISJAogUlVMRV9FVklERU5DRV9GSUxURVJfVU5TUEVDSUZJRU'
+    'QQABIkCiBSVUxFX0VWSURFTkNFX0ZJTFRFUl9XSVRIX1JFUE9SVBABEicKI1JVTEVfRVZJREVO'
+    'Q0VfRklMVEVSX1dJVEhPVVRfUkVQT1JUEAI=');
+
 @$core.Deprecated('Use algorithmVersionDescriptor instead')
 const AlgorithmVersion$json = {
   '1': 'AlgorithmVersion',
@@ -315,14 +331,23 @@ const ListRuleVersionsRequest$json = {
     {'1': 'query', '3': 1, '4': 1, '5': 9, '10': 'query'},
     {'1': 'page_size', '3': 2, '4': 1, '5': 5, '10': 'pageSize'},
     {'1': 'before_id', '3': 3, '4': 1, '5': 3, '10': 'beforeId'},
+    {
+      '1': 'evidence_filter',
+      '3': 4,
+      '4': 1,
+      '5': 14,
+      '6': '.lab.v1.RuleEvidenceFilter',
+      '10': 'evidenceFilter'
+    },
   ],
 };
 
 /// Descriptor for `ListRuleVersionsRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List listRuleVersionsRequestDescriptor =
-    $convert.base64Decode(
-        'ChdMaXN0UnVsZVZlcnNpb25zUmVxdWVzdBIUCgVxdWVyeRgBIAEoCVIFcXVlcnkSGwoJcGFnZV'
-        '9zaXplGAIgASgFUghwYWdlU2l6ZRIbCgliZWZvcmVfaWQYAyABKANSCGJlZm9yZUlk');
+final $typed_data.Uint8List listRuleVersionsRequestDescriptor = $convert.base64Decode(
+    'ChdMaXN0UnVsZVZlcnNpb25zUmVxdWVzdBIUCgVxdWVyeRgBIAEoCVIFcXVlcnkSGwoJcGFnZV'
+    '9zaXplGAIgASgFUghwYWdlU2l6ZRIbCgliZWZvcmVfaWQYAyABKANSCGJlZm9yZUlkEkMKD2V2'
+    'aWRlbmNlX2ZpbHRlchgEIAEoDjIaLmxhYi52MS5SdWxlRXZpZGVuY2VGaWx0ZXJSDmV2aWRlbm'
+    'NlRmlsdGVy');
 
 @$core.Deprecated('Use listRuleVersionsResponseDescriptor instead')
 const ListRuleVersionsResponse$json = {
@@ -371,6 +396,14 @@ const GetRuleVersionResponse$json = {
       '10': 'version'
     },
     {'1': 'definition_json', '3': 2, '4': 1, '5': 9, '10': 'definitionJson'},
+    {
+      '1': 'latest_report',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.LatestReport',
+      '10': 'latestReport'
+    },
   ],
 };
 
@@ -378,7 +411,8 @@ const GetRuleVersionResponse$json = {
 final $typed_data.Uint8List getRuleVersionResponseDescriptor = $convert.base64Decode(
     'ChZHZXRSdWxlVmVyc2lvblJlc3BvbnNlEjQKB3ZlcnNpb24YASABKAsyGi5sYWIudjEuUnVsZV'
     'ZlcnNpb25TdW1tYXJ5Ugd2ZXJzaW9uEicKD2RlZmluaXRpb25fanNvbhgCIAEoCVIOZGVmaW5p'
-    'dGlvbkpzb24=');
+    'dGlvbkpzb24SOQoNbGF0ZXN0X3JlcG9ydBgDIAEoCzIULmxhYi52MS5MYXRlc3RSZXBvcnRSDG'
+    'xhdGVzdFJlcG9ydA==');
 
 @$core.Deprecated('Use saveRuleVersionRequestDescriptor instead')
 const SaveRuleVersionRequest$json = {

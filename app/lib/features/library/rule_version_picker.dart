@@ -9,6 +9,7 @@ import '../../core/format.dart';
 import '../../core/theme/tokens.dart';
 import '../../core/widgets/data.dart';
 import '../../gen/lab/v1/library.pb.dart';
+import 'rule_editor.dart';
 
 final ruleTemplatesProvider = FutureProvider.autoDispose<List<RuleTemplate>>((
   ref,
@@ -27,14 +28,27 @@ final ruleVersionProvider = FutureProvider.autoDispose
     );
 
 final ruleVersionsProvider = FutureProvider.autoDispose
-    .family<ListRuleVersionsResponse, (String, Int64)>((ref, page) {
-      final (query, before) = page;
+    .family<ListRuleVersionsResponse, (String, Int64, RuleEvidenceFilter)>((
+      ref,
+      page,
+    ) {
+      final (query, before, evidence) = page;
       return ref
           .watch(libraryClientProvider)
           .listRuleVersions(
-            ListRuleVersionsRequest(query: query, beforeId: before),
+            ListRuleVersionsRequest(
+              query: query,
+              beforeId: before,
+              evidenceFilter: evidence,
+            ),
           );
     });
+
+const _evidenceOptions = {
+  RuleEvidenceFilter.RULE_EVIDENCE_FILTER_UNSPECIFIED: 'همهٔ نسخه‌ها',
+  RuleEvidenceFilter.RULE_EVIDENCE_FILTER_WITH_REPORT: 'دارای گزارش',
+  RuleEvidenceFilter.RULE_EVIDENCE_FILTER_WITHOUT_REPORT: 'بدون گزارش',
+};
 
 /// The selected version belongs to the form and survives navigation between pages.
 class RuleVersionPicker extends ConsumerStatefulWidget {
@@ -43,11 +57,13 @@ class RuleVersionPicker extends ConsumerStatefulWidget {
     required this.onPick,
     this.selected,
     this.excluded,
+    this.showEvidence = false,
   });
 
   final ValueChanged<RuleVersionSummary> onPick;
   final Int64? selected;
   final Int64? excluded;
+  final bool showEvidence;
 
   @override
   ConsumerState<RuleVersionPicker> createState() => _RuleVersionPickerState();
@@ -56,6 +72,7 @@ class RuleVersionPicker extends ConsumerStatefulWidget {
 class _RuleVersionPickerState extends ConsumerState<RuleVersionPicker> {
   final _pages = [Int64.ZERO];
   String _query = '';
+  var _evidence = RuleEvidenceFilter.RULE_EVIDENCE_FILTER_UNSPECIFIED;
   Timer? _debounce;
 
   @override
@@ -78,7 +95,7 @@ class _RuleVersionPickerState extends ConsumerState<RuleVersionPicker> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = ruleVersionsProvider((_query, _pages.last));
+    final provider = ruleVersionsProvider((_query, _pages.last, _evidence));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -92,6 +109,25 @@ class _RuleVersionPickerState extends ConsumerState<RuleVersionPicker> {
           onChanged: _search,
         ),
         const SizedBox(height: AppSpace.sm),
+        if (widget.showEvidence) ...[
+          RuleSelect(
+            label: 'گزارش ارزیابی',
+            value: _evidence.name,
+            options: {
+              for (final MapEntry(:key, :value) in _evidenceOptions.entries)
+                key.name: value,
+            },
+            onChanged: (value) => setState(() {
+              _evidence = _evidenceOptions.keys.firstWhere(
+                (option) => option.name == value,
+              );
+              _pages
+                ..clear()
+                ..add(Int64.ZERO);
+            }),
+          ),
+          const SizedBox(height: AppSpace.sm),
+        ],
         AsyncSection(
           value: ref.watch(provider),
           onRetry: () => ref.invalidate(provider),

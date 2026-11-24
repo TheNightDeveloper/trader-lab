@@ -18,9 +18,12 @@ import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'audit.pb.dart' as $2;
 import 'common.pb.dart' as $1;
+import 'library.pbenum.dart';
 import 'report.pb.dart' as $0;
 
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
+
+export 'library.pbenum.dart';
 
 class AlgorithmVersion extends $pb.GeneratedMessage {
   factory AlgorithmVersion({
@@ -1075,11 +1078,13 @@ class ListRuleVersionsRequest extends $pb.GeneratedMessage {
     $core.String? query,
     $core.int? pageSize,
     $fixnum.Int64? beforeId,
+    RuleEvidenceFilter? evidenceFilter,
   }) {
     final result = ListRuleVersionsRequest._();
     if (query != null) result.query = query;
     if (pageSize != null) result.pageSize = pageSize;
     if (beforeId != null) result.beforeId = beforeId;
+    if (evidenceFilter != null) result.evidenceFilter = evidenceFilter;
     return result;
   }
 
@@ -1099,6 +1104,8 @@ class ListRuleVersionsRequest extends $pb.GeneratedMessage {
     ..aOS(1, _omitFieldNames ? '' : 'query')
     ..aI(2, _omitFieldNames ? '' : 'pageSize')
     ..aInt64(3, _omitFieldNames ? '' : 'beforeId')
+    ..aE<RuleEvidenceFilter>(4, _omitFieldNames ? '' : 'evidenceFilter',
+        enumValues: RuleEvidenceFilter.values)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1151,6 +1158,15 @@ class ListRuleVersionsRequest extends $pb.GeneratedMessage {
   $core.bool hasBeforeId() => $_has(2);
   @$pb.TagNumber(3)
   void clearBeforeId() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  RuleEvidenceFilter get evidenceFilter => $_getN(3);
+  @$pb.TagNumber(4)
+  set evidenceFilter(RuleEvidenceFilter value) => $_setField(4, value);
+  @$pb.TagNumber(4)
+  $core.bool hasEvidenceFilter() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearEvidenceFilter() => $_clearField(4);
 }
 
 class ListRuleVersionsResponse extends $pb.GeneratedMessage {
@@ -1283,10 +1299,12 @@ class GetRuleVersionResponse extends $pb.GeneratedMessage {
   factory GetRuleVersionResponse({
     RuleVersionSummary? version,
     $core.String? definitionJson,
+    LatestReport? latestReport,
   }) {
     final result = GetRuleVersionResponse._();
     if (version != null) result.version = version;
     if (definitionJson != null) result.definitionJson = definitionJson;
+    if (latestReport != null) result.latestReport = latestReport;
     return result;
   }
 
@@ -1306,6 +1324,8 @@ class GetRuleVersionResponse extends $pb.GeneratedMessage {
     ..aOM<RuleVersionSummary>(1, _omitFieldNames ? '' : 'version',
         subBuilder: RuleVersionSummary.$_createMessage)
     ..aOS(2, _omitFieldNames ? '' : 'definitionJson')
+    ..aOM<LatestReport>(3, _omitFieldNames ? '' : 'latestReport',
+        subBuilder: LatestReport.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1351,6 +1371,17 @@ class GetRuleVersionResponse extends $pb.GeneratedMessage {
   $core.bool hasDefinitionJson() => $_has(1);
   @$pb.TagNumber(2)
   void clearDefinitionJson() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  LatestReport get latestReport => $_getN(2);
+  @$pb.TagNumber(3)
+  set latestReport(LatestReport value) => $_setField(3, value);
+  @$pb.TagNumber(3)
+  $core.bool hasLatestReport() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearLatestReport() => $_clearField(3);
+  @$pb.TagNumber(3)
+  LatestReport ensureLatestReport() => $_ensure(2);
 }
 
 class SaveRuleVersionRequest extends $pb.GeneratedMessage {

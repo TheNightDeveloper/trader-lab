@@ -111,4 +111,24 @@ func TestSavedRuleVersions(t *testing.T) {
 	reproduced, err := reports.Reproduce(ctx, connect.NewRequest(&labv1.ReproduceRequest{ReportId: id}))
 	require.NoError(t, err)
 	require.True(t, reproduced.Msg.GetIdentical())
+	profile, err := library.GetRuleVersion(ctx, connect.NewRequest(&labv1.GetRuleVersionRequest{Id: version.GetId()}))
+	require.NoError(t, err)
+	require.Equal(t, id, profile.Msg.GetLatestReport().GetReportId())
+	withReport := labv1.RuleEvidenceFilter_RULE_EVIDENCE_FILTER_WITH_REPORT
+	result, err := library.ListRuleVersions(ctx, connect.NewRequest(&labv1.ListRuleVersionsRequest{EvidenceFilter: withReport, PageSize: 1}))
+	require.NoError(t, err)
+	require.Len(t, result.Msg.GetVersions(), 1)
+	require.Equal(t, version.GetId(), result.Msg.GetVersions()[0].GetId())
+	following, err := library.ListRuleVersions(ctx, connect.NewRequest(&labv1.ListRuleVersionsRequest{
+		EvidenceFilter: withReport, PageSize: 1, BeforeId: result.Msg.GetNextBeforeId(),
+	}))
+	require.NoError(t, err)
+	require.Len(t, following.Msg.GetVersions(), 1)
+	require.Equal(t, second.GetId(), following.Msg.GetVersions()[0].GetId())
+	unreported, err := library.ListRuleVersions(ctx, connect.NewRequest(&labv1.ListRuleVersionsRequest{
+		EvidenceFilter: labv1.RuleEvidenceFilter_RULE_EVIDENCE_FILTER_WITHOUT_REPORT, Query: "regime",
+	}))
+	require.NoError(t, err)
+	require.Len(t, unreported.Msg.GetVersions(), 1)
+	require.Equal(t, regime.Msg.GetVersion().GetId(), unreported.Msg.GetVersions()[0].GetId())
 }
