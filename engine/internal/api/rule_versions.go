@@ -189,7 +189,16 @@ func (h *Library) ComposeRuleVersions(ctx context.Context, req *connect.Request[
 		}
 		components = append(components, def)
 	}
-	def, err := strategy.ComposeRules(components[0], components[1], m.GetEntryMode(), owner)
+	var def strategy.RuleDefinition
+	var err error
+	switch {
+	case m.GetEntryMode() == "regime":
+		def, err = strategy.ComposeRegimeRules(components[0], components[1], int(m.GetRegimeSmaPeriod()), owner)
+	case m.GetRegimeSmaPeriod() != 0:
+		return nil, invalid("دورهٔ میانگین فقط برای انتخاب بر اساس وضعیت بازار است")
+	default:
+		def, err = strategy.ComposeRules(components[0], components[1], m.GetEntryMode(), owner)
+	}
 	if err != nil {
 		return nil, invalid(err.Error())
 	}

@@ -11,8 +11,9 @@ import (
 
 type rulePredicate struct {
 	// Compute the full lookback during validation so runtime tests can index safely.
-	bars int
-	test func([]data.Bar) (matches, ready bool)
+	bars   int
+	test   func([]data.Bar) (matches, ready bool)
+	reason func([]data.Bar) string
 }
 
 type ruleCompiler struct {
@@ -28,7 +29,10 @@ func (c *ruleCompiler) compile(r Rule, depth int) (rulePredicate, error) {
 		return rulePredicate{}, fmt.Errorf("node limit is %d", maxRuleNodes)
 	}
 	c.remaining--
-	if r.Op == "and" || r.Op == "or" {
+	if r.Op == "and" || r.Op == "or" || r.Op == "route" {
+		if r.Op == "route" && len(r.Args) != 3 {
+			return rulePredicate{}, fmt.Errorf("route requires a condition, true rule and false rule")
+		}
 		if len(r.Args) < 2 || r.Left != nil || r.Right != nil {
 			return rulePredicate{}, fmt.Errorf("%s requires at least two child rules", r.Op)
 		}
@@ -41,6 +45,24 @@ func (c *ruleCompiler) compile(r Rule, depth int) (rulePredicate, error) {
 			}
 			children[i] = child
 			bars = max(bars, child.bars)
+		}
+		if r.Op == "route" {
+			return rulePredicate{bars: bars, test: func(history []data.Bar) (bool, bool) {
+				// An unavailable classifier does not select either entry branch.
+				above, ok := children[0].test(history)
+				if !ok {
+					return false, false
+				}
+				if above {
+					return children[1].test(history)
+				}
+				return children[2].test(history)
+			}, reason: func(history []data.Bar) string {
+				if above, _ := children[0].test(history); above {
+					return "rule regime entry: A"
+				}
+				return "rule regime entry: B"
+			}}, nil
 		}
 		all := r.Op == "and"
 		return rulePredicate{bars: bars, test: func(history []data.Bar) (bool, bool) {
@@ -141,6 +163,7 @@ func (c *ruleCompiler) compileValue(v RuleValue) (func([]data.Bar) (float64, boo
 
 type ruleStrategy struct {
 	entry, exit func([]data.Bar) (bool, bool)
+	reason      func([]data.Bar) string
 	bars        int
 	base        time.Duration
 	exposure    money.Ratio
@@ -170,7 +193,11 @@ func (s *ruleStrategy) OnBar(ctx RunContext, b data.Bar) ([]Intent, error) {
 	} else if !wasLong {
 		if entry, ready := s.entry(history); ready && entry {
 			s.long[b.Instrument] = true
-			return []Intent{{Instrument: b.Instrument, Target: s.exposure, Reason: "rule entry"}}, nil
+			reason := "rule entry"
+			if s.reason != nil {
+				reason = s.reason(history)
+			}
+			return []Intent{{Instrument: b.Instrument, Target: s.exposure, Reason: reason}}, nil
 		}
 	}
 	return nil, nil

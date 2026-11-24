@@ -72,6 +72,13 @@ func TestSavedRuleVersions(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, version.GetContentHash(), loaded.Msg.GetVersion().GetContentHash())
 	require.Contains(t, loaded.Msg.GetDefinitionJson(), `"op":"and"`)
+	regime, err := library.ComposeRuleVersions(ctx, connect.NewRequest(&labv1.ComposeRuleVersionsRequest{
+		Title: "Regime", FirstId: first.GetId(), SecondId: second.GetId(), EntryMode: "regime", ExitOwnerId: first.GetId(), RegimeSmaPeriod: 30,
+	}))
+	require.NoError(t, err)
+	routed, err := library.GetRuleVersion(ctx, connect.NewRequest(&labv1.GetRuleVersionRequest{Id: regime.Msg.GetVersion().GetId()}))
+	require.NoError(t, err)
+	require.Contains(t, routed.Msg.GetDefinitionJson(), `"op":"route"`)
 
 	require.NoError(t, data.SeedInstruments(ctx, st.Queries))
 	bars := waveBars(4_200)

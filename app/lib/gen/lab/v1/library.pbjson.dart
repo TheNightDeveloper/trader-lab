@@ -427,6 +427,7 @@ const ComposeRuleVersionsRequest$json = {
     {'1': 'second_id', '3': 3, '4': 1, '5': 3, '10': 'secondId'},
     {'1': 'entry_mode', '3': 4, '4': 1, '5': 9, '10': 'entryMode'},
     {'1': 'exit_owner_id', '3': 5, '4': 1, '5': 3, '10': 'exitOwnerId'},
+    {'1': 'regime_sma_period', '3': 6, '4': 1, '5': 5, '10': 'regimeSmaPeriod'},
   ],
 };
 
@@ -435,7 +436,7 @@ final $typed_data.Uint8List composeRuleVersionsRequestDescriptor = $convert.base
     'ChpDb21wb3NlUnVsZVZlcnNpb25zUmVxdWVzdBIUCgV0aXRsZRgBIAEoCVIFdGl0bGUSGQoIZm'
     'lyc3RfaWQYAiABKANSB2ZpcnN0SWQSGwoJc2Vjb25kX2lkGAMgASgDUghzZWNvbmRJZBIdCgpl'
     'bnRyeV9tb2RlGAQgASgJUgllbnRyeU1vZGUSIgoNZXhpdF9vd25lcl9pZBgFIAEoA1ILZXhpdE'
-    '93bmVySWQ=');
+    '93bmVySWQSKgoRcmVnaW1lX3NtYV9wZXJpb2QYBiABKAVSD3JlZ2ltZVNtYVBlcmlvZA==');
 
 @$core.Deprecated('Use composeRuleVersionsResponseDescriptor instead')
 const ComposeRuleVersionsResponse$json = {

@@ -132,8 +132,9 @@ message ComposeRuleVersionsRequest {
   string title = 1;
   int64 first_id = 2;
   int64 second_id = 3;
-  string entry_mode = 4; // and | or
+  string entry_mode = 4; // and | or | regime
   int64 exit_owner_id = 5; // one of the two component versions
+  int32 regime_sma_period = 6; // only for regime, in base bars
 }
 
 message ComposeRuleVersionsResponse {

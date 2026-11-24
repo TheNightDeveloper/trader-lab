@@ -1119,14 +1119,15 @@ func (x *SaveRuleVersionResponse) GetVersion() *RuleVersionSummary {
 }
 
 type ComposeRuleVersionsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Title         string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
-	FirstId       int64                  `protobuf:"varint,2,opt,name=first_id,json=firstId,proto3" json:"first_id,omitempty"`
-	SecondId      int64                  `protobuf:"varint,3,opt,name=second_id,json=secondId,proto3" json:"second_id,omitempty"`
-	EntryMode     string                 `protobuf:"bytes,4,opt,name=entry_mode,json=entryMode,proto3" json:"entry_mode,omitempty"`          // and | or
-	ExitOwnerId   int64                  `protobuf:"varint,5,opt,name=exit_owner_id,json=exitOwnerId,proto3" json:"exit_owner_id,omitempty"` // one of the two component versions
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Title           string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
+	FirstId         int64                  `protobuf:"varint,2,opt,name=first_id,json=firstId,proto3" json:"first_id,omitempty"`
+	SecondId        int64                  `protobuf:"varint,3,opt,name=second_id,json=secondId,proto3" json:"second_id,omitempty"`
+	EntryMode       string                 `protobuf:"bytes,4,opt,name=entry_mode,json=entryMode,proto3" json:"entry_mode,omitempty"`                      // and | or | regime
+	ExitOwnerId     int64                  `protobuf:"varint,5,opt,name=exit_owner_id,json=exitOwnerId,proto3" json:"exit_owner_id,omitempty"`             // one of the two component versions
+	RegimeSmaPeriod int32                  `protobuf:"varint,6,opt,name=regime_sma_period,json=regimeSmaPeriod,proto3" json:"regime_sma_period,omitempty"` // only for regime, in base bars
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *ComposeRuleVersionsRequest) Reset() {
@@ -1190,6 +1191,13 @@ func (x *ComposeRuleVersionsRequest) GetEntryMode() string {
 func (x *ComposeRuleVersionsRequest) GetExitOwnerId() int64 {
 	if x != nil {
 		return x.ExitOwnerId
+	}
+	return 0
+}
+
+func (x *ComposeRuleVersionsRequest) GetRegimeSmaPeriod() int32 {
+	if x != nil {
+		return x.RegimeSmaPeriod
 	}
 	return 0
 }
@@ -1474,14 +1482,15 @@ const file_lab_v1_library_proto_rawDesc = "" +
 	"\tparent_id\x18\x03 \x01(\x03R\bparentId\x12!\n" +
 	"\ftemplate_key\x18\x04 \x01(\tR\vtemplateKey\"O\n" +
 	"\x17SaveRuleVersionResponse\x124\n" +
-	"\aversion\x18\x01 \x01(\v2\x1a.lab.v1.RuleVersionSummaryR\aversion\"\xad\x01\n" +
+	"\aversion\x18\x01 \x01(\v2\x1a.lab.v1.RuleVersionSummaryR\aversion\"\xd9\x01\n" +
 	"\x1aComposeRuleVersionsRequest\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12\x19\n" +
 	"\bfirst_id\x18\x02 \x01(\x03R\afirstId\x12\x1b\n" +
 	"\tsecond_id\x18\x03 \x01(\x03R\bsecondId\x12\x1d\n" +
 	"\n" +
 	"entry_mode\x18\x04 \x01(\tR\tentryMode\x12\"\n" +
-	"\rexit_owner_id\x18\x05 \x01(\x03R\vexitOwnerId\"S\n" +
+	"\rexit_owner_id\x18\x05 \x01(\x03R\vexitOwnerId\x12*\n" +
+	"\x11regime_sma_period\x18\x06 \x01(\x05R\x0fregimeSmaPeriod\"S\n" +
 	"\x1bComposeRuleVersionsResponse\x124\n" +
 	"\aversion\x18\x01 \x01(\v2\x1a.lab.v1.RuleVersionSummaryR\aversion\"\x81\x01\n" +
 	"\fRuleTemplate\x12\x10\n" +

@@ -21,6 +21,7 @@ class ComposeRuleDialog extends ConsumerStatefulWidget {
 
 class _ComposeRuleDialogState extends ConsumerState<ComposeRuleDialog> {
   final _title = TextEditingController();
+  final _period = TextEditingController(text: '20');
   final _form = GlobalKey<FormState>();
   RuleVersionSummary? _first, _second;
   String _mode = 'and';
@@ -31,6 +32,7 @@ class _ComposeRuleDialogState extends ConsumerState<ComposeRuleDialog> {
   @override
   void dispose() {
     _title.dispose();
+    _period.dispose();
     super.dispose();
   }
 
@@ -88,6 +90,9 @@ class _ComposeRuleDialogState extends ConsumerState<ComposeRuleDialog> {
               firstId: first.id,
               secondId: second.id,
               entryMode: _mode,
+              regimeSmaPeriod: _mode == 'regime'
+                  ? int.parse(ruleNumber(_period.text))
+                  : null,
               exitOwnerId: _owner == 'a' ? first.id : second.id,
             ),
           );
@@ -150,11 +155,30 @@ class _ComposeRuleDialogState extends ConsumerState<ComposeRuleDialog> {
                   options: const {
                     'and': 'هر دو شرط (AND)',
                     'or': 'حداقل یک شرط (OR)',
+                    'regime': 'انتخاب بر اساس وضعیت بازار',
                   },
                   onChanged: (mode) => setState(() => _mode = mode),
                   enabled: !_saving,
                 ),
                 const SizedBox(height: AppSpace.sm),
+                if (_mode == 'regime') ...[
+                  TextFormField(
+                    controller: _period,
+                    enabled: !_saving,
+                    textDirection: TextDirection.ltr,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'دورهٔ میانگین وضعیت بازار (کندل)',
+                    ),
+                    validator: (text) {
+                      final value = int.tryParse(ruleNumber(text ?? ''));
+                      return value != null && value >= 2 && value <= 1000
+                          ? null
+                          : 'دوره باید بین ۲ و ۱۰۰۰ کندل باشد';
+                    },
+                  ),
+                  const SizedBox(height: AppSpace.sm),
+                ],
                 RuleSelect(
                   label: 'مسئول خروج و اندازهٔ موقعیت',
                   value: _owner,
@@ -166,9 +190,11 @@ class _ComposeRuleDialogState extends ConsumerState<ComposeRuleDialog> {
                 SectionCard(
                   title: 'رفتار ترکیب',
                   child: Text(
-                    _mode == 'and'
-                        ? 'برای ورود هر دو شرط باید هم‌زمان برقرار باشند. خروج و اندازهٔ موقعیت از «$owner» گرفته می‌شود.'
-                        : 'برای ورود کافی است یکی از دو شرط برقرار باشد. خروج و اندازهٔ موقعیت از «$owner» گرفته می‌شود.',
+                    '${switch (_mode) {
+                      'and' => 'برای ورود هر دو شرط باید هم‌زمان برقرار باشند.',
+                      'regime' => 'اگر قیمت پایانی کندل برابر یا بالاتر از میانگین باشد، شرط ورود A بررسی می‌شود. زیر میانگین، شرط ورود B بررسی می‌شود. تا آماده شدن میانگین، ورودی صادر نمی‌شود.',
+                      _ => 'برای ورود کافی است یکی از دو شرط برقرار باشد.',
+                    }} خروج و اندازهٔ موقعیت از «$owner» گرفته می‌شود.',
                   ),
                 ),
                 if (_error != null)

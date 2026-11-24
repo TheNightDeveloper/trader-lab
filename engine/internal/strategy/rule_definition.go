@@ -92,7 +92,7 @@ func (d RuleDefinition) Build() (Strategy, error) {
 		return nil, fmt.Errorf("strategy: exit: %w", err)
 	}
 	return &ruleStrategy{
-		entry: entry.test, exit: exit.test, bars: max(entry.bars, exit.bars),
+		entry: entry.test, exit: exit.test, reason: entry.reason, bars: max(entry.bars, exit.bars),
 		exposure: d.Exposure, base: c.base, long: make(map[string]bool),
 	}, nil
 }
@@ -114,6 +114,16 @@ func ComposeRules(a, b RuleDefinition, entryMode, exitOwner string) (RuleDefinit
 	if entryMode != "and" && entryMode != "or" {
 		return RuleDefinition{}, fmt.Errorf("strategy: composition entry mode must be 'and' or 'or'")
 	}
+	return composeEntry(a, b, Rule{Op: entryMode, Args: []Rule{a.Entry, b.Entry}}, exitOwner)
+}
+
+// ComposeRegimeRules chooses one entry from the closed-bar trend and keeps the exit owner fixed.
+func ComposeRegimeRules(a, b RuleDefinition, period int, exitOwner string) (RuleDefinition, error) {
+	gate := Rule{Op: "gte", Left: &RuleValue{Kind: "close"}, Right: &RuleValue{Kind: "sma", Period: period}}
+	return composeEntry(a, b, Rule{Op: "route", Args: []Rule{gate, a.Entry, b.Entry}}, exitOwner)
+}
+
+func composeEntry(a, b RuleDefinition, entry Rule, exitOwner string) (RuleDefinition, error) {
 	owner := a
 	switch exitOwner {
 	case "a":
@@ -134,7 +144,7 @@ func ComposeRules(a, b RuleDefinition, entryMode, exitOwner string) (RuleDefinit
 		}
 	}
 	d := RuleDefinition{Format: RuleFormatV1, BaseTimeframe: base, Exposure: owner.Exposure,
-		Entry: Rule{Op: entryMode, Args: []Rule{a.Entry, b.Entry}}, Exit: owner.Exit}
+		Entry: entry, Exit: owner.Exit}
 	if _, err := d.Build(); err != nil {
 		return RuleDefinition{}, err
 	}

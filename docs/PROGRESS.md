@@ -2,6 +2,14 @@
 
 Update at the end of every session.
 
+## P2 closed-bar regime routing (2026-11-24)
+
+The composer can route entries to A when the closed price is at or above a
+configurable trailing SMA and to B below it. No entry is generated while the
+classifier is unavailable. The chosen exit and exposure owner remain fixed
+across regime changes. Tests cover both branches, warm-up and exit precedence.
+The typed API and saved definition preserve the classifier period and lineage.
+
 ## P2 composition and three-way backtest UI (2026-11-24)
 
 The composer picks two immutable rule versions and shows how the entry mode

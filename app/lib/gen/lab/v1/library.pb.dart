@@ -1517,6 +1517,7 @@ class ComposeRuleVersionsRequest extends $pb.GeneratedMessage {
     $fixnum.Int64? secondId,
     $core.String? entryMode,
     $fixnum.Int64? exitOwnerId,
+    $core.int? regimeSmaPeriod,
   }) {
     final result = ComposeRuleVersionsRequest._();
     if (title != null) result.title = title;
@@ -1524,6 +1525,7 @@ class ComposeRuleVersionsRequest extends $pb.GeneratedMessage {
     if (secondId != null) result.secondId = secondId;
     if (entryMode != null) result.entryMode = entryMode;
     if (exitOwnerId != null) result.exitOwnerId = exitOwnerId;
+    if (regimeSmaPeriod != null) result.regimeSmaPeriod = regimeSmaPeriod;
     return result;
   }
 
@@ -1545,6 +1547,7 @@ class ComposeRuleVersionsRequest extends $pb.GeneratedMessage {
     ..aInt64(3, _omitFieldNames ? '' : 'secondId')
     ..aOS(4, _omitFieldNames ? '' : 'entryMode')
     ..aInt64(5, _omitFieldNames ? '' : 'exitOwnerId')
+    ..aI(6, _omitFieldNames ? '' : 'regimeSmaPeriod')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1618,6 +1621,15 @@ class ComposeRuleVersionsRequest extends $pb.GeneratedMessage {
   $core.bool hasExitOwnerId() => $_has(4);
   @$pb.TagNumber(5)
   void clearExitOwnerId() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.int get regimeSmaPeriod => $_getIZ(5);
+  @$pb.TagNumber(6)
+  set regimeSmaPeriod($core.int value) => $_setSignedInt32(5, value);
+  @$pb.TagNumber(6)
+  $core.bool hasRegimeSmaPeriod() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearRegimeSmaPeriod() => $_clearField(6);
 }
 
 class ComposeRuleVersionsResponse extends $pb.GeneratedMessage {

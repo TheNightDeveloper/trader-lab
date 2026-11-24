@@ -21,6 +21,7 @@ const _operators = <String, String>{
   'cross_below': 'تقاطع نزولی با',
   'and': 'همهٔ شرط‌ها',
   'or': 'حداقل یک شرط',
+  'route': 'انتخاب بر اساس یک شرط',
 };
 const _kinds = <String, String>{
   'close': 'قیمت پایانی',
@@ -60,6 +61,10 @@ String describeOperand(RuleJson operand) => switch (operand['kind']) {
 String describeRule(RuleJson rule) {
   final op = rule['op'] as String;
   final children = childrenOf(rule);
+  if (op == 'route') {
+    final branches = children.map(describeRule).toList();
+    return 'اگر ${branches[0]}، ${branches[1]} وگرنه ${branches[2]}';
+  }
   if (children.isNotEmpty) {
     return '(${children.map(describeRule).join(op == 'and' ? ' و ' : ' یا ')})';
   }
@@ -98,16 +103,29 @@ class _RuleNodeEditorState extends State<RuleNodeEditor> {
         RuleSelect(
           value: op,
           label: label,
-          options: depth < 8 ? _operators : Map.of(_operators)
-            ..removeWhere((k, _) => k == 'and' || k == 'or'),
+          options: {
+            for (final MapEntry(:key, :value) in _operators.entries)
+              if (depth < 8 || !['and', 'or', 'route'].contains(key))
+                key: value,
+          },
           onChanged: (next) {
-            final group = next == 'and' || next == 'or';
-            onChanged(switch ((group, children.isNotEmpty)) {
-              (true, false) => {
+            if (next == op) return;
+            if (op == 'route' || next == 'route') {
+              setState(() => _childrenRevision++);
+            }
+            final previous = op == 'route'
+                ? children.skip(1).toList()
+                : children;
+            final arms = previous.isEmpty
+                ? [rule, comparisonRule('gt')]
+                : previous;
+            onChanged(switch (next) {
+              'route' when op != 'route' => {
                 'op': next,
-                'args': [rule, comparisonRule('gt')],
+                'args': [comparisonRule('gte'), ...arms.take(2)],
               },
-              (false, true) => comparisonRule(next),
+              'and' || 'or' => {'op': next, 'args': arms},
+              _ when children.isNotEmpty => comparisonRule(next),
               _ => {...rule, 'op': next},
             });
           },
@@ -145,7 +163,13 @@ class _RuleNodeEditorState extends State<RuleNodeEditor> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       RuleNodeEditor(
-                        label: 'عملگر شرط ${index + 1}',
+                        label: op == 'route'
+                            ? [
+                                'شرط انتخاب',
+                                'در صورت برقراری شرط',
+                                'در صورت برقرار نبودن شرط',
+                              ][index]
+                            : 'عملگر شرط ${index + 1}',
                         rule: child,
                         depth: depth + 1,
                         onChanged: (value) => onChanged({
@@ -156,7 +180,7 @@ class _RuleNodeEditorState extends State<RuleNodeEditor> {
                           ],
                         }),
                       ),
-                      if (children.length > 2)
+                      if (op != 'route' && children.length > 2)
                         TextButton(
                           onPressed: () {
                             // Rebuild moved fields so their editing state follows the remaining rules.
@@ -177,15 +201,16 @@ class _RuleNodeEditorState extends State<RuleNodeEditor> {
               ),
             ),
           // The engine validates the total node count across entry and exit.
-          TextButton(
-            onPressed: children.length < 64
-                ? () => onChanged({
-                    ...rule,
-                    'args': [...children, comparisonRule('gt')],
-                  })
-                : null,
-            child: const Text('افزودن شرط'),
-          ),
+          if (op != 'route')
+            TextButton(
+              onPressed: children.length < 64
+                  ? () => onChanged({
+                      ...rule,
+                      'args': [...children, comparisonRule('gt')],
+                    })
+                  : null,
+              child: const Text('افزودن شرط'),
+            ),
         ],
       ],
     );
