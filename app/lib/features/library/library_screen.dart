@@ -54,6 +54,11 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
           title: Dest.library.label(l),
           subtitle: Dest.library.subtitle(l),
           actions: [
+            OutlinedButton.icon(
+              onPressed: () => context.go('/library/rules'),
+              icon: const Icon(Icons.rule_outlined, size: 18),
+              label: const Text('کتابخانهٔ قواعد'),
+            ),
             FilledButton.icon(
               onPressed: version == null
                   ? null

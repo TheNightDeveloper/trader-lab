@@ -1,3 +1,4 @@
+import 'package:fixnum/fixnum.dart';
 import 'package:animations/animations.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
@@ -10,6 +11,7 @@ import '../features/home/home_screen.dart';
 import '../features/experiments/queue_screen.dart';
 import '../features/learning/learning_screen.dart';
 import '../features/library/library_screen.dart';
+import '../features/library/rule_library_screen.dart';
 import '../features/pnl/pnl_screen.dart';
 import '../features/reports/compare_screen.dart';
 import '../features/reports/report_screen.dart';
@@ -36,6 +38,23 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
       routes: [
         GoRoute(path: Dest.home.path, pageBuilder: (context, state) => _page(context, state, const HomeScreen())),
         GoRoute(path: Dest.library.path, pageBuilder: (context, state) => _page(context, state, const LibraryScreen())),
+        GoRoute(
+          path: '/library/rules',
+          pageBuilder: (context, state) =>
+              _page(context, state, const RuleLibraryScreen()),
+        ),
+        GoRoute(
+          path: '/library/rules/:id',
+          redirect: (context, state) {
+            final id = Int64.tryParseInt(state.pathParameters['id'] ?? '');
+            return id == null || id <= Int64.ZERO ? '/library/rules' : null;
+          },
+          pageBuilder: (context, state) => _page(
+            context,
+            state,
+            RuleDetailsScreen(id: Int64.parseInt(state.pathParameters['id']!)),
+          ),
+        ),
         GoRoute(
           path: Dest.builder.path,
           pageBuilder: (context, state) =>

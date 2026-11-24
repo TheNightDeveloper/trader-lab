@@ -2,6 +2,16 @@
 
 Update at the end of every session.
 
+## P2 rule library and draft editor (2026-11-24)
+
+The Persian Rules Library opens from the existing strategy catalog. It searches
+and pages saved definitions on the server and opens curated templates in a
+form-based editor with nested entry and exit rules and a sentence preview.
+Version details show the hash, data timeframe, parents and definition changes.
+Chrome against the local engine and PostgreSQL reached the 201st version and
+saved and reopened its clone, with checks at 1440 and 390 pixels. Dart analysis
+and the 57 existing Flutter tests passed.
+
 ## P2 saved rules and report API (2026-11-24)
 
 The library stores validated rule definitions as immutable PostgreSQL versions.
