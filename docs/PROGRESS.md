@@ -2,6 +2,16 @@
 
 Update at the end of every session.
 
+## P2 report execution profile (2026-11-24)
+
+A saved-rule report links back to the exact version it ran and displays the
+stored definition hash, dataset IDs, out-of-sample interval, capital, fees,
+slippage, latency and split choices. The full Chrome workflow passed at desktop
+width with the report and draft dialog also checked at 390 pixels. The route
+covered the 201st version, cloning, regime composition, three stored reports,
+evidence filtering and both new templates. The release web build, Dart analysis
+and all 57 existing Flutter tests passed.
+
 ## P2 Donchian and Cutler RSI templates (2026-11-24)
 
 Donchian breakout uses the preceding 20 highs and 10 lows, excluding the
