@@ -126,6 +126,7 @@ func run() error {
 	if err := sc.Start(ctx, newServer(cfg,
 		route(labv1connect.NewHealthServiceHandler(health)),
 		route(labv1connect.NewDataServiceHandler(dataSvc)),
+		route(labv1connect.NewMarketServiceHandler(&api.Market{Store: st, Clock: clock.Wall{}, Live: liveSource(live), Symbols: cfg.LiveSymbols})),
 		route(labv1connect.NewFxServiceHandler(fxSvc)),
 		route(labv1connect.NewReportServiceHandler(&api.Report{Svc: reports, Limiter: limiter})),
 		route(labv1connect.NewPnlServiceHandler(&api.Pnl{Svc: reports, Limiter: limiter})),
