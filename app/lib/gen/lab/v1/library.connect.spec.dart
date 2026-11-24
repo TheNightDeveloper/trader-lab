@@ -32,4 +32,39 @@ abstract final class LibraryService {
     labv1library.ListLifecycleEventsRequest.new,
     labv1library.ListLifecycleEventsResponse.new,
   );
+
+  static const listRuleVersions = connect.Spec(
+    '/$name/ListRuleVersions',
+    connect.StreamType.unary,
+    labv1library.ListRuleVersionsRequest.new,
+    labv1library.ListRuleVersionsResponse.new,
+  );
+
+  static const getRuleVersion = connect.Spec(
+    '/$name/GetRuleVersion',
+    connect.StreamType.unary,
+    labv1library.GetRuleVersionRequest.new,
+    labv1library.GetRuleVersionResponse.new,
+  );
+
+  static const saveRuleVersion = connect.Spec(
+    '/$name/SaveRuleVersion',
+    connect.StreamType.unary,
+    labv1library.SaveRuleVersionRequest.new,
+    labv1library.SaveRuleVersionResponse.new,
+  );
+
+  static const composeRuleVersions = connect.Spec(
+    '/$name/ComposeRuleVersions',
+    connect.StreamType.unary,
+    labv1library.ComposeRuleVersionsRequest.new,
+    labv1library.ComposeRuleVersionsResponse.new,
+  );
+
+  static const listRuleTemplates = connect.Spec(
+    '/$name/ListRuleTemplates',
+    connect.StreamType.unary,
+    labv1library.ListRuleTemplatesRequest.new,
+    labv1library.ListRuleTemplatesResponse.new,
+  );
 }

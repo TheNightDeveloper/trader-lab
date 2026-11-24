@@ -293,24 +293,26 @@ func (x *ListStrategiesResponse) GetStrategies() []*StrategyInfo {
 }
 
 type ReportSpec struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	DatasetIds     []string               `protobuf:"bytes,1,rep,name=dataset_ids,json=datasetIds,proto3" json:"dataset_ids,omitempty"`
-	Timeframe      string                 `protobuf:"bytes,2,opt,name=timeframe,proto3" json:"timeframe,omitempty"` // taken from the datasets; ignored on create
-	Strategy       string                 `protobuf:"bytes,3,opt,name=strategy,proto3" json:"strategy,omitempty"`
-	Params         map[string]float64     `protobuf:"bytes,4,rep,name=params,proto3" json:"params,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"fixed64,2,opt,name=value"`
-	Capital        *Money                 `protobuf:"bytes,5,opt,name=capital,proto3" json:"capital,omitempty"`   // USDT
-	Fee            *Decimal               `protobuf:"bytes,6,opt,name=fee,proto3" json:"fee,omitempty"`           // per side, fraction (0.001 = 10 bps)
-	Slippage       *Decimal               `protobuf:"bytes,7,opt,name=slippage,proto3" json:"slippage,omitempty"` // per side, fraction
-	Sizing         string                 `protobuf:"bytes,8,opt,name=sizing,proto3" json:"sizing,omitempty"`     // equity | fixed
-	FixedUsdt      *Money                 `protobuf:"bytes,9,opt,name=fixed_usdt,json=fixedUsdt,proto3" json:"fixed_usdt,omitempty"`
-	LatencyBars    int32                  `protobuf:"varint,10,opt,name=latency_bars,json=latencyBars,proto3" json:"latency_bars,omitempty"`
-	Folds          int32                  `protobuf:"varint,11,opt,name=folds,proto3" json:"folds,omitempty"`
-	Rolling        bool                   `protobuf:"varint,12,opt,name=rolling,proto3" json:"rolling,omitempty"`
-	Holdout        *Decimal               `protobuf:"bytes,13,opt,name=holdout,proto3" json:"holdout,omitempty"` // share of the range, fraction
-	EmbargoSeconds int64                  `protobuf:"varint,14,opt,name=embargo_seconds,json=embargoSeconds,proto3" json:"embargo_seconds,omitempty"`
-	EngineVersion  string                 `protobuf:"bytes,15,opt,name=engine_version,json=engineVersion,proto3" json:"engine_version,omitempty"` // set by the engine
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	DatasetIds      []string               `protobuf:"bytes,1,rep,name=dataset_ids,json=datasetIds,proto3" json:"dataset_ids,omitempty"`
+	Timeframe       string                 `protobuf:"bytes,2,opt,name=timeframe,proto3" json:"timeframe,omitempty"` // taken from the datasets; ignored on create
+	Strategy        string                 `protobuf:"bytes,3,opt,name=strategy,proto3" json:"strategy,omitempty"`
+	Params          map[string]float64     `protobuf:"bytes,4,rep,name=params,proto3" json:"params,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"fixed64,2,opt,name=value"`
+	Capital         *Money                 `protobuf:"bytes,5,opt,name=capital,proto3" json:"capital,omitempty"`   // USDT
+	Fee             *Decimal               `protobuf:"bytes,6,opt,name=fee,proto3" json:"fee,omitempty"`           // per side, fraction (0.001 = 10 bps)
+	Slippage        *Decimal               `protobuf:"bytes,7,opt,name=slippage,proto3" json:"slippage,omitempty"` // per side, fraction
+	Sizing          string                 `protobuf:"bytes,8,opt,name=sizing,proto3" json:"sizing,omitempty"`     // equity | fixed
+	FixedUsdt       *Money                 `protobuf:"bytes,9,opt,name=fixed_usdt,json=fixedUsdt,proto3" json:"fixed_usdt,omitempty"`
+	LatencyBars     int32                  `protobuf:"varint,10,opt,name=latency_bars,json=latencyBars,proto3" json:"latency_bars,omitempty"`
+	Folds           int32                  `protobuf:"varint,11,opt,name=folds,proto3" json:"folds,omitempty"`
+	Rolling         bool                   `protobuf:"varint,12,opt,name=rolling,proto3" json:"rolling,omitempty"`
+	Holdout         *Decimal               `protobuf:"bytes,13,opt,name=holdout,proto3" json:"holdout,omitempty"` // share of the range, fraction
+	EmbargoSeconds  int64                  `protobuf:"varint,14,opt,name=embargo_seconds,json=embargoSeconds,proto3" json:"embargo_seconds,omitempty"`
+	EngineVersion   string                 `protobuf:"bytes,15,opt,name=engine_version,json=engineVersion,proto3" json:"engine_version,omitempty"`         // set by the engine
+	RuleVersionId   int64                  `protobuf:"varint,16,opt,name=rule_version_id,json=ruleVersionId,proto3" json:"rule_version_id,omitempty"`      // immutable Library research version, zero for native strategies
+	RuleContentHash string                 `protobuf:"bytes,17,opt,name=rule_content_hash,json=ruleContentHash,proto3" json:"rule_content_hash,omitempty"` // set by the engine on stored reports
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *ReportSpec) Reset() {
@@ -444,6 +446,20 @@ func (x *ReportSpec) GetEmbargoSeconds() int64 {
 func (x *ReportSpec) GetEngineVersion() string {
 	if x != nil {
 		return x.EngineVersion
+	}
+	return ""
+}
+
+func (x *ReportSpec) GetRuleVersionId() int64 {
+	if x != nil {
+		return x.RuleVersionId
+	}
+	return 0
+}
+
+func (x *ReportSpec) GetRuleContentHash() string {
+	if x != nil {
+		return x.RuleContentHash
 	}
 	return ""
 }
@@ -2996,7 +3012,7 @@ const file_lab_v1_report_proto_rawDesc = "" +
 	"\x16ListStrategiesResponse\x124\n" +
 	"\n" +
 	"strategies\x18\x01 \x03(\v2\x14.lab.v1.StrategyInfoR\n" +
-	"strategies\"\xe7\x04\n" +
+	"strategies\"\xbb\x05\n" +
 	"\n" +
 	"ReportSpec\x12\x1f\n" +
 	"\vdataset_ids\x18\x01 \x03(\tR\n" +
@@ -3016,7 +3032,9 @@ const file_lab_v1_report_proto_rawDesc = "" +
 	"\arolling\x18\f \x01(\bR\arolling\x12)\n" +
 	"\aholdout\x18\r \x01(\v2\x0f.lab.v1.DecimalR\aholdout\x12'\n" +
 	"\x0fembargo_seconds\x18\x0e \x01(\x03R\x0eembargoSeconds\x12%\n" +
-	"\x0eengine_version\x18\x0f \x01(\tR\rengineVersion\x1a9\n" +
+	"\x0eengine_version\x18\x0f \x01(\tR\rengineVersion\x12&\n" +
+	"\x0frule_version_id\x18\x10 \x01(\x03R\rruleVersionId\x12*\n" +
+	"\x11rule_content_hash\x18\x11 \x01(\tR\x0fruleContentHash\x1a9\n" +
 	"\vParamsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\x01R\x05value:\x028\x01\"=\n" +

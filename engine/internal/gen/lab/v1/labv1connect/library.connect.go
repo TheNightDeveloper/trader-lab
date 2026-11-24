@@ -42,6 +42,21 @@ const (
 	// LibraryServiceListLifecycleEventsProcedure is the fully-qualified name of the LibraryService's
 	// ListLifecycleEvents RPC.
 	LibraryServiceListLifecycleEventsProcedure = "/lab.v1.LibraryService/ListLifecycleEvents"
+	// LibraryServiceListRuleVersionsProcedure is the fully-qualified name of the LibraryService's
+	// ListRuleVersions RPC.
+	LibraryServiceListRuleVersionsProcedure = "/lab.v1.LibraryService/ListRuleVersions"
+	// LibraryServiceGetRuleVersionProcedure is the fully-qualified name of the LibraryService's
+	// GetRuleVersion RPC.
+	LibraryServiceGetRuleVersionProcedure = "/lab.v1.LibraryService/GetRuleVersion"
+	// LibraryServiceSaveRuleVersionProcedure is the fully-qualified name of the LibraryService's
+	// SaveRuleVersion RPC.
+	LibraryServiceSaveRuleVersionProcedure = "/lab.v1.LibraryService/SaveRuleVersion"
+	// LibraryServiceComposeRuleVersionsProcedure is the fully-qualified name of the LibraryService's
+	// ComposeRuleVersions RPC.
+	LibraryServiceComposeRuleVersionsProcedure = "/lab.v1.LibraryService/ComposeRuleVersions"
+	// LibraryServiceListRuleTemplatesProcedure is the fully-qualified name of the LibraryService's
+	// ListRuleTemplates RPC.
+	LibraryServiceListRuleTemplatesProcedure = "/lab.v1.LibraryService/ListRuleTemplates"
 )
 
 // LibraryServiceClient is a client for the lab.v1.LibraryService service.
@@ -49,6 +64,11 @@ type LibraryServiceClient interface {
 	ListAlgorithms(context.Context, *connect.Request[v1.ListAlgorithmsRequest]) (*connect.Response[v1.ListAlgorithmsResponse], error)
 	SetVersionState(context.Context, *connect.Request[v1.SetVersionStateRequest]) (*connect.Response[v1.SetVersionStateResponse], error)
 	ListLifecycleEvents(context.Context, *connect.Request[v1.ListLifecycleEventsRequest]) (*connect.Response[v1.ListLifecycleEventsResponse], error)
+	ListRuleVersions(context.Context, *connect.Request[v1.ListRuleVersionsRequest]) (*connect.Response[v1.ListRuleVersionsResponse], error)
+	GetRuleVersion(context.Context, *connect.Request[v1.GetRuleVersionRequest]) (*connect.Response[v1.GetRuleVersionResponse], error)
+	SaveRuleVersion(context.Context, *connect.Request[v1.SaveRuleVersionRequest]) (*connect.Response[v1.SaveRuleVersionResponse], error)
+	ComposeRuleVersions(context.Context, *connect.Request[v1.ComposeRuleVersionsRequest]) (*connect.Response[v1.ComposeRuleVersionsResponse], error)
+	ListRuleTemplates(context.Context, *connect.Request[v1.ListRuleTemplatesRequest]) (*connect.Response[v1.ListRuleTemplatesResponse], error)
 }
 
 // NewLibraryServiceClient constructs a client for the lab.v1.LibraryService service. By default, it
@@ -80,6 +100,36 @@ func NewLibraryServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 			connect.WithSchema(libraryServiceMethods.ByName("ListLifecycleEvents")),
 			connect.WithClientOptions(opts...),
 		),
+		listRuleVersions: connect.NewClient[v1.ListRuleVersionsRequest, v1.ListRuleVersionsResponse](
+			httpClient,
+			baseURL+LibraryServiceListRuleVersionsProcedure,
+			connect.WithSchema(libraryServiceMethods.ByName("ListRuleVersions")),
+			connect.WithClientOptions(opts...),
+		),
+		getRuleVersion: connect.NewClient[v1.GetRuleVersionRequest, v1.GetRuleVersionResponse](
+			httpClient,
+			baseURL+LibraryServiceGetRuleVersionProcedure,
+			connect.WithSchema(libraryServiceMethods.ByName("GetRuleVersion")),
+			connect.WithClientOptions(opts...),
+		),
+		saveRuleVersion: connect.NewClient[v1.SaveRuleVersionRequest, v1.SaveRuleVersionResponse](
+			httpClient,
+			baseURL+LibraryServiceSaveRuleVersionProcedure,
+			connect.WithSchema(libraryServiceMethods.ByName("SaveRuleVersion")),
+			connect.WithClientOptions(opts...),
+		),
+		composeRuleVersions: connect.NewClient[v1.ComposeRuleVersionsRequest, v1.ComposeRuleVersionsResponse](
+			httpClient,
+			baseURL+LibraryServiceComposeRuleVersionsProcedure,
+			connect.WithSchema(libraryServiceMethods.ByName("ComposeRuleVersions")),
+			connect.WithClientOptions(opts...),
+		),
+		listRuleTemplates: connect.NewClient[v1.ListRuleTemplatesRequest, v1.ListRuleTemplatesResponse](
+			httpClient,
+			baseURL+LibraryServiceListRuleTemplatesProcedure,
+			connect.WithSchema(libraryServiceMethods.ByName("ListRuleTemplates")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -88,6 +138,11 @@ type libraryServiceClient struct {
 	listAlgorithms      *connect.Client[v1.ListAlgorithmsRequest, v1.ListAlgorithmsResponse]
 	setVersionState     *connect.Client[v1.SetVersionStateRequest, v1.SetVersionStateResponse]
 	listLifecycleEvents *connect.Client[v1.ListLifecycleEventsRequest, v1.ListLifecycleEventsResponse]
+	listRuleVersions    *connect.Client[v1.ListRuleVersionsRequest, v1.ListRuleVersionsResponse]
+	getRuleVersion      *connect.Client[v1.GetRuleVersionRequest, v1.GetRuleVersionResponse]
+	saveRuleVersion     *connect.Client[v1.SaveRuleVersionRequest, v1.SaveRuleVersionResponse]
+	composeRuleVersions *connect.Client[v1.ComposeRuleVersionsRequest, v1.ComposeRuleVersionsResponse]
+	listRuleTemplates   *connect.Client[v1.ListRuleTemplatesRequest, v1.ListRuleTemplatesResponse]
 }
 
 // ListAlgorithms calls lab.v1.LibraryService.ListAlgorithms.
@@ -105,11 +160,41 @@ func (c *libraryServiceClient) ListLifecycleEvents(ctx context.Context, req *con
 	return c.listLifecycleEvents.CallUnary(ctx, req)
 }
 
+// ListRuleVersions calls lab.v1.LibraryService.ListRuleVersions.
+func (c *libraryServiceClient) ListRuleVersions(ctx context.Context, req *connect.Request[v1.ListRuleVersionsRequest]) (*connect.Response[v1.ListRuleVersionsResponse], error) {
+	return c.listRuleVersions.CallUnary(ctx, req)
+}
+
+// GetRuleVersion calls lab.v1.LibraryService.GetRuleVersion.
+func (c *libraryServiceClient) GetRuleVersion(ctx context.Context, req *connect.Request[v1.GetRuleVersionRequest]) (*connect.Response[v1.GetRuleVersionResponse], error) {
+	return c.getRuleVersion.CallUnary(ctx, req)
+}
+
+// SaveRuleVersion calls lab.v1.LibraryService.SaveRuleVersion.
+func (c *libraryServiceClient) SaveRuleVersion(ctx context.Context, req *connect.Request[v1.SaveRuleVersionRequest]) (*connect.Response[v1.SaveRuleVersionResponse], error) {
+	return c.saveRuleVersion.CallUnary(ctx, req)
+}
+
+// ComposeRuleVersions calls lab.v1.LibraryService.ComposeRuleVersions.
+func (c *libraryServiceClient) ComposeRuleVersions(ctx context.Context, req *connect.Request[v1.ComposeRuleVersionsRequest]) (*connect.Response[v1.ComposeRuleVersionsResponse], error) {
+	return c.composeRuleVersions.CallUnary(ctx, req)
+}
+
+// ListRuleTemplates calls lab.v1.LibraryService.ListRuleTemplates.
+func (c *libraryServiceClient) ListRuleTemplates(ctx context.Context, req *connect.Request[v1.ListRuleTemplatesRequest]) (*connect.Response[v1.ListRuleTemplatesResponse], error) {
+	return c.listRuleTemplates.CallUnary(ctx, req)
+}
+
 // LibraryServiceHandler is an implementation of the lab.v1.LibraryService service.
 type LibraryServiceHandler interface {
 	ListAlgorithms(context.Context, *connect.Request[v1.ListAlgorithmsRequest]) (*connect.Response[v1.ListAlgorithmsResponse], error)
 	SetVersionState(context.Context, *connect.Request[v1.SetVersionStateRequest]) (*connect.Response[v1.SetVersionStateResponse], error)
 	ListLifecycleEvents(context.Context, *connect.Request[v1.ListLifecycleEventsRequest]) (*connect.Response[v1.ListLifecycleEventsResponse], error)
+	ListRuleVersions(context.Context, *connect.Request[v1.ListRuleVersionsRequest]) (*connect.Response[v1.ListRuleVersionsResponse], error)
+	GetRuleVersion(context.Context, *connect.Request[v1.GetRuleVersionRequest]) (*connect.Response[v1.GetRuleVersionResponse], error)
+	SaveRuleVersion(context.Context, *connect.Request[v1.SaveRuleVersionRequest]) (*connect.Response[v1.SaveRuleVersionResponse], error)
+	ComposeRuleVersions(context.Context, *connect.Request[v1.ComposeRuleVersionsRequest]) (*connect.Response[v1.ComposeRuleVersionsResponse], error)
+	ListRuleTemplates(context.Context, *connect.Request[v1.ListRuleTemplatesRequest]) (*connect.Response[v1.ListRuleTemplatesResponse], error)
 }
 
 // NewLibraryServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -137,6 +222,36 @@ func NewLibraryServiceHandler(svc LibraryServiceHandler, opts ...connect.Handler
 		connect.WithSchema(libraryServiceMethods.ByName("ListLifecycleEvents")),
 		connect.WithHandlerOptions(opts...),
 	)
+	libraryServiceListRuleVersionsHandler := connect.NewUnaryHandler(
+		LibraryServiceListRuleVersionsProcedure,
+		svc.ListRuleVersions,
+		connect.WithSchema(libraryServiceMethods.ByName("ListRuleVersions")),
+		connect.WithHandlerOptions(opts...),
+	)
+	libraryServiceGetRuleVersionHandler := connect.NewUnaryHandler(
+		LibraryServiceGetRuleVersionProcedure,
+		svc.GetRuleVersion,
+		connect.WithSchema(libraryServiceMethods.ByName("GetRuleVersion")),
+		connect.WithHandlerOptions(opts...),
+	)
+	libraryServiceSaveRuleVersionHandler := connect.NewUnaryHandler(
+		LibraryServiceSaveRuleVersionProcedure,
+		svc.SaveRuleVersion,
+		connect.WithSchema(libraryServiceMethods.ByName("SaveRuleVersion")),
+		connect.WithHandlerOptions(opts...),
+	)
+	libraryServiceComposeRuleVersionsHandler := connect.NewUnaryHandler(
+		LibraryServiceComposeRuleVersionsProcedure,
+		svc.ComposeRuleVersions,
+		connect.WithSchema(libraryServiceMethods.ByName("ComposeRuleVersions")),
+		connect.WithHandlerOptions(opts...),
+	)
+	libraryServiceListRuleTemplatesHandler := connect.NewUnaryHandler(
+		LibraryServiceListRuleTemplatesProcedure,
+		svc.ListRuleTemplates,
+		connect.WithSchema(libraryServiceMethods.ByName("ListRuleTemplates")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/lab.v1.LibraryService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case LibraryServiceListAlgorithmsProcedure:
@@ -145,6 +260,16 @@ func NewLibraryServiceHandler(svc LibraryServiceHandler, opts ...connect.Handler
 			libraryServiceSetVersionStateHandler.ServeHTTP(w, r)
 		case LibraryServiceListLifecycleEventsProcedure:
 			libraryServiceListLifecycleEventsHandler.ServeHTTP(w, r)
+		case LibraryServiceListRuleVersionsProcedure:
+			libraryServiceListRuleVersionsHandler.ServeHTTP(w, r)
+		case LibraryServiceGetRuleVersionProcedure:
+			libraryServiceGetRuleVersionHandler.ServeHTTP(w, r)
+		case LibraryServiceSaveRuleVersionProcedure:
+			libraryServiceSaveRuleVersionHandler.ServeHTTP(w, r)
+		case LibraryServiceComposeRuleVersionsProcedure:
+			libraryServiceComposeRuleVersionsHandler.ServeHTTP(w, r)
+		case LibraryServiceListRuleTemplatesProcedure:
+			libraryServiceListRuleTemplatesHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -164,4 +289,24 @@ func (UnimplementedLibraryServiceHandler) SetVersionState(context.Context, *conn
 
 func (UnimplementedLibraryServiceHandler) ListLifecycleEvents(context.Context, *connect.Request[v1.ListLifecycleEventsRequest]) (*connect.Response[v1.ListLifecycleEventsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("lab.v1.LibraryService.ListLifecycleEvents is not implemented"))
+}
+
+func (UnimplementedLibraryServiceHandler) ListRuleVersions(context.Context, *connect.Request[v1.ListRuleVersionsRequest]) (*connect.Response[v1.ListRuleVersionsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("lab.v1.LibraryService.ListRuleVersions is not implemented"))
+}
+
+func (UnimplementedLibraryServiceHandler) GetRuleVersion(context.Context, *connect.Request[v1.GetRuleVersionRequest]) (*connect.Response[v1.GetRuleVersionResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("lab.v1.LibraryService.GetRuleVersion is not implemented"))
+}
+
+func (UnimplementedLibraryServiceHandler) SaveRuleVersion(context.Context, *connect.Request[v1.SaveRuleVersionRequest]) (*connect.Response[v1.SaveRuleVersionResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("lab.v1.LibraryService.SaveRuleVersion is not implemented"))
+}
+
+func (UnimplementedLibraryServiceHandler) ComposeRuleVersions(context.Context, *connect.Request[v1.ComposeRuleVersionsRequest]) (*connect.Response[v1.ComposeRuleVersionsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("lab.v1.LibraryService.ComposeRuleVersions is not implemented"))
+}
+
+func (UnimplementedLibraryServiceHandler) ListRuleTemplates(context.Context, *connect.Request[v1.ListRuleTemplatesRequest]) (*connect.Response[v1.ListRuleTemplatesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("lab.v1.LibraryService.ListRuleTemplates is not implemented"))
 }

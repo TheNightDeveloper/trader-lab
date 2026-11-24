@@ -33,6 +33,7 @@ type Spec struct {
 	Strategy          string                   `json:"strategy"`
 	Params            strategy.Params          `json:"params"` // complete: defaults filled in
 	Rule              *strategy.RuleDefinition `json:"rule,omitempty"`
+	RuleVersionID     int64                    `json:"rule_version_id,omitempty"`
 	Sim               sim.Config               `json:"sim"`
 	Split             SplitPlan                `json:"split"`
 	// EngineVersion of the code that produced the report (reproducibility badge).

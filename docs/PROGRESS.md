@@ -2,6 +2,15 @@
 
 Update at the end of every session.
 
+## P2 saved rules and report API (2026-11-24)
+
+The library stores validated rule definitions as immutable PostgreSQL versions.
+It supports template drafts, descendant versions, AND/OR composition with both
+parents recorded, and title search with keyset pagination. Reports pin the saved
+version ID and embed its exact definition for reproducibility. The Connect and
+PostgreSQL integration test covers rejected definitions, the 201st result, clone
+and composition lineage, and an identical rerun of a saved-rule report.
+
 ## P2 rule composition and evaluation (2026-11-23)
 
 The evaluator runs a `rules/v1` strategy through the main, holdout and stress

@@ -322,6 +322,8 @@ class ReportSpec extends $pb.GeneratedMessage {
     $1.Decimal? holdout,
     $fixnum.Int64? embargoSeconds,
     $core.String? engineVersion,
+    $fixnum.Int64? ruleVersionId,
+    $core.String? ruleContentHash,
   }) {
     final result = ReportSpec._();
     if (datasetIds != null) result.datasetIds.addAll(datasetIds);
@@ -339,6 +341,8 @@ class ReportSpec extends $pb.GeneratedMessage {
     if (holdout != null) result.holdout = holdout;
     if (embargoSeconds != null) result.embargoSeconds = embargoSeconds;
     if (engineVersion != null) result.engineVersion = engineVersion;
+    if (ruleVersionId != null) result.ruleVersionId = ruleVersionId;
+    if (ruleContentHash != null) result.ruleContentHash = ruleContentHash;
     return result;
   }
 
@@ -379,6 +383,8 @@ class ReportSpec extends $pb.GeneratedMessage {
         subBuilder: $1.Decimal.$_createMessage)
     ..aInt64(14, _omitFieldNames ? '' : 'embargoSeconds')
     ..aOS(15, _omitFieldNames ? '' : 'engineVersion')
+    ..aInt64(16, _omitFieldNames ? '' : 'ruleVersionId')
+    ..aOS(17, _omitFieldNames ? '' : 'ruleContentHash')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -533,6 +539,24 @@ class ReportSpec extends $pb.GeneratedMessage {
   $core.bool hasEngineVersion() => $_has(14);
   @$pb.TagNumber(15)
   void clearEngineVersion() => $_clearField(15);
+
+  @$pb.TagNumber(16)
+  $fixnum.Int64 get ruleVersionId => $_getI64(15);
+  @$pb.TagNumber(16)
+  set ruleVersionId($fixnum.Int64 value) => $_setInt64(15, value);
+  @$pb.TagNumber(16)
+  $core.bool hasRuleVersionId() => $_has(15);
+  @$pb.TagNumber(16)
+  void clearRuleVersionId() => $_clearField(16);
+
+  @$pb.TagNumber(17)
+  $core.String get ruleContentHash => $_getSZ(16);
+  @$pb.TagNumber(17)
+  set ruleContentHash($core.String value) => $_setString(16, value);
+  @$pb.TagNumber(17)
+  $core.bool hasRuleContentHash() => $_has(16);
+  @$pb.TagNumber(17)
+  void clearRuleContentHash() => $_clearField(17);
 }
 
 class CreateReportRequest extends $pb.GeneratedMessage {

@@ -12,6 +12,11 @@ service LibraryService {
   rpc ListAlgorithms(ListAlgorithmsRequest) returns (ListAlgorithmsResponse);
   rpc SetVersionState(SetVersionStateRequest) returns (SetVersionStateResponse);
   rpc ListLifecycleEvents(ListLifecycleEventsRequest) returns (ListLifecycleEventsResponse);
+  rpc ListRuleVersions(ListRuleVersionsRequest) returns (ListRuleVersionsResponse);
+  rpc GetRuleVersion(GetRuleVersionRequest) returns (GetRuleVersionResponse);
+  rpc SaveRuleVersion(SaveRuleVersionRequest) returns (SaveRuleVersionResponse);
+  rpc ComposeRuleVersions(ComposeRuleVersionsRequest) returns (ComposeRuleVersionsResponse);
+  rpc ListRuleTemplates(ListRuleTemplatesRequest) returns (ListRuleTemplatesResponse);
 }
 
 message AlgorithmVersion {
@@ -79,4 +84,71 @@ message ListLifecycleEventsRequest {
 message ListLifecycleEventsResponse {
   repeated LifecycleEvent events = 1;
   AuditCursor next_cursor = 2; // absent on the last page
+}
+
+// RuleVersionSummary describes an immutable research draft and its ancestry.
+message RuleVersionSummary {
+  int64 id = 1;
+  string title = 2;
+  string content_hash = 3;
+  int64 parent_id = 4;
+  int64 other_parent_id = 5;
+  string template_key = 6;
+  int64 created_unix_ms = 7;
+}
+
+message ListRuleVersionsRequest {
+  string query = 1;
+  int32 page_size = 2;
+  int64 before_id = 3; // exclusive, zero starts at the newest version
+}
+
+message ListRuleVersionsResponse {
+  repeated RuleVersionSummary versions = 1;
+  int64 next_before_id = 2; // zero means the last page
+}
+
+message GetRuleVersionRequest {
+  int64 id = 1;
+}
+
+message GetRuleVersionResponse {
+  RuleVersionSummary version = 1;
+  string definition_json = 2; // validated rules/v1
+}
+
+message SaveRuleVersionRequest {
+  string title = 1;
+  string definition_json = 2;
+  int64 parent_id = 3; // zero begins a lineage
+  string template_key = 4; // when set, a new lineage derives from this template
+}
+
+message SaveRuleVersionResponse {
+  RuleVersionSummary version = 1;
+}
+
+message ComposeRuleVersionsRequest {
+  string title = 1;
+  int64 first_id = 2;
+  int64 second_id = 3;
+  string entry_mode = 4; // and | or
+  int64 exit_owner_id = 5; // one of the two component versions
+}
+
+message ComposeRuleVersionsResponse {
+  RuleVersionSummary version = 1;
+}
+
+message RuleTemplate {
+  string key = 1;
+  string title = 2;
+  string description = 3;
+  string definition_json = 4;
+}
+
+message ListRuleTemplatesRequest {}
+
+message ListRuleTemplatesResponse {
+  repeated RuleTemplate templates = 1;
 }

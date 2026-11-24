@@ -105,6 +105,11 @@ func specP(s eval.Spec) *labv1.ReportSpec {
 		Sizing: string(s.Sim.Sizing), LatencyBars: int32(s.Sim.LatencyBars),
 		Folds: int32(s.Split.Folds), Rolling: s.Split.Rolling, Holdout: ratioP(s.Split.Holdout),
 		EmbargoSeconds: int64(s.Split.Embargo / time.Second), EngineVersion: s.EngineVersion,
+		RuleVersionId: s.RuleVersionID,
+	}
+	if s.Rule != nil {
+		// Report specs already contain the validated rule snapshot used for evaluation.
+		p.RuleContentHash, _ = s.Rule.ContentHash()
 	}
 	if s.Sim.FixedUSDT.V != 0 {
 		p.FixedUsdt = moneyP(s.Sim.FixedUSDT)
@@ -132,9 +137,30 @@ func reportErr(err error) error {
 }
 
 func (h *Report) CreateReport(ctx context.Context, req *connect.Request[labv1.CreateReportRequest]) (*connect.Response[labv1.CreateReportResponse], error) {
-	spec, err := specIn(req.Msg.GetSpec())
+	input := req.Msg.GetSpec()
+	spec, err := specIn(input)
 	if err != nil {
 		return nil, invalid(err.Error())
+	}
+	if id := input.GetRuleVersionId(); id != 0 {
+		if (spec.Strategy != "" && spec.Strategy != strategy.RuleFormatV1) || len(input.GetParams()) != 0 {
+			return nil, invalid("برای اجرای نسخهٔ قواعد، پارامترهای استراتژی داخلی را حذف کنید")
+		}
+		row, err := getSavedRule(ctx, h.Svc.Store, id)
+		if err != nil {
+			return nil, err
+		}
+		if hash := input.GetRuleContentHash(); hash != "" && hash != row.ContentHash {
+			return nil, invalid("هش تعریف با نسخهٔ انتخاب‌شده هم‌خوانی ندارد")
+		}
+		def, err := decodeSavedRule(row)
+		if err != nil {
+			return nil, err
+		}
+		// Embed the executed definition so saved reports can be reproduced independently.
+		spec.Strategy, spec.Rule, spec.RuleVersionID = strategy.RuleFormatV1, &def, id
+	} else if input.GetRuleContentHash() != "" {
+		return nil, invalid("یک نسخهٔ ذخیره‌شده از قواعد انتخاب کنید")
 	}
 	// A quick run is research: it waits for the whole research share, so it never
 	// competes with queued attempts for CPU beyond the cap.

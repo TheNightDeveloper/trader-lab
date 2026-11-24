@@ -182,6 +182,14 @@ const ReportSpec$json = {
     },
     {'1': 'embargo_seconds', '3': 14, '4': 1, '5': 3, '10': 'embargoSeconds'},
     {'1': 'engine_version', '3': 15, '4': 1, '5': 9, '10': 'engineVersion'},
+    {'1': 'rule_version_id', '3': 16, '4': 1, '5': 3, '10': 'ruleVersionId'},
+    {
+      '1': 'rule_content_hash',
+      '3': 17,
+      '4': 1,
+      '5': 9,
+      '10': 'ruleContentHash'
+    },
   ],
   '3': [ReportSpec_ParamsEntry$json],
 };
@@ -208,8 +216,9 @@ final $typed_data.Uint8List reportSpecDescriptor = $convert.base64Decode(
     'Vmb2xkcxgLIAEoBVIFZm9sZHMSGAoHcm9sbGluZxgMIAEoCFIHcm9sbGluZxIpCgdob2xkb3V0'
     'GA0gASgLMg8ubGFiLnYxLkRlY2ltYWxSB2hvbGRvdXQSJwoPZW1iYXJnb19zZWNvbmRzGA4gAS'
     'gDUg5lbWJhcmdvU2Vjb25kcxIlCg5lbmdpbmVfdmVyc2lvbhgPIAEoCVINZW5naW5lVmVyc2lv'
-    'bho5CgtQYXJhbXNFbnRyeRIQCgNrZXkYASABKAlSA2tleRIUCgV2YWx1ZRgCIAEoAVIFdmFsdW'
-    'U6AjgB');
+    'bhImCg9ydWxlX3ZlcnNpb25faWQYECABKANSDXJ1bGVWZXJzaW9uSWQSKgoRcnVsZV9jb250ZW'
+    '50X2hhc2gYESABKAlSD3J1bGVDb250ZW50SGFzaBo5CgtQYXJhbXNFbnRyeRIQCgNrZXkYASAB'
+    'KAlSA2tleRIUCgV2YWx1ZRgCIAEoAVIFdmFsdWU6AjgB');
 
 @$core.Deprecated('Use createReportRequestDescriptor instead')
 const CreateReportRequest$json = {

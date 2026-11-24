@@ -286,6 +286,225 @@ final $typed_data.Uint8List listLifecycleEventsResponseDescriptor =
         'xpZmVjeWNsZUV2ZW50UgZldmVudHMSNAoLbmV4dF9jdXJzb3IYAiABKAsyEy5sYWIudjEuQXVk'
         'aXRDdXJzb3JSCm5leHRDdXJzb3I=');
 
+@$core.Deprecated('Use ruleVersionSummaryDescriptor instead')
+const RuleVersionSummary$json = {
+  '1': 'RuleVersionSummary',
+  '2': [
+    {'1': 'id', '3': 1, '4': 1, '5': 3, '10': 'id'},
+    {'1': 'title', '3': 2, '4': 1, '5': 9, '10': 'title'},
+    {'1': 'content_hash', '3': 3, '4': 1, '5': 9, '10': 'contentHash'},
+    {'1': 'parent_id', '3': 4, '4': 1, '5': 3, '10': 'parentId'},
+    {'1': 'other_parent_id', '3': 5, '4': 1, '5': 3, '10': 'otherParentId'},
+    {'1': 'template_key', '3': 6, '4': 1, '5': 9, '10': 'templateKey'},
+    {'1': 'created_unix_ms', '3': 7, '4': 1, '5': 3, '10': 'createdUnixMs'},
+  ],
+};
+
+/// Descriptor for `RuleVersionSummary`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List ruleVersionSummaryDescriptor = $convert.base64Decode(
+    'ChJSdWxlVmVyc2lvblN1bW1hcnkSDgoCaWQYASABKANSAmlkEhQKBXRpdGxlGAIgASgJUgV0aX'
+    'RsZRIhCgxjb250ZW50X2hhc2gYAyABKAlSC2NvbnRlbnRIYXNoEhsKCXBhcmVudF9pZBgEIAEo'
+    'A1IIcGFyZW50SWQSJgoPb3RoZXJfcGFyZW50X2lkGAUgASgDUg1vdGhlclBhcmVudElkEiEKDH'
+    'RlbXBsYXRlX2tleRgGIAEoCVILdGVtcGxhdGVLZXkSJgoPY3JlYXRlZF91bml4X21zGAcgASgD'
+    'Ug1jcmVhdGVkVW5peE1z');
+
+@$core.Deprecated('Use listRuleVersionsRequestDescriptor instead')
+const ListRuleVersionsRequest$json = {
+  '1': 'ListRuleVersionsRequest',
+  '2': [
+    {'1': 'query', '3': 1, '4': 1, '5': 9, '10': 'query'},
+    {'1': 'page_size', '3': 2, '4': 1, '5': 5, '10': 'pageSize'},
+    {'1': 'before_id', '3': 3, '4': 1, '5': 3, '10': 'beforeId'},
+  ],
+};
+
+/// Descriptor for `ListRuleVersionsRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List listRuleVersionsRequestDescriptor =
+    $convert.base64Decode(
+        'ChdMaXN0UnVsZVZlcnNpb25zUmVxdWVzdBIUCgVxdWVyeRgBIAEoCVIFcXVlcnkSGwoJcGFnZV'
+        '9zaXplGAIgASgFUghwYWdlU2l6ZRIbCgliZWZvcmVfaWQYAyABKANSCGJlZm9yZUlk');
+
+@$core.Deprecated('Use listRuleVersionsResponseDescriptor instead')
+const ListRuleVersionsResponse$json = {
+  '1': 'ListRuleVersionsResponse',
+  '2': [
+    {
+      '1': 'versions',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.lab.v1.RuleVersionSummary',
+      '10': 'versions'
+    },
+    {'1': 'next_before_id', '3': 2, '4': 1, '5': 3, '10': 'nextBeforeId'},
+  ],
+};
+
+/// Descriptor for `ListRuleVersionsResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List listRuleVersionsResponseDescriptor = $convert.base64Decode(
+    'ChhMaXN0UnVsZVZlcnNpb25zUmVzcG9uc2USNgoIdmVyc2lvbnMYASADKAsyGi5sYWIudjEuUn'
+    'VsZVZlcnNpb25TdW1tYXJ5Ugh2ZXJzaW9ucxIkCg5uZXh0X2JlZm9yZV9pZBgCIAEoA1IMbmV4'
+    'dEJlZm9yZUlk');
+
+@$core.Deprecated('Use getRuleVersionRequestDescriptor instead')
+const GetRuleVersionRequest$json = {
+  '1': 'GetRuleVersionRequest',
+  '2': [
+    {'1': 'id', '3': 1, '4': 1, '5': 3, '10': 'id'},
+  ],
+};
+
+/// Descriptor for `GetRuleVersionRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getRuleVersionRequestDescriptor = $convert
+    .base64Decode('ChVHZXRSdWxlVmVyc2lvblJlcXVlc3QSDgoCaWQYASABKANSAmlk');
+
+@$core.Deprecated('Use getRuleVersionResponseDescriptor instead')
+const GetRuleVersionResponse$json = {
+  '1': 'GetRuleVersionResponse',
+  '2': [
+    {
+      '1': 'version',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.RuleVersionSummary',
+      '10': 'version'
+    },
+    {'1': 'definition_json', '3': 2, '4': 1, '5': 9, '10': 'definitionJson'},
+  ],
+};
+
+/// Descriptor for `GetRuleVersionResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getRuleVersionResponseDescriptor = $convert.base64Decode(
+    'ChZHZXRSdWxlVmVyc2lvblJlc3BvbnNlEjQKB3ZlcnNpb24YASABKAsyGi5sYWIudjEuUnVsZV'
+    'ZlcnNpb25TdW1tYXJ5Ugd2ZXJzaW9uEicKD2RlZmluaXRpb25fanNvbhgCIAEoCVIOZGVmaW5p'
+    'dGlvbkpzb24=');
+
+@$core.Deprecated('Use saveRuleVersionRequestDescriptor instead')
+const SaveRuleVersionRequest$json = {
+  '1': 'SaveRuleVersionRequest',
+  '2': [
+    {'1': 'title', '3': 1, '4': 1, '5': 9, '10': 'title'},
+    {'1': 'definition_json', '3': 2, '4': 1, '5': 9, '10': 'definitionJson'},
+    {'1': 'parent_id', '3': 3, '4': 1, '5': 3, '10': 'parentId'},
+    {'1': 'template_key', '3': 4, '4': 1, '5': 9, '10': 'templateKey'},
+  ],
+};
+
+/// Descriptor for `SaveRuleVersionRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List saveRuleVersionRequestDescriptor = $convert.base64Decode(
+    'ChZTYXZlUnVsZVZlcnNpb25SZXF1ZXN0EhQKBXRpdGxlGAEgASgJUgV0aXRsZRInCg9kZWZpbm'
+    'l0aW9uX2pzb24YAiABKAlSDmRlZmluaXRpb25Kc29uEhsKCXBhcmVudF9pZBgDIAEoA1IIcGFy'
+    'ZW50SWQSIQoMdGVtcGxhdGVfa2V5GAQgASgJUgt0ZW1wbGF0ZUtleQ==');
+
+@$core.Deprecated('Use saveRuleVersionResponseDescriptor instead')
+const SaveRuleVersionResponse$json = {
+  '1': 'SaveRuleVersionResponse',
+  '2': [
+    {
+      '1': 'version',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.RuleVersionSummary',
+      '10': 'version'
+    },
+  ],
+};
+
+/// Descriptor for `SaveRuleVersionResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List saveRuleVersionResponseDescriptor =
+    $convert.base64Decode(
+        'ChdTYXZlUnVsZVZlcnNpb25SZXNwb25zZRI0Cgd2ZXJzaW9uGAEgASgLMhoubGFiLnYxLlJ1bG'
+        'VWZXJzaW9uU3VtbWFyeVIHdmVyc2lvbg==');
+
+@$core.Deprecated('Use composeRuleVersionsRequestDescriptor instead')
+const ComposeRuleVersionsRequest$json = {
+  '1': 'ComposeRuleVersionsRequest',
+  '2': [
+    {'1': 'title', '3': 1, '4': 1, '5': 9, '10': 'title'},
+    {'1': 'first_id', '3': 2, '4': 1, '5': 3, '10': 'firstId'},
+    {'1': 'second_id', '3': 3, '4': 1, '5': 3, '10': 'secondId'},
+    {'1': 'entry_mode', '3': 4, '4': 1, '5': 9, '10': 'entryMode'},
+    {'1': 'exit_owner_id', '3': 5, '4': 1, '5': 3, '10': 'exitOwnerId'},
+  ],
+};
+
+/// Descriptor for `ComposeRuleVersionsRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List composeRuleVersionsRequestDescriptor = $convert.base64Decode(
+    'ChpDb21wb3NlUnVsZVZlcnNpb25zUmVxdWVzdBIUCgV0aXRsZRgBIAEoCVIFdGl0bGUSGQoIZm'
+    'lyc3RfaWQYAiABKANSB2ZpcnN0SWQSGwoJc2Vjb25kX2lkGAMgASgDUghzZWNvbmRJZBIdCgpl'
+    'bnRyeV9tb2RlGAQgASgJUgllbnRyeU1vZGUSIgoNZXhpdF9vd25lcl9pZBgFIAEoA1ILZXhpdE'
+    '93bmVySWQ=');
+
+@$core.Deprecated('Use composeRuleVersionsResponseDescriptor instead')
+const ComposeRuleVersionsResponse$json = {
+  '1': 'ComposeRuleVersionsResponse',
+  '2': [
+    {
+      '1': 'version',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.RuleVersionSummary',
+      '10': 'version'
+    },
+  ],
+};
+
+/// Descriptor for `ComposeRuleVersionsResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List composeRuleVersionsResponseDescriptor =
+    $convert.base64Decode(
+        'ChtDb21wb3NlUnVsZVZlcnNpb25zUmVzcG9uc2USNAoHdmVyc2lvbhgBIAEoCzIaLmxhYi52MS'
+        '5SdWxlVmVyc2lvblN1bW1hcnlSB3ZlcnNpb24=');
+
+@$core.Deprecated('Use ruleTemplateDescriptor instead')
+const RuleTemplate$json = {
+  '1': 'RuleTemplate',
+  '2': [
+    {'1': 'key', '3': 1, '4': 1, '5': 9, '10': 'key'},
+    {'1': 'title', '3': 2, '4': 1, '5': 9, '10': 'title'},
+    {'1': 'description', '3': 3, '4': 1, '5': 9, '10': 'description'},
+    {'1': 'definition_json', '3': 4, '4': 1, '5': 9, '10': 'definitionJson'},
+  ],
+};
+
+/// Descriptor for `RuleTemplate`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List ruleTemplateDescriptor = $convert.base64Decode(
+    'CgxSdWxlVGVtcGxhdGUSEAoDa2V5GAEgASgJUgNrZXkSFAoFdGl0bGUYAiABKAlSBXRpdGxlEi'
+    'AKC2Rlc2NyaXB0aW9uGAMgASgJUgtkZXNjcmlwdGlvbhInCg9kZWZpbml0aW9uX2pzb24YBCAB'
+    'KAlSDmRlZmluaXRpb25Kc29u');
+
+@$core.Deprecated('Use listRuleTemplatesRequestDescriptor instead')
+const ListRuleTemplatesRequest$json = {
+  '1': 'ListRuleTemplatesRequest',
+};
+
+/// Descriptor for `ListRuleTemplatesRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List listRuleTemplatesRequestDescriptor =
+    $convert.base64Decode('ChhMaXN0UnVsZVRlbXBsYXRlc1JlcXVlc3Q=');
+
+@$core.Deprecated('Use listRuleTemplatesResponseDescriptor instead')
+const ListRuleTemplatesResponse$json = {
+  '1': 'ListRuleTemplatesResponse',
+  '2': [
+    {
+      '1': 'templates',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.lab.v1.RuleTemplate',
+      '10': 'templates'
+    },
+  ],
+};
+
+/// Descriptor for `ListRuleTemplatesResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List listRuleTemplatesResponseDescriptor =
+    $convert.base64Decode(
+        'ChlMaXN0UnVsZVRlbXBsYXRlc1Jlc3BvbnNlEjIKCXRlbXBsYXRlcxgBIAMoCzIULmxhYi52MS'
+        '5SdWxlVGVtcGxhdGVSCXRlbXBsYXRlcw==');
+
 const $core.Map<$core.String, $core.dynamic> LibraryServiceBase$json = {
   '1': 'LibraryService',
   '2': [
@@ -303,6 +522,31 @@ const $core.Map<$core.String, $core.dynamic> LibraryServiceBase$json = {
       '1': 'ListLifecycleEvents',
       '2': '.lab.v1.ListLifecycleEventsRequest',
       '3': '.lab.v1.ListLifecycleEventsResponse'
+    },
+    {
+      '1': 'ListRuleVersions',
+      '2': '.lab.v1.ListRuleVersionsRequest',
+      '3': '.lab.v1.ListRuleVersionsResponse'
+    },
+    {
+      '1': 'GetRuleVersion',
+      '2': '.lab.v1.GetRuleVersionRequest',
+      '3': '.lab.v1.GetRuleVersionResponse'
+    },
+    {
+      '1': 'SaveRuleVersion',
+      '2': '.lab.v1.SaveRuleVersionRequest',
+      '3': '.lab.v1.SaveRuleVersionResponse'
+    },
+    {
+      '1': 'ComposeRuleVersions',
+      '2': '.lab.v1.ComposeRuleVersionsRequest',
+      '3': '.lab.v1.ComposeRuleVersionsResponse'
+    },
+    {
+      '1': 'ListRuleTemplates',
+      '2': '.lab.v1.ListRuleTemplatesRequest',
+      '3': '.lab.v1.ListRuleTemplatesResponse'
     },
   ],
 };
@@ -326,6 +570,18 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
   '.lab.v1.ListLifecycleEventsResponse': ListLifecycleEventsResponse$json,
   '.lab.v1.LifecycleEvent': LifecycleEvent$json,
   '.lab.v1.AuditEvent': $2.AuditEvent$json,
+  '.lab.v1.ListRuleVersionsRequest': ListRuleVersionsRequest$json,
+  '.lab.v1.ListRuleVersionsResponse': ListRuleVersionsResponse$json,
+  '.lab.v1.RuleVersionSummary': RuleVersionSummary$json,
+  '.lab.v1.GetRuleVersionRequest': GetRuleVersionRequest$json,
+  '.lab.v1.GetRuleVersionResponse': GetRuleVersionResponse$json,
+  '.lab.v1.SaveRuleVersionRequest': SaveRuleVersionRequest$json,
+  '.lab.v1.SaveRuleVersionResponse': SaveRuleVersionResponse$json,
+  '.lab.v1.ComposeRuleVersionsRequest': ComposeRuleVersionsRequest$json,
+  '.lab.v1.ComposeRuleVersionsResponse': ComposeRuleVersionsResponse$json,
+  '.lab.v1.ListRuleTemplatesRequest': ListRuleTemplatesRequest$json,
+  '.lab.v1.ListRuleTemplatesResponse': ListRuleTemplatesResponse$json,
+  '.lab.v1.RuleTemplate': RuleTemplate$json,
 };
 
 /// Descriptor for `LibraryService`. Decode as a `google.protobuf.ServiceDescriptorProto`.
@@ -334,5 +590,12 @@ final $typed_data.Uint8List libraryServiceDescriptor = $convert.base64Decode(
     'htc1JlcXVlc3QaHi5sYWIudjEuTGlzdEFsZ29yaXRobXNSZXNwb25zZRJSCg9TZXRWZXJzaW9u'
     'U3RhdGUSHi5sYWIudjEuU2V0VmVyc2lvblN0YXRlUmVxdWVzdBofLmxhYi52MS5TZXRWZXJzaW'
     '9uU3RhdGVSZXNwb25zZRJeChNMaXN0TGlmZWN5Y2xlRXZlbnRzEiIubGFiLnYxLkxpc3RMaWZl'
-    'Y3ljbGVFdmVudHNSZXF1ZXN0GiMubGFiLnYxLkxpc3RMaWZlY3ljbGVFdmVudHNSZXNwb25zZQ'
-    '==');
+    'Y3ljbGVFdmVudHNSZXF1ZXN0GiMubGFiLnYxLkxpc3RMaWZlY3ljbGVFdmVudHNSZXNwb25zZR'
+    'JVChBMaXN0UnVsZVZlcnNpb25zEh8ubGFiLnYxLkxpc3RSdWxlVmVyc2lvbnNSZXF1ZXN0GiAu'
+    'bGFiLnYxLkxpc3RSdWxlVmVyc2lvbnNSZXNwb25zZRJPCg5HZXRSdWxlVmVyc2lvbhIdLmxhYi'
+    '52MS5HZXRSdWxlVmVyc2lvblJlcXVlc3QaHi5sYWIudjEuR2V0UnVsZVZlcnNpb25SZXNwb25z'
+    'ZRJSCg9TYXZlUnVsZVZlcnNpb24SHi5sYWIudjEuU2F2ZVJ1bGVWZXJzaW9uUmVxdWVzdBofLm'
+    'xhYi52MS5TYXZlUnVsZVZlcnNpb25SZXNwb25zZRJeChNDb21wb3NlUnVsZVZlcnNpb25zEiIu'
+    'bGFiLnYxLkNvbXBvc2VSdWxlVmVyc2lvbnNSZXF1ZXN0GiMubGFiLnYxLkNvbXBvc2VSdWxlVm'
+    'Vyc2lvbnNSZXNwb25zZRJYChFMaXN0UnVsZVRlbXBsYXRlcxIgLmxhYi52MS5MaXN0UnVsZVRl'
+    'bXBsYXRlc1JlcXVlc3QaIS5sYWIudjEuTGlzdFJ1bGVUZW1wbGF0ZXNSZXNwb25zZQ==');

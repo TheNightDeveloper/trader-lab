@@ -58,6 +58,8 @@ message ReportSpec {
   Decimal holdout = 13; // share of the range, fraction
   int64 embargo_seconds = 14;
   string engine_version = 15; // set by the engine
+  int64 rule_version_id = 16; // immutable Library research version, zero for native strategies
+  string rule_content_hash = 17; // set by the engine on stored reports
 }
 
 message CreateReportRequest {

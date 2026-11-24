@@ -267,6 +267,17 @@ type Setting struct {
 	UpdatedAt time.Time
 }
 
+type StrategyRuleVersion struct {
+	ID            int64
+	Title         string
+	ContentHash   string
+	Definition    []byte
+	ParentID      *int64
+	OtherParentID *int64
+	TemplateKey   string
+	CreatedAt     time.Time
+}
+
 type Trade struct {
 	ReportID      string
 	Run           string
