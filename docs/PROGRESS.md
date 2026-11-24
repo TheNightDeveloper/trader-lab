@@ -12,6 +12,11 @@ covered the 201st version, cloning, regime composition, three stored reports,
 evidence filtering and both new templates. The release web build, Dart analysis
 and all 57 existing Flutter tests passed.
 
+The full Go suite passed with PostgreSQL required on Windows and under the
+Linux race detector. Go vet, lint, depguard, simulator goldens, Buf compatibility
+and generated Go/Dart/SQL checks passed. P2 verification in this checkpoint is
+local. P1 representative-user review remains open.
+
 ## P2 Donchian and Cutler RSI templates (2026-11-24)
 
 Donchian breakout uses the preceding 20 highs and 10 lows, excluding the
