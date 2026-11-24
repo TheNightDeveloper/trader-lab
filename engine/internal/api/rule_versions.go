@@ -230,10 +230,31 @@ func (h *Library) ComposeRuleVersions(ctx context.Context, req *connect.Request[
 }
 
 func ruleTemplates() []ruleTemplate {
-	// Both initial recipes use only indicators with defined closed-bar semantics.
+	closePrice := &strategy.RuleValue{Kind: "close"}
+	priorHigh := &strategy.RuleValue{Kind: "prior_high", Period: 20}
+	priorLow := &strategy.RuleValue{Kind: "prior_low", Period: 10}
+	rsi := &strategy.RuleValue{Kind: "rsi", Period: 14}
+	sma50 := &strategy.RuleValue{Kind: "sma", Period: 50}
+	low, high := 30.0, 70.0
 	return []ruleTemplate{
 		{"sma-cross", "تقاطع میانگین‌های متحرک", "ورود با تقاطع صعودی و خروج با تقاطع نزولی میانگین‌های ۱۰ و ۳۰ کندلی", crossTemplate("", &strategy.RuleValue{Kind: "sma", Period: 10}, &strategy.RuleValue{Kind: "sma", Period: 30})},
-		{"closed-hour-trend", "تقاطع با قیمت بسته‌شدهٔ ساعتی", "مقایسهٔ قیمت کندل ۱۵ دقیقه‌ای با آخرین قیمت بسته‌شدهٔ یک‌ساعته", crossTemplate(data.TF15m, &strategy.RuleValue{Kind: "close"}, &strategy.RuleValue{Kind: "bucket_close", Timeframe: data.TF1h})},
+		{"closed-hour-trend", "تقاطع با قیمت بسته‌شدهٔ ساعتی", "مقایسهٔ قیمت کندل ۱۵ دقیقه‌ای با آخرین قیمت بسته‌شدهٔ یک‌ساعته", crossTemplate(data.TF15m, closePrice, &strategy.RuleValue{Kind: "bucket_close", Timeframe: data.TF1h})},
+		{"donchian-breakout", "شکست کانال دانچیان", "ورود بالای بیشترین سقف ۲۰ کندل قبل و خروج زیر کمترین کف ۱۰ کندل قبل", strategy.RuleDefinition{
+			Format: strategy.RuleFormatV1, Exposure: money.RatioOne,
+			Entry: strategy.Rule{Op: "gt", Left: closePrice, Right: priorHigh},
+			Exit:  strategy.Rule{Op: "lt", Left: closePrice, Right: priorLow},
+		}},
+		{"rsi-pullback", "پولبک RSI ساده", "ورود با عبور صعودی RSI سادهٔ ۱۴ کندلی از ۳۰ در روند بالای میانگین ۵۰ کندلی. خروج در RSI برابر یا بالاتر از ۷۰ یا افت قیمت زیر میانگین.", strategy.RuleDefinition{
+			Format: strategy.RuleFormatV1, Exposure: money.RatioOne,
+			Entry: strategy.Rule{Op: "and", Args: []strategy.Rule{
+				{Op: "cross_above", Left: rsi, Right: &strategy.RuleValue{Kind: "constant", Number: &low}},
+				{Op: "gt", Left: closePrice, Right: sma50},
+			}},
+			Exit: strategy.Rule{Op: "or", Args: []strategy.Rule{
+				{Op: "gte", Left: rsi, Right: &strategy.RuleValue{Kind: "constant", Number: &high}},
+				{Op: "lt", Left: closePrice, Right: sma50},
+			}},
+		}},
 	}
 }
 

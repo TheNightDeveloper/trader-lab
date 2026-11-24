@@ -26,6 +26,9 @@ const _operators = <String, String>{
 const _kinds = <String, String>{
   'close': 'قیمت پایانی',
   'sma': 'میانگین متحرک ساده',
+  'prior_high': 'بیشترین سقف کندل‌های قبلی',
+  'prior_low': 'کمترین کف کندل‌های قبلی',
+  'rsi': 'RSI ساده (Cutler)',
   'bucket_close': 'قیمت پایانی بازهٔ بزرگ‌تر',
   'constant': 'عدد ثابت',
 };
@@ -52,6 +55,9 @@ Iterable<RuleJson> childrenOf(RuleJson rule) =>
 
 String describeOperand(RuleJson operand) => switch (operand['kind']) {
   'sma' => 'میانگین ${operand['period'] ?? '…'} کندل',
+  'prior_high' => 'بیشترین سقف ${operand['period'] ?? '…'} کندل قبل',
+  'prior_low' => 'کمترین کف ${operand['period'] ?? '…'} کندل قبل',
+  'rsi' => 'RSI سادهٔ ${operand['period'] ?? '…'} کندلی',
   'bucket_close' =>
     'پایان بازهٔ ${ruleTimeframes[operand['timeframe']] ?? '…'}',
   'constant' => '${operand['number'] ?? '…'}',
@@ -217,6 +223,8 @@ class _RuleNodeEditorState extends State<RuleNodeEditor> {
   }
 }
 
+const _rollingKinds = {'sma', 'prior_high', 'prior_low', 'rsi'};
+
 class _OperandEditor extends StatelessWidget {
   const _OperandEditor({
     required this.label,
@@ -231,7 +239,8 @@ class _OperandEditor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kind = operand['kind'] as String;
-    final field = kind == 'sma' ? 'period' : 'number';
+    final hasPeriod = _rollingKinds.contains(kind);
+    final field = hasPeriod ? 'period' : 'number';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -241,12 +250,12 @@ class _OperandEditor extends StatelessWidget {
           options: _kinds,
           onChanged: (next) => onChanged({
             'kind': next,
-            if (next == 'sma') 'period': 20,
+            if (_rollingKinds.contains(next)) 'period': next == 'rsi' ? 14 : 20,
             if (next == 'constant') 'number': 0,
             if (next == 'bucket_close') 'timeframe': '1h',
           }),
         ),
-        if (kind == 'sma' || kind == 'constant') ...[
+        if (hasPeriod || kind == 'constant') ...[
           const SizedBox(height: AppSpace.sm),
           TextFormField(
             key: ValueKey(kind),
@@ -256,13 +265,13 @@ class _OperandEditor extends StatelessWidget {
               decimal: kind == 'constant',
             ),
             decoration: InputDecoration(
-              labelText: kind == 'sma'
+              labelText: hasPeriod
                   ? 'دوره (۲ تا ۱۰۰۰ کندل)'
                   : 'عدد ثابت (صفر یا بیشتر)',
             ),
             onChanged: (text) => onChanged({
               ...operand,
-              field: kind == 'sma'
+              field: hasPeriod
                   ? int.tryParse(ruleNumber(text))
                   : double.tryParse(ruleNumber(text)),
             }),
@@ -271,7 +280,7 @@ class _OperandEditor extends StatelessWidget {
               final valid =
                   v != null &&
                   v.isFinite &&
-                  (kind == 'sma' ? v >= 2 && v <= 1000 : !v.isNegative);
+                  (hasPeriod ? v >= 2 && v <= 1000 : !v.isNegative);
               return valid ? null : 'مقدار معتبر وارد کنید';
             },
           ),

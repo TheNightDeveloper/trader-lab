@@ -2,6 +2,14 @@
 
 Update at the end of every session.
 
+## P2 Donchian and Cutler RSI templates (2026-11-24)
+
+Donchian breakout uses the preceding 20 highs and 10 lows, excluding the
+signal candle. The pullback template crosses above Cutler RSI 30 within a
+50-bar uptrend and exits at RSI 70 or when the trend fails. Both templates
+compile through `rules/v1` and open in the same draft editor. Deterministic
+series assert exact entry and exit bars. Chrome opened and saved both templates.
+
 ## P2 rule evidence and details (2026-11-24)
 
 The Library can filter versions with or without a backtest on the server. A
@@ -80,8 +88,8 @@ See [ADR-062](DECISIONS.md#adr-062-version-rule-strategies-at-the-engine-boundar
 
 The full Go suite passed with PostgreSQL required on Windows and with `-race`
 on Linux. Simulator goldens, Go vet, lint and depguard passed. All 57 existing
-Flutter tests passed and Dart analysis was clean. Higher-timeframe inputs,
-learned-model definitions, drafts and Library integration are still open.
+Flutter tests passed and Dart analysis was clean. At that checkpoint, higher-timeframe inputs,
+learned-model definitions, drafts and Library integration were still open.
 Representative-user acceptance for P1 is pending.
 
 ## P1 hosted CI passed (2026-11-22)

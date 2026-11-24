@@ -514,8 +514,8 @@ explanation states the numeric range failure.
 `rules/v1` describes one closed-bar stream per instrument with separate entry
 and exit predicates and a fixed-point exposure. The JSON hash covers the ordered
 tree and normalized field values. The engine compiles comparisons, crossings,
-AND/OR, closes and trailing close means before the run. Validation bounds the
-payload at 32 KiB, the predicate tree at 64 nodes and depth 8, and the SMA period
+AND/OR, regime routing, and rolling values before the run. Validation bounds the
+payload at 32 KiB, the predicate tree at 64 nodes and depth 8, and indicator periods
 at 1,000 bars. A crossing also reads one previous bar.
 
 Both predicates use observed history. With a declared base timeframe,
@@ -523,4 +523,9 @@ Both predicates use observed history. With a declared base timeframe,
 members are present and complete. Unknown values propagate through comparisons,
 and AND/OR can resolve when a known child determines the outcome. Exit wins on
 the same bar. Target transitions leave pending fills to the simulator's existing
-latency and expiry policy. Draft persistence and API exposure are subsequent work.
+latency and expiry policy. Saved definitions are immutable and their reports embed the executed rule.
+
+Donchian operands use only preceding candle highs and lows. The RSI operand
+uses Cutler RSI over a finite window of close changes and therefore differs
+from the chart’s Wilder RSI. Regime selection evaluates one branch and keeps
+the chosen exit and exposure owner pinned for the entire run.

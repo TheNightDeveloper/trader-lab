@@ -3,7 +3,9 @@ package api
 import (
 	"context"
 	"net/http"
+	"slices"
 	"testing"
+	"time"
 
 	"connectrpc.com/connect"
 	"github.com/stretchr/testify/require"
@@ -11,6 +13,7 @@ import (
 	"tradinglab/engine/internal/data"
 	labv1 "tradinglab/engine/internal/gen/lab/v1"
 	"tradinglab/engine/internal/gen/lab/v1/labv1connect"
+	"tradinglab/engine/internal/money"
 	"tradinglab/engine/internal/report"
 	"tradinglab/engine/internal/store/storetest"
 )
@@ -26,7 +29,7 @@ func TestSavedRuleVersions(t *testing.T) {
 	reports := labv1connect.NewReportServiceClient(srv.Client(), srv.URL)
 	templates, err := library.ListRuleTemplates(ctx, connect.NewRequest(&labv1.ListRuleTemplatesRequest{}))
 	require.NoError(t, err)
-	require.Len(t, templates.Msg.GetTemplates(), 2)
+	require.Len(t, templates.Msg.GetTemplates(), 4)
 	template := templates.Msg.GetTemplates()[0]
 	save := func(title string, parent int64, key string) *labv1.RuleVersionSummary {
 		t.Helper()
@@ -131,4 +134,65 @@ func TestSavedRuleVersions(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, unreported.Msg.GetVersions(), 1)
 	require.Equal(t, regime.Msg.GetVersion().GetId(), unreported.Msg.GetVersions()[0].GetId())
+}
+
+type templateHistory []data.Bar
+
+func (h templateHistory) History(string) []data.Bar { return h }
+func (h templateHistory) Position(string) money.Qty { return money.Qty{} }
+
+func TestExpandedRuleTemplatesEmitExpectedTargets(t *testing.T) {
+	donchian := make([]int64, 20, 22)
+	for i := range donchian {
+		donchian[i] = 100
+	}
+	donchian = append(donchian, 103, 97)
+	var prices []int64
+	for range 50 {
+		prices = append(prices, 100)
+	}
+	for range 15 {
+		prices = append(prices, 150)
+	}
+	for i := range int64(12) {
+		prices = append(prices, 149-i)
+	}
+	prices = append(prices, 141, 144, 170)
+
+	for _, tc := range []struct {
+		key         string
+		prices      []int64
+		entry, exit int
+	}{
+		{"donchian-breakout", donchian, 20, 21},
+		{"rsi-pullback", prices, len(prices) - 2, len(prices) - 1},
+	} {
+		t.Run(tc.key, func(t *testing.T) {
+			templates := ruleTemplates()
+			index := slices.IndexFunc(templates, func(template ruleTemplate) bool { return template.key == tc.key })
+			require.NotEqual(t, -1, index)
+			engine, err := templates[index].def.Build()
+			require.NoError(t, err)
+			var history templateHistory
+			for i, price := range tc.prices {
+				at := time.Unix(int64(i)*60, 0)
+				bar := data.Bar{Instrument: "BTCUSDT", OpenTime: at, CloseTime: at.Add(time.Minute),
+					H: money.Price{V: (price + 1) * 1e8, Scale: 8}, L: money.Price{V: (price - 1) * 1e8, Scale: 8},
+					C: money.Price{V: price * 1e8, Scale: 8}}
+				history = append(history, bar)
+				intents, err := engine.OnBar(history, bar)
+				require.NoError(t, err)
+				switch i {
+				case tc.entry:
+					require.Len(t, intents, 1, "entry bar %d", i)
+					require.Equal(t, money.RatioOne, intents[0].Target)
+				case tc.exit:
+					require.Len(t, intents, 1, "exit bar %d", i)
+					require.Zero(t, intents[0].Target)
+				default:
+					require.Empty(t, intents, "unexpected intent on bar %d", i)
+				}
+			}
+		})
+	}
 }

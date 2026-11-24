@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"tradinglab/engine/internal/data"
+	"tradinglab/engine/internal/feature"
 	"tradinglab/engine/internal/money"
 )
 
@@ -148,7 +149,7 @@ func (c *ruleCompiler) compileValue(v RuleValue) (func([]data.Bar) (float64, boo
 			return func(history []data.Bar) (float64, bool) { return closeF(history[len(history)-1]), true }, 1, nil
 		}
 	case "sma":
-		if v.Number == nil && v.Period >= 2 && v.Period <= maxRuleBars {
+		if validPeriod(v) {
 			return func(history []data.Bar) (float64, bool) {
 				var sum float64
 				for _, b := range history[len(history)-v.Period:] {
@@ -157,8 +158,37 @@ func (c *ruleCompiler) compileValue(v RuleValue) (func([]data.Bar) (float64, boo
 				return sum / float64(v.Period), true
 			}, v.Period, nil
 		}
+	case "prior_high", "prior_low":
+		if validPeriod(v) {
+			return func(history []data.Bar) (float64, bool) {
+				// Exclude the signal candle so its extremes cannot move the channel it tests.
+				prior := history[len(history)-v.Period-1 : len(history)-1]
+				if v.Kind == "prior_high" {
+					level := prior[0].H.V
+					for _, b := range prior[1:] {
+						level = max(level, b.H.V)
+					}
+					return float64(level) / 1e8, true
+				}
+				level := prior[0].L.V
+				for _, b := range prior[1:] {
+					level = min(level, b.L.V)
+				}
+				return float64(level) / 1e8, true
+			}, v.Period + 1, nil
+		}
+	case "rsi":
+		if validPeriod(v) {
+			return func(history []data.Bar) (float64, bool) {
+				return 100 * feature.SimpleRSI(history[len(history)-v.Period-1:]), true
+			}, v.Period + 1, nil
+		}
 	}
-	return nil, 0, fmt.Errorf("invalid %q operand (sma period must be in 2..%d)", v.Kind, maxRuleBars)
+	return nil, 0, fmt.Errorf("invalid %q operand (rolling period must be in 2..%d)", v.Kind, maxRuleBars)
+}
+
+func validPeriod(v RuleValue) bool {
+	return v.Number == nil && v.Period >= 2 && v.Period <= maxRuleBars
 }
 
 type ruleStrategy struct {

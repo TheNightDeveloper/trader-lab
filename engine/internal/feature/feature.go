@@ -56,22 +56,7 @@ var defs = map[string]def{
 		return math.Sqrt(math.Max(0, sq/n-m*m))
 	}},
 	// RSI over 14 changes (simple averages), as a fraction 0..1; 0.5 when flat.
-	"rsi_14": {15, func(b []data.Bar) float64 {
-		t := b[len(b)-15:]
-		var up, down float64
-		for i := 1; i < len(t); i++ {
-			d := closeF(t[i]) - closeF(t[i-1])
-			if d > 0 {
-				up += d
-			} else {
-				down -= d
-			}
-		}
-		if up+down == 0 {
-			return 0.5
-		}
-		return up / (up + down)
-	}},
+	"rsi_14": {15, func(b []data.Bar) float64 { return SimpleRSI(b[len(b)-15:]) }},
 	// Close relative to its 24-bar simple average.
 	"sma_gap_24": {24, func(b []data.Bar) float64 {
 		t := b[len(b)-24:]
@@ -369,4 +354,21 @@ func (s Scaler) Apply(x []float64) []float64 {
 		z[j] = (v - s.Mean[j]) / s.Std[j]
 	}
 	return z
+}
+
+// SimpleRSI returns Cutler RSI as a fraction over the changes in the supplied window.
+func SimpleRSI(b []data.Bar) float64 {
+	var up, down float64
+	for i := 1; i < len(b); i++ {
+		d := closeF(b[i]) - closeF(b[i-1])
+		if d > 0 {
+			up += d
+		} else {
+			down -= d
+		}
+	}
+	if up+down == 0 {
+		return 0.5
+	}
+	return up / (up + down)
 }

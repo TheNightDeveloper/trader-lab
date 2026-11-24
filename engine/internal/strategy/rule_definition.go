@@ -36,7 +36,7 @@ type Rule struct {
 	Right *RuleValue `json:"right,omitempty"`
 }
 
-// RuleValue selects a close, trailing mean, closed bucket or nonnegative constant.
+// RuleValue selects an observed price, rolling indicator, closed bucket or constant.
 type RuleValue struct {
 	Kind      string         `json:"kind"`
 	Number    *float64       `json:"number,omitempty"`
