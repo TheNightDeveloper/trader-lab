@@ -69,6 +69,14 @@ func (d *RuleDefinition) UnmarshalJSON(raw []byte) error {
 
 // Build compiles validated rules and creates independent target state for a run.
 func (d RuleDefinition) Build() (Strategy, error) {
+	s, err := d.compile()
+	if err != nil {
+		return nil, err
+	}
+	return s, nil
+}
+
+func (d RuleDefinition) compile() (*ruleStrategy, error) {
 	if d.Format != RuleFormatV1 {
 		return nil, fmt.Errorf("strategy: unsupported rule definition format %q", d.Format)
 	}
@@ -95,6 +103,24 @@ func (d RuleDefinition) Build() (Strategy, error) {
 		entry: entry.test, exit: exit.test, reason: entry.reason, bars: max(entry.bars, exit.bars),
 		exposure: d.Exposure, base: c.base, long: make(map[string]bool),
 	}, nil
+}
+
+// ProbeEntry observes the latest candle from flat exposure without consuming strategy state.
+// ready distinguishes missing indicator inputs from a confirmed absence of an entry.
+func (d RuleDefinition) ProbeEntry(history []data.Bar) (intent Intent, ready bool, err error) {
+	s, err := d.compile()
+	if err != nil || len(history) < s.bars {
+		return Intent{}, false, err
+	}
+	exit, ready := s.exit(history)
+	if !ready || exit {
+		return Intent{}, ready, nil
+	}
+	entry, ready := s.entry(history)
+	if !ready || !entry {
+		return Intent{}, ready, nil
+	}
+	return s.entryIntent(history[len(history)-1].Instrument, history), true, nil
 }
 
 // ContentHash identifies the validated ordered AST through its canonical JSON.

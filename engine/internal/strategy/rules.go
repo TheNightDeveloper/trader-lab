@@ -223,14 +223,18 @@ func (s *ruleStrategy) OnBar(ctx RunContext, b data.Bar) ([]Intent, error) {
 	} else if !wasLong {
 		if entry, ready := s.entry(history); ready && entry {
 			s.long[b.Instrument] = true
-			reason := "rule entry"
-			if s.reason != nil {
-				reason = s.reason(history)
-			}
-			return []Intent{{Instrument: b.Instrument, Target: s.exposure, Reason: reason}}, nil
+			return []Intent{s.entryIntent(b.Instrument, history)}, nil
 		}
 	}
 	return nil, nil
+}
+
+func (s *ruleStrategy) entryIntent(symbol string, history []data.Bar) Intent {
+	reason := "rule entry"
+	if s.reason != nil {
+		reason = s.reason(history)
+	}
+	return Intent{Instrument: symbol, Target: s.exposure, Reason: reason}
 }
 
 // bucketClose reads the last aligned bucket only after its entire sequence is visible.

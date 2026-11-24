@@ -13,6 +13,7 @@ import (
 	"tradinglab/engine/internal/data"
 	labv1 "tradinglab/engine/internal/gen/lab/v1"
 	"tradinglab/engine/internal/instrument"
+	"tradinglab/engine/internal/jobs"
 	"tradinglab/engine/internal/store"
 	"tradinglab/engine/internal/store/db"
 )
@@ -22,6 +23,7 @@ type Market struct {
 	Clock   clock.Clock
 	Live    LiveSource
 	Symbols []string // same configuration as public candle ingestion
+	Limiter *jobs.Limiter
 }
 
 func (m *Market) GetMarketSnapshot(ctx context.Context, _ *connect.Request[labv1.GetMarketSnapshotRequest]) (*connect.Response[labv1.GetMarketSnapshotResponse], error) {
@@ -33,9 +35,6 @@ func (m *Market) GetMarketSnapshot(ctx context.Context, _ *connect.Request[labv1
 		if spec.Quote == instrument.USDT && slices.Contains(m.Symbols, spec.Symbol) {
 			symbols = append(symbols, spec.Symbol)
 		}
-	}
-	if len(symbols) == 0 {
-		return connect.NewResponse(response), nil
 	}
 	candles, err := m.Store.LatestMarketCandles(ctx, db.LatestMarketCandlesParams{Symbols: symbols, AsOf: now})
 	if err != nil {
@@ -50,6 +49,7 @@ func (m *Market) GetMarketSnapshot(ctx context.Context, _ *connect.Request[labv1
 		bySymbol[candle.Symbol] = candle
 	}
 	feeds := make(map[string]data.LiveSymbolStatus, len(symbols))
+	freshSymbols := make(map[string]bool, len(symbols))
 	if m.Live != nil {
 		for _, feed := range m.Live.Status().Symbols {
 			feeds[feed.Symbol] = feed
@@ -70,7 +70,20 @@ func (m *Market) GetMarketSnapshot(ctx context.Context, _ *connect.Request[labv1
 		if m.Live != nil {
 			watch.State = marketFeedState(feeds[spec.Symbol], candle.CloseTime)
 		}
+		freshSymbols[spec.Symbol] = watch.State == labv1.LiveState_LIVE_STATE_FRESH
 		response.MarketWatch = append(response.MarketWatch, watch)
+	}
+	rows, err := m.Store.RecentMarketOpportunities(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, row := range rows {
+		response.Opportunities = append(response.Opportunities, &labv1.MarketOpportunity{
+			Id: row.ID, Symbol: row.Symbol, RuleVersionId: row.RuleVersionID, RuleTitle: row.RuleTitle,
+			ReportId: row.ReportID, Reason: row.Reason, ReferenceClose: usdtP(row.ReferenceClose),
+			CandleClosedAtUnixMs: ms(row.CandleClosedAt), ObservedAtUnixMs: ms(row.ObservedAt), ExpiresAtUnixMs: ms(row.ExpiresAt),
+			Current: freshSymbols[row.Symbol] && opportunityCurrent(feeds[row.Symbol], now, row.CandleClosedAt, row.ExpiresAt),
+		})
 	}
 	return connect.NewResponse(response), nil
 }

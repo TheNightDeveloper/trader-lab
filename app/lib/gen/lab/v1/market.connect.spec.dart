@@ -17,4 +17,12 @@ abstract final class MarketService {
     labv1market.GetMarketSnapshotRequest.new,
     labv1market.GetMarketSnapshotResponse.new,
   );
+
+  /// Observes a tested rule on the latest complete 1h candle and records a match.
+  static const scanMarketOpportunity = connect.Spec(
+    '/$name/ScanMarketOpportunity',
+    connect.StreamType.unary,
+    labv1market.ScanMarketOpportunityRequest.new,
+    labv1market.ScanMarketOpportunityResponse.new,
+  );
 }

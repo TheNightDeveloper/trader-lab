@@ -206,6 +206,21 @@ type LifecycleEvent struct {
 	At        time.Time
 }
 
+type MarketOpportunity struct {
+	ID             int64
+	Symbol         string
+	RuleVersionID  int64
+	ReportID       string
+	SpecRevision   string
+	CandleClosedAt time.Time
+	ObservedAt     time.Time
+	ExpiresAt      time.Time
+	ReferenceClose int64
+	Reason         string
+	Snapshot       []byte
+	SnapshotSha256 string
+}
+
 type ModelArtifact struct {
 	ID          string
 	AlgorithmID string

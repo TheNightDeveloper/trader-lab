@@ -23,11 +23,15 @@ export 'market.pb.dart';
 abstract class MarketServiceBase extends $pb.GeneratedService {
   $async.Future<$3.GetMarketSnapshotResponse> getMarketSnapshot(
       $pb.ServerContext ctx, $3.GetMarketSnapshotRequest request);
+  $async.Future<$3.ScanMarketOpportunityResponse> scanMarketOpportunity(
+      $pb.ServerContext ctx, $3.ScanMarketOpportunityRequest request);
 
   $pb.GeneratedMessage createRequest($core.String methodName) {
     switch (methodName) {
       case 'GetMarketSnapshot':
         return $3.GetMarketSnapshotRequest();
+      case 'ScanMarketOpportunity':
+        return $3.ScanMarketOpportunityRequest();
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }
@@ -38,6 +42,9 @@ abstract class MarketServiceBase extends $pb.GeneratedService {
     switch (methodName) {
       case 'GetMarketSnapshot':
         return getMarketSnapshot(ctx, request as $3.GetMarketSnapshotRequest);
+      case 'ScanMarketOpportunity':
+        return scanMarketOpportunity(
+            ctx, request as $3.ScanMarketOpportunityRequest);
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }

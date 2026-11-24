@@ -18,9 +18,12 @@ import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'common.pb.dart' as $1;
 import 'health.pbenum.dart' as $2;
+import 'market.pbenum.dart';
 import 'workspace.pb.dart' as $0;
 
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
+
+export 'market.pbenum.dart';
 
 class GetMarketSnapshotRequest extends $pb.GeneratedMessage {
   factory GetMarketSnapshotRequest() => GetMarketSnapshotRequest._();
@@ -70,10 +73,12 @@ class GetMarketSnapshotResponse extends $pb.GeneratedMessage {
   factory GetMarketSnapshotResponse({
     $fixnum.Int64? observedAtUnixMs,
     $core.Iterable<MarketWatch>? marketWatch,
+    $core.Iterable<MarketOpportunity>? opportunities,
   }) {
     final result = GetMarketSnapshotResponse._();
     if (observedAtUnixMs != null) result.observedAtUnixMs = observedAtUnixMs;
     if (marketWatch != null) result.marketWatch.addAll(marketWatch);
+    if (opportunities != null) result.opportunities.addAll(opportunities);
     return result;
   }
 
@@ -93,6 +98,8 @@ class GetMarketSnapshotResponse extends $pb.GeneratedMessage {
     ..aInt64(1, _omitFieldNames ? '' : 'observedAtUnixMs')
     ..pPM<MarketWatch>(2, _omitFieldNames ? '' : 'marketWatch',
         subBuilder: MarketWatch.$_createMessage)
+    ..pPM<MarketOpportunity>(3, _omitFieldNames ? '' : 'opportunities',
+        subBuilder: MarketOpportunity.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -132,6 +139,9 @@ class GetMarketSnapshotResponse extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(2)
   $pb.PbList<MarketWatch> get marketWatch => $_getList(1);
+
+  @$pb.TagNumber(3)
+  $pb.PbList<MarketOpportunity> get opportunities => $_getList(2);
 }
 
 class MarketWatch extends $pb.GeneratedMessage {
@@ -331,6 +341,341 @@ class MarketCandle extends $pb.GeneratedMessage {
   $1.Money ensureClose() => $_ensure(4);
 }
 
+class ScanMarketOpportunityRequest extends $pb.GeneratedMessage {
+  factory ScanMarketOpportunityRequest({
+    $fixnum.Int64? ruleVersionId,
+    $core.String? symbol,
+  }) {
+    final result = ScanMarketOpportunityRequest._();
+    if (ruleVersionId != null) result.ruleVersionId = ruleVersionId;
+    if (symbol != null) result.symbol = symbol;
+    return result;
+  }
+
+  ScanMarketOpportunityRequest._();
+
+  factory ScanMarketOpportunityRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ScanMarketOpportunityRequest()..mergeFromBuffer(data, registry);
+  factory ScanMarketOpportunityRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ScanMarketOpportunityRequest()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ScanMarketOpportunityRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: ScanMarketOpportunityRequest.$_createMessage)
+    ..aInt64(1, _omitFieldNames ? '' : 'ruleVersionId')
+    ..aOS(2, _omitFieldNames ? '' : 'symbol')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ScanMarketOpportunityRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ScanMarketOpportunityRequest copyWith(
+          void Function(ScanMarketOpportunityRequest) updates) =>
+      super.copyWith(
+              (message) => updates(message as ScanMarketOpportunityRequest))
+          as ScanMarketOpportunityRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use ScanMarketOpportunityRequest() / ScanMarketOpportunityRequest.new instead')
+  static ScanMarketOpportunityRequest create() =>
+      ScanMarketOpportunityRequest._();
+  static $pb.GeneratedMessage $_createMessage() =>
+      ScanMarketOpportunityRequest._();
+  @$core.override
+  ScanMarketOpportunityRequest createEmptyInstance() =>
+      ScanMarketOpportunityRequest._();
+  @$core.pragma('dart2js:noInline')
+  static ScanMarketOpportunityRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ScanMarketOpportunityRequest>(
+          ScanMarketOpportunityRequest.$_createMessage);
+  static ScanMarketOpportunityRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get ruleVersionId => $_getI64(0);
+  @$pb.TagNumber(1)
+  set ruleVersionId($fixnum.Int64 value) => $_setInt64(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasRuleVersionId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearRuleVersionId() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get symbol => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set symbol($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasSymbol() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearSymbol() => $_clearField(2);
+}
+
+class ScanMarketOpportunityResponse extends $pb.GeneratedMessage {
+  factory ScanMarketOpportunityResponse({
+    MarketScanState? state,
+    MarketOpportunity? opportunity,
+  }) {
+    final result = ScanMarketOpportunityResponse._();
+    if (state != null) result.state = state;
+    if (opportunity != null) result.opportunity = opportunity;
+    return result;
+  }
+
+  ScanMarketOpportunityResponse._();
+
+  factory ScanMarketOpportunityResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ScanMarketOpportunityResponse()..mergeFromBuffer(data, registry);
+  factory ScanMarketOpportunityResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ScanMarketOpportunityResponse()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ScanMarketOpportunityResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: ScanMarketOpportunityResponse.$_createMessage)
+    ..aE<MarketScanState>(1, _omitFieldNames ? '' : 'state',
+        enumValues: MarketScanState.values)
+    ..aOM<MarketOpportunity>(2, _omitFieldNames ? '' : 'opportunity',
+        subBuilder: MarketOpportunity.$_createMessage)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ScanMarketOpportunityResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ScanMarketOpportunityResponse copyWith(
+          void Function(ScanMarketOpportunityResponse) updates) =>
+      super.copyWith(
+              (message) => updates(message as ScanMarketOpportunityResponse))
+          as ScanMarketOpportunityResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use ScanMarketOpportunityResponse() / ScanMarketOpportunityResponse.new instead')
+  static ScanMarketOpportunityResponse create() =>
+      ScanMarketOpportunityResponse._();
+  static $pb.GeneratedMessage $_createMessage() =>
+      ScanMarketOpportunityResponse._();
+  @$core.override
+  ScanMarketOpportunityResponse createEmptyInstance() =>
+      ScanMarketOpportunityResponse._();
+  @$core.pragma('dart2js:noInline')
+  static ScanMarketOpportunityResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ScanMarketOpportunityResponse>(
+          ScanMarketOpportunityResponse.$_createMessage);
+  static ScanMarketOpportunityResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  MarketScanState get state => $_getN(0);
+  @$pb.TagNumber(1)
+  set state(MarketScanState value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasState() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearState() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  MarketOpportunity get opportunity => $_getN(1);
+  @$pb.TagNumber(2)
+  set opportunity(MarketOpportunity value) => $_setField(2, value);
+  @$pb.TagNumber(2)
+  $core.bool hasOpportunity() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearOpportunity() => $_clearField(2);
+  @$pb.TagNumber(2)
+  MarketOpportunity ensureOpportunity() => $_ensure(1);
+}
+
+class MarketOpportunity extends $pb.GeneratedMessage {
+  factory MarketOpportunity({
+    $fixnum.Int64? id,
+    $core.String? symbol,
+    $fixnum.Int64? ruleVersionId,
+    $core.String? ruleTitle,
+    $core.String? reportId,
+    $core.String? reason,
+    $1.Money? referenceClose,
+    $fixnum.Int64? candleClosedAtUnixMs,
+    $fixnum.Int64? observedAtUnixMs,
+    $fixnum.Int64? expiresAtUnixMs,
+    $core.bool? current,
+  }) {
+    final result = MarketOpportunity._();
+    if (id != null) result.id = id;
+    if (symbol != null) result.symbol = symbol;
+    if (ruleVersionId != null) result.ruleVersionId = ruleVersionId;
+    if (ruleTitle != null) result.ruleTitle = ruleTitle;
+    if (reportId != null) result.reportId = reportId;
+    if (reason != null) result.reason = reason;
+    if (referenceClose != null) result.referenceClose = referenceClose;
+    if (candleClosedAtUnixMs != null)
+      result.candleClosedAtUnixMs = candleClosedAtUnixMs;
+    if (observedAtUnixMs != null) result.observedAtUnixMs = observedAtUnixMs;
+    if (expiresAtUnixMs != null) result.expiresAtUnixMs = expiresAtUnixMs;
+    if (current != null) result.current = current;
+    return result;
+  }
+
+  MarketOpportunity._();
+
+  factory MarketOpportunity.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      MarketOpportunity()..mergeFromBuffer(data, registry);
+  factory MarketOpportunity.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      MarketOpportunity()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'MarketOpportunity',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: MarketOpportunity.$_createMessage)
+    ..aInt64(1, _omitFieldNames ? '' : 'id')
+    ..aOS(2, _omitFieldNames ? '' : 'symbol')
+    ..aInt64(3, _omitFieldNames ? '' : 'ruleVersionId')
+    ..aOS(4, _omitFieldNames ? '' : 'ruleTitle')
+    ..aOS(5, _omitFieldNames ? '' : 'reportId')
+    ..aOS(6, _omitFieldNames ? '' : 'reason')
+    ..aOM<$1.Money>(7, _omitFieldNames ? '' : 'referenceClose',
+        subBuilder: $1.Money.$_createMessage)
+    ..aInt64(8, _omitFieldNames ? '' : 'candleClosedAtUnixMs')
+    ..aInt64(9, _omitFieldNames ? '' : 'observedAtUnixMs')
+    ..aInt64(10, _omitFieldNames ? '' : 'expiresAtUnixMs')
+    ..aOB(11, _omitFieldNames ? '' : 'current')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  MarketOpportunity clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  MarketOpportunity copyWith(void Function(MarketOpportunity) updates) =>
+      super.copyWith((message) => updates(message as MarketOpportunity))
+          as MarketOpportunity;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use MarketOpportunity() / MarketOpportunity.new instead')
+  static MarketOpportunity create() => MarketOpportunity._();
+  static $pb.GeneratedMessage $_createMessage() => MarketOpportunity._();
+  @$core.override
+  MarketOpportunity createEmptyInstance() => MarketOpportunity._();
+  @$core.pragma('dart2js:noInline')
+  static MarketOpportunity getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<MarketOpportunity>(
+          MarketOpportunity.$_createMessage);
+  static MarketOpportunity? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get id => $_getI64(0);
+  @$pb.TagNumber(1)
+  set id($fixnum.Int64 value) => $_setInt64(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get symbol => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set symbol($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasSymbol() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearSymbol() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $fixnum.Int64 get ruleVersionId => $_getI64(2);
+  @$pb.TagNumber(3)
+  set ruleVersionId($fixnum.Int64 value) => $_setInt64(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasRuleVersionId() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearRuleVersionId() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.String get ruleTitle => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set ruleTitle($core.String value) => $_setString(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasRuleTitle() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearRuleTitle() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.String get reportId => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set reportId($core.String value) => $_setString(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasReportId() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearReportId() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.String get reason => $_getSZ(5);
+  @$pb.TagNumber(6)
+  set reason($core.String value) => $_setString(5, value);
+  @$pb.TagNumber(6)
+  $core.bool hasReason() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearReason() => $_clearField(6);
+
+  @$pb.TagNumber(7)
+  $1.Money get referenceClose => $_getN(6);
+  @$pb.TagNumber(7)
+  set referenceClose($1.Money value) => $_setField(7, value);
+  @$pb.TagNumber(7)
+  $core.bool hasReferenceClose() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearReferenceClose() => $_clearField(7);
+  @$pb.TagNumber(7)
+  $1.Money ensureReferenceClose() => $_ensure(6);
+
+  @$pb.TagNumber(8)
+  $fixnum.Int64 get candleClosedAtUnixMs => $_getI64(7);
+  @$pb.TagNumber(8)
+  set candleClosedAtUnixMs($fixnum.Int64 value) => $_setInt64(7, value);
+  @$pb.TagNumber(8)
+  $core.bool hasCandleClosedAtUnixMs() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearCandleClosedAtUnixMs() => $_clearField(8);
+
+  @$pb.TagNumber(9)
+  $fixnum.Int64 get observedAtUnixMs => $_getI64(8);
+  @$pb.TagNumber(9)
+  set observedAtUnixMs($fixnum.Int64 value) => $_setInt64(8, value);
+  @$pb.TagNumber(9)
+  $core.bool hasObservedAtUnixMs() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearObservedAtUnixMs() => $_clearField(9);
+
+  @$pb.TagNumber(10)
+  $fixnum.Int64 get expiresAtUnixMs => $_getI64(9);
+  @$pb.TagNumber(10)
+  set expiresAtUnixMs($fixnum.Int64 value) => $_setInt64(9, value);
+  @$pb.TagNumber(10)
+  $core.bool hasExpiresAtUnixMs() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearExpiresAtUnixMs() => $_clearField(10);
+
+  @$pb.TagNumber(11)
+  $core.bool get current => $_getBF(10);
+  @$pb.TagNumber(11)
+  set current($core.bool value) => $_setBool(10, value);
+  @$pb.TagNumber(11)
+  $core.bool hasCurrent() => $_has(10);
+  @$pb.TagNumber(11)
+  void clearCurrent() => $_clearField(11);
+}
+
 class MarketServiceApi {
   final $pb.RpcClient _client;
 
@@ -341,6 +686,12 @@ class MarketServiceApi {
           $pb.ClientContext? ctx, GetMarketSnapshotRequest request) =>
       _client.invoke<GetMarketSnapshotResponse>(ctx, 'MarketService',
           'GetMarketSnapshot', request, GetMarketSnapshotResponse());
+
+  /// Observes a tested rule on the latest complete 1h candle and records a match.
+  $async.Future<ScanMarketOpportunityResponse> scanMarketOpportunity(
+          $pb.ClientContext? ctx, ScanMarketOpportunityRequest request) =>
+      _client.invoke<ScanMarketOpportunityResponse>(ctx, 'MarketService',
+          'ScanMarketOpportunity', request, ScanMarketOpportunityResponse());
 }
 
 const $core.bool _omitFieldNames =

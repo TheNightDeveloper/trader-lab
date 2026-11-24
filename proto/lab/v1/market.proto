@@ -9,6 +9,8 @@ import "lab/v1/workspace.proto";
 service MarketService {
   // Returns the configured spot USDT watchlist and its latest known observations.
   rpc GetMarketSnapshot(GetMarketSnapshotRequest) returns (GetMarketSnapshotResponse);
+  // Observes a tested rule on the latest complete 1h candle and records a match.
+  rpc ScanMarketOpportunity(ScanMarketOpportunityRequest) returns (ScanMarketOpportunityResponse);
 }
 
 message GetMarketSnapshotRequest {}
@@ -16,6 +18,7 @@ message GetMarketSnapshotRequest {}
 message GetMarketSnapshotResponse {
   int64 observed_at_unix_ms = 1;
   repeated MarketWatch market_watch = 2;
+  repeated MarketOpportunity opportunities = 3; // newest 25, including expired observations
 }
 
 message MarketWatch {
@@ -31,4 +34,35 @@ message MarketCandle {
   int64 available_at_unix_ms = 3;
   int32 revision = 4;
   Money close = 5;
+}
+
+message ScanMarketOpportunityRequest {
+  int64 rule_version_id = 1;
+  string symbol = 2;
+}
+
+message ScanMarketOpportunityResponse {
+  MarketScanState state = 1;
+  MarketOpportunity opportunity = 2; // present only on a recorded match
+}
+
+enum MarketScanState {
+  MARKET_SCAN_STATE_UNSPECIFIED = 0;
+  MARKET_SCAN_STATE_MATCH = 1;
+  MARKET_SCAN_STATE_NO_MATCH = 2;
+  MARKET_SCAN_STATE_INCOMPLETE_DATA = 3;
+}
+
+message MarketOpportunity {
+  int64 id = 1;
+  string symbol = 2;
+  int64 rule_version_id = 3;
+  string rule_title = 4;
+  string report_id = 5;
+  string reason = 6;
+  Money reference_close = 7;
+  int64 candle_closed_at_unix_ms = 8;
+  int64 observed_at_unix_ms = 9;
+  int64 expires_at_unix_ms = 10;
+  bool current = 11; // server confirmed a fresh feed and the observation is within its window
 }

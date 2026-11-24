@@ -68,7 +68,7 @@ func TestMarketSnapshotUsesKnownFeedRevisions(t *testing.T) {
 	require.EqualValues(t, 2, last.GetCandle().GetRevision())
 	require.Equal(t, "6700000000002", last.GetCandle().GetClose().GetUnits())
 	require.Equal(t, bar.AvailableAt.UnixMilli(), last.GetCandle().GetAvailableAtUnixMs())
-	require.Empty(t, read(&Market{Clock: wall}).GetMarketWatch())
+	require.Empty(t, read(&Market{Store: st, Clock: wall}).GetMarketWatch())
 }
 
 func TestMarketSnapshotDoesNotReuseFreshnessForDifferentCandle(t *testing.T) {
