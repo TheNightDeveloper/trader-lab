@@ -231,6 +231,66 @@ abstract class L10n {
   /// **'داده'**
   String get navData;
 
+  /// No description provided for @navMarket.
+  ///
+  /// In fa, this message translates to:
+  /// **'دیدبان بازار'**
+  String get navMarket;
+
+  /// No description provided for @screenMarketSub.
+  ///
+  /// In fa, this message translates to:
+  /// **'قیمت پایانی آخرین کندل یک‌دقیقه‌ای جفت‌های اسپات USDT'**
+  String get screenMarketSub;
+
+  /// No description provided for @marketObservedAt.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان آخرین بررسی بازار'**
+  String get marketObservedAt;
+
+  /// No description provided for @marketLoading.
+  ///
+  /// In fa, this message translates to:
+  /// **'در حال دریافت دادهٔ دیدبان…'**
+  String get marketLoading;
+
+  /// No description provided for @marketEmpty.
+  ///
+  /// In fa, this message translates to:
+  /// **'هیچ جفت اسپات USDT برای دریافت زنده پیکربندی نشده است.'**
+  String get marketEmpty;
+
+  /// No description provided for @marketDisconnected.
+  ///
+  /// In fa, this message translates to:
+  /// **'ارتباط دیدبان قطع شده است. آخرین دادهٔ تأییدشده نمایش داده می‌شود.'**
+  String get marketDisconnected;
+
+  /// No description provided for @marketNoCandle.
+  ///
+  /// In fa, this message translates to:
+  /// **'هنوز کندل بسته‌شده‌ای از جریان زنده ثبت نشده است.'**
+  String get marketNoCandle;
+
+  /// No description provided for @marketClosePrice.
+  ///
+  /// In fa, this message translates to:
+  /// **'قیمت پایانی'**
+  String get marketClosePrice;
+
+  /// No description provided for @marketClosedAt.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان بسته‌شدن کندل'**
+  String get marketClosedAt;
+
+  /// No description provided for @marketAvailableAt.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان در دسترس بودن داده'**
+  String get marketAvailableAt;
+
   /// No description provided for @navGroupReview.
   ///
   /// In fa, this message translates to:

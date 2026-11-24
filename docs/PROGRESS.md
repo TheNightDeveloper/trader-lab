@@ -2,6 +2,23 @@
 
 Update at the end of every session.
 
+## P3 market watchlist (2026-11-24)
+
+The market watchlist uses the engine's configured spot USDT symbols. The
+Connect API returns each symbol's latest available closed 1m REST candle,
+its stored revision, and the per-symbol feed state. Archive candles and
+unavailable corrections stay out of the view. PostgreSQL retains the last
+observation across engine restarts.
+
+At `/market`, the Persian UI shows the exact close and separately labels
+the candle close, availability and snapshot times in UTC. It keeps the last
+confirmed data visible during connection loss and retries automatically.
+Chrome at 1440 and 390 pixels verified the page with a real local engine,
+seeded PostgreSQL candles, an interrupted request and recovery to a new revision.
+Dart analysis, the web release build, and all 57 existing Flutter tests passed.
+
+The opportunity scanner, trade plans and operational Paper account remain open.
+
 ## P2 report execution profile (2026-11-24)
 
 A saved-rule report links back to the exact version it ran and displays the

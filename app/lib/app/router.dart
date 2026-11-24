@@ -12,6 +12,7 @@ import '../features/experiments/queue_screen.dart';
 import '../features/learning/learning_screen.dart';
 import '../features/library/library_screen.dart';
 import '../features/library/rule_library_screen.dart';
+import '../features/market/market_screen.dart';
 import '../features/pnl/pnl_screen.dart';
 import '../features/reports/compare_screen.dart';
 import '../features/reports/report_screen.dart';
@@ -97,6 +98,7 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
               _page(context, state, ChartScreen(report: state.uri.queryParameters['report'])),
         ),
         GoRoute(path: Dest.data.path, pageBuilder: (context, state) => _page(context, state, const DataScreen())),
+        GoRoute(path: Dest.market.path, pageBuilder: (context, state) => _page(context, state, const MarketScreen())),
         GoRoute(
           path: Dest.settings.path,
           pageBuilder: (context, state) => _page(context, state, const SettingsScreen()),

@@ -84,6 +84,40 @@ class L10nFa extends L10n {
   String get navData => 'داده';
 
   @override
+  String get navMarket => 'دیدبان بازار';
+
+  @override
+  String get screenMarketSub =>
+      'قیمت پایانی آخرین کندل یک‌دقیقه‌ای جفت‌های اسپات USDT';
+
+  @override
+  String get marketObservedAt => 'زمان آخرین بررسی بازار';
+
+  @override
+  String get marketLoading => 'در حال دریافت دادهٔ دیدبان…';
+
+  @override
+  String get marketEmpty =>
+      'هیچ جفت اسپات USDT برای دریافت زنده پیکربندی نشده است.';
+
+  @override
+  String get marketDisconnected =>
+      'ارتباط دیدبان قطع شده است. آخرین دادهٔ تأییدشده نمایش داده می‌شود.';
+
+  @override
+  String get marketNoCandle =>
+      'هنوز کندل بسته‌شده‌ای از جریان زنده ثبت نشده است.';
+
+  @override
+  String get marketClosePrice => 'قیمت پایانی';
+
+  @override
+  String get marketClosedAt => 'زمان بسته‌شدن کندل';
+
+  @override
+  String get marketAvailableAt => 'زمان در دسترس بودن داده';
+
+  @override
   String get navGroupReview => 'بررسی';
 
   @override
