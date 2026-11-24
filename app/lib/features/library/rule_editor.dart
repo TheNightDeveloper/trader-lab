@@ -272,12 +272,14 @@ class RuleSelect extends StatelessWidget {
     required this.value,
     required this.options,
     required this.onChanged,
+    this.enabled = true,
   });
 
   final String label;
   final String value;
   final Map<String, String> options;
   final ValueChanged<String> onChanged;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) => DropdownButtonFormField<String>(
@@ -288,8 +290,10 @@ class RuleSelect extends StatelessWidget {
       for (final MapEntry(:key, :value) in options.entries)
         DropdownMenuItem(value: key, child: Text(value)),
     ],
-    onChanged: (next) {
-      if (next != null) onChanged(next);
-    },
+    onChanged: enabled
+        ? (next) {
+            if (next != null) onChanged(next);
+          }
+        : null,
   );
 }

@@ -10,12 +10,24 @@ import '../../core/widgets/data.dart';
 import '../../core/widgets/layout.dart';
 import '../../gen/lab/v1/library.pb.dart';
 import '../page_frame.dart';
+import 'rule_composer.dart';
 import 'rule_draft_dialog.dart';
 import 'rule_editor.dart';
 import 'rule_version_picker.dart';
 
 class RuleLibraryScreen extends ConsumerWidget {
   const RuleLibraryScreen({super.key});
+
+  Future<void> _compose(BuildContext context) async {
+    final version = await showDialog<RuleVersionSummary>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const ComposeRuleDialog(),
+    );
+    if (context.mounted && version != null) {
+      context.go(ruleVersionPath(version.id));
+    }
+  }
 
   Future<void> _draft(BuildContext context, {RuleTemplate? template}) async {
     final version = await showDialog<RuleVersionSummary>(
@@ -37,6 +49,11 @@ class RuleLibraryScreen extends ConsumerWidget {
           OutlinedButton(
             onPressed: () => context.go('/library'),
             child: const Text('استراتژی‌های داخلی'),
+          ),
+          OutlinedButton.icon(
+            onPressed: () => _compose(context),
+            icon: const Icon(Icons.merge_type),
+            label: const Text('ترکیب نسخه‌ها'),
           ),
           FilledButton.icon(
             onPressed: () => _draft(context),
@@ -138,6 +155,8 @@ class _RuleDetails extends StatelessWidget {
           ),
           child: _RuleSummary(definition: definition),
         ),
+        const SizedBox(height: AppSpace.md),
+        _RuleBacktests(data: data),
         const SizedBox(height: AppSpace.md),
         SectionCard(
           title: 'نیاز داده',
@@ -263,4 +282,33 @@ class _RuleChanges extends StatelessWidget {
   String _display(Object? value) => value is RuleJson
       ? describeRule(value)
       : ruleTimeframes[value] ?? value?.toString() ?? 'همهٔ بازه‌ها';
+}
+
+class _RuleBacktests extends StatefulWidget {
+  const _RuleBacktests({required this.data});
+
+  final GetRuleVersionResponse data;
+
+  @override
+  State<_RuleBacktests> createState() => _RuleBacktestsState();
+}
+
+class _RuleBacktestsState extends State<_RuleBacktests> {
+  // Once expanded the form stays mounted so hiding it does not discard an in-flight group.
+  bool _opened = false;
+  bool get _group => widget.data.version.otherParentId != Int64.ZERO;
+
+  @override
+  Widget build(BuildContext context) => SectionCard(
+    child: ExpansionTile(
+      title: Text(_group ? 'بک‌تست A، B و A+B' : 'بک‌تست این نسخه'),
+      maintainState: true,
+      onExpansionChanged: (value) {
+        if (value && !_opened) setState(() => _opened = true);
+      },
+      children: [
+        if (_opened) RuleBacktestSection(rule: widget.data, compare: _group),
+      ],
+    ),
+  );
 }

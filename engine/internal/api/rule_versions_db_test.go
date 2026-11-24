@@ -82,10 +82,21 @@ func TestSavedRuleVersions(t *testing.T) {
 	input := &labv1.ReportSpec{DatasetIds: []string{ds.ID}, Capital: usdtMoney("1000"), Folds: 3, RuleVersionId: version.GetId(), RuleContentHash: "wrong"}
 	_, err = reports.CreateReport(ctx, connect.NewRequest(&labv1.CreateReportRequest{Spec: input}))
 	require.Equal(t, connect.CodeInvalidArgument, connect.CodeOf(err))
-	input.RuleContentHash = version.GetContentHash()
-	created, err := reports.CreateReport(ctx, connect.NewRequest(&labv1.CreateReportRequest{Spec: input}))
+	// The UI submits A, B and A+B separately with one set of execution assumptions.
+	ids := make([]string, 0, 3)
+	for _, arm := range []*labv1.RuleVersionSummary{first, second, version} {
+		input.RuleVersionId, input.RuleContentHash = arm.GetId(), arm.GetContentHash()
+		created, err := reports.CreateReport(ctx, connect.NewRequest(&labv1.CreateReportRequest{Spec: input}))
+		require.NoError(t, err)
+		ids = append(ids, created.Msg.GetReportId())
+	}
+	comparison, err := reports.Compare(ctx, connect.NewRequest(&labv1.CompareRequest{ReportIds: ids}))
 	require.NoError(t, err)
-	id := created.Msg.GetReportId()
+	require.Len(t, comparison.Msg.GetColumns(), 3)
+	for _, assumption := range comparison.Msg.GetAssumptions() {
+		require.False(t, assumption.GetBlocking() && assumption.GetDiffers(), assumption.GetKey())
+	}
+	id := ids[2]
 	got, err := reports.GetReport(ctx, connect.NewRequest(&labv1.GetReportRequest{ReportId: id}))
 	require.NoError(t, err)
 	require.Equal(t, version.GetId(), got.Msg.GetReport().GetSpec().GetRuleVersionId())

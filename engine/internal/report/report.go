@@ -323,7 +323,11 @@ func (s Service) persist(ctx context.Context, id string, bars map[string][]data.
 	ret, _ := metrics.Get(ev.OOS.Metrics, "total_return")
 	closed, _ := metrics.Get(ev.OOS.Metrics, "closed_trades")
 	symbols := slices.Sorted(maps.Keys(bars))
-	title := fmt.Sprintf("%s · %s · %s", ev.Spec.Strategy, strings.Join(symbols, "+"), ev.Spec.Timeframe)
+	name := ev.Spec.Strategy
+	if ev.Spec.RuleVersionID != 0 {
+		name = fmt.Sprintf("%s #%d", name, ev.Spec.RuleVersionID)
+	}
+	title := fmt.Sprintf("%s · %s · %s", name, strings.Join(symbols, "+"), ev.Spec.Timeframe)
 	return s.Store.InTx(ctx, func(q *db.Queries) error {
 		err := q.InsertReport(ctx, db.InsertReportParams{
 			ID: id, Title: title, Spec: specJ, Split: splitJ, Evaluation: evJ, Holdout: holdJ,

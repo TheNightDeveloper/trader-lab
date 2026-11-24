@@ -2,6 +2,15 @@
 
 Update at the end of every session.
 
+## P2 composition and three-way backtest UI (2026-11-24)
+
+The composer picks two immutable rule versions and shows how the entry mode
+and exit owner affect the result. A single version or all three variants can
+use the existing backtest form. Group runs share dataset, cost and split inputs,
+retain completed legs after a later failure, and open A, B and A+B in Compare.
+Chrome verified three stored reports with the exact version and dataset IDs.
+The PostgreSQL test also verifies the blocking comparison assumptions match.
+
 ## P2 rule library and draft editor (2026-11-24)
 
 The Persian Rules Library opens from the existing strategy catalog. It searches

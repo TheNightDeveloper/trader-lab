@@ -76,7 +76,10 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
           pageBuilder: (context, state) => _page(
             context,
             state,
-            CompareScreen(ids: (state.uri.queryParameters['ids'] ?? '').split(',').where((s) => s.isNotEmpty).toList()),
+            CompareScreen(
+              ids: (state.uri.queryParameters['ids'] ?? '').split(',').where((s) => s.isNotEmpty).toList(),
+              composition: state.uri.queryParameters['composition'] == '1',
+            ),
           ),
         ),
         GoRoute(

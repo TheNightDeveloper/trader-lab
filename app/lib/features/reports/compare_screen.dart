@@ -21,8 +21,11 @@ import 'report_screen.dart';
 String colLabel(int i) => String.fromCharCode(65 + i); // A, B, C…
 
 class CompareScreen extends ConsumerWidget {
-  const CompareScreen({super.key, required this.ids});
+  const CompareScreen({super.key, required this.ids, this.composition = false});
   final List<String> ids;
+  final bool composition;
+
+  String _label(int index) => composition && ids.length == 3 && index == 2 ? 'A+B' : colLabel(index);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -72,7 +75,7 @@ class CompareScreen extends ConsumerWidget {
 
   List<Widget> _body(BuildContext context, L10n l, CompareResponse c) {
     final blocking = c.assumptions.where((a) => a.differs && a.blocking).toList();
-    final cols = [l.compareAssumption, for (var i = 0; i < c.columns.length; i++) colLabel(i), ''];
+    final cols = [l.compareAssumption, for (var i = 0; i < c.columns.length; i++) _label(i), ''];
     final colors = [...AppColors.series, AppColors.positive, AppColors.negative, AppColors.link];
     return [
       Wrap(
@@ -82,7 +85,7 @@ class CompareScreen extends ConsumerWidget {
           for (final (i, col) in c.columns.indexed)
             InkWell(
               onTap: () => context.go('/reports/${col.reportId}'),
-              child: BadgeChip('${colLabel(i)} · ${col.title}', tone: col.eligible ? 'neutral' : 'warning'),
+              child: BadgeChip('${_label(i)} · ${col.title}', tone: col.eligible ? 'neutral' : 'warning'),
             ),
         ],
       ),
@@ -122,7 +125,7 @@ class CompareScreen extends ConsumerWidget {
           series: [
             for (final (i, col) in c.columns.indexed)
               ChartSeries(
-                label: colLabel(i),
+                label: _label(i),
                 points: equityPoints(col.equity),
                 color: colors[i % colors.length],
                 dashed: i.isOdd,
@@ -134,7 +137,7 @@ class CompareScreen extends ConsumerWidget {
         title: l.compareMetrics,
         child: DataTableBox(
           minWidth: 560,
-          columns: [l.compareMetric, for (var i = 0; i < c.columns.length; i++) colLabel(i)],
+          columns: [l.compareMetric, for (var i = 0; i < c.columns.length; i++) _label(i)],
           rows: [
             for (final key in ['total_return', 'net_pnl', 'max_drawdown', 'sharpe', 'trades', 'win_rate'])
               [
