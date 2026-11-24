@@ -2,6 +2,27 @@
 
 Update at the end of every session.
 
+## P3 opportunity scan (2026-11-24)
+
+A tested rule version can open a manual spot scan from its Library detail.
+The engine requires a one-hour backtest for that version and symbol, a
+confirmed public-feed candle and complete inputs for the last closed hour.
+It uses the same rule predicates as the simulator. A match retains its exact
+input snapshot and digest, rule version, report and expiry in PostgreSQL.
+Concurrent scans share one record per version, symbol and closed hour.
+
+The watchlist shows recent opportunities, their reason, reference price and
+validity window, with links to the original rule and evidence. An expired or
+stale observation remains visible with its inactive state.
+
+Chrome ran Library → scan → recorded opportunity at 1440 pixels against the
+Go handlers and PostgreSQL with a seeded feed. A repeated scan kept the same
+record. At 390 pixels Chrome reopened the saved details from the watchlist.
+The PostgreSQL-required Go suite, Go vet and lint, Buf compatibility, Dart
+analysis, release web build and all 57 existing Flutter tests passed.
+
+Background scans, trade plans, execution risk checks and Paper accounts remain open.
+
 ## P3 market watchlist (2026-11-24)
 
 The market watchlist uses the engine's configured spot USDT symbols. The

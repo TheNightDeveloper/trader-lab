@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../app/nav.dart';
 import '../../core/format.dart';
 import '../../core/metric.dart';
 import '../../core/theme/tokens.dart';
@@ -12,6 +13,7 @@ import '../../core/widgets/data.dart';
 import '../../core/widgets/layout.dart';
 import '../../core/widgets/num.dart';
 import '../../gen/lab/v1/library.pb.dart';
+import '../../l10n/app_localizations.dart';
 import '../page_frame.dart';
 import 'rule_composer.dart';
 import 'rule_draft_dialog.dart';
@@ -200,6 +202,15 @@ class _RuleDetailsState extends State<_RuleDetails> {
           ),
         ),
         const SizedBox(height: AppSpace.md),
+        if (data.hasLatestReport() && (base == null || base == '1h'))
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: OutlinedButton.icon(
+              onPressed: () => context.go('${Dest.market.path}?rule=${version.id}'),
+              icon: const Icon(Icons.radar_outlined),
+              label: Text(L10n.of(context).marketScanOpen),
+            ),
+          ),
         _RuleBacktests(data: data),
       ],
     );

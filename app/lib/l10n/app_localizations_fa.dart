@@ -118,6 +118,76 @@ class L10nFa extends L10n {
   String get marketAvailableAt => 'زمان در دسترس بودن داده';
 
   @override
+  String get marketScanOpen => 'بررسی این نسخه در دیدبان';
+
+  @override
+  String get marketScanTitle => 'بررسی آخرین کندل یک‌ساعته';
+
+  @override
+  String get marketScanHelp =>
+      'برای نماد انتخابی، همین نسخه باید بک‌تست یک‌ساعته داشته باشد.';
+
+  @override
+  String get marketScanSymbol => 'نماد برای بررسی';
+
+  @override
+  String get marketScanReady => 'بررسی فرصت';
+
+  @override
+  String get marketScanRunning => 'در حال بررسی…';
+
+  @override
+  String get marketScanWaitForFeed =>
+      'برای بررسی، نمادی با دادهٔ تازه انتخاب کنید.';
+
+  @override
+  String get marketScanRecorded => 'فرصت در دیدبان ثبت شد.';
+
+  @override
+  String get marketScanNoMatch => 'در آخرین کندل، شرط ورود برقرار نبود.';
+
+  @override
+  String get marketScanIncomplete =>
+      'تاریخچهٔ کندل‌های کامل برای بررسی این نسخه کافی نیست.';
+
+  @override
+  String get marketScanUnexpected => 'نتیجهٔ بررسی از موتور دریافت نشد.';
+
+  @override
+  String get marketOpportunitiesTitle => 'فرصت‌های ثبت‌شده';
+
+  @override
+  String get marketOpportunitiesEmpty =>
+      'هنوز فرصتی ثبت نشده است. بررسی را از یک نسخهٔ بک‌تست‌شده در کتابخانه آغاز کنید.';
+
+  @override
+  String get marketOpportunityCurrent => 'در بازهٔ اعتبار';
+
+  @override
+  String get marketOpportunityInactive => 'فعلاً نامعتبر';
+
+  @override
+  String get marketOpportunityExpires => 'پایان اعتبار';
+
+  @override
+  String get marketOpportunityPrice => 'قیمت مرجع کندل';
+
+  @override
+  String get marketOpportunityEntry => 'شرط ورود نسخه برقرار بود';
+
+  @override
+  String get marketOpportunityRegimeA => 'شرط ورود شاخهٔ A برقرار بود';
+
+  @override
+  String get marketOpportunityRegimeB => 'شرط ورود شاخهٔ B برقرار بود';
+
+  @override
+  String get marketOpportunityRule => 'مشاهدهٔ نسخه';
+
+  @override
+  String get marketOpportunityReport => 'مشاهدهٔ بک‌تست';
+
+  @override
   String get navGroupReview => 'بررسی';
 
   @override

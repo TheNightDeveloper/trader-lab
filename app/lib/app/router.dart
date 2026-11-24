@@ -98,7 +98,14 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
               _page(context, state, ChartScreen(report: state.uri.queryParameters['report'])),
         ),
         GoRoute(path: Dest.data.path, pageBuilder: (context, state) => _page(context, state, const DataScreen())),
-        GoRoute(path: Dest.market.path, pageBuilder: (context, state) => _page(context, state, const MarketScreen())),
+        GoRoute(
+          path: Dest.market.path,
+          pageBuilder: (context, state) => _page(
+            context,
+            state,
+            MarketScreen(ruleId: Int64.tryParseInt(state.uri.queryParameters['rule'] ?? '')),
+          ),
+        ),
         GoRoute(
           path: Dest.settings.path,
           pageBuilder: (context, state) => _page(context, state, const SettingsScreen()),

@@ -291,6 +291,138 @@ abstract class L10n {
   /// **'زمان در دسترس بودن داده'**
   String get marketAvailableAt;
 
+  /// No description provided for @marketScanOpen.
+  ///
+  /// In fa, this message translates to:
+  /// **'بررسی این نسخه در دیدبان'**
+  String get marketScanOpen;
+
+  /// No description provided for @marketScanTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'بررسی آخرین کندل یک‌ساعته'**
+  String get marketScanTitle;
+
+  /// No description provided for @marketScanHelp.
+  ///
+  /// In fa, this message translates to:
+  /// **'برای نماد انتخابی، همین نسخه باید بک‌تست یک‌ساعته داشته باشد.'**
+  String get marketScanHelp;
+
+  /// No description provided for @marketScanSymbol.
+  ///
+  /// In fa, this message translates to:
+  /// **'نماد برای بررسی'**
+  String get marketScanSymbol;
+
+  /// No description provided for @marketScanReady.
+  ///
+  /// In fa, this message translates to:
+  /// **'بررسی فرصت'**
+  String get marketScanReady;
+
+  /// No description provided for @marketScanRunning.
+  ///
+  /// In fa, this message translates to:
+  /// **'در حال بررسی…'**
+  String get marketScanRunning;
+
+  /// No description provided for @marketScanWaitForFeed.
+  ///
+  /// In fa, this message translates to:
+  /// **'برای بررسی، نمادی با دادهٔ تازه انتخاب کنید.'**
+  String get marketScanWaitForFeed;
+
+  /// No description provided for @marketScanRecorded.
+  ///
+  /// In fa, this message translates to:
+  /// **'فرصت در دیدبان ثبت شد.'**
+  String get marketScanRecorded;
+
+  /// No description provided for @marketScanNoMatch.
+  ///
+  /// In fa, this message translates to:
+  /// **'در آخرین کندل، شرط ورود برقرار نبود.'**
+  String get marketScanNoMatch;
+
+  /// No description provided for @marketScanIncomplete.
+  ///
+  /// In fa, this message translates to:
+  /// **'تاریخچهٔ کندل‌های کامل برای بررسی این نسخه کافی نیست.'**
+  String get marketScanIncomplete;
+
+  /// No description provided for @marketScanUnexpected.
+  ///
+  /// In fa, this message translates to:
+  /// **'نتیجهٔ بررسی از موتور دریافت نشد.'**
+  String get marketScanUnexpected;
+
+  /// No description provided for @marketOpportunitiesTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'فرصت‌های ثبت‌شده'**
+  String get marketOpportunitiesTitle;
+
+  /// No description provided for @marketOpportunitiesEmpty.
+  ///
+  /// In fa, this message translates to:
+  /// **'هنوز فرصتی ثبت نشده است. بررسی را از یک نسخهٔ بک‌تست‌شده در کتابخانه آغاز کنید.'**
+  String get marketOpportunitiesEmpty;
+
+  /// No description provided for @marketOpportunityCurrent.
+  ///
+  /// In fa, this message translates to:
+  /// **'در بازهٔ اعتبار'**
+  String get marketOpportunityCurrent;
+
+  /// No description provided for @marketOpportunityInactive.
+  ///
+  /// In fa, this message translates to:
+  /// **'فعلاً نامعتبر'**
+  String get marketOpportunityInactive;
+
+  /// No description provided for @marketOpportunityExpires.
+  ///
+  /// In fa, this message translates to:
+  /// **'پایان اعتبار'**
+  String get marketOpportunityExpires;
+
+  /// No description provided for @marketOpportunityPrice.
+  ///
+  /// In fa, this message translates to:
+  /// **'قیمت مرجع کندل'**
+  String get marketOpportunityPrice;
+
+  /// No description provided for @marketOpportunityEntry.
+  ///
+  /// In fa, this message translates to:
+  /// **'شرط ورود نسخه برقرار بود'**
+  String get marketOpportunityEntry;
+
+  /// No description provided for @marketOpportunityRegimeA.
+  ///
+  /// In fa, this message translates to:
+  /// **'شرط ورود شاخهٔ A برقرار بود'**
+  String get marketOpportunityRegimeA;
+
+  /// No description provided for @marketOpportunityRegimeB.
+  ///
+  /// In fa, this message translates to:
+  /// **'شرط ورود شاخهٔ B برقرار بود'**
+  String get marketOpportunityRegimeB;
+
+  /// No description provided for @marketOpportunityRule.
+  ///
+  /// In fa, this message translates to:
+  /// **'مشاهدهٔ نسخه'**
+  String get marketOpportunityRule;
+
+  /// No description provided for @marketOpportunityReport.
+  ///
+  /// In fa, this message translates to:
+  /// **'مشاهدهٔ بک‌تست'**
+  String get marketOpportunityReport;
+
   /// No description provided for @navGroupReview.
   ///
   /// In fa, this message translates to:

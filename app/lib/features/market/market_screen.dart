@@ -17,6 +17,7 @@ import '../../gen/lab/v1/market.connect.client.dart';
 import '../../gen/lab/v1/market.pb.dart';
 import '../../l10n/app_localizations.dart';
 import '../page_frame.dart';
+import 'market_opportunities.dart';
 
 /// One request at a time, only while the screen is visible. Riverpod keeps the
 /// last confirmed response when a request fails and restarts the stream on retry.
@@ -32,7 +33,9 @@ final _marketSnapshotProvider = StreamProvider.autoDispose<GetMarketSnapshotResp
 }, retry: reconnectForever);
 
 class MarketScreen extends ConsumerWidget {
-  const MarketScreen({super.key});
+  const MarketScreen({super.key, this.ruleId});
+
+  final Int64? ruleId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -40,6 +43,7 @@ class MarketScreen extends ConsumerWidget {
     final market = ref.watch(_marketSnapshotProvider);
     final snapshot = market.value;
     final disconnected = market.hasError;
+    final selectedRule = ruleId;
     return PageFrame(
       children: [
         PageHeader(title: Dest.market.label(l), subtitle: Dest.market.subtitle(l)),
@@ -52,6 +56,15 @@ class MarketScreen extends ConsumerWidget {
           )
         else ...[
           if (disconnected) WarningBanner(l.marketDisconnected, icon: Icons.cloud_off_rounded),
+          if (selectedRule != null && selectedRule > Int64.ZERO)
+            MarketScanCard(
+              key: ValueKey(selectedRule),
+              ruleId: selectedRule,
+              watches: snapshot.marketWatch,
+              disconnected: disconnected,
+              onRecorded: () => ref.invalidate(_marketSnapshotProvider),
+            ),
+          MarketOpportunityHistory(opportunities: snapshot.opportunities, disconnected: disconnected),
           _MarketTimestamp(label: l.marketObservedAt, time: snapshot.observedAtUnixMs),
           if (snapshot.marketWatch.isEmpty)
             EmptyState(l.marketEmpty)
