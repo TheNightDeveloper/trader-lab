@@ -16,3 +16,20 @@ WHERE paper_entries.id IN (
     ORDER BY e.id DESC LIMIT @page_limit
 )
 ORDER BY paper_entries.id DESC;
+
+-- name: LatestPaperJournalNote :one
+SELECT * FROM paper_journal_notes WHERE entry_id = $1 ORDER BY revision DESC LIMIT 1;
+
+-- The primary key also enforces one winner when concurrent requests read the same revision.
+-- name: AppendPaperJournalNote :one
+WITH input AS (
+    SELECT sqlc.arg(receipt_id)::bigint AS receipt_id, sqlc.arg(expected_revision)::bigint AS expected_revision,
+           sqlc.arg(note_body)::text AS note_body, sqlc.arg(note_time)::timestamptz AS note_time
+)
+INSERT INTO paper_journal_notes (entry_id, revision, body, recorded_at)
+SELECT receipt_id, expected_revision + 1, note_body, note_time FROM input
+WHERE expected_revision = coalesce((
+    SELECT max(n.revision) FROM paper_journal_notes n WHERE n.entry_id = input.receipt_id
+), 0)
+ON CONFLICT DO NOTHING
+RETURNING *;

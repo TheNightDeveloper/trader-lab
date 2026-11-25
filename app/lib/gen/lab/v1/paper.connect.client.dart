@@ -145,6 +145,23 @@ extension type PaperServiceClient (connect.Transport _transport) {
     );
   }
 
+  Future<labv1paper.SavePaperJournalNoteResponse> savePaperJournalNote(
+    labv1paper.SavePaperJournalNoteRequest input, {
+    connect.Headers? headers,
+    connect.AbortSignal? signal,
+    Function(connect.Headers)? onHeader,
+    Function(connect.Headers)? onTrailer,
+  }) {
+    return connect.Client(_transport).unary(
+      specs.PaperService.savePaperJournalNote,
+      input,
+      signal: signal,
+      headers: headers,
+      onHeader: onHeader,
+      onTrailer: onTrailer,
+    );
+  }
+
   Future<labv1paper.CancelPaperEntryResponse> cancelPaperEntry(
     labv1paper.CancelPaperEntryRequest input, {
     connect.Headers? headers,

@@ -7,7 +7,63 @@ package db
 
 import (
 	"context"
+	"time"
 )
+
+const appendPaperJournalNote = `-- name: AppendPaperJournalNote :one
+WITH input AS (
+    SELECT $1::bigint AS receipt_id, $2::bigint AS expected_revision,
+           $3::text AS note_body, $4::timestamptz AS note_time
+)
+INSERT INTO paper_journal_notes (entry_id, revision, body, recorded_at)
+SELECT receipt_id, expected_revision + 1, note_body, note_time FROM input
+WHERE expected_revision = coalesce((
+    SELECT max(n.revision) FROM paper_journal_notes n WHERE n.entry_id = input.receipt_id
+), 0)
+ON CONFLICT DO NOTHING
+RETURNING entry_id, revision, body, recorded_at
+`
+
+type AppendPaperJournalNoteParams struct {
+	ReceiptID        int64
+	ExpectedRevision int64
+	NoteBody         string
+	NoteTime         time.Time
+}
+
+// The primary key also enforces one winner when concurrent requests read the same revision.
+func (q *Queries) AppendPaperJournalNote(ctx context.Context, arg AppendPaperJournalNoteParams) (PaperJournalNote, error) {
+	row := q.db.QueryRow(ctx, appendPaperJournalNote,
+		arg.ReceiptID,
+		arg.ExpectedRevision,
+		arg.NoteBody,
+		arg.NoteTime,
+	)
+	var i PaperJournalNote
+	err := row.Scan(
+		&i.EntryID,
+		&i.Revision,
+		&i.Body,
+		&i.RecordedAt,
+	)
+	return i, err
+}
+
+const latestPaperJournalNote = `-- name: LatestPaperJournalNote :one
+SELECT entry_id, revision, body, recorded_at FROM paper_journal_notes WHERE entry_id = $1 ORDER BY revision DESC LIMIT 1
+`
+
+func (q *Queries) LatestPaperJournalNote(ctx context.Context, entryID int64) (PaperJournalNote, error) {
+	row := q.db.QueryRow(ctx, latestPaperJournalNote, entryID)
+	var i PaperJournalNote
+	err := row.Scan(
+		&i.EntryID,
+		&i.Revision,
+		&i.Body,
+		&i.RecordedAt,
+	)
+	return i, err
+}
 
 const listPaperJournal = `-- name: ListPaperJournal :many
 SELECT paper_entries.id, paper_entries.account_id, paper_entries.opportunity_id, paper_entries.plan_hash, paper_entries.symbol, paper_entries.state, paper_entries.confirmed_at, paper_entries.expires_at, paper_entries.next_open_at, paper_entries.quantity, paper_entries.filled_quantity, paper_entries.reserved_cash, paper_entries.exposure_bound, paper_entries.loss_bound,

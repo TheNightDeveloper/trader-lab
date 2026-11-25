@@ -194,6 +194,12 @@ func (p *Paper) GetPaperReceipt(ctx context.Context, req *connect.Request[labv1.
 		for _, event := range events {
 			response.Events = append(response.Events, paperEventP(entry, event))
 		}
+		note, err := q.LatestPaperJournalNote(ctx, entry.ID)
+		if err == nil {
+			response.Note = paperJournalNoteP(note)
+		} else if !errors.Is(err, pgx.ErrNoRows) {
+			return err
+		}
 		return nil
 	})
 	if err != nil {

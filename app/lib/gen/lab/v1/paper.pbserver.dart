@@ -37,6 +37,8 @@ abstract class PaperServiceBase extends $pb.GeneratedService {
       $pb.ServerContext ctx, $4.ListPaperJournalRequest request);
   $async.Future<$4.GetPaperReplayResponse> getPaperReplay(
       $pb.ServerContext ctx, $4.GetPaperReplayRequest request);
+  $async.Future<$4.SavePaperJournalNoteResponse> savePaperJournalNote(
+      $pb.ServerContext ctx, $4.SavePaperJournalNoteRequest request);
   $async.Future<$4.CancelPaperEntryResponse> cancelPaperEntry(
       $pb.ServerContext ctx, $4.CancelPaperEntryRequest request);
   $async.Future<$4.ReducePaperPositionResponse> reducePaperPosition(
@@ -62,6 +64,8 @@ abstract class PaperServiceBase extends $pb.GeneratedService {
         return $4.ListPaperJournalRequest();
       case 'GetPaperReplay':
         return $4.GetPaperReplayRequest();
+      case 'SavePaperJournalNote':
+        return $4.SavePaperJournalNoteRequest();
       case 'CancelPaperEntry':
         return $4.CancelPaperEntryRequest();
       case 'ReducePaperPosition':
@@ -93,6 +97,9 @@ abstract class PaperServiceBase extends $pb.GeneratedService {
         return listPaperJournal(ctx, request as $4.ListPaperJournalRequest);
       case 'GetPaperReplay':
         return getPaperReplay(ctx, request as $4.GetPaperReplayRequest);
+      case 'SavePaperJournalNote':
+        return savePaperJournalNote(
+            ctx, request as $4.SavePaperJournalNoteRequest);
       case 'CancelPaperEntry':
         return cancelPaperEntry(ctx, request as $4.CancelPaperEntryRequest);
       case 'ReducePaperPosition':

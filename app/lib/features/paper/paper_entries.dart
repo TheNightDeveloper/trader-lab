@@ -19,6 +19,7 @@ import '../../gen/lab/v1/workspace.pbenum.dart';
 import '../../l10n/app_localizations.dart';
 import '../page_frame.dart';
 import 'paper_controls.dart';
+import 'paper_journal_note.dart';
 import 'paper_providers.dart';
 
 String _receiptPath(Int64 id) => '/paper/receipts/$id';
@@ -276,6 +277,12 @@ class _PaperReceiptScreenState extends ConsumerState<PaperReceiptScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [for (final event in snapshot.events) PaperEventRow(event: event)],
             ),
+          ),
+          PaperJournalNoteEditor(
+            key: ValueKey(widget.id),
+            receiptId: widget.id,
+            note: snapshot.hasNote() ? snapshot.note : null,
+            connected: !state.hasError && !state.isLoading,
           ),
         ],
       ],

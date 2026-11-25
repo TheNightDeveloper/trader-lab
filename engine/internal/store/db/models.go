@@ -298,6 +298,13 @@ type PaperExecutionEvent struct {
 	CandleRevision int32
 }
 
+type PaperJournalNote struct {
+	EntryID    int64
+	Revision   int64
+	Body       string
+	RecordedAt time.Time
+}
+
 type PaperPolicyVersion struct {
 	AccountID     string
 	Revision      int64

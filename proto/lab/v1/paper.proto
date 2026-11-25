@@ -17,6 +17,7 @@ service PaperService {
   rpc GetPaperReceipt(GetPaperReceiptRequest) returns (GetPaperReceiptResponse);
   rpc ListPaperJournal(ListPaperJournalRequest) returns (ListPaperJournalResponse);
   rpc GetPaperReplay(GetPaperReplayRequest) returns (GetPaperReplayResponse);
+  rpc SavePaperJournalNote(SavePaperJournalNoteRequest) returns (SavePaperJournalNoteResponse);
   rpc CancelPaperEntry(CancelPaperEntryRequest) returns (CancelPaperEntryResponse);
   rpc ReducePaperPosition(ReducePaperPositionRequest) returns (ReducePaperPositionResponse);
   rpc SetPaperEntryPause(SetPaperEntryPauseRequest) returns (SetPaperEntryPauseResponse);
@@ -94,6 +95,23 @@ message GetPaperReceiptResponse {
   PaperReceipt receipt = 1;
   repeated PaperExecutionEvent events = 2;
   PaperReduction reduction = 3; // latest request, including a terminal outcome
+  PaperJournalNote note = 4;
+}
+
+message PaperJournalNote {
+  string text = 1; // user annotation; an empty revision clears the visible note
+  int64 revision = 2;
+  int64 recorded_at_unix_ms = 3;
+}
+
+message SavePaperJournalNoteRequest {
+  int64 receipt_id = 1;
+  string text = 2;
+  int64 expected_revision = 3; // zero until the first note
+}
+
+message SavePaperJournalNoteResponse {
+  PaperJournalNote note = 1;
 }
 
 message ListPaperJournalRequest {

@@ -657,6 +657,42 @@ abstract class L10n {
   /// **'موقعیت بسته‌شده'**
   String get paperJournalClosedPosition;
 
+  /// No description provided for @paperJournalNote.
+  ///
+  /// In fa, this message translates to:
+  /// **'یادداشت شخصی'**
+  String get paperJournalNote;
+
+  /// No description provided for @paperJournalNoteAdd.
+  ///
+  /// In fa, this message translates to:
+  /// **'افزودن یادداشت'**
+  String get paperJournalNoteAdd;
+
+  /// No description provided for @paperJournalNoteEdit.
+  ///
+  /// In fa, this message translates to:
+  /// **'ویرایش یادداشت'**
+  String get paperJournalNoteEdit;
+
+  /// No description provided for @paperJournalNoteSave.
+  ///
+  /// In fa, this message translates to:
+  /// **'ذخیرهٔ یادداشت'**
+  String get paperJournalNoteSave;
+
+  /// No description provided for @paperJournalNoteSavedAt.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان ذخیرهٔ یادداشت'**
+  String get paperJournalNoteSavedAt;
+
+  /// No description provided for @paperJournalNoteConflict.
+  ///
+  /// In fa, this message translates to:
+  /// **'یادداشت در برگهٔ دیگری تغییر کرده است. برای دیدن نسخهٔ تازه، از ویرایش خارج شوید.'**
+  String get paperJournalNoteConflict;
+
   /// No description provided for @paperReplayTitle.
   ///
   /// In fa, this message translates to:

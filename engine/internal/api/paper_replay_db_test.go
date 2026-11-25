@@ -7,6 +7,7 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/sync/errgroup"
 	"google.golang.org/protobuf/proto"
 
 	"tradinglab/engine/internal/data"
@@ -81,6 +82,40 @@ func TestPaperReplayUsesOnlyRecordedDecisionEvidence(t *testing.T) {
 	require.Equal(t, "cancelled", cancelled.GetExecution().GetEvent().GetKind())
 	require.Nil(t, cancelled.NextCursor)
 	require.Nil(t, cancelled.GetExecution().GetConfirmationCandle())
+
+	saveNote := func(text string, revision int64) (*connect.Response[labv1.SavePaperJournalNoteResponse], error) {
+		return client.SavePaperJournalNote(ctx, connect.NewRequest(&labv1.SavePaperJournalNoteRequest{
+			ReceiptId: id, Text: text, ExpectedRevision: revision,
+		}))
+	}
+	saved, err := saveNote("یادداشت آزمون", 0)
+	require.NoError(t, err)
+	retried, err := saveNote("یادداشت آزمون", 0)
+	require.NoError(t, err)
+	require.True(t, proto.Equal(saved.Msg, retried.Msg))
+	_, err = saveNote("نسخهٔ قدیمی", 0)
+	require.Equal(t, connect.CodeAborted, connect.CodeOf(err))
+	receipt, err := client.GetPaperReceipt(ctx, connect.NewRequest(&labv1.GetPaperReceiptRequest{ReceiptId: id}))
+	require.NoError(t, err)
+	require.True(t, proto.Equal(saved.Msg.GetNote(), receipt.Msg.GetNote()))
+	require.True(t, proto.Equal(cancelled, read(accepted.GetNextCursor())))
+	var group errgroup.Group
+	var writes [2]connect.Code
+	for i, body := range []string{"مرور اول", "مرور دوم"} {
+		group.Go(func() error {
+			_, err := saveNote(body, 1)
+			if err != nil {
+				writes[i] = connect.CodeOf(err)
+			}
+			return nil
+		})
+	}
+	require.NoError(t, group.Wait())
+	require.ElementsMatch(t, []connect.Code{0, connect.CodeAborted}, writes[:])
+	cleared, err := saveNote("", 2)
+	require.NoError(t, err)
+	require.EqualValues(t, 3, cleared.Msg.GetNote().GetRevision())
+	require.Empty(t, cleared.Msg.GetNote().GetText())
 
 	// Receipts created before the migration still replay without inventing the confirmation quote.
 	_, err = market.Store.Pool.Exec(ctx, "DELETE FROM paper_confirmation_evidence WHERE event_id = $1", review.GetNextCursor())

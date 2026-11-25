@@ -1061,11 +1061,13 @@ class GetPaperReceiptResponse extends $pb.GeneratedMessage {
     PaperReceipt? receipt,
     $core.Iterable<PaperExecutionEvent>? events,
     PaperReduction? reduction,
+    PaperJournalNote? note,
   }) {
     final result = GetPaperReceiptResponse._();
     if (receipt != null) result.receipt = receipt;
     if (events != null) result.events.addAll(events);
     if (reduction != null) result.reduction = reduction;
+    if (note != null) result.note = note;
     return result;
   }
 
@@ -1088,6 +1090,8 @@ class GetPaperReceiptResponse extends $pb.GeneratedMessage {
         subBuilder: PaperExecutionEvent.$_createMessage)
     ..aOM<PaperReduction>(3, _omitFieldNames ? '' : 'reduction',
         subBuilder: PaperReduction.$_createMessage)
+    ..aOM<PaperJournalNote>(4, _omitFieldNames ? '' : 'note',
+        subBuilder: PaperJournalNote.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1138,6 +1142,251 @@ class GetPaperReceiptResponse extends $pb.GeneratedMessage {
   void clearReduction() => $_clearField(3);
   @$pb.TagNumber(3)
   PaperReduction ensureReduction() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  PaperJournalNote get note => $_getN(3);
+  @$pb.TagNumber(4)
+  set note(PaperJournalNote value) => $_setField(4, value);
+  @$pb.TagNumber(4)
+  $core.bool hasNote() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearNote() => $_clearField(4);
+  @$pb.TagNumber(4)
+  PaperJournalNote ensureNote() => $_ensure(3);
+}
+
+class PaperJournalNote extends $pb.GeneratedMessage {
+  factory PaperJournalNote({
+    $core.String? text,
+    $fixnum.Int64? revision,
+    $fixnum.Int64? recordedAtUnixMs,
+  }) {
+    final result = PaperJournalNote._();
+    if (text != null) result.text = text;
+    if (revision != null) result.revision = revision;
+    if (recordedAtUnixMs != null) result.recordedAtUnixMs = recordedAtUnixMs;
+    return result;
+  }
+
+  PaperJournalNote._();
+
+  factory PaperJournalNote.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      PaperJournalNote()..mergeFromBuffer(data, registry);
+  factory PaperJournalNote.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      PaperJournalNote()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'PaperJournalNote',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: PaperJournalNote.$_createMessage)
+    ..aOS(1, _omitFieldNames ? '' : 'text')
+    ..aInt64(2, _omitFieldNames ? '' : 'revision')
+    ..aInt64(3, _omitFieldNames ? '' : 'recordedAtUnixMs')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  PaperJournalNote clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  PaperJournalNote copyWith(void Function(PaperJournalNote) updates) =>
+      super.copyWith((message) => updates(message as PaperJournalNote))
+          as PaperJournalNote;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use PaperJournalNote() / PaperJournalNote.new instead')
+  static PaperJournalNote create() => PaperJournalNote._();
+  static $pb.GeneratedMessage $_createMessage() => PaperJournalNote._();
+  @$core.override
+  PaperJournalNote createEmptyInstance() => PaperJournalNote._();
+  @$core.pragma('dart2js:noInline')
+  static PaperJournalNote getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<PaperJournalNote>(
+          PaperJournalNote.$_createMessage);
+  static PaperJournalNote? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get text => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set text($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasText() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearText() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get revision => $_getI64(1);
+  @$pb.TagNumber(2)
+  set revision($fixnum.Int64 value) => $_setInt64(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasRevision() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearRevision() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $fixnum.Int64 get recordedAtUnixMs => $_getI64(2);
+  @$pb.TagNumber(3)
+  set recordedAtUnixMs($fixnum.Int64 value) => $_setInt64(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasRecordedAtUnixMs() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearRecordedAtUnixMs() => $_clearField(3);
+}
+
+class SavePaperJournalNoteRequest extends $pb.GeneratedMessage {
+  factory SavePaperJournalNoteRequest({
+    $fixnum.Int64? receiptId,
+    $core.String? text,
+    $fixnum.Int64? expectedRevision,
+  }) {
+    final result = SavePaperJournalNoteRequest._();
+    if (receiptId != null) result.receiptId = receiptId;
+    if (text != null) result.text = text;
+    if (expectedRevision != null) result.expectedRevision = expectedRevision;
+    return result;
+  }
+
+  SavePaperJournalNoteRequest._();
+
+  factory SavePaperJournalNoteRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      SavePaperJournalNoteRequest()..mergeFromBuffer(data, registry);
+  factory SavePaperJournalNoteRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      SavePaperJournalNoteRequest()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SavePaperJournalNoteRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: SavePaperJournalNoteRequest.$_createMessage)
+    ..aInt64(1, _omitFieldNames ? '' : 'receiptId')
+    ..aOS(2, _omitFieldNames ? '' : 'text')
+    ..aInt64(3, _omitFieldNames ? '' : 'expectedRevision')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SavePaperJournalNoteRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SavePaperJournalNoteRequest copyWith(
+          void Function(SavePaperJournalNoteRequest) updates) =>
+      super.copyWith(
+              (message) => updates(message as SavePaperJournalNoteRequest))
+          as SavePaperJournalNoteRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use SavePaperJournalNoteRequest() / SavePaperJournalNoteRequest.new instead')
+  static SavePaperJournalNoteRequest create() =>
+      SavePaperJournalNoteRequest._();
+  static $pb.GeneratedMessage $_createMessage() =>
+      SavePaperJournalNoteRequest._();
+  @$core.override
+  SavePaperJournalNoteRequest createEmptyInstance() =>
+      SavePaperJournalNoteRequest._();
+  @$core.pragma('dart2js:noInline')
+  static SavePaperJournalNoteRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SavePaperJournalNoteRequest>(
+          SavePaperJournalNoteRequest.$_createMessage);
+  static SavePaperJournalNoteRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get receiptId => $_getI64(0);
+  @$pb.TagNumber(1)
+  set receiptId($fixnum.Int64 value) => $_setInt64(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasReceiptId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearReceiptId() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get text => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set text($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasText() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearText() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $fixnum.Int64 get expectedRevision => $_getI64(2);
+  @$pb.TagNumber(3)
+  set expectedRevision($fixnum.Int64 value) => $_setInt64(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasExpectedRevision() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearExpectedRevision() => $_clearField(3);
+}
+
+class SavePaperJournalNoteResponse extends $pb.GeneratedMessage {
+  factory SavePaperJournalNoteResponse({
+    PaperJournalNote? note,
+  }) {
+    final result = SavePaperJournalNoteResponse._();
+    if (note != null) result.note = note;
+    return result;
+  }
+
+  SavePaperJournalNoteResponse._();
+
+  factory SavePaperJournalNoteResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      SavePaperJournalNoteResponse()..mergeFromBuffer(data, registry);
+  factory SavePaperJournalNoteResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      SavePaperJournalNoteResponse()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SavePaperJournalNoteResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: SavePaperJournalNoteResponse.$_createMessage)
+    ..aOM<PaperJournalNote>(1, _omitFieldNames ? '' : 'note',
+        subBuilder: PaperJournalNote.$_createMessage)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SavePaperJournalNoteResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SavePaperJournalNoteResponse copyWith(
+          void Function(SavePaperJournalNoteResponse) updates) =>
+      super.copyWith(
+              (message) => updates(message as SavePaperJournalNoteResponse))
+          as SavePaperJournalNoteResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use SavePaperJournalNoteResponse() / SavePaperJournalNoteResponse.new instead')
+  static SavePaperJournalNoteResponse create() =>
+      SavePaperJournalNoteResponse._();
+  static $pb.GeneratedMessage $_createMessage() =>
+      SavePaperJournalNoteResponse._();
+  @$core.override
+  SavePaperJournalNoteResponse createEmptyInstance() =>
+      SavePaperJournalNoteResponse._();
+  @$core.pragma('dart2js:noInline')
+  static SavePaperJournalNoteResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SavePaperJournalNoteResponse>(
+          SavePaperJournalNoteResponse.$_createMessage);
+  static SavePaperJournalNoteResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  PaperJournalNote get note => $_getN(0);
+  @$pb.TagNumber(1)
+  set note(PaperJournalNote value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasNote() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearNote() => $_clearField(1);
+  @$pb.TagNumber(1)
+  PaperJournalNote ensureNote() => $_ensure(0);
 }
 
 class ListPaperJournalRequest extends $pb.GeneratedMessage {
@@ -3576,6 +3825,10 @@ class PaperServiceApi {
           $pb.ClientContext? ctx, GetPaperReplayRequest request) =>
       _client.invoke<GetPaperReplayResponse>(ctx, 'PaperService',
           'GetPaperReplay', request, GetPaperReplayResponse());
+  $async.Future<SavePaperJournalNoteResponse> savePaperJournalNote(
+          $pb.ClientContext? ctx, SavePaperJournalNoteRequest request) =>
+      _client.invoke<SavePaperJournalNoteResponse>(ctx, 'PaperService',
+          'SavePaperJournalNote', request, SavePaperJournalNoteResponse());
   $async.Future<CancelPaperEntryResponse> cancelPaperEntry(
           $pb.ClientContext? ctx, CancelPaperEntryRequest request) =>
       _client.invoke<CancelPaperEntryResponse>(ctx, 'PaperService',

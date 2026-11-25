@@ -299,6 +299,25 @@ class L10nFa extends L10n {
   String get paperJournalClosedPosition => 'موقعیت بسته‌شده';
 
   @override
+  String get paperJournalNote => 'یادداشت شخصی';
+
+  @override
+  String get paperJournalNoteAdd => 'افزودن یادداشت';
+
+  @override
+  String get paperJournalNoteEdit => 'ویرایش یادداشت';
+
+  @override
+  String get paperJournalNoteSave => 'ذخیرهٔ یادداشت';
+
+  @override
+  String get paperJournalNoteSavedAt => 'زمان ذخیرهٔ یادداشت';
+
+  @override
+  String get paperJournalNoteConflict =>
+      'یادداشت در برگهٔ دیگری تغییر کرده است. برای دیدن نسخهٔ تازه، از ویرایش خارج شوید.';
+
+  @override
   String get paperReplayTitle => 'بازپخش تصمیم';
 
   @override

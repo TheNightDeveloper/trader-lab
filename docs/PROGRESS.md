@@ -2,6 +2,13 @@
 
 Update at the end of every session.
 
+## P3 Personal journal notes (2026-11-25)
+
+A receipt now accepts an optional personal note. The engine records separate
+note revisions, rejects stale edits from another tab, and recovers an exact
+retry. Clearing a note preserves earlier revisions. Notes stay out of the
+recorded decision and execution replay.
+
 ## P3 Opportunity review (2026-11-25)
 
 The watchlist can filter the recorded opportunities by symbol and validity.
