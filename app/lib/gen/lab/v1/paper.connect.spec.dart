@@ -38,4 +38,25 @@ abstract final class PaperService {
     labv1paper.GetPaperPlanRequest.new,
     labv1paper.GetPaperPlanResponse.new,
   );
+
+  static const confirmPaperPlan = connect.Spec(
+    '/$name/ConfirmPaperPlan',
+    connect.StreamType.unary,
+    labv1paper.ConfirmPaperPlanRequest.new,
+    labv1paper.ConfirmPaperPlanResponse.new,
+  );
+
+  static const getPaperReceipt = connect.Spec(
+    '/$name/GetPaperReceipt',
+    connect.StreamType.unary,
+    labv1paper.GetPaperReceiptRequest.new,
+    labv1paper.GetPaperReceiptResponse.new,
+  );
+
+  static const cancelPaperEntry = connect.Spec(
+    '/$name/CancelPaperEntry',
+    connect.StreamType.unary,
+    labv1paper.CancelPaperEntryRequest.new,
+    labv1paper.CancelPaperEntryResponse.new,
+  );
 }

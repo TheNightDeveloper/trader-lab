@@ -51,11 +51,18 @@ func (p *Paper) PreviewPaperPlan(ctx context.Context, req *connect.Request[labv1
 	if !supported || spotKey(spec).GetSpecRevision() != opp.SpecRevision {
 		return rejectPaperPlan("instrument_changed", "مشخصات نماد این فرصت دیگر معتبر نیست"), nil
 	}
+	usage, err := p.Market.Store.PaperExposure(ctx, db.PaperExposureParams{AccountID: account.ID, Symbol: opp.Symbol})
+	if err != nil {
+		return nil, err
+	}
+	if usage.SymbolBusy || usage.Slots >= paperPositionLimit {
+		return rejectPaperPlan("position_limit", "این نماد ورودی یا موقعیت فعال دارد، یا ظرفیت موقعیت‌های حساب پر است"), nil
+	}
 	now := p.Market.Clock.Now()
 	if now.Before(opp.ObservedAt) || !now.Before(opp.ExpiresAt) {
 		return rejectPaperPlan("opportunity_expired", "اعتبار فرصت پایان یافته است"), nil
 	}
-	candle, err := p.paperCandle(ctx, opp.Symbol, now, opp.CandleClosedAt)
+	candle, err := p.paperCandle(ctx, p.Market.Store.Queries, opp.Symbol, now, opp.CandleClosedAt)
 	if errors.Is(err, errMarketFeed) {
 		return rejectPaperPlan("feed_stale", errMarketFeed.Error()), nil
 	}
@@ -92,8 +99,8 @@ func (p *Paper) PreviewPaperPlan(ctx context.Context, req *connect.Request[labv1
 	}
 	size, err := paper.SizePlan(spec, costs, paper.PlanInput{
 		Reference: candle.C, EntryLimit: entryLimit.V, Stop: stop.V, TakeProfit: target.V,
-		Cash: account.CashAvailable, NotionalBudget: min(exposure, account.MaxExposure),
-		LossBudget: min(account.MaxLoss, account.MaxOpenLoss), MaxCost: money.Ratio(account.MaxCostPpm),
+		Cash: account.CashAvailable, NotionalBudget: min(exposure, account.MaxExposure-usage.Exposure),
+		LossBudget: min(account.MaxLoss, account.MaxOpenLoss-usage.OpenLoss), MaxCost: money.Ratio(account.MaxCostPpm),
 	})
 	switch {
 	case errors.Is(err, paper.ErrLevels):
@@ -145,18 +152,27 @@ func (p *Paper) GetPaperPlan(ctx context.Context, req *connect.Request[labv1.Get
 	if err != nil {
 		return nil, err
 	}
+	entry, err := p.Market.Store.PaperEntryForOpportunity(ctx, db.PaperEntryForOpportunityParams{
+		AccountID: plan.GetAccount().GetAccountId(), OpportunityID: plan.GetOpportunityId(),
+	})
+	if err == nil {
+		return connect.NewResponse(&labv1.GetPaperPlanResponse{Plan: plan, Receipt: paperReceiptP(entry)}), nil
+	}
+	if !errors.Is(err, pgx.ErrNoRows) {
+		return nil, err
+	}
 	account, err := p.Market.Store.ReadPaperAccount(ctx, plan.GetAccount().GetAccountId())
 	if err != nil {
 		return nil, err
 	}
-	restriction, err := p.reviewRestriction(ctx, plan, account)
+	restriction, err := p.reviewRestriction(ctx, p.Market.Store.Queries, plan, account)
 	if err != nil {
 		return nil, err
 	}
 	return connect.NewResponse(&labv1.GetPaperPlanResponse{Plan: plan, Restriction: restriction}), nil
 }
 
-func (p *Paper) reviewRestriction(ctx context.Context, plan *labv1.PaperPlan, account db.ReadPaperAccountRow) (*labv1.PaperRestriction, error) {
+func (p *Paper) reviewRestriction(ctx context.Context, q *db.Queries, plan *labv1.PaperPlan, account db.ReadPaperAccountRow) (*labv1.PaperRestriction, error) {
 	now := p.Market.Clock.Now()
 	if now.UnixMilli() >= plan.GetExpiresAtUnixMs() {
 		return paperRestriction("plan_expired", "اعتبار این برنامه پایان یافته است"), nil
@@ -169,7 +185,7 @@ func (p *Paper) reviewRestriction(ctx context.Context, plan *labv1.PaperPlan, ac
 	if !supported || spotKey(spec).GetSpecRevision() != plan.GetInstrument().GetSpecRevision() {
 		return paperRestriction("instrument_changed", "مشخصات نماد این برنامه دیگر معتبر نیست"), nil
 	}
-	candle, err := p.paperCandle(ctx, symbol, now, time.UnixMilli(plan.GetReferenceCandleClosedAtUnixMs()))
+	candle, err := p.paperCandle(ctx, q, symbol, now, time.UnixMilli(plan.GetReferenceCandleClosedAtUnixMs()))
 	if errors.Is(err, errMarketFeed) {
 		return paperRestriction("feed_stale", errMarketFeed.Error()), nil
 	}
@@ -220,12 +236,12 @@ func readPaperPlan(ctx context.Context, q *db.Queries, hash string) (*labv1.Pape
 	return plan, nil
 }
 
-func (p *Paper) paperCandle(ctx context.Context, symbol string, now, minClose time.Time) (db.LatestMarketCandlesRow, error) {
+func (p *Paper) paperCandle(ctx context.Context, q *db.Queries, symbol string, now, minClose time.Time) (db.LatestMarketCandlesRow, error) {
 	feed := p.Market.feed(symbol)
 	if !slices.Contains(p.Market.Symbols, symbol) || feed.LastClose.Before(minClose) || feed.State != data.LiveFresh {
 		return db.LatestMarketCandlesRow{}, errMarketFeed
 	}
-	candles, err := p.Market.Store.LatestMarketCandles(ctx, db.LatestMarketCandlesParams{Symbols: []string{symbol}, AsOf: now})
+	candles, err := q.LatestMarketCandles(ctx, db.LatestMarketCandlesParams{Symbols: []string{symbol}, AsOf: now})
 	if err != nil {
 		return db.LatestMarketCandlesRow{}, err
 	}

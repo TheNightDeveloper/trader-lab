@@ -76,4 +76,55 @@ extension type PaperServiceClient (connect.Transport _transport) {
       onTrailer: onTrailer,
     );
   }
+
+  Future<labv1paper.ConfirmPaperPlanResponse> confirmPaperPlan(
+    labv1paper.ConfirmPaperPlanRequest input, {
+    connect.Headers? headers,
+    connect.AbortSignal? signal,
+    Function(connect.Headers)? onHeader,
+    Function(connect.Headers)? onTrailer,
+  }) {
+    return connect.Client(_transport).unary(
+      specs.PaperService.confirmPaperPlan,
+      input,
+      signal: signal,
+      headers: headers,
+      onHeader: onHeader,
+      onTrailer: onTrailer,
+    );
+  }
+
+  Future<labv1paper.GetPaperReceiptResponse> getPaperReceipt(
+    labv1paper.GetPaperReceiptRequest input, {
+    connect.Headers? headers,
+    connect.AbortSignal? signal,
+    Function(connect.Headers)? onHeader,
+    Function(connect.Headers)? onTrailer,
+  }) {
+    return connect.Client(_transport).unary(
+      specs.PaperService.getPaperReceipt,
+      input,
+      signal: signal,
+      headers: headers,
+      onHeader: onHeader,
+      onTrailer: onTrailer,
+    );
+  }
+
+  Future<labv1paper.CancelPaperEntryResponse> cancelPaperEntry(
+    labv1paper.CancelPaperEntryRequest input, {
+    connect.Headers? headers,
+    connect.AbortSignal? signal,
+    Function(connect.Headers)? onHeader,
+    Function(connect.Headers)? onTrailer,
+  }) {
+    return connect.Client(_transport).unary(
+      specs.PaperService.cancelPaperEntry,
+      input,
+      signal: signal,
+      headers: headers,
+      onHeader: onHeader,
+      onTrailer: onTrailer,
+    );
+  }
 }

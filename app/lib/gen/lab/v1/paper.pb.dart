@@ -18,9 +18,12 @@ import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'account.pb.dart' as $1;
 import 'common.pb.dart' as $0;
+import 'paper.pbenum.dart';
 import 'workspace.pb.dart' as $2;
 
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
+
+export 'paper.pbenum.dart';
 
 class GetPaperAccountRequest extends $pb.GeneratedMessage {
   factory GetPaperAccountRequest() => GetPaperAccountRequest._();
@@ -68,9 +71,13 @@ class GetPaperAccountRequest extends $pb.GeneratedMessage {
 class GetPaperAccountResponse extends $pb.GeneratedMessage {
   factory GetPaperAccountResponse({
     PaperAccount? paperAccount,
+    $core.Iterable<PaperReceipt>? recentReceipts,
+    $core.Iterable<PaperPosition>? positions,
   }) {
     final result = GetPaperAccountResponse._();
     if (paperAccount != null) result.paperAccount = paperAccount;
+    if (recentReceipts != null) result.recentReceipts.addAll(recentReceipts);
+    if (positions != null) result.positions.addAll(positions);
     return result;
   }
 
@@ -89,6 +96,10 @@ class GetPaperAccountResponse extends $pb.GeneratedMessage {
       createEmptyInstance: GetPaperAccountResponse.$_createMessage)
     ..aOM<PaperAccount>(1, _omitFieldNames ? '' : 'paperAccount',
         subBuilder: PaperAccount.$_createMessage)
+    ..pPM<PaperReceipt>(2, _omitFieldNames ? '' : 'recentReceipts',
+        subBuilder: PaperReceipt.$_createMessage)
+    ..pPM<PaperPosition>(3, _omitFieldNames ? '' : 'positions',
+        subBuilder: PaperPosition.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -125,6 +136,12 @@ class GetPaperAccountResponse extends $pb.GeneratedMessage {
   void clearPaperAccount() => $_clearField(1);
   @$pb.TagNumber(1)
   PaperAccount ensurePaperAccount() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $pb.PbList<PaperReceipt> get recentReceipts => $_getList(1);
+
+  @$pb.TagNumber(3)
+  $pb.PbList<PaperPosition> get positions => $_getList(2);
 }
 
 class InitializePaperAccountRequest extends $pb.GeneratedMessage {
@@ -713,10 +730,12 @@ class GetPaperPlanResponse extends $pb.GeneratedMessage {
   factory GetPaperPlanResponse({
     PaperPlan? plan,
     PaperRestriction? restriction,
+    PaperReceipt? receipt,
   }) {
     final result = GetPaperPlanResponse._();
     if (plan != null) result.plan = plan;
     if (restriction != null) result.restriction = restriction;
+    if (receipt != null) result.receipt = receipt;
     return result;
   }
 
@@ -737,6 +756,8 @@ class GetPaperPlanResponse extends $pb.GeneratedMessage {
         subBuilder: PaperPlan.$_createMessage)
     ..aOM<PaperRestriction>(2, _omitFieldNames ? '' : 'restriction',
         subBuilder: PaperRestriction.$_createMessage)
+    ..aOM<PaperReceipt>(3, _omitFieldNames ? '' : 'receipt',
+        subBuilder: PaperReceipt.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -783,6 +804,923 @@ class GetPaperPlanResponse extends $pb.GeneratedMessage {
   void clearRestriction() => $_clearField(2);
   @$pb.TagNumber(2)
   PaperRestriction ensureRestriction() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  PaperReceipt get receipt => $_getN(2);
+  @$pb.TagNumber(3)
+  set receipt(PaperReceipt value) => $_setField(3, value);
+  @$pb.TagNumber(3)
+  $core.bool hasReceipt() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearReceipt() => $_clearField(3);
+  @$pb.TagNumber(3)
+  PaperReceipt ensureReceipt() => $_ensure(2);
+}
+
+class ConfirmPaperPlanRequest extends $pb.GeneratedMessage {
+  factory ConfirmPaperPlanRequest({
+    $2.AccountRef? account,
+    $core.String? planHash,
+  }) {
+    final result = ConfirmPaperPlanRequest._();
+    if (account != null) result.account = account;
+    if (planHash != null) result.planHash = planHash;
+    return result;
+  }
+
+  ConfirmPaperPlanRequest._();
+
+  factory ConfirmPaperPlanRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ConfirmPaperPlanRequest()..mergeFromBuffer(data, registry);
+  factory ConfirmPaperPlanRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ConfirmPaperPlanRequest()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ConfirmPaperPlanRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: ConfirmPaperPlanRequest.$_createMessage)
+    ..aOM<$2.AccountRef>(1, _omitFieldNames ? '' : 'account',
+        subBuilder: $2.AccountRef.$_createMessage)
+    ..aOS(2, _omitFieldNames ? '' : 'planHash')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ConfirmPaperPlanRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ConfirmPaperPlanRequest copyWith(
+          void Function(ConfirmPaperPlanRequest) updates) =>
+      super.copyWith((message) => updates(message as ConfirmPaperPlanRequest))
+          as ConfirmPaperPlanRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use ConfirmPaperPlanRequest() / ConfirmPaperPlanRequest.new instead')
+  static ConfirmPaperPlanRequest create() => ConfirmPaperPlanRequest._();
+  static $pb.GeneratedMessage $_createMessage() => ConfirmPaperPlanRequest._();
+  @$core.override
+  ConfirmPaperPlanRequest createEmptyInstance() => ConfirmPaperPlanRequest._();
+  @$core.pragma('dart2js:noInline')
+  static ConfirmPaperPlanRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ConfirmPaperPlanRequest>(
+          ConfirmPaperPlanRequest.$_createMessage);
+  static ConfirmPaperPlanRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $2.AccountRef get account => $_getN(0);
+  @$pb.TagNumber(1)
+  set account($2.AccountRef value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasAccount() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearAccount() => $_clearField(1);
+  @$pb.TagNumber(1)
+  $2.AccountRef ensureAccount() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $core.String get planHash => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set planHash($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasPlanHash() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearPlanHash() => $_clearField(2);
+}
+
+class ConfirmPaperPlanResponse extends $pb.GeneratedMessage {
+  factory ConfirmPaperPlanResponse({
+    PaperReceipt? receipt,
+    PaperRestriction? restriction,
+  }) {
+    final result = ConfirmPaperPlanResponse._();
+    if (receipt != null) result.receipt = receipt;
+    if (restriction != null) result.restriction = restriction;
+    return result;
+  }
+
+  ConfirmPaperPlanResponse._();
+
+  factory ConfirmPaperPlanResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ConfirmPaperPlanResponse()..mergeFromBuffer(data, registry);
+  factory ConfirmPaperPlanResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ConfirmPaperPlanResponse()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ConfirmPaperPlanResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: ConfirmPaperPlanResponse.$_createMessage)
+    ..aOM<PaperReceipt>(1, _omitFieldNames ? '' : 'receipt',
+        subBuilder: PaperReceipt.$_createMessage)
+    ..aOM<PaperRestriction>(2, _omitFieldNames ? '' : 'restriction',
+        subBuilder: PaperRestriction.$_createMessage)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ConfirmPaperPlanResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ConfirmPaperPlanResponse copyWith(
+          void Function(ConfirmPaperPlanResponse) updates) =>
+      super.copyWith((message) => updates(message as ConfirmPaperPlanResponse))
+          as ConfirmPaperPlanResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use ConfirmPaperPlanResponse() / ConfirmPaperPlanResponse.new instead')
+  static ConfirmPaperPlanResponse create() => ConfirmPaperPlanResponse._();
+  static $pb.GeneratedMessage $_createMessage() => ConfirmPaperPlanResponse._();
+  @$core.override
+  ConfirmPaperPlanResponse createEmptyInstance() =>
+      ConfirmPaperPlanResponse._();
+  @$core.pragma('dart2js:noInline')
+  static ConfirmPaperPlanResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ConfirmPaperPlanResponse>(
+          ConfirmPaperPlanResponse.$_createMessage);
+  static ConfirmPaperPlanResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  PaperReceipt get receipt => $_getN(0);
+  @$pb.TagNumber(1)
+  set receipt(PaperReceipt value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasReceipt() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearReceipt() => $_clearField(1);
+  @$pb.TagNumber(1)
+  PaperReceipt ensureReceipt() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  PaperRestriction get restriction => $_getN(1);
+  @$pb.TagNumber(2)
+  set restriction(PaperRestriction value) => $_setField(2, value);
+  @$pb.TagNumber(2)
+  $core.bool hasRestriction() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearRestriction() => $_clearField(2);
+  @$pb.TagNumber(2)
+  PaperRestriction ensureRestriction() => $_ensure(1);
+}
+
+class GetPaperReceiptRequest extends $pb.GeneratedMessage {
+  factory GetPaperReceiptRequest({
+    $fixnum.Int64? receiptId,
+  }) {
+    final result = GetPaperReceiptRequest._();
+    if (receiptId != null) result.receiptId = receiptId;
+    return result;
+  }
+
+  GetPaperReceiptRequest._();
+
+  factory GetPaperReceiptRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      GetPaperReceiptRequest()..mergeFromBuffer(data, registry);
+  factory GetPaperReceiptRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      GetPaperReceiptRequest()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetPaperReceiptRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: GetPaperReceiptRequest.$_createMessage)
+    ..aInt64(1, _omitFieldNames ? '' : 'receiptId')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetPaperReceiptRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetPaperReceiptRequest copyWith(
+          void Function(GetPaperReceiptRequest) updates) =>
+      super.copyWith((message) => updates(message as GetPaperReceiptRequest))
+          as GetPaperReceiptRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use GetPaperReceiptRequest() / GetPaperReceiptRequest.new instead')
+  static GetPaperReceiptRequest create() => GetPaperReceiptRequest._();
+  static $pb.GeneratedMessage $_createMessage() => GetPaperReceiptRequest._();
+  @$core.override
+  GetPaperReceiptRequest createEmptyInstance() => GetPaperReceiptRequest._();
+  @$core.pragma('dart2js:noInline')
+  static GetPaperReceiptRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetPaperReceiptRequest>(
+          GetPaperReceiptRequest.$_createMessage);
+  static GetPaperReceiptRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get receiptId => $_getI64(0);
+  @$pb.TagNumber(1)
+  set receiptId($fixnum.Int64 value) => $_setInt64(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasReceiptId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearReceiptId() => $_clearField(1);
+}
+
+class GetPaperReceiptResponse extends $pb.GeneratedMessage {
+  factory GetPaperReceiptResponse({
+    PaperReceipt? receipt,
+    $core.Iterable<PaperExecutionEvent>? events,
+  }) {
+    final result = GetPaperReceiptResponse._();
+    if (receipt != null) result.receipt = receipt;
+    if (events != null) result.events.addAll(events);
+    return result;
+  }
+
+  GetPaperReceiptResponse._();
+
+  factory GetPaperReceiptResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      GetPaperReceiptResponse()..mergeFromBuffer(data, registry);
+  factory GetPaperReceiptResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      GetPaperReceiptResponse()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetPaperReceiptResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: GetPaperReceiptResponse.$_createMessage)
+    ..aOM<PaperReceipt>(1, _omitFieldNames ? '' : 'receipt',
+        subBuilder: PaperReceipt.$_createMessage)
+    ..pPM<PaperExecutionEvent>(2, _omitFieldNames ? '' : 'events',
+        subBuilder: PaperExecutionEvent.$_createMessage)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetPaperReceiptResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetPaperReceiptResponse copyWith(
+          void Function(GetPaperReceiptResponse) updates) =>
+      super.copyWith((message) => updates(message as GetPaperReceiptResponse))
+          as GetPaperReceiptResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use GetPaperReceiptResponse() / GetPaperReceiptResponse.new instead')
+  static GetPaperReceiptResponse create() => GetPaperReceiptResponse._();
+  static $pb.GeneratedMessage $_createMessage() => GetPaperReceiptResponse._();
+  @$core.override
+  GetPaperReceiptResponse createEmptyInstance() => GetPaperReceiptResponse._();
+  @$core.pragma('dart2js:noInline')
+  static GetPaperReceiptResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetPaperReceiptResponse>(
+          GetPaperReceiptResponse.$_createMessage);
+  static GetPaperReceiptResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  PaperReceipt get receipt => $_getN(0);
+  @$pb.TagNumber(1)
+  set receipt(PaperReceipt value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasReceipt() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearReceipt() => $_clearField(1);
+  @$pb.TagNumber(1)
+  PaperReceipt ensureReceipt() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $pb.PbList<PaperExecutionEvent> get events => $_getList(1);
+}
+
+class CancelPaperEntryRequest extends $pb.GeneratedMessage {
+  factory CancelPaperEntryRequest({
+    $2.AccountRef? account,
+    $fixnum.Int64? receiptId,
+  }) {
+    final result = CancelPaperEntryRequest._();
+    if (account != null) result.account = account;
+    if (receiptId != null) result.receiptId = receiptId;
+    return result;
+  }
+
+  CancelPaperEntryRequest._();
+
+  factory CancelPaperEntryRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      CancelPaperEntryRequest()..mergeFromBuffer(data, registry);
+  factory CancelPaperEntryRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      CancelPaperEntryRequest()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'CancelPaperEntryRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: CancelPaperEntryRequest.$_createMessage)
+    ..aOM<$2.AccountRef>(1, _omitFieldNames ? '' : 'account',
+        subBuilder: $2.AccountRef.$_createMessage)
+    ..aInt64(2, _omitFieldNames ? '' : 'receiptId')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  CancelPaperEntryRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  CancelPaperEntryRequest copyWith(
+          void Function(CancelPaperEntryRequest) updates) =>
+      super.copyWith((message) => updates(message as CancelPaperEntryRequest))
+          as CancelPaperEntryRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use CancelPaperEntryRequest() / CancelPaperEntryRequest.new instead')
+  static CancelPaperEntryRequest create() => CancelPaperEntryRequest._();
+  static $pb.GeneratedMessage $_createMessage() => CancelPaperEntryRequest._();
+  @$core.override
+  CancelPaperEntryRequest createEmptyInstance() => CancelPaperEntryRequest._();
+  @$core.pragma('dart2js:noInline')
+  static CancelPaperEntryRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<CancelPaperEntryRequest>(
+          CancelPaperEntryRequest.$_createMessage);
+  static CancelPaperEntryRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $2.AccountRef get account => $_getN(0);
+  @$pb.TagNumber(1)
+  set account($2.AccountRef value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasAccount() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearAccount() => $_clearField(1);
+  @$pb.TagNumber(1)
+  $2.AccountRef ensureAccount() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get receiptId => $_getI64(1);
+  @$pb.TagNumber(2)
+  set receiptId($fixnum.Int64 value) => $_setInt64(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasReceiptId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearReceiptId() => $_clearField(2);
+}
+
+class CancelPaperEntryResponse extends $pb.GeneratedMessage {
+  factory CancelPaperEntryResponse({
+    PaperReceipt? receipt,
+  }) {
+    final result = CancelPaperEntryResponse._();
+    if (receipt != null) result.receipt = receipt;
+    return result;
+  }
+
+  CancelPaperEntryResponse._();
+
+  factory CancelPaperEntryResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      CancelPaperEntryResponse()..mergeFromBuffer(data, registry);
+  factory CancelPaperEntryResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      CancelPaperEntryResponse()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'CancelPaperEntryResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: CancelPaperEntryResponse.$_createMessage)
+    ..aOM<PaperReceipt>(1, _omitFieldNames ? '' : 'receipt',
+        subBuilder: PaperReceipt.$_createMessage)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  CancelPaperEntryResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  CancelPaperEntryResponse copyWith(
+          void Function(CancelPaperEntryResponse) updates) =>
+      super.copyWith((message) => updates(message as CancelPaperEntryResponse))
+          as CancelPaperEntryResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use CancelPaperEntryResponse() / CancelPaperEntryResponse.new instead')
+  static CancelPaperEntryResponse create() => CancelPaperEntryResponse._();
+  static $pb.GeneratedMessage $_createMessage() => CancelPaperEntryResponse._();
+  @$core.override
+  CancelPaperEntryResponse createEmptyInstance() =>
+      CancelPaperEntryResponse._();
+  @$core.pragma('dart2js:noInline')
+  static CancelPaperEntryResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<CancelPaperEntryResponse>(
+          CancelPaperEntryResponse.$_createMessage);
+  static CancelPaperEntryResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  PaperReceipt get receipt => $_getN(0);
+  @$pb.TagNumber(1)
+  set receipt(PaperReceipt value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasReceipt() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearReceipt() => $_clearField(1);
+  @$pb.TagNumber(1)
+  PaperReceipt ensureReceipt() => $_ensure(0);
+}
+
+class PaperReceipt extends $pb.GeneratedMessage {
+  factory PaperReceipt({
+    $fixnum.Int64? id,
+    $2.AccountRef? account,
+    $core.String? planHash,
+    $core.String? symbol,
+    PaperEntryState? state,
+    $0.Money? requestedQuantity,
+    $0.Money? filledQuantity,
+    $0.Money? reservedCash,
+    $fixnum.Int64? confirmedAtUnixMs,
+    $fixnum.Int64? expiresAtUnixMs,
+  }) {
+    final result = PaperReceipt._();
+    if (id != null) result.id = id;
+    if (account != null) result.account = account;
+    if (planHash != null) result.planHash = planHash;
+    if (symbol != null) result.symbol = symbol;
+    if (state != null) result.state = state;
+    if (requestedQuantity != null) result.requestedQuantity = requestedQuantity;
+    if (filledQuantity != null) result.filledQuantity = filledQuantity;
+    if (reservedCash != null) result.reservedCash = reservedCash;
+    if (confirmedAtUnixMs != null) result.confirmedAtUnixMs = confirmedAtUnixMs;
+    if (expiresAtUnixMs != null) result.expiresAtUnixMs = expiresAtUnixMs;
+    return result;
+  }
+
+  PaperReceipt._();
+
+  factory PaperReceipt.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      PaperReceipt()..mergeFromBuffer(data, registry);
+  factory PaperReceipt.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      PaperReceipt()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'PaperReceipt',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: PaperReceipt.$_createMessage)
+    ..aInt64(1, _omitFieldNames ? '' : 'id')
+    ..aOM<$2.AccountRef>(2, _omitFieldNames ? '' : 'account',
+        subBuilder: $2.AccountRef.$_createMessage)
+    ..aOS(3, _omitFieldNames ? '' : 'planHash')
+    ..aOS(4, _omitFieldNames ? '' : 'symbol')
+    ..aE<PaperEntryState>(5, _omitFieldNames ? '' : 'state',
+        enumValues: PaperEntryState.values)
+    ..aOM<$0.Money>(6, _omitFieldNames ? '' : 'requestedQuantity',
+        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Money>(7, _omitFieldNames ? '' : 'filledQuantity',
+        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Money>(8, _omitFieldNames ? '' : 'reservedCash',
+        subBuilder: $0.Money.$_createMessage)
+    ..aInt64(9, _omitFieldNames ? '' : 'confirmedAtUnixMs')
+    ..aInt64(10, _omitFieldNames ? '' : 'expiresAtUnixMs')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  PaperReceipt clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  PaperReceipt copyWith(void Function(PaperReceipt) updates) =>
+      super.copyWith((message) => updates(message as PaperReceipt))
+          as PaperReceipt;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use PaperReceipt() / PaperReceipt.new instead')
+  static PaperReceipt create() => PaperReceipt._();
+  static $pb.GeneratedMessage $_createMessage() => PaperReceipt._();
+  @$core.override
+  PaperReceipt createEmptyInstance() => PaperReceipt._();
+  @$core.pragma('dart2js:noInline')
+  static PaperReceipt getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<PaperReceipt>(
+          PaperReceipt.$_createMessage);
+  static PaperReceipt? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get id => $_getI64(0);
+  @$pb.TagNumber(1)
+  set id($fixnum.Int64 value) => $_setInt64(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $2.AccountRef get account => $_getN(1);
+  @$pb.TagNumber(2)
+  set account($2.AccountRef value) => $_setField(2, value);
+  @$pb.TagNumber(2)
+  $core.bool hasAccount() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearAccount() => $_clearField(2);
+  @$pb.TagNumber(2)
+  $2.AccountRef ensureAccount() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  $core.String get planHash => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set planHash($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasPlanHash() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearPlanHash() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.String get symbol => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set symbol($core.String value) => $_setString(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasSymbol() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearSymbol() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  PaperEntryState get state => $_getN(4);
+  @$pb.TagNumber(5)
+  set state(PaperEntryState value) => $_setField(5, value);
+  @$pb.TagNumber(5)
+  $core.bool hasState() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearState() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  $0.Money get requestedQuantity => $_getN(5);
+  @$pb.TagNumber(6)
+  set requestedQuantity($0.Money value) => $_setField(6, value);
+  @$pb.TagNumber(6)
+  $core.bool hasRequestedQuantity() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearRequestedQuantity() => $_clearField(6);
+  @$pb.TagNumber(6)
+  $0.Money ensureRequestedQuantity() => $_ensure(5);
+
+  @$pb.TagNumber(7)
+  $0.Money get filledQuantity => $_getN(6);
+  @$pb.TagNumber(7)
+  set filledQuantity($0.Money value) => $_setField(7, value);
+  @$pb.TagNumber(7)
+  $core.bool hasFilledQuantity() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearFilledQuantity() => $_clearField(7);
+  @$pb.TagNumber(7)
+  $0.Money ensureFilledQuantity() => $_ensure(6);
+
+  @$pb.TagNumber(8)
+  $0.Money get reservedCash => $_getN(7);
+  @$pb.TagNumber(8)
+  set reservedCash($0.Money value) => $_setField(8, value);
+  @$pb.TagNumber(8)
+  $core.bool hasReservedCash() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearReservedCash() => $_clearField(8);
+  @$pb.TagNumber(8)
+  $0.Money ensureReservedCash() => $_ensure(7);
+
+  @$pb.TagNumber(9)
+  $fixnum.Int64 get confirmedAtUnixMs => $_getI64(8);
+  @$pb.TagNumber(9)
+  set confirmedAtUnixMs($fixnum.Int64 value) => $_setInt64(8, value);
+  @$pb.TagNumber(9)
+  $core.bool hasConfirmedAtUnixMs() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearConfirmedAtUnixMs() => $_clearField(9);
+
+  @$pb.TagNumber(10)
+  $fixnum.Int64 get expiresAtUnixMs => $_getI64(9);
+  @$pb.TagNumber(10)
+  set expiresAtUnixMs($fixnum.Int64 value) => $_setInt64(9, value);
+  @$pb.TagNumber(10)
+  $core.bool hasExpiresAtUnixMs() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearExpiresAtUnixMs() => $_clearField(10);
+}
+
+class PaperPosition extends $pb.GeneratedMessage {
+  factory PaperPosition({
+    $fixnum.Int64? receiptId,
+    $core.String? symbol,
+    $0.Money? quantity,
+    $0.Money? costBasis,
+    $1.MoneyReading? marketValue,
+  }) {
+    final result = PaperPosition._();
+    if (receiptId != null) result.receiptId = receiptId;
+    if (symbol != null) result.symbol = symbol;
+    if (quantity != null) result.quantity = quantity;
+    if (costBasis != null) result.costBasis = costBasis;
+    if (marketValue != null) result.marketValue = marketValue;
+    return result;
+  }
+
+  PaperPosition._();
+
+  factory PaperPosition.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      PaperPosition()..mergeFromBuffer(data, registry);
+  factory PaperPosition.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      PaperPosition()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'PaperPosition',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: PaperPosition.$_createMessage)
+    ..aInt64(1, _omitFieldNames ? '' : 'receiptId')
+    ..aOS(2, _omitFieldNames ? '' : 'symbol')
+    ..aOM<$0.Money>(3, _omitFieldNames ? '' : 'quantity',
+        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Money>(4, _omitFieldNames ? '' : 'costBasis',
+        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$1.MoneyReading>(5, _omitFieldNames ? '' : 'marketValue',
+        subBuilder: $1.MoneyReading.$_createMessage)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  PaperPosition clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  PaperPosition copyWith(void Function(PaperPosition) updates) =>
+      super.copyWith((message) => updates(message as PaperPosition))
+          as PaperPosition;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use PaperPosition() / PaperPosition.new instead')
+  static PaperPosition create() => PaperPosition._();
+  static $pb.GeneratedMessage $_createMessage() => PaperPosition._();
+  @$core.override
+  PaperPosition createEmptyInstance() => PaperPosition._();
+  @$core.pragma('dart2js:noInline')
+  static PaperPosition getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<PaperPosition>(
+          PaperPosition.$_createMessage);
+  static PaperPosition? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get receiptId => $_getI64(0);
+  @$pb.TagNumber(1)
+  set receiptId($fixnum.Int64 value) => $_setInt64(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasReceiptId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearReceiptId() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get symbol => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set symbol($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasSymbol() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearSymbol() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $0.Money get quantity => $_getN(2);
+  @$pb.TagNumber(3)
+  set quantity($0.Money value) => $_setField(3, value);
+  @$pb.TagNumber(3)
+  $core.bool hasQuantity() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearQuantity() => $_clearField(3);
+  @$pb.TagNumber(3)
+  $0.Money ensureQuantity() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  $0.Money get costBasis => $_getN(3);
+  @$pb.TagNumber(4)
+  set costBasis($0.Money value) => $_setField(4, value);
+  @$pb.TagNumber(4)
+  $core.bool hasCostBasis() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearCostBasis() => $_clearField(4);
+  @$pb.TagNumber(4)
+  $0.Money ensureCostBasis() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  $1.MoneyReading get marketValue => $_getN(4);
+  @$pb.TagNumber(5)
+  set marketValue($1.MoneyReading value) => $_setField(5, value);
+  @$pb.TagNumber(5)
+  $core.bool hasMarketValue() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearMarketValue() => $_clearField(5);
+  @$pb.TagNumber(5)
+  $1.MoneyReading ensureMarketValue() => $_ensure(4);
+}
+
+class PaperExecutionEvent extends $pb.GeneratedMessage {
+  factory PaperExecutionEvent({
+    $fixnum.Int64? id,
+    $core.String? kind,
+    $fixnum.Int64? recordedAtUnixMs,
+    $0.Money? quantity,
+    $0.Money? referencePrice,
+    $0.Money? fillPrice,
+    $0.Money? fee,
+    $0.Money? cash,
+    $fixnum.Int64? candleOpenedAtUnixMs,
+    $core.int? candleRevision,
+    $0.Money? realizedPnl,
+  }) {
+    final result = PaperExecutionEvent._();
+    if (id != null) result.id = id;
+    if (kind != null) result.kind = kind;
+    if (recordedAtUnixMs != null) result.recordedAtUnixMs = recordedAtUnixMs;
+    if (quantity != null) result.quantity = quantity;
+    if (referencePrice != null) result.referencePrice = referencePrice;
+    if (fillPrice != null) result.fillPrice = fillPrice;
+    if (fee != null) result.fee = fee;
+    if (cash != null) result.cash = cash;
+    if (candleOpenedAtUnixMs != null)
+      result.candleOpenedAtUnixMs = candleOpenedAtUnixMs;
+    if (candleRevision != null) result.candleRevision = candleRevision;
+    if (realizedPnl != null) result.realizedPnl = realizedPnl;
+    return result;
+  }
+
+  PaperExecutionEvent._();
+
+  factory PaperExecutionEvent.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      PaperExecutionEvent()..mergeFromBuffer(data, registry);
+  factory PaperExecutionEvent.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      PaperExecutionEvent()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'PaperExecutionEvent',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: PaperExecutionEvent.$_createMessage)
+    ..aInt64(1, _omitFieldNames ? '' : 'id')
+    ..aOS(2, _omitFieldNames ? '' : 'kind')
+    ..aInt64(3, _omitFieldNames ? '' : 'recordedAtUnixMs')
+    ..aOM<$0.Money>(4, _omitFieldNames ? '' : 'quantity',
+        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Money>(5, _omitFieldNames ? '' : 'referencePrice',
+        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Money>(6, _omitFieldNames ? '' : 'fillPrice',
+        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Money>(7, _omitFieldNames ? '' : 'fee',
+        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Money>(8, _omitFieldNames ? '' : 'cash',
+        subBuilder: $0.Money.$_createMessage)
+    ..aInt64(9, _omitFieldNames ? '' : 'candleOpenedAtUnixMs')
+    ..aI(10, _omitFieldNames ? '' : 'candleRevision')
+    ..aOM<$0.Money>(11, _omitFieldNames ? '' : 'realizedPnl',
+        subBuilder: $0.Money.$_createMessage)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  PaperExecutionEvent clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  PaperExecutionEvent copyWith(void Function(PaperExecutionEvent) updates) =>
+      super.copyWith((message) => updates(message as PaperExecutionEvent))
+          as PaperExecutionEvent;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core
+      .Deprecated('Use PaperExecutionEvent() / PaperExecutionEvent.new instead')
+  static PaperExecutionEvent create() => PaperExecutionEvent._();
+  static $pb.GeneratedMessage $_createMessage() => PaperExecutionEvent._();
+  @$core.override
+  PaperExecutionEvent createEmptyInstance() => PaperExecutionEvent._();
+  @$core.pragma('dart2js:noInline')
+  static PaperExecutionEvent getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<PaperExecutionEvent>(
+          PaperExecutionEvent.$_createMessage);
+  static PaperExecutionEvent? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get id => $_getI64(0);
+  @$pb.TagNumber(1)
+  set id($fixnum.Int64 value) => $_setInt64(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get kind => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set kind($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasKind() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearKind() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $fixnum.Int64 get recordedAtUnixMs => $_getI64(2);
+  @$pb.TagNumber(3)
+  set recordedAtUnixMs($fixnum.Int64 value) => $_setInt64(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasRecordedAtUnixMs() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearRecordedAtUnixMs() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $0.Money get quantity => $_getN(3);
+  @$pb.TagNumber(4)
+  set quantity($0.Money value) => $_setField(4, value);
+  @$pb.TagNumber(4)
+  $core.bool hasQuantity() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearQuantity() => $_clearField(4);
+  @$pb.TagNumber(4)
+  $0.Money ensureQuantity() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  $0.Money get referencePrice => $_getN(4);
+  @$pb.TagNumber(5)
+  set referencePrice($0.Money value) => $_setField(5, value);
+  @$pb.TagNumber(5)
+  $core.bool hasReferencePrice() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearReferencePrice() => $_clearField(5);
+  @$pb.TagNumber(5)
+  $0.Money ensureReferencePrice() => $_ensure(4);
+
+  @$pb.TagNumber(6)
+  $0.Money get fillPrice => $_getN(5);
+  @$pb.TagNumber(6)
+  set fillPrice($0.Money value) => $_setField(6, value);
+  @$pb.TagNumber(6)
+  $core.bool hasFillPrice() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearFillPrice() => $_clearField(6);
+  @$pb.TagNumber(6)
+  $0.Money ensureFillPrice() => $_ensure(5);
+
+  @$pb.TagNumber(7)
+  $0.Money get fee => $_getN(6);
+  @$pb.TagNumber(7)
+  set fee($0.Money value) => $_setField(7, value);
+  @$pb.TagNumber(7)
+  $core.bool hasFee() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearFee() => $_clearField(7);
+  @$pb.TagNumber(7)
+  $0.Money ensureFee() => $_ensure(6);
+
+  @$pb.TagNumber(8)
+  $0.Money get cash => $_getN(7);
+  @$pb.TagNumber(8)
+  set cash($0.Money value) => $_setField(8, value);
+  @$pb.TagNumber(8)
+  $core.bool hasCash() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearCash() => $_clearField(8);
+  @$pb.TagNumber(8)
+  $0.Money ensureCash() => $_ensure(7);
+
+  @$pb.TagNumber(9)
+  $fixnum.Int64 get candleOpenedAtUnixMs => $_getI64(8);
+  @$pb.TagNumber(9)
+  set candleOpenedAtUnixMs($fixnum.Int64 value) => $_setInt64(8, value);
+  @$pb.TagNumber(9)
+  $core.bool hasCandleOpenedAtUnixMs() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearCandleOpenedAtUnixMs() => $_clearField(9);
+
+  @$pb.TagNumber(10)
+  $core.int get candleRevision => $_getIZ(9);
+  @$pb.TagNumber(10)
+  set candleRevision($core.int value) => $_setSignedInt32(9, value);
+  @$pb.TagNumber(10)
+  $core.bool hasCandleRevision() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearCandleRevision() => $_clearField(10);
+
+  @$pb.TagNumber(11)
+  $0.Money get realizedPnl => $_getN(10);
+  @$pb.TagNumber(11)
+  set realizedPnl($0.Money value) => $_setField(11, value);
+  @$pb.TagNumber(11)
+  $core.bool hasRealizedPnl() => $_has(10);
+  @$pb.TagNumber(11)
+  void clearRealizedPnl() => $_clearField(11);
+  @$pb.TagNumber(11)
+  $0.Money ensureRealizedPnl() => $_ensure(10);
 }
 
 class PaperRestriction extends $pb.GeneratedMessage {
@@ -1279,6 +2217,18 @@ class PaperServiceApi {
           $pb.ClientContext? ctx, GetPaperPlanRequest request) =>
       _client.invoke<GetPaperPlanResponse>(
           ctx, 'PaperService', 'GetPaperPlan', request, GetPaperPlanResponse());
+  $async.Future<ConfirmPaperPlanResponse> confirmPaperPlan(
+          $pb.ClientContext? ctx, ConfirmPaperPlanRequest request) =>
+      _client.invoke<ConfirmPaperPlanResponse>(ctx, 'PaperService',
+          'ConfirmPaperPlan', request, ConfirmPaperPlanResponse());
+  $async.Future<GetPaperReceiptResponse> getPaperReceipt(
+          $pb.ClientContext? ctx, GetPaperReceiptRequest request) =>
+      _client.invoke<GetPaperReceiptResponse>(ctx, 'PaperService',
+          'GetPaperReceipt', request, GetPaperReceiptResponse());
+  $async.Future<CancelPaperEntryResponse> cancelPaperEntry(
+          $pb.ClientContext? ctx, CancelPaperEntryRequest request) =>
+      _client.invoke<CancelPaperEntryResponse>(ctx, 'PaperService',
+          'CancelPaperEntry', request, CancelPaperEntryResponse());
 }
 
 const $core.bool _omitFieldNames =

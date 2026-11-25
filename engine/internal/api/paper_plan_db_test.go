@@ -23,11 +23,14 @@ import (
 	"tradinglab/engine/internal/strategy"
 )
 
-func TestPaperAccountAndPlanAreDurableAndBoundToReview(t *testing.T) {
+const paperTestUnit = 100_000_000
+
+func paperFixture(t *testing.T) (*Market, *clock.Virtual, labv1connect.PaperServiceClient, int64) {
+	t.Helper()
 	ctx := context.Background()
 	st := storetest.Open(t)
 	require.NoError(t, data.SeedInstruments(ctx, st.Queries))
-	const unit = 100_000_000
+	const unit = paperTestUnit
 	price := money.Price{V: 100 * unit, Scale: instrument.Scale}
 	_, err := data.UpsertBars(ctx, st, "BTCUSDT", "rest", "fixture", []data.Bar{{
 		OpenTime: now.Add(-time.Minute), CloseTime: now, AvailableAt: now, O: price, H: price, L: price, C: price,
@@ -57,7 +60,13 @@ func TestPaperAccountAndPlanAreDurableAndBoundToReview(t *testing.T) {
 	feed := fakeLive{data.LiveStatus{Symbols: []data.LiveSymbolStatus{{Symbol: "BTCUSDT", State: data.LiveFresh, LastClose: now}}}}
 	market := &Market{Store: st, Clock: wall, Live: feed, Symbols: []string{"BTCUSDT"}}
 	srv := serve(t, func(mux *http.ServeMux) { mux.Handle(labv1connect.NewPaperServiceHandler(&Paper{Market: market})) })
-	client := labv1connect.NewPaperServiceClient(srv.Client(), srv.URL)
+	return market, wall, labv1connect.NewPaperServiceClient(srv.Client(), srv.URL), opp.ID
+}
+
+func TestPaperAccountAndPlanAreDurableAndBoundToReview(t *testing.T) {
+	ctx := context.Background()
+	market, wall, client, opportunityID := paperFixture(t)
+	const unit = paperTestUnit
 	before, err := client.GetPaperAccount(ctx, connect.NewRequest(&labv1.GetPaperAccountRequest{}))
 	require.NoError(t, err)
 	require.Nil(t, before.Msg.GetPaperAccount())
@@ -72,12 +81,12 @@ func TestPaperAccountAndPlanAreDurableAndBoundToReview(t *testing.T) {
 	}
 	require.NoError(t, group.Wait())
 	var funding int64
-	require.NoError(t, st.Pool.QueryRow(ctx, `SELECT sum(amount)::bigint FROM paper_postings WHERE account_id = $1 AND destination = 'available'`, paperAccountID).Scan(&funding))
+	require.NoError(t, market.Store.Pool.QueryRow(ctx, `SELECT sum(amount)::bigint FROM paper_postings WHERE account_id = $1 AND destination = 'available'`, paperAccountID).Scan(&funding))
 	require.EqualValues(t, 1_000*unit, funding)
 	account, err := client.GetPaperAccount(ctx, connect.NewRequest(&labv1.GetPaperAccountRequest{}))
 	require.NoError(t, err)
 	require.Equal(t, start.GetCapital().GetUnits(), account.Msg.GetPaperAccount().GetSnapshot().GetAvailableBalance().GetValue().GetUnits())
-	preview := &labv1.PreviewPaperPlanRequest{Account: paperAccountRef(), OpportunityId: opp.ID, Stop: usdtP(90 * unit), TakeProfit: usdtP(120 * unit)}
+	preview := &labv1.PreviewPaperPlanRequest{Account: paperAccountRef(), OpportunityId: opportunityID, Stop: usdtP(90 * unit), TakeProfit: usdtP(120 * unit)}
 	build := func() *labv1.PreviewPaperPlanResponse {
 		t.Helper()
 		res, err := client.PreviewPaperPlan(ctx, connect.NewRequest(preview))

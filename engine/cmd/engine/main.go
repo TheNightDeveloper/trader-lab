@@ -88,6 +88,8 @@ func run() error {
 		go live.Run(ctx)
 	}
 	market := &api.Market{Store: st, Clock: clock.Wall{}, Live: liveSource(live), Symbols: cfg.LiveSymbols, Limiter: limiter}
+	paperService := &api.Paper{Market: market}
+	go paperService.RunPaper(ctx)
 	if live != nil {
 		go market.RunMarketScans(ctx)
 	}
@@ -131,7 +133,7 @@ func run() error {
 		route(labv1connect.NewHealthServiceHandler(health)),
 		route(labv1connect.NewDataServiceHandler(dataSvc)),
 		route(labv1connect.NewMarketServiceHandler(market)),
-		route(labv1connect.NewPaperServiceHandler(&api.Paper{Market: market})),
+		route(labv1connect.NewPaperServiceHandler(paperService)),
 		route(labv1connect.NewFxServiceHandler(fxSvc)),
 		route(labv1connect.NewReportServiceHandler(&api.Report{Svc: reports, Limiter: limiter})),
 		route(labv1connect.NewPnlServiceHandler(&api.Pnl{Svc: reports, Limiter: limiter})),

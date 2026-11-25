@@ -249,6 +249,38 @@ type PaperAccount struct {
 	CashReserved   int64
 }
 
+type PaperEntry struct {
+	ID             int64
+	AccountID      string
+	OpportunityID  int64
+	PlanHash       string
+	Symbol         string
+	State          int32
+	ConfirmedAt    time.Time
+	ExpiresAt      time.Time
+	NextOpenAt     time.Time
+	Quantity       int64
+	FilledQuantity int64
+	ReservedCash   int64
+	ExposureBound  int64
+	LossBound      int64
+}
+
+type PaperExecutionEvent struct {
+	ID             int64
+	EntryID        int64
+	Kind           string
+	RecordedAt     time.Time
+	Quantity       int64
+	Reference      int64
+	FillPrice      int64
+	Fee            int64
+	Cash           int64
+	RealizedPnl    int64
+	CandleOpenAt   *time.Time
+	CandleRevision int32
+}
+
 type PaperPolicyVersion struct {
 	AccountID     string
 	Revision      int64
@@ -260,6 +292,13 @@ type PaperPolicyVersion struct {
 	SlippagePpm   int64
 	MaxCostPpm    int64
 	EntryDriftPpm int64
+}
+
+type PaperPosition struct {
+	EntryID    int64
+	Quantity   int64
+	CostBasis  int64
+	NextOpenAt time.Time
 }
 
 type PaperPosting struct {

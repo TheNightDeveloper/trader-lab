@@ -1,0 +1,229 @@
+package api
+
+import (
+	"context"
+	"strconv"
+	"testing"
+	"time"
+
+	"connectrpc.com/connect"
+	"github.com/stretchr/testify/require"
+	"golang.org/x/sync/errgroup"
+
+	"tradinglab/engine/internal/data"
+	labv1 "tradinglab/engine/internal/gen/lab/v1"
+	"tradinglab/engine/internal/instrument"
+	"tradinglab/engine/internal/money"
+	"tradinglab/engine/internal/store/db"
+)
+
+func TestPaperConfirmationPartialFillCancelAndProtectiveExit(t *testing.T) {
+	ctx := context.Background()
+	market, wall, client, opportunityID := paperFixture(t)
+	p := &Paper{Market: market}
+	const unit = paperTestUnit
+	_, err := client.InitializePaperAccount(ctx, connect.NewRequest(&labv1.InitializePaperAccountRequest{
+		Capital: usdtP(250 * unit), MaxLossPerTrade: usdtP(15 * unit), MaxOpenLoss: usdtP(20 * unit), MaxSpotExposure: usdtP(200 * unit),
+	}))
+	require.NoError(t, err)
+	preview, err := client.PreviewPaperPlan(ctx, connect.NewRequest(&labv1.PreviewPaperPlanRequest{
+		Account: paperAccountRef(), OpportunityId: opportunityID, Stop: usdtP(90 * unit), TakeProfit: usdtP(120 * unit),
+	}))
+	require.NoError(t, err)
+	plan := preview.Msg.GetPlan()
+	require.NotNil(t, plan)
+	confirm := func() (*labv1.ConfirmPaperPlanResponse, error) {
+		res, err := client.ConfirmPaperPlan(ctx, connect.NewRequest(&labv1.ConfirmPaperPlanRequest{Account: paperAccountRef(), PlanHash: plan.GetPlanHash()}))
+		if err != nil {
+			return nil, err
+		}
+		return res.Msg, nil
+	}
+	feed := market.Live
+	market.Live = nil
+	rejected, err := confirm()
+	require.NoError(t, err)
+	require.Equal(t, "feed_stale", rejected.GetRestriction().GetCode())
+	market.Live = feed
+	var group errgroup.Group
+	var receipts [2]int64
+	for i := range receipts {
+		group.Go(func() error {
+			result, err := confirm()
+			receipts[i] = result.GetReceipt().GetId()
+			return err
+		})
+	}
+	require.NoError(t, group.Wait())
+	id := receipts[0]
+	require.Positive(t, id)
+	require.Equal(t, id, receipts[1])
+	read := func() *labv1.GetPaperReceiptResponse {
+		t.Helper()
+		res, err := client.GetPaperReceipt(ctx, connect.NewRequest(&labv1.GetPaperReceiptRequest{ReceiptId: id}))
+		require.NoError(t, err)
+		return res.Msg
+	}
+	book := func() *labv1.GetPaperAccountResponse {
+		t.Helper()
+		res, err := client.GetPaperAccount(ctx, connect.NewRequest(&labv1.GetPaperAccountRequest{}))
+		require.NoError(t, err)
+		return res.Msg
+	}
+	units := func(value *labv1.Money) int64 {
+		t.Helper()
+		v, err := strconv.ParseInt(value.GetUnits(), 10, 64)
+		require.NoError(t, err)
+		return v
+	}
+	initial := read()
+	require.Len(t, initial.GetEvents(), 1)
+	require.Equal(t, labv1.PaperEntryState_PAPER_ENTRY_STATE_PENDING, initial.GetReceipt().GetState())
+	reserved := units(plan.GetRequiredCash())
+	require.Equal(t, reserved, units(initial.GetReceipt().GetReservedCash()))
+	require.Equal(t, int64(250*unit)-reserved, units(book().GetPaperAccount().GetSnapshot().GetAvailableBalance().GetValue()))
+
+	ingest := func(offset int, open, lo, hi, close int64) {
+		t.Helper()
+		at := now.Add(time.Duration(offset) * time.Minute)
+		price := func(v int64) money.Price { return money.Price{V: v * unit, Scale: instrument.Scale} }
+		_, err := data.UpsertBars(ctx, market.Store, "BTCUSDT", "rest", "fixture", []data.Bar{{
+			OpenTime: at, CloseTime: at.Add(time.Minute), AvailableAt: at.Add(time.Minute),
+			O: price(open), H: price(hi), L: price(lo), C: price(close), Volume: money.Qty{V: 20 * unit, Scale: instrument.Scale},
+		}})
+		require.NoError(t, err)
+		require.NoError(t, wall.Set(at.Add(time.Minute)))
+	}
+	ingest(0, 100, 99, 101, 100) // opened before the confirmation
+	require.NoError(t, p.runPaperCycle(ctx))
+	require.Len(t, read().GetEvents(), 1)
+	ingest(1, 100, 99, 101, 100)
+	// A fresh service instance consumes the same durable queue after restart.
+	p = &Paper{Market: market}
+	require.NoError(t, p.runPaperCycle(ctx))
+	partial := read()
+	require.Equal(t, labv1.PaperEntryState_PAPER_ENTRY_STATE_PARTIAL, partial.GetReceipt().GetState())
+	require.EqualValues(t, unit/5, units(partial.GetReceipt().GetFilledQuantity()))
+	require.Len(t, book().GetPositions(), 1)
+	require.Equal(t, labv1.MoneyAvailability_MONEY_AVAILABILITY_STALE, book().GetPaperAccount().GetSnapshot().GetEquity().GetUnavailable().GetReason())
+
+	ingest(2, 100, 99, 101, 100)
+	require.NoError(t, p.runPaperCycle(ctx)) // protection advances before another entry on the same bar
+	group = errgroup.Group{}
+	group.Go(func() error { return p.runPaperCycle(ctx) })
+	group.Go(func() error {
+		_, err := client.CancelPaperEntry(ctx, connect.NewRequest(&labv1.CancelPaperEntryRequest{Account: paperAccountRef(), ReceiptId: id}))
+		return err
+	})
+	require.NoError(t, group.Wait())
+	cancelled := read()
+	require.Equal(t, labv1.PaperEntryState_PAPER_ENTRY_STATE_CANCELLED, cancelled.GetReceipt().GetState())
+	require.Zero(t, units(cancelled.GetReceipt().GetReservedCash()))
+	opened := book().GetPositions()[0]
+	require.Equal(t, units(cancelled.GetReceipt().GetFilledQuantity()), units(opened.GetQuantity()))
+	spent := units(opened.GetCostBasis())
+	require.Equal(t, int64(250*unit)-spent, units(book().GetPaperAccount().GetSnapshot().GetAvailableBalance().GetValue()))
+	recovered, err := confirm()
+	require.NoError(t, err)
+	require.Equal(t, id, recovered.GetReceipt().GetId())
+
+	market.Live = nil // protecting existing positions never needs entry permission
+	ingest(3, 85, 80, 122, 105)
+	require.NoError(t, p.runPaperCycle(ctx))
+	require.NoError(t, p.runPaperCycle(ctx))
+	closed := read()
+	last := closed.GetEvents()[len(closed.GetEvents())-1]
+	require.Equal(t, "stop_exit", last.GetKind())
+	require.EqualValues(t, 85*unit, units(last.GetReferencePrice()))
+	pnl := units(last.GetCash()) - spent
+	require.Equal(t, pnl, units(last.GetRealizedPnl()))
+	final := book()
+	require.Empty(t, final.GetPositions())
+	require.Equal(t, int64(250*unit)+pnl, units(final.GetPaperAccount().GetSnapshot().GetEquity().GetValue()))
+	var available, reservedAfter, positionAfter, fees int64
+	require.NoError(t, market.Store.Pool.QueryRow(ctx, `SELECT
+coalesce(sum(amount * ((destination = 'available')::int - (source = 'available')::int)) FILTER (WHERE asset = 'USDT'), 0)::bigint,
+coalesce(sum(amount * ((destination = 'reserved')::int - (source = 'reserved')::int)) FILTER (WHERE asset = 'USDT'), 0)::bigint,
+coalesce(sum(amount * ((destination = 'position')::int - (source = 'position')::int)) FILTER (WHERE asset = 'BTC'), 0)::bigint,
+coalesce(sum(amount) FILTER (WHERE destination = 'fees' AND asset = 'USDT'), 0)::bigint
+FROM paper_postings WHERE account_id = $1`, paperAccountID).Scan(&available, &reservedAfter, &positionAfter, &fees))
+	require.Equal(t, int64(250*unit)+pnl, available)
+	require.Zero(t, reservedAfter)
+	require.Zero(t, positionAfter)
+	var eventFees int64
+	for _, event := range closed.GetEvents() {
+		if event.GetFee() != nil {
+			eventFees += units(event.GetFee())
+		}
+	}
+	require.Equal(t, eventFees, fees)
+}
+
+func TestPaperEntriesShareCashAcrossSymbols(t *testing.T) {
+	ctx := context.Background()
+	market, wall, client, btcID := paperFixture(t)
+	const unit = paperTestUnit
+	st := market.Store
+	btc, err := st.PaperOpportunity(ctx, btcID)
+	require.NoError(t, err)
+	price := money.Price{V: 100 * unit, Scale: instrument.Scale}
+	_, err = data.UpsertBars(ctx, st, "ETHUSDT", "rest", "fixture", []data.Bar{{
+		OpenTime: now.Add(-time.Minute), CloseTime: now, AvailableAt: now, O: price, H: price, L: price, C: price,
+	}})
+	require.NoError(t, err)
+	require.NoError(t, st.InsertMarketOpportunity(ctx, db.InsertMarketOpportunityParams{
+		Symbol: "ETHUSDT", RuleVersionID: btc.RuleVersionID, ReportID: btc.ReportID, SpecRevision: marketSpecRevision("ETHUSDT"),
+		CandleClosedAt: now, ObservedAt: now, ExpiresAt: btc.ExpiresAt, ReferenceClose: price.V,
+		Reason: "rule entry", Snapshot: []byte(`[]`), SnapshotSha256: btc.SnapshotSha256,
+	}))
+	eth, err := st.MarketOpportunity(ctx, db.MarketOpportunityParams{RuleVersionID: btc.RuleVersionID, Symbol: "ETHUSDT", CandleClosedAt: now})
+	require.NoError(t, err)
+	market.Symbols = []string{"BTCUSDT", "ETHUSDT"}
+	market.Live = fakeLive{data.LiveStatus{Symbols: []data.LiveSymbolStatus{
+		{Symbol: "BTCUSDT", State: data.LiveFresh, LastClose: now}, {Symbol: "ETHUSDT", State: data.LiveFresh, LastClose: now},
+	}}}
+	_, err = client.InitializePaperAccount(ctx, connect.NewRequest(&labv1.InitializePaperAccountRequest{
+		Capital: usdtP(100 * unit), MaxLossPerTrade: usdtP(40 * unit), MaxOpenLoss: usdtP(40 * unit), MaxSpotExposure: usdtP(100 * unit),
+	}))
+	require.NoError(t, err)
+	preview := func(id int64) *labv1.PreviewPaperPlanResponse {
+		t.Helper()
+		res, err := client.PreviewPaperPlan(ctx, connect.NewRequest(&labv1.PreviewPaperPlanRequest{
+			Account: paperAccountRef(), OpportunityId: id, Stop: usdtP(90 * unit), TakeProfit: usdtP(120 * unit),
+		}))
+		require.NoError(t, err)
+		return res.Msg
+	}
+	plans := []*labv1.PaperPlan{preview(btcID).GetPlan(), preview(eth.ID).GetPlan()}
+	var group errgroup.Group
+	var results [2]*labv1.ConfirmPaperPlanResponse
+	for i, plan := range plans {
+		require.NotNil(t, plan)
+		group.Go(func() error {
+			res, err := client.ConfirmPaperPlan(ctx, connect.NewRequest(&labv1.ConfirmPaperPlanRequest{Account: paperAccountRef(), PlanHash: plan.GetPlanHash()}))
+			if err == nil {
+				results[i] = res.Msg
+			}
+			return err
+		})
+	}
+	require.NoError(t, group.Wait())
+	var accepted int
+	for i, res := range results {
+		if res.GetReceipt() != nil {
+			accepted++
+		} else {
+			require.Equal(t, "account_changed", res.GetRestriction().GetCode())
+			require.Equal(t, "risk_budget", preview(plans[i].GetOpportunityId()).GetRestriction().GetCode())
+		}
+	}
+	require.Equal(t, 1, accepted)
+	require.NoError(t, wall.Set(now.Add(11*time.Minute)))
+	require.NoError(t, (&Paper{Market: market}).runPaperCycle(ctx))
+	book, err := client.GetPaperAccount(ctx, connect.NewRequest(&labv1.GetPaperAccountRequest{}))
+	require.NoError(t, err)
+	require.Len(t, book.Msg.GetRecentReceipts(), 1)
+	require.Equal(t, labv1.PaperEntryState_PAPER_ENTRY_STATE_EXPIRED, book.Msg.GetRecentReceipts()[0].GetState())
+	require.Equal(t, usdtP(100*unit).GetUnits(), book.Msg.GetPaperAccount().GetSnapshot().GetAvailableBalance().GetValue().GetUnits())
+	require.Equal(t, "0", book.Msg.GetPaperAccount().GetReservedBalance().GetUnits())
+}

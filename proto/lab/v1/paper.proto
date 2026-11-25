@@ -12,12 +12,17 @@ service PaperService {
   rpc InitializePaperAccount(InitializePaperAccountRequest) returns (InitializePaperAccountResponse);
   rpc PreviewPaperPlan(PreviewPaperPlanRequest) returns (PreviewPaperPlanResponse);
   rpc GetPaperPlan(GetPaperPlanRequest) returns (GetPaperPlanResponse);
+  rpc ConfirmPaperPlan(ConfirmPaperPlanRequest) returns (ConfirmPaperPlanResponse);
+  rpc GetPaperReceipt(GetPaperReceiptRequest) returns (GetPaperReceiptResponse);
+  rpc CancelPaperEntry(CancelPaperEntryRequest) returns (CancelPaperEntryResponse);
 }
 
 message GetPaperAccountRequest {}
 
 message GetPaperAccountResponse {
   PaperAccount paper_account = 1; // absent until initialized
+  repeated PaperReceipt recent_receipts = 2;
+  repeated PaperPosition positions = 3;
 }
 
 message InitializePaperAccountRequest {
@@ -61,6 +66,79 @@ message GetPaperPlanRequest {
 message GetPaperPlanResponse {
   PaperPlan plan = 1;
   PaperRestriction restriction = 2; // the recorded plan may no longer be usable
+  PaperReceipt receipt = 3; // survives a lost confirmation response
+}
+
+message ConfirmPaperPlanRequest {
+  AccountRef account = 1;
+  string plan_hash = 2;
+}
+
+message ConfirmPaperPlanResponse {
+  PaperReceipt receipt = 1;
+  PaperRestriction restriction = 2;
+}
+
+message GetPaperReceiptRequest {
+  int64 receipt_id = 1;
+}
+
+message GetPaperReceiptResponse {
+  PaperReceipt receipt = 1;
+  repeated PaperExecutionEvent events = 2;
+}
+
+message CancelPaperEntryRequest {
+  AccountRef account = 1;
+  int64 receipt_id = 2;
+}
+
+message CancelPaperEntryResponse {
+  PaperReceipt receipt = 1;
+}
+
+enum PaperEntryState {
+  PAPER_ENTRY_STATE_UNSPECIFIED = 0;
+  PAPER_ENTRY_STATE_PENDING = 1;
+  PAPER_ENTRY_STATE_PARTIAL = 2;
+  PAPER_ENTRY_STATE_FILLED = 3;
+  PAPER_ENTRY_STATE_CANCELLED = 4;
+  PAPER_ENTRY_STATE_EXPIRED = 5;
+}
+
+message PaperReceipt {
+  int64 id = 1;
+  AccountRef account = 2;
+  string plan_hash = 3;
+  string symbol = 4;
+  PaperEntryState state = 5;
+  Money requested_quantity = 6;
+  Money filled_quantity = 7;
+  Money reserved_cash = 8;
+  int64 confirmed_at_unix_ms = 9;
+  int64 expires_at_unix_ms = 10;
+}
+
+message PaperPosition {
+  int64 receipt_id = 1;
+  string symbol = 2;
+  Money quantity = 3;
+  Money cost_basis = 4; // includes paid entry fees
+  MoneyReading market_value = 5;
+}
+
+message PaperExecutionEvent {
+  int64 id = 1;
+  string kind = 2;
+  int64 recorded_at_unix_ms = 3;
+  Money quantity = 4;
+  Money reference_price = 5;
+  Money fill_price = 6;
+  Money fee = 7;
+  Money cash = 8;
+  optional int64 candle_opened_at_unix_ms = 9;
+  int32 candle_revision = 10;
+  Money realized_pnl = 11; // present for exits, after entry and exit costs
 }
 
 message PaperRestriction {

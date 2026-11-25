@@ -27,18 +27,11 @@ func paperAccountMatches(ref *labv1.AccountRef) bool {
 }
 
 func (p *Paper) GetPaperAccount(ctx context.Context, _ *connect.Request[labv1.GetPaperAccountRequest]) (*connect.Response[labv1.GetPaperAccountResponse], error) {
-	row, err := p.Market.Store.ReadPaperAccount(ctx, paperAccountID)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return connect.NewResponse(&labv1.GetPaperAccountResponse{}), nil
-	}
+	book, err := p.readPaperBook(ctx)
 	if err != nil {
 		return nil, err
 	}
-	account, err := paperAccountP(row, p.Market.Clock.Now())
-	if err != nil {
-		return nil, err
-	}
-	return connect.NewResponse(&labv1.GetPaperAccountResponse{PaperAccount: account}), nil
+	return connect.NewResponse(book), nil
 }
 
 func (p *Paper) InitializePaperAccount(ctx context.Context, req *connect.Request[labv1.InitializePaperAccountRequest]) (*connect.Response[labv1.InitializePaperAccountResponse], error) {
@@ -91,31 +84,100 @@ func (p *Paper) InitializePaperAccount(ctx context.Context, req *connect.Request
 	if err != nil {
 		return nil, err
 	}
-	account, err := paperAccountP(row, now)
+	book, err := p.readPaperBook(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return connect.NewResponse(&labv1.InitializePaperAccountResponse{PaperAccount: account}), nil
+	return connect.NewResponse(&labv1.InitializePaperAccountResponse{PaperAccount: book.PaperAccount}), nil
+}
+
+func (p *Paper) readPaperBook(ctx context.Context) (*labv1.GetPaperAccountResponse, error) {
+	book := &labv1.GetPaperAccountResponse{}
+	err := p.Market.Store.InTxOptions(ctx, pgx.TxOptions{IsoLevel: pgx.RepeatableRead, AccessMode: pgx.ReadOnly}, func(q *db.Queries) error {
+		row, err := q.ReadPaperAccount(ctx, paperAccountID)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		positions, err := q.ListPaperPositions(ctx, row.ID)
+		if err != nil {
+			return err
+		}
+		now := p.Market.Clock.Now()
+		equity, err := money.AddInt64(row.CashAvailable, row.CashReserved)
+		if err != nil {
+			return err
+		}
+		var stale bool
+		for _, position := range positions {
+			spec, _ := paperSpotSpec(position.Symbol)
+			view := &labv1.PaperPosition{
+				ReceiptId: position.EntryID, Symbol: position.Symbol,
+				Quantity: moneyP(money.Amount{Asset: spec.Base, V: position.Quantity}), CostBasis: usdtP(position.CostBasis),
+			}
+			candle, err := p.paperCandle(ctx, q, position.Symbol, now, time.Time{})
+			if errors.Is(err, errMarketFeed) {
+				stale = true
+				view.MarketValue = stalePaperValue()
+			} else {
+				if err != nil {
+					return err
+				}
+				value, err := money.MulScaled(position.Quantity, spec.Base.Scale, candle.C, instrument.Scale, instrument.Scale, money.Floor)
+				if err != nil {
+					return err
+				}
+				equity, err = money.AddInt64(equity, value)
+				if err != nil {
+					return err
+				}
+				view.MarketValue = paperMoneyValue(value)
+			}
+			book.Positions = append(book.Positions, view)
+		}
+		mark := paperMoneyValue(equity)
+		if stale {
+			mark = stalePaperValue()
+		}
+		book.PaperAccount = paperAccountP(row, now, mark)
+		entries, err := q.RecentPaperEntries(ctx, row.ID)
+		if err != nil {
+			return err
+		}
+		for _, entry := range entries {
+			book.RecentReceipts = append(book.RecentReceipts, paperReceiptP(entry))
+		}
+		return nil
+	})
+	return book, err
 }
 
 func paperPolicyP(row db.ReadPaperAccountRow) *labv1.RiskPolicyVersion {
 	return &labv1.RiskPolicyVersion{PolicyId: row.ID, Revision: row.PolicyRevision, EffectiveFromUnixMs: ms(row.EffectiveAt)}
 }
 
-func paperAccountP(row db.ReadPaperAccountRow, now time.Time) (*labv1.PaperAccount, error) {
-	equity, err := money.AddInt64(row.CashAvailable, row.CashReserved)
-	if err != nil {
-		return nil, err
-	}
+func paperAccountP(row db.ReadPaperAccountRow, now time.Time, equity *labv1.MoneyReading) *labv1.PaperAccount {
 	return &labv1.PaperAccount{
 		Snapshot: &labv1.AccountSnapshot{
 			Account: paperAccountRef(), Revision: row.Revision, AsOfUnixMs: ms(now), AccountingAsset: instrument.USDT.Code,
-			Equity:           &labv1.MoneyReading{Result: &labv1.MoneyReading_Value{Value: usdtP(equity)}},
-			AvailableBalance: &labv1.MoneyReading{Result: &labv1.MoneyReading_Value{Value: usdtP(row.CashAvailable)}},
+			Equity:           equity,
+			AvailableBalance: paperMoneyValue(row.CashAvailable),
 			RiskPolicy:       paperPolicyP(row),
 		},
 		InitialCapital: usdtP(row.InitialCapital), ReservedBalance: usdtP(row.CashReserved),
 		MaxLossPerTrade: usdtP(row.MaxLoss), MaxOpenLoss: usdtP(row.MaxOpenLoss), MaxSpotExposure: usdtP(row.MaxExposure),
 		FeeRate: ratioP(money.Ratio(row.FeePpm)), SlippageRate: ratioP(money.Ratio(row.SlippagePpm)),
-	}, nil
+	}
+}
+
+func paperMoneyValue(amount int64) *labv1.MoneyReading {
+	return &labv1.MoneyReading{Result: &labv1.MoneyReading_Value{Value: usdtP(amount)}}
+}
+
+func stalePaperValue() *labv1.MoneyReading {
+	return &labv1.MoneyReading{Result: &labv1.MoneyReading_Unavailable{Unavailable: &labv1.UnavailableMoney{
+		Reason: labv1.MoneyAvailability_MONEY_AVAILABILITY_STALE, Detail: "برای ارزش‌گذاری موقعیت، قیمت تازه در دسترس نیست",
+	}}}
 }
