@@ -2,6 +2,39 @@
 
 Update at the end of every session.
 
+## P3 Paper entries and protective exits (2026-11-25)
+
+Confirmation locks the account, revalidates the reviewed hash and market,
+checks aggregate exposure and open loss, and commits the receipt, cash
+reservation and event together. The opportunity has one receipt even when
+confirmation is repeated in another tab or its response is lost. Active entries
+and positions are limited to one per symbol and four per account.
+
+The engine processes the durable queue from eligible REST candles opened after
+confirmation. Simulated entry participation is capped at 1% of minute volume.
+Each partial fill updates the cursor, balance, position and balanced postings
+atomically. Cancellation releases only the unused reservation. Protective exits
+remain active after cancellation or expiry. The OHLC model uses the adverse
+stop when intrabar order is ambiguous, and marks a loss gap at its observed open.
+Protection begins on the first full minute opened after the fill was observable.
+The exit realizes net proceeds less the actual entry cost basis.
+
+The workspace links review to its durable receipt, shows pending, partial,
+filled, cancelled and expired states, and lists open positions with a typed
+unavailable mark when current pricing is missing. Receipt events expose exact
+costs and realized PnL.
+
+Chrome with seeded PostgreSQL data recovered a committed receipt after dropping
+the confirmation response, displayed a partial fill, cancelled the remainder at
+390 pixels, and reopened the protective exit and realized PnL. PostgreSQL-required
+Go tests passed, including 12 repetitions of the concurrent confirmation and
+cancel/fill cases. The checks reconciled final cash, base quantity and fees to
+ledger postings. Go lint and vet, Buf compatibility, Dart analysis, the web
+release build and all 57 existing Flutter tests passed.
+
+Manual reduction, reconciliation, portfolio journal and replay, and the complete
+J1/J2/J5 acceptance passes remain open.
+
 ## P3 Paper account and immutable plan review (2026-11-25)
 
 Paper setup funds one local USDT account. Account, initial policy and the

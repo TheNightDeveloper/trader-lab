@@ -402,7 +402,7 @@ abstract class L10n {
   /// No description provided for @paperFillAssumptions.
   ///
   /// In fa, this message translates to:
-  /// **'برآورد بر اساس کندل بستهٔ یک‌دقیقه‌ای، با کارمزد و لغزش شبیه‌سازی‌شده است. عبور قیمت از حد ضرر می‌تواند زیان بیشتری ایجاد کند.'**
+  /// **'ورود با قیمت بازشدن کندل کامل یک‌دقیقه‌ای بعد از تأیید و حداکثر یک درصد از حجم کندل شبیه‌سازی می‌شود. کارمزد و لغزش اعمال می‌شوند و عبور قیمت از حد ضرر می‌تواند زیان بیشتری ایجاد کند.'**
   String get paperFillAssumptions;
 
   /// No description provided for @paperFeeRate.
@@ -434,6 +434,180 @@ abstract class L10n {
   /// In fa, this message translates to:
   /// **'مرور دوباره'**
   String get paperReviewAgain;
+
+  /// No description provided for @paperConfirm.
+  ///
+  /// In fa, this message translates to:
+  /// **'تأیید ورود مجازی'**
+  String get paperConfirm;
+
+  /// No description provided for @paperConfirmationUnknown.
+  ///
+  /// In fa, this message translates to:
+  /// **'پاسخ تأیید دریافت نشد. رسید دوباره از موتور بررسی می‌شود.'**
+  String get paperConfirmationUnknown;
+
+  /// No description provided for @paperReceipt.
+  ///
+  /// In fa, this message translates to:
+  /// **'رسید معاملهٔ مجازی'**
+  String get paperReceipt;
+
+  /// No description provided for @paperViewReceipt.
+  ///
+  /// In fa, this message translates to:
+  /// **'مشاهدهٔ رسید'**
+  String get paperViewReceipt;
+
+  /// No description provided for @paperViewPlan.
+  ///
+  /// In fa, this message translates to:
+  /// **'مشاهدهٔ برنامهٔ تأییدشده'**
+  String get paperViewPlan;
+
+  /// No description provided for @paperRecentReceipts.
+  ///
+  /// In fa, this message translates to:
+  /// **'رسیدهای اخیر'**
+  String get paperRecentReceipts;
+
+  /// No description provided for @paperOpenPositions.
+  ///
+  /// In fa, this message translates to:
+  /// **'موقعیت‌های باز'**
+  String get paperOpenPositions;
+
+  /// No description provided for @paperPositionValue.
+  ///
+  /// In fa, this message translates to:
+  /// **'ارزش با قیمت بازار'**
+  String get paperPositionValue;
+
+  /// No description provided for @paperCostBasis.
+  ///
+  /// In fa, this message translates to:
+  /// **'بهای تمام‌شده با کارمزد'**
+  String get paperCostBasis;
+
+  /// No description provided for @paperFilledQuantity.
+  ///
+  /// In fa, this message translates to:
+  /// **'حجم اجراشده'**
+  String get paperFilledQuantity;
+
+  /// No description provided for @paperCancelEntry.
+  ///
+  /// In fa, this message translates to:
+  /// **'لغو ماندهٔ ورود'**
+  String get paperCancelEntry;
+
+  /// No description provided for @paperConfirmedAt.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان تأیید'**
+  String get paperConfirmedAt;
+
+  /// No description provided for @paperEntryExpires.
+  ///
+  /// In fa, this message translates to:
+  /// **'پایان مهلت ورود'**
+  String get paperEntryExpires;
+
+  /// No description provided for @paperEntryPending.
+  ///
+  /// In fa, this message translates to:
+  /// **'در صف اجرا'**
+  String get paperEntryPending;
+
+  /// No description provided for @paperEntryPartial.
+  ///
+  /// In fa, this message translates to:
+  /// **'بخشی اجرا شده'**
+  String get paperEntryPartial;
+
+  /// No description provided for @paperEntryFilled.
+  ///
+  /// In fa, this message translates to:
+  /// **'ورود کامل اجرا شد'**
+  String get paperEntryFilled;
+
+  /// No description provided for @paperEntryCancelled.
+  ///
+  /// In fa, this message translates to:
+  /// **'ماندهٔ ورود لغو شد'**
+  String get paperEntryCancelled;
+
+  /// No description provided for @paperEntryExpired.
+  ///
+  /// In fa, this message translates to:
+  /// **'مهلت ورود پایان یافت'**
+  String get paperEntryExpired;
+
+  /// No description provided for @paperEventHistory.
+  ///
+  /// In fa, this message translates to:
+  /// **'رویدادهای رسید'**
+  String get paperEventHistory;
+
+  /// No description provided for @paperEventAccepted.
+  ///
+  /// In fa, this message translates to:
+  /// **'تأیید و رزرو وجه'**
+  String get paperEventAccepted;
+
+  /// No description provided for @paperEventEntryFill.
+  ///
+  /// In fa, this message translates to:
+  /// **'اجرای ورود'**
+  String get paperEventEntryFill;
+
+  /// No description provided for @paperEventStopExit.
+  ///
+  /// In fa, this message translates to:
+  /// **'خروج با حد ضرر'**
+  String get paperEventStopExit;
+
+  /// No description provided for @paperEventTargetExit.
+  ///
+  /// In fa, this message translates to:
+  /// **'خروج با هدف سود'**
+  String get paperEventTargetExit;
+
+  /// No description provided for @paperEventProtectionCancel.
+  ///
+  /// In fa, this message translates to:
+  /// **'لغو مانده برای خروج محافظتی'**
+  String get paperEventProtectionCancel;
+
+  /// No description provided for @paperEventFee.
+  ///
+  /// In fa, this message translates to:
+  /// **'کارمزد'**
+  String get paperEventFee;
+
+  /// No description provided for @paperExecutionPrice.
+  ///
+  /// In fa, this message translates to:
+  /// **'قیمت اجرای مجازی'**
+  String get paperExecutionPrice;
+
+  /// No description provided for @paperExecutionCandle.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان بازشدن کندل اجرا'**
+  String get paperExecutionCandle;
+
+  /// No description provided for @paperEventCash.
+  ///
+  /// In fa, this message translates to:
+  /// **'مبلغ رویداد'**
+  String get paperEventCash;
+
+  /// No description provided for @paperRealizedPnl.
+  ///
+  /// In fa, this message translates to:
+  /// **'سود و زیان تحقق‌یافته'**
+  String get paperRealizedPnl;
 
   /// No description provided for @screenMarketSub.
   ///

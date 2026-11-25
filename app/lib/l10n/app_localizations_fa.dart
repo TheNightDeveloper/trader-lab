@@ -169,7 +169,7 @@ class L10nFa extends L10n {
 
   @override
   String get paperFillAssumptions =>
-      'برآورد بر اساس کندل بستهٔ یک‌دقیقه‌ای، با کارمزد و لغزش شبیه‌سازی‌شده است. عبور قیمت از حد ضرر می‌تواند زیان بیشتری ایجاد کند.';
+      'ورود با قیمت بازشدن کندل کامل یک‌دقیقه‌ای بعد از تأیید و حداکثر یک درصد از حجم کندل شبیه‌سازی می‌شود. کارمزد و لغزش اعمال می‌شوند و عبور قیمت از حد ضرر می‌تواند زیان بیشتری ایجاد کند.';
 
   @override
   String get paperFeeRate => 'کارمزد هر سمت';
@@ -185,6 +185,94 @@ class L10nFa extends L10n {
 
   @override
   String get paperReviewAgain => 'مرور دوباره';
+
+  @override
+  String get paperConfirm => 'تأیید ورود مجازی';
+
+  @override
+  String get paperConfirmationUnknown =>
+      'پاسخ تأیید دریافت نشد. رسید دوباره از موتور بررسی می‌شود.';
+
+  @override
+  String get paperReceipt => 'رسید معاملهٔ مجازی';
+
+  @override
+  String get paperViewReceipt => 'مشاهدهٔ رسید';
+
+  @override
+  String get paperViewPlan => 'مشاهدهٔ برنامهٔ تأییدشده';
+
+  @override
+  String get paperRecentReceipts => 'رسیدهای اخیر';
+
+  @override
+  String get paperOpenPositions => 'موقعیت‌های باز';
+
+  @override
+  String get paperPositionValue => 'ارزش با قیمت بازار';
+
+  @override
+  String get paperCostBasis => 'بهای تمام‌شده با کارمزد';
+
+  @override
+  String get paperFilledQuantity => 'حجم اجراشده';
+
+  @override
+  String get paperCancelEntry => 'لغو ماندهٔ ورود';
+
+  @override
+  String get paperConfirmedAt => 'زمان تأیید';
+
+  @override
+  String get paperEntryExpires => 'پایان مهلت ورود';
+
+  @override
+  String get paperEntryPending => 'در صف اجرا';
+
+  @override
+  String get paperEntryPartial => 'بخشی اجرا شده';
+
+  @override
+  String get paperEntryFilled => 'ورود کامل اجرا شد';
+
+  @override
+  String get paperEntryCancelled => 'ماندهٔ ورود لغو شد';
+
+  @override
+  String get paperEntryExpired => 'مهلت ورود پایان یافت';
+
+  @override
+  String get paperEventHistory => 'رویدادهای رسید';
+
+  @override
+  String get paperEventAccepted => 'تأیید و رزرو وجه';
+
+  @override
+  String get paperEventEntryFill => 'اجرای ورود';
+
+  @override
+  String get paperEventStopExit => 'خروج با حد ضرر';
+
+  @override
+  String get paperEventTargetExit => 'خروج با هدف سود';
+
+  @override
+  String get paperEventProtectionCancel => 'لغو مانده برای خروج محافظتی';
+
+  @override
+  String get paperEventFee => 'کارمزد';
+
+  @override
+  String get paperExecutionPrice => 'قیمت اجرای مجازی';
+
+  @override
+  String get paperExecutionCandle => 'زمان بازشدن کندل اجرا';
+
+  @override
+  String get paperEventCash => 'مبلغ رویداد';
+
+  @override
+  String get paperRealizedPnl => 'سود و زیان تحقق‌یافته';
 
   @override
   String get screenMarketSub =>

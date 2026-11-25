@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../app/nav.dart';
-import '../../core/api/engine.dart';
 import '../../core/format.dart';
 import '../../core/metric.dart';
 import '../../core/money.dart';
@@ -16,35 +15,13 @@ import '../../core/widgets/layout.dart';
 import '../../core/widgets/num.dart';
 import '../../core/widgets/workspace_status.dart';
 import '../../gen/lab/v1/common.pb.dart' show Money;
-import '../../gen/lab/v1/paper.connect.client.dart';
 import '../../gen/lab/v1/paper.pb.dart';
 import '../../gen/lab/v1/workspace.pbenum.dart';
 import '../../l10n/app_localizations.dart';
 import '../library/rule_editor.dart' show ruleNumber;
 import '../page_frame.dart';
-
-final _paperClient = Provider((ref) => PaperServiceClient(ref.watch(transportProvider)));
-
-final _paperAccount = StreamProvider.autoDispose<GetPaperAccountResponse>((ref) {
-  final client = ref.watch(_paperClient);
-  return _pollPaper(ref, (signal) => client.getPaperAccount(GetPaperAccountRequest(), signal: signal));
-}, retry: reconnectForever);
-
-final _paperPlan = StreamProvider.autoDispose.family<GetPaperPlanResponse, String>((ref, hash) {
-  final client = ref.watch(_paperClient);
-  return _pollPaper(ref, (signal) => client.getPaperPlan(GetPaperPlanRequest(planHash: hash), signal: signal));
-}, retry: reconnectForever);
-
-/// Keep the last server receipt during disconnects and obtain fresh review eligibility on reconnect.
-Stream<T> _pollPaper<T>(Ref ref, Future<T> Function(AbortSignal) read) async* {
-  final signal = CancelableSignal();
-  ref.onDispose(signal.cancel);
-  const interval = Duration(seconds: 5);
-  while (ref.mounted) {
-    yield await read(TimeoutSignal(interval, parent: signal));
-    await Future<void>.delayed(interval);
-  }
-}
+import 'paper_entries.dart';
+import 'paper_providers.dart';
 
 class PaperScreen extends ConsumerWidget {
   const PaperScreen({super.key, this.opportunityId});
@@ -54,7 +31,7 @@ class PaperScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = L10n.of(context);
-    final accountState = ref.watch(_paperAccount);
+    final accountState = ref.watch(paperAccountProvider);
     final snapshot = accountState.value;
     final id = opportunityId;
     final account = snapshot != null && snapshot.hasPaperAccount() ? snapshot.paperAccount : null;
@@ -64,7 +41,7 @@ class PaperScreen extends ConsumerWidget {
         if (snapshot == null)
           AsyncSection(
             value: accountState,
-            onRetry: () => ref.invalidate(_paperAccount),
+            onRetry: () => ref.invalidate(paperAccountProvider),
             skeleton: Text(l.paperLoading),
             builder: (_) => const SizedBox.shrink(),
           )
@@ -78,7 +55,7 @@ class PaperScreen extends ConsumerWidget {
               enabled: !accountState.hasError,
               submit: (values, signal) async {
                 await ref
-                    .read(_paperClient)
+                    .read(paperClientProvider)
                     .initializePaperAccount(
                       InitializePaperAccountRequest(
                         capital: values[0],
@@ -88,7 +65,7 @@ class PaperScreen extends ConsumerWidget {
                       ),
                       signal: signal,
                     );
-                if (context.mounted) ref.invalidate(_paperAccount);
+                if (context.mounted) ref.invalidate(paperAccountProvider);
                 return null;
               },
             )
@@ -103,7 +80,7 @@ class PaperScreen extends ConsumerWidget {
                 enabled: !accountState.hasError,
                 submit: (values, signal) async {
                   final result = await ref
-                      .read(_paperClient)
+                      .read(paperClientProvider)
                       .previewPaperPlan(
                         PreviewPaperPlanRequest(
                           account: account.snapshot.account,
@@ -117,6 +94,7 @@ class PaperScreen extends ConsumerWidget {
                   return result.hasRestriction() ? result.restriction.detail : null;
                 },
               ),
+            PaperActivity(positions: snapshot.positions, receipts: snapshot.recentReceipts),
           ],
         ],
       ],
@@ -132,7 +110,8 @@ class PaperPlanScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = L10n.of(context);
-    final state = ref.watch(_paperPlan(hash));
+    final provider = paperPlanProvider(hash);
+    final state = ref.watch(provider);
     final review = state.value;
     return PageFrame(
       children: [
@@ -140,14 +119,21 @@ class PaperPlanScreen extends ConsumerWidget {
         if (review == null)
           AsyncSection(
             value: state,
-            onRetry: () => ref.invalidate(_paperPlan(hash)),
+            onRetry: () => ref.invalidate(provider),
             skeleton: Text(l.paperPlanLoading),
             builder: (_) => const SizedBox.shrink(),
           )
         else ...[
           if (state.hasError) WarningBanner(l.engineUnreachable),
           if (review.hasRestriction()) WarningBanner(review.restriction.detail),
-          _PaperPlanSummary(plan: review.plan),
+          _PaperPlanSummary(
+            plan: review.plan,
+            confirm: PaperPlanConfirm(
+              review: review,
+              enabled: !state.hasError && !state.isLoading,
+              onRefresh: () => ref.invalidate(provider),
+            ),
+          ),
         ],
       ],
     );
@@ -175,9 +161,9 @@ class _PaperAccountSummary extends StatelessWidget {
       trailing: Mono(snapshot.account.accountId),
       child: _PaperReadings(
         values: [
-          (l.paperAvailable, snapshot.availableBalance.value),
+          (l.paperAvailable, snapshot.availableBalance.hasValue() ? snapshot.availableBalance.value : null),
           (l.paperReserved, account.reservedBalance),
-          (l.paperEquity, snapshot.equity.value),
+          (l.paperEquity, snapshot.equity.hasValue() ? snapshot.equity.value : null),
           (l.paperMaxLoss, account.maxLossPerTrade),
           (l.paperMaxOpenLoss, account.maxOpenLoss),
           (l.paperMaxExposure, account.maxSpotExposure),
@@ -188,9 +174,10 @@ class _PaperAccountSummary extends StatelessWidget {
 }
 
 class _PaperPlanSummary extends StatelessWidget {
-  const _PaperPlanSummary({required this.plan});
+  const _PaperPlanSummary({required this.plan, required this.confirm});
 
   final PaperPlan plan;
+  final Widget confirm;
 
   @override
   Widget build(BuildContext context) {
@@ -238,6 +225,8 @@ class _PaperPlanSummary extends StatelessWidget {
             spacing: AppSpace.sm,
             children: [Text(l.paperPlanExpiry), Mono('${fmtDateTime(utcMs(plan.expiresAtUnixMs))} UTC')],
           ),
+          const SizedBox(height: AppSpace.sm),
+          confirm,
           Wrap(
             spacing: AppSpace.sm,
             children: [
@@ -260,7 +249,7 @@ class _PaperPlanSummary extends StatelessWidget {
 class _PaperReadings extends StatelessWidget {
   const _PaperReadings({required this.values});
 
-  final List<(String, Money)> values;
+  final List<(String, Money?)> values;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -273,7 +262,10 @@ class _PaperReadings extends StatelessWidget {
             spacing: AppSpace.sm,
             children: [
               Text(label),
-              Num(moneyValue(amount), unit: amount.asset),
+              if (amount != null)
+                Num(moneyValue(amount), unit: amount.asset)
+              else
+                Text(L10n.of(context).statusLiveUnavailable),
             ],
           ),
         ),
