@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:connectrpc/connect.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,6 +20,7 @@ import '../../gen/lab/v1/market.connect.client.dart';
 import '../../gen/lab/v1/market.pb.dart';
 import '../../l10n/app_localizations.dart';
 import '../library/rule_draft_dialog.dart' show ruleVersionPath;
+import '../library/rule_editor.dart' show RuleJson, describeRule;
 import '../library/rule_version_picker.dart';
 
 class MarketScanCard extends ConsumerStatefulWidget {
@@ -274,23 +277,66 @@ class _MarketBackgroundScanRow extends StatelessWidget {
 }
 
 /// Each disclosure keeps the recorded inputs and its original evidence reachable after expiry.
-class MarketOpportunityHistory extends StatelessWidget {
+class MarketOpportunityHistory extends StatefulWidget {
   const MarketOpportunityHistory({super.key, required this.opportunities, required this.disconnected});
 
   final List<MarketOpportunity> opportunities;
   final bool disconnected;
 
   @override
+  State<MarketOpportunityHistory> createState() => _MarketOpportunityHistoryState();
+}
+
+class _MarketOpportunityHistoryState extends State<MarketOpportunityHistory> {
+  String _symbol = '';
+  bool _onlyCurrent = false;
+
+  @override
   Widget build(BuildContext context) {
     final l = L10n.of(context);
+    final opportunities = widget.opportunities;
+    final symbols = opportunities.map((item) => item.symbol).toSet().toList()..sort();
+    final selected = symbols.contains(_symbol) ? _symbol : '';
+    // Filter on the last snapshot so a disconnect keeps the same results visible.
+    final filtered = opportunities.where(
+      (item) => (selected.isEmpty || item.symbol == selected) && (!_onlyCurrent || item.current),
+    );
     return SectionCard(
       title: l.marketOpportunitiesTitle,
       child: opportunities.isEmpty
           ? EmptyState(l.marketOpportunitiesEmpty)
           : Column(
               children: [
-                for (final item in opportunities)
-                  _OpportunityDetails(key: ValueKey(item.id), item: item, current: item.current && !disconnected),
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Wrap(
+                    spacing: AppSpace.sm,
+                    runSpacing: AppSpace.xs,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      DropdownButton<String>(
+                        value: selected,
+                        items: [
+                          DropdownMenuItem(value: '', child: Text(l.marketOpportunityAllSymbols)),
+                          for (final symbol in symbols) DropdownMenuItem(value: symbol, child: Mono(symbol)),
+                        ],
+                        onChanged: (value) => setState(() => _symbol = value ?? ''),
+                      ),
+                      FilterChip(
+                        label: Text(l.marketOpportunityOnlyCurrent),
+                        selected: _onlyCurrent,
+                        onSelected: (value) => setState(() => _onlyCurrent = value),
+                      ),
+                    ],
+                  ),
+                ),
+                if (filtered.isEmpty) EmptyState(l.marketOpportunityNoFiltered),
+                for (final item in filtered)
+                  _OpportunityDetails(
+                    key: ValueKey(item.id),
+                    item: item,
+                    current: item.current && !widget.disconnected,
+                  ),
               ],
             ),
     );
@@ -325,6 +371,7 @@ class _OpportunityDetails extends StatelessWidget {
       childrenPadding: const EdgeInsets.all(AppSpace.md),
       children: [
         Text(reason),
+        _OpportunityEntryCondition(versionId: item.ruleVersionId),
         Text(l.marketOpportunityPrice, style: AppText.caption),
         Num(moneyValue(item.referenceClose), unit: item.referenceClose.asset),
         Wrap(
@@ -354,6 +401,34 @@ class _OpportunityDetails extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+class _OpportunityEntryCondition extends ConsumerWidget {
+  const _OpportunityEntryCondition({required this.versionId});
+
+  final Int64 versionId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = L10n.of(context);
+    final provider = ruleVersionProvider(versionId);
+    return AsyncSection(
+      value: ref.watch(provider),
+      onRetry: () => ref.invalidate(provider),
+      skeleton: Text(l.paperReplayEntryRule),
+      builder: (version) {
+        // Assess the saved version the observation used, even after a newer draft is saved.
+        final definition = jsonDecode(version.definitionJson) as RuleJson;
+        return Wrap(
+          spacing: AppSpace.sm,
+          children: [
+            Text(l.paperReplayEntryRule, style: AppText.caption),
+            Text(describeRule(definition['entry'] as RuleJson)),
+          ],
+        );
+      },
     );
   }
 }

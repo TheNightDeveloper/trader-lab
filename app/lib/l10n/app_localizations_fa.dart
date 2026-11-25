@@ -490,6 +490,15 @@ class L10nFa extends L10n {
   String get marketScanUnexpected => 'نتیجهٔ بررسی از موتور دریافت نشد.';
 
   @override
+  String get marketOpportunityAllSymbols => 'همهٔ نمادها';
+
+  @override
+  String get marketOpportunityOnlyCurrent => 'فقط فرصت‌های معتبر';
+
+  @override
+  String get marketOpportunityNoFiltered => 'فرصتی مطابق این فیلترها نیست.';
+
+  @override
   String get marketBackgroundTitle => 'اسکن‌های خودکار یک‌ساعته';
 
   @override

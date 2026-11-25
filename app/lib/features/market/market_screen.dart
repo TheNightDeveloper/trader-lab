@@ -43,6 +43,7 @@ class MarketScreen extends ConsumerWidget {
     final market = ref.watch(_marketSnapshotProvider);
     final snapshot = market.value;
     final disconnected = market.hasError;
+    final canAct = !disconnected && !market.isLoading;
     final selectedRule = ruleId;
     return PageFrame(
       children: [
@@ -62,21 +63,21 @@ class MarketScreen extends ConsumerWidget {
               ruleId: selectedRule,
               watches: snapshot.marketWatch,
               subscriptions: snapshot.scanSubscriptions,
-              disconnected: disconnected,
+              disconnected: !canAct,
               onRecorded: () => ref.invalidate(_marketSnapshotProvider),
             ),
           if (snapshot.scanSubscriptions.isNotEmpty)
             MarketBackgroundScans(
               subscriptions: snapshot.scanSubscriptions,
               freshSymbols: {
-                if (!disconnected)
+                if (canAct)
                   for (final watch in snapshot.marketWatch)
                     if (watch.state == LiveState.LIVE_STATE_FRESH) watch.instrument.symbol,
               },
-              disconnected: disconnected,
+              disconnected: !canAct,
               onChanged: () => ref.invalidate(_marketSnapshotProvider),
             ),
-          MarketOpportunityHistory(opportunities: snapshot.opportunities, disconnected: disconnected),
+          MarketOpportunityHistory(opportunities: snapshot.opportunities, disconnected: !canAct),
           _MarketTimestamp(label: l.marketObservedAt, time: snapshot.observedAtUnixMs),
           if (snapshot.marketWatch.isEmpty)
             EmptyState(l.marketEmpty)

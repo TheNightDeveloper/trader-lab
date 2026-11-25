@@ -1011,6 +1011,24 @@ abstract class L10n {
   /// **'نتیجهٔ بررسی از موتور دریافت نشد.'**
   String get marketScanUnexpected;
 
+  /// No description provided for @marketOpportunityAllSymbols.
+  ///
+  /// In fa, this message translates to:
+  /// **'همهٔ نمادها'**
+  String get marketOpportunityAllSymbols;
+
+  /// No description provided for @marketOpportunityOnlyCurrent.
+  ///
+  /// In fa, this message translates to:
+  /// **'فقط فرصت‌های معتبر'**
+  String get marketOpportunityOnlyCurrent;
+
+  /// No description provided for @marketOpportunityNoFiltered.
+  ///
+  /// In fa, this message translates to:
+  /// **'فرصتی مطابق این فیلترها نیست.'**
+  String get marketOpportunityNoFiltered;
+
   /// No description provided for @marketBackgroundTitle.
   ///
   /// In fa, this message translates to:

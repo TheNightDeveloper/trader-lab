@@ -2,6 +2,14 @@
 
 Update at the end of every session.
 
+## P3 Opportunity review (2026-11-25)
+
+The watchlist can filter the recorded opportunities by symbol and validity.
+An expanded opportunity shows the entry condition from its exact saved version.
+Refreshing the watchlist retains the previous rows and suspends order review
+until a fresh server response is available. Dart analysis and the web release
+build passed.
+
 ## P3 Decision replay (2026-11-25)
 
 Each journal trade and receipt can open a read-only replay. The timeline starts
