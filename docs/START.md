@@ -120,6 +120,23 @@ The sidebar and all text are in Persian. Screen names below are the sidebar labe
 Reports are immutable. If a fix changes how numbers are computed, old reports keep their
 old numbers, and "Reproduce" on them reports the difference.
 
+### Paper trading
+
+1. Open **حساب مجازی** and create the local USDT account with capital and risk limits.
+2. In **داده**, prepare a one-hour dataset for a USDT spot pair enabled in `live_symbols`.
+   Open **کتابخانهٔ قواعد**, save a template or draft and run a backtest for that pair.
+3. Review the report evidence, return to the saved version and choose
+   **بررسی این نسخه در دیدبان**. Select the pair and enable the automatic scan to
+   follow each newly closed hour while the engine runs.
+4. In **دیدبان بازار**, expand a valid opportunity to read its condition and evidence.
+   Open its Paper plan, enter the stop and target, and check size, costs and risk before
+   confirming. The engine opens a durable simulated-order receipt.
+5. Use the Paper account for open positions and risk controls. Use the journal to
+   reopen receipts, add a personal note or replay the recorded decision step by step.
+
+The engine keeps running after the browser closes. Stale market data blocks new entries.
+The local database retains receipts, positions and the journal across engine restarts.
+
 ## 6. Tests and checks
 
 ```sh

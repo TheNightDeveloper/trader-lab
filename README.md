@@ -2,11 +2,11 @@
 
 A personal research platform for crypto **spot** trading algorithms. A Go engine imports
 market data, runs deterministic simulations and evaluates strategies. A Flutter Web UI
-(Persian, RTL) shows the results. **No real orders exist in v1.** There is no account and
-no API key.
+(Persian, RTL) shows the results. Paper trades use a local virtual USDT account and
+public market data. All fills are simulated.
 
 > Status: M0–M6 are implemented. The **P0 stabilization gate passed** for
-> research candidate `e34975a`. **P1 is underway.** See [P1 progress](docs/P1_STATUS.md),
+> research candidate `e34975a`. See [phase progress](docs/PROGRESS.md), [P1 progress](docs/P1_STATUS.md),
 > [P0 verification](docs/P0_STATUS.md) and [the master plan](docs/Trading_Lab_Master_Plan_FA.md).
 
 ## What works today
@@ -19,10 +19,12 @@ no API key.
 | P&L calculator | Recalculate a stored report or a single trade under different fees or slippage |
 | Chart | Candles with decision markers |
 | Strategies | `hold-cash`, `buy-and-hold`, `trend-ema`, `mean-rev-bands` |
+| Market watch | Scan closed hourly candles with a backtested rule and inspect its recorded opportunities |
+| Paper | Review and confirm entries, manage positions, reconcile the account and replay journal decisions |
 
 The Library, six-step Experiment Builder, streamed Run Queue and Learning screen are
 implemented. Learning includes bounded retraining, forward tests and human-approved
-promotion/rollback. These remain research tools; no account or real execution exists.
+promotion/rollback for research strategies.
 
 The first P0 batch fixes research admission, baseline warm-up, exact comparison, protection
 markers and calculator request races. Shared dataset pickers search and page the server

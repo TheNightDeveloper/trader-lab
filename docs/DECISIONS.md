@@ -529,3 +529,16 @@ Donchian operands use only preceding candle highs and lows. The RSI operand
 uses Cutler RSI over a finite window of close changes and therefore differs
 from the chart’s Wilder RSI. Regime selection evaluates one branch and keeps
 the chosen exit and exposure owner pinned for the entire run.
+
+## ADR-063 Record Paper execution, replay and annotations independently
+
+The Paper account row serializes risk authorization and reservation. The accepted
+receipt doubles as the local execution queue, and updates to the balance, position,
+postings and event history commit in the same transaction. The worker can recover
+pending work from its stored candle cursor after restart.
+
+The journal reads execution events for fees and realized P&L. Replay reads the
+recorded opportunity and rule, the hashed plan, the revalidation candle and one
+execution event at a time. Older receipts can lack revalidation candle evidence.
+Personal notes use separate append-only revisions so editing them leaves the
+trade history and replay stable.

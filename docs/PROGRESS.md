@@ -2,6 +2,36 @@
 
 Update at the end of every session.
 
+## P3 local acceptance (2026-11-25)
+
+Runtime candidate `a02c848` completed the Paper phase acceptance checks.
+Chrome 158 exercised the release web build against the Go engine and
+PostgreSQL with a controlled clock and public-feed fixture.
+
+- **J1.** Funded a Paper account, checked the hourly dataset, saved a Donchian
+  template, ran its backtest, read the report evidence and enabled the scan.
+  The engine recorded an opportunity while the browser tab was closed.
+- **J2.** Filtered opportunities, read the entry condition and reviewed the
+  plan's risk, cost and 24-candle chart. Concurrent confirmations in two tabs
+  and a lost confirmation response recovered one receipt. Back navigation
+  and refresh kept that receipt. PostgreSQL also tested account-wide admission
+  against simultaneous confirmations for two symbols.
+- **J5.** A stale feed and an interrupted plan read each disabled confirmation
+  while retaining the review. Restart kept the same pending receipt and exact
+  cash reservation. On reconnection the server restored actions and the
+  receipt subsequently recorded a partial fill, cancellation and protective exit.
+- The journal matched posted fees and realized P&L and retained the saved note
+  after reload. Replay showed the recorded chart and advanced through review,
+  approval and fill without revealing the later exit in earlier steps.
+  Browser checks covered 390, 768, 1024 and 1440 pixels with zero page errors.
+
+Required PostgreSQL passed the Linux Go race suite and Golden scenarios.
+These checks covered the cancel/fill race, risk-reducing exits with entry
+paused, and the outbound order guard. Go lint, vet, the depguard probe, Dart
+analysis, Flutter tests, the release web build and Buf compatibility passed.
+The generated Go, Dart and SQL matched the committed files byte for byte.
+This is local verification using controlled market data.
+
 ## P3 Paper plan chart and provenance (2026-11-25)
 
 The plan review plots up to 24 hourly candles from the recorded opportunity.
