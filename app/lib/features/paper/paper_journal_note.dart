@@ -120,7 +120,7 @@ class _PaperJournalNoteEditorState extends ConsumerState<PaperJournalNoteEditor>
             ),
           ] else ...[
             if (savedText.isNotEmpty && note != null) ...[
-              SelectableText(savedText),
+              Text(savedText),
               Wrap(
                 spacing: AppSpace.sm,
                 children: [Text(l.paperJournalNoteSavedAt), Mono('${fmtDateTime(utcMs(note.recordedAtUnixMs))} UTC')],
