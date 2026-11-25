@@ -39,6 +39,8 @@ class AppSidebar extends StatelessWidget {
                 ],
               ),
             ),
+            // Connection status stays above growing navigation on the docked sidebar.
+            if (onNavigate == null) ...[const StatusBlock(), const SizedBox(height: AppSpace.sm)],
             for (final entry in Dest.sidebar)
               switch (entry) {
                 NavHeader(:final label) => _GroupHeader(label(l)),
@@ -51,8 +53,7 @@ class AppSidebar extends StatelessWidget {
                   },
                 ),
               },
-            const SizedBox(height: AppSpace.lg),
-            const StatusBlock(),
+            if (onNavigate != null) ...[const SizedBox(height: AppSpace.lg), const StatusBlock()],
           ],
         ),
       ),

@@ -87,6 +87,106 @@ class L10nFa extends L10n {
   String get navMarket => 'دیدبان بازار';
 
   @override
+  String get navPaper => 'حساب مجازی';
+
+  @override
+  String get screenPaperSub => 'موجودی USDT و حدود ریسک معاملات آزمایشی اسپات';
+
+  @override
+  String get paperLoading => 'در حال دریافت حساب مجازی…';
+
+  @override
+  String get paperCreateAccount => 'ایجاد حساب مجازی';
+
+  @override
+  String get paperInitialCapital => 'سرمایهٔ مجازی اولیه';
+
+  @override
+  String get paperMaxLoss => 'حد زیان هر معامله';
+
+  @override
+  String get paperMaxOpenLoss => 'حد مجموع ریسک باز';
+
+  @override
+  String get paperMaxExposure => 'حد ارزش موقعیت‌های اسپات';
+
+  @override
+  String get paperAvailable => 'موجودی آزاد';
+
+  @override
+  String get paperReserved => 'موجودی رزروشده';
+
+  @override
+  String get paperEquity => 'ارزش حساب';
+
+  @override
+  String get paperReviewOpportunity => 'برنامهٔ معاملهٔ مجازی';
+
+  @override
+  String get paperBuildPlan => 'محاسبه و مرور برنامه';
+
+  @override
+  String get paperPlanLoading => 'در حال دریافت برنامه…';
+
+  @override
+  String get paperPlanTitle => 'مرور برنامهٔ معاملهٔ مجازی';
+
+  @override
+  String get paperRiskSummary => 'ریسک و هزینه برای حساب مجازی';
+
+  @override
+  String get paperStop => 'حد ضرر';
+
+  @override
+  String get paperTarget => 'هدف سود';
+
+  @override
+  String get paperExpectedEntry => 'قیمت برآوردی ورود';
+
+  @override
+  String get paperEntryLimit => 'سقف قیمت ورود';
+
+  @override
+  String get paperQuantity => 'حجم برنامه';
+
+  @override
+  String get paperNotional => 'ارزش برآوردی ورود';
+
+  @override
+  String get paperRequiredCash => 'موجودی لازم با کارمزد';
+
+  @override
+  String get paperPlannedLoss => 'زیان برنامه‌ریزی‌شده تا حد ضرر';
+
+  @override
+  String get paperEstimatedCost => 'هزینهٔ برآوردی ورود و خروج';
+
+  @override
+  String get paperPlanExpiry => 'پایان اعتبار مرور';
+
+  @override
+  String get paperCandleTime => 'زمان بسته‌شدن کندل مرجع';
+
+  @override
+  String get paperFillAssumptions =>
+      'برآورد بر اساس کندل بستهٔ یک‌دقیقه‌ای، با کارمزد و لغزش شبیه‌سازی‌شده است. عبور قیمت از حد ضرر می‌تواند زیان بیشتری ایجاد کند.';
+
+  @override
+  String get paperFeeRate => 'کارمزد هر سمت';
+
+  @override
+  String get paperSlippageRate => 'لغزش هر سمت';
+
+  @override
+  String get paperAmountError => 'مبلغ مثبت با حداکثر ۸ رقم اعشار وارد کنید.';
+
+  @override
+  String get paperSaving => 'در حال دریافت پاسخ موتور…';
+
+  @override
+  String get paperReviewAgain => 'مرور دوباره';
+
+  @override
   String get screenMarketSub =>
       'قیمت پایانی آخرین کندل یک‌دقیقه‌ای جفت‌های اسپات USDT';
 

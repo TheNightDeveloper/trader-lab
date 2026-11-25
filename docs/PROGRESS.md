@@ -2,6 +2,31 @@
 
 Update at the end of every session.
 
+## P3 Paper account and immutable plan review (2026-11-25)
+
+Paper setup funds one local USDT account. Account, initial policy and the
+balanced funding posting commit together. A retry with the same setup does
+not fund the account twice. The user sets the per-trade loss, aggregate risk
+and spot exposure limits during setup.
+
+An eligible opportunity can open a fixed-point spot review
+with a user-supplied stop and target. The server checks the live minute
+candle, caps the entry against the opportunity, sizes to the lot and budget,
+and rejects excessive cost. The archived review pins its evidence, candle
+revision, policy, account revision, price limits and expiry. The same hash
+reopens the recorded terms, with a server restriction when the review expires
+or market/account eligibility changes.
+
+Chrome created the Paper account with Persian-digit inputs, reviewed the
+server's risk and costs at 1440 pixels and reopened the same plan at 390
+pixels against Go and PostgreSQL with seeded market data. The PostgreSQL-required
+Go suite, Buf compatibility, Dart analysis, web release build and 57 existing
+Flutter tests passed. The docked sidebar keeps connection status above navigation.
+
+Order confirmation, atomic reservation, execution and cancellation, position
+management, reconciliation and the journal remain open. P3 acceptance still
+needs the complete J1/J2/J5 workflows and ledger/fill race checks.
+
 ## P3 background opportunity scans (2026-11-25)
 
 The Library-to-watchlist flow can enable one tested rule version per spot

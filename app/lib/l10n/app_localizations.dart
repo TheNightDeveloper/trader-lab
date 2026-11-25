@@ -237,6 +237,204 @@ abstract class L10n {
   /// **'دیدبان بازار'**
   String get navMarket;
 
+  /// No description provided for @navPaper.
+  ///
+  /// In fa, this message translates to:
+  /// **'حساب مجازی'**
+  String get navPaper;
+
+  /// No description provided for @screenPaperSub.
+  ///
+  /// In fa, this message translates to:
+  /// **'موجودی USDT و حدود ریسک معاملات آزمایشی اسپات'**
+  String get screenPaperSub;
+
+  /// No description provided for @paperLoading.
+  ///
+  /// In fa, this message translates to:
+  /// **'در حال دریافت حساب مجازی…'**
+  String get paperLoading;
+
+  /// No description provided for @paperCreateAccount.
+  ///
+  /// In fa, this message translates to:
+  /// **'ایجاد حساب مجازی'**
+  String get paperCreateAccount;
+
+  /// No description provided for @paperInitialCapital.
+  ///
+  /// In fa, this message translates to:
+  /// **'سرمایهٔ مجازی اولیه'**
+  String get paperInitialCapital;
+
+  /// No description provided for @paperMaxLoss.
+  ///
+  /// In fa, this message translates to:
+  /// **'حد زیان هر معامله'**
+  String get paperMaxLoss;
+
+  /// No description provided for @paperMaxOpenLoss.
+  ///
+  /// In fa, this message translates to:
+  /// **'حد مجموع ریسک باز'**
+  String get paperMaxOpenLoss;
+
+  /// No description provided for @paperMaxExposure.
+  ///
+  /// In fa, this message translates to:
+  /// **'حد ارزش موقعیت‌های اسپات'**
+  String get paperMaxExposure;
+
+  /// No description provided for @paperAvailable.
+  ///
+  /// In fa, this message translates to:
+  /// **'موجودی آزاد'**
+  String get paperAvailable;
+
+  /// No description provided for @paperReserved.
+  ///
+  /// In fa, this message translates to:
+  /// **'موجودی رزروشده'**
+  String get paperReserved;
+
+  /// No description provided for @paperEquity.
+  ///
+  /// In fa, this message translates to:
+  /// **'ارزش حساب'**
+  String get paperEquity;
+
+  /// No description provided for @paperReviewOpportunity.
+  ///
+  /// In fa, this message translates to:
+  /// **'برنامهٔ معاملهٔ مجازی'**
+  String get paperReviewOpportunity;
+
+  /// No description provided for @paperBuildPlan.
+  ///
+  /// In fa, this message translates to:
+  /// **'محاسبه و مرور برنامه'**
+  String get paperBuildPlan;
+
+  /// No description provided for @paperPlanLoading.
+  ///
+  /// In fa, this message translates to:
+  /// **'در حال دریافت برنامه…'**
+  String get paperPlanLoading;
+
+  /// No description provided for @paperPlanTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'مرور برنامهٔ معاملهٔ مجازی'**
+  String get paperPlanTitle;
+
+  /// No description provided for @paperRiskSummary.
+  ///
+  /// In fa, this message translates to:
+  /// **'ریسک و هزینه برای حساب مجازی'**
+  String get paperRiskSummary;
+
+  /// No description provided for @paperStop.
+  ///
+  /// In fa, this message translates to:
+  /// **'حد ضرر'**
+  String get paperStop;
+
+  /// No description provided for @paperTarget.
+  ///
+  /// In fa, this message translates to:
+  /// **'هدف سود'**
+  String get paperTarget;
+
+  /// No description provided for @paperExpectedEntry.
+  ///
+  /// In fa, this message translates to:
+  /// **'قیمت برآوردی ورود'**
+  String get paperExpectedEntry;
+
+  /// No description provided for @paperEntryLimit.
+  ///
+  /// In fa, this message translates to:
+  /// **'سقف قیمت ورود'**
+  String get paperEntryLimit;
+
+  /// No description provided for @paperQuantity.
+  ///
+  /// In fa, this message translates to:
+  /// **'حجم برنامه'**
+  String get paperQuantity;
+
+  /// No description provided for @paperNotional.
+  ///
+  /// In fa, this message translates to:
+  /// **'ارزش برآوردی ورود'**
+  String get paperNotional;
+
+  /// No description provided for @paperRequiredCash.
+  ///
+  /// In fa, this message translates to:
+  /// **'موجودی لازم با کارمزد'**
+  String get paperRequiredCash;
+
+  /// No description provided for @paperPlannedLoss.
+  ///
+  /// In fa, this message translates to:
+  /// **'زیان برنامه‌ریزی‌شده تا حد ضرر'**
+  String get paperPlannedLoss;
+
+  /// No description provided for @paperEstimatedCost.
+  ///
+  /// In fa, this message translates to:
+  /// **'هزینهٔ برآوردی ورود و خروج'**
+  String get paperEstimatedCost;
+
+  /// No description provided for @paperPlanExpiry.
+  ///
+  /// In fa, this message translates to:
+  /// **'پایان اعتبار مرور'**
+  String get paperPlanExpiry;
+
+  /// No description provided for @paperCandleTime.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان بسته‌شدن کندل مرجع'**
+  String get paperCandleTime;
+
+  /// No description provided for @paperFillAssumptions.
+  ///
+  /// In fa, this message translates to:
+  /// **'برآورد بر اساس کندل بستهٔ یک‌دقیقه‌ای، با کارمزد و لغزش شبیه‌سازی‌شده است. عبور قیمت از حد ضرر می‌تواند زیان بیشتری ایجاد کند.'**
+  String get paperFillAssumptions;
+
+  /// No description provided for @paperFeeRate.
+  ///
+  /// In fa, this message translates to:
+  /// **'کارمزد هر سمت'**
+  String get paperFeeRate;
+
+  /// No description provided for @paperSlippageRate.
+  ///
+  /// In fa, this message translates to:
+  /// **'لغزش هر سمت'**
+  String get paperSlippageRate;
+
+  /// No description provided for @paperAmountError.
+  ///
+  /// In fa, this message translates to:
+  /// **'مبلغ مثبت با حداکثر ۸ رقم اعشار وارد کنید.'**
+  String get paperAmountError;
+
+  /// No description provided for @paperSaving.
+  ///
+  /// In fa, this message translates to:
+  /// **'در حال دریافت پاسخ موتور…'**
+  String get paperSaving;
+
+  /// No description provided for @paperReviewAgain.
+  ///
+  /// In fa, this message translates to:
+  /// **'مرور دوباره'**
+  String get paperReviewAgain;
+
   /// No description provided for @screenMarketSub.
   ///
   /// In fa, this message translates to:

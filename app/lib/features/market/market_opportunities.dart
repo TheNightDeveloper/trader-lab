@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../app/nav.dart';
 import '../../core/api/engine.dart';
 import '../../core/format.dart';
 import '../../core/money.dart';
@@ -343,6 +344,11 @@ class _OpportunityDetails extends StatelessWidget {
               onPressed: () => context.go('/reports/${Uri.encodeComponent(item.reportId)}'),
               child: Text(l.marketOpportunityReport),
             ),
+            if (current)
+              OutlinedButton(
+                onPressed: () => context.go('${Dest.paper.path}?opportunity=${item.id}'),
+                child: Text(l.paperReviewOpportunity),
+              ),
           ],
         ),
       ],

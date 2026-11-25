@@ -13,6 +13,7 @@ import '../features/learning/learning_screen.dart';
 import '../features/library/library_screen.dart';
 import '../features/library/rule_library_screen.dart';
 import '../features/market/market_screen.dart';
+import '../features/paper/paper_screen.dart';
 import '../features/pnl/pnl_screen.dart';
 import '../features/reports/compare_screen.dart';
 import '../features/reports/report_screen.dart';
@@ -105,6 +106,18 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
             state,
             MarketScreen(ruleId: Int64.tryParseInt(state.uri.queryParameters['rule'] ?? '')),
           ),
+        ),
+        GoRoute(
+          path: Dest.paper.path,
+          pageBuilder: (context, state) => _page(
+            context,
+            state,
+            PaperScreen(opportunityId: Int64.tryParseInt(state.uri.queryParameters['opportunity'] ?? '')),
+          ),
+        ),
+        GoRoute(
+          path: '/paper/plans/:hash',
+          pageBuilder: (context, state) => _page(context, state, PaperPlanScreen(hash: state.pathParameters['hash']!)),
         ),
         GoRoute(
           path: Dest.settings.path,
