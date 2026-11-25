@@ -2,6 +2,34 @@
 
 Update at the end of every session.
 
+## P3 Reduce-only controls and ledger reconciliation (2026-11-25)
+
+The Paper account can pause entry confirmation and pending entry fills.
+Resumption skips candles opened during the pause. A manual reduction pins the
+observed position revision and lot-aligned quantity, cancels unused entry work,
+and survives disconnection until a qualifying closed candle is available.
+Retries recover the same request. A protective exit that takes precedence
+settles the queued reduction without selling twice. Partial reductions allocate
+exact cost basis and leave protection on the remaining quantity.
+
+The account snapshot reports cash, reservation, position and event checks
+against postings and execution history, with the time and durable event ID
+of the check. A mismatch inhibits new risk. A reconciled position remains
+eligible to reduce when the entry pause or an unrelated cash mismatch is active.
+The Paper UI shows the checks and pause, accepts a partial or full reduction,
+and displays the durable pending or terminal outcome in the receipt.
+
+The PostgreSQL suite passed. Focused tests repeated duplicate submissions,
+stale-feed and paused-entry reduction, basis allocation, cash drift admission,
+and protective supersession. Chrome paused entry at 1440 pixels, requested a
+partial reduction using Persian digits with the feed down, and recovered the
+filled receipt at 390 pixels against seeded Go and PostgreSQL. Buf compatibility,
+Go lint and vet, Dart analysis, the web release build and 57 existing Flutter
+tests passed.
+
+Portfolio journal, decision replay and the complete J1/J2/J5 acceptance
+passes remain open.
+
 ## P3 Paper entries and protective exits (2026-11-25)
 
 Confirmation locks the account, revalidates the reviewed hash and market,

@@ -275,6 +275,81 @@ class L10nFa extends L10n {
   String get paperRealizedPnl => 'سود و زیان تحقق‌یافته';
 
   @override
+  String get paperRiskControls => 'کنترل ریسک حساب مجازی';
+
+  @override
+  String get paperPauseEntries => 'توقف ورود';
+
+  @override
+  String get paperResumeEntries => 'ازسرگیری ورود';
+
+  @override
+  String get paperEntriesPaused =>
+      'ورودهای مجازی متوقف‌اند. حفاظت از موقعیت‌های باز ادامه دارد.';
+
+  @override
+  String get paperReconciled =>
+      'مانده‌ها، رزروها، موقعیت‌ها و رویدادها با دفتر تطبیق دارند.';
+
+  @override
+  String get paperReconcileMismatch =>
+      'مغایرت در تطبیق حساب. ورود تازه متوقف است.';
+
+  @override
+  String get paperReconcileCash => 'مغایرت موجودی نقدی';
+
+  @override
+  String get paperReconcileReservations => 'مغایرت وجه رزروشده';
+
+  @override
+  String get paperReconcilePositions => 'مغایرت موقعیت یا بهای تمام‌شده';
+
+  @override
+  String get paperReconcileEvents => 'مغایرت جریان وجه یا کارمزد رویدادها';
+
+  @override
+  String get paperReconcileChecked => 'زمان تطبیق';
+
+  @override
+  String get paperReducePosition => 'کاهش یا بستن موقعیت';
+
+  @override
+  String get paperReduceAmount => 'حجم کاهش';
+
+  @override
+  String get paperReduceLot => 'گام حجم';
+
+  @override
+  String get paperReduceAmountError =>
+      'حجم مثبت، در حد موجودی موقعیت و مضرب گام حجم وارد کنید.';
+
+  @override
+  String get paperReduceRequest => 'ثبت درخواست کاهش';
+
+  @override
+  String get paperReduceDescription =>
+      'ماندهٔ ورود لغو می‌شود. کاهش با نخستین کندل کامل پس از درخواست اجرا می‌شود و در نبود داده منتظر می‌ماند.';
+
+  @override
+  String get paperReductionPending => 'درخواست کاهش در انتظار اجراست';
+
+  @override
+  String get paperReductionFilled => 'کاهش موقعیت اجرا شد';
+
+  @override
+  String get paperReductionSuperseded =>
+      'خروج محافظتی قبل از اجرای کاهش انجام شد';
+
+  @override
+  String get paperEventManualExit => 'خروج با درخواست کاربر';
+
+  @override
+  String get paperEventReduceRequest => 'ثبت درخواست کاهش موقعیت';
+
+  @override
+  String get paperEventReduceCancelEntry => 'لغو ماندهٔ ورود برای کاهش موقعیت';
+
+  @override
   String get screenMarketSub =>
       'قیمت پایانی آخرین کندل یک‌دقیقه‌ای جفت‌های اسپات USDT';
 

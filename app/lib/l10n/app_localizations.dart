@@ -609,6 +609,144 @@ abstract class L10n {
   /// **'سود و زیان تحقق‌یافته'**
   String get paperRealizedPnl;
 
+  /// No description provided for @paperRiskControls.
+  ///
+  /// In fa, this message translates to:
+  /// **'کنترل ریسک حساب مجازی'**
+  String get paperRiskControls;
+
+  /// No description provided for @paperPauseEntries.
+  ///
+  /// In fa, this message translates to:
+  /// **'توقف ورود'**
+  String get paperPauseEntries;
+
+  /// No description provided for @paperResumeEntries.
+  ///
+  /// In fa, this message translates to:
+  /// **'ازسرگیری ورود'**
+  String get paperResumeEntries;
+
+  /// No description provided for @paperEntriesPaused.
+  ///
+  /// In fa, this message translates to:
+  /// **'ورودهای مجازی متوقف‌اند. حفاظت از موقعیت‌های باز ادامه دارد.'**
+  String get paperEntriesPaused;
+
+  /// No description provided for @paperReconciled.
+  ///
+  /// In fa, this message translates to:
+  /// **'مانده‌ها، رزروها، موقعیت‌ها و رویدادها با دفتر تطبیق دارند.'**
+  String get paperReconciled;
+
+  /// No description provided for @paperReconcileMismatch.
+  ///
+  /// In fa, this message translates to:
+  /// **'مغایرت در تطبیق حساب. ورود تازه متوقف است.'**
+  String get paperReconcileMismatch;
+
+  /// No description provided for @paperReconcileCash.
+  ///
+  /// In fa, this message translates to:
+  /// **'مغایرت موجودی نقدی'**
+  String get paperReconcileCash;
+
+  /// No description provided for @paperReconcileReservations.
+  ///
+  /// In fa, this message translates to:
+  /// **'مغایرت وجه رزروشده'**
+  String get paperReconcileReservations;
+
+  /// No description provided for @paperReconcilePositions.
+  ///
+  /// In fa, this message translates to:
+  /// **'مغایرت موقعیت یا بهای تمام‌شده'**
+  String get paperReconcilePositions;
+
+  /// No description provided for @paperReconcileEvents.
+  ///
+  /// In fa, this message translates to:
+  /// **'مغایرت جریان وجه یا کارمزد رویدادها'**
+  String get paperReconcileEvents;
+
+  /// No description provided for @paperReconcileChecked.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان تطبیق'**
+  String get paperReconcileChecked;
+
+  /// No description provided for @paperReducePosition.
+  ///
+  /// In fa, this message translates to:
+  /// **'کاهش یا بستن موقعیت'**
+  String get paperReducePosition;
+
+  /// No description provided for @paperReduceAmount.
+  ///
+  /// In fa, this message translates to:
+  /// **'حجم کاهش'**
+  String get paperReduceAmount;
+
+  /// No description provided for @paperReduceLot.
+  ///
+  /// In fa, this message translates to:
+  /// **'گام حجم'**
+  String get paperReduceLot;
+
+  /// No description provided for @paperReduceAmountError.
+  ///
+  /// In fa, this message translates to:
+  /// **'حجم مثبت، در حد موجودی موقعیت و مضرب گام حجم وارد کنید.'**
+  String get paperReduceAmountError;
+
+  /// No description provided for @paperReduceRequest.
+  ///
+  /// In fa, this message translates to:
+  /// **'ثبت درخواست کاهش'**
+  String get paperReduceRequest;
+
+  /// No description provided for @paperReduceDescription.
+  ///
+  /// In fa, this message translates to:
+  /// **'ماندهٔ ورود لغو می‌شود. کاهش با نخستین کندل کامل پس از درخواست اجرا می‌شود و در نبود داده منتظر می‌ماند.'**
+  String get paperReduceDescription;
+
+  /// No description provided for @paperReductionPending.
+  ///
+  /// In fa, this message translates to:
+  /// **'درخواست کاهش در انتظار اجراست'**
+  String get paperReductionPending;
+
+  /// No description provided for @paperReductionFilled.
+  ///
+  /// In fa, this message translates to:
+  /// **'کاهش موقعیت اجرا شد'**
+  String get paperReductionFilled;
+
+  /// No description provided for @paperReductionSuperseded.
+  ///
+  /// In fa, this message translates to:
+  /// **'خروج محافظتی قبل از اجرای کاهش انجام شد'**
+  String get paperReductionSuperseded;
+
+  /// No description provided for @paperEventManualExit.
+  ///
+  /// In fa, this message translates to:
+  /// **'خروج با درخواست کاربر'**
+  String get paperEventManualExit;
+
+  /// No description provided for @paperEventReduceRequest.
+  ///
+  /// In fa, this message translates to:
+  /// **'ثبت درخواست کاهش موقعیت'**
+  String get paperEventReduceRequest;
+
+  /// No description provided for @paperEventReduceCancelEntry.
+  ///
+  /// In fa, this message translates to:
+  /// **'لغو ماندهٔ ورود برای کاهش موقعیت'**
+  String get paperEventReduceCancelEntry;
+
   /// No description provided for @screenMarketSub.
   ///
   /// In fa, this message translates to:

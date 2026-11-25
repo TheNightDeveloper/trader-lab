@@ -14,9 +14,11 @@ import '../../core/widgets/num.dart';
 import '../../core/widgets/workspace_status.dart';
 import '../../gen/lab/v1/common.pb.dart' show Money;
 import '../../gen/lab/v1/paper.pb.dart';
+import '../../gen/lab/v1/workspace.pb.dart' show AccountRef;
 import '../../gen/lab/v1/workspace.pbenum.dart';
 import '../../l10n/app_localizations.dart';
 import '../page_frame.dart';
+import 'paper_controls.dart';
 import 'paper_providers.dart';
 
 String _receiptPath(Int64 id) => '/paper/receipts/$id';
@@ -110,10 +112,18 @@ class _PaperPlanConfirmState extends ConsumerState<PaperPlanConfirm> {
 }
 
 class PaperActivity extends StatelessWidget {
-  const PaperActivity({super.key, required this.positions, required this.receipts});
+  const PaperActivity({
+    super.key,
+    required this.account,
+    required this.positions,
+    required this.receipts,
+    required this.reductionEnabled,
+  });
 
+  final AccountRef account;
   final List<PaperPosition> positions;
   final List<PaperReceipt> receipts;
+  final bool reductionEnabled;
 
   @override
   Widget build(BuildContext context) {
@@ -129,6 +139,7 @@ class PaperActivity extends StatelessWidget {
               children: [
                 for (final position in positions)
                   Padding(
+                    key: ValueKey(position.receiptId),
                     padding: const EdgeInsets.only(bottom: AppSpace.sm),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,9 +156,15 @@ class PaperActivity extends StatelessWidget {
                           label: l.paperPositionValue,
                           amount: position.marketValue.hasValue() ? position.marketValue.value : null,
                         ),
-                        TextButton(
-                          onPressed: () => context.go(_receiptPath(position.receiptId)),
-                          child: Text(l.paperViewReceipt),
+                        Wrap(
+                          spacing: AppSpace.sm,
+                          children: [
+                            PaperReductionControl(account: account, position: position, enabled: reductionEnabled),
+                            TextButton(
+                              onPressed: () => context.go(_receiptPath(position.receiptId)),
+                              child: Text(l.paperViewReceipt),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -242,6 +259,7 @@ class _PaperReceiptScreenState extends ConsumerState<PaperReceiptScreen> {
           if (_error case final message?) WarningBanner(message),
           _PaperReceiptSummary(
             receipt: snapshot.receipt,
+            reduction: snapshot.hasReduction() ? snapshot.reduction : null,
             busy: _busy,
             onCancel: !_busy && !state.hasError && !state.isLoading ? () => _cancel(snapshot.receipt) : null,
           ),
@@ -259,9 +277,10 @@ class _PaperReceiptScreenState extends ConsumerState<PaperReceiptScreen> {
 }
 
 class _PaperReceiptSummary extends StatelessWidget {
-  const _PaperReceiptSummary({required this.receipt, required this.busy, this.onCancel});
+  const _PaperReceiptSummary({required this.receipt, required this.busy, this.onCancel, this.reduction});
 
   final PaperReceipt receipt;
+  final PaperReduction? reduction;
   final bool busy;
   final VoidCallback? onCancel;
 
@@ -282,6 +301,7 @@ class _PaperReceiptSummary extends StatelessWidget {
           _PaperMoneyLine(label: l.paperReserved, amount: receipt.reservedCash),
           _PaperTimeLine(label: l.paperConfirmedAt, at: receipt.confirmedAtUnixMs),
           _PaperTimeLine(label: l.paperEntryExpires, at: receipt.expiresAtUnixMs),
+          if (reduction case final attempt?) PaperReductionStatus(reduction: attempt),
           Wrap(
             spacing: AppSpace.sm,
             children: [
@@ -310,6 +330,9 @@ class _PaperEventRow extends StatelessWidget {
       'entry_fill' => l.paperEventEntryFill,
       'stop_exit' => l.paperEventStopExit,
       'target_exit' => l.paperEventTargetExit,
+      'manual_exit' => l.paperEventManualExit,
+      'reduction_requested' => l.paperEventReduceRequest,
+      'reduction_cancelled_remainder' => l.paperEventReduceCancelEntry,
       'cancelled' => l.paperEntryCancelled,
       'expired' => l.paperEntryExpired,
       'protection_cancelled_remainder' => l.paperEventProtectionCancel,
@@ -327,7 +350,7 @@ class _PaperEventRow extends StatelessWidget {
         if (event.hasCandleOpenedAtUnixMs())
           _PaperTimeLine(label: l.paperExecutionCandle, at: event.candleOpenedAtUnixMs),
         if (event.hasFee()) _PaperMoneyLine(label: l.paperEventFee, amount: event.fee),
-        _PaperMoneyLine(label: l.paperEventCash, amount: event.cash),
+        if (event.hasCash()) _PaperMoneyLine(label: l.paperEventCash, amount: event.cash),
         if (event.hasRealizedPnl()) _PaperMoneyLine(label: l.paperRealizedPnl, amount: event.realizedPnl),
       ],
     );

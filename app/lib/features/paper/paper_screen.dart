@@ -20,6 +20,7 @@ import '../../gen/lab/v1/workspace.pbenum.dart';
 import '../../l10n/app_localizations.dart';
 import '../library/rule_editor.dart' show ruleNumber;
 import '../page_frame.dart';
+import 'paper_controls.dart';
 import 'paper_entries.dart';
 import 'paper_providers.dart';
 
@@ -35,6 +36,7 @@ class PaperScreen extends ConsumerWidget {
     final snapshot = accountState.value;
     final id = opportunityId;
     final account = snapshot != null && snapshot.hasPaperAccount() ? snapshot.paperAccount : null;
+    final connected = !accountState.hasError && !accountState.isLoading;
     return PageFrame(
       children: [
         PageHeader(title: Dest.paper.label(l), subtitle: Dest.paper.subtitle(l), actions: const [_PaperBadge()]),
@@ -52,7 +54,7 @@ class PaperScreen extends ConsumerWidget {
               title: l.paperCreateAccount,
               labels: [l.paperInitialCapital, l.paperMaxLoss, l.paperMaxOpenLoss, l.paperMaxExposure],
               action: l.paperCreateAccount,
-              enabled: !accountState.hasError,
+              enabled: connected,
               submit: (values, signal) async {
                 await ref
                     .read(paperClientProvider)
@@ -71,13 +73,19 @@ class PaperScreen extends ConsumerWidget {
             )
           else ...[
             _PaperAccountSummary(account: account),
+            if (snapshot.hasReconciliation())
+              PaperRiskControls(account: account, reconciliation: snapshot.reconciliation, enabled: connected),
             if (id != null && id > Int64.ZERO)
               _PaperAmountsForm(
                 key: ValueKey(id),
                 title: l.paperReviewOpportunity,
                 labels: [l.paperStop, l.paperTarget],
                 action: l.paperBuildPlan,
-                enabled: !accountState.hasError,
+                enabled:
+                    connected &&
+                    !account.entriesPaused &&
+                    snapshot.hasReconciliation() &&
+                    paperLedgerMatches(snapshot.reconciliation),
                 submit: (values, signal) async {
                   final result = await ref
                       .read(paperClientProvider)
@@ -94,7 +102,12 @@ class PaperScreen extends ConsumerWidget {
                   return result.hasRestriction() ? result.restriction.detail : null;
                 },
               ),
-            PaperActivity(positions: snapshot.positions, receipts: snapshot.recentReceipts),
+            PaperActivity(
+              account: account.snapshot.account,
+              positions: snapshot.positions,
+              receipts: snapshot.recentReceipts,
+              reductionEnabled: connected && snapshot.hasReconciliation() && snapshot.reconciliation.positionsMatch,
+            ),
           ],
         ],
       ],
@@ -162,7 +175,7 @@ class _PaperAccountSummary extends StatelessWidget {
       child: _PaperReadings(
         values: [
           (l.paperAvailable, snapshot.availableBalance.hasValue() ? snapshot.availableBalance.value : null),
-          (l.paperReserved, account.reservedBalance),
+          (l.paperReserved, account.hasReservedBalance() ? account.reservedBalance : null),
           (l.paperEquity, snapshot.equity.hasValue() ? snapshot.equity.value : null),
           (l.paperMaxLoss, account.maxLossPerTrade),
           (l.paperMaxOpenLoss, account.maxOpenLoss),
