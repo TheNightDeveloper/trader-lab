@@ -146,7 +146,7 @@ class PaperPlanScreen extends ConsumerWidget {
         else ...[
           if (state.hasError) WarningBanner(l.engineUnreachable),
           if (review.hasRestriction()) WarningBanner(review.restriction.detail),
-          _PaperPlanSummary(
+          PaperPlanSummary(
             plan: review.plan,
             confirm: PaperPlanConfirm(
               review: review,
@@ -193,11 +193,11 @@ class _PaperAccountSummary extends StatelessWidget {
   }
 }
 
-class _PaperPlanSummary extends StatelessWidget {
-  const _PaperPlanSummary({required this.plan, required this.confirm});
+class PaperPlanSummary extends StatelessWidget {
+  const PaperPlanSummary({super.key, required this.plan, this.confirm});
 
   final PaperPlan plan;
-  final Widget confirm;
+  final Widget? confirm;
 
   @override
   Widget build(BuildContext context) {
@@ -241,25 +241,29 @@ class _PaperPlanSummary extends StatelessWidget {
             spacing: AppSpace.sm,
             children: [Text(l.paperCandleTime), Mono('${fmtDateTime(utcMs(plan.referenceCandleClosedAtUnixMs))} UTC')],
           ),
+          PaperTimeLine(label: l.paperPlanQuoteAt, at: plan.quotedAtUnixMs),
           Wrap(
             spacing: AppSpace.sm,
             children: [Text(l.paperPlanExpiry), Mono('${fmtDateTime(utcMs(plan.expiresAtUnixMs))} UTC')],
           ),
-          const SizedBox(height: AppSpace.sm),
-          confirm,
-          Wrap(
-            spacing: AppSpace.sm,
-            children: [
-              TextButton(
-                onPressed: () => context.go('/reports/${Uri.encodeComponent(plan.reportId)}'),
-                child: Text(l.marketOpportunityReport),
-              ),
-              OutlinedButton(
-                onPressed: () => context.go('${Dest.paper.path}?opportunity=${plan.opportunityId}'),
-                child: Text(l.paperReviewAgain),
-              ),
-            ],
-          ),
+          // Historical review shares the evidence view without its live transaction controls.
+          if (confirm case final controls?) ...[
+            const SizedBox(height: AppSpace.sm),
+            controls,
+            Wrap(
+              spacing: AppSpace.sm,
+              children: [
+                TextButton(
+                  onPressed: () => context.go('/reports/${Uri.encodeComponent(plan.reportId)}'),
+                  child: Text(l.marketOpportunityReport),
+                ),
+                OutlinedButton(
+                  onPressed: () => context.go('${Dest.paper.path}?opportunity=${plan.opportunityId}'),
+                  child: Text(l.paperReviewAgain),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );

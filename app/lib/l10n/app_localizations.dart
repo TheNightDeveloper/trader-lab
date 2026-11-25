@@ -399,6 +399,12 @@ abstract class L10n {
   /// **'زمان بسته‌شدن کندل مرجع'**
   String get paperCandleTime;
 
+  /// No description provided for @paperPlanQuoteAt.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان دادهٔ برنامه'**
+  String get paperPlanQuoteAt;
+
   /// No description provided for @paperFillAssumptions.
   ///
   /// In fa, this message translates to:
@@ -650,6 +656,102 @@ abstract class L10n {
   /// In fa, this message translates to:
   /// **'موقعیت بسته‌شده'**
   String get paperJournalClosedPosition;
+
+  /// No description provided for @paperReplayTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازپخش تصمیم'**
+  String get paperReplayTitle;
+
+  /// No description provided for @paperReplayPrevious.
+  ///
+  /// In fa, this message translates to:
+  /// **'گام قبل'**
+  String get paperReplayPrevious;
+
+  /// No description provided for @paperReplayNext.
+  ///
+  /// In fa, this message translates to:
+  /// **'گام بعد'**
+  String get paperReplayNext;
+
+  /// No description provided for @paperReplayObservation.
+  ///
+  /// In fa, this message translates to:
+  /// **'مشاهدهٔ فرصت'**
+  String get paperReplayObservation;
+
+  /// No description provided for @paperReplayExecution.
+  ///
+  /// In fa, this message translates to:
+  /// **'رویداد ثبت‌شده'**
+  String get paperReplayExecution;
+
+  /// No description provided for @paperReplayObservedAt.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان ثبت مشاهده'**
+  String get paperReplayObservedAt;
+
+  /// No description provided for @paperReplayInputs.
+  ///
+  /// In fa, this message translates to:
+  /// **'تعداد کندل‌های ورودی ۱ساعته'**
+  String get paperReplayInputs;
+
+  /// No description provided for @paperReplayInputOpen.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازشدن'**
+  String get paperReplayInputOpen;
+
+  /// No description provided for @paperReplayInputHigh.
+  ///
+  /// In fa, this message translates to:
+  /// **'بیشینه'**
+  String get paperReplayInputHigh;
+
+  /// No description provided for @paperReplayInputLow.
+  ///
+  /// In fa, this message translates to:
+  /// **'کمینه'**
+  String get paperReplayInputLow;
+
+  /// No description provided for @paperReplayEntryRule.
+  ///
+  /// In fa, this message translates to:
+  /// **'شرط ورود ثبت‌شده'**
+  String get paperReplayEntryRule;
+
+  /// No description provided for @paperReplaySnapshotHash.
+  ///
+  /// In fa, this message translates to:
+  /// **'هش دادهٔ مشاهده'**
+  String get paperReplaySnapshotHash;
+
+  /// No description provided for @paperReplayRuleHash.
+  ///
+  /// In fa, this message translates to:
+  /// **'هش نسخهٔ قواعد'**
+  String get paperReplayRuleHash;
+
+  /// No description provided for @paperReplayConfirmationPrice.
+  ///
+  /// In fa, this message translates to:
+  /// **'قیمت مرجع در تأیید'**
+  String get paperReplayConfirmationPrice;
+
+  /// No description provided for @paperReplayConfirmationUnavailable.
+  ///
+  /// In fa, this message translates to:
+  /// **'کندل بازبینی هنگام ثبت این رسید ذخیره نشده است.'**
+  String get paperReplayConfirmationUnavailable;
+
+  /// No description provided for @paperReplayRevision.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازبینی کندل'**
+  String get paperReplayRevision;
 
   /// No description provided for @paperRiskControls.
   ///

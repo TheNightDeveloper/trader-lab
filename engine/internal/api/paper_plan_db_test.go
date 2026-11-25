@@ -49,10 +49,15 @@ func paperFixture(t *testing.T) (*Market, *clock.Virtual, labv1connect.PaperServ
 	require.NoError(t, err)
 	empty := []byte(`{}`)
 	require.NoError(t, st.InsertReport(ctx, db.InsertReportParams{ID: "paper-evidence", Spec: empty, Split: empty, Evaluation: empty, Holdout: empty}))
+	snapshot, err := json.Marshal([]data.Bar{{
+		Instrument: "BTCUSDT", OpenTime: now.Add(-time.Hour), CloseTime: now, AvailableAt: now,
+		O: price, H: price, L: price, C: price,
+	}})
+	require.NoError(t, err)
 	require.NoError(t, st.InsertMarketOpportunity(ctx, db.InsertMarketOpportunityParams{
 		Symbol: "BTCUSDT", RuleVersionID: version.ID, ReportID: "paper-evidence", SpecRevision: marketSpecRevision("BTCUSDT"),
 		CandleClosedAt: now, ObservedAt: now, ExpiresAt: now.Add(time.Hour), ReferenceClose: price.V,
-		Reason: "rule entry", Snapshot: []byte(`[]`), SnapshotSha256: paperPlanHash([]byte(`[]`)),
+		Reason: "rule entry", Snapshot: snapshot, SnapshotSha256: paperPlanHash(snapshot),
 	}))
 	opp, err := st.MarketOpportunity(ctx, db.MarketOpportunityParams{RuleVersionID: version.ID, Symbol: "BTCUSDT", CandleClosedAt: now})
 	require.NoError(t, err)

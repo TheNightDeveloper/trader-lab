@@ -60,6 +60,13 @@ abstract final class PaperService {
     labv1paper.ListPaperJournalResponse.new,
   );
 
+  static const getPaperReplay = connect.Spec(
+    '/$name/GetPaperReplay',
+    connect.StreamType.unary,
+    labv1paper.GetPaperReplayRequest.new,
+    labv1paper.GetPaperReplayResponse.new,
+  );
+
   static const cancelPaperEntry = connect.Spec(
     '/$name/CancelPaperEntry',
     connect.StreamType.unary,

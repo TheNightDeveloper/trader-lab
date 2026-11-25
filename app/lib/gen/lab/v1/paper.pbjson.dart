@@ -17,6 +17,7 @@ import 'dart:typed_data' as $typed_data;
 
 import 'account.pbjson.dart' as $1;
 import 'common.pbjson.dart' as $0;
+import 'market.pbjson.dart' as $3;
 import 'workspace.pbjson.dart' as $2;
 
 @$core.Deprecated('Use paperReductionStateDescriptor instead')
@@ -567,6 +568,185 @@ final $typed_data.Uint8List paperJournalTradeDescriptor = $convert.base64Decode(
     'lwdFIHcmVjZWlwdBIyCg1vcGVuX3F1YW50aXR5GAIgASgLMg0ubGFiLnYxLk1vbmV5UgxvcGVu'
     'UXVhbnRpdHkSKgoJZmVlc19wYWlkGAMgASgLMg0ubGFiLnYxLk1vbmV5UghmZWVzUGFpZBIwCg'
     'xyZWFsaXplZF9wbmwYBCABKAsyDS5sYWIudjEuTW9uZXlSC3JlYWxpemVkUG5s');
+
+@$core.Deprecated('Use getPaperReplayRequestDescriptor instead')
+const GetPaperReplayRequest$json = {
+  '1': 'GetPaperReplayRequest',
+  '2': [
+    {'1': 'receipt_id', '3': 1, '4': 1, '5': 3, '10': 'receiptId'},
+    {'1': 'cursor', '3': 2, '4': 1, '5': 3, '10': 'cursor'},
+  ],
+};
+
+/// Descriptor for `GetPaperReplayRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getPaperReplayRequestDescriptor = $convert.base64Decode(
+    'ChVHZXRQYXBlclJlcGxheVJlcXVlc3QSHQoKcmVjZWlwdF9pZBgBIAEoA1IJcmVjZWlwdElkEh'
+    'YKBmN1cnNvchgCIAEoA1IGY3Vyc29y');
+
+@$core.Deprecated('Use getPaperReplayResponseDescriptor instead')
+const GetPaperReplayResponse$json = {
+  '1': 'GetPaperReplayResponse',
+  '2': [
+    {'1': 'symbol', '3': 1, '4': 1, '5': 9, '10': 'symbol'},
+    {
+      '1': 'previous_cursor',
+      '3': 2,
+      '4': 1,
+      '5': 3,
+      '9': 1,
+      '10': 'previousCursor',
+      '17': true
+    },
+    {
+      '1': 'next_cursor',
+      '3': 3,
+      '4': 1,
+      '5': 3,
+      '9': 2,
+      '10': 'nextCursor',
+      '17': true
+    },
+    {
+      '1': 'observation',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.PaperReplayObservation',
+      '9': 0,
+      '10': 'observation'
+    },
+    {
+      '1': 'plan',
+      '3': 5,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.PaperPlan',
+      '9': 0,
+      '10': 'plan'
+    },
+    {
+      '1': 'execution',
+      '3': 6,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.PaperReplayExecution',
+      '9': 0,
+      '10': 'execution'
+    },
+  ],
+  '8': [
+    {'1': 'step'},
+    {'1': '_previous_cursor'},
+    {'1': '_next_cursor'},
+  ],
+};
+
+/// Descriptor for `GetPaperReplayResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getPaperReplayResponseDescriptor = $convert.base64Decode(
+    'ChZHZXRQYXBlclJlcGxheVJlc3BvbnNlEhYKBnN5bWJvbBgBIAEoCVIGc3ltYm9sEiwKD3ByZX'
+    'Zpb3VzX2N1cnNvchgCIAEoA0gBUg5wcmV2aW91c0N1cnNvcogBARIkCgtuZXh0X2N1cnNvchgD'
+    'IAEoA0gCUgpuZXh0Q3Vyc29yiAEBEkIKC29ic2VydmF0aW9uGAQgASgLMh4ubGFiLnYxLlBhcG'
+    'VyUmVwbGF5T2JzZXJ2YXRpb25IAFILb2JzZXJ2YXRpb24SJwoEcGxhbhgFIAEoCzIRLmxhYi52'
+    'MS5QYXBlclBsYW5IAFIEcGxhbhI8CglleGVjdXRpb24YBiABKAsyHC5sYWIudjEuUGFwZXJSZX'
+    'BsYXlFeGVjdXRpb25IAFIJZXhlY3V0aW9uQgYKBHN0ZXBCEgoQX3ByZXZpb3VzX2N1cnNvckIO'
+    'CgxfbmV4dF9jdXJzb3I=');
+
+@$core.Deprecated('Use paperReplayObservationDescriptor instead')
+const PaperReplayObservation$json = {
+  '1': 'PaperReplayObservation',
+  '2': [
+    {
+      '1': 'opportunity',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.MarketOpportunity',
+      '10': 'opportunity'
+    },
+    {'1': 'snapshot_sha256', '3': 2, '4': 1, '5': 9, '10': 'snapshotSha256'},
+    {
+      '1': 'input_candle_count',
+      '3': 3,
+      '4': 1,
+      '5': 5,
+      '10': 'inputCandleCount'
+    },
+    {
+      '1': 'last_input_available_at_unix_ms',
+      '3': 4,
+      '4': 1,
+      '5': 3,
+      '10': 'lastInputAvailableAtUnixMs'
+    },
+    {
+      '1': 'last_input_open',
+      '3': 5,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.Money',
+      '10': 'lastInputOpen'
+    },
+    {
+      '1': 'last_input_high',
+      '3': 6,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.Money',
+      '10': 'lastInputHigh'
+    },
+    {
+      '1': 'last_input_low',
+      '3': 7,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.Money',
+      '10': 'lastInputLow'
+    },
+    {'1': 'rule_sha256', '3': 8, '4': 1, '5': 9, '10': 'ruleSha256'},
+    {'1': 'entry_rule_json', '3': 9, '4': 1, '5': 9, '10': 'entryRuleJson'},
+  ],
+};
+
+/// Descriptor for `PaperReplayObservation`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List paperReplayObservationDescriptor = $convert.base64Decode(
+    'ChZQYXBlclJlcGxheU9ic2VydmF0aW9uEjsKC29wcG9ydHVuaXR5GAEgASgLMhkubGFiLnYxLk'
+    '1hcmtldE9wcG9ydHVuaXR5UgtvcHBvcnR1bml0eRInCg9zbmFwc2hvdF9zaGEyNTYYAiABKAlS'
+    'DnNuYXBzaG90U2hhMjU2EiwKEmlucHV0X2NhbmRsZV9jb3VudBgDIAEoBVIQaW5wdXRDYW5kbG'
+    'VDb3VudBJDCh9sYXN0X2lucHV0X2F2YWlsYWJsZV9hdF91bml4X21zGAQgASgDUhpsYXN0SW5w'
+    'dXRBdmFpbGFibGVBdFVuaXhNcxI1Cg9sYXN0X2lucHV0X29wZW4YBSABKAsyDS5sYWIudjEuTW'
+    '9uZXlSDWxhc3RJbnB1dE9wZW4SNQoPbGFzdF9pbnB1dF9oaWdoGAYgASgLMg0ubGFiLnYxLk1v'
+    'bmV5Ug1sYXN0SW5wdXRIaWdoEjMKDmxhc3RfaW5wdXRfbG93GAcgASgLMg0ubGFiLnYxLk1vbm'
+    'V5UgxsYXN0SW5wdXRMb3cSHwoLcnVsZV9zaGEyNTYYCCABKAlSCnJ1bGVTaGEyNTYSJgoPZW50'
+    'cnlfcnVsZV9qc29uGAkgASgJUg1lbnRyeVJ1bGVKc29u');
+
+@$core.Deprecated('Use paperReplayExecutionDescriptor instead')
+const PaperReplayExecution$json = {
+  '1': 'PaperReplayExecution',
+  '2': [
+    {
+      '1': 'event',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.PaperExecutionEvent',
+      '10': 'event'
+    },
+    {
+      '1': 'confirmation_candle',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.MarketCandle',
+      '10': 'confirmationCandle'
+    },
+  ],
+};
+
+/// Descriptor for `PaperReplayExecution`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List paperReplayExecutionDescriptor = $convert.base64Decode(
+    'ChRQYXBlclJlcGxheUV4ZWN1dGlvbhIxCgVldmVudBgBIAEoCzIbLmxhYi52MS5QYXBlckV4ZW'
+    'N1dGlvbkV2ZW50UgVldmVudBJFChNjb25maXJtYXRpb25fY2FuZGxlGAIgASgLMhQubGFiLnYx'
+    'Lk1hcmtldENhbmRsZVISY29uZmlybWF0aW9uQ2FuZGxl');
 
 @$core.Deprecated('Use cancelPaperEntryRequestDescriptor instead')
 const CancelPaperEntryRequest$json = {
@@ -1233,6 +1413,11 @@ const $core.Map<$core.String, $core.dynamic> PaperServiceBase$json = {
       '3': '.lab.v1.ListPaperJournalResponse'
     },
     {
+      '1': 'GetPaperReplay',
+      '2': '.lab.v1.GetPaperReplayRequest',
+      '3': '.lab.v1.GetPaperReplayResponse'
+    },
+    {
       '1': 'CancelPaperEntry',
       '2': '.lab.v1.CancelPaperEntryRequest',
       '3': '.lab.v1.CancelPaperEntryResponse'
@@ -1284,6 +1469,12 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
   '.lab.v1.ListPaperJournalRequest': ListPaperJournalRequest$json,
   '.lab.v1.ListPaperJournalResponse': ListPaperJournalResponse$json,
   '.lab.v1.PaperJournalTrade': PaperJournalTrade$json,
+  '.lab.v1.GetPaperReplayRequest': GetPaperReplayRequest$json,
+  '.lab.v1.GetPaperReplayResponse': GetPaperReplayResponse$json,
+  '.lab.v1.PaperReplayObservation': PaperReplayObservation$json,
+  '.lab.v1.MarketOpportunity': $3.MarketOpportunity$json,
+  '.lab.v1.PaperReplayExecution': PaperReplayExecution$json,
+  '.lab.v1.MarketCandle': $3.MarketCandle$json,
   '.lab.v1.CancelPaperEntryRequest': CancelPaperEntryRequest$json,
   '.lab.v1.CancelPaperEntryResponse': CancelPaperEntryResponse$json,
   '.lab.v1.ReducePaperPositionRequest': ReducePaperPositionRequest$json,
@@ -1305,9 +1496,10 @@ final $typed_data.Uint8List paperServiceDescriptor = $convert.base64Decode(
     'UmVzcG9uc2USUgoPR2V0UGFwZXJSZWNlaXB0Eh4ubGFiLnYxLkdldFBhcGVyUmVjZWlwdFJlcX'
     'Vlc3QaHy5sYWIudjEuR2V0UGFwZXJSZWNlaXB0UmVzcG9uc2USVQoQTGlzdFBhcGVySm91cm5h'
     'bBIfLmxhYi52MS5MaXN0UGFwZXJKb3VybmFsUmVxdWVzdBogLmxhYi52MS5MaXN0UGFwZXJKb3'
-    'VybmFsUmVzcG9uc2USVQoQQ2FuY2VsUGFwZXJFbnRyeRIfLmxhYi52MS5DYW5jZWxQYXBlckVu'
-    'dHJ5UmVxdWVzdBogLmxhYi52MS5DYW5jZWxQYXBlckVudHJ5UmVzcG9uc2USXgoTUmVkdWNlUG'
-    'FwZXJQb3NpdGlvbhIiLmxhYi52MS5SZWR1Y2VQYXBlclBvc2l0aW9uUmVxdWVzdBojLmxhYi52'
-    'MS5SZWR1Y2VQYXBlclBvc2l0aW9uUmVzcG9uc2USWwoSU2V0UGFwZXJFbnRyeVBhdXNlEiEubG'
-    'FiLnYxLlNldFBhcGVyRW50cnlQYXVzZVJlcXVlc3QaIi5sYWIudjEuU2V0UGFwZXJFbnRyeVBh'
-    'dXNlUmVzcG9uc2U=');
+    'VybmFsUmVzcG9uc2USTwoOR2V0UGFwZXJSZXBsYXkSHS5sYWIudjEuR2V0UGFwZXJSZXBsYXlS'
+    'ZXF1ZXN0Gh4ubGFiLnYxLkdldFBhcGVyUmVwbGF5UmVzcG9uc2USVQoQQ2FuY2VsUGFwZXJFbn'
+    'RyeRIfLmxhYi52MS5DYW5jZWxQYXBlckVudHJ5UmVxdWVzdBogLmxhYi52MS5DYW5jZWxQYXBl'
+    'ckVudHJ5UmVzcG9uc2USXgoTUmVkdWNlUGFwZXJQb3NpdGlvbhIiLmxhYi52MS5SZWR1Y2VQYX'
+    'BlclBvc2l0aW9uUmVxdWVzdBojLmxhYi52MS5SZWR1Y2VQYXBlclBvc2l0aW9uUmVzcG9uc2US'
+    'WwoSU2V0UGFwZXJFbnRyeVBhdXNlEiEubGFiLnYxLlNldFBhcGVyRW50cnlQYXVzZVJlcXVlc3'
+    'QaIi5sYWIudjEuU2V0UGFwZXJFbnRyeVBhdXNlUmVzcG9uc2U=');

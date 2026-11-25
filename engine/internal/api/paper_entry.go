@@ -104,7 +104,7 @@ func (p *Paper) reservePaperPlan(ctx context.Context, q *db.Queries, plan *labv1
 	if err != nil {
 		return entry, nil, err
 	}
-	restriction, err := p.reviewRestriction(ctx, q, plan, account)
+	candle, restriction, err := p.revalidatePaperPlan(ctx, q, plan, account)
 	if err != nil || restriction != nil {
 		return entry, restriction, err
 	}
@@ -158,6 +158,12 @@ func (p *Paper) reservePaperPlan(ctx context.Context, q *db.Queries, plan *labv1
 	}
 	event, err := q.InsertPaperExecutionEvent(ctx, db.InsertPaperExecutionEventParams{EntryID: entry.ID, Kind: "accepted", RecordedAt: now, Cash: reserve.V})
 	if err != nil {
+		return entry, nil, err
+	}
+	if err := q.StorePaperConfirmationEvidence(ctx, db.StorePaperConfirmationEvidenceParams{
+		EventID: event, OpenTime: candle.OpenTime, CloseTime: candle.CloseTime, AvailableAt: candle.AvailableAt,
+		Revision: candle.Revision, ClosePrice: candle.C,
+	}); err != nil {
 		return entry, nil, err
 	}
 	if err := paperPosting(ctx, q, event, 0, now, "USDT", "available", "reserved", reserve.V); err != nil {

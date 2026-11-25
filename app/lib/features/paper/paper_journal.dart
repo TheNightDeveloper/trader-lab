@@ -87,7 +87,16 @@ class _JournalTrade extends StatelessWidget {
             Text(l.paperJournalClosedPosition),
           PaperMoneyLine(label: l.paperJournalFeesPaid, amount: trade.feesPaid),
           PaperMoneyLine(label: l.paperRealizedPnl, amount: trade.realizedPnl),
-          TextButton(onPressed: () => context.go('/paper/receipts/${receipt.id}'), child: Text(l.paperViewReceipt)),
+          Wrap(
+            spacing: AppSpace.sm,
+            children: [
+              TextButton(onPressed: () => context.go('/paper/receipts/${receipt.id}'), child: Text(l.paperViewReceipt)),
+              TextButton(
+                onPressed: () => context.go('/paper/receipts/${receipt.id}/replay'),
+                child: Text(l.paperReplayTitle),
+              ),
+            ],
+          ),
         ],
       ),
     );

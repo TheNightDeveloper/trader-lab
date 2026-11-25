@@ -54,6 +54,9 @@ const (
 	// PaperServiceListPaperJournalProcedure is the fully-qualified name of the PaperService's
 	// ListPaperJournal RPC.
 	PaperServiceListPaperJournalProcedure = "/lab.v1.PaperService/ListPaperJournal"
+	// PaperServiceGetPaperReplayProcedure is the fully-qualified name of the PaperService's
+	// GetPaperReplay RPC.
+	PaperServiceGetPaperReplayProcedure = "/lab.v1.PaperService/GetPaperReplay"
 	// PaperServiceCancelPaperEntryProcedure is the fully-qualified name of the PaperService's
 	// CancelPaperEntry RPC.
 	PaperServiceCancelPaperEntryProcedure = "/lab.v1.PaperService/CancelPaperEntry"
@@ -74,6 +77,7 @@ type PaperServiceClient interface {
 	ConfirmPaperPlan(context.Context, *connect.Request[v1.ConfirmPaperPlanRequest]) (*connect.Response[v1.ConfirmPaperPlanResponse], error)
 	GetPaperReceipt(context.Context, *connect.Request[v1.GetPaperReceiptRequest]) (*connect.Response[v1.GetPaperReceiptResponse], error)
 	ListPaperJournal(context.Context, *connect.Request[v1.ListPaperJournalRequest]) (*connect.Response[v1.ListPaperJournalResponse], error)
+	GetPaperReplay(context.Context, *connect.Request[v1.GetPaperReplayRequest]) (*connect.Response[v1.GetPaperReplayResponse], error)
 	CancelPaperEntry(context.Context, *connect.Request[v1.CancelPaperEntryRequest]) (*connect.Response[v1.CancelPaperEntryResponse], error)
 	ReducePaperPosition(context.Context, *connect.Request[v1.ReducePaperPositionRequest]) (*connect.Response[v1.ReducePaperPositionResponse], error)
 	SetPaperEntryPause(context.Context, *connect.Request[v1.SetPaperEntryPauseRequest]) (*connect.Response[v1.SetPaperEntryPauseResponse], error)
@@ -132,6 +136,12 @@ func NewPaperServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(paperServiceMethods.ByName("ListPaperJournal")),
 			connect.WithClientOptions(opts...),
 		),
+		getPaperReplay: connect.NewClient[v1.GetPaperReplayRequest, v1.GetPaperReplayResponse](
+			httpClient,
+			baseURL+PaperServiceGetPaperReplayProcedure,
+			connect.WithSchema(paperServiceMethods.ByName("GetPaperReplay")),
+			connect.WithClientOptions(opts...),
+		),
 		cancelPaperEntry: connect.NewClient[v1.CancelPaperEntryRequest, v1.CancelPaperEntryResponse](
 			httpClient,
 			baseURL+PaperServiceCancelPaperEntryProcedure,
@@ -162,6 +172,7 @@ type paperServiceClient struct {
 	confirmPaperPlan       *connect.Client[v1.ConfirmPaperPlanRequest, v1.ConfirmPaperPlanResponse]
 	getPaperReceipt        *connect.Client[v1.GetPaperReceiptRequest, v1.GetPaperReceiptResponse]
 	listPaperJournal       *connect.Client[v1.ListPaperJournalRequest, v1.ListPaperJournalResponse]
+	getPaperReplay         *connect.Client[v1.GetPaperReplayRequest, v1.GetPaperReplayResponse]
 	cancelPaperEntry       *connect.Client[v1.CancelPaperEntryRequest, v1.CancelPaperEntryResponse]
 	reducePaperPosition    *connect.Client[v1.ReducePaperPositionRequest, v1.ReducePaperPositionResponse]
 	setPaperEntryPause     *connect.Client[v1.SetPaperEntryPauseRequest, v1.SetPaperEntryPauseResponse]
@@ -202,6 +213,11 @@ func (c *paperServiceClient) ListPaperJournal(ctx context.Context, req *connect.
 	return c.listPaperJournal.CallUnary(ctx, req)
 }
 
+// GetPaperReplay calls lab.v1.PaperService.GetPaperReplay.
+func (c *paperServiceClient) GetPaperReplay(ctx context.Context, req *connect.Request[v1.GetPaperReplayRequest]) (*connect.Response[v1.GetPaperReplayResponse], error) {
+	return c.getPaperReplay.CallUnary(ctx, req)
+}
+
 // CancelPaperEntry calls lab.v1.PaperService.CancelPaperEntry.
 func (c *paperServiceClient) CancelPaperEntry(ctx context.Context, req *connect.Request[v1.CancelPaperEntryRequest]) (*connect.Response[v1.CancelPaperEntryResponse], error) {
 	return c.cancelPaperEntry.CallUnary(ctx, req)
@@ -226,6 +242,7 @@ type PaperServiceHandler interface {
 	ConfirmPaperPlan(context.Context, *connect.Request[v1.ConfirmPaperPlanRequest]) (*connect.Response[v1.ConfirmPaperPlanResponse], error)
 	GetPaperReceipt(context.Context, *connect.Request[v1.GetPaperReceiptRequest]) (*connect.Response[v1.GetPaperReceiptResponse], error)
 	ListPaperJournal(context.Context, *connect.Request[v1.ListPaperJournalRequest]) (*connect.Response[v1.ListPaperJournalResponse], error)
+	GetPaperReplay(context.Context, *connect.Request[v1.GetPaperReplayRequest]) (*connect.Response[v1.GetPaperReplayResponse], error)
 	CancelPaperEntry(context.Context, *connect.Request[v1.CancelPaperEntryRequest]) (*connect.Response[v1.CancelPaperEntryResponse], error)
 	ReducePaperPosition(context.Context, *connect.Request[v1.ReducePaperPositionRequest]) (*connect.Response[v1.ReducePaperPositionResponse], error)
 	SetPaperEntryPause(context.Context, *connect.Request[v1.SetPaperEntryPauseRequest]) (*connect.Response[v1.SetPaperEntryPauseResponse], error)
@@ -280,6 +297,12 @@ func NewPaperServiceHandler(svc PaperServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(paperServiceMethods.ByName("ListPaperJournal")),
 		connect.WithHandlerOptions(opts...),
 	)
+	paperServiceGetPaperReplayHandler := connect.NewUnaryHandler(
+		PaperServiceGetPaperReplayProcedure,
+		svc.GetPaperReplay,
+		connect.WithSchema(paperServiceMethods.ByName("GetPaperReplay")),
+		connect.WithHandlerOptions(opts...),
+	)
 	paperServiceCancelPaperEntryHandler := connect.NewUnaryHandler(
 		PaperServiceCancelPaperEntryProcedure,
 		svc.CancelPaperEntry,
@@ -314,6 +337,8 @@ func NewPaperServiceHandler(svc PaperServiceHandler, opts ...connect.HandlerOpti
 			paperServiceGetPaperReceiptHandler.ServeHTTP(w, r)
 		case PaperServiceListPaperJournalProcedure:
 			paperServiceListPaperJournalHandler.ServeHTTP(w, r)
+		case PaperServiceGetPaperReplayProcedure:
+			paperServiceGetPaperReplayHandler.ServeHTTP(w, r)
 		case PaperServiceCancelPaperEntryProcedure:
 			paperServiceCancelPaperEntryHandler.ServeHTTP(w, r)
 		case PaperServiceReducePaperPositionProcedure:
@@ -355,6 +380,10 @@ func (UnimplementedPaperServiceHandler) GetPaperReceipt(context.Context, *connec
 
 func (UnimplementedPaperServiceHandler) ListPaperJournal(context.Context, *connect.Request[v1.ListPaperJournalRequest]) (*connect.Response[v1.ListPaperJournalResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("lab.v1.PaperService.ListPaperJournal is not implemented"))
+}
+
+func (UnimplementedPaperServiceHandler) GetPaperReplay(context.Context, *connect.Request[v1.GetPaperReplayRequest]) (*connect.Response[v1.GetPaperReplayResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("lab.v1.PaperService.GetPaperReplay is not implemented"))
 }
 
 func (UnimplementedPaperServiceHandler) CancelPaperEntry(context.Context, *connect.Request[v1.CancelPaperEntryRequest]) (*connect.Response[v1.CancelPaperEntryResponse], error) {

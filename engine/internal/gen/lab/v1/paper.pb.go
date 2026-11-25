@@ -1051,6 +1051,340 @@ func (x *PaperJournalTrade) GetRealizedPnl() *Money {
 	return nil
 }
 
+type GetPaperReplayRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ReceiptId     int64                  `protobuf:"varint,1,opt,name=receipt_id,json=receiptId,proto3" json:"receipt_id,omitempty"`
+	Cursor        int64                  `protobuf:"varint,2,opt,name=cursor,proto3" json:"cursor,omitempty"` // zero: observation, -1: plan review, positive: execution event ID
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetPaperReplayRequest) Reset() {
+	*x = GetPaperReplayRequest{}
+	mi := &file_lab_v1_paper_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetPaperReplayRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetPaperReplayRequest) ProtoMessage() {}
+
+func (x *GetPaperReplayRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_paper_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetPaperReplayRequest.ProtoReflect.Descriptor instead.
+func (*GetPaperReplayRequest) Descriptor() ([]byte, []int) {
+	return file_lab_v1_paper_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *GetPaperReplayRequest) GetReceiptId() int64 {
+	if x != nil {
+		return x.ReceiptId
+	}
+	return 0
+}
+
+func (x *GetPaperReplayRequest) GetCursor() int64 {
+	if x != nil {
+		return x.Cursor
+	}
+	return 0
+}
+
+type GetPaperReplayResponse struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Symbol         string                 `protobuf:"bytes,1,opt,name=symbol,proto3" json:"symbol,omitempty"`
+	PreviousCursor *int64                 `protobuf:"varint,2,opt,name=previous_cursor,json=previousCursor,proto3,oneof" json:"previous_cursor,omitempty"`
+	NextCursor     *int64                 `protobuf:"varint,3,opt,name=next_cursor,json=nextCursor,proto3,oneof" json:"next_cursor,omitempty"`
+	// Types that are valid to be assigned to Step:
+	//
+	//	*GetPaperReplayResponse_Observation
+	//	*GetPaperReplayResponse_Plan
+	//	*GetPaperReplayResponse_Execution
+	Step          isGetPaperReplayResponse_Step `protobuf_oneof:"step"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetPaperReplayResponse) Reset() {
+	*x = GetPaperReplayResponse{}
+	mi := &file_lab_v1_paper_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetPaperReplayResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetPaperReplayResponse) ProtoMessage() {}
+
+func (x *GetPaperReplayResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_paper_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetPaperReplayResponse.ProtoReflect.Descriptor instead.
+func (*GetPaperReplayResponse) Descriptor() ([]byte, []int) {
+	return file_lab_v1_paper_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *GetPaperReplayResponse) GetSymbol() string {
+	if x != nil {
+		return x.Symbol
+	}
+	return ""
+}
+
+func (x *GetPaperReplayResponse) GetPreviousCursor() int64 {
+	if x != nil && x.PreviousCursor != nil {
+		return *x.PreviousCursor
+	}
+	return 0
+}
+
+func (x *GetPaperReplayResponse) GetNextCursor() int64 {
+	if x != nil && x.NextCursor != nil {
+		return *x.NextCursor
+	}
+	return 0
+}
+
+func (x *GetPaperReplayResponse) GetStep() isGetPaperReplayResponse_Step {
+	if x != nil {
+		return x.Step
+	}
+	return nil
+}
+
+func (x *GetPaperReplayResponse) GetObservation() *PaperReplayObservation {
+	if x != nil {
+		if x, ok := x.Step.(*GetPaperReplayResponse_Observation); ok {
+			return x.Observation
+		}
+	}
+	return nil
+}
+
+func (x *GetPaperReplayResponse) GetPlan() *PaperPlan {
+	if x != nil {
+		if x, ok := x.Step.(*GetPaperReplayResponse_Plan); ok {
+			return x.Plan
+		}
+	}
+	return nil
+}
+
+func (x *GetPaperReplayResponse) GetExecution() *PaperReplayExecution {
+	if x != nil {
+		if x, ok := x.Step.(*GetPaperReplayResponse_Execution); ok {
+			return x.Execution
+		}
+	}
+	return nil
+}
+
+type isGetPaperReplayResponse_Step interface {
+	isGetPaperReplayResponse_Step()
+}
+
+type GetPaperReplayResponse_Observation struct {
+	Observation *PaperReplayObservation `protobuf:"bytes,4,opt,name=observation,proto3,oneof"`
+}
+
+type GetPaperReplayResponse_Plan struct {
+	Plan *PaperPlan `protobuf:"bytes,5,opt,name=plan,proto3,oneof"`
+}
+
+type GetPaperReplayResponse_Execution struct {
+	Execution *PaperReplayExecution `protobuf:"bytes,6,opt,name=execution,proto3,oneof"`
+}
+
+func (*GetPaperReplayResponse_Observation) isGetPaperReplayResponse_Step() {}
+
+func (*GetPaperReplayResponse_Plan) isGetPaperReplayResponse_Step() {}
+
+func (*GetPaperReplayResponse_Execution) isGetPaperReplayResponse_Step() {}
+
+type PaperReplayObservation struct {
+	state                      protoimpl.MessageState `protogen:"open.v1"`
+	Opportunity                *MarketOpportunity     `protobuf:"bytes,1,opt,name=opportunity,proto3" json:"opportunity,omitempty"`
+	SnapshotSha256             string                 `protobuf:"bytes,2,opt,name=snapshot_sha256,json=snapshotSha256,proto3" json:"snapshot_sha256,omitempty"`
+	InputCandleCount           int32                  `protobuf:"varint,3,opt,name=input_candle_count,json=inputCandleCount,proto3" json:"input_candle_count,omitempty"`
+	LastInputAvailableAtUnixMs int64                  `protobuf:"varint,4,opt,name=last_input_available_at_unix_ms,json=lastInputAvailableAtUnixMs,proto3" json:"last_input_available_at_unix_ms,omitempty"`
+	LastInputOpen              *Money                 `protobuf:"bytes,5,opt,name=last_input_open,json=lastInputOpen,proto3" json:"last_input_open,omitempty"`
+	LastInputHigh              *Money                 `protobuf:"bytes,6,opt,name=last_input_high,json=lastInputHigh,proto3" json:"last_input_high,omitempty"`
+	LastInputLow               *Money                 `protobuf:"bytes,7,opt,name=last_input_low,json=lastInputLow,proto3" json:"last_input_low,omitempty"`
+	RuleSha256                 string                 `protobuf:"bytes,8,opt,name=rule_sha256,json=ruleSha256,proto3" json:"rule_sha256,omitempty"`
+	EntryRuleJson              string                 `protobuf:"bytes,9,opt,name=entry_rule_json,json=entryRuleJson,proto3" json:"entry_rule_json,omitempty"`
+	unknownFields              protoimpl.UnknownFields
+	sizeCache                  protoimpl.SizeCache
+}
+
+func (x *PaperReplayObservation) Reset() {
+	*x = PaperReplayObservation{}
+	mi := &file_lab_v1_paper_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PaperReplayObservation) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PaperReplayObservation) ProtoMessage() {}
+
+func (x *PaperReplayObservation) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_paper_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PaperReplayObservation.ProtoReflect.Descriptor instead.
+func (*PaperReplayObservation) Descriptor() ([]byte, []int) {
+	return file_lab_v1_paper_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *PaperReplayObservation) GetOpportunity() *MarketOpportunity {
+	if x != nil {
+		return x.Opportunity
+	}
+	return nil
+}
+
+func (x *PaperReplayObservation) GetSnapshotSha256() string {
+	if x != nil {
+		return x.SnapshotSha256
+	}
+	return ""
+}
+
+func (x *PaperReplayObservation) GetInputCandleCount() int32 {
+	if x != nil {
+		return x.InputCandleCount
+	}
+	return 0
+}
+
+func (x *PaperReplayObservation) GetLastInputAvailableAtUnixMs() int64 {
+	if x != nil {
+		return x.LastInputAvailableAtUnixMs
+	}
+	return 0
+}
+
+func (x *PaperReplayObservation) GetLastInputOpen() *Money {
+	if x != nil {
+		return x.LastInputOpen
+	}
+	return nil
+}
+
+func (x *PaperReplayObservation) GetLastInputHigh() *Money {
+	if x != nil {
+		return x.LastInputHigh
+	}
+	return nil
+}
+
+func (x *PaperReplayObservation) GetLastInputLow() *Money {
+	if x != nil {
+		return x.LastInputLow
+	}
+	return nil
+}
+
+func (x *PaperReplayObservation) GetRuleSha256() string {
+	if x != nil {
+		return x.RuleSha256
+	}
+	return ""
+}
+
+func (x *PaperReplayObservation) GetEntryRuleJson() string {
+	if x != nil {
+		return x.EntryRuleJson
+	}
+	return ""
+}
+
+type PaperReplayExecution struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	Event              *PaperExecutionEvent   `protobuf:"bytes,1,opt,name=event,proto3" json:"event,omitempty"`
+	ConfirmationCandle *MarketCandle          `protobuf:"bytes,2,opt,name=confirmation_candle,json=confirmationCandle,proto3" json:"confirmation_candle,omitempty"` // present for approvals recorded with this evidence
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *PaperReplayExecution) Reset() {
+	*x = PaperReplayExecution{}
+	mi := &file_lab_v1_paper_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PaperReplayExecution) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PaperReplayExecution) ProtoMessage() {}
+
+func (x *PaperReplayExecution) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_paper_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PaperReplayExecution.ProtoReflect.Descriptor instead.
+func (*PaperReplayExecution) Descriptor() ([]byte, []int) {
+	return file_lab_v1_paper_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *PaperReplayExecution) GetEvent() *PaperExecutionEvent {
+	if x != nil {
+		return x.Event
+	}
+	return nil
+}
+
+func (x *PaperReplayExecution) GetConfirmationCandle() *MarketCandle {
+	if x != nil {
+		return x.ConfirmationCandle
+	}
+	return nil
+}
+
 type CancelPaperEntryRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Account       *AccountRef            `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
@@ -1061,7 +1395,7 @@ type CancelPaperEntryRequest struct {
 
 func (x *CancelPaperEntryRequest) Reset() {
 	*x = CancelPaperEntryRequest{}
-	mi := &file_lab_v1_paper_proto_msgTypes[16]
+	mi := &file_lab_v1_paper_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1073,7 +1407,7 @@ func (x *CancelPaperEntryRequest) String() string {
 func (*CancelPaperEntryRequest) ProtoMessage() {}
 
 func (x *CancelPaperEntryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_paper_proto_msgTypes[16]
+	mi := &file_lab_v1_paper_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1086,7 +1420,7 @@ func (x *CancelPaperEntryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelPaperEntryRequest.ProtoReflect.Descriptor instead.
 func (*CancelPaperEntryRequest) Descriptor() ([]byte, []int) {
-	return file_lab_v1_paper_proto_rawDescGZIP(), []int{16}
+	return file_lab_v1_paper_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *CancelPaperEntryRequest) GetAccount() *AccountRef {
@@ -1112,7 +1446,7 @@ type CancelPaperEntryResponse struct {
 
 func (x *CancelPaperEntryResponse) Reset() {
 	*x = CancelPaperEntryResponse{}
-	mi := &file_lab_v1_paper_proto_msgTypes[17]
+	mi := &file_lab_v1_paper_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1124,7 +1458,7 @@ func (x *CancelPaperEntryResponse) String() string {
 func (*CancelPaperEntryResponse) ProtoMessage() {}
 
 func (x *CancelPaperEntryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_paper_proto_msgTypes[17]
+	mi := &file_lab_v1_paper_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1137,7 +1471,7 @@ func (x *CancelPaperEntryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelPaperEntryResponse.ProtoReflect.Descriptor instead.
 func (*CancelPaperEntryResponse) Descriptor() ([]byte, []int) {
-	return file_lab_v1_paper_proto_rawDescGZIP(), []int{17}
+	return file_lab_v1_paper_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *CancelPaperEntryResponse) GetReceipt() *PaperReceipt {
@@ -1159,7 +1493,7 @@ type ReducePaperPositionRequest struct {
 
 func (x *ReducePaperPositionRequest) Reset() {
 	*x = ReducePaperPositionRequest{}
-	mi := &file_lab_v1_paper_proto_msgTypes[18]
+	mi := &file_lab_v1_paper_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1171,7 +1505,7 @@ func (x *ReducePaperPositionRequest) String() string {
 func (*ReducePaperPositionRequest) ProtoMessage() {}
 
 func (x *ReducePaperPositionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_paper_proto_msgTypes[18]
+	mi := &file_lab_v1_paper_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1184,7 +1518,7 @@ func (x *ReducePaperPositionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReducePaperPositionRequest.ProtoReflect.Descriptor instead.
 func (*ReducePaperPositionRequest) Descriptor() ([]byte, []int) {
-	return file_lab_v1_paper_proto_rawDescGZIP(), []int{18}
+	return file_lab_v1_paper_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *ReducePaperPositionRequest) GetAccount() *AccountRef {
@@ -1225,7 +1559,7 @@ type ReducePaperPositionResponse struct {
 
 func (x *ReducePaperPositionResponse) Reset() {
 	*x = ReducePaperPositionResponse{}
-	mi := &file_lab_v1_paper_proto_msgTypes[19]
+	mi := &file_lab_v1_paper_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1237,7 +1571,7 @@ func (x *ReducePaperPositionResponse) String() string {
 func (*ReducePaperPositionResponse) ProtoMessage() {}
 
 func (x *ReducePaperPositionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_paper_proto_msgTypes[19]
+	mi := &file_lab_v1_paper_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1250,7 +1584,7 @@ func (x *ReducePaperPositionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReducePaperPositionResponse.ProtoReflect.Descriptor instead.
 func (*ReducePaperPositionResponse) Descriptor() ([]byte, []int) {
-	return file_lab_v1_paper_proto_rawDescGZIP(), []int{19}
+	return file_lab_v1_paper_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *ReducePaperPositionResponse) GetReduction() *PaperReduction {
@@ -1281,7 +1615,7 @@ type PaperReduction struct {
 
 func (x *PaperReduction) Reset() {
 	*x = PaperReduction{}
-	mi := &file_lab_v1_paper_proto_msgTypes[20]
+	mi := &file_lab_v1_paper_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1293,7 +1627,7 @@ func (x *PaperReduction) String() string {
 func (*PaperReduction) ProtoMessage() {}
 
 func (x *PaperReduction) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_paper_proto_msgTypes[20]
+	mi := &file_lab_v1_paper_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1306,7 +1640,7 @@ func (x *PaperReduction) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PaperReduction.ProtoReflect.Descriptor instead.
 func (*PaperReduction) Descriptor() ([]byte, []int) {
-	return file_lab_v1_paper_proto_rawDescGZIP(), []int{20}
+	return file_lab_v1_paper_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *PaperReduction) GetId() int64 {
@@ -1365,7 +1699,7 @@ type PaperReconciliation struct {
 
 func (x *PaperReconciliation) Reset() {
 	*x = PaperReconciliation{}
-	mi := &file_lab_v1_paper_proto_msgTypes[21]
+	mi := &file_lab_v1_paper_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1377,7 +1711,7 @@ func (x *PaperReconciliation) String() string {
 func (*PaperReconciliation) ProtoMessage() {}
 
 func (x *PaperReconciliation) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_paper_proto_msgTypes[21]
+	mi := &file_lab_v1_paper_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1390,7 +1724,7 @@ func (x *PaperReconciliation) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PaperReconciliation.ProtoReflect.Descriptor instead.
 func (*PaperReconciliation) Descriptor() ([]byte, []int) {
-	return file_lab_v1_paper_proto_rawDescGZIP(), []int{21}
+	return file_lab_v1_paper_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *PaperReconciliation) GetCheckedAtUnixMs() int64 {
@@ -1445,7 +1779,7 @@ type SetPaperEntryPauseRequest struct {
 
 func (x *SetPaperEntryPauseRequest) Reset() {
 	*x = SetPaperEntryPauseRequest{}
-	mi := &file_lab_v1_paper_proto_msgTypes[22]
+	mi := &file_lab_v1_paper_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1457,7 +1791,7 @@ func (x *SetPaperEntryPauseRequest) String() string {
 func (*SetPaperEntryPauseRequest) ProtoMessage() {}
 
 func (x *SetPaperEntryPauseRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_paper_proto_msgTypes[22]
+	mi := &file_lab_v1_paper_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1470,7 +1804,7 @@ func (x *SetPaperEntryPauseRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetPaperEntryPauseRequest.ProtoReflect.Descriptor instead.
 func (*SetPaperEntryPauseRequest) Descriptor() ([]byte, []int) {
-	return file_lab_v1_paper_proto_rawDescGZIP(), []int{22}
+	return file_lab_v1_paper_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *SetPaperEntryPauseRequest) GetAccount() *AccountRef {
@@ -1496,7 +1830,7 @@ type SetPaperEntryPauseResponse struct {
 
 func (x *SetPaperEntryPauseResponse) Reset() {
 	*x = SetPaperEntryPauseResponse{}
-	mi := &file_lab_v1_paper_proto_msgTypes[23]
+	mi := &file_lab_v1_paper_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1508,7 +1842,7 @@ func (x *SetPaperEntryPauseResponse) String() string {
 func (*SetPaperEntryPauseResponse) ProtoMessage() {}
 
 func (x *SetPaperEntryPauseResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_paper_proto_msgTypes[23]
+	mi := &file_lab_v1_paper_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1521,7 +1855,7 @@ func (x *SetPaperEntryPauseResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetPaperEntryPauseResponse.ProtoReflect.Descriptor instead.
 func (*SetPaperEntryPauseResponse) Descriptor() ([]byte, []int) {
-	return file_lab_v1_paper_proto_rawDescGZIP(), []int{23}
+	return file_lab_v1_paper_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *SetPaperEntryPauseResponse) GetPaused() bool {
@@ -1549,7 +1883,7 @@ type PaperReceipt struct {
 
 func (x *PaperReceipt) Reset() {
 	*x = PaperReceipt{}
-	mi := &file_lab_v1_paper_proto_msgTypes[24]
+	mi := &file_lab_v1_paper_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1561,7 +1895,7 @@ func (x *PaperReceipt) String() string {
 func (*PaperReceipt) ProtoMessage() {}
 
 func (x *PaperReceipt) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_paper_proto_msgTypes[24]
+	mi := &file_lab_v1_paper_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1574,7 +1908,7 @@ func (x *PaperReceipt) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PaperReceipt.ProtoReflect.Descriptor instead.
 func (*PaperReceipt) Descriptor() ([]byte, []int) {
-	return file_lab_v1_paper_proto_rawDescGZIP(), []int{24}
+	return file_lab_v1_paper_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *PaperReceipt) GetId() int64 {
@@ -1663,7 +1997,7 @@ type PaperPosition struct {
 
 func (x *PaperPosition) Reset() {
 	*x = PaperPosition{}
-	mi := &file_lab_v1_paper_proto_msgTypes[25]
+	mi := &file_lab_v1_paper_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1675,7 +2009,7 @@ func (x *PaperPosition) String() string {
 func (*PaperPosition) ProtoMessage() {}
 
 func (x *PaperPosition) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_paper_proto_msgTypes[25]
+	mi := &file_lab_v1_paper_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1688,7 +2022,7 @@ func (x *PaperPosition) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PaperPosition.ProtoReflect.Descriptor instead.
 func (*PaperPosition) Descriptor() ([]byte, []int) {
-	return file_lab_v1_paper_proto_rawDescGZIP(), []int{25}
+	return file_lab_v1_paper_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *PaperPosition) GetReceiptId() int64 {
@@ -1766,7 +2100,7 @@ type PaperExecutionEvent struct {
 
 func (x *PaperExecutionEvent) Reset() {
 	*x = PaperExecutionEvent{}
-	mi := &file_lab_v1_paper_proto_msgTypes[26]
+	mi := &file_lab_v1_paper_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1778,7 +2112,7 @@ func (x *PaperExecutionEvent) String() string {
 func (*PaperExecutionEvent) ProtoMessage() {}
 
 func (x *PaperExecutionEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_paper_proto_msgTypes[26]
+	mi := &file_lab_v1_paper_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1791,7 +2125,7 @@ func (x *PaperExecutionEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PaperExecutionEvent.ProtoReflect.Descriptor instead.
 func (*PaperExecutionEvent) Descriptor() ([]byte, []int) {
-	return file_lab_v1_paper_proto_rawDescGZIP(), []int{26}
+	return file_lab_v1_paper_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *PaperExecutionEvent) GetId() int64 {
@@ -1881,7 +2215,7 @@ type PaperRestriction struct {
 
 func (x *PaperRestriction) Reset() {
 	*x = PaperRestriction{}
-	mi := &file_lab_v1_paper_proto_msgTypes[27]
+	mi := &file_lab_v1_paper_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1893,7 +2227,7 @@ func (x *PaperRestriction) String() string {
 func (*PaperRestriction) ProtoMessage() {}
 
 func (x *PaperRestriction) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_paper_proto_msgTypes[27]
+	mi := &file_lab_v1_paper_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1906,7 +2240,7 @@ func (x *PaperRestriction) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PaperRestriction.ProtoReflect.Descriptor instead.
 func (*PaperRestriction) Descriptor() ([]byte, []int) {
-	return file_lab_v1_paper_proto_rawDescGZIP(), []int{27}
+	return file_lab_v1_paper_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *PaperRestriction) GetCode() string {
@@ -1957,7 +2291,7 @@ type PaperPlan struct {
 
 func (x *PaperPlan) Reset() {
 	*x = PaperPlan{}
-	mi := &file_lab_v1_paper_proto_msgTypes[28]
+	mi := &file_lab_v1_paper_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1969,7 +2303,7 @@ func (x *PaperPlan) String() string {
 func (*PaperPlan) ProtoMessage() {}
 
 func (x *PaperPlan) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_paper_proto_msgTypes[28]
+	mi := &file_lab_v1_paper_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1982,7 +2316,7 @@ func (x *PaperPlan) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PaperPlan.ProtoReflect.Descriptor instead.
 func (*PaperPlan) Descriptor() ([]byte, []int) {
-	return file_lab_v1_paper_proto_rawDescGZIP(), []int{28}
+	return file_lab_v1_paper_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *PaperPlan) GetPlanHash() string {
@@ -2171,7 +2505,7 @@ var File_lab_v1_paper_proto protoreflect.FileDescriptor
 
 const file_lab_v1_paper_proto_rawDesc = "" +
 	"\n" +
-	"\x12lab/v1/paper.proto\x12\x06lab.v1\x1a\x14lab/v1/account.proto\x1a\x13lab/v1/common.proto\x1a\x16lab/v1/workspace.proto\"\x18\n" +
+	"\x12lab/v1/paper.proto\x12\x06lab.v1\x1a\x14lab/v1/account.proto\x1a\x13lab/v1/common.proto\x1a\x13lab/v1/market.proto\x1a\x16lab/v1/workspace.proto\"\x18\n" +
 	"\x16GetPaperAccountRequest\"\x8d\x02\n" +
 	"\x17GetPaperAccountResponse\x129\n" +
 	"\rpaper_account\x18\x01 \x01(\v2\x14.lab.v1.PaperAccountR\fpaperAccount\x12=\n" +
@@ -2232,7 +2566,36 @@ const file_lab_v1_paper_proto_rawDesc = "" +
 	"\areceipt\x18\x01 \x01(\v2\x14.lab.v1.PaperReceiptR\areceipt\x122\n" +
 	"\ropen_quantity\x18\x02 \x01(\v2\r.lab.v1.MoneyR\fopenQuantity\x12*\n" +
 	"\tfees_paid\x18\x03 \x01(\v2\r.lab.v1.MoneyR\bfeesPaid\x120\n" +
-	"\frealized_pnl\x18\x04 \x01(\v2\r.lab.v1.MoneyR\vrealizedPnl\"f\n" +
+	"\frealized_pnl\x18\x04 \x01(\v2\r.lab.v1.MoneyR\vrealizedPnl\"N\n" +
+	"\x15GetPaperReplayRequest\x12\x1d\n" +
+	"\n" +
+	"receipt_id\x18\x01 \x01(\x03R\treceiptId\x12\x16\n" +
+	"\x06cursor\x18\x02 \x01(\x03R\x06cursor\"\xdb\x02\n" +
+	"\x16GetPaperReplayResponse\x12\x16\n" +
+	"\x06symbol\x18\x01 \x01(\tR\x06symbol\x12,\n" +
+	"\x0fprevious_cursor\x18\x02 \x01(\x03H\x01R\x0epreviousCursor\x88\x01\x01\x12$\n" +
+	"\vnext_cursor\x18\x03 \x01(\x03H\x02R\n" +
+	"nextCursor\x88\x01\x01\x12B\n" +
+	"\vobservation\x18\x04 \x01(\v2\x1e.lab.v1.PaperReplayObservationH\x00R\vobservation\x12'\n" +
+	"\x04plan\x18\x05 \x01(\v2\x11.lab.v1.PaperPlanH\x00R\x04plan\x12<\n" +
+	"\texecution\x18\x06 \x01(\v2\x1c.lab.v1.PaperReplayExecutionH\x00R\texecutionB\x06\n" +
+	"\x04stepB\x12\n" +
+	"\x10_previous_cursorB\x0e\n" +
+	"\f_next_cursor\"\xdd\x03\n" +
+	"\x16PaperReplayObservation\x12;\n" +
+	"\vopportunity\x18\x01 \x01(\v2\x19.lab.v1.MarketOpportunityR\vopportunity\x12'\n" +
+	"\x0fsnapshot_sha256\x18\x02 \x01(\tR\x0esnapshotSha256\x12,\n" +
+	"\x12input_candle_count\x18\x03 \x01(\x05R\x10inputCandleCount\x12C\n" +
+	"\x1flast_input_available_at_unix_ms\x18\x04 \x01(\x03R\x1alastInputAvailableAtUnixMs\x125\n" +
+	"\x0flast_input_open\x18\x05 \x01(\v2\r.lab.v1.MoneyR\rlastInputOpen\x125\n" +
+	"\x0flast_input_high\x18\x06 \x01(\v2\r.lab.v1.MoneyR\rlastInputHigh\x123\n" +
+	"\x0elast_input_low\x18\a \x01(\v2\r.lab.v1.MoneyR\flastInputLow\x12\x1f\n" +
+	"\vrule_sha256\x18\b \x01(\tR\n" +
+	"ruleSha256\x12&\n" +
+	"\x0fentry_rule_json\x18\t \x01(\tR\rentryRuleJson\"\x90\x01\n" +
+	"\x14PaperReplayExecution\x121\n" +
+	"\x05event\x18\x01 \x01(\v2\x1b.lab.v1.PaperExecutionEventR\x05event\x12E\n" +
+	"\x13confirmation_candle\x18\x02 \x01(\v2\x14.lab.v1.MarketCandleR\x12confirmationCandle\"f\n" +
 	"\x17CancelPaperEntryRequest\x12,\n" +
 	"\aaccount\x18\x01 \x01(\v2\x12.lab.v1.AccountRefR\aaccount\x12\x1d\n" +
 	"\n" +
@@ -2355,7 +2718,7 @@ const file_lab_v1_paper_proto_rawDesc = "" +
 	"\x19PAPER_ENTRY_STATE_PARTIAL\x10\x02\x12\x1c\n" +
 	"\x18PAPER_ENTRY_STATE_FILLED\x10\x03\x12\x1f\n" +
 	"\x1bPAPER_ENTRY_STATE_CANCELLED\x10\x04\x12\x1d\n" +
-	"\x19PAPER_ENTRY_STATE_EXPIRED\x10\x052\x83\a\n" +
+	"\x19PAPER_ENTRY_STATE_EXPIRED\x10\x052\xd4\a\n" +
 	"\fPaperService\x12R\n" +
 	"\x0fGetPaperAccount\x12\x1e.lab.v1.GetPaperAccountRequest\x1a\x1f.lab.v1.GetPaperAccountResponse\x12g\n" +
 	"\x16InitializePaperAccount\x12%.lab.v1.InitializePaperAccountRequest\x1a&.lab.v1.InitializePaperAccountResponse\x12U\n" +
@@ -2363,7 +2726,8 @@ const file_lab_v1_paper_proto_rawDesc = "" +
 	"\fGetPaperPlan\x12\x1b.lab.v1.GetPaperPlanRequest\x1a\x1c.lab.v1.GetPaperPlanResponse\x12U\n" +
 	"\x10ConfirmPaperPlan\x12\x1f.lab.v1.ConfirmPaperPlanRequest\x1a .lab.v1.ConfirmPaperPlanResponse\x12R\n" +
 	"\x0fGetPaperReceipt\x12\x1e.lab.v1.GetPaperReceiptRequest\x1a\x1f.lab.v1.GetPaperReceiptResponse\x12U\n" +
-	"\x10ListPaperJournal\x12\x1f.lab.v1.ListPaperJournalRequest\x1a .lab.v1.ListPaperJournalResponse\x12U\n" +
+	"\x10ListPaperJournal\x12\x1f.lab.v1.ListPaperJournalRequest\x1a .lab.v1.ListPaperJournalResponse\x12O\n" +
+	"\x0eGetPaperReplay\x12\x1d.lab.v1.GetPaperReplayRequest\x1a\x1e.lab.v1.GetPaperReplayResponse\x12U\n" +
 	"\x10CancelPaperEntry\x12\x1f.lab.v1.CancelPaperEntryRequest\x1a .lab.v1.CancelPaperEntryResponse\x12^\n" +
 	"\x13ReducePaperPosition\x12\".lab.v1.ReducePaperPositionRequest\x1a#.lab.v1.ReducePaperPositionResponse\x12[\n" +
 	"\x12SetPaperEntryPause\x12!.lab.v1.SetPaperEntryPauseRequest\x1a\".lab.v1.SetPaperEntryPauseResponseB~\n" +
@@ -2384,7 +2748,7 @@ func file_lab_v1_paper_proto_rawDescGZIP() []byte {
 }
 
 var file_lab_v1_paper_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_lab_v1_paper_proto_msgTypes = make([]protoimpl.MessageInfo, 29)
+var file_lab_v1_paper_proto_msgTypes = make([]protoimpl.MessageInfo, 33)
 var file_lab_v1_paper_proto_goTypes = []any{
 	(PaperReductionState)(0),               // 0: lab.v1.PaperReductionState
 	(PaperEntryState)(0),                   // 1: lab.v1.PaperEntryState
@@ -2404,129 +2768,146 @@ var file_lab_v1_paper_proto_goTypes = []any{
 	(*ListPaperJournalRequest)(nil),        // 15: lab.v1.ListPaperJournalRequest
 	(*ListPaperJournalResponse)(nil),       // 16: lab.v1.ListPaperJournalResponse
 	(*PaperJournalTrade)(nil),              // 17: lab.v1.PaperJournalTrade
-	(*CancelPaperEntryRequest)(nil),        // 18: lab.v1.CancelPaperEntryRequest
-	(*CancelPaperEntryResponse)(nil),       // 19: lab.v1.CancelPaperEntryResponse
-	(*ReducePaperPositionRequest)(nil),     // 20: lab.v1.ReducePaperPositionRequest
-	(*ReducePaperPositionResponse)(nil),    // 21: lab.v1.ReducePaperPositionResponse
-	(*PaperReduction)(nil),                 // 22: lab.v1.PaperReduction
-	(*PaperReconciliation)(nil),            // 23: lab.v1.PaperReconciliation
-	(*SetPaperEntryPauseRequest)(nil),      // 24: lab.v1.SetPaperEntryPauseRequest
-	(*SetPaperEntryPauseResponse)(nil),     // 25: lab.v1.SetPaperEntryPauseResponse
-	(*PaperReceipt)(nil),                   // 26: lab.v1.PaperReceipt
-	(*PaperPosition)(nil),                  // 27: lab.v1.PaperPosition
-	(*PaperExecutionEvent)(nil),            // 28: lab.v1.PaperExecutionEvent
-	(*PaperRestriction)(nil),               // 29: lab.v1.PaperRestriction
-	(*PaperPlan)(nil),                      // 30: lab.v1.PaperPlan
-	(*Money)(nil),                          // 31: lab.v1.Money
-	(*AccountSnapshot)(nil),                // 32: lab.v1.AccountSnapshot
-	(*Decimal)(nil),                        // 33: lab.v1.Decimal
-	(*AccountRef)(nil),                     // 34: lab.v1.AccountRef
-	(*MoneyReading)(nil),                   // 35: lab.v1.MoneyReading
-	(*RiskPolicyVersion)(nil),              // 36: lab.v1.RiskPolicyVersion
-	(*InstrumentKey)(nil),                  // 37: lab.v1.InstrumentKey
+	(*GetPaperReplayRequest)(nil),          // 18: lab.v1.GetPaperReplayRequest
+	(*GetPaperReplayResponse)(nil),         // 19: lab.v1.GetPaperReplayResponse
+	(*PaperReplayObservation)(nil),         // 20: lab.v1.PaperReplayObservation
+	(*PaperReplayExecution)(nil),           // 21: lab.v1.PaperReplayExecution
+	(*CancelPaperEntryRequest)(nil),        // 22: lab.v1.CancelPaperEntryRequest
+	(*CancelPaperEntryResponse)(nil),       // 23: lab.v1.CancelPaperEntryResponse
+	(*ReducePaperPositionRequest)(nil),     // 24: lab.v1.ReducePaperPositionRequest
+	(*ReducePaperPositionResponse)(nil),    // 25: lab.v1.ReducePaperPositionResponse
+	(*PaperReduction)(nil),                 // 26: lab.v1.PaperReduction
+	(*PaperReconciliation)(nil),            // 27: lab.v1.PaperReconciliation
+	(*SetPaperEntryPauseRequest)(nil),      // 28: lab.v1.SetPaperEntryPauseRequest
+	(*SetPaperEntryPauseResponse)(nil),     // 29: lab.v1.SetPaperEntryPauseResponse
+	(*PaperReceipt)(nil),                   // 30: lab.v1.PaperReceipt
+	(*PaperPosition)(nil),                  // 31: lab.v1.PaperPosition
+	(*PaperExecutionEvent)(nil),            // 32: lab.v1.PaperExecutionEvent
+	(*PaperRestriction)(nil),               // 33: lab.v1.PaperRestriction
+	(*PaperPlan)(nil),                      // 34: lab.v1.PaperPlan
+	(*Money)(nil),                          // 35: lab.v1.Money
+	(*AccountSnapshot)(nil),                // 36: lab.v1.AccountSnapshot
+	(*Decimal)(nil),                        // 37: lab.v1.Decimal
+	(*AccountRef)(nil),                     // 38: lab.v1.AccountRef
+	(*MarketOpportunity)(nil),              // 39: lab.v1.MarketOpportunity
+	(*MarketCandle)(nil),                   // 40: lab.v1.MarketCandle
+	(*MoneyReading)(nil),                   // 41: lab.v1.MoneyReading
+	(*RiskPolicyVersion)(nil),              // 42: lab.v1.RiskPolicyVersion
+	(*InstrumentKey)(nil),                  // 43: lab.v1.InstrumentKey
 }
 var file_lab_v1_paper_proto_depIdxs = []int32{
 	6,  // 0: lab.v1.GetPaperAccountResponse.paper_account:type_name -> lab.v1.PaperAccount
-	26, // 1: lab.v1.GetPaperAccountResponse.recent_receipts:type_name -> lab.v1.PaperReceipt
-	27, // 2: lab.v1.GetPaperAccountResponse.positions:type_name -> lab.v1.PaperPosition
-	23, // 3: lab.v1.GetPaperAccountResponse.reconciliation:type_name -> lab.v1.PaperReconciliation
-	31, // 4: lab.v1.InitializePaperAccountRequest.capital:type_name -> lab.v1.Money
-	31, // 5: lab.v1.InitializePaperAccountRequest.max_loss_per_trade:type_name -> lab.v1.Money
-	31, // 6: lab.v1.InitializePaperAccountRequest.max_open_loss:type_name -> lab.v1.Money
-	31, // 7: lab.v1.InitializePaperAccountRequest.max_spot_exposure:type_name -> lab.v1.Money
+	30, // 1: lab.v1.GetPaperAccountResponse.recent_receipts:type_name -> lab.v1.PaperReceipt
+	31, // 2: lab.v1.GetPaperAccountResponse.positions:type_name -> lab.v1.PaperPosition
+	27, // 3: lab.v1.GetPaperAccountResponse.reconciliation:type_name -> lab.v1.PaperReconciliation
+	35, // 4: lab.v1.InitializePaperAccountRequest.capital:type_name -> lab.v1.Money
+	35, // 5: lab.v1.InitializePaperAccountRequest.max_loss_per_trade:type_name -> lab.v1.Money
+	35, // 6: lab.v1.InitializePaperAccountRequest.max_open_loss:type_name -> lab.v1.Money
+	35, // 7: lab.v1.InitializePaperAccountRequest.max_spot_exposure:type_name -> lab.v1.Money
 	6,  // 8: lab.v1.InitializePaperAccountResponse.paper_account:type_name -> lab.v1.PaperAccount
-	32, // 9: lab.v1.PaperAccount.snapshot:type_name -> lab.v1.AccountSnapshot
-	31, // 10: lab.v1.PaperAccount.initial_capital:type_name -> lab.v1.Money
-	31, // 11: lab.v1.PaperAccount.reserved_balance:type_name -> lab.v1.Money
-	31, // 12: lab.v1.PaperAccount.max_loss_per_trade:type_name -> lab.v1.Money
-	31, // 13: lab.v1.PaperAccount.max_open_loss:type_name -> lab.v1.Money
-	31, // 14: lab.v1.PaperAccount.max_spot_exposure:type_name -> lab.v1.Money
-	33, // 15: lab.v1.PaperAccount.fee_rate:type_name -> lab.v1.Decimal
-	33, // 16: lab.v1.PaperAccount.slippage_rate:type_name -> lab.v1.Decimal
-	34, // 17: lab.v1.PreviewPaperPlanRequest.account:type_name -> lab.v1.AccountRef
-	31, // 18: lab.v1.PreviewPaperPlanRequest.stop:type_name -> lab.v1.Money
-	31, // 19: lab.v1.PreviewPaperPlanRequest.take_profit:type_name -> lab.v1.Money
-	30, // 20: lab.v1.PreviewPaperPlanResponse.plan:type_name -> lab.v1.PaperPlan
-	29, // 21: lab.v1.PreviewPaperPlanResponse.restriction:type_name -> lab.v1.PaperRestriction
-	30, // 22: lab.v1.GetPaperPlanResponse.plan:type_name -> lab.v1.PaperPlan
-	29, // 23: lab.v1.GetPaperPlanResponse.restriction:type_name -> lab.v1.PaperRestriction
-	26, // 24: lab.v1.GetPaperPlanResponse.receipt:type_name -> lab.v1.PaperReceipt
-	34, // 25: lab.v1.ConfirmPaperPlanRequest.account:type_name -> lab.v1.AccountRef
-	26, // 26: lab.v1.ConfirmPaperPlanResponse.receipt:type_name -> lab.v1.PaperReceipt
-	29, // 27: lab.v1.ConfirmPaperPlanResponse.restriction:type_name -> lab.v1.PaperRestriction
-	26, // 28: lab.v1.GetPaperReceiptResponse.receipt:type_name -> lab.v1.PaperReceipt
-	28, // 29: lab.v1.GetPaperReceiptResponse.events:type_name -> lab.v1.PaperExecutionEvent
-	22, // 30: lab.v1.GetPaperReceiptResponse.reduction:type_name -> lab.v1.PaperReduction
+	36, // 9: lab.v1.PaperAccount.snapshot:type_name -> lab.v1.AccountSnapshot
+	35, // 10: lab.v1.PaperAccount.initial_capital:type_name -> lab.v1.Money
+	35, // 11: lab.v1.PaperAccount.reserved_balance:type_name -> lab.v1.Money
+	35, // 12: lab.v1.PaperAccount.max_loss_per_trade:type_name -> lab.v1.Money
+	35, // 13: lab.v1.PaperAccount.max_open_loss:type_name -> lab.v1.Money
+	35, // 14: lab.v1.PaperAccount.max_spot_exposure:type_name -> lab.v1.Money
+	37, // 15: lab.v1.PaperAccount.fee_rate:type_name -> lab.v1.Decimal
+	37, // 16: lab.v1.PaperAccount.slippage_rate:type_name -> lab.v1.Decimal
+	38, // 17: lab.v1.PreviewPaperPlanRequest.account:type_name -> lab.v1.AccountRef
+	35, // 18: lab.v1.PreviewPaperPlanRequest.stop:type_name -> lab.v1.Money
+	35, // 19: lab.v1.PreviewPaperPlanRequest.take_profit:type_name -> lab.v1.Money
+	34, // 20: lab.v1.PreviewPaperPlanResponse.plan:type_name -> lab.v1.PaperPlan
+	33, // 21: lab.v1.PreviewPaperPlanResponse.restriction:type_name -> lab.v1.PaperRestriction
+	34, // 22: lab.v1.GetPaperPlanResponse.plan:type_name -> lab.v1.PaperPlan
+	33, // 23: lab.v1.GetPaperPlanResponse.restriction:type_name -> lab.v1.PaperRestriction
+	30, // 24: lab.v1.GetPaperPlanResponse.receipt:type_name -> lab.v1.PaperReceipt
+	38, // 25: lab.v1.ConfirmPaperPlanRequest.account:type_name -> lab.v1.AccountRef
+	30, // 26: lab.v1.ConfirmPaperPlanResponse.receipt:type_name -> lab.v1.PaperReceipt
+	33, // 27: lab.v1.ConfirmPaperPlanResponse.restriction:type_name -> lab.v1.PaperRestriction
+	30, // 28: lab.v1.GetPaperReceiptResponse.receipt:type_name -> lab.v1.PaperReceipt
+	32, // 29: lab.v1.GetPaperReceiptResponse.events:type_name -> lab.v1.PaperExecutionEvent
+	26, // 30: lab.v1.GetPaperReceiptResponse.reduction:type_name -> lab.v1.PaperReduction
 	17, // 31: lab.v1.ListPaperJournalResponse.trades:type_name -> lab.v1.PaperJournalTrade
-	26, // 32: lab.v1.PaperJournalTrade.receipt:type_name -> lab.v1.PaperReceipt
-	31, // 33: lab.v1.PaperJournalTrade.open_quantity:type_name -> lab.v1.Money
-	31, // 34: lab.v1.PaperJournalTrade.fees_paid:type_name -> lab.v1.Money
-	31, // 35: lab.v1.PaperJournalTrade.realized_pnl:type_name -> lab.v1.Money
-	34, // 36: lab.v1.CancelPaperEntryRequest.account:type_name -> lab.v1.AccountRef
-	26, // 37: lab.v1.CancelPaperEntryResponse.receipt:type_name -> lab.v1.PaperReceipt
-	34, // 38: lab.v1.ReducePaperPositionRequest.account:type_name -> lab.v1.AccountRef
-	31, // 39: lab.v1.ReducePaperPositionRequest.quantity:type_name -> lab.v1.Money
-	22, // 40: lab.v1.ReducePaperPositionResponse.reduction:type_name -> lab.v1.PaperReduction
-	29, // 41: lab.v1.ReducePaperPositionResponse.restriction:type_name -> lab.v1.PaperRestriction
-	0,  // 42: lab.v1.PaperReduction.state:type_name -> lab.v1.PaperReductionState
-	31, // 43: lab.v1.PaperReduction.quantity:type_name -> lab.v1.Money
-	34, // 44: lab.v1.SetPaperEntryPauseRequest.account:type_name -> lab.v1.AccountRef
-	34, // 45: lab.v1.PaperReceipt.account:type_name -> lab.v1.AccountRef
-	1,  // 46: lab.v1.PaperReceipt.state:type_name -> lab.v1.PaperEntryState
-	31, // 47: lab.v1.PaperReceipt.requested_quantity:type_name -> lab.v1.Money
-	31, // 48: lab.v1.PaperReceipt.filled_quantity:type_name -> lab.v1.Money
-	31, // 49: lab.v1.PaperReceipt.reserved_cash:type_name -> lab.v1.Money
-	31, // 50: lab.v1.PaperPosition.quantity:type_name -> lab.v1.Money
-	31, // 51: lab.v1.PaperPosition.cost_basis:type_name -> lab.v1.Money
-	35, // 52: lab.v1.PaperPosition.market_value:type_name -> lab.v1.MoneyReading
-	31, // 53: lab.v1.PaperPosition.lot:type_name -> lab.v1.Money
-	22, // 54: lab.v1.PaperPosition.pending_reduction:type_name -> lab.v1.PaperReduction
-	31, // 55: lab.v1.PaperExecutionEvent.quantity:type_name -> lab.v1.Money
-	31, // 56: lab.v1.PaperExecutionEvent.reference_price:type_name -> lab.v1.Money
-	31, // 57: lab.v1.PaperExecutionEvent.fill_price:type_name -> lab.v1.Money
-	31, // 58: lab.v1.PaperExecutionEvent.fee:type_name -> lab.v1.Money
-	31, // 59: lab.v1.PaperExecutionEvent.cash:type_name -> lab.v1.Money
-	31, // 60: lab.v1.PaperExecutionEvent.realized_pnl:type_name -> lab.v1.Money
-	34, // 61: lab.v1.PaperPlan.account:type_name -> lab.v1.AccountRef
-	36, // 62: lab.v1.PaperPlan.risk_policy:type_name -> lab.v1.RiskPolicyVersion
-	37, // 63: lab.v1.PaperPlan.instrument:type_name -> lab.v1.InstrumentKey
-	31, // 64: lab.v1.PaperPlan.reference_price:type_name -> lab.v1.Money
-	31, // 65: lab.v1.PaperPlan.estimated_entry:type_name -> lab.v1.Money
-	31, // 66: lab.v1.PaperPlan.max_entry_price:type_name -> lab.v1.Money
-	31, // 67: lab.v1.PaperPlan.stop:type_name -> lab.v1.Money
-	31, // 68: lab.v1.PaperPlan.take_profit:type_name -> lab.v1.Money
-	31, // 69: lab.v1.PaperPlan.quantity:type_name -> lab.v1.Money
-	31, // 70: lab.v1.PaperPlan.notional:type_name -> lab.v1.Money
-	31, // 71: lab.v1.PaperPlan.required_cash:type_name -> lab.v1.Money
-	31, // 72: lab.v1.PaperPlan.planned_loss:type_name -> lab.v1.Money
-	31, // 73: lab.v1.PaperPlan.estimated_cost:type_name -> lab.v1.Money
-	33, // 74: lab.v1.PaperPlan.fee_rate:type_name -> lab.v1.Decimal
-	33, // 75: lab.v1.PaperPlan.slippage_rate:type_name -> lab.v1.Decimal
-	2,  // 76: lab.v1.PaperService.GetPaperAccount:input_type -> lab.v1.GetPaperAccountRequest
-	4,  // 77: lab.v1.PaperService.InitializePaperAccount:input_type -> lab.v1.InitializePaperAccountRequest
-	7,  // 78: lab.v1.PaperService.PreviewPaperPlan:input_type -> lab.v1.PreviewPaperPlanRequest
-	9,  // 79: lab.v1.PaperService.GetPaperPlan:input_type -> lab.v1.GetPaperPlanRequest
-	11, // 80: lab.v1.PaperService.ConfirmPaperPlan:input_type -> lab.v1.ConfirmPaperPlanRequest
-	13, // 81: lab.v1.PaperService.GetPaperReceipt:input_type -> lab.v1.GetPaperReceiptRequest
-	15, // 82: lab.v1.PaperService.ListPaperJournal:input_type -> lab.v1.ListPaperJournalRequest
-	18, // 83: lab.v1.PaperService.CancelPaperEntry:input_type -> lab.v1.CancelPaperEntryRequest
-	20, // 84: lab.v1.PaperService.ReducePaperPosition:input_type -> lab.v1.ReducePaperPositionRequest
-	24, // 85: lab.v1.PaperService.SetPaperEntryPause:input_type -> lab.v1.SetPaperEntryPauseRequest
-	3,  // 86: lab.v1.PaperService.GetPaperAccount:output_type -> lab.v1.GetPaperAccountResponse
-	5,  // 87: lab.v1.PaperService.InitializePaperAccount:output_type -> lab.v1.InitializePaperAccountResponse
-	8,  // 88: lab.v1.PaperService.PreviewPaperPlan:output_type -> lab.v1.PreviewPaperPlanResponse
-	10, // 89: lab.v1.PaperService.GetPaperPlan:output_type -> lab.v1.GetPaperPlanResponse
-	12, // 90: lab.v1.PaperService.ConfirmPaperPlan:output_type -> lab.v1.ConfirmPaperPlanResponse
-	14, // 91: lab.v1.PaperService.GetPaperReceipt:output_type -> lab.v1.GetPaperReceiptResponse
-	16, // 92: lab.v1.PaperService.ListPaperJournal:output_type -> lab.v1.ListPaperJournalResponse
-	19, // 93: lab.v1.PaperService.CancelPaperEntry:output_type -> lab.v1.CancelPaperEntryResponse
-	21, // 94: lab.v1.PaperService.ReducePaperPosition:output_type -> lab.v1.ReducePaperPositionResponse
-	25, // 95: lab.v1.PaperService.SetPaperEntryPause:output_type -> lab.v1.SetPaperEntryPauseResponse
-	86, // [86:96] is the sub-list for method output_type
-	76, // [76:86] is the sub-list for method input_type
-	76, // [76:76] is the sub-list for extension type_name
-	76, // [76:76] is the sub-list for extension extendee
-	0,  // [0:76] is the sub-list for field type_name
+	30, // 32: lab.v1.PaperJournalTrade.receipt:type_name -> lab.v1.PaperReceipt
+	35, // 33: lab.v1.PaperJournalTrade.open_quantity:type_name -> lab.v1.Money
+	35, // 34: lab.v1.PaperJournalTrade.fees_paid:type_name -> lab.v1.Money
+	35, // 35: lab.v1.PaperJournalTrade.realized_pnl:type_name -> lab.v1.Money
+	20, // 36: lab.v1.GetPaperReplayResponse.observation:type_name -> lab.v1.PaperReplayObservation
+	34, // 37: lab.v1.GetPaperReplayResponse.plan:type_name -> lab.v1.PaperPlan
+	21, // 38: lab.v1.GetPaperReplayResponse.execution:type_name -> lab.v1.PaperReplayExecution
+	39, // 39: lab.v1.PaperReplayObservation.opportunity:type_name -> lab.v1.MarketOpportunity
+	35, // 40: lab.v1.PaperReplayObservation.last_input_open:type_name -> lab.v1.Money
+	35, // 41: lab.v1.PaperReplayObservation.last_input_high:type_name -> lab.v1.Money
+	35, // 42: lab.v1.PaperReplayObservation.last_input_low:type_name -> lab.v1.Money
+	32, // 43: lab.v1.PaperReplayExecution.event:type_name -> lab.v1.PaperExecutionEvent
+	40, // 44: lab.v1.PaperReplayExecution.confirmation_candle:type_name -> lab.v1.MarketCandle
+	38, // 45: lab.v1.CancelPaperEntryRequest.account:type_name -> lab.v1.AccountRef
+	30, // 46: lab.v1.CancelPaperEntryResponse.receipt:type_name -> lab.v1.PaperReceipt
+	38, // 47: lab.v1.ReducePaperPositionRequest.account:type_name -> lab.v1.AccountRef
+	35, // 48: lab.v1.ReducePaperPositionRequest.quantity:type_name -> lab.v1.Money
+	26, // 49: lab.v1.ReducePaperPositionResponse.reduction:type_name -> lab.v1.PaperReduction
+	33, // 50: lab.v1.ReducePaperPositionResponse.restriction:type_name -> lab.v1.PaperRestriction
+	0,  // 51: lab.v1.PaperReduction.state:type_name -> lab.v1.PaperReductionState
+	35, // 52: lab.v1.PaperReduction.quantity:type_name -> lab.v1.Money
+	38, // 53: lab.v1.SetPaperEntryPauseRequest.account:type_name -> lab.v1.AccountRef
+	38, // 54: lab.v1.PaperReceipt.account:type_name -> lab.v1.AccountRef
+	1,  // 55: lab.v1.PaperReceipt.state:type_name -> lab.v1.PaperEntryState
+	35, // 56: lab.v1.PaperReceipt.requested_quantity:type_name -> lab.v1.Money
+	35, // 57: lab.v1.PaperReceipt.filled_quantity:type_name -> lab.v1.Money
+	35, // 58: lab.v1.PaperReceipt.reserved_cash:type_name -> lab.v1.Money
+	35, // 59: lab.v1.PaperPosition.quantity:type_name -> lab.v1.Money
+	35, // 60: lab.v1.PaperPosition.cost_basis:type_name -> lab.v1.Money
+	41, // 61: lab.v1.PaperPosition.market_value:type_name -> lab.v1.MoneyReading
+	35, // 62: lab.v1.PaperPosition.lot:type_name -> lab.v1.Money
+	26, // 63: lab.v1.PaperPosition.pending_reduction:type_name -> lab.v1.PaperReduction
+	35, // 64: lab.v1.PaperExecutionEvent.quantity:type_name -> lab.v1.Money
+	35, // 65: lab.v1.PaperExecutionEvent.reference_price:type_name -> lab.v1.Money
+	35, // 66: lab.v1.PaperExecutionEvent.fill_price:type_name -> lab.v1.Money
+	35, // 67: lab.v1.PaperExecutionEvent.fee:type_name -> lab.v1.Money
+	35, // 68: lab.v1.PaperExecutionEvent.cash:type_name -> lab.v1.Money
+	35, // 69: lab.v1.PaperExecutionEvent.realized_pnl:type_name -> lab.v1.Money
+	38, // 70: lab.v1.PaperPlan.account:type_name -> lab.v1.AccountRef
+	42, // 71: lab.v1.PaperPlan.risk_policy:type_name -> lab.v1.RiskPolicyVersion
+	43, // 72: lab.v1.PaperPlan.instrument:type_name -> lab.v1.InstrumentKey
+	35, // 73: lab.v1.PaperPlan.reference_price:type_name -> lab.v1.Money
+	35, // 74: lab.v1.PaperPlan.estimated_entry:type_name -> lab.v1.Money
+	35, // 75: lab.v1.PaperPlan.max_entry_price:type_name -> lab.v1.Money
+	35, // 76: lab.v1.PaperPlan.stop:type_name -> lab.v1.Money
+	35, // 77: lab.v1.PaperPlan.take_profit:type_name -> lab.v1.Money
+	35, // 78: lab.v1.PaperPlan.quantity:type_name -> lab.v1.Money
+	35, // 79: lab.v1.PaperPlan.notional:type_name -> lab.v1.Money
+	35, // 80: lab.v1.PaperPlan.required_cash:type_name -> lab.v1.Money
+	35, // 81: lab.v1.PaperPlan.planned_loss:type_name -> lab.v1.Money
+	35, // 82: lab.v1.PaperPlan.estimated_cost:type_name -> lab.v1.Money
+	37, // 83: lab.v1.PaperPlan.fee_rate:type_name -> lab.v1.Decimal
+	37, // 84: lab.v1.PaperPlan.slippage_rate:type_name -> lab.v1.Decimal
+	2,  // 85: lab.v1.PaperService.GetPaperAccount:input_type -> lab.v1.GetPaperAccountRequest
+	4,  // 86: lab.v1.PaperService.InitializePaperAccount:input_type -> lab.v1.InitializePaperAccountRequest
+	7,  // 87: lab.v1.PaperService.PreviewPaperPlan:input_type -> lab.v1.PreviewPaperPlanRequest
+	9,  // 88: lab.v1.PaperService.GetPaperPlan:input_type -> lab.v1.GetPaperPlanRequest
+	11, // 89: lab.v1.PaperService.ConfirmPaperPlan:input_type -> lab.v1.ConfirmPaperPlanRequest
+	13, // 90: lab.v1.PaperService.GetPaperReceipt:input_type -> lab.v1.GetPaperReceiptRequest
+	15, // 91: lab.v1.PaperService.ListPaperJournal:input_type -> lab.v1.ListPaperJournalRequest
+	18, // 92: lab.v1.PaperService.GetPaperReplay:input_type -> lab.v1.GetPaperReplayRequest
+	22, // 93: lab.v1.PaperService.CancelPaperEntry:input_type -> lab.v1.CancelPaperEntryRequest
+	24, // 94: lab.v1.PaperService.ReducePaperPosition:input_type -> lab.v1.ReducePaperPositionRequest
+	28, // 95: lab.v1.PaperService.SetPaperEntryPause:input_type -> lab.v1.SetPaperEntryPauseRequest
+	3,  // 96: lab.v1.PaperService.GetPaperAccount:output_type -> lab.v1.GetPaperAccountResponse
+	5,  // 97: lab.v1.PaperService.InitializePaperAccount:output_type -> lab.v1.InitializePaperAccountResponse
+	8,  // 98: lab.v1.PaperService.PreviewPaperPlan:output_type -> lab.v1.PreviewPaperPlanResponse
+	10, // 99: lab.v1.PaperService.GetPaperPlan:output_type -> lab.v1.GetPaperPlanResponse
+	12, // 100: lab.v1.PaperService.ConfirmPaperPlan:output_type -> lab.v1.ConfirmPaperPlanResponse
+	14, // 101: lab.v1.PaperService.GetPaperReceipt:output_type -> lab.v1.GetPaperReceiptResponse
+	16, // 102: lab.v1.PaperService.ListPaperJournal:output_type -> lab.v1.ListPaperJournalResponse
+	19, // 103: lab.v1.PaperService.GetPaperReplay:output_type -> lab.v1.GetPaperReplayResponse
+	23, // 104: lab.v1.PaperService.CancelPaperEntry:output_type -> lab.v1.CancelPaperEntryResponse
+	25, // 105: lab.v1.PaperService.ReducePaperPosition:output_type -> lab.v1.ReducePaperPositionResponse
+	29, // 106: lab.v1.PaperService.SetPaperEntryPause:output_type -> lab.v1.SetPaperEntryPauseResponse
+	96, // [96:107] is the sub-list for method output_type
+	85, // [85:96] is the sub-list for method input_type
+	85, // [85:85] is the sub-list for extension type_name
+	85, // [85:85] is the sub-list for extension extendee
+	0,  // [0:85] is the sub-list for field type_name
 }
 
 func init() { file_lab_v1_paper_proto_init() }
@@ -2536,17 +2917,23 @@ func file_lab_v1_paper_proto_init() {
 	}
 	file_lab_v1_account_proto_init()
 	file_lab_v1_common_proto_init()
+	file_lab_v1_market_proto_init()
 	file_lab_v1_workspace_proto_init()
-	file_lab_v1_paper_proto_msgTypes[20].OneofWrappers = []any{}
-	file_lab_v1_paper_proto_msgTypes[22].OneofWrappers = []any{}
+	file_lab_v1_paper_proto_msgTypes[17].OneofWrappers = []any{
+		(*GetPaperReplayResponse_Observation)(nil),
+		(*GetPaperReplayResponse_Plan)(nil),
+		(*GetPaperReplayResponse_Execution)(nil),
+	}
+	file_lab_v1_paper_proto_msgTypes[24].OneofWrappers = []any{}
 	file_lab_v1_paper_proto_msgTypes[26].OneofWrappers = []any{}
+	file_lab_v1_paper_proto_msgTypes[30].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_lab_v1_paper_proto_rawDesc), len(file_lab_v1_paper_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   29,
+			NumMessages:   33,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

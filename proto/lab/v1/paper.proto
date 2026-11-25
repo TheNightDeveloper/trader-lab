@@ -4,6 +4,7 @@ package lab.v1;
 
 import "lab/v1/account.proto";
 import "lab/v1/common.proto";
+import "lab/v1/market.proto";
 import "lab/v1/workspace.proto";
 
 // PaperService only operates on local, simulated spot accounts.
@@ -15,6 +16,7 @@ service PaperService {
   rpc ConfirmPaperPlan(ConfirmPaperPlanRequest) returns (ConfirmPaperPlanResponse);
   rpc GetPaperReceipt(GetPaperReceiptRequest) returns (GetPaperReceiptResponse);
   rpc ListPaperJournal(ListPaperJournalRequest) returns (ListPaperJournalResponse);
+  rpc GetPaperReplay(GetPaperReplayRequest) returns (GetPaperReplayResponse);
   rpc CancelPaperEntry(CancelPaperEntryRequest) returns (CancelPaperEntryResponse);
   rpc ReducePaperPosition(ReducePaperPositionRequest) returns (ReducePaperPositionResponse);
   rpc SetPaperEntryPause(SetPaperEntryPauseRequest) returns (SetPaperEntryPauseResponse);
@@ -108,6 +110,39 @@ message PaperJournalTrade {
   Money open_quantity = 2; // absent when no position remains
   Money fees_paid = 3;
   Money realized_pnl = 4;
+}
+
+message GetPaperReplayRequest {
+  int64 receipt_id = 1;
+  int64 cursor = 2; // zero: observation, -1: plan review, positive: execution event ID
+}
+
+message GetPaperReplayResponse {
+  string symbol = 1;
+  optional int64 previous_cursor = 2;
+  optional int64 next_cursor = 3;
+  oneof step {
+    PaperReplayObservation observation = 4;
+    PaperPlan plan = 5;
+    PaperReplayExecution execution = 6;
+  }
+}
+
+message PaperReplayObservation {
+  MarketOpportunity opportunity = 1;
+  string snapshot_sha256 = 2;
+  int32 input_candle_count = 3;
+  int64 last_input_available_at_unix_ms = 4;
+  Money last_input_open = 5;
+  Money last_input_high = 6;
+  Money last_input_low = 7;
+  string rule_sha256 = 8;
+  string entry_rule_json = 9;
+}
+
+message PaperReplayExecution {
+  PaperExecutionEvent event = 1;
+  MarketCandle confirmation_candle = 2; // present for approvals recorded with this evidence
 }
 
 message CancelPaperEntryRequest {

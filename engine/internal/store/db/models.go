@@ -250,6 +250,15 @@ type PaperAccount struct {
 	EntriesPaused  bool
 }
 
+type PaperConfirmationEvidence struct {
+	EventID     int64
+	OpenTime    time.Time
+	CloseTime   time.Time
+	AvailableAt time.Time
+	Revision    int32
+	ClosePrice  int64
+}
+
 type PaperEntry struct {
 	ID             int64
 	AccountID      string

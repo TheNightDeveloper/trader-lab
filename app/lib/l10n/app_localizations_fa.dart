@@ -168,6 +168,9 @@ class L10nFa extends L10n {
   String get paperCandleTime => 'زمان بسته‌شدن کندل مرجع';
 
   @override
+  String get paperPlanQuoteAt => 'زمان دادهٔ برنامه';
+
+  @override
   String get paperFillAssumptions =>
       'ورود با قیمت بازشدن کندل کامل یک‌دقیقه‌ای بعد از تأیید و حداکثر یک درصد از حجم کندل شبیه‌سازی می‌شود. کارمزد و لغزش اعمال می‌شوند و عبور قیمت از حد ضرر می‌تواند زیان بیشتری ایجاد کند.';
 
@@ -294,6 +297,55 @@ class L10nFa extends L10n {
 
   @override
   String get paperJournalClosedPosition => 'موقعیت بسته‌شده';
+
+  @override
+  String get paperReplayTitle => 'بازپخش تصمیم';
+
+  @override
+  String get paperReplayPrevious => 'گام قبل';
+
+  @override
+  String get paperReplayNext => 'گام بعد';
+
+  @override
+  String get paperReplayObservation => 'مشاهدهٔ فرصت';
+
+  @override
+  String get paperReplayExecution => 'رویداد ثبت‌شده';
+
+  @override
+  String get paperReplayObservedAt => 'زمان ثبت مشاهده';
+
+  @override
+  String get paperReplayInputs => 'تعداد کندل‌های ورودی ۱ساعته';
+
+  @override
+  String get paperReplayInputOpen => 'بازشدن';
+
+  @override
+  String get paperReplayInputHigh => 'بیشینه';
+
+  @override
+  String get paperReplayInputLow => 'کمینه';
+
+  @override
+  String get paperReplayEntryRule => 'شرط ورود ثبت‌شده';
+
+  @override
+  String get paperReplaySnapshotHash => 'هش دادهٔ مشاهده';
+
+  @override
+  String get paperReplayRuleHash => 'هش نسخهٔ قواعد';
+
+  @override
+  String get paperReplayConfirmationPrice => 'قیمت مرجع در تأیید';
+
+  @override
+  String get paperReplayConfirmationUnavailable =>
+      'کندل بازبینی هنگام ثبت این رسید ذخیره نشده است.';
+
+  @override
+  String get paperReplayRevision => 'بازبینی کندل';
 
   @override
   String get paperRiskControls => 'کنترل ریسک حساب مجازی';

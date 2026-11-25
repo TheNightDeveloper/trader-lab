@@ -31,6 +31,18 @@ final paperJournalProvider = StreamProvider.autoDispose.family<ListPaperJournalR
   );
 }, retry: reconnectForever);
 
+final paperReplayProvider = StreamProvider.autoDispose.family<GetPaperReplayResponse, (Int64, Int64)>((ref, key) {
+  final (id, cursor) = key;
+  final client = ref.watch(paperClientProvider);
+  return _pollPaper(
+    ref,
+    (signal) => client.getPaperReplay(
+      GetPaperReplayRequest(receiptId: id, cursor: cursor),
+      signal: signal,
+    ),
+  );
+}, retry: reconnectForever);
+
 /// Revalidation is server-owned. Keep the last complete view if a poll fails.
 Stream<T> _pollPaper<T>(Ref ref, Future<T> Function(AbortSignal) read) async* {
   final signal = CancelableSignal();

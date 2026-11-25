@@ -15,6 +15,7 @@ import '../features/library/rule_library_screen.dart';
 import '../features/market/market_screen.dart';
 import '../features/paper/paper_entries.dart';
 import '../features/paper/paper_journal.dart';
+import '../features/paper/paper_replay.dart';
 import '../features/paper/paper_screen.dart';
 import '../features/pnl/pnl_screen.dart';
 import '../features/reports/compare_screen.dart';
@@ -128,6 +129,21 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
         GoRoute(
           path: '/paper/plans/:hash',
           pageBuilder: (context, state) => _page(context, state, PaperPlanScreen(hash: state.pathParameters['hash']!)),
+        ),
+        GoRoute(
+          path: '/paper/receipts/:id/replay',
+          redirect: (context, state) {
+            final id = Int64.tryParseInt(state.pathParameters['id'] ?? '');
+            return id == null || id <= Int64.ZERO ? '/paper/journal' : null;
+          },
+          pageBuilder: (context, state) => _page(
+            context,
+            state,
+            PaperReplayScreen(
+              id: Int64.parseInt(state.pathParameters['id']!),
+              cursor: Int64.tryParseInt(state.uri.queryParameters['cursor'] ?? '') ?? Int64.ZERO,
+            ),
+          ),
         ),
         GoRoute(
           path: '/paper/receipts/:id',

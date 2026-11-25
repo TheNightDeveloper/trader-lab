@@ -175,60 +175,61 @@ func (p *Paper) GetPaperPlan(ctx context.Context, req *connect.Request[labv1.Get
 	if err != nil {
 		return nil, err
 	}
-	restriction, err := p.reviewRestriction(ctx, p.Market.Store.Queries, plan, account)
+	_, restriction, err := p.revalidatePaperPlan(ctx, p.Market.Store.Queries, plan, account)
 	if err != nil {
 		return nil, err
 	}
 	return connect.NewResponse(&labv1.GetPaperPlanResponse{Plan: plan, Restriction: restriction}), nil
 }
 
-func (p *Paper) reviewRestriction(ctx context.Context, q *db.Queries, plan *labv1.PaperPlan, account db.ReadPaperAccountRow) (*labv1.PaperRestriction, error) {
+func (p *Paper) revalidatePaperPlan(ctx context.Context, q *db.Queries, plan *labv1.PaperPlan, account db.ReadPaperAccountRow) (db.LatestMarketCandlesRow, *labv1.PaperRestriction, error) {
+	var candle db.LatestMarketCandlesRow
 	now := p.Market.Clock.Now()
 	if now.UnixMilli() >= plan.GetExpiresAtUnixMs() {
-		return paperRestriction("plan_expired", "اعتبار این برنامه پایان یافته است"), nil
+		return candle, paperRestriction("plan_expired", "اعتبار این برنامه پایان یافته است"), nil
 	}
 	if account.EntriesPaused {
-		return paperRestriction("entries_paused", "ورود تازه برای این حساب متوقف است"), nil
+		return candle, paperRestriction("entries_paused", "ورود تازه برای این حساب متوقف است"), nil
 	}
 	if account.Revision != plan.GetAccountRevision() || account.PolicyRevision != plan.GetRiskPolicy().GetRevision() {
-		return paperRestriction("account_changed", "موجودی یا سیاست حساب تغییر کرده است؛ برنامه را دوباره مرور کنید"), nil
+		return candle, paperRestriction("account_changed", "موجودی یا سیاست حساب تغییر کرده است؛ برنامه را دوباره مرور کنید"), nil
 	}
 	ledger, err := q.ReconcilePaperBook(ctx, account.ID)
 	if err != nil {
-		return nil, err
+		return candle, nil, err
 	}
 	if !paperReconciled(ledger) {
-		return paperReconciliationRestriction(), nil
+		return candle, paperReconciliationRestriction(), nil
 	}
 	symbol := plan.GetInstrument().GetSymbol()
 	spec, supported := paperSpotSpec(symbol)
 	if !supported || spotKey(spec).GetSpecRevision() != plan.GetInstrument().GetSpecRevision() {
-		return paperRestriction("instrument_changed", "مشخصات نماد این برنامه دیگر معتبر نیست"), nil
+		return candle, paperRestriction("instrument_changed", "مشخصات نماد این برنامه دیگر معتبر نیست"), nil
 	}
-	candle, err := p.paperCandle(ctx, q, symbol, now, time.UnixMilli(plan.GetReferenceCandleClosedAtUnixMs()))
+	candle, err = p.paperCandle(ctx, q, symbol, now, time.UnixMilli(plan.GetReferenceCandleClosedAtUnixMs()))
 	if errors.Is(err, errMarketFeed) {
-		return paperRestriction("feed_stale", errMarketFeed.Error()), nil
+		return candle, paperRestriction("feed_stale", errMarketFeed.Error()), nil
 	}
 	if err != nil {
-		return nil, err
+		return candle, nil, err
 	}
 	costs := paper.Costs{Fee: money.Ratio(account.FeePpm), Slippage: money.Ratio(account.SlippagePpm)}
 	entry, err := costs.Fill(spec, true, candle.C, 0)
 	if err != nil {
-		return nil, err
+		return candle, nil, err
 	}
 	limit, _, err := usdtIn(plan.GetMaxEntryPrice(), "entry limit")
 	if err != nil {
-		return nil, err
+		return candle, nil, err
 	}
 	stop, _, err := usdtIn(plan.GetStop(), "stop")
 	if err != nil {
-		return nil, err
+		return candle, nil, err
 	}
 	if entry.Price > limit.V || candle.C <= stop.V {
-		return paperRestriction("entry_drift", "قیمت از محدودهٔ ورود برنامه خارج شده است"), nil
+		return candle, paperRestriction("entry_drift", "قیمت از محدودهٔ ورود برنامه خارج شده است"), nil
 	}
-	return nil, nil
+	return candle, nil, nil
 }
 
 func readPaperPlan(ctx context.Context, q *db.Queries, hash string) (*labv1.PaperPlan, error) {

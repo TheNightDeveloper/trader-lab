@@ -297,6 +297,13 @@ class MarketOpportunityHistory extends StatelessWidget {
   }
 }
 
+String marketOpportunityReason(L10n l, String reason) => switch (reason) {
+  'rule entry' => l.marketOpportunityEntry,
+  'rule regime entry: A' => l.marketOpportunityRegimeA,
+  'rule regime entry: B' => l.marketOpportunityRegimeB,
+  _ => reason,
+};
+
 class _OpportunityDetails extends StatelessWidget {
   const _OpportunityDetails({super.key, required this.item, required this.current});
 
@@ -306,12 +313,7 @@ class _OpportunityDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = L10n.of(context);
-    final reason = switch (item.reason) {
-      'rule entry' => l.marketOpportunityEntry,
-      'rule regime entry: A' => l.marketOpportunityRegimeA,
-      'rule regime entry: B' => l.marketOpportunityRegimeB,
-      _ => item.reason,
-    };
+    final reason = marketOpportunityReason(l, item.reason);
     return ExpansionTile(
       title: Wrap(spacing: AppSpace.sm, children: [Mono(item.symbol), Text(item.ruleTitle)]),
       subtitle: StatusText(

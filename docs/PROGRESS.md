@@ -2,6 +2,23 @@
 
 Update at the end of every session.
 
+## P3 Decision replay (2026-11-25)
+
+Each journal trade and receipt can open a read-only replay. The timeline starts
+with the recorded observation and entry rule, then shows the immutable risk
+review, followed by individual execution events. A replay cursor is scoped to
+its receipt and the response carries only the selected step.
+
+The engine checks the observation digest against both the stored input and the
+review and reads the recorded rule version. New approvals retain the actual
+market candle used for final revalidation in the reservation transaction.
+Receipts made before that capture still show their recorded plan and events.
+
+A PostgreSQL integration test revises the public candle after confirmation,
+then checks that observation, review and approval retain their own original
+values. It also covers a cancelled receipt and an approval without a recorded
+confirmation candle.
+
 ## P3 Paper journal (2026-11-25)
 
 Paper now links to a paginated journal of the account's durable receipts.

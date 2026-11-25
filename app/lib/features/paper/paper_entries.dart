@@ -245,7 +245,14 @@ class _PaperReceiptScreenState extends ConsumerState<PaperReceiptScreen> {
       children: [
         PageHeader(
           title: l.paperReceipt,
-          actions: const [EnvironmentBadge(environment: Environment.ENVIRONMENT_PAPER)],
+          actions: [
+            const EnvironmentBadge(environment: Environment.ENVIRONMENT_PAPER),
+            if (snapshot != null)
+              OutlinedButton(
+                onPressed: () => context.go('/paper/receipts/${widget.id}/replay'),
+                child: Text(l.paperReplayTitle),
+              ),
+          ],
         ),
         if (snapshot == null)
           AsyncSection(
@@ -267,7 +274,7 @@ class _PaperReceiptScreenState extends ConsumerState<PaperReceiptScreen> {
             title: l.paperEventHistory,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [for (final event in snapshot.events) _PaperEventRow(event: event)],
+              children: [for (final event in snapshot.events) PaperEventRow(event: event)],
             ),
           ),
         ],
@@ -299,8 +306,8 @@ class _PaperReceiptSummary extends StatelessWidget {
           PaperMoneyLine(label: l.paperQuantity, amount: receipt.requestedQuantity),
           PaperMoneyLine(label: l.paperFilledQuantity, amount: receipt.filledQuantity),
           PaperMoneyLine(label: l.paperReserved, amount: receipt.reservedCash),
-          _PaperTimeLine(label: l.paperConfirmedAt, at: receipt.confirmedAtUnixMs),
-          _PaperTimeLine(label: l.paperEntryExpires, at: receipt.expiresAtUnixMs),
+          PaperTimeLine(label: l.paperConfirmedAt, at: receipt.confirmedAtUnixMs),
+          PaperTimeLine(label: l.paperEntryExpires, at: receipt.expiresAtUnixMs),
           if (reduction case final attempt?) PaperReductionStatus(reduction: attempt),
           Wrap(
             spacing: AppSpace.sm,
@@ -317,10 +324,11 @@ class _PaperReceiptSummary extends StatelessWidget {
   }
 }
 
-class _PaperEventRow extends StatelessWidget {
-  const _PaperEventRow({required this.event});
+class PaperEventRow extends StatelessWidget {
+  const PaperEventRow({super.key, required this.event, this.initiallyExpanded = false});
 
   final PaperExecutionEvent event;
+  final bool initiallyExpanded;
 
   @override
   Widget build(BuildContext context) {
@@ -339,6 +347,7 @@ class _PaperEventRow extends StatelessWidget {
       _ => event.kind,
     };
     return ExpansionTile(
+      initiallyExpanded: initiallyExpanded,
       title: Text(title),
       subtitle: Mono('${fmtDateTime(utcMs(event.recordedAtUnixMs))} UTC'),
       expandedCrossAxisAlignment: CrossAxisAlignment.start,
@@ -348,7 +357,7 @@ class _PaperEventRow extends StatelessWidget {
         if (event.hasReferencePrice()) PaperMoneyLine(label: l.marketOpportunityPrice, amount: event.referencePrice),
         if (event.hasFillPrice()) PaperMoneyLine(label: l.paperExecutionPrice, amount: event.fillPrice),
         if (event.hasCandleOpenedAtUnixMs())
-          _PaperTimeLine(label: l.paperExecutionCandle, at: event.candleOpenedAtUnixMs),
+          PaperTimeLine(label: l.paperExecutionCandle, at: event.candleOpenedAtUnixMs),
         if (event.hasFee()) PaperMoneyLine(label: l.paperEventFee, amount: event.fee),
         if (event.hasCash()) PaperMoneyLine(label: l.paperEventCash, amount: event.cash),
         if (event.hasRealizedPnl()) PaperMoneyLine(label: l.paperRealizedPnl, amount: event.realizedPnl),
@@ -376,8 +385,8 @@ class PaperMoneyLine extends StatelessWidget {
   }
 }
 
-class _PaperTimeLine extends StatelessWidget {
-  const _PaperTimeLine({required this.label, required this.at});
+class PaperTimeLine extends StatelessWidget {
+  const PaperTimeLine({super.key, required this.label, required this.at});
 
   final String label;
   final Int64 at;
