@@ -15,63 +15,67 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import 'paper.pb.dart' as $4;
+import 'paper.pb.dart' as $5;
 import 'paper.pbjson.dart';
 
 export 'paper.pb.dart';
 
 abstract class PaperServiceBase extends $pb.GeneratedService {
-  $async.Future<$4.GetPaperAccountResponse> getPaperAccount(
-      $pb.ServerContext ctx, $4.GetPaperAccountRequest request);
-  $async.Future<$4.InitializePaperAccountResponse> initializePaperAccount(
-      $pb.ServerContext ctx, $4.InitializePaperAccountRequest request);
-  $async.Future<$4.PreviewPaperPlanResponse> previewPaperPlan(
-      $pb.ServerContext ctx, $4.PreviewPaperPlanRequest request);
-  $async.Future<$4.GetPaperPlanResponse> getPaperPlan(
-      $pb.ServerContext ctx, $4.GetPaperPlanRequest request);
-  $async.Future<$4.ConfirmPaperPlanResponse> confirmPaperPlan(
-      $pb.ServerContext ctx, $4.ConfirmPaperPlanRequest request);
-  $async.Future<$4.GetPaperReceiptResponse> getPaperReceipt(
-      $pb.ServerContext ctx, $4.GetPaperReceiptRequest request);
-  $async.Future<$4.ListPaperJournalResponse> listPaperJournal(
-      $pb.ServerContext ctx, $4.ListPaperJournalRequest request);
-  $async.Future<$4.GetPaperReplayResponse> getPaperReplay(
-      $pb.ServerContext ctx, $4.GetPaperReplayRequest request);
-  $async.Future<$4.SavePaperJournalNoteResponse> savePaperJournalNote(
-      $pb.ServerContext ctx, $4.SavePaperJournalNoteRequest request);
-  $async.Future<$4.CancelPaperEntryResponse> cancelPaperEntry(
-      $pb.ServerContext ctx, $4.CancelPaperEntryRequest request);
-  $async.Future<$4.ReducePaperPositionResponse> reducePaperPosition(
-      $pb.ServerContext ctx, $4.ReducePaperPositionRequest request);
-  $async.Future<$4.SetPaperEntryPauseResponse> setPaperEntryPause(
-      $pb.ServerContext ctx, $4.SetPaperEntryPauseRequest request);
+  $async.Future<$5.GetPaperAccountResponse> getPaperAccount(
+      $pb.ServerContext ctx, $5.GetPaperAccountRequest request);
+  $async.Future<$5.InitializePaperAccountResponse> initializePaperAccount(
+      $pb.ServerContext ctx, $5.InitializePaperAccountRequest request);
+  $async.Future<$5.PreviewPaperPlanResponse> previewPaperPlan(
+      $pb.ServerContext ctx, $5.PreviewPaperPlanRequest request);
+  $async.Future<$5.GetPaperPlanResponse> getPaperPlan(
+      $pb.ServerContext ctx, $5.GetPaperPlanRequest request);
+  $async.Future<$5.GetPaperPlanContextResponse> getPaperPlanContext(
+      $pb.ServerContext ctx, $5.GetPaperPlanContextRequest request);
+  $async.Future<$5.ConfirmPaperPlanResponse> confirmPaperPlan(
+      $pb.ServerContext ctx, $5.ConfirmPaperPlanRequest request);
+  $async.Future<$5.GetPaperReceiptResponse> getPaperReceipt(
+      $pb.ServerContext ctx, $5.GetPaperReceiptRequest request);
+  $async.Future<$5.ListPaperJournalResponse> listPaperJournal(
+      $pb.ServerContext ctx, $5.ListPaperJournalRequest request);
+  $async.Future<$5.GetPaperReplayResponse> getPaperReplay(
+      $pb.ServerContext ctx, $5.GetPaperReplayRequest request);
+  $async.Future<$5.SavePaperJournalNoteResponse> savePaperJournalNote(
+      $pb.ServerContext ctx, $5.SavePaperJournalNoteRequest request);
+  $async.Future<$5.CancelPaperEntryResponse> cancelPaperEntry(
+      $pb.ServerContext ctx, $5.CancelPaperEntryRequest request);
+  $async.Future<$5.ReducePaperPositionResponse> reducePaperPosition(
+      $pb.ServerContext ctx, $5.ReducePaperPositionRequest request);
+  $async.Future<$5.SetPaperEntryPauseResponse> setPaperEntryPause(
+      $pb.ServerContext ctx, $5.SetPaperEntryPauseRequest request);
 
   $pb.GeneratedMessage createRequest($core.String methodName) {
     switch (methodName) {
       case 'GetPaperAccount':
-        return $4.GetPaperAccountRequest();
+        return $5.GetPaperAccountRequest();
       case 'InitializePaperAccount':
-        return $4.InitializePaperAccountRequest();
+        return $5.InitializePaperAccountRequest();
       case 'PreviewPaperPlan':
-        return $4.PreviewPaperPlanRequest();
+        return $5.PreviewPaperPlanRequest();
       case 'GetPaperPlan':
-        return $4.GetPaperPlanRequest();
+        return $5.GetPaperPlanRequest();
+      case 'GetPaperPlanContext':
+        return $5.GetPaperPlanContextRequest();
       case 'ConfirmPaperPlan':
-        return $4.ConfirmPaperPlanRequest();
+        return $5.ConfirmPaperPlanRequest();
       case 'GetPaperReceipt':
-        return $4.GetPaperReceiptRequest();
+        return $5.GetPaperReceiptRequest();
       case 'ListPaperJournal':
-        return $4.ListPaperJournalRequest();
+        return $5.ListPaperJournalRequest();
       case 'GetPaperReplay':
-        return $4.GetPaperReplayRequest();
+        return $5.GetPaperReplayRequest();
       case 'SavePaperJournalNote':
-        return $4.SavePaperJournalNoteRequest();
+        return $5.SavePaperJournalNoteRequest();
       case 'CancelPaperEntry':
-        return $4.CancelPaperEntryRequest();
+        return $5.CancelPaperEntryRequest();
       case 'ReducePaperPosition':
-        return $4.ReducePaperPositionRequest();
+        return $5.ReducePaperPositionRequest();
       case 'SetPaperEntryPause':
-        return $4.SetPaperEntryPauseRequest();
+        return $5.SetPaperEntryPauseRequest();
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }
@@ -81,32 +85,35 @@ abstract class PaperServiceBase extends $pb.GeneratedService {
       $core.String methodName, $pb.GeneratedMessage request) {
     switch (methodName) {
       case 'GetPaperAccount':
-        return getPaperAccount(ctx, request as $4.GetPaperAccountRequest);
+        return getPaperAccount(ctx, request as $5.GetPaperAccountRequest);
       case 'InitializePaperAccount':
         return initializePaperAccount(
-            ctx, request as $4.InitializePaperAccountRequest);
+            ctx, request as $5.InitializePaperAccountRequest);
       case 'PreviewPaperPlan':
-        return previewPaperPlan(ctx, request as $4.PreviewPaperPlanRequest);
+        return previewPaperPlan(ctx, request as $5.PreviewPaperPlanRequest);
       case 'GetPaperPlan':
-        return getPaperPlan(ctx, request as $4.GetPaperPlanRequest);
+        return getPaperPlan(ctx, request as $5.GetPaperPlanRequest);
+      case 'GetPaperPlanContext':
+        return getPaperPlanContext(
+            ctx, request as $5.GetPaperPlanContextRequest);
       case 'ConfirmPaperPlan':
-        return confirmPaperPlan(ctx, request as $4.ConfirmPaperPlanRequest);
+        return confirmPaperPlan(ctx, request as $5.ConfirmPaperPlanRequest);
       case 'GetPaperReceipt':
-        return getPaperReceipt(ctx, request as $4.GetPaperReceiptRequest);
+        return getPaperReceipt(ctx, request as $5.GetPaperReceiptRequest);
       case 'ListPaperJournal':
-        return listPaperJournal(ctx, request as $4.ListPaperJournalRequest);
+        return listPaperJournal(ctx, request as $5.ListPaperJournalRequest);
       case 'GetPaperReplay':
-        return getPaperReplay(ctx, request as $4.GetPaperReplayRequest);
+        return getPaperReplay(ctx, request as $5.GetPaperReplayRequest);
       case 'SavePaperJournalNote':
         return savePaperJournalNote(
-            ctx, request as $4.SavePaperJournalNoteRequest);
+            ctx, request as $5.SavePaperJournalNoteRequest);
       case 'CancelPaperEntry':
-        return cancelPaperEntry(ctx, request as $4.CancelPaperEntryRequest);
+        return cancelPaperEntry(ctx, request as $5.CancelPaperEntryRequest);
       case 'ReducePaperPosition':
         return reducePaperPosition(
-            ctx, request as $4.ReducePaperPositionRequest);
+            ctx, request as $5.ReducePaperPositionRequest);
       case 'SetPaperEntryPause':
-        return setPaperEntryPause(ctx, request as $4.SetPaperEntryPauseRequest);
+        return setPaperEntryPause(ctx, request as $5.SetPaperEntryPauseRequest);
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }

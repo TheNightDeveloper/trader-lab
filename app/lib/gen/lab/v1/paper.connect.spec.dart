@@ -39,6 +39,13 @@ abstract final class PaperService {
     labv1paper.GetPaperPlanResponse.new,
   );
 
+  static const getPaperPlanContext = connect.Spec(
+    '/$name/GetPaperPlanContext',
+    connect.StreamType.unary,
+    labv1paper.GetPaperPlanContextRequest.new,
+    labv1paper.GetPaperPlanContextResponse.new,
+  );
+
   static const confirmPaperPlan = connect.Spec(
     '/$name/ConfirmPaperPlan',
     connect.StreamType.unary,

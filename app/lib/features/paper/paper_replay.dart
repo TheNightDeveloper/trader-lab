@@ -17,6 +17,7 @@ import '../library/rule_editor.dart' show RuleJson, describeRule;
 import '../market/market_opportunities.dart' show marketOpportunityReason;
 import '../page_frame.dart';
 import 'paper_entries.dart';
+import 'paper_market_chart.dart';
 import 'paper_providers.dart';
 import 'paper_screen.dart';
 
@@ -68,7 +69,14 @@ class PaperReplayScreen extends ConsumerWidget {
             key: ValueKey(cursor),
             child: switch (replay.whichStep()) {
               GetPaperReplayResponse_Step.observation => _ReplayObservation(observation: replay.observation),
-              GetPaperReplayResponse_Step.plan => PaperPlanSummary(plan: replay.plan),
+              GetPaperReplayResponse_Step.plan => Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  PaperPlanSummary(plan: replay.plan),
+                  const SizedBox(height: AppSpace.md),
+                  PaperPlanMarket(plan: replay.plan),
+                ],
+              ),
               GetPaperReplayResponse_Step.execution => _ReplayExecution(execution: replay.execution),
               GetPaperReplayResponse_Step.notSet => Text(l.statusLiveUnavailable),
             },
@@ -102,10 +110,12 @@ class _ReplayObservation extends StatelessWidget {
           Wrap(spacing: AppSpace.sm, children: [Text(opportunity.ruleTitle), Mono('#${opportunity.ruleVersionId}')]),
           Text(marketOpportunityReason(l, opportunity.reason)),
           Text(describeRule(jsonDecode(observation.entryRuleJson) as RuleJson)),
-          PaperTimeLine(label: l.paperReplayObservedAt, at: opportunity.observedAtUnixMs),
-          PaperTimeLine(label: l.marketClosedAt, at: opportunity.candleClosedAtUnixMs),
-          PaperTimeLine(label: l.marketAvailableAt, at: observation.lastInputAvailableAtUnixMs),
           PaperMoneyLine(label: l.marketOpportunityPrice, amount: opportunity.referenceClose),
+          if (observation.hasMarketContext())
+            PaperMarketChart(market: observation.marketContext, symbol: opportunity.symbol)
+          else
+            PaperTimeLine(label: l.paperReplayObservedAt, at: opportunity.observedAtUnixMs),
+          PaperTimeLine(label: l.marketAvailableAt, at: observation.lastInputAvailableAtUnixMs),
           Wrap(
             spacing: AppSpace.sm,
             children: [Text(l.paperReplayInputs), Mono(observation.inputCandleCount.toString())],
@@ -152,6 +162,8 @@ class _ReplayExecution extends StatelessWidget {
             PaperTimeLine(label: l.marketClosedAt, at: candle.closedAtUnixMs),
             PaperTimeLine(label: l.marketAvailableAt, at: candle.availableAtUnixMs),
             Wrap(spacing: AppSpace.sm, children: [Text(l.paperReplayRevision), Mono(candle.revision.toString())]),
+            if (execution.approvalBuildSha256.isNotEmpty)
+              PaperEvidenceHash(label: l.paperApprovalBuild, hash: execution.approvalBuildSha256),
           ] else if (execution.event.kind == 'accepted')
             Text(l.paperReplayConfirmationUnavailable),
         ],

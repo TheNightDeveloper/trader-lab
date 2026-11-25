@@ -162,7 +162,7 @@ func (p *Paper) reservePaperPlan(ctx context.Context, q *db.Queries, plan *labv1
 	}
 	if err := q.StorePaperConfirmationEvidence(ctx, db.StorePaperConfirmationEvidenceParams{
 		EventID: event, OpenTime: candle.OpenTime, CloseTime: candle.CloseTime, AvailableAt: candle.AvailableAt,
-		Revision: candle.Revision, ClosePrice: candle.C,
+		Revision: candle.Revision, ClosePrice: candle.C, EngineBuildSha256: p.Market.Build,
 	}); err != nil {
 		return entry, nil, err
 	}

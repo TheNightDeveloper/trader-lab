@@ -135,6 +135,9 @@ class L10nFa extends L10n {
   String get paperRiskSummary => 'ریسک و هزینه برای حساب مجازی';
 
   @override
+  String get paperSpotBuy => 'خرید اسپات';
+
+  @override
   String get paperStop => 'حد ضرر';
 
   @override
@@ -171,8 +174,20 @@ class L10nFa extends L10n {
   String get paperPlanQuoteAt => 'زمان دادهٔ برنامه';
 
   @override
+  String get paperMarketChart => 'نمودار کندل‌های یک‌ساعتهٔ فرصت';
+
+  @override
+  String get paperScannerBuild => 'بیلد اسکن فرصت';
+
+  @override
+  String get paperPlanEngineBuild => 'بیلد ساخت برنامه';
+
+  @override
+  String get paperApprovalBuild => 'بیلد تأیید برنامه';
+
+  @override
   String get paperFillAssumptions =>
-      'ورود با قیمت بازشدن کندل کامل یک‌دقیقه‌ای بعد از تأیید و حداکثر یک درصد از حجم کندل شبیه‌سازی می‌شود. کارمزد و لغزش اعمال می‌شوند و عبور قیمت از حد ضرر می‌تواند زیان بیشتری ایجاد کند.';
+      'ورود با قیمت بازشدن کندل کامل یک‌دقیقه‌ای بعد از تأیید و حداکثر یک درصد از حجم کندل شبیه‌سازی می‌شود. کارمزد و لغزش اعمال می‌شوند و عبور قیمت از حد ضرر می‌تواند زیان بیشتری ایجاد کند. اگر هر دو حد در یک کندل لمس شوند و ترتیب از قیمت بازشدن مشخص نباشد، شبیه‌ساز خروج با حد ضرر را فرض می‌کند.';
 
   @override
   String get paperFeeRate => 'کارمزد هر سمت';

@@ -142,6 +142,7 @@ func (p *Paper) PreviewPaperPlan(ctx context.Context, req *connect.Request[labv1
 		Notional: usdtP(size.Notional), RequiredCash: usdtP(size.ReservedCash), PlannedLoss: usdtP(size.PlannedLoss),
 		EstimatedCost: usdtP(size.EstimatedCost), FeeRate: ratioP(costs.Fee), SlippageRate: ratioP(costs.Slippage), FillModel: paperFillModel,
 		ReferenceCandleClosedAtUnixMs: ms(candle.CloseTime), ReferenceCandleRevision: candle.Revision,
+		EngineBuildSha256: p.Market.Build,
 	}
 	// The digest binds the full immutable review, apart from the digest field itself.
 	body, err := proto.MarshalOptions{Deterministic: true}.Marshal(plan)

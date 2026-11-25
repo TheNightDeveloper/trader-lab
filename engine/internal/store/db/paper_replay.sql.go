@@ -22,7 +22,7 @@ func (q *Queries) FirstPaperReplayEvent(ctx context.Context, entryID int64) (int
 }
 
 const paperConfirmationEvidence = `-- name: PaperConfirmationEvidence :one
-SELECT event_id, open_time, close_time, available_at, revision, close_price FROM paper_confirmation_evidence WHERE event_id = $1
+SELECT event_id, open_time, close_time, available_at, revision, close_price, engine_build_sha256 FROM paper_confirmation_evidence WHERE event_id = $1
 `
 
 func (q *Queries) PaperConfirmationEvidence(ctx context.Context, eventID int64) (PaperConfirmationEvidence, error) {
@@ -35,6 +35,7 @@ func (q *Queries) PaperConfirmationEvidence(ctx context.Context, eventID int64) 
 		&i.AvailableAt,
 		&i.Revision,
 		&i.ClosePrice,
+		&i.EngineBuildSha256,
 	)
 	return i, err
 }
@@ -81,7 +82,7 @@ func (q *Queries) PaperReplayEvent(ctx context.Context, arg PaperReplayEventPara
 }
 
 const paperReplayOpportunity = `-- name: PaperReplayOpportunity :one
-SELECT id, symbol, rule_version_id, report_id, spec_revision, candle_closed_at, observed_at, expires_at, reference_close, reason, snapshot, snapshot_sha256 FROM market_opportunities WHERE id = $1
+SELECT id, symbol, rule_version_id, report_id, spec_revision, candle_closed_at, observed_at, expires_at, reference_close, reason, snapshot, snapshot_sha256, engine_build_sha256 FROM market_opportunities WHERE id = $1
 `
 
 func (q *Queries) PaperReplayOpportunity(ctx context.Context, id int64) (MarketOpportunity, error) {
@@ -100,22 +101,24 @@ func (q *Queries) PaperReplayOpportunity(ctx context.Context, id int64) (MarketO
 		&i.Reason,
 		&i.Snapshot,
 		&i.SnapshotSha256,
+		&i.EngineBuildSha256,
 	)
 	return i, err
 }
 
 const storePaperConfirmationEvidence = `-- name: StorePaperConfirmationEvidence :exec
-INSERT INTO paper_confirmation_evidence (event_id, open_time, close_time, available_at, revision, close_price)
-VALUES ($1, $2, $3, $4, $5, $6)
+INSERT INTO paper_confirmation_evidence (event_id, open_time, close_time, available_at, revision, close_price, engine_build_sha256)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
 `
 
 type StorePaperConfirmationEvidenceParams struct {
-	EventID     int64
-	OpenTime    time.Time
-	CloseTime   time.Time
-	AvailableAt time.Time
-	Revision    int32
-	ClosePrice  int64
+	EventID           int64
+	OpenTime          time.Time
+	CloseTime         time.Time
+	AvailableAt       time.Time
+	Revision          int32
+	ClosePrice        int64
+	EngineBuildSha256 string
 }
 
 func (q *Queries) StorePaperConfirmationEvidence(ctx context.Context, arg StorePaperConfirmationEvidenceParams) error {
@@ -126,6 +129,7 @@ func (q *Queries) StorePaperConfirmationEvidence(ctx context.Context, arg StoreP
 		arg.AvailableAt,
 		arg.Revision,
 		arg.ClosePrice,
+		arg.EngineBuildSha256,
 	)
 	return err
 }

@@ -87,7 +87,7 @@ func run() error {
 		}
 		go live.Run(ctx)
 	}
-	market := &api.Market{Store: st, Clock: clock.Wall{}, Live: liveSource(live), Symbols: cfg.LiveSymbols, Limiter: limiter}
+	market := &api.Market{Store: st, Clock: clock.Wall{}, Live: liveSource(live), Build: build, Symbols: cfg.LiveSymbols, Limiter: limiter}
 	paperService := &api.Paper{Market: market}
 	go paperService.RunPaper(ctx)
 	if live != nil {

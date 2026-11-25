@@ -16,8 +16,9 @@ import 'dart:core' as $core;
 import 'dart:typed_data' as $typed_data;
 
 import 'account.pbjson.dart' as $1;
+import 'chart.pbjson.dart' as $3;
 import 'common.pbjson.dart' as $0;
-import 'market.pbjson.dart' as $3;
+import 'market.pbjson.dart' as $4;
 import 'workspace.pbjson.dart' as $2;
 
 @$core.Deprecated('Use paperReductionStateDescriptor instead')
@@ -377,6 +378,84 @@ final $typed_data.Uint8List getPaperPlanResponseDescriptor = $convert.base64Deco
     'IEcGxhbhI6CgtyZXN0cmljdGlvbhgCIAEoCzIYLmxhYi52MS5QYXBlclJlc3RyaWN0aW9uUgty'
     'ZXN0cmljdGlvbhIuCgdyZWNlaXB0GAMgASgLMhQubGFiLnYxLlBhcGVyUmVjZWlwdFIHcmVjZW'
     'lwdA==');
+
+@$core.Deprecated('Use getPaperPlanContextRequestDescriptor instead')
+const GetPaperPlanContextRequest$json = {
+  '1': 'GetPaperPlanContextRequest',
+  '2': [
+    {'1': 'plan_hash', '3': 1, '4': 1, '5': 9, '10': 'planHash'},
+  ],
+};
+
+/// Descriptor for `GetPaperPlanContextRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getPaperPlanContextRequestDescriptor =
+    $convert.base64Decode(
+        'ChpHZXRQYXBlclBsYW5Db250ZXh0UmVxdWVzdBIbCglwbGFuX2hhc2gYASABKAlSCHBsYW5IYX'
+        'No');
+
+@$core.Deprecated('Use getPaperPlanContextResponseDescriptor instead')
+const GetPaperPlanContextResponse$json = {
+  '1': 'GetPaperPlanContextResponse',
+  '2': [
+    {
+      '1': 'market_context',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.PaperMarketContext',
+      '10': 'marketContext'
+    },
+  ],
+};
+
+/// Descriptor for `GetPaperPlanContextResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getPaperPlanContextResponseDescriptor =
+    $convert.base64Decode(
+        'ChtHZXRQYXBlclBsYW5Db250ZXh0UmVzcG9uc2USQQoObWFya2V0X2NvbnRleHQYASABKAsyGi'
+        '5sYWIudjEuUGFwZXJNYXJrZXRDb250ZXh0Ug1tYXJrZXRDb250ZXh0');
+
+@$core.Deprecated('Use paperMarketContextDescriptor instead')
+const PaperMarketContext$json = {
+  '1': 'PaperMarketContext',
+  '2': [
+    {
+      '1': 'candles',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.lab.v1.ChartBar',
+      '10': 'candles'
+    },
+    {
+      '1': 'candle_closed_at_unix_ms',
+      '3': 2,
+      '4': 1,
+      '5': 3,
+      '10': 'candleClosedAtUnixMs'
+    },
+    {
+      '1': 'observed_at_unix_ms',
+      '3': 3,
+      '4': 1,
+      '5': 3,
+      '10': 'observedAtUnixMs'
+    },
+    {
+      '1': 'scanner_build_sha256',
+      '3': 4,
+      '4': 1,
+      '5': 9,
+      '10': 'scannerBuildSha256'
+    },
+  ],
+};
+
+/// Descriptor for `PaperMarketContext`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List paperMarketContextDescriptor = $convert.base64Decode(
+    'ChJQYXBlck1hcmtldENvbnRleHQSKgoHY2FuZGxlcxgBIAMoCzIQLmxhYi52MS5DaGFydEJhcl'
+    'IHY2FuZGxlcxI2ChhjYW5kbGVfY2xvc2VkX2F0X3VuaXhfbXMYAiABKANSFGNhbmRsZUNsb3Nl'
+    'ZEF0VW5peE1zEi0KE29ic2VydmVkX2F0X3VuaXhfbXMYAyABKANSEG9ic2VydmVkQXRVbml4TX'
+    'MSMAoUc2Nhbm5lcl9idWlsZF9zaGEyNTYYBCABKAlSEnNjYW5uZXJCdWlsZFNoYTI1Ng==');
 
 @$core.Deprecated('Use confirmPaperPlanRequestDescriptor instead')
 const ConfirmPaperPlanRequest$json = {
@@ -779,6 +858,14 @@ const PaperReplayObservation$json = {
     },
     {'1': 'rule_sha256', '3': 8, '4': 1, '5': 9, '10': 'ruleSha256'},
     {'1': 'entry_rule_json', '3': 9, '4': 1, '5': 9, '10': 'entryRuleJson'},
+    {
+      '1': 'market_context',
+      '3': 10,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.PaperMarketContext',
+      '10': 'marketContext'
+    },
   ],
 };
 
@@ -792,7 +879,8 @@ final $typed_data.Uint8List paperReplayObservationDescriptor = $convert.base64De
     '9uZXlSDWxhc3RJbnB1dE9wZW4SNQoPbGFzdF9pbnB1dF9oaWdoGAYgASgLMg0ubGFiLnYxLk1v'
     'bmV5Ug1sYXN0SW5wdXRIaWdoEjMKDmxhc3RfaW5wdXRfbG93GAcgASgLMg0ubGFiLnYxLk1vbm'
     'V5UgxsYXN0SW5wdXRMb3cSHwoLcnVsZV9zaGEyNTYYCCABKAlSCnJ1bGVTaGEyNTYSJgoPZW50'
-    'cnlfcnVsZV9qc29uGAkgASgJUg1lbnRyeVJ1bGVKc29u');
+    'cnlfcnVsZV9qc29uGAkgASgJUg1lbnRyeVJ1bGVKc29uEkEKDm1hcmtldF9jb250ZXh0GAogAS'
+    'gLMhoubGFiLnYxLlBhcGVyTWFya2V0Q29udGV4dFINbWFya2V0Q29udGV4dA==');
 
 @$core.Deprecated('Use paperReplayExecutionDescriptor instead')
 const PaperReplayExecution$json = {
@@ -814,6 +902,13 @@ const PaperReplayExecution$json = {
       '6': '.lab.v1.MarketCandle',
       '10': 'confirmationCandle'
     },
+    {
+      '1': 'approval_build_sha256',
+      '3': 3,
+      '4': 1,
+      '5': 9,
+      '10': 'approvalBuildSha256'
+    },
   ],
 };
 
@@ -821,7 +916,8 @@ const PaperReplayExecution$json = {
 final $typed_data.Uint8List paperReplayExecutionDescriptor = $convert.base64Decode(
     'ChRQYXBlclJlcGxheUV4ZWN1dGlvbhIxCgVldmVudBgBIAEoCzIbLmxhYi52MS5QYXBlckV4ZW'
     'N1dGlvbkV2ZW50UgVldmVudBJFChNjb25maXJtYXRpb25fY2FuZGxlGAIgASgLMhQubGFiLnYx'
-    'Lk1hcmtldENhbmRsZVISY29uZmlybWF0aW9uQ2FuZGxl');
+    'Lk1hcmtldENhbmRsZVISY29uZmlybWF0aW9uQ2FuZGxlEjIKFWFwcHJvdmFsX2J1aWxkX3NoYT'
+    'I1NhgDIAEoCVITYXBwcm92YWxCdWlsZFNoYTI1Ng==');
 
 @$core.Deprecated('Use cancelPaperEntryRequestDescriptor instead')
 const CancelPaperEntryRequest$json = {
@@ -1420,6 +1516,13 @@ const PaperPlan$json = {
       '5': 5,
       '10': 'referenceCandleRevision'
     },
+    {
+      '1': 'engine_build_sha256',
+      '3': 27,
+      '4': 1,
+      '5': 9,
+      '10': 'engineBuildSha256'
+    },
   ],
 };
 
@@ -1447,7 +1550,8 @@ final $typed_data.Uint8List paperPlanDescriptor = $convert.base64Decode(
     '1hbFIMc2xpcHBhZ2VSYXRlEh0KCmZpbGxfbW9kZWwYGCABKAlSCWZpbGxNb2RlbBJJCiJyZWZl'
     'cmVuY2VfY2FuZGxlX2Nsb3NlZF9hdF91bml4X21zGBkgASgDUh1yZWZlcmVuY2VDYW5kbGVDbG'
     '9zZWRBdFVuaXhNcxI6ChlyZWZlcmVuY2VfY2FuZGxlX3JldmlzaW9uGBogASgFUhdyZWZlcmVu'
-    'Y2VDYW5kbGVSZXZpc2lvbg==');
+    'Y2VDYW5kbGVSZXZpc2lvbhIuChNlbmdpbmVfYnVpbGRfc2hhMjU2GBsgASgJUhFlbmdpbmVCdW'
+    'lsZFNoYTI1Ng==');
 
 const $core.Map<$core.String, $core.dynamic> PaperServiceBase$json = {
   '1': 'PaperService',
@@ -1471,6 +1575,11 @@ const $core.Map<$core.String, $core.dynamic> PaperServiceBase$json = {
       '1': 'GetPaperPlan',
       '2': '.lab.v1.GetPaperPlanRequest',
       '3': '.lab.v1.GetPaperPlanResponse'
+    },
+    {
+      '1': 'GetPaperPlanContext',
+      '2': '.lab.v1.GetPaperPlanContextRequest',
+      '3': '.lab.v1.GetPaperPlanContextResponse'
     },
     {
       '1': 'ConfirmPaperPlan',
@@ -1541,6 +1650,10 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
   '.lab.v1.PaperRestriction': PaperRestriction$json,
   '.lab.v1.GetPaperPlanRequest': GetPaperPlanRequest$json,
   '.lab.v1.GetPaperPlanResponse': GetPaperPlanResponse$json,
+  '.lab.v1.GetPaperPlanContextRequest': GetPaperPlanContextRequest$json,
+  '.lab.v1.GetPaperPlanContextResponse': GetPaperPlanContextResponse$json,
+  '.lab.v1.PaperMarketContext': PaperMarketContext$json,
+  '.lab.v1.ChartBar': $3.ChartBar$json,
   '.lab.v1.ConfirmPaperPlanRequest': ConfirmPaperPlanRequest$json,
   '.lab.v1.ConfirmPaperPlanResponse': ConfirmPaperPlanResponse$json,
   '.lab.v1.GetPaperReceiptRequest': GetPaperReceiptRequest$json,
@@ -1553,9 +1666,9 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
   '.lab.v1.GetPaperReplayRequest': GetPaperReplayRequest$json,
   '.lab.v1.GetPaperReplayResponse': GetPaperReplayResponse$json,
   '.lab.v1.PaperReplayObservation': PaperReplayObservation$json,
-  '.lab.v1.MarketOpportunity': $3.MarketOpportunity$json,
+  '.lab.v1.MarketOpportunity': $4.MarketOpportunity$json,
   '.lab.v1.PaperReplayExecution': PaperReplayExecution$json,
-  '.lab.v1.MarketCandle': $3.MarketCandle$json,
+  '.lab.v1.MarketCandle': $4.MarketCandle$json,
   '.lab.v1.SavePaperJournalNoteRequest': SavePaperJournalNoteRequest$json,
   '.lab.v1.SavePaperJournalNoteResponse': SavePaperJournalNoteResponse$json,
   '.lab.v1.CancelPaperEntryRequest': CancelPaperEntryRequest$json,
@@ -1574,17 +1687,19 @@ final $typed_data.Uint8List paperServiceDescriptor = $convert.base64Decode(
     'xhYi52MS5Jbml0aWFsaXplUGFwZXJBY2NvdW50UmVzcG9uc2USVQoQUHJldmlld1BhcGVyUGxh'
     'bhIfLmxhYi52MS5QcmV2aWV3UGFwZXJQbGFuUmVxdWVzdBogLmxhYi52MS5QcmV2aWV3UGFwZX'
     'JQbGFuUmVzcG9uc2USSQoMR2V0UGFwZXJQbGFuEhsubGFiLnYxLkdldFBhcGVyUGxhblJlcXVl'
-    'c3QaHC5sYWIudjEuR2V0UGFwZXJQbGFuUmVzcG9uc2USVQoQQ29uZmlybVBhcGVyUGxhbhIfLm'
-    'xhYi52MS5Db25maXJtUGFwZXJQbGFuUmVxdWVzdBogLmxhYi52MS5Db25maXJtUGFwZXJQbGFu'
-    'UmVzcG9uc2USUgoPR2V0UGFwZXJSZWNlaXB0Eh4ubGFiLnYxLkdldFBhcGVyUmVjZWlwdFJlcX'
-    'Vlc3QaHy5sYWIudjEuR2V0UGFwZXJSZWNlaXB0UmVzcG9uc2USVQoQTGlzdFBhcGVySm91cm5h'
-    'bBIfLmxhYi52MS5MaXN0UGFwZXJKb3VybmFsUmVxdWVzdBogLmxhYi52MS5MaXN0UGFwZXJKb3'
-    'VybmFsUmVzcG9uc2USTwoOR2V0UGFwZXJSZXBsYXkSHS5sYWIudjEuR2V0UGFwZXJSZXBsYXlS'
-    'ZXF1ZXN0Gh4ubGFiLnYxLkdldFBhcGVyUmVwbGF5UmVzcG9uc2USYQoUU2F2ZVBhcGVySm91cm'
-    '5hbE5vdGUSIy5sYWIudjEuU2F2ZVBhcGVySm91cm5hbE5vdGVSZXF1ZXN0GiQubGFiLnYxLlNh'
-    'dmVQYXBlckpvdXJuYWxOb3RlUmVzcG9uc2USVQoQQ2FuY2VsUGFwZXJFbnRyeRIfLmxhYi52MS'
-    '5DYW5jZWxQYXBlckVudHJ5UmVxdWVzdBogLmxhYi52MS5DYW5jZWxQYXBlckVudHJ5UmVzcG9u'
-    'c2USXgoTUmVkdWNlUGFwZXJQb3NpdGlvbhIiLmxhYi52MS5SZWR1Y2VQYXBlclBvc2l0aW9uUm'
-    'VxdWVzdBojLmxhYi52MS5SZWR1Y2VQYXBlclBvc2l0aW9uUmVzcG9uc2USWwoSU2V0UGFwZXJF'
-    'bnRyeVBhdXNlEiEubGFiLnYxLlNldFBhcGVyRW50cnlQYXVzZVJlcXVlc3QaIi5sYWIudjEuU2'
-    'V0UGFwZXJFbnRyeVBhdXNlUmVzcG9uc2U=');
+    'c3QaHC5sYWIudjEuR2V0UGFwZXJQbGFuUmVzcG9uc2USXgoTR2V0UGFwZXJQbGFuQ29udGV4dB'
+    'IiLmxhYi52MS5HZXRQYXBlclBsYW5Db250ZXh0UmVxdWVzdBojLmxhYi52MS5HZXRQYXBlclBs'
+    'YW5Db250ZXh0UmVzcG9uc2USVQoQQ29uZmlybVBhcGVyUGxhbhIfLmxhYi52MS5Db25maXJtUG'
+    'FwZXJQbGFuUmVxdWVzdBogLmxhYi52MS5Db25maXJtUGFwZXJQbGFuUmVzcG9uc2USUgoPR2V0'
+    'UGFwZXJSZWNlaXB0Eh4ubGFiLnYxLkdldFBhcGVyUmVjZWlwdFJlcXVlc3QaHy5sYWIudjEuR2'
+    'V0UGFwZXJSZWNlaXB0UmVzcG9uc2USVQoQTGlzdFBhcGVySm91cm5hbBIfLmxhYi52MS5MaXN0'
+    'UGFwZXJKb3VybmFsUmVxdWVzdBogLmxhYi52MS5MaXN0UGFwZXJKb3VybmFsUmVzcG9uc2USTw'
+    'oOR2V0UGFwZXJSZXBsYXkSHS5sYWIudjEuR2V0UGFwZXJSZXBsYXlSZXF1ZXN0Gh4ubGFiLnYx'
+    'LkdldFBhcGVyUmVwbGF5UmVzcG9uc2USYQoUU2F2ZVBhcGVySm91cm5hbE5vdGUSIy5sYWIudj'
+    'EuU2F2ZVBhcGVySm91cm5hbE5vdGVSZXF1ZXN0GiQubGFiLnYxLlNhdmVQYXBlckpvdXJuYWxO'
+    'b3RlUmVzcG9uc2USVQoQQ2FuY2VsUGFwZXJFbnRyeRIfLmxhYi52MS5DYW5jZWxQYXBlckVudH'
+    'J5UmVxdWVzdBogLmxhYi52MS5DYW5jZWxQYXBlckVudHJ5UmVzcG9uc2USXgoTUmVkdWNlUGFw'
+    'ZXJQb3NpdGlvbhIiLmxhYi52MS5SZWR1Y2VQYXBlclBvc2l0aW9uUmVxdWVzdBojLmxhYi52MS'
+    '5SZWR1Y2VQYXBlclBvc2l0aW9uUmVzcG9uc2USWwoSU2V0UGFwZXJFbnRyeVBhdXNlEiEubGFi'
+    'LnYxLlNldFBhcGVyRW50cnlQYXVzZVJlcXVlc3QaIi5sYWIudjEuU2V0UGFwZXJFbnRyeVBhdX'
+    'NlUmVzcG9uc2U=');

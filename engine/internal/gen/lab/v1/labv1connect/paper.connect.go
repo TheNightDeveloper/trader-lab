@@ -45,6 +45,9 @@ const (
 	// PaperServiceGetPaperPlanProcedure is the fully-qualified name of the PaperService's GetPaperPlan
 	// RPC.
 	PaperServiceGetPaperPlanProcedure = "/lab.v1.PaperService/GetPaperPlan"
+	// PaperServiceGetPaperPlanContextProcedure is the fully-qualified name of the PaperService's
+	// GetPaperPlanContext RPC.
+	PaperServiceGetPaperPlanContextProcedure = "/lab.v1.PaperService/GetPaperPlanContext"
 	// PaperServiceConfirmPaperPlanProcedure is the fully-qualified name of the PaperService's
 	// ConfirmPaperPlan RPC.
 	PaperServiceConfirmPaperPlanProcedure = "/lab.v1.PaperService/ConfirmPaperPlan"
@@ -77,6 +80,7 @@ type PaperServiceClient interface {
 	InitializePaperAccount(context.Context, *connect.Request[v1.InitializePaperAccountRequest]) (*connect.Response[v1.InitializePaperAccountResponse], error)
 	PreviewPaperPlan(context.Context, *connect.Request[v1.PreviewPaperPlanRequest]) (*connect.Response[v1.PreviewPaperPlanResponse], error)
 	GetPaperPlan(context.Context, *connect.Request[v1.GetPaperPlanRequest]) (*connect.Response[v1.GetPaperPlanResponse], error)
+	GetPaperPlanContext(context.Context, *connect.Request[v1.GetPaperPlanContextRequest]) (*connect.Response[v1.GetPaperPlanContextResponse], error)
 	ConfirmPaperPlan(context.Context, *connect.Request[v1.ConfirmPaperPlanRequest]) (*connect.Response[v1.ConfirmPaperPlanResponse], error)
 	GetPaperReceipt(context.Context, *connect.Request[v1.GetPaperReceiptRequest]) (*connect.Response[v1.GetPaperReceiptResponse], error)
 	ListPaperJournal(context.Context, *connect.Request[v1.ListPaperJournalRequest]) (*connect.Response[v1.ListPaperJournalResponse], error)
@@ -120,6 +124,12 @@ func NewPaperServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			httpClient,
 			baseURL+PaperServiceGetPaperPlanProcedure,
 			connect.WithSchema(paperServiceMethods.ByName("GetPaperPlan")),
+			connect.WithClientOptions(opts...),
+		),
+		getPaperPlanContext: connect.NewClient[v1.GetPaperPlanContextRequest, v1.GetPaperPlanContextResponse](
+			httpClient,
+			baseURL+PaperServiceGetPaperPlanContextProcedure,
+			connect.WithSchema(paperServiceMethods.ByName("GetPaperPlanContext")),
 			connect.WithClientOptions(opts...),
 		),
 		confirmPaperPlan: connect.NewClient[v1.ConfirmPaperPlanRequest, v1.ConfirmPaperPlanResponse](
@@ -179,6 +189,7 @@ type paperServiceClient struct {
 	initializePaperAccount *connect.Client[v1.InitializePaperAccountRequest, v1.InitializePaperAccountResponse]
 	previewPaperPlan       *connect.Client[v1.PreviewPaperPlanRequest, v1.PreviewPaperPlanResponse]
 	getPaperPlan           *connect.Client[v1.GetPaperPlanRequest, v1.GetPaperPlanResponse]
+	getPaperPlanContext    *connect.Client[v1.GetPaperPlanContextRequest, v1.GetPaperPlanContextResponse]
 	confirmPaperPlan       *connect.Client[v1.ConfirmPaperPlanRequest, v1.ConfirmPaperPlanResponse]
 	getPaperReceipt        *connect.Client[v1.GetPaperReceiptRequest, v1.GetPaperReceiptResponse]
 	listPaperJournal       *connect.Client[v1.ListPaperJournalRequest, v1.ListPaperJournalResponse]
@@ -207,6 +218,11 @@ func (c *paperServiceClient) PreviewPaperPlan(ctx context.Context, req *connect.
 // GetPaperPlan calls lab.v1.PaperService.GetPaperPlan.
 func (c *paperServiceClient) GetPaperPlan(ctx context.Context, req *connect.Request[v1.GetPaperPlanRequest]) (*connect.Response[v1.GetPaperPlanResponse], error) {
 	return c.getPaperPlan.CallUnary(ctx, req)
+}
+
+// GetPaperPlanContext calls lab.v1.PaperService.GetPaperPlanContext.
+func (c *paperServiceClient) GetPaperPlanContext(ctx context.Context, req *connect.Request[v1.GetPaperPlanContextRequest]) (*connect.Response[v1.GetPaperPlanContextResponse], error) {
+	return c.getPaperPlanContext.CallUnary(ctx, req)
 }
 
 // ConfirmPaperPlan calls lab.v1.PaperService.ConfirmPaperPlan.
@@ -255,6 +271,7 @@ type PaperServiceHandler interface {
 	InitializePaperAccount(context.Context, *connect.Request[v1.InitializePaperAccountRequest]) (*connect.Response[v1.InitializePaperAccountResponse], error)
 	PreviewPaperPlan(context.Context, *connect.Request[v1.PreviewPaperPlanRequest]) (*connect.Response[v1.PreviewPaperPlanResponse], error)
 	GetPaperPlan(context.Context, *connect.Request[v1.GetPaperPlanRequest]) (*connect.Response[v1.GetPaperPlanResponse], error)
+	GetPaperPlanContext(context.Context, *connect.Request[v1.GetPaperPlanContextRequest]) (*connect.Response[v1.GetPaperPlanContextResponse], error)
 	ConfirmPaperPlan(context.Context, *connect.Request[v1.ConfirmPaperPlanRequest]) (*connect.Response[v1.ConfirmPaperPlanResponse], error)
 	GetPaperReceipt(context.Context, *connect.Request[v1.GetPaperReceiptRequest]) (*connect.Response[v1.GetPaperReceiptResponse], error)
 	ListPaperJournal(context.Context, *connect.Request[v1.ListPaperJournalRequest]) (*connect.Response[v1.ListPaperJournalResponse], error)
@@ -294,6 +311,12 @@ func NewPaperServiceHandler(svc PaperServiceHandler, opts ...connect.HandlerOpti
 		PaperServiceGetPaperPlanProcedure,
 		svc.GetPaperPlan,
 		connect.WithSchema(paperServiceMethods.ByName("GetPaperPlan")),
+		connect.WithHandlerOptions(opts...),
+	)
+	paperServiceGetPaperPlanContextHandler := connect.NewUnaryHandler(
+		PaperServiceGetPaperPlanContextProcedure,
+		svc.GetPaperPlanContext,
+		connect.WithSchema(paperServiceMethods.ByName("GetPaperPlanContext")),
 		connect.WithHandlerOptions(opts...),
 	)
 	paperServiceConfirmPaperPlanHandler := connect.NewUnaryHandler(
@@ -354,6 +377,8 @@ func NewPaperServiceHandler(svc PaperServiceHandler, opts ...connect.HandlerOpti
 			paperServicePreviewPaperPlanHandler.ServeHTTP(w, r)
 		case PaperServiceGetPaperPlanProcedure:
 			paperServiceGetPaperPlanHandler.ServeHTTP(w, r)
+		case PaperServiceGetPaperPlanContextProcedure:
+			paperServiceGetPaperPlanContextHandler.ServeHTTP(w, r)
 		case PaperServiceConfirmPaperPlanProcedure:
 			paperServiceConfirmPaperPlanHandler.ServeHTTP(w, r)
 		case PaperServiceGetPaperReceiptProcedure:
@@ -393,6 +418,10 @@ func (UnimplementedPaperServiceHandler) PreviewPaperPlan(context.Context, *conne
 
 func (UnimplementedPaperServiceHandler) GetPaperPlan(context.Context, *connect.Request[v1.GetPaperPlanRequest]) (*connect.Response[v1.GetPaperPlanResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("lab.v1.PaperService.GetPaperPlan is not implemented"))
+}
+
+func (UnimplementedPaperServiceHandler) GetPaperPlanContext(context.Context, *connect.Request[v1.GetPaperPlanContextRequest]) (*connect.Response[v1.GetPaperPlanContextResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("lab.v1.PaperService.GetPaperPlanContext is not implemented"))
 }
 
 func (UnimplementedPaperServiceHandler) ConfirmPaperPlan(context.Context, *connect.Request[v1.ConfirmPaperPlanRequest]) (*connect.Response[v1.ConfirmPaperPlanResponse], error) {

@@ -128,7 +128,7 @@ func (m *Market) scanMarketHour(ctx context.Context, q *db.Queries, symbol strin
 	err = q.InsertMarketOpportunity(ctx, db.InsertMarketOpportunityParams{
 		Symbol: symbol, RuleVersionID: rule.version.ID, ReportID: rule.reportID, SpecRevision: marketSpecRevision(symbol),
 		CandleClosedAt: closedAt, ObservedAt: now, ExpiresAt: expires, ReferenceClose: close,
-		Reason: intent.Reason, Snapshot: snapshot, SnapshotSha256: fmt.Sprintf("%x", sha256.Sum256(snapshot)),
+		Reason: intent.Reason, Snapshot: snapshot, SnapshotSha256: fmt.Sprintf("%x", sha256.Sum256(snapshot)), EngineBuildSha256: m.Build,
 	})
 	if err != nil {
 		return nil, err

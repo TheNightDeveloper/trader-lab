@@ -77,6 +77,23 @@ extension type PaperServiceClient (connect.Transport _transport) {
     );
   }
 
+  Future<labv1paper.GetPaperPlanContextResponse> getPaperPlanContext(
+    labv1paper.GetPaperPlanContextRequest input, {
+    connect.Headers? headers,
+    connect.AbortSignal? signal,
+    Function(connect.Headers)? onHeader,
+    Function(connect.Headers)? onTrailer,
+  }) {
+    return connect.Client(_transport).unary(
+      specs.PaperService.getPaperPlanContext,
+      input,
+      signal: signal,
+      headers: headers,
+      onHeader: onHeader,
+      onTrailer: onTrailer,
+    );
+  }
+
   Future<labv1paper.ConfirmPaperPlanResponse> confirmPaperPlan(
     labv1paper.ConfirmPaperPlanRequest input, {
     connect.Headers? headers,

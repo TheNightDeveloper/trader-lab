@@ -49,15 +49,20 @@ func paperFixture(t *testing.T) (*Market, *clock.Virtual, labv1connect.PaperServ
 	require.NoError(t, err)
 	empty := []byte(`{}`)
 	require.NoError(t, st.InsertReport(ctx, db.InsertReportParams{ID: "paper-evidence", Spec: empty, Split: empty, Evaluation: empty, Holdout: empty}))
-	snapshot, err := json.Marshal([]data.Bar{{
-		Instrument: "BTCUSDT", OpenTime: now.Add(-time.Hour), CloseTime: now, AvailableAt: now,
-		O: price, H: price, L: price, C: price,
-	}})
+	bars := make([]data.Bar, 30)
+	for i := range bars {
+		open := now.Add(time.Duration(i-len(bars)) * time.Hour)
+		bars[i] = data.Bar{
+			Instrument: "BTCUSDT", OpenTime: open, CloseTime: open.Add(time.Hour), AvailableAt: open.Add(time.Hour),
+			O: price, H: price, L: price, C: price,
+		}
+	}
+	snapshot, err := json.Marshal(bars)
 	require.NoError(t, err)
 	require.NoError(t, st.InsertMarketOpportunity(ctx, db.InsertMarketOpportunityParams{
 		Symbol: "BTCUSDT", RuleVersionID: version.ID, ReportID: "paper-evidence", SpecRevision: marketSpecRevision("BTCUSDT"),
 		CandleClosedAt: now, ObservedAt: now, ExpiresAt: now.Add(time.Hour), ReferenceClose: price.V,
-		Reason: "rule entry", Snapshot: snapshot, SnapshotSha256: paperPlanHash(snapshot),
+		Reason: "rule entry", Snapshot: snapshot, SnapshotSha256: paperPlanHash(snapshot), EngineBuildSha256: "scanner-build",
 	}))
 	opp, err := st.MarketOpportunity(ctx, db.MarketOpportunityParams{RuleVersionID: version.ID, Symbol: "BTCUSDT", CandleClosedAt: now})
 	require.NoError(t, err)

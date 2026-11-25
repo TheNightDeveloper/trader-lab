@@ -22,6 +22,7 @@ type Market struct {
 	Store   *store.Store
 	Clock   clock.Clock
 	Live    LiveSource
+	Build   string
 	Symbols []string // same configuration as public candle ingestion
 	Limiter *jobs.Limiter
 }

@@ -12,9 +12,9 @@ LIMIT 1;
 -- name: InsertMarketOpportunity :exec
 INSERT INTO market_opportunities (
     symbol, rule_version_id, report_id, spec_revision, candle_closed_at, observed_at,
-    expires_at, reference_close, reason, snapshot, snapshot_sha256
+    expires_at, reference_close, reason, snapshot, snapshot_sha256, engine_build_sha256
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 ON CONFLICT (rule_version_id, symbol, candle_closed_at) DO NOTHING;
 
 -- name: MarketOpportunity :one

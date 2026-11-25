@@ -17,8 +17,9 @@ import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'account.pb.dart' as $1;
+import 'chart.pb.dart' as $3;
 import 'common.pb.dart' as $0;
-import 'market.pb.dart' as $3;
+import 'market.pb.dart' as $4;
 import 'paper.pbenum.dart';
 import 'workspace.pb.dart' as $2;
 
@@ -843,6 +844,224 @@ class GetPaperPlanResponse extends $pb.GeneratedMessage {
   void clearReceipt() => $_clearField(3);
   @$pb.TagNumber(3)
   PaperReceipt ensureReceipt() => $_ensure(2);
+}
+
+class GetPaperPlanContextRequest extends $pb.GeneratedMessage {
+  factory GetPaperPlanContextRequest({
+    $core.String? planHash,
+  }) {
+    final result = GetPaperPlanContextRequest._();
+    if (planHash != null) result.planHash = planHash;
+    return result;
+  }
+
+  GetPaperPlanContextRequest._();
+
+  factory GetPaperPlanContextRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      GetPaperPlanContextRequest()..mergeFromBuffer(data, registry);
+  factory GetPaperPlanContextRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      GetPaperPlanContextRequest()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetPaperPlanContextRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: GetPaperPlanContextRequest.$_createMessage)
+    ..aOS(1, _omitFieldNames ? '' : 'planHash')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetPaperPlanContextRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetPaperPlanContextRequest copyWith(
+          void Function(GetPaperPlanContextRequest) updates) =>
+      super.copyWith(
+              (message) => updates(message as GetPaperPlanContextRequest))
+          as GetPaperPlanContextRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use GetPaperPlanContextRequest() / GetPaperPlanContextRequest.new instead')
+  static GetPaperPlanContextRequest create() => GetPaperPlanContextRequest._();
+  static $pb.GeneratedMessage $_createMessage() =>
+      GetPaperPlanContextRequest._();
+  @$core.override
+  GetPaperPlanContextRequest createEmptyInstance() =>
+      GetPaperPlanContextRequest._();
+  @$core.pragma('dart2js:noInline')
+  static GetPaperPlanContextRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetPaperPlanContextRequest>(
+          GetPaperPlanContextRequest.$_createMessage);
+  static GetPaperPlanContextRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get planHash => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set planHash($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasPlanHash() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearPlanHash() => $_clearField(1);
+}
+
+class GetPaperPlanContextResponse extends $pb.GeneratedMessage {
+  factory GetPaperPlanContextResponse({
+    PaperMarketContext? marketContext,
+  }) {
+    final result = GetPaperPlanContextResponse._();
+    if (marketContext != null) result.marketContext = marketContext;
+    return result;
+  }
+
+  GetPaperPlanContextResponse._();
+
+  factory GetPaperPlanContextResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      GetPaperPlanContextResponse()..mergeFromBuffer(data, registry);
+  factory GetPaperPlanContextResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      GetPaperPlanContextResponse()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetPaperPlanContextResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: GetPaperPlanContextResponse.$_createMessage)
+    ..aOM<PaperMarketContext>(1, _omitFieldNames ? '' : 'marketContext',
+        subBuilder: PaperMarketContext.$_createMessage)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetPaperPlanContextResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetPaperPlanContextResponse copyWith(
+          void Function(GetPaperPlanContextResponse) updates) =>
+      super.copyWith(
+              (message) => updates(message as GetPaperPlanContextResponse))
+          as GetPaperPlanContextResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use GetPaperPlanContextResponse() / GetPaperPlanContextResponse.new instead')
+  static GetPaperPlanContextResponse create() =>
+      GetPaperPlanContextResponse._();
+  static $pb.GeneratedMessage $_createMessage() =>
+      GetPaperPlanContextResponse._();
+  @$core.override
+  GetPaperPlanContextResponse createEmptyInstance() =>
+      GetPaperPlanContextResponse._();
+  @$core.pragma('dart2js:noInline')
+  static GetPaperPlanContextResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetPaperPlanContextResponse>(
+          GetPaperPlanContextResponse.$_createMessage);
+  static GetPaperPlanContextResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  PaperMarketContext get marketContext => $_getN(0);
+  @$pb.TagNumber(1)
+  set marketContext(PaperMarketContext value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasMarketContext() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearMarketContext() => $_clearField(1);
+  @$pb.TagNumber(1)
+  PaperMarketContext ensureMarketContext() => $_ensure(0);
+}
+
+class PaperMarketContext extends $pb.GeneratedMessage {
+  factory PaperMarketContext({
+    $core.Iterable<$3.ChartBar>? candles,
+    $fixnum.Int64? candleClosedAtUnixMs,
+    $fixnum.Int64? observedAtUnixMs,
+    $core.String? scannerBuildSha256,
+  }) {
+    final result = PaperMarketContext._();
+    if (candles != null) result.candles.addAll(candles);
+    if (candleClosedAtUnixMs != null)
+      result.candleClosedAtUnixMs = candleClosedAtUnixMs;
+    if (observedAtUnixMs != null) result.observedAtUnixMs = observedAtUnixMs;
+    if (scannerBuildSha256 != null)
+      result.scannerBuildSha256 = scannerBuildSha256;
+    return result;
+  }
+
+  PaperMarketContext._();
+
+  factory PaperMarketContext.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      PaperMarketContext()..mergeFromBuffer(data, registry);
+  factory PaperMarketContext.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      PaperMarketContext()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'PaperMarketContext',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: PaperMarketContext.$_createMessage)
+    ..pPM<$3.ChartBar>(1, _omitFieldNames ? '' : 'candles',
+        subBuilder: $3.ChartBar.$_createMessage)
+    ..aInt64(2, _omitFieldNames ? '' : 'candleClosedAtUnixMs')
+    ..aInt64(3, _omitFieldNames ? '' : 'observedAtUnixMs')
+    ..aOS(4, _omitFieldNames ? '' : 'scannerBuildSha256')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  PaperMarketContext clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  PaperMarketContext copyWith(void Function(PaperMarketContext) updates) =>
+      super.copyWith((message) => updates(message as PaperMarketContext))
+          as PaperMarketContext;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use PaperMarketContext() / PaperMarketContext.new instead')
+  static PaperMarketContext create() => PaperMarketContext._();
+  static $pb.GeneratedMessage $_createMessage() => PaperMarketContext._();
+  @$core.override
+  PaperMarketContext createEmptyInstance() => PaperMarketContext._();
+  @$core.pragma('dart2js:noInline')
+  static PaperMarketContext getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<PaperMarketContext>(
+          PaperMarketContext.$_createMessage);
+  static PaperMarketContext? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<$3.ChartBar> get candles => $_getList(0);
+
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get candleClosedAtUnixMs => $_getI64(1);
+  @$pb.TagNumber(2)
+  set candleClosedAtUnixMs($fixnum.Int64 value) => $_setInt64(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasCandleClosedAtUnixMs() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearCandleClosedAtUnixMs() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $fixnum.Int64 get observedAtUnixMs => $_getI64(2);
+  @$pb.TagNumber(3)
+  set observedAtUnixMs($fixnum.Int64 value) => $_setInt64(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasObservedAtUnixMs() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearObservedAtUnixMs() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.String get scannerBuildSha256 => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set scannerBuildSha256($core.String value) => $_setString(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasScannerBuildSha256() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearScannerBuildSha256() => $_clearField(4);
 }
 
 class ConfirmPaperPlanRequest extends $pb.GeneratedMessage {
@@ -1842,7 +2061,7 @@ class GetPaperReplayResponse extends $pb.GeneratedMessage {
 
 class PaperReplayObservation extends $pb.GeneratedMessage {
   factory PaperReplayObservation({
-    $3.MarketOpportunity? opportunity,
+    $4.MarketOpportunity? opportunity,
     $core.String? snapshotSha256,
     $core.int? inputCandleCount,
     $fixnum.Int64? lastInputAvailableAtUnixMs,
@@ -1851,6 +2070,7 @@ class PaperReplayObservation extends $pb.GeneratedMessage {
     $0.Money? lastInputLow,
     $core.String? ruleSha256,
     $core.String? entryRuleJson,
+    PaperMarketContext? marketContext,
   }) {
     final result = PaperReplayObservation._();
     if (opportunity != null) result.opportunity = opportunity;
@@ -1863,6 +2083,7 @@ class PaperReplayObservation extends $pb.GeneratedMessage {
     if (lastInputLow != null) result.lastInputLow = lastInputLow;
     if (ruleSha256 != null) result.ruleSha256 = ruleSha256;
     if (entryRuleJson != null) result.entryRuleJson = entryRuleJson;
+    if (marketContext != null) result.marketContext = marketContext;
     return result;
   }
 
@@ -1879,8 +2100,8 @@ class PaperReplayObservation extends $pb.GeneratedMessage {
       _omitMessageNames ? '' : 'PaperReplayObservation',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: PaperReplayObservation.$_createMessage)
-    ..aOM<$3.MarketOpportunity>(1, _omitFieldNames ? '' : 'opportunity',
-        subBuilder: $3.MarketOpportunity.$_createMessage)
+    ..aOM<$4.MarketOpportunity>(1, _omitFieldNames ? '' : 'opportunity',
+        subBuilder: $4.MarketOpportunity.$_createMessage)
     ..aOS(2, _omitFieldNames ? '' : 'snapshotSha256')
     ..aI(3, _omitFieldNames ? '' : 'inputCandleCount')
     ..aInt64(4, _omitFieldNames ? '' : 'lastInputAvailableAtUnixMs')
@@ -1892,6 +2113,8 @@ class PaperReplayObservation extends $pb.GeneratedMessage {
         subBuilder: $0.Money.$_createMessage)
     ..aOS(8, _omitFieldNames ? '' : 'ruleSha256')
     ..aOS(9, _omitFieldNames ? '' : 'entryRuleJson')
+    ..aOM<PaperMarketContext>(10, _omitFieldNames ? '' : 'marketContext',
+        subBuilder: PaperMarketContext.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1919,15 +2142,15 @@ class PaperReplayObservation extends $pb.GeneratedMessage {
   static PaperReplayObservation? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $3.MarketOpportunity get opportunity => $_getN(0);
+  $4.MarketOpportunity get opportunity => $_getN(0);
   @$pb.TagNumber(1)
-  set opportunity($3.MarketOpportunity value) => $_setField(1, value);
+  set opportunity($4.MarketOpportunity value) => $_setField(1, value);
   @$pb.TagNumber(1)
   $core.bool hasOpportunity() => $_has(0);
   @$pb.TagNumber(1)
   void clearOpportunity() => $_clearField(1);
   @$pb.TagNumber(1)
-  $3.MarketOpportunity ensureOpportunity() => $_ensure(0);
+  $4.MarketOpportunity ensureOpportunity() => $_ensure(0);
 
   @$pb.TagNumber(2)
   $core.String get snapshotSha256 => $_getSZ(1);
@@ -2006,17 +2229,31 @@ class PaperReplayObservation extends $pb.GeneratedMessage {
   $core.bool hasEntryRuleJson() => $_has(8);
   @$pb.TagNumber(9)
   void clearEntryRuleJson() => $_clearField(9);
+
+  @$pb.TagNumber(10)
+  PaperMarketContext get marketContext => $_getN(9);
+  @$pb.TagNumber(10)
+  set marketContext(PaperMarketContext value) => $_setField(10, value);
+  @$pb.TagNumber(10)
+  $core.bool hasMarketContext() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearMarketContext() => $_clearField(10);
+  @$pb.TagNumber(10)
+  PaperMarketContext ensureMarketContext() => $_ensure(9);
 }
 
 class PaperReplayExecution extends $pb.GeneratedMessage {
   factory PaperReplayExecution({
     PaperExecutionEvent? event,
-    $3.MarketCandle? confirmationCandle,
+    $4.MarketCandle? confirmationCandle,
+    $core.String? approvalBuildSha256,
   }) {
     final result = PaperReplayExecution._();
     if (event != null) result.event = event;
     if (confirmationCandle != null)
       result.confirmationCandle = confirmationCandle;
+    if (approvalBuildSha256 != null)
+      result.approvalBuildSha256 = approvalBuildSha256;
     return result;
   }
 
@@ -2035,8 +2272,9 @@ class PaperReplayExecution extends $pb.GeneratedMessage {
       createEmptyInstance: PaperReplayExecution.$_createMessage)
     ..aOM<PaperExecutionEvent>(1, _omitFieldNames ? '' : 'event',
         subBuilder: PaperExecutionEvent.$_createMessage)
-    ..aOM<$3.MarketCandle>(2, _omitFieldNames ? '' : 'confirmationCandle',
-        subBuilder: $3.MarketCandle.$_createMessage)
+    ..aOM<$4.MarketCandle>(2, _omitFieldNames ? '' : 'confirmationCandle',
+        subBuilder: $4.MarketCandle.$_createMessage)
+    ..aOS(3, _omitFieldNames ? '' : 'approvalBuildSha256')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -2074,15 +2312,24 @@ class PaperReplayExecution extends $pb.GeneratedMessage {
   PaperExecutionEvent ensureEvent() => $_ensure(0);
 
   @$pb.TagNumber(2)
-  $3.MarketCandle get confirmationCandle => $_getN(1);
+  $4.MarketCandle get confirmationCandle => $_getN(1);
   @$pb.TagNumber(2)
-  set confirmationCandle($3.MarketCandle value) => $_setField(2, value);
+  set confirmationCandle($4.MarketCandle value) => $_setField(2, value);
   @$pb.TagNumber(2)
   $core.bool hasConfirmationCandle() => $_has(1);
   @$pb.TagNumber(2)
   void clearConfirmationCandle() => $_clearField(2);
   @$pb.TagNumber(2)
-  $3.MarketCandle ensureConfirmationCandle() => $_ensure(1);
+  $4.MarketCandle ensureConfirmationCandle() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  $core.String get approvalBuildSha256 => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set approvalBuildSha256($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasApprovalBuildSha256() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearApprovalBuildSha256() => $_clearField(3);
 }
 
 class CancelPaperEntryRequest extends $pb.GeneratedMessage {
@@ -3412,6 +3659,7 @@ class PaperPlan extends $pb.GeneratedMessage {
     $core.String? fillModel,
     $fixnum.Int64? referenceCandleClosedAtUnixMs,
     $core.int? referenceCandleRevision,
+    $core.String? engineBuildSha256,
   }) {
     final result = PaperPlan._();
     if (planHash != null) result.planHash = planHash;
@@ -3442,6 +3690,7 @@ class PaperPlan extends $pb.GeneratedMessage {
       result.referenceCandleClosedAtUnixMs = referenceCandleClosedAtUnixMs;
     if (referenceCandleRevision != null)
       result.referenceCandleRevision = referenceCandleRevision;
+    if (engineBuildSha256 != null) result.engineBuildSha256 = engineBuildSha256;
     return result;
   }
 
@@ -3499,6 +3748,7 @@ class PaperPlan extends $pb.GeneratedMessage {
     ..aOS(24, _omitFieldNames ? '' : 'fillModel')
     ..aInt64(25, _omitFieldNames ? '' : 'referenceCandleClosedAtUnixMs')
     ..aI(26, _omitFieldNames ? '' : 'referenceCandleRevision')
+    ..aOS(27, _omitFieldNames ? '' : 'engineBuildSha256')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -3785,6 +4035,15 @@ class PaperPlan extends $pb.GeneratedMessage {
   $core.bool hasReferenceCandleRevision() => $_has(25);
   @$pb.TagNumber(26)
   void clearReferenceCandleRevision() => $_clearField(26);
+
+  @$pb.TagNumber(27)
+  $core.String get engineBuildSha256 => $_getSZ(26);
+  @$pb.TagNumber(27)
+  set engineBuildSha256($core.String value) => $_setString(26, value);
+  @$pb.TagNumber(27)
+  $core.bool hasEngineBuildSha256() => $_has(26);
+  @$pb.TagNumber(27)
+  void clearEngineBuildSha256() => $_clearField(27);
 }
 
 /// PaperService only operates on local, simulated spot accounts.
@@ -3809,6 +4068,10 @@ class PaperServiceApi {
           $pb.ClientContext? ctx, GetPaperPlanRequest request) =>
       _client.invoke<GetPaperPlanResponse>(
           ctx, 'PaperService', 'GetPaperPlan', request, GetPaperPlanResponse());
+  $async.Future<GetPaperPlanContextResponse> getPaperPlanContext(
+          $pb.ClientContext? ctx, GetPaperPlanContextRequest request) =>
+      _client.invoke<GetPaperPlanContextResponse>(ctx, 'PaperService',
+          'GetPaperPlanContext', request, GetPaperPlanContextResponse());
   $async.Future<ConfirmPaperPlanResponse> confirmPaperPlan(
           $pb.ClientContext? ctx, ConfirmPaperPlanRequest request) =>
       _client.invoke<ConfirmPaperPlanResponse>(ctx, 'PaperService',

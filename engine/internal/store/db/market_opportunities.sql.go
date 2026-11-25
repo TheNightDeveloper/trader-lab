@@ -13,24 +13,25 @@ import (
 const insertMarketOpportunity = `-- name: InsertMarketOpportunity :exec
 INSERT INTO market_opportunities (
     symbol, rule_version_id, report_id, spec_revision, candle_closed_at, observed_at,
-    expires_at, reference_close, reason, snapshot, snapshot_sha256
+    expires_at, reference_close, reason, snapshot, snapshot_sha256, engine_build_sha256
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 ON CONFLICT (rule_version_id, symbol, candle_closed_at) DO NOTHING
 `
 
 type InsertMarketOpportunityParams struct {
-	Symbol         string
-	RuleVersionID  int64
-	ReportID       string
-	SpecRevision   string
-	CandleClosedAt time.Time
-	ObservedAt     time.Time
-	ExpiresAt      time.Time
-	ReferenceClose int64
-	Reason         string
-	Snapshot       []byte
-	SnapshotSha256 string
+	Symbol            string
+	RuleVersionID     int64
+	ReportID          string
+	SpecRevision      string
+	CandleClosedAt    time.Time
+	ObservedAt        time.Time
+	ExpiresAt         time.Time
+	ReferenceClose    int64
+	Reason            string
+	Snapshot          []byte
+	SnapshotSha256    string
+	EngineBuildSha256 string
 }
 
 func (q *Queries) InsertMarketOpportunity(ctx context.Context, arg InsertMarketOpportunityParams) error {
@@ -46,6 +47,7 @@ func (q *Queries) InsertMarketOpportunity(ctx context.Context, arg InsertMarketO
 		arg.Reason,
 		arg.Snapshot,
 		arg.SnapshotSha256,
+		arg.EngineBuildSha256,
 	)
 	return err
 }

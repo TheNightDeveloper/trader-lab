@@ -163,9 +163,7 @@ func (h *Chart) GetChart(ctx context.Context, req *connect.Request[labv1.GetChar
 	byOpen := make(map[int64]data.Bar, len(shown))
 	for _, b := range shown {
 		byOpen[b.OpenTime.UnixMilli()] = b
-		res.Bars = append(res.Bars, &labv1.ChartBar{
-			OpenUnixMs: ms(b.OpenTime), Open: decP(b.O.V, 8), High: decP(b.H.V, 8), Low: decP(b.L.V, 8), Close: decP(b.C.V, 8), Volume: decP(b.Volume.V, 8),
-		})
+		res.Bars = append(res.Bars, chartBarP(b))
 	}
 	for _, d := range decisions {
 		b, ok := byOpen[d.InputBarOpen.UnixMilli()]
@@ -190,6 +188,13 @@ func (h *Chart) GetChart(ctx context.Context, req *connect.Request[labv1.GetChar
 
 	slices.SortStableFunc(res.Markers, func(a, b *labv1.ChartMarker) int { return int(a.BarOpenUnixMs - b.BarOpenUnixMs) })
 	return connect.NewResponse(res), nil
+}
+
+func chartBarP(b data.Bar) *labv1.ChartBar {
+	return &labv1.ChartBar{
+		OpenUnixMs: ms(b.OpenTime), Open: decP(b.O.V, 8), High: decP(b.H.V, 8), Low: decP(b.L.V, 8),
+		Close: decP(b.C.V, 8), Volume: decP(b.Volume.V, 8),
+	}
 }
 
 func (h *Chart) GetDecision(ctx context.Context, req *connect.Request[labv1.GetDecisionRequest]) (*connect.Response[labv1.GetDecisionResponse], error) {

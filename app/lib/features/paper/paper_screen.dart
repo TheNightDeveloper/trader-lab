@@ -22,6 +22,7 @@ import '../library/rule_editor.dart' show ruleNumber;
 import '../page_frame.dart';
 import 'paper_controls.dart';
 import 'paper_entries.dart';
+import 'paper_market_chart.dart';
 import 'paper_providers.dart';
 
 class PaperScreen extends ConsumerWidget {
@@ -154,6 +155,7 @@ class PaperPlanScreen extends ConsumerWidget {
               onRefresh: () => ref.invalidate(provider),
             ),
           ),
+          PaperPlanMarket(plan: review.plan),
         ],
       ],
     );
@@ -204,7 +206,10 @@ class PaperPlanSummary extends StatelessWidget {
     final l = L10n.of(context);
     return SectionCard(
       title: l.paperRiskSummary,
-      trailing: Wrap(spacing: AppSpace.sm, children: [Mono(plan.instrument.symbol), Mono(plan.account.accountId)]),
+      trailing: Wrap(
+        spacing: AppSpace.sm,
+        children: [Text(l.paperSpotBuy), Mono(plan.instrument.symbol), Mono(plan.account.accountId)],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -222,7 +227,6 @@ class PaperPlanSummary extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpace.md),
-          Text(l.paperFillAssumptions, style: AppText.caption),
           Wrap(
             spacing: AppSpace.sm,
             children: [
@@ -237,11 +241,6 @@ class PaperPlanSummary extends StatelessWidget {
               Num(fractionToBps(plan.slippageRate), unit: 'bps'),
             ],
           ),
-          Wrap(
-            spacing: AppSpace.sm,
-            children: [Text(l.paperCandleTime), Mono('${fmtDateTime(utcMs(plan.referenceCandleClosedAtUnixMs))} UTC')],
-          ),
-          PaperTimeLine(label: l.paperPlanQuoteAt, at: plan.quotedAtUnixMs),
           Wrap(
             spacing: AppSpace.sm,
             children: [Text(l.paperPlanExpiry), Mono('${fmtDateTime(utcMs(plan.expiresAtUnixMs))} UTC')],

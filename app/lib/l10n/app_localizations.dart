@@ -333,6 +333,12 @@ abstract class L10n {
   /// **'ریسک و هزینه برای حساب مجازی'**
   String get paperRiskSummary;
 
+  /// No description provided for @paperSpotBuy.
+  ///
+  /// In fa, this message translates to:
+  /// **'خرید اسپات'**
+  String get paperSpotBuy;
+
   /// No description provided for @paperStop.
   ///
   /// In fa, this message translates to:
@@ -405,10 +411,34 @@ abstract class L10n {
   /// **'زمان دادهٔ برنامه'**
   String get paperPlanQuoteAt;
 
+  /// No description provided for @paperMarketChart.
+  ///
+  /// In fa, this message translates to:
+  /// **'نمودار کندل‌های یک‌ساعتهٔ فرصت'**
+  String get paperMarketChart;
+
+  /// No description provided for @paperScannerBuild.
+  ///
+  /// In fa, this message translates to:
+  /// **'بیلد اسکن فرصت'**
+  String get paperScannerBuild;
+
+  /// No description provided for @paperPlanEngineBuild.
+  ///
+  /// In fa, this message translates to:
+  /// **'بیلد ساخت برنامه'**
+  String get paperPlanEngineBuild;
+
+  /// No description provided for @paperApprovalBuild.
+  ///
+  /// In fa, this message translates to:
+  /// **'بیلد تأیید برنامه'**
+  String get paperApprovalBuild;
+
   /// No description provided for @paperFillAssumptions.
   ///
   /// In fa, this message translates to:
-  /// **'ورود با قیمت بازشدن کندل کامل یک‌دقیقه‌ای بعد از تأیید و حداکثر یک درصد از حجم کندل شبیه‌سازی می‌شود. کارمزد و لغزش اعمال می‌شوند و عبور قیمت از حد ضرر می‌تواند زیان بیشتری ایجاد کند.'**
+  /// **'ورود با قیمت بازشدن کندل کامل یک‌دقیقه‌ای بعد از تأیید و حداکثر یک درصد از حجم کندل شبیه‌سازی می‌شود. کارمزد و لغزش اعمال می‌شوند و عبور قیمت از حد ضرر می‌تواند زیان بیشتری ایجاد کند. اگر هر دو حد در یک کندل لمس شوند و ترتیب از قیمت بازشدن مشخص نباشد، شبیه‌ساز خروج با حد ضرر را فرض می‌کند.'**
   String get paperFillAssumptions;
 
   /// No description provided for @paperFeeRate.

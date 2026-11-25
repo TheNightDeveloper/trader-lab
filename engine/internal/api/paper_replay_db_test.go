@@ -19,6 +19,7 @@ import (
 func TestPaperReplayUsesOnlyRecordedDecisionEvidence(t *testing.T) {
 	ctx := context.Background()
 	market, _, client, opportunityID := paperFixture(t)
+	market.Build = "review-build"
 	const unit = paperTestUnit
 	_, err := client.InitializePaperAccount(ctx, connect.NewRequest(&labv1.InitializePaperAccountRequest{
 		Capital: usdtP(250 * unit), MaxLossPerTrade: usdtP(15 * unit), MaxOpenLoss: usdtP(20 * unit), MaxSpotExposure: usdtP(200 * unit),
@@ -30,6 +31,17 @@ func TestPaperReplayUsesOnlyRecordedDecisionEvidence(t *testing.T) {
 	require.NoError(t, err)
 	plan := preview.Msg.GetPlan()
 	require.NotNil(t, plan)
+	require.Equal(t, "review-build", plan.GetEngineBuildSha256())
+	readChart := func() *labv1.PaperMarketContext {
+		t.Helper()
+		response, err := client.GetPaperPlanContext(ctx, connect.NewRequest(&labv1.GetPaperPlanContextRequest{PlanHash: plan.GetPlanHash()}))
+		require.NoError(t, err)
+		return response.Msg.GetMarketContext()
+	}
+	chart := readChart()
+	require.Equal(t, "scanner-build", chart.GetScannerBuildSha256())
+	require.Len(t, chart.GetCandles(), 24)
+	require.Equal(t, ms(now.Add(-time.Hour)), chart.GetCandles()[23].GetOpenUnixMs())
 	revise := func(value int64) {
 		t.Helper()
 		price := money.Price{V: value, Scale: instrument.Scale}
@@ -39,6 +51,7 @@ func TestPaperReplayUsesOnlyRecordedDecisionEvidence(t *testing.T) {
 		require.NoError(t, err)
 	}
 	revise(100*unit + unit/10)
+	market.Build = "approval-build"
 	confirmed, err := client.ConfirmPaperPlan(ctx, connect.NewRequest(&labv1.ConfirmPaperPlanRequest{
 		Account: paperAccountRef(), PlanHash: plan.GetPlanHash(),
 	}))
@@ -63,8 +76,10 @@ func TestPaperReplayUsesOnlyRecordedDecisionEvidence(t *testing.T) {
 	require.Nil(t, observation.GetExecution())
 	require.Nil(t, observation.GetPlan())
 	require.Equal(t, plan.GetSnapshotSha256(), observation.GetObservation().GetSnapshotSha256())
+	require.True(t, proto.Equal(chart, observation.GetObservation().GetMarketContext()))
+	require.True(t, proto.Equal(chart, readChart()))
 	require.Equal(t, usdtP(100*unit).GetUnits(), observation.GetObservation().GetOpportunity().GetReferenceClose().GetUnits())
-	require.EqualValues(t, 1, observation.GetObservation().GetInputCandleCount())
+	require.EqualValues(t, 30, observation.GetObservation().GetInputCandleCount())
 	require.Contains(t, observation.GetObservation().GetEntryRuleJson(), `"op": "gt"`)
 	review := read(observation.GetNextCursor())
 	require.NotNil(t, review.PreviousCursor)
@@ -74,6 +89,7 @@ func TestPaperReplayUsesOnlyRecordedDecisionEvidence(t *testing.T) {
 	accepted := read(review.GetNextCursor())
 	require.EqualValues(t, -1, accepted.GetPreviousCursor())
 	require.Equal(t, "accepted", accepted.GetExecution().GetEvent().GetKind())
+	require.Equal(t, "approval-build", accepted.GetExecution().GetApprovalBuildSha256())
 	require.EqualValues(t, 2, accepted.GetExecution().GetConfirmationCandle().GetRevision())
 	require.Equal(t, usdtP(100*unit+unit/10).GetUnits(), accepted.GetExecution().GetConfirmationCandle().GetClose().GetUnits())
 	require.Nil(t, accepted.GetExecution().GetEvent().GetFee())

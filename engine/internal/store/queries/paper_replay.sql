@@ -1,6 +1,6 @@
 -- name: StorePaperConfirmationEvidence :exec
-INSERT INTO paper_confirmation_evidence (event_id, open_time, close_time, available_at, revision, close_price)
-VALUES ($1, $2, $3, $4, $5, $6);
+INSERT INTO paper_confirmation_evidence (event_id, open_time, close_time, available_at, revision, close_price, engine_build_sha256)
+VALUES ($1, $2, $3, $4, $5, $6, $7);
 
 -- name: PaperConfirmationEvidence :one
 SELECT * FROM paper_confirmation_evidence WHERE event_id = $1;

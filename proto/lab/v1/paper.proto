@@ -3,6 +3,7 @@ syntax = "proto3";
 package lab.v1;
 
 import "lab/v1/account.proto";
+import "lab/v1/chart.proto";
 import "lab/v1/common.proto";
 import "lab/v1/market.proto";
 import "lab/v1/workspace.proto";
@@ -13,6 +14,7 @@ service PaperService {
   rpc InitializePaperAccount(InitializePaperAccountRequest) returns (InitializePaperAccountResponse);
   rpc PreviewPaperPlan(PreviewPaperPlanRequest) returns (PreviewPaperPlanResponse);
   rpc GetPaperPlan(GetPaperPlanRequest) returns (GetPaperPlanResponse);
+  rpc GetPaperPlanContext(GetPaperPlanContextRequest) returns (GetPaperPlanContextResponse);
   rpc ConfirmPaperPlan(ConfirmPaperPlanRequest) returns (ConfirmPaperPlanResponse);
   rpc GetPaperReceipt(GetPaperReceiptRequest) returns (GetPaperReceiptResponse);
   rpc ListPaperJournal(ListPaperJournalRequest) returns (ListPaperJournalResponse);
@@ -75,6 +77,21 @@ message GetPaperPlanResponse {
   PaperPlan plan = 1;
   PaperRestriction restriction = 2; // the recorded plan may no longer be usable
   PaperReceipt receipt = 3; // survives a lost confirmation response
+}
+
+message GetPaperPlanContextRequest {
+  string plan_hash = 1;
+}
+
+message GetPaperPlanContextResponse {
+  PaperMarketContext market_context = 1;
+}
+
+message PaperMarketContext {
+  repeated ChartBar candles = 1; // up to 24 closed hourly inputs from the observed snapshot
+  int64 candle_closed_at_unix_ms = 2;
+  int64 observed_at_unix_ms = 3;
+  string scanner_build_sha256 = 4; // absent on older opportunities
 }
 
 message ConfirmPaperPlanRequest {
@@ -156,11 +173,13 @@ message PaperReplayObservation {
   Money last_input_low = 7;
   string rule_sha256 = 8;
   string entry_rule_json = 9;
+  PaperMarketContext market_context = 10;
 }
 
 message PaperReplayExecution {
   PaperExecutionEvent event = 1;
   MarketCandle confirmation_candle = 2; // present for approvals recorded with this evidence
+  string approval_build_sha256 = 3;
 }
 
 message CancelPaperEntryRequest {
@@ -297,4 +316,5 @@ message PaperPlan {
   string fill_model = 24;
   int64 reference_candle_closed_at_unix_ms = 25;
   int32 reference_candle_revision = 26;
+  string engine_build_sha256 = 27;
 }

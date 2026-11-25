@@ -10,7 +10,6 @@ import (
 	"github.com/jackc/pgx/v5"
 	"google.golang.org/protobuf/proto"
 
-	"tradinglab/engine/internal/data"
 	labv1 "tradinglab/engine/internal/gen/lab/v1"
 	"tradinglab/engine/internal/store/db"
 )
@@ -64,35 +63,18 @@ func (p *Paper) GetPaperReplay(ctx context.Context, req *connect.Request[labv1.G
 }
 
 func readPaperReplayObservation(ctx context.Context, q *db.Queries, entry db.PaperEntry) (*labv1.PaperReplayObservation, error) {
-	record, err := q.PaperReplayOpportunity(ctx, entry.OpportunityID)
-	if err != nil {
-		return nil, err
-	}
 	plan, err := readPaperPlan(ctx, q, entry.PlanHash)
 	if err != nil {
 		return nil, err
 	}
-	if paperPlanHash(record.Snapshot) != record.SnapshotSha256 || record.SnapshotSha256 != plan.GetSnapshotSha256() ||
-		record.Symbol != entry.Symbol || record.RuleVersionID != plan.GetRuleVersionId() || record.ReportID != plan.GetReportId() ||
-		record.SpecRevision != plan.GetInstrument().GetSpecRevision() {
-		return nil, fmt.Errorf("paper replay opportunity %d does not match its review", record.ID)
+	if plan.GetOpportunityId() != entry.OpportunityID || plan.GetInstrument().GetSymbol() != entry.Symbol {
+		return nil, fmt.Errorf("paper replay receipt %d does not match its review", entry.ID)
 	}
-	var bars []data.Bar
-	if err := json.Unmarshal(record.Snapshot, &bars); err != nil {
-		return nil, fmt.Errorf("decode paper replay opportunity %d: %w", record.ID, err)
-	}
-	if len(bars) == 0 {
-		return nil, fmt.Errorf("paper replay opportunity %d has no recorded input", record.ID)
-	}
-	for _, bar := range bars {
-		if bar.Instrument != record.Symbol || bar.CloseTime.After(record.CandleClosedAt) || bar.AvailableAt.After(record.ObservedAt) {
-			return nil, fmt.Errorf("paper replay opportunity %d contains an invalid input", record.ID)
-		}
+	record, bars, err := readPaperMarketInput(ctx, q, plan)
+	if err != nil {
+		return nil, err
 	}
 	last := bars[len(bars)-1]
-	if !last.CloseTime.Equal(record.CandleClosedAt) || last.C.V != record.ReferenceClose {
-		return nil, fmt.Errorf("paper replay opportunity %d has a mismatched reference candle", record.ID)
-	}
 	version, err := q.GetRuleVersion(ctx, record.RuleVersionID)
 	if err != nil {
 		return nil, err
@@ -113,7 +95,7 @@ func readPaperReplayObservation(ctx context.Context, q *db.Queries, entry db.Pap
 		},
 		SnapshotSha256: record.SnapshotSha256, InputCandleCount: int32(len(bars)), LastInputAvailableAtUnixMs: ms(last.AvailableAt),
 		LastInputOpen: usdtP(last.O.V), LastInputHigh: usdtP(last.H.V), LastInputLow: usdtP(last.L.V),
-		RuleSha256: version.ContentHash, EntryRuleJson: string(rule),
+		RuleSha256: version.ContentHash, EntryRuleJson: string(rule), MarketContext: paperMarketContextP(record, bars),
 	}, nil
 }
 
@@ -129,6 +111,7 @@ func readPaperReplayExecution(ctx context.Context, q *db.Queries, entry db.Paper
 	if execution.Event.GetKind() == "accepted" {
 		evidence, err := q.PaperConfirmationEvidence(ctx, cursor)
 		if err == nil {
+			execution.ApprovalBuildSha256 = evidence.EngineBuildSha256
 			execution.ConfirmationCandle = &labv1.MarketCandle{
 				OpenedAtUnixMs: ms(evidence.OpenTime), ClosedAtUnixMs: ms(evidence.CloseTime),
 				AvailableAtUnixMs: ms(evidence.AvailableAt), Revision: evidence.Revision, Close: usdtP(evidence.ClosePrice),

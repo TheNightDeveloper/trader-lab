@@ -18,6 +18,18 @@ final paperPlanProvider = StreamProvider.autoDispose.family<GetPaperPlanResponse
   return _pollPaper(ref, (signal) => client.getPaperPlan(GetPaperPlanRequest(planHash: hash), signal: signal));
 }, retry: reconnectForever);
 
+// The chart is an immutable read, so plan status polling only refreshes restrictions and receipts.
+final paperPlanContextProvider = FutureProvider.autoDispose.family<GetPaperPlanContextResponse, String>((ref, hash) {
+  final signal = CancelableSignal();
+  ref.onDispose(signal.cancel);
+  return ref
+      .watch(paperClientProvider)
+      .getPaperPlanContext(
+        GetPaperPlanContextRequest(planHash: hash),
+        signal: TimeoutSignal(const Duration(seconds: 5), parent: signal),
+      );
+}, retry: apiRetry);
+
 final paperReceiptProvider = StreamProvider.autoDispose.family<GetPaperReceiptResponse, Int64>((ref, id) {
   final client = ref.watch(paperClientProvider);
   return _pollPaper(ref, (signal) => client.getPaperReceipt(GetPaperReceiptRequest(receiptId: id), signal: signal));

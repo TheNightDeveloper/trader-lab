@@ -207,18 +207,19 @@ type LifecycleEvent struct {
 }
 
 type MarketOpportunity struct {
-	ID             int64
-	Symbol         string
-	RuleVersionID  int64
-	ReportID       string
-	SpecRevision   string
-	CandleClosedAt time.Time
-	ObservedAt     time.Time
-	ExpiresAt      time.Time
-	ReferenceClose int64
-	Reason         string
-	Snapshot       []byte
-	SnapshotSha256 string
+	ID                int64
+	Symbol            string
+	RuleVersionID     int64
+	ReportID          string
+	SpecRevision      string
+	CandleClosedAt    time.Time
+	ObservedAt        time.Time
+	ExpiresAt         time.Time
+	ReferenceClose    int64
+	Reason            string
+	Snapshot          []byte
+	SnapshotSha256    string
+	EngineBuildSha256 string
 }
 
 type MarketScanSubscription struct {
@@ -251,12 +252,13 @@ type PaperAccount struct {
 }
 
 type PaperConfirmationEvidence struct {
-	EventID     int64
-	OpenTime    time.Time
-	CloseTime   time.Time
-	AvailableAt time.Time
-	Revision    int32
-	ClosePrice  int64
+	EventID           int64
+	OpenTime          time.Time
+	CloseTime         time.Time
+	AvailableAt       time.Time
+	Revision          int32
+	ClosePrice        int64
+	EngineBuildSha256 string
 }
 
 type PaperEntry struct {

@@ -2,6 +2,14 @@
 
 Update at the end of every session.
 
+## P3 Paper plan chart and provenance (2026-11-25)
+
+The plan review plots up to 24 hourly candles from the recorded opportunity.
+It displays the review levels on the chart and gives the candle time, the plan
+quote time and the fill assumption below it. Decision replay uses the same
+bounded historical view. New opportunities, plans and approvals retain their
+respective engine build hashes.
+
 ## P3 Personal journal notes (2026-11-25)
 
 A receipt now accepts an optional personal note. The engine records separate
