@@ -59,4 +59,18 @@ abstract final class PaperService {
     labv1paper.CancelPaperEntryRequest.new,
     labv1paper.CancelPaperEntryResponse.new,
   );
+
+  static const reducePaperPosition = connect.Spec(
+    '/$name/ReducePaperPosition',
+    connect.StreamType.unary,
+    labv1paper.ReducePaperPositionRequest.new,
+    labv1paper.ReducePaperPositionResponse.new,
+  );
+
+  static const setPaperEntryPause = connect.Spec(
+    '/$name/SetPaperEntryPause',
+    connect.StreamType.unary,
+    labv1paper.SetPaperEntryPauseRequest.new,
+    labv1paper.SetPaperEntryPauseResponse.new,
+  );
 }

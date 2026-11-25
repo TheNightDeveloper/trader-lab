@@ -40,6 +40,16 @@ func (p *Paper) PreviewPaperPlan(ctx context.Context, req *connect.Request[labv1
 	if err != nil {
 		return nil, err
 	}
+	if account.EntriesPaused {
+		return rejectPaperPlan("entries_paused", "ورود تازه برای این حساب متوقف است"), nil
+	}
+	ledger, err := p.Market.Store.ReconcilePaperBook(ctx, account.ID)
+	if err != nil {
+		return nil, err
+	}
+	if !paperReconciled(ledger) {
+		return connect.NewResponse(&labv1.PreviewPaperPlanResponse{Restriction: paperReconciliationRestriction()}), nil
+	}
 	opp, err := p.Market.Store.PaperOpportunity(ctx, in.GetOpportunityId())
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, connect.NewError(connect.CodeNotFound, errors.New("فرصت پیدا نشد"))
@@ -177,8 +187,18 @@ func (p *Paper) reviewRestriction(ctx context.Context, q *db.Queries, plan *labv
 	if now.UnixMilli() >= plan.GetExpiresAtUnixMs() {
 		return paperRestriction("plan_expired", "اعتبار این برنامه پایان یافته است"), nil
 	}
+	if account.EntriesPaused {
+		return paperRestriction("entries_paused", "ورود تازه برای این حساب متوقف است"), nil
+	}
 	if account.Revision != plan.GetAccountRevision() || account.PolicyRevision != plan.GetRiskPolicy().GetRevision() {
 		return paperRestriction("account_changed", "موجودی یا سیاست حساب تغییر کرده است؛ برنامه را دوباره مرور کنید"), nil
+	}
+	ledger, err := q.ReconcilePaperBook(ctx, account.ID)
+	if err != nil {
+		return nil, err
+	}
+	if !paperReconciled(ledger) {
+		return paperReconciliationRestriction(), nil
 	}
 	symbol := plan.GetInstrument().GetSymbol()
 	spec, supported := paperSpotSpec(symbol)

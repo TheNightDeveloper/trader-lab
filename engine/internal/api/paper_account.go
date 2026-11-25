@@ -34,6 +34,37 @@ func (p *Paper) GetPaperAccount(ctx context.Context, _ *connect.Request[labv1.Ge
 	return connect.NewResponse(book), nil
 }
 
+func (p *Paper) SetPaperEntryPause(ctx context.Context, req *connect.Request[labv1.SetPaperEntryPauseRequest]) (*connect.Response[labv1.SetPaperEntryPauseResponse], error) {
+	if !paperAccountMatches(req.Msg.GetAccount()) || req.Msg.Paused == nil {
+		return nil, invalid("حساب مجازی و وضعیت ورود را مشخص کنید")
+	}
+	paused := req.Msg.GetPaused()
+	err := p.Market.Store.InTx(ctx, func(q *db.Queries) error {
+		if err := q.LockPaperAccount(ctx, paperAccountID); err != nil {
+			return err
+		}
+		wasPaused, err := q.PaperEntriesPaused(ctx, paperAccountID)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return connect.NewError(connect.CodeNotFound, errors.New("حساب مجازی پیدا نشد"))
+		}
+		if err != nil {
+			return err
+		}
+		now := p.Market.Clock.Now()
+		if wasPaused && !paused {
+			// A resume admits only candles opened after the resume decision.
+			if err := q.SkipPausedPaperCandles(ctx, db.SkipPausedPaperCandlesParams{AccountID: paperAccountID, ResumeAt: firstFullPaperMinute(now)}); err != nil {
+				return err
+			}
+		}
+		return q.SetPaperEntryPause(ctx, db.SetPaperEntryPauseParams{ID: paperAccountID, Paused: paused, RecordedAt: now})
+	})
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(&labv1.SetPaperEntryPauseResponse{Paused: paused}), nil
+}
+
 func (p *Paper) InitializePaperAccount(ctx context.Context, req *connect.Request[labv1.InitializePaperAccountRequest]) (*connect.Response[labv1.InitializePaperAccountResponse], error) {
 	input := req.Msg
 	readings := []*labv1.Money{input.GetCapital(), input.GetMaxLossPerTrade(), input.GetMaxOpenLoss(), input.GetMaxSpotExposure()}
@@ -106,9 +137,18 @@ func (p *Paper) readPaperBook(ctx context.Context) (*labv1.GetPaperAccountRespon
 			return err
 		}
 		now := p.Market.Clock.Now()
-		equity, err := money.AddInt64(row.CashAvailable, row.CashReserved)
+		ledger, err := q.ReconcilePaperBook(ctx, row.ID)
 		if err != nil {
 			return err
+		}
+		book.Reconciliation = paperReconciliationP(ledger, now)
+		var equity int64
+		matched := paperReconciled(ledger)
+		if matched {
+			equity, err = money.AddInt64(row.CashAvailable, row.CashReserved)
+			if err != nil {
+				return err
+			}
 		}
 		var stale bool
 		for _, position := range positions {
@@ -116,6 +156,18 @@ func (p *Paper) readPaperBook(ctx context.Context) (*labv1.GetPaperAccountRespon
 			view := &labv1.PaperPosition{
 				ReceiptId: position.EntryID, Symbol: position.Symbol,
 				Quantity: moneyP(money.Amount{Asset: spec.Base, V: position.Quantity}), CostBasis: usdtP(position.CostBasis),
+				Revision: position.Revision, Lot: moneyP(money.Amount{Asset: spec.Base, V: spec.Lot.V}),
+			}
+			reduction, err := q.PendingPaperReduction(ctx, position.EntryID)
+			if err == nil {
+				view.PendingReduction = paperReductionP(position.Symbol, reduction)
+			} else if !errors.Is(err, pgx.ErrNoRows) {
+				return err
+			}
+			if !ledger.PositionsMatch {
+				view.MarketValue = invalidPaperValue()
+				book.Positions = append(book.Positions, view)
+				continue
 			}
 			candle, err := p.paperCandle(ctx, q, position.Symbol, now, time.Time{})
 			if errors.Is(err, errMarketFeed) {
@@ -129,9 +181,11 @@ func (p *Paper) readPaperBook(ctx context.Context) (*labv1.GetPaperAccountRespon
 				if err != nil {
 					return err
 				}
-				equity, err = money.AddInt64(equity, value)
-				if err != nil {
-					return err
+				if matched {
+					equity, err = money.AddInt64(equity, value)
+					if err != nil {
+						return err
+					}
 				}
 				view.MarketValue = paperMoneyValue(value)
 			}
@@ -141,7 +195,14 @@ func (p *Paper) readPaperBook(ctx context.Context) (*labv1.GetPaperAccountRespon
 		if stale {
 			mark = stalePaperValue()
 		}
+		if !matched {
+			mark = invalidPaperValue()
+		}
 		book.PaperAccount = paperAccountP(row, now, mark)
+		if !ledger.CashMatches || !ledger.ReservationsMatch {
+			book.PaperAccount.Snapshot.AvailableBalance = invalidPaperValue()
+			book.PaperAccount.ReservedBalance = nil
+		}
 		entries, err := q.RecentPaperEntries(ctx, row.ID)
 		if err != nil {
 			return err
@@ -169,6 +230,7 @@ func paperAccountP(row db.ReadPaperAccountRow, now time.Time, equity *labv1.Mone
 		InitialCapital: usdtP(row.InitialCapital), ReservedBalance: usdtP(row.CashReserved),
 		MaxLossPerTrade: usdtP(row.MaxLoss), MaxOpenLoss: usdtP(row.MaxOpenLoss), MaxSpotExposure: usdtP(row.MaxExposure),
 		FeeRate: ratioP(money.Ratio(row.FeePpm)), SlippageRate: ratioP(money.Ratio(row.SlippagePpm)),
+		EntriesPaused: row.EntriesPaused,
 	}
 }
 
@@ -179,5 +241,11 @@ func paperMoneyValue(amount int64) *labv1.MoneyReading {
 func stalePaperValue() *labv1.MoneyReading {
 	return &labv1.MoneyReading{Result: &labv1.MoneyReading_Unavailable{Unavailable: &labv1.UnavailableMoney{
 		Reason: labv1.MoneyAvailability_MONEY_AVAILABILITY_STALE, Detail: "برای ارزش‌گذاری موقعیت، قیمت تازه در دسترس نیست",
+	}}}
+}
+
+func invalidPaperValue() *labv1.MoneyReading {
+	return &labv1.MoneyReading{Result: &labv1.MoneyReading_Unavailable{Unavailable: &labv1.UnavailableMoney{
+		Reason: labv1.MoneyAvailability_MONEY_AVAILABILITY_INVALID, Detail: "ارزش حساب هنوز با دفتر تطبیق ندارد",
 	}}}
 }

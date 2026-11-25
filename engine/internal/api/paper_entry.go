@@ -140,10 +140,7 @@ func (p *Paper) reservePaperPlan(ctx context.Context, q *db.Queries, plan *labv1
 	if now.UnixMilli() >= plan.GetExpiresAtUnixMs() || !now.Before(opp.ExpiresAt) {
 		return entry, paperRestriction("plan_expired", "اعتبار برنامه یا فرصت پایان یافته است"), nil
 	}
-	next := now.Truncate(time.Minute)
-	if next.Before(now) {
-		next = next.Add(time.Minute)
-	}
+	next := firstFullPaperMinute(now)
 	expires := now.Add(10 * time.Minute)
 	if opp.ExpiresAt.Before(expires) {
 		expires = opp.ExpiresAt
@@ -178,6 +175,12 @@ func (p *Paper) GetPaperReceipt(ctx context.Context, req *connect.Request[labv1.
 			return err
 		}
 		response.Receipt = paperReceiptP(entry)
+		reduction, err := q.LatestPaperReduction(ctx, entry.ID)
+		if err == nil {
+			response.Reduction = paperReductionP(entry.Symbol, reduction)
+		} else if !errors.Is(err, pgx.ErrNoRows) {
+			return err
+		}
 		events, err := q.PaperExecutionEvents(ctx, entry.ID)
 		if err != nil {
 			return err
@@ -268,12 +271,17 @@ func paperReceiptP(e db.PaperEntry) *labv1.PaperReceipt {
 }
 
 func paperEventP(entry db.PaperEntry, row db.PaperExecutionEvent) *labv1.PaperExecutionEvent {
-	event := &labv1.PaperExecutionEvent{Id: row.ID, Kind: row.Kind, RecordedAtUnixMs: ms(row.RecordedAt), Cash: usdtP(row.Cash)}
+	event := &labv1.PaperExecutionEvent{Id: row.ID, Kind: row.Kind, RecordedAtUnixMs: ms(row.RecordedAt)}
+	if row.Kind != "reduction_requested" {
+		event.Cash = usdtP(row.Cash)
+	}
+	if row.Quantity > 0 {
+		spec, _ := paperSpotSpec(entry.Symbol)
+		event.Quantity = moneyP(money.Amount{V: row.Quantity, Asset: spec.Base})
+	}
 	if row.CandleOpenAt != nil {
 		opened := ms(*row.CandleOpenAt)
 		event.CandleOpenedAtUnixMs, event.CandleRevision = &opened, row.CandleRevision
-		spec, _ := paperSpotSpec(entry.Symbol)
-		event.Quantity = moneyP(money.Amount{V: row.Quantity, Asset: spec.Base})
 		event.ReferencePrice, event.FillPrice, event.Fee = usdtP(row.Reference), usdtP(row.FillPrice), usdtP(row.Fee)
 		if row.Kind != "entry_fill" {
 			event.RealizedPnl = usdtP(row.RealizedPnl)

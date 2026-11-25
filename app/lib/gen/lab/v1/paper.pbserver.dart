@@ -35,6 +35,10 @@ abstract class PaperServiceBase extends $pb.GeneratedService {
       $pb.ServerContext ctx, $3.GetPaperReceiptRequest request);
   $async.Future<$3.CancelPaperEntryResponse> cancelPaperEntry(
       $pb.ServerContext ctx, $3.CancelPaperEntryRequest request);
+  $async.Future<$3.ReducePaperPositionResponse> reducePaperPosition(
+      $pb.ServerContext ctx, $3.ReducePaperPositionRequest request);
+  $async.Future<$3.SetPaperEntryPauseResponse> setPaperEntryPause(
+      $pb.ServerContext ctx, $3.SetPaperEntryPauseRequest request);
 
   $pb.GeneratedMessage createRequest($core.String methodName) {
     switch (methodName) {
@@ -52,6 +56,10 @@ abstract class PaperServiceBase extends $pb.GeneratedService {
         return $3.GetPaperReceiptRequest();
       case 'CancelPaperEntry':
         return $3.CancelPaperEntryRequest();
+      case 'ReducePaperPosition':
+        return $3.ReducePaperPositionRequest();
+      case 'SetPaperEntryPause':
+        return $3.SetPaperEntryPauseRequest();
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }
@@ -75,6 +83,11 @@ abstract class PaperServiceBase extends $pb.GeneratedService {
         return getPaperReceipt(ctx, request as $3.GetPaperReceiptRequest);
       case 'CancelPaperEntry':
         return cancelPaperEntry(ctx, request as $3.CancelPaperEntryRequest);
+      case 'ReducePaperPosition':
+        return reducePaperPosition(
+            ctx, request as $3.ReducePaperPositionRequest);
+      case 'SetPaperEntryPause':
+        return setPaperEntryPause(ctx, request as $3.SetPaperEntryPauseRequest);
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }

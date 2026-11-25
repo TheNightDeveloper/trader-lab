@@ -247,6 +247,7 @@ type PaperAccount struct {
 	InitialCapital int64
 	CashAvailable  int64
 	CashReserved   int64
+	EntriesPaused  bool
 }
 
 type PaperEntry struct {
@@ -264,6 +265,13 @@ type PaperEntry struct {
 	ReservedCash   int64
 	ExposureBound  int64
 	LossBound      int64
+}
+
+type PaperEntryControl struct {
+	AccountID       string
+	AccountRevision int64
+	RecordedAt      time.Time
+	EntriesPaused   bool
 }
 
 type PaperExecutionEvent struct {
@@ -299,6 +307,7 @@ type PaperPosition struct {
 	Quantity   int64
 	CostBasis  int64
 	NextOpenAt time.Time
+	Revision   int64
 }
 
 type PaperPosting struct {
@@ -310,6 +319,17 @@ type PaperPosting struct {
 	Source      string
 	Destination string
 	Amount      int64
+}
+
+type PaperReduction struct {
+	ID               int64
+	EntryID          int64
+	PositionRevision int64
+	Quantity         int64
+	RequestedAt      time.Time
+	NextOpenAt       time.Time
+	State            int32
+	ResultEventID    *int64
 }
 
 type PaperTradePlan struct {

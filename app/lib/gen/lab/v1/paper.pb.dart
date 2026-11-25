@@ -73,11 +73,13 @@ class GetPaperAccountResponse extends $pb.GeneratedMessage {
     PaperAccount? paperAccount,
     $core.Iterable<PaperReceipt>? recentReceipts,
     $core.Iterable<PaperPosition>? positions,
+    PaperReconciliation? reconciliation,
   }) {
     final result = GetPaperAccountResponse._();
     if (paperAccount != null) result.paperAccount = paperAccount;
     if (recentReceipts != null) result.recentReceipts.addAll(recentReceipts);
     if (positions != null) result.positions.addAll(positions);
+    if (reconciliation != null) result.reconciliation = reconciliation;
     return result;
   }
 
@@ -100,6 +102,8 @@ class GetPaperAccountResponse extends $pb.GeneratedMessage {
         subBuilder: PaperReceipt.$_createMessage)
     ..pPM<PaperPosition>(3, _omitFieldNames ? '' : 'positions',
         subBuilder: PaperPosition.$_createMessage)
+    ..aOM<PaperReconciliation>(4, _omitFieldNames ? '' : 'reconciliation',
+        subBuilder: PaperReconciliation.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -142,6 +146,17 @@ class GetPaperAccountResponse extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(3)
   $pb.PbList<PaperPosition> get positions => $_getList(2);
+
+  @$pb.TagNumber(4)
+  PaperReconciliation get reconciliation => $_getN(3);
+  @$pb.TagNumber(4)
+  set reconciliation(PaperReconciliation value) => $_setField(4, value);
+  @$pb.TagNumber(4)
+  $core.bool hasReconciliation() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearReconciliation() => $_clearField(4);
+  @$pb.TagNumber(4)
+  PaperReconciliation ensureReconciliation() => $_ensure(3);
 }
 
 class InitializePaperAccountRequest extends $pb.GeneratedMessage {
@@ -331,6 +346,7 @@ class PaperAccount extends $pb.GeneratedMessage {
     $0.Money? maxSpotExposure,
     $0.Decimal? feeRate,
     $0.Decimal? slippageRate,
+    $core.bool? entriesPaused,
   }) {
     final result = PaperAccount._();
     if (snapshot != null) result.snapshot = snapshot;
@@ -341,6 +357,7 @@ class PaperAccount extends $pb.GeneratedMessage {
     if (maxSpotExposure != null) result.maxSpotExposure = maxSpotExposure;
     if (feeRate != null) result.feeRate = feeRate;
     if (slippageRate != null) result.slippageRate = slippageRate;
+    if (entriesPaused != null) result.entriesPaused = entriesPaused;
     return result;
   }
 
@@ -373,6 +390,7 @@ class PaperAccount extends $pb.GeneratedMessage {
         subBuilder: $0.Decimal.$_createMessage)
     ..aOM<$0.Decimal>(8, _omitFieldNames ? '' : 'slippageRate',
         subBuilder: $0.Decimal.$_createMessage)
+    ..aOB(9, _omitFieldNames ? '' : 'entriesPaused')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -484,6 +502,15 @@ class PaperAccount extends $pb.GeneratedMessage {
   void clearSlippageRate() => $_clearField(8);
   @$pb.TagNumber(8)
   $0.Decimal ensureSlippageRate() => $_ensure(7);
+
+  @$pb.TagNumber(9)
+  $core.bool get entriesPaused => $_getBF(8);
+  @$pb.TagNumber(9)
+  set entriesPaused($core.bool value) => $_setBool(8, value);
+  @$pb.TagNumber(9)
+  $core.bool hasEntriesPaused() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearEntriesPaused() => $_clearField(9);
 }
 
 class PreviewPaperPlanRequest extends $pb.GeneratedMessage {
@@ -1032,10 +1059,12 @@ class GetPaperReceiptResponse extends $pb.GeneratedMessage {
   factory GetPaperReceiptResponse({
     PaperReceipt? receipt,
     $core.Iterable<PaperExecutionEvent>? events,
+    PaperReduction? reduction,
   }) {
     final result = GetPaperReceiptResponse._();
     if (receipt != null) result.receipt = receipt;
     if (events != null) result.events.addAll(events);
+    if (reduction != null) result.reduction = reduction;
     return result;
   }
 
@@ -1056,6 +1085,8 @@ class GetPaperReceiptResponse extends $pb.GeneratedMessage {
         subBuilder: PaperReceipt.$_createMessage)
     ..pPM<PaperExecutionEvent>(2, _omitFieldNames ? '' : 'events',
         subBuilder: PaperExecutionEvent.$_createMessage)
+    ..aOM<PaperReduction>(3, _omitFieldNames ? '' : 'reduction',
+        subBuilder: PaperReduction.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1095,6 +1126,17 @@ class GetPaperReceiptResponse extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(2)
   $pb.PbList<PaperExecutionEvent> get events => $_getList(1);
+
+  @$pb.TagNumber(3)
+  PaperReduction get reduction => $_getN(2);
+  @$pb.TagNumber(3)
+  set reduction(PaperReduction value) => $_setField(3, value);
+  @$pb.TagNumber(3)
+  $core.bool hasReduction() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearReduction() => $_clearField(3);
+  @$pb.TagNumber(3)
+  PaperReduction ensureReduction() => $_ensure(2);
 }
 
 class CancelPaperEntryRequest extends $pb.GeneratedMessage {
@@ -1232,6 +1274,568 @@ class CancelPaperEntryResponse extends $pb.GeneratedMessage {
   void clearReceipt() => $_clearField(1);
   @$pb.TagNumber(1)
   PaperReceipt ensureReceipt() => $_ensure(0);
+}
+
+class ReducePaperPositionRequest extends $pb.GeneratedMessage {
+  factory ReducePaperPositionRequest({
+    $2.AccountRef? account,
+    $fixnum.Int64? receiptId,
+    $fixnum.Int64? positionRevision,
+    $0.Money? quantity,
+  }) {
+    final result = ReducePaperPositionRequest._();
+    if (account != null) result.account = account;
+    if (receiptId != null) result.receiptId = receiptId;
+    if (positionRevision != null) result.positionRevision = positionRevision;
+    if (quantity != null) result.quantity = quantity;
+    return result;
+  }
+
+  ReducePaperPositionRequest._();
+
+  factory ReducePaperPositionRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ReducePaperPositionRequest()..mergeFromBuffer(data, registry);
+  factory ReducePaperPositionRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ReducePaperPositionRequest()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ReducePaperPositionRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: ReducePaperPositionRequest.$_createMessage)
+    ..aOM<$2.AccountRef>(1, _omitFieldNames ? '' : 'account',
+        subBuilder: $2.AccountRef.$_createMessage)
+    ..aInt64(2, _omitFieldNames ? '' : 'receiptId')
+    ..aInt64(3, _omitFieldNames ? '' : 'positionRevision')
+    ..aOM<$0.Money>(4, _omitFieldNames ? '' : 'quantity',
+        subBuilder: $0.Money.$_createMessage)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ReducePaperPositionRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ReducePaperPositionRequest copyWith(
+          void Function(ReducePaperPositionRequest) updates) =>
+      super.copyWith(
+              (message) => updates(message as ReducePaperPositionRequest))
+          as ReducePaperPositionRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use ReducePaperPositionRequest() / ReducePaperPositionRequest.new instead')
+  static ReducePaperPositionRequest create() => ReducePaperPositionRequest._();
+  static $pb.GeneratedMessage $_createMessage() =>
+      ReducePaperPositionRequest._();
+  @$core.override
+  ReducePaperPositionRequest createEmptyInstance() =>
+      ReducePaperPositionRequest._();
+  @$core.pragma('dart2js:noInline')
+  static ReducePaperPositionRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ReducePaperPositionRequest>(
+          ReducePaperPositionRequest.$_createMessage);
+  static ReducePaperPositionRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $2.AccountRef get account => $_getN(0);
+  @$pb.TagNumber(1)
+  set account($2.AccountRef value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasAccount() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearAccount() => $_clearField(1);
+  @$pb.TagNumber(1)
+  $2.AccountRef ensureAccount() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get receiptId => $_getI64(1);
+  @$pb.TagNumber(2)
+  set receiptId($fixnum.Int64 value) => $_setInt64(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasReceiptId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearReceiptId() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $fixnum.Int64 get positionRevision => $_getI64(2);
+  @$pb.TagNumber(3)
+  set positionRevision($fixnum.Int64 value) => $_setInt64(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasPositionRevision() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearPositionRevision() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $0.Money get quantity => $_getN(3);
+  @$pb.TagNumber(4)
+  set quantity($0.Money value) => $_setField(4, value);
+  @$pb.TagNumber(4)
+  $core.bool hasQuantity() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearQuantity() => $_clearField(4);
+  @$pb.TagNumber(4)
+  $0.Money ensureQuantity() => $_ensure(3);
+}
+
+class ReducePaperPositionResponse extends $pb.GeneratedMessage {
+  factory ReducePaperPositionResponse({
+    PaperReduction? reduction,
+    PaperRestriction? restriction,
+  }) {
+    final result = ReducePaperPositionResponse._();
+    if (reduction != null) result.reduction = reduction;
+    if (restriction != null) result.restriction = restriction;
+    return result;
+  }
+
+  ReducePaperPositionResponse._();
+
+  factory ReducePaperPositionResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ReducePaperPositionResponse()..mergeFromBuffer(data, registry);
+  factory ReducePaperPositionResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ReducePaperPositionResponse()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ReducePaperPositionResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: ReducePaperPositionResponse.$_createMessage)
+    ..aOM<PaperReduction>(1, _omitFieldNames ? '' : 'reduction',
+        subBuilder: PaperReduction.$_createMessage)
+    ..aOM<PaperRestriction>(2, _omitFieldNames ? '' : 'restriction',
+        subBuilder: PaperRestriction.$_createMessage)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ReducePaperPositionResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ReducePaperPositionResponse copyWith(
+          void Function(ReducePaperPositionResponse) updates) =>
+      super.copyWith(
+              (message) => updates(message as ReducePaperPositionResponse))
+          as ReducePaperPositionResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use ReducePaperPositionResponse() / ReducePaperPositionResponse.new instead')
+  static ReducePaperPositionResponse create() =>
+      ReducePaperPositionResponse._();
+  static $pb.GeneratedMessage $_createMessage() =>
+      ReducePaperPositionResponse._();
+  @$core.override
+  ReducePaperPositionResponse createEmptyInstance() =>
+      ReducePaperPositionResponse._();
+  @$core.pragma('dart2js:noInline')
+  static ReducePaperPositionResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ReducePaperPositionResponse>(
+          ReducePaperPositionResponse.$_createMessage);
+  static ReducePaperPositionResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  PaperReduction get reduction => $_getN(0);
+  @$pb.TagNumber(1)
+  set reduction(PaperReduction value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasReduction() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearReduction() => $_clearField(1);
+  @$pb.TagNumber(1)
+  PaperReduction ensureReduction() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  PaperRestriction get restriction => $_getN(1);
+  @$pb.TagNumber(2)
+  set restriction(PaperRestriction value) => $_setField(2, value);
+  @$pb.TagNumber(2)
+  $core.bool hasRestriction() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearRestriction() => $_clearField(2);
+  @$pb.TagNumber(2)
+  PaperRestriction ensureRestriction() => $_ensure(1);
+}
+
+class PaperReduction extends $pb.GeneratedMessage {
+  factory PaperReduction({
+    $fixnum.Int64? id,
+    $fixnum.Int64? receiptId,
+    PaperReductionState? state,
+    $0.Money? quantity,
+    $fixnum.Int64? requestedAtUnixMs,
+    $fixnum.Int64? resultEventId,
+  }) {
+    final result = PaperReduction._();
+    if (id != null) result.id = id;
+    if (receiptId != null) result.receiptId = receiptId;
+    if (state != null) result.state = state;
+    if (quantity != null) result.quantity = quantity;
+    if (requestedAtUnixMs != null) result.requestedAtUnixMs = requestedAtUnixMs;
+    if (resultEventId != null) result.resultEventId = resultEventId;
+    return result;
+  }
+
+  PaperReduction._();
+
+  factory PaperReduction.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      PaperReduction()..mergeFromBuffer(data, registry);
+  factory PaperReduction.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      PaperReduction()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'PaperReduction',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: PaperReduction.$_createMessage)
+    ..aInt64(1, _omitFieldNames ? '' : 'id')
+    ..aInt64(2, _omitFieldNames ? '' : 'receiptId')
+    ..aE<PaperReductionState>(3, _omitFieldNames ? '' : 'state',
+        enumValues: PaperReductionState.values)
+    ..aOM<$0.Money>(4, _omitFieldNames ? '' : 'quantity',
+        subBuilder: $0.Money.$_createMessage)
+    ..aInt64(5, _omitFieldNames ? '' : 'requestedAtUnixMs')
+    ..aInt64(6, _omitFieldNames ? '' : 'resultEventId')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  PaperReduction clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  PaperReduction copyWith(void Function(PaperReduction) updates) =>
+      super.copyWith((message) => updates(message as PaperReduction))
+          as PaperReduction;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use PaperReduction() / PaperReduction.new instead')
+  static PaperReduction create() => PaperReduction._();
+  static $pb.GeneratedMessage $_createMessage() => PaperReduction._();
+  @$core.override
+  PaperReduction createEmptyInstance() => PaperReduction._();
+  @$core.pragma('dart2js:noInline')
+  static PaperReduction getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<PaperReduction>(
+          PaperReduction.$_createMessage);
+  static PaperReduction? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get id => $_getI64(0);
+  @$pb.TagNumber(1)
+  set id($fixnum.Int64 value) => $_setInt64(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get receiptId => $_getI64(1);
+  @$pb.TagNumber(2)
+  set receiptId($fixnum.Int64 value) => $_setInt64(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasReceiptId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearReceiptId() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  PaperReductionState get state => $_getN(2);
+  @$pb.TagNumber(3)
+  set state(PaperReductionState value) => $_setField(3, value);
+  @$pb.TagNumber(3)
+  $core.bool hasState() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearState() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $0.Money get quantity => $_getN(3);
+  @$pb.TagNumber(4)
+  set quantity($0.Money value) => $_setField(4, value);
+  @$pb.TagNumber(4)
+  $core.bool hasQuantity() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearQuantity() => $_clearField(4);
+  @$pb.TagNumber(4)
+  $0.Money ensureQuantity() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  $fixnum.Int64 get requestedAtUnixMs => $_getI64(4);
+  @$pb.TagNumber(5)
+  set requestedAtUnixMs($fixnum.Int64 value) => $_setInt64(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasRequestedAtUnixMs() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearRequestedAtUnixMs() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  $fixnum.Int64 get resultEventId => $_getI64(5);
+  @$pb.TagNumber(6)
+  set resultEventId($fixnum.Int64 value) => $_setInt64(5, value);
+  @$pb.TagNumber(6)
+  $core.bool hasResultEventId() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearResultEventId() => $_clearField(6);
+}
+
+class PaperReconciliation extends $pb.GeneratedMessage {
+  factory PaperReconciliation({
+    $fixnum.Int64? checkedAtUnixMs,
+    $fixnum.Int64? lastEventId,
+    $core.bool? cashMatches,
+    $core.bool? reservationsMatch,
+    $core.bool? positionsMatch,
+    $core.bool? eventsMatch,
+  }) {
+    final result = PaperReconciliation._();
+    if (checkedAtUnixMs != null) result.checkedAtUnixMs = checkedAtUnixMs;
+    if (lastEventId != null) result.lastEventId = lastEventId;
+    if (cashMatches != null) result.cashMatches = cashMatches;
+    if (reservationsMatch != null) result.reservationsMatch = reservationsMatch;
+    if (positionsMatch != null) result.positionsMatch = positionsMatch;
+    if (eventsMatch != null) result.eventsMatch = eventsMatch;
+    return result;
+  }
+
+  PaperReconciliation._();
+
+  factory PaperReconciliation.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      PaperReconciliation()..mergeFromBuffer(data, registry);
+  factory PaperReconciliation.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      PaperReconciliation()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'PaperReconciliation',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: PaperReconciliation.$_createMessage)
+    ..aInt64(1, _omitFieldNames ? '' : 'checkedAtUnixMs')
+    ..aInt64(2, _omitFieldNames ? '' : 'lastEventId')
+    ..aOB(3, _omitFieldNames ? '' : 'cashMatches')
+    ..aOB(4, _omitFieldNames ? '' : 'reservationsMatch')
+    ..aOB(5, _omitFieldNames ? '' : 'positionsMatch')
+    ..aOB(6, _omitFieldNames ? '' : 'eventsMatch')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  PaperReconciliation clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  PaperReconciliation copyWith(void Function(PaperReconciliation) updates) =>
+      super.copyWith((message) => updates(message as PaperReconciliation))
+          as PaperReconciliation;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core
+      .Deprecated('Use PaperReconciliation() / PaperReconciliation.new instead')
+  static PaperReconciliation create() => PaperReconciliation._();
+  static $pb.GeneratedMessage $_createMessage() => PaperReconciliation._();
+  @$core.override
+  PaperReconciliation createEmptyInstance() => PaperReconciliation._();
+  @$core.pragma('dart2js:noInline')
+  static PaperReconciliation getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<PaperReconciliation>(
+          PaperReconciliation.$_createMessage);
+  static PaperReconciliation? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get checkedAtUnixMs => $_getI64(0);
+  @$pb.TagNumber(1)
+  set checkedAtUnixMs($fixnum.Int64 value) => $_setInt64(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasCheckedAtUnixMs() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCheckedAtUnixMs() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get lastEventId => $_getI64(1);
+  @$pb.TagNumber(2)
+  set lastEventId($fixnum.Int64 value) => $_setInt64(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasLastEventId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearLastEventId() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.bool get cashMatches => $_getBF(2);
+  @$pb.TagNumber(3)
+  set cashMatches($core.bool value) => $_setBool(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasCashMatches() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearCashMatches() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.bool get reservationsMatch => $_getBF(3);
+  @$pb.TagNumber(4)
+  set reservationsMatch($core.bool value) => $_setBool(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasReservationsMatch() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearReservationsMatch() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.bool get positionsMatch => $_getBF(4);
+  @$pb.TagNumber(5)
+  set positionsMatch($core.bool value) => $_setBool(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasPositionsMatch() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearPositionsMatch() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.bool get eventsMatch => $_getBF(5);
+  @$pb.TagNumber(6)
+  set eventsMatch($core.bool value) => $_setBool(5, value);
+  @$pb.TagNumber(6)
+  $core.bool hasEventsMatch() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearEventsMatch() => $_clearField(6);
+}
+
+class SetPaperEntryPauseRequest extends $pb.GeneratedMessage {
+  factory SetPaperEntryPauseRequest({
+    $2.AccountRef? account,
+    $core.bool? paused,
+  }) {
+    final result = SetPaperEntryPauseRequest._();
+    if (account != null) result.account = account;
+    if (paused != null) result.paused = paused;
+    return result;
+  }
+
+  SetPaperEntryPauseRequest._();
+
+  factory SetPaperEntryPauseRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      SetPaperEntryPauseRequest()..mergeFromBuffer(data, registry);
+  factory SetPaperEntryPauseRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      SetPaperEntryPauseRequest()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SetPaperEntryPauseRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: SetPaperEntryPauseRequest.$_createMessage)
+    ..aOM<$2.AccountRef>(1, _omitFieldNames ? '' : 'account',
+        subBuilder: $2.AccountRef.$_createMessage)
+    ..aOB(2, _omitFieldNames ? '' : 'paused')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetPaperEntryPauseRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetPaperEntryPauseRequest copyWith(
+          void Function(SetPaperEntryPauseRequest) updates) =>
+      super.copyWith((message) => updates(message as SetPaperEntryPauseRequest))
+          as SetPaperEntryPauseRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use SetPaperEntryPauseRequest() / SetPaperEntryPauseRequest.new instead')
+  static SetPaperEntryPauseRequest create() => SetPaperEntryPauseRequest._();
+  static $pb.GeneratedMessage $_createMessage() =>
+      SetPaperEntryPauseRequest._();
+  @$core.override
+  SetPaperEntryPauseRequest createEmptyInstance() =>
+      SetPaperEntryPauseRequest._();
+  @$core.pragma('dart2js:noInline')
+  static SetPaperEntryPauseRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SetPaperEntryPauseRequest>(
+          SetPaperEntryPauseRequest.$_createMessage);
+  static SetPaperEntryPauseRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $2.AccountRef get account => $_getN(0);
+  @$pb.TagNumber(1)
+  set account($2.AccountRef value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasAccount() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearAccount() => $_clearField(1);
+  @$pb.TagNumber(1)
+  $2.AccountRef ensureAccount() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $core.bool get paused => $_getBF(1);
+  @$pb.TagNumber(2)
+  set paused($core.bool value) => $_setBool(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasPaused() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearPaused() => $_clearField(2);
+}
+
+class SetPaperEntryPauseResponse extends $pb.GeneratedMessage {
+  factory SetPaperEntryPauseResponse({
+    $core.bool? paused,
+  }) {
+    final result = SetPaperEntryPauseResponse._();
+    if (paused != null) result.paused = paused;
+    return result;
+  }
+
+  SetPaperEntryPauseResponse._();
+
+  factory SetPaperEntryPauseResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      SetPaperEntryPauseResponse()..mergeFromBuffer(data, registry);
+  factory SetPaperEntryPauseResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      SetPaperEntryPauseResponse()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SetPaperEntryPauseResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: SetPaperEntryPauseResponse.$_createMessage)
+    ..aOB(1, _omitFieldNames ? '' : 'paused')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetPaperEntryPauseResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetPaperEntryPauseResponse copyWith(
+          void Function(SetPaperEntryPauseResponse) updates) =>
+      super.copyWith(
+              (message) => updates(message as SetPaperEntryPauseResponse))
+          as SetPaperEntryPauseResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use SetPaperEntryPauseResponse() / SetPaperEntryPauseResponse.new instead')
+  static SetPaperEntryPauseResponse create() => SetPaperEntryPauseResponse._();
+  static $pb.GeneratedMessage $_createMessage() =>
+      SetPaperEntryPauseResponse._();
+  @$core.override
+  SetPaperEntryPauseResponse createEmptyInstance() =>
+      SetPaperEntryPauseResponse._();
+  @$core.pragma('dart2js:noInline')
+  static SetPaperEntryPauseResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SetPaperEntryPauseResponse>(
+          SetPaperEntryPauseResponse.$_createMessage);
+  static SetPaperEntryPauseResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get paused => $_getBF(0);
+  @$pb.TagNumber(1)
+  set paused($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasPaused() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearPaused() => $_clearField(1);
 }
 
 class PaperReceipt extends $pb.GeneratedMessage {
@@ -1419,6 +2023,9 @@ class PaperPosition extends $pb.GeneratedMessage {
     $0.Money? quantity,
     $0.Money? costBasis,
     $1.MoneyReading? marketValue,
+    $fixnum.Int64? revision,
+    $0.Money? lot,
+    PaperReduction? pendingReduction,
   }) {
     final result = PaperPosition._();
     if (receiptId != null) result.receiptId = receiptId;
@@ -1426,6 +2033,9 @@ class PaperPosition extends $pb.GeneratedMessage {
     if (quantity != null) result.quantity = quantity;
     if (costBasis != null) result.costBasis = costBasis;
     if (marketValue != null) result.marketValue = marketValue;
+    if (revision != null) result.revision = revision;
+    if (lot != null) result.lot = lot;
+    if (pendingReduction != null) result.pendingReduction = pendingReduction;
     return result;
   }
 
@@ -1450,6 +2060,11 @@ class PaperPosition extends $pb.GeneratedMessage {
         subBuilder: $0.Money.$_createMessage)
     ..aOM<$1.MoneyReading>(5, _omitFieldNames ? '' : 'marketValue',
         subBuilder: $1.MoneyReading.$_createMessage)
+    ..aInt64(6, _omitFieldNames ? '' : 'revision')
+    ..aOM<$0.Money>(7, _omitFieldNames ? '' : 'lot',
+        subBuilder: $0.Money.$_createMessage)
+    ..aOM<PaperReduction>(8, _omitFieldNames ? '' : 'pendingReduction',
+        subBuilder: PaperReduction.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1524,6 +2139,37 @@ class PaperPosition extends $pb.GeneratedMessage {
   void clearMarketValue() => $_clearField(5);
   @$pb.TagNumber(5)
   $1.MoneyReading ensureMarketValue() => $_ensure(4);
+
+  @$pb.TagNumber(6)
+  $fixnum.Int64 get revision => $_getI64(5);
+  @$pb.TagNumber(6)
+  set revision($fixnum.Int64 value) => $_setInt64(5, value);
+  @$pb.TagNumber(6)
+  $core.bool hasRevision() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearRevision() => $_clearField(6);
+
+  @$pb.TagNumber(7)
+  $0.Money get lot => $_getN(6);
+  @$pb.TagNumber(7)
+  set lot($0.Money value) => $_setField(7, value);
+  @$pb.TagNumber(7)
+  $core.bool hasLot() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearLot() => $_clearField(7);
+  @$pb.TagNumber(7)
+  $0.Money ensureLot() => $_ensure(6);
+
+  @$pb.TagNumber(8)
+  PaperReduction get pendingReduction => $_getN(7);
+  @$pb.TagNumber(8)
+  set pendingReduction(PaperReduction value) => $_setField(8, value);
+  @$pb.TagNumber(8)
+  $core.bool hasPendingReduction() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearPendingReduction() => $_clearField(8);
+  @$pb.TagNumber(8)
+  PaperReduction ensurePendingReduction() => $_ensure(7);
 }
 
 class PaperExecutionEvent extends $pb.GeneratedMessage {
@@ -2229,6 +2875,14 @@ class PaperServiceApi {
           $pb.ClientContext? ctx, CancelPaperEntryRequest request) =>
       _client.invoke<CancelPaperEntryResponse>(ctx, 'PaperService',
           'CancelPaperEntry', request, CancelPaperEntryResponse());
+  $async.Future<ReducePaperPositionResponse> reducePaperPosition(
+          $pb.ClientContext? ctx, ReducePaperPositionRequest request) =>
+      _client.invoke<ReducePaperPositionResponse>(ctx, 'PaperService',
+          'ReducePaperPosition', request, ReducePaperPositionResponse());
+  $async.Future<SetPaperEntryPauseResponse> setPaperEntryPause(
+          $pb.ClientContext? ctx, SetPaperEntryPauseRequest request) =>
+      _client.invoke<SetPaperEntryPauseResponse>(ctx, 'PaperService',
+          'SetPaperEntryPause', request, SetPaperEntryPauseResponse());
 }
 
 const $core.bool _omitFieldNames =

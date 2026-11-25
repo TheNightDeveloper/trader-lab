@@ -19,6 +19,24 @@ import 'account.pbjson.dart' as $1;
 import 'common.pbjson.dart' as $0;
 import 'workspace.pbjson.dart' as $2;
 
+@$core.Deprecated('Use paperReductionStateDescriptor instead')
+const PaperReductionState$json = {
+  '1': 'PaperReductionState',
+  '2': [
+    {'1': 'PAPER_REDUCTION_STATE_UNSPECIFIED', '2': 0},
+    {'1': 'PAPER_REDUCTION_STATE_PENDING', '2': 1},
+    {'1': 'PAPER_REDUCTION_STATE_FILLED', '2': 2},
+    {'1': 'PAPER_REDUCTION_STATE_SUPERSEDED', '2': 3},
+  ],
+};
+
+/// Descriptor for `PaperReductionState`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List paperReductionStateDescriptor = $convert.base64Decode(
+    'ChNQYXBlclJlZHVjdGlvblN0YXRlEiUKIVBBUEVSX1JFRFVDVElPTl9TVEFURV9VTlNQRUNJRk'
+    'lFRBAAEiEKHVBBUEVSX1JFRFVDVElPTl9TVEFURV9QRU5ESU5HEAESIAocUEFQRVJfUkVEVUNU'
+    'SU9OX1NUQVRFX0ZJTExFRBACEiQKIFBBUEVSX1JFRFVDVElPTl9TVEFURV9TVVBFUlNFREVEEA'
+    'M=');
+
 @$core.Deprecated('Use paperEntryStateDescriptor instead')
 const PaperEntryState$json = {
   '1': 'PaperEntryState',
@@ -76,6 +94,14 @@ const GetPaperAccountResponse$json = {
       '6': '.lab.v1.PaperPosition',
       '10': 'positions'
     },
+    {
+      '1': 'reconciliation',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.PaperReconciliation',
+      '10': 'reconciliation'
+    },
   ],
 };
 
@@ -84,7 +110,8 @@ final $typed_data.Uint8List getPaperAccountResponseDescriptor = $convert.base64D
     'ChdHZXRQYXBlckFjY291bnRSZXNwb25zZRI5Cg1wYXBlcl9hY2NvdW50GAEgASgLMhQubGFiLn'
     'YxLlBhcGVyQWNjb3VudFIMcGFwZXJBY2NvdW50Ej0KD3JlY2VudF9yZWNlaXB0cxgCIAMoCzIU'
     'LmxhYi52MS5QYXBlclJlY2VpcHRSDnJlY2VudFJlY2VpcHRzEjMKCXBvc2l0aW9ucxgDIAMoCz'
-    'IVLmxhYi52MS5QYXBlclBvc2l0aW9uUglwb3NpdGlvbnM=');
+    'IVLmxhYi52MS5QYXBlclBvc2l0aW9uUglwb3NpdGlvbnMSQwoOcmVjb25jaWxpYXRpb24YBCAB'
+    'KAsyGy5sYWIudjEuUGFwZXJSZWNvbmNpbGlhdGlvblIOcmVjb25jaWxpYXRpb24=');
 
 @$core.Deprecated('Use initializePaperAccountRequestDescriptor instead')
 const InitializePaperAccountRequest$json = {
@@ -222,6 +249,7 @@ const PaperAccount$json = {
       '6': '.lab.v1.Decimal',
       '10': 'slippageRate'
     },
+    {'1': 'entries_paused', '3': 9, '4': 1, '5': 8, '10': 'entriesPaused'},
   ],
 };
 
@@ -235,7 +263,7 @@ final $typed_data.Uint8List paperAccountDescriptor = $convert.base64Decode(
     'V5UgttYXhPcGVuTG9zcxI5ChFtYXhfc3BvdF9leHBvc3VyZRgGIAEoCzINLmxhYi52MS5Nb25l'
     'eVIPbWF4U3BvdEV4cG9zdXJlEioKCGZlZV9yYXRlGAcgASgLMg8ubGFiLnYxLkRlY2ltYWxSB2'
     'ZlZVJhdGUSNAoNc2xpcHBhZ2VfcmF0ZRgIIAEoCzIPLmxhYi52MS5EZWNpbWFsUgxzbGlwcGFn'
-    'ZVJhdGU=');
+    'ZVJhdGUSJQoOZW50cmllc19wYXVzZWQYCSABKAhSDWVudHJpZXNQYXVzZWQ=');
 
 @$core.Deprecated('Use previewPaperPlanRequestDescriptor instead')
 const PreviewPaperPlanRequest$json = {
@@ -434,6 +462,14 @@ const GetPaperReceiptResponse$json = {
       '6': '.lab.v1.PaperExecutionEvent',
       '10': 'events'
     },
+    {
+      '1': 'reduction',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.PaperReduction',
+      '10': 'reduction'
+    },
   ],
 };
 
@@ -441,7 +477,8 @@ const GetPaperReceiptResponse$json = {
 final $typed_data.Uint8List getPaperReceiptResponseDescriptor = $convert.base64Decode(
     'ChdHZXRQYXBlclJlY2VpcHRSZXNwb25zZRIuCgdyZWNlaXB0GAEgASgLMhQubGFiLnYxLlBhcG'
     'VyUmVjZWlwdFIHcmVjZWlwdBIzCgZldmVudHMYAiADKAsyGy5sYWIudjEuUGFwZXJFeGVjdXRp'
-    'b25FdmVudFIGZXZlbnRz');
+    'b25FdmVudFIGZXZlbnRzEjQKCXJlZHVjdGlvbhgDIAEoCzIWLmxhYi52MS5QYXBlclJlZHVjdG'
+    'lvblIJcmVkdWN0aW9u');
 
 @$core.Deprecated('Use cancelPaperEntryRequestDescriptor instead')
 const CancelPaperEntryRequest$json = {
@@ -485,6 +522,197 @@ final $typed_data.Uint8List cancelPaperEntryResponseDescriptor =
     $convert.base64Decode(
         'ChhDYW5jZWxQYXBlckVudHJ5UmVzcG9uc2USLgoHcmVjZWlwdBgBIAEoCzIULmxhYi52MS5QYX'
         'BlclJlY2VpcHRSB3JlY2VpcHQ=');
+
+@$core.Deprecated('Use reducePaperPositionRequestDescriptor instead')
+const ReducePaperPositionRequest$json = {
+  '1': 'ReducePaperPositionRequest',
+  '2': [
+    {
+      '1': 'account',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.AccountRef',
+      '10': 'account'
+    },
+    {'1': 'receipt_id', '3': 2, '4': 1, '5': 3, '10': 'receiptId'},
+    {
+      '1': 'position_revision',
+      '3': 3,
+      '4': 1,
+      '5': 3,
+      '10': 'positionRevision'
+    },
+    {
+      '1': 'quantity',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.Money',
+      '10': 'quantity'
+    },
+  ],
+};
+
+/// Descriptor for `ReducePaperPositionRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List reducePaperPositionRequestDescriptor = $convert.base64Decode(
+    'ChpSZWR1Y2VQYXBlclBvc2l0aW9uUmVxdWVzdBIsCgdhY2NvdW50GAEgASgLMhIubGFiLnYxLk'
+    'FjY291bnRSZWZSB2FjY291bnQSHQoKcmVjZWlwdF9pZBgCIAEoA1IJcmVjZWlwdElkEisKEXBv'
+    'c2l0aW9uX3JldmlzaW9uGAMgASgDUhBwb3NpdGlvblJldmlzaW9uEikKCHF1YW50aXR5GAQgAS'
+    'gLMg0ubGFiLnYxLk1vbmV5UghxdWFudGl0eQ==');
+
+@$core.Deprecated('Use reducePaperPositionResponseDescriptor instead')
+const ReducePaperPositionResponse$json = {
+  '1': 'ReducePaperPositionResponse',
+  '2': [
+    {
+      '1': 'reduction',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.PaperReduction',
+      '10': 'reduction'
+    },
+    {
+      '1': 'restriction',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.PaperRestriction',
+      '10': 'restriction'
+    },
+  ],
+};
+
+/// Descriptor for `ReducePaperPositionResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List reducePaperPositionResponseDescriptor =
+    $convert.base64Decode(
+        'ChtSZWR1Y2VQYXBlclBvc2l0aW9uUmVzcG9uc2USNAoJcmVkdWN0aW9uGAEgASgLMhYubGFiLn'
+        'YxLlBhcGVyUmVkdWN0aW9uUglyZWR1Y3Rpb24SOgoLcmVzdHJpY3Rpb24YAiABKAsyGC5sYWIu'
+        'djEuUGFwZXJSZXN0cmljdGlvblILcmVzdHJpY3Rpb24=');
+
+@$core.Deprecated('Use paperReductionDescriptor instead')
+const PaperReduction$json = {
+  '1': 'PaperReduction',
+  '2': [
+    {'1': 'id', '3': 1, '4': 1, '5': 3, '10': 'id'},
+    {'1': 'receipt_id', '3': 2, '4': 1, '5': 3, '10': 'receiptId'},
+    {
+      '1': 'state',
+      '3': 3,
+      '4': 1,
+      '5': 14,
+      '6': '.lab.v1.PaperReductionState',
+      '10': 'state'
+    },
+    {
+      '1': 'quantity',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.Money',
+      '10': 'quantity'
+    },
+    {
+      '1': 'requested_at_unix_ms',
+      '3': 5,
+      '4': 1,
+      '5': 3,
+      '10': 'requestedAtUnixMs'
+    },
+    {
+      '1': 'result_event_id',
+      '3': 6,
+      '4': 1,
+      '5': 3,
+      '9': 0,
+      '10': 'resultEventId',
+      '17': true
+    },
+  ],
+  '8': [
+    {'1': '_result_event_id'},
+  ],
+};
+
+/// Descriptor for `PaperReduction`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List paperReductionDescriptor = $convert.base64Decode(
+    'Cg5QYXBlclJlZHVjdGlvbhIOCgJpZBgBIAEoA1ICaWQSHQoKcmVjZWlwdF9pZBgCIAEoA1IJcm'
+    'VjZWlwdElkEjEKBXN0YXRlGAMgASgOMhsubGFiLnYxLlBhcGVyUmVkdWN0aW9uU3RhdGVSBXN0'
+    'YXRlEikKCHF1YW50aXR5GAQgASgLMg0ubGFiLnYxLk1vbmV5UghxdWFudGl0eRIvChRyZXF1ZX'
+    'N0ZWRfYXRfdW5peF9tcxgFIAEoA1IRcmVxdWVzdGVkQXRVbml4TXMSKwoPcmVzdWx0X2V2ZW50'
+    'X2lkGAYgASgDSABSDXJlc3VsdEV2ZW50SWSIAQFCEgoQX3Jlc3VsdF9ldmVudF9pZA==');
+
+@$core.Deprecated('Use paperReconciliationDescriptor instead')
+const PaperReconciliation$json = {
+  '1': 'PaperReconciliation',
+  '2': [
+    {
+      '1': 'checked_at_unix_ms',
+      '3': 1,
+      '4': 1,
+      '5': 3,
+      '10': 'checkedAtUnixMs'
+    },
+    {'1': 'last_event_id', '3': 2, '4': 1, '5': 3, '10': 'lastEventId'},
+    {'1': 'cash_matches', '3': 3, '4': 1, '5': 8, '10': 'cashMatches'},
+    {
+      '1': 'reservations_match',
+      '3': 4,
+      '4': 1,
+      '5': 8,
+      '10': 'reservationsMatch'
+    },
+    {'1': 'positions_match', '3': 5, '4': 1, '5': 8, '10': 'positionsMatch'},
+    {'1': 'events_match', '3': 6, '4': 1, '5': 8, '10': 'eventsMatch'},
+  ],
+};
+
+/// Descriptor for `PaperReconciliation`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List paperReconciliationDescriptor = $convert.base64Decode(
+    'ChNQYXBlclJlY29uY2lsaWF0aW9uEisKEmNoZWNrZWRfYXRfdW5peF9tcxgBIAEoA1IPY2hlY2'
+    'tlZEF0VW5peE1zEiIKDWxhc3RfZXZlbnRfaWQYAiABKANSC2xhc3RFdmVudElkEiEKDGNhc2hf'
+    'bWF0Y2hlcxgDIAEoCFILY2FzaE1hdGNoZXMSLQoScmVzZXJ2YXRpb25zX21hdGNoGAQgASgIUh'
+    'FyZXNlcnZhdGlvbnNNYXRjaBInCg9wb3NpdGlvbnNfbWF0Y2gYBSABKAhSDnBvc2l0aW9uc01h'
+    'dGNoEiEKDGV2ZW50c19tYXRjaBgGIAEoCFILZXZlbnRzTWF0Y2g=');
+
+@$core.Deprecated('Use setPaperEntryPauseRequestDescriptor instead')
+const SetPaperEntryPauseRequest$json = {
+  '1': 'SetPaperEntryPauseRequest',
+  '2': [
+    {
+      '1': 'account',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.AccountRef',
+      '10': 'account'
+    },
+    {'1': 'paused', '3': 2, '4': 1, '5': 8, '9': 0, '10': 'paused', '17': true},
+  ],
+  '8': [
+    {'1': '_paused'},
+  ],
+};
+
+/// Descriptor for `SetPaperEntryPauseRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List setPaperEntryPauseRequestDescriptor = $convert.base64Decode(
+    'ChlTZXRQYXBlckVudHJ5UGF1c2VSZXF1ZXN0EiwKB2FjY291bnQYASABKAsyEi5sYWIudjEuQW'
+    'Njb3VudFJlZlIHYWNjb3VudBIbCgZwYXVzZWQYAiABKAhIAFIGcGF1c2VkiAEBQgkKB19wYXVz'
+    'ZWQ=');
+
+@$core.Deprecated('Use setPaperEntryPauseResponseDescriptor instead')
+const SetPaperEntryPauseResponse$json = {
+  '1': 'SetPaperEntryPauseResponse',
+  '2': [
+    {'1': 'paused', '3': 1, '4': 1, '5': 8, '10': 'paused'},
+  ],
+};
+
+/// Descriptor for `SetPaperEntryPauseResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List setPaperEntryPauseResponseDescriptor =
+    $convert.base64Decode(
+        'ChpTZXRQYXBlckVudHJ5UGF1c2VSZXNwb25zZRIWCgZwYXVzZWQYASABKAhSBnBhdXNlZA==');
 
 @$core.Deprecated('Use paperReceiptDescriptor instead')
 const PaperReceipt$json = {
@@ -591,6 +819,16 @@ const PaperPosition$json = {
       '6': '.lab.v1.MoneyReading',
       '10': 'marketValue'
     },
+    {'1': 'revision', '3': 6, '4': 1, '5': 3, '10': 'revision'},
+    {'1': 'lot', '3': 7, '4': 1, '5': 11, '6': '.lab.v1.Money', '10': 'lot'},
+    {
+      '1': 'pending_reduction',
+      '3': 8,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.PaperReduction',
+      '10': 'pendingReduction'
+    },
   ],
 };
 
@@ -599,7 +837,10 @@ final $typed_data.Uint8List paperPositionDescriptor = $convert.base64Decode(
     'Cg1QYXBlclBvc2l0aW9uEh0KCnJlY2VpcHRfaWQYASABKANSCXJlY2VpcHRJZBIWCgZzeW1ib2'
     'wYAiABKAlSBnN5bWJvbBIpCghxdWFudGl0eRgDIAEoCzINLmxhYi52MS5Nb25leVIIcXVhbnRp'
     'dHkSLAoKY29zdF9iYXNpcxgEIAEoCzINLmxhYi52MS5Nb25leVIJY29zdEJhc2lzEjcKDG1hcm'
-    'tldF92YWx1ZRgFIAEoCzIULmxhYi52MS5Nb25leVJlYWRpbmdSC21hcmtldFZhbHVl');
+    'tldF92YWx1ZRgFIAEoCzIULmxhYi52MS5Nb25leVJlYWRpbmdSC21hcmtldFZhbHVlEhoKCHJl'
+    'dmlzaW9uGAYgASgDUghyZXZpc2lvbhIfCgNsb3QYByABKAsyDS5sYWIudjEuTW9uZXlSA2xvdB'
+    'JDChFwZW5kaW5nX3JlZHVjdGlvbhgIIAEoCzIWLmxhYi52MS5QYXBlclJlZHVjdGlvblIQcGVu'
+    'ZGluZ1JlZHVjdGlvbg==');
 
 @$core.Deprecated('Use paperExecutionEventDescriptor instead')
 const PaperExecutionEvent$json = {
@@ -903,6 +1144,16 @@ const $core.Map<$core.String, $core.dynamic> PaperServiceBase$json = {
       '2': '.lab.v1.CancelPaperEntryRequest',
       '3': '.lab.v1.CancelPaperEntryResponse'
     },
+    {
+      '1': 'ReducePaperPosition',
+      '2': '.lab.v1.ReducePaperPositionRequest',
+      '3': '.lab.v1.ReducePaperPositionResponse'
+    },
+    {
+      '1': 'SetPaperEntryPause',
+      '2': '.lab.v1.SetPaperEntryPauseRequest',
+      '3': '.lab.v1.SetPaperEntryPauseResponse'
+    },
   ],
 };
 
@@ -921,6 +1172,8 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
   '.lab.v1.Decimal': $0.Decimal$json,
   '.lab.v1.PaperReceipt': PaperReceipt$json,
   '.lab.v1.PaperPosition': PaperPosition$json,
+  '.lab.v1.PaperReduction': PaperReduction$json,
+  '.lab.v1.PaperReconciliation': PaperReconciliation$json,
   '.lab.v1.InitializePaperAccountRequest': InitializePaperAccountRequest$json,
   '.lab.v1.InitializePaperAccountResponse': InitializePaperAccountResponse$json,
   '.lab.v1.PreviewPaperPlanRequest': PreviewPaperPlanRequest$json,
@@ -937,6 +1190,10 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
   '.lab.v1.PaperExecutionEvent': PaperExecutionEvent$json,
   '.lab.v1.CancelPaperEntryRequest': CancelPaperEntryRequest$json,
   '.lab.v1.CancelPaperEntryResponse': CancelPaperEntryResponse$json,
+  '.lab.v1.ReducePaperPositionRequest': ReducePaperPositionRequest$json,
+  '.lab.v1.ReducePaperPositionResponse': ReducePaperPositionResponse$json,
+  '.lab.v1.SetPaperEntryPauseRequest': SetPaperEntryPauseRequest$json,
+  '.lab.v1.SetPaperEntryPauseResponse': SetPaperEntryPauseResponse$json,
 };
 
 /// Descriptor for `PaperService`. Decode as a `google.protobuf.ServiceDescriptorProto`.
@@ -952,4 +1209,7 @@ final $typed_data.Uint8List paperServiceDescriptor = $convert.base64Decode(
     'UmVzcG9uc2USUgoPR2V0UGFwZXJSZWNlaXB0Eh4ubGFiLnYxLkdldFBhcGVyUmVjZWlwdFJlcX'
     'Vlc3QaHy5sYWIudjEuR2V0UGFwZXJSZWNlaXB0UmVzcG9uc2USVQoQQ2FuY2VsUGFwZXJFbnRy'
     'eRIfLmxhYi52MS5DYW5jZWxQYXBlckVudHJ5UmVxdWVzdBogLmxhYi52MS5DYW5jZWxQYXBlck'
-    'VudHJ5UmVzcG9uc2U=');
+    'VudHJ5UmVzcG9uc2USXgoTUmVkdWNlUGFwZXJQb3NpdGlvbhIiLmxhYi52MS5SZWR1Y2VQYXBl'
+    'clBvc2l0aW9uUmVxdWVzdBojLmxhYi52MS5SZWR1Y2VQYXBlclBvc2l0aW9uUmVzcG9uc2USWw'
+    'oSU2V0UGFwZXJFbnRyeVBhdXNlEiEubGFiLnYxLlNldFBhcGVyRW50cnlQYXVzZVJlcXVlc3Qa'
+    'Ii5sYWIudjEuU2V0UGFwZXJFbnRyeVBhdXNlUmVzcG9uc2U=');

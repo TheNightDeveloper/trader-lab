@@ -14,6 +14,7 @@ const addPaperPosition = `-- name: AddPaperPosition :exec
 INSERT INTO paper_positions (entry_id, quantity, cost_basis, next_open_at) VALUES ($1, $2, $3, $4)
 ON CONFLICT (entry_id) DO UPDATE SET quantity = paper_positions.quantity + EXCLUDED.quantity,
     cost_basis = paper_positions.cost_basis + EXCLUDED.cost_basis,
+    revision = paper_positions.revision + 1,
     next_open_at = GREATEST(paper_positions.next_open_at, EXCLUDED.next_open_at)
 `
 
@@ -143,7 +144,7 @@ func (q *Queries) InsertPaperExecutionEvent(ctx context.Context, arg InsertPaper
 }
 
 const listPaperPositions = `-- name: ListPaperPositions :many
-SELECT p.entry_id, e.symbol, p.quantity, p.cost_basis
+SELECT p.entry_id, e.symbol, p.quantity, p.cost_basis, p.revision
 FROM paper_positions p JOIN paper_entries e ON e.id = p.entry_id
 WHERE e.account_id = $1 ORDER BY p.entry_id
 `
@@ -153,6 +154,7 @@ type ListPaperPositionsRow struct {
 	Symbol    string
 	Quantity  int64
 	CostBasis int64
+	Revision  int64
 }
 
 func (q *Queries) ListPaperPositions(ctx context.Context, accountID string) ([]ListPaperPositionsRow, error) {
@@ -169,6 +171,7 @@ func (q *Queries) ListPaperPositions(ctx context.Context, accountID string) ([]L
 			&i.Symbol,
 			&i.Quantity,
 			&i.CostBasis,
+			&i.Revision,
 		); err != nil {
 			return nil, err
 		}
@@ -258,6 +261,17 @@ func (q *Queries) NextPaperCandle(ctx context.Context, arg NextPaperCandleParams
 	return i, err
 }
 
+const paperEntriesPaused = `-- name: PaperEntriesPaused :one
+SELECT entries_paused FROM paper_accounts WHERE id = $1
+`
+
+func (q *Queries) PaperEntriesPaused(ctx context.Context, id string) (bool, error) {
+	row := q.db.QueryRow(ctx, paperEntriesPaused, id)
+	var entries_paused bool
+	err := row.Scan(&entries_paused)
+	return entries_paused, err
+}
+
 const paperEntryForOpportunity = `-- name: PaperEntryForOpportunity :one
 SELECT id, account_id, opportunity_id, plan_hash, symbol, state, confirmed_at, expires_at, next_open_at, quantity, filled_quantity, reserved_cash, exposure_bound, loss_bound FROM paper_entries WHERE account_id = $1 AND opportunity_id = $2
 `
@@ -327,14 +341,14 @@ func (q *Queries) PaperExecutionEvents(ctx context.Context, entryID int64) ([]Pa
 }
 
 const paperExposure = `-- name: PaperExposure :one
-SELECT coalesce(sum(exposure_bound), 0)::bigint AS exposure,
-       coalesce(sum(loss_bound), 0)::bigint AS open_loss,
+SELECT coalesce(sum(CASE WHEN e.state IN (1, 2) THEN exposure_bound
+                        ELSE div(exposure_bound::numeric * p.quantity + e.quantity - 1, e.quantity) END), 0)::bigint AS exposure,
+       coalesce(sum(CASE WHEN e.state IN (1, 2) THEN loss_bound
+                        ELSE div(loss_bound::numeric * p.quantity + e.quantity - 1, e.quantity) END), 0)::bigint AS open_loss,
        count(*)::int AS slots,
        coalesce(bool_or(symbol = $1), false)::boolean AS symbol_busy
-FROM paper_entries e
-WHERE e.account_id = $2 AND (e.state IN (1, 2) OR EXISTS (
-    SELECT 1 FROM paper_positions p WHERE p.entry_id = e.id
-))
+FROM paper_entries e LEFT JOIN paper_positions p ON p.entry_id = e.id
+WHERE e.account_id = $2 AND (e.state IN (1, 2) OR p.entry_id IS NOT NULL)
 `
 
 type PaperExposureParams struct {
@@ -419,7 +433,7 @@ func (q *Queries) ReadPaperEntry(ctx context.Context, arg ReadPaperEntryParams) 
 }
 
 const readPaperPosition = `-- name: ReadPaperPosition :one
-SELECT entry_id, quantity, cost_basis, next_open_at FROM paper_positions WHERE entry_id = $1
+SELECT entry_id, quantity, cost_basis, next_open_at, revision FROM paper_positions WHERE entry_id = $1
 `
 
 func (q *Queries) ReadPaperPosition(ctx context.Context, entryID int64) (PaperPosition, error) {
@@ -430,6 +444,7 @@ func (q *Queries) ReadPaperPosition(ctx context.Context, entryID int64) (PaperPo
 		&i.Quantity,
 		&i.CostBasis,
 		&i.NextOpenAt,
+		&i.Revision,
 	)
 	return i, err
 }
@@ -482,6 +497,41 @@ func (q *Queries) RemovePaperPosition(ctx context.Context, entryID int64) error 
 	return err
 }
 
+const setPaperEntryPause = `-- name: SetPaperEntryPause :exec
+WITH changed AS (
+    UPDATE paper_accounts SET entries_paused = $2, revision = revision + 1
+    WHERE id = $3 AND entries_paused <> $2 RETURNING id, revision, entries_paused
+)
+INSERT INTO paper_entry_controls (account_id, account_revision, recorded_at, entries_paused)
+SELECT id, revision, $1, entries_paused FROM changed
+`
+
+type SetPaperEntryPauseParams struct {
+	RecordedAt time.Time
+	Paused     bool
+	ID         string
+}
+
+func (q *Queries) SetPaperEntryPause(ctx context.Context, arg SetPaperEntryPauseParams) error {
+	_, err := q.db.Exec(ctx, setPaperEntryPause, arg.RecordedAt, arg.Paused, arg.ID)
+	return err
+}
+
+const skipPausedPaperCandles = `-- name: SkipPausedPaperCandles :exec
+UPDATE paper_entries SET next_open_at = GREATEST(next_open_at, $1::timestamptz)
+WHERE account_id = $2 AND state IN (1, 2)
+`
+
+type SkipPausedPaperCandlesParams struct {
+	ResumeAt  time.Time
+	AccountID string
+}
+
+func (q *Queries) SkipPausedPaperCandles(ctx context.Context, arg SkipPausedPaperCandlesParams) error {
+	_, err := q.db.Exec(ctx, skipPausedPaperCandles, arg.ResumeAt, arg.AccountID)
+	return err
+}
+
 const updatePaperEntry = `-- name: UpdatePaperEntry :one
 UPDATE paper_entries SET state = $2, filled_quantity = $3, reserved_cash = $4, next_open_at = $5
 WHERE id = $1 RETURNING id, account_id, opportunity_id, plan_hash, symbol, state, confirmed_at, expires_at, next_open_at, quantity, filled_quantity, reserved_cash, exposure_bound, loss_bound
@@ -521,4 +571,27 @@ func (q *Queries) UpdatePaperEntry(ctx context.Context, arg UpdatePaperEntryPara
 		&i.LossBound,
 	)
 	return i, err
+}
+
+const updatePaperPositionAfterReduction = `-- name: UpdatePaperPositionAfterReduction :exec
+UPDATE paper_positions SET quantity = quantity - $1::bigint,
+    cost_basis = cost_basis - $2::bigint, revision = revision + 1,
+    next_open_at = $3 WHERE entry_id = $4
+`
+
+type UpdatePaperPositionAfterReductionParams struct {
+	Sold          int64
+	ReleasedBasis int64
+	NextOpenAt    time.Time
+	EntryID       int64
+}
+
+func (q *Queries) UpdatePaperPositionAfterReduction(ctx context.Context, arg UpdatePaperPositionAfterReductionParams) error {
+	_, err := q.db.Exec(ctx, updatePaperPositionAfterReduction,
+		arg.Sold,
+		arg.ReleasedBasis,
+		arg.NextOpenAt,
+		arg.EntryID,
+	)
+	return err
 }

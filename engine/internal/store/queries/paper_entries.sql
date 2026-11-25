@@ -9,15 +9,30 @@ SET cash_available = cash_available + @available_delta::bigint,
     revision = revision + 1
 WHERE id = @id;
 
+-- name: SetPaperEntryPause :exec
+WITH changed AS (
+    UPDATE paper_accounts SET entries_paused = @paused, revision = revision + 1
+    WHERE id = @id AND entries_paused <> @paused RETURNING id, revision, entries_paused
+)
+INSERT INTO paper_entry_controls (account_id, account_revision, recorded_at, entries_paused)
+SELECT id, revision, @recorded_at, entries_paused FROM changed;
+
+-- name: PaperEntriesPaused :one
+SELECT entries_paused FROM paper_accounts WHERE id = $1;
+
+-- name: SkipPausedPaperCandles :exec
+UPDATE paper_entries SET next_open_at = GREATEST(next_open_at, @resume_at::timestamptz)
+WHERE account_id = @account_id AND state IN (1, 2);
+
 -- name: PaperExposure :one
-SELECT coalesce(sum(exposure_bound), 0)::bigint AS exposure,
-       coalesce(sum(loss_bound), 0)::bigint AS open_loss,
+SELECT coalesce(sum(CASE WHEN e.state IN (1, 2) THEN exposure_bound
+                        ELSE div(exposure_bound::numeric * p.quantity + e.quantity - 1, e.quantity) END), 0)::bigint AS exposure,
+       coalesce(sum(CASE WHEN e.state IN (1, 2) THEN loss_bound
+                        ELSE div(loss_bound::numeric * p.quantity + e.quantity - 1, e.quantity) END), 0)::bigint AS open_loss,
        count(*)::int AS slots,
        coalesce(bool_or(symbol = @symbol), false)::boolean AS symbol_busy
-FROM paper_entries e
-WHERE e.account_id = @account_id AND (e.state IN (1, 2) OR EXISTS (
-    SELECT 1 FROM paper_positions p WHERE p.entry_id = e.id
-));
+FROM paper_entries e LEFT JOIN paper_positions p ON p.entry_id = e.id
+WHERE e.account_id = @account_id AND (e.state IN (1, 2) OR p.entry_id IS NOT NULL);
 
 -- name: InsertPaperEntry :one
 INSERT INTO paper_entries (account_id, opportunity_id, plan_hash, symbol, confirmed_at,
@@ -54,6 +69,7 @@ ORDER BY open_time, revision DESC LIMIT 1;
 INSERT INTO paper_positions (entry_id, quantity, cost_basis, next_open_at) VALUES ($1, $2, $3, $4)
 ON CONFLICT (entry_id) DO UPDATE SET quantity = paper_positions.quantity + EXCLUDED.quantity,
     cost_basis = paper_positions.cost_basis + EXCLUDED.cost_basis,
+    revision = paper_positions.revision + 1,
     next_open_at = GREATEST(paper_positions.next_open_at, EXCLUDED.next_open_at);
 
 -- name: ReadPaperPosition :one
@@ -65,8 +81,13 @@ UPDATE paper_positions SET next_open_at = $2 WHERE entry_id = $1;
 -- name: RemovePaperPosition :exec
 DELETE FROM paper_positions WHERE entry_id = $1;
 
+-- name: UpdatePaperPositionAfterReduction :exec
+UPDATE paper_positions SET quantity = quantity - @sold::bigint,
+    cost_basis = cost_basis - @released_basis::bigint, revision = revision + 1,
+    next_open_at = @next_open_at WHERE entry_id = @entry_id;
+
 -- name: ListPaperPositions :many
-SELECT p.entry_id, e.symbol, p.quantity, p.cost_basis
+SELECT p.entry_id, e.symbol, p.quantity, p.cost_basis, p.revision
 FROM paper_positions p JOIN paper_entries e ON e.id = p.entry_id
 WHERE e.account_id = $1 ORDER BY p.entry_id;
 

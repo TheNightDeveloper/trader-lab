@@ -15,6 +15,8 @@ service PaperService {
   rpc ConfirmPaperPlan(ConfirmPaperPlanRequest) returns (ConfirmPaperPlanResponse);
   rpc GetPaperReceipt(GetPaperReceiptRequest) returns (GetPaperReceiptResponse);
   rpc CancelPaperEntry(CancelPaperEntryRequest) returns (CancelPaperEntryResponse);
+  rpc ReducePaperPosition(ReducePaperPositionRequest) returns (ReducePaperPositionResponse);
+  rpc SetPaperEntryPause(SetPaperEntryPauseRequest) returns (SetPaperEntryPauseResponse);
 }
 
 message GetPaperAccountRequest {}
@@ -23,6 +25,7 @@ message GetPaperAccountResponse {
   PaperAccount paper_account = 1; // absent until initialized
   repeated PaperReceipt recent_receipts = 2;
   repeated PaperPosition positions = 3;
+  PaperReconciliation reconciliation = 4;
 }
 
 message InitializePaperAccountRequest {
@@ -45,6 +48,7 @@ message PaperAccount {
   Money max_spot_exposure = 6;
   Decimal fee_rate = 7;
   Decimal slippage_rate = 8;
+  bool entries_paused = 9;
 }
 
 message PreviewPaperPlanRequest {
@@ -86,6 +90,7 @@ message GetPaperReceiptRequest {
 message GetPaperReceiptResponse {
   PaperReceipt receipt = 1;
   repeated PaperExecutionEvent events = 2;
+  PaperReduction reduction = 3; // latest request, including a terminal outcome
 }
 
 message CancelPaperEntryRequest {
@@ -95,6 +100,52 @@ message CancelPaperEntryRequest {
 
 message CancelPaperEntryResponse {
   PaperReceipt receipt = 1;
+}
+
+message ReducePaperPositionRequest {
+  AccountRef account = 1;
+  int64 receipt_id = 2;
+  int64 position_revision = 3;
+  Money quantity = 4; // exact base asset amount, rounded to a lot by the caller
+}
+
+message ReducePaperPositionResponse {
+  PaperReduction reduction = 1;
+  PaperRestriction restriction = 2;
+}
+
+enum PaperReductionState {
+  PAPER_REDUCTION_STATE_UNSPECIFIED = 0;
+  PAPER_REDUCTION_STATE_PENDING = 1;
+  PAPER_REDUCTION_STATE_FILLED = 2;
+  PAPER_REDUCTION_STATE_SUPERSEDED = 3;
+}
+
+message PaperReduction {
+  int64 id = 1;
+  int64 receipt_id = 2;
+  PaperReductionState state = 3;
+  Money quantity = 4;
+  int64 requested_at_unix_ms = 5;
+  optional int64 result_event_id = 6;
+}
+
+message PaperReconciliation {
+  int64 checked_at_unix_ms = 1;
+  int64 last_event_id = 2;
+  bool cash_matches = 3;
+  bool reservations_match = 4;
+  bool positions_match = 5;
+  bool events_match = 6;
+}
+
+message SetPaperEntryPauseRequest {
+  AccountRef account = 1;
+  optional bool paused = 2;
+}
+
+message SetPaperEntryPauseResponse {
+  bool paused = 1;
 }
 
 enum PaperEntryState {
@@ -125,6 +176,9 @@ message PaperPosition {
   Money quantity = 3;
   Money cost_basis = 4; // includes paid entry fees
   MoneyReading market_value = 5;
+  int64 revision = 6;
+  Money lot = 7;
+  PaperReduction pending_reduction = 8;
 }
 
 message PaperExecutionEvent {

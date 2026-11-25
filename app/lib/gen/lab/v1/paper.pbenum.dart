@@ -14,6 +14,35 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
+class PaperReductionState extends $pb.ProtobufEnum {
+  static const PaperReductionState PAPER_REDUCTION_STATE_UNSPECIFIED =
+      PaperReductionState._(
+          0, _omitEnumNames ? '' : 'PAPER_REDUCTION_STATE_UNSPECIFIED');
+  static const PaperReductionState PAPER_REDUCTION_STATE_PENDING =
+      PaperReductionState._(
+          1, _omitEnumNames ? '' : 'PAPER_REDUCTION_STATE_PENDING');
+  static const PaperReductionState PAPER_REDUCTION_STATE_FILLED =
+      PaperReductionState._(
+          2, _omitEnumNames ? '' : 'PAPER_REDUCTION_STATE_FILLED');
+  static const PaperReductionState PAPER_REDUCTION_STATE_SUPERSEDED =
+      PaperReductionState._(
+          3, _omitEnumNames ? '' : 'PAPER_REDUCTION_STATE_SUPERSEDED');
+
+  static const $core.List<PaperReductionState> values = <PaperReductionState>[
+    PAPER_REDUCTION_STATE_UNSPECIFIED,
+    PAPER_REDUCTION_STATE_PENDING,
+    PAPER_REDUCTION_STATE_FILLED,
+    PAPER_REDUCTION_STATE_SUPERSEDED,
+  ];
+
+  static final $core.List<PaperReductionState?> _byValue =
+      $pb.ProtobufEnum.$_initByValueList(values, 3);
+  static PaperReductionState? valueOf($core.int value) =>
+      value < 0 || value >= _byValue.length ? null : _byValue[value];
+
+  const PaperReductionState._(super.value, super.name);
+}
+
 class PaperEntryState extends $pb.ProtobufEnum {
   static const PaperEntryState PAPER_ENTRY_STATE_UNSPECIFIED =
       PaperEntryState._(

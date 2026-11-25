@@ -142,7 +142,7 @@ func (q *Queries) PaperOpportunity(ctx context.Context, id int64) (PaperOpportun
 }
 
 const readPaperAccount = `-- name: ReadPaperAccount :one
-SELECT a.id, a.created_at, a.revision, a.policy_revision, a.initial_capital, a.cash_available, a.cash_reserved, p.effective_at, p.max_loss, p.max_open_loss, p.max_exposure,
+SELECT a.id, a.created_at, a.revision, a.policy_revision, a.initial_capital, a.cash_available, a.cash_reserved, a.entries_paused, p.effective_at, p.max_loss, p.max_open_loss, p.max_exposure,
        p.fee_ppm, p.slippage_ppm, p.max_cost_ppm, p.entry_drift_ppm
 FROM paper_accounts a JOIN paper_policy_versions p ON (p.account_id, p.revision) = (a.id, a.policy_revision)
 WHERE a.id = $1
@@ -156,6 +156,7 @@ type ReadPaperAccountRow struct {
 	InitialCapital int64
 	CashAvailable  int64
 	CashReserved   int64
+	EntriesPaused  bool
 	EffectiveAt    time.Time
 	MaxLoss        int64
 	MaxOpenLoss    int64
@@ -177,6 +178,7 @@ func (q *Queries) ReadPaperAccount(ctx context.Context, id string) (ReadPaperAcc
 		&i.InitialCapital,
 		&i.CashAvailable,
 		&i.CashReserved,
+		&i.EntriesPaused,
 		&i.EffectiveAt,
 		&i.MaxLoss,
 		&i.MaxOpenLoss,
