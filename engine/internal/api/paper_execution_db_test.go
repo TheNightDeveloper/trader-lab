@@ -106,6 +106,10 @@ func TestPaperConfirmationPartialFillCancelAndProtectiveExit(t *testing.T) {
 	require.EqualValues(t, unit/5, units(partial.GetReceipt().GetFilledQuantity()))
 	require.Len(t, book().GetPositions(), 1)
 	require.Equal(t, labv1.MoneyAvailability_MONEY_AVAILABILITY_STALE, book().GetPaperAccount().GetSnapshot().GetEquity().GetUnavailable().GetReason())
+	journal, err := client.ListPaperJournal(ctx, connect.NewRequest(&labv1.ListPaperJournalRequest{}))
+	require.NoError(t, err)
+	require.Len(t, journal.Msg.GetTrades(), 1)
+	require.Equal(t, units(partial.GetReceipt().GetFilledQuantity()), units(journal.Msg.GetTrades()[0].GetOpenQuantity()))
 
 	ingest(2, 100, 99, 101, 100)
 	require.NoError(t, p.runPaperCycle(ctx)) // protection advances before another entry on the same bar
@@ -157,6 +161,44 @@ FROM paper_postings WHERE account_id = $1`, paperAccountID).Scan(&available, &re
 		}
 	}
 	require.Equal(t, eventFees, fees)
+	journal, err = client.ListPaperJournal(ctx, connect.NewRequest(&labv1.ListPaperJournalRequest{}))
+	require.NoError(t, err)
+	require.Len(t, journal.Msg.GetTrades(), 1)
+	trade := journal.Msg.GetTrades()[0]
+	require.Equal(t, id, trade.GetReceipt().GetId())
+	require.Nil(t, trade.GetOpenQuantity())
+	require.Equal(t, fees, units(trade.GetFeesPaid()))
+	require.Equal(t, pnl, units(trade.GetRealizedPnl()))
+
+	// Seed archived receipts to exercise the exclusive cursor without running more fills.
+	_, err = market.Store.Pool.Exec(ctx, `
+WITH opportunities AS (
+    INSERT INTO market_opportunities (symbol, rule_version_id, report_id, spec_revision, candle_closed_at,
+        observed_at, expires_at, reference_close, reason, snapshot, snapshot_sha256)
+    SELECT o.symbol, o.rule_version_id, o.report_id, o.spec_revision, o.candle_closed_at - n * interval '1 hour',
+        o.observed_at, o.expires_at, o.reference_close, o.reason, o.snapshot, o.snapshot_sha256
+    FROM market_opportunities o CROSS JOIN generate_series(1, 20) n WHERE o.id = $1
+    RETURNING id, symbol, observed_at, expires_at
+), plans AS (
+    INSERT INTO paper_trade_plans (hash, account_id, opportunity_id, expires_at, body)
+    SELECT 'archived-' || id, $2, id, expires_at, ''::bytea FROM opportunities
+    RETURNING hash, opportunity_id
+)
+INSERT INTO paper_entries (account_id, opportunity_id, plan_hash, symbol, state, confirmed_at,
+    expires_at, next_open_at, quantity, reserved_cash, exposure_bound, loss_bound)
+SELECT $2, o.id, plans.hash, o.symbol, 4, o.observed_at, o.expires_at, o.observed_at, 1, 0, 1, 1
+FROM opportunities o JOIN plans ON plans.opportunity_id = o.id`, opportunityID, paperAccountID)
+	require.NoError(t, err)
+	firstPage, err := client.ListPaperJournal(ctx, connect.NewRequest(&labv1.ListPaperJournalRequest{}))
+	require.NoError(t, err)
+	require.Len(t, firstPage.Msg.GetTrades(), 20)
+	cursor := firstPage.Msg.GetNextBeforeReceiptId()
+	require.Equal(t, firstPage.Msg.GetTrades()[19].GetReceipt().GetId(), cursor)
+	lastPage, err := client.ListPaperJournal(ctx, connect.NewRequest(&labv1.ListPaperJournalRequest{BeforeReceiptId: cursor}))
+	require.NoError(t, err)
+	require.Len(t, lastPage.Msg.GetTrades(), 1)
+	require.Equal(t, id, lastPage.Msg.GetTrades()[0].GetReceipt().GetId())
+	require.Zero(t, lastPage.Msg.GetNextBeforeReceiptId())
 }
 
 func TestPaperEntriesShareCashAcrossSymbols(t *testing.T) {

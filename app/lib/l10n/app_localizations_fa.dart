@@ -275,6 +275,27 @@ class L10nFa extends L10n {
   String get paperRealizedPnl => 'سود و زیان تحقق‌یافته';
 
   @override
+  String get paperJournalTitle => 'ژورنال حساب مجازی';
+
+  @override
+  String get paperJournalEmpty => 'هنوز رسیدی در این صفحه ثبت نشده است.';
+
+  @override
+  String get paperJournalOlder => 'رسیدهای قدیمی‌تر';
+
+  @override
+  String get paperJournalNewest => 'تازه‌ترین رسیدها';
+
+  @override
+  String get paperJournalOpenQuantity => 'حجم باز';
+
+  @override
+  String get paperJournalFeesPaid => 'کارمزد پرداخت‌شده';
+
+  @override
+  String get paperJournalClosedPosition => 'موقعیت بسته‌شده';
+
+  @override
   String get paperRiskControls => 'کنترل ریسک حساب مجازی';
 
   @override

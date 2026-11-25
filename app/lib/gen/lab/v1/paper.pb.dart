@@ -1139,6 +1139,238 @@ class GetPaperReceiptResponse extends $pb.GeneratedMessage {
   PaperReduction ensureReduction() => $_ensure(2);
 }
 
+class ListPaperJournalRequest extends $pb.GeneratedMessage {
+  factory ListPaperJournalRequest({
+    $fixnum.Int64? beforeReceiptId,
+  }) {
+    final result = ListPaperJournalRequest._();
+    if (beforeReceiptId != null) result.beforeReceiptId = beforeReceiptId;
+    return result;
+  }
+
+  ListPaperJournalRequest._();
+
+  factory ListPaperJournalRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ListPaperJournalRequest()..mergeFromBuffer(data, registry);
+  factory ListPaperJournalRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ListPaperJournalRequest()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ListPaperJournalRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: ListPaperJournalRequest.$_createMessage)
+    ..aInt64(1, _omitFieldNames ? '' : 'beforeReceiptId')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListPaperJournalRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListPaperJournalRequest copyWith(
+          void Function(ListPaperJournalRequest) updates) =>
+      super.copyWith((message) => updates(message as ListPaperJournalRequest))
+          as ListPaperJournalRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use ListPaperJournalRequest() / ListPaperJournalRequest.new instead')
+  static ListPaperJournalRequest create() => ListPaperJournalRequest._();
+  static $pb.GeneratedMessage $_createMessage() => ListPaperJournalRequest._();
+  @$core.override
+  ListPaperJournalRequest createEmptyInstance() => ListPaperJournalRequest._();
+  @$core.pragma('dart2js:noInline')
+  static ListPaperJournalRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ListPaperJournalRequest>(
+          ListPaperJournalRequest.$_createMessage);
+  static ListPaperJournalRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get beforeReceiptId => $_getI64(0);
+  @$pb.TagNumber(1)
+  set beforeReceiptId($fixnum.Int64 value) => $_setInt64(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasBeforeReceiptId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearBeforeReceiptId() => $_clearField(1);
+}
+
+class ListPaperJournalResponse extends $pb.GeneratedMessage {
+  factory ListPaperJournalResponse({
+    $core.Iterable<PaperJournalTrade>? trades,
+    $fixnum.Int64? nextBeforeReceiptId,
+  }) {
+    final result = ListPaperJournalResponse._();
+    if (trades != null) result.trades.addAll(trades);
+    if (nextBeforeReceiptId != null)
+      result.nextBeforeReceiptId = nextBeforeReceiptId;
+    return result;
+  }
+
+  ListPaperJournalResponse._();
+
+  factory ListPaperJournalResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ListPaperJournalResponse()..mergeFromBuffer(data, registry);
+  factory ListPaperJournalResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ListPaperJournalResponse()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ListPaperJournalResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: ListPaperJournalResponse.$_createMessage)
+    ..pPM<PaperJournalTrade>(1, _omitFieldNames ? '' : 'trades',
+        subBuilder: PaperJournalTrade.$_createMessage)
+    ..aInt64(2, _omitFieldNames ? '' : 'nextBeforeReceiptId')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListPaperJournalResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListPaperJournalResponse copyWith(
+          void Function(ListPaperJournalResponse) updates) =>
+      super.copyWith((message) => updates(message as ListPaperJournalResponse))
+          as ListPaperJournalResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use ListPaperJournalResponse() / ListPaperJournalResponse.new instead')
+  static ListPaperJournalResponse create() => ListPaperJournalResponse._();
+  static $pb.GeneratedMessage $_createMessage() => ListPaperJournalResponse._();
+  @$core.override
+  ListPaperJournalResponse createEmptyInstance() =>
+      ListPaperJournalResponse._();
+  @$core.pragma('dart2js:noInline')
+  static ListPaperJournalResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ListPaperJournalResponse>(
+          ListPaperJournalResponse.$_createMessage);
+  static ListPaperJournalResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<PaperJournalTrade> get trades => $_getList(0);
+
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get nextBeforeReceiptId => $_getI64(1);
+  @$pb.TagNumber(2)
+  set nextBeforeReceiptId($fixnum.Int64 value) => $_setInt64(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasNextBeforeReceiptId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearNextBeforeReceiptId() => $_clearField(2);
+}
+
+class PaperJournalTrade extends $pb.GeneratedMessage {
+  factory PaperJournalTrade({
+    PaperReceipt? receipt,
+    $0.Money? openQuantity,
+    $0.Money? feesPaid,
+    $0.Money? realizedPnl,
+  }) {
+    final result = PaperJournalTrade._();
+    if (receipt != null) result.receipt = receipt;
+    if (openQuantity != null) result.openQuantity = openQuantity;
+    if (feesPaid != null) result.feesPaid = feesPaid;
+    if (realizedPnl != null) result.realizedPnl = realizedPnl;
+    return result;
+  }
+
+  PaperJournalTrade._();
+
+  factory PaperJournalTrade.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      PaperJournalTrade()..mergeFromBuffer(data, registry);
+  factory PaperJournalTrade.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      PaperJournalTrade()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'PaperJournalTrade',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: PaperJournalTrade.$_createMessage)
+    ..aOM<PaperReceipt>(1, _omitFieldNames ? '' : 'receipt',
+        subBuilder: PaperReceipt.$_createMessage)
+    ..aOM<$0.Money>(2, _omitFieldNames ? '' : 'openQuantity',
+        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Money>(3, _omitFieldNames ? '' : 'feesPaid',
+        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Money>(4, _omitFieldNames ? '' : 'realizedPnl',
+        subBuilder: $0.Money.$_createMessage)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  PaperJournalTrade clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  PaperJournalTrade copyWith(void Function(PaperJournalTrade) updates) =>
+      super.copyWith((message) => updates(message as PaperJournalTrade))
+          as PaperJournalTrade;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use PaperJournalTrade() / PaperJournalTrade.new instead')
+  static PaperJournalTrade create() => PaperJournalTrade._();
+  static $pb.GeneratedMessage $_createMessage() => PaperJournalTrade._();
+  @$core.override
+  PaperJournalTrade createEmptyInstance() => PaperJournalTrade._();
+  @$core.pragma('dart2js:noInline')
+  static PaperJournalTrade getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<PaperJournalTrade>(
+          PaperJournalTrade.$_createMessage);
+  static PaperJournalTrade? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  PaperReceipt get receipt => $_getN(0);
+  @$pb.TagNumber(1)
+  set receipt(PaperReceipt value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasReceipt() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearReceipt() => $_clearField(1);
+  @$pb.TagNumber(1)
+  PaperReceipt ensureReceipt() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $0.Money get openQuantity => $_getN(1);
+  @$pb.TagNumber(2)
+  set openQuantity($0.Money value) => $_setField(2, value);
+  @$pb.TagNumber(2)
+  $core.bool hasOpenQuantity() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearOpenQuantity() => $_clearField(2);
+  @$pb.TagNumber(2)
+  $0.Money ensureOpenQuantity() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  $0.Money get feesPaid => $_getN(2);
+  @$pb.TagNumber(3)
+  set feesPaid($0.Money value) => $_setField(3, value);
+  @$pb.TagNumber(3)
+  $core.bool hasFeesPaid() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearFeesPaid() => $_clearField(3);
+  @$pb.TagNumber(3)
+  $0.Money ensureFeesPaid() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  $0.Money get realizedPnl => $_getN(3);
+  @$pb.TagNumber(4)
+  set realizedPnl($0.Money value) => $_setField(4, value);
+  @$pb.TagNumber(4)
+  $core.bool hasRealizedPnl() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearRealizedPnl() => $_clearField(4);
+  @$pb.TagNumber(4)
+  $0.Money ensureRealizedPnl() => $_ensure(3);
+}
+
 class CancelPaperEntryRequest extends $pb.GeneratedMessage {
   factory CancelPaperEntryRequest({
     $2.AccountRef? account,
@@ -2871,6 +3103,10 @@ class PaperServiceApi {
           $pb.ClientContext? ctx, GetPaperReceiptRequest request) =>
       _client.invoke<GetPaperReceiptResponse>(ctx, 'PaperService',
           'GetPaperReceipt', request, GetPaperReceiptResponse());
+  $async.Future<ListPaperJournalResponse> listPaperJournal(
+          $pb.ClientContext? ctx, ListPaperJournalRequest request) =>
+      _client.invoke<ListPaperJournalResponse>(ctx, 'PaperService',
+          'ListPaperJournal', request, ListPaperJournalResponse());
   $async.Future<CancelPaperEntryResponse> cancelPaperEntry(
           $pb.ClientContext? ctx, CancelPaperEntryRequest request) =>
       _client.invoke<CancelPaperEntryResponse>(ctx, 'PaperService',

@@ -480,6 +480,94 @@ final $typed_data.Uint8List getPaperReceiptResponseDescriptor = $convert.base64D
     'b25FdmVudFIGZXZlbnRzEjQKCXJlZHVjdGlvbhgDIAEoCzIWLmxhYi52MS5QYXBlclJlZHVjdG'
     'lvblIJcmVkdWN0aW9u');
 
+@$core.Deprecated('Use listPaperJournalRequestDescriptor instead')
+const ListPaperJournalRequest$json = {
+  '1': 'ListPaperJournalRequest',
+  '2': [
+    {'1': 'before_receipt_id', '3': 1, '4': 1, '5': 3, '10': 'beforeReceiptId'},
+  ],
+};
+
+/// Descriptor for `ListPaperJournalRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List listPaperJournalRequestDescriptor =
+    $convert.base64Decode(
+        'ChdMaXN0UGFwZXJKb3VybmFsUmVxdWVzdBIqChFiZWZvcmVfcmVjZWlwdF9pZBgBIAEoA1IPYm'
+        'Vmb3JlUmVjZWlwdElk');
+
+@$core.Deprecated('Use listPaperJournalResponseDescriptor instead')
+const ListPaperJournalResponse$json = {
+  '1': 'ListPaperJournalResponse',
+  '2': [
+    {
+      '1': 'trades',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.lab.v1.PaperJournalTrade',
+      '10': 'trades'
+    },
+    {
+      '1': 'next_before_receipt_id',
+      '3': 2,
+      '4': 1,
+      '5': 3,
+      '10': 'nextBeforeReceiptId'
+    },
+  ],
+};
+
+/// Descriptor for `ListPaperJournalResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List listPaperJournalResponseDescriptor = $convert.base64Decode(
+    'ChhMaXN0UGFwZXJKb3VybmFsUmVzcG9uc2USMQoGdHJhZGVzGAEgAygLMhkubGFiLnYxLlBhcG'
+    'VySm91cm5hbFRyYWRlUgZ0cmFkZXMSMwoWbmV4dF9iZWZvcmVfcmVjZWlwdF9pZBgCIAEoA1IT'
+    'bmV4dEJlZm9yZVJlY2VpcHRJZA==');
+
+@$core.Deprecated('Use paperJournalTradeDescriptor instead')
+const PaperJournalTrade$json = {
+  '1': 'PaperJournalTrade',
+  '2': [
+    {
+      '1': 'receipt',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.PaperReceipt',
+      '10': 'receipt'
+    },
+    {
+      '1': 'open_quantity',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.Money',
+      '10': 'openQuantity'
+    },
+    {
+      '1': 'fees_paid',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.Money',
+      '10': 'feesPaid'
+    },
+    {
+      '1': 'realized_pnl',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.lab.v1.Money',
+      '10': 'realizedPnl'
+    },
+  ],
+};
+
+/// Descriptor for `PaperJournalTrade`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List paperJournalTradeDescriptor = $convert.base64Decode(
+    'ChFQYXBlckpvdXJuYWxUcmFkZRIuCgdyZWNlaXB0GAEgASgLMhQubGFiLnYxLlBhcGVyUmVjZW'
+    'lwdFIHcmVjZWlwdBIyCg1vcGVuX3F1YW50aXR5GAIgASgLMg0ubGFiLnYxLk1vbmV5UgxvcGVu'
+    'UXVhbnRpdHkSKgoJZmVlc19wYWlkGAMgASgLMg0ubGFiLnYxLk1vbmV5UghmZWVzUGFpZBIwCg'
+    'xyZWFsaXplZF9wbmwYBCABKAsyDS5sYWIudjEuTW9uZXlSC3JlYWxpemVkUG5s');
+
 @$core.Deprecated('Use cancelPaperEntryRequestDescriptor instead')
 const CancelPaperEntryRequest$json = {
   '1': 'CancelPaperEntryRequest',
@@ -1140,6 +1228,11 @@ const $core.Map<$core.String, $core.dynamic> PaperServiceBase$json = {
       '3': '.lab.v1.GetPaperReceiptResponse'
     },
     {
+      '1': 'ListPaperJournal',
+      '2': '.lab.v1.ListPaperJournalRequest',
+      '3': '.lab.v1.ListPaperJournalResponse'
+    },
+    {
       '1': 'CancelPaperEntry',
       '2': '.lab.v1.CancelPaperEntryRequest',
       '3': '.lab.v1.CancelPaperEntryResponse'
@@ -1188,6 +1281,9 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
   '.lab.v1.GetPaperReceiptRequest': GetPaperReceiptRequest$json,
   '.lab.v1.GetPaperReceiptResponse': GetPaperReceiptResponse$json,
   '.lab.v1.PaperExecutionEvent': PaperExecutionEvent$json,
+  '.lab.v1.ListPaperJournalRequest': ListPaperJournalRequest$json,
+  '.lab.v1.ListPaperJournalResponse': ListPaperJournalResponse$json,
+  '.lab.v1.PaperJournalTrade': PaperJournalTrade$json,
   '.lab.v1.CancelPaperEntryRequest': CancelPaperEntryRequest$json,
   '.lab.v1.CancelPaperEntryResponse': CancelPaperEntryResponse$json,
   '.lab.v1.ReducePaperPositionRequest': ReducePaperPositionRequest$json,
@@ -1207,9 +1303,11 @@ final $typed_data.Uint8List paperServiceDescriptor = $convert.base64Decode(
     'c3QaHC5sYWIudjEuR2V0UGFwZXJQbGFuUmVzcG9uc2USVQoQQ29uZmlybVBhcGVyUGxhbhIfLm'
     'xhYi52MS5Db25maXJtUGFwZXJQbGFuUmVxdWVzdBogLmxhYi52MS5Db25maXJtUGFwZXJQbGFu'
     'UmVzcG9uc2USUgoPR2V0UGFwZXJSZWNlaXB0Eh4ubGFiLnYxLkdldFBhcGVyUmVjZWlwdFJlcX'
-    'Vlc3QaHy5sYWIudjEuR2V0UGFwZXJSZWNlaXB0UmVzcG9uc2USVQoQQ2FuY2VsUGFwZXJFbnRy'
-    'eRIfLmxhYi52MS5DYW5jZWxQYXBlckVudHJ5UmVxdWVzdBogLmxhYi52MS5DYW5jZWxQYXBlck'
-    'VudHJ5UmVzcG9uc2USXgoTUmVkdWNlUGFwZXJQb3NpdGlvbhIiLmxhYi52MS5SZWR1Y2VQYXBl'
-    'clBvc2l0aW9uUmVxdWVzdBojLmxhYi52MS5SZWR1Y2VQYXBlclBvc2l0aW9uUmVzcG9uc2USWw'
-    'oSU2V0UGFwZXJFbnRyeVBhdXNlEiEubGFiLnYxLlNldFBhcGVyRW50cnlQYXVzZVJlcXVlc3Qa'
-    'Ii5sYWIudjEuU2V0UGFwZXJFbnRyeVBhdXNlUmVzcG9uc2U=');
+    'Vlc3QaHy5sYWIudjEuR2V0UGFwZXJSZWNlaXB0UmVzcG9uc2USVQoQTGlzdFBhcGVySm91cm5h'
+    'bBIfLmxhYi52MS5MaXN0UGFwZXJKb3VybmFsUmVxdWVzdBogLmxhYi52MS5MaXN0UGFwZXJKb3'
+    'VybmFsUmVzcG9uc2USVQoQQ2FuY2VsUGFwZXJFbnRyeRIfLmxhYi52MS5DYW5jZWxQYXBlckVu'
+    'dHJ5UmVxdWVzdBogLmxhYi52MS5DYW5jZWxQYXBlckVudHJ5UmVzcG9uc2USXgoTUmVkdWNlUG'
+    'FwZXJQb3NpdGlvbhIiLmxhYi52MS5SZWR1Y2VQYXBlclBvc2l0aW9uUmVxdWVzdBojLmxhYi52'
+    'MS5SZWR1Y2VQYXBlclBvc2l0aW9uUmVzcG9uc2USWwoSU2V0UGFwZXJFbnRyeVBhdXNlEiEubG'
+    'FiLnYxLlNldFBhcGVyRW50cnlQYXVzZVJlcXVlc3QaIi5sYWIudjEuU2V0UGFwZXJFbnRyeVBh'
+    'dXNlUmVzcG9uc2U=');

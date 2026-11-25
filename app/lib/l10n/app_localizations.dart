@@ -609,6 +609,48 @@ abstract class L10n {
   /// **'سود و زیان تحقق‌یافته'**
   String get paperRealizedPnl;
 
+  /// No description provided for @paperJournalTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'ژورنال حساب مجازی'**
+  String get paperJournalTitle;
+
+  /// No description provided for @paperJournalEmpty.
+  ///
+  /// In fa, this message translates to:
+  /// **'هنوز رسیدی در این صفحه ثبت نشده است.'**
+  String get paperJournalEmpty;
+
+  /// No description provided for @paperJournalOlder.
+  ///
+  /// In fa, this message translates to:
+  /// **'رسیدهای قدیمی‌تر'**
+  String get paperJournalOlder;
+
+  /// No description provided for @paperJournalNewest.
+  ///
+  /// In fa, this message translates to:
+  /// **'تازه‌ترین رسیدها'**
+  String get paperJournalNewest;
+
+  /// No description provided for @paperJournalOpenQuantity.
+  ///
+  /// In fa, this message translates to:
+  /// **'حجم باز'**
+  String get paperJournalOpenQuantity;
+
+  /// No description provided for @paperJournalFeesPaid.
+  ///
+  /// In fa, this message translates to:
+  /// **'کارمزد پرداخت‌شده'**
+  String get paperJournalFeesPaid;
+
+  /// No description provided for @paperJournalClosedPosition.
+  ///
+  /// In fa, this message translates to:
+  /// **'موقعیت بسته‌شده'**
+  String get paperJournalClosedPosition;
+
   /// No description provided for @paperRiskControls.
   ///
   /// In fa, this message translates to:

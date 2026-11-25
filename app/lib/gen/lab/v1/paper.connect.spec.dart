@@ -53,6 +53,13 @@ abstract final class PaperService {
     labv1paper.GetPaperReceiptResponse.new,
   );
 
+  static const listPaperJournal = connect.Spec(
+    '/$name/ListPaperJournal',
+    connect.StreamType.unary,
+    labv1paper.ListPaperJournalRequest.new,
+    labv1paper.ListPaperJournalResponse.new,
+  );
+
   static const cancelPaperEntry = connect.Spec(
     '/$name/CancelPaperEntry',
     connect.StreamType.unary,

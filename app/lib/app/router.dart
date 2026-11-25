@@ -14,6 +14,7 @@ import '../features/library/library_screen.dart';
 import '../features/library/rule_library_screen.dart';
 import '../features/market/market_screen.dart';
 import '../features/paper/paper_entries.dart';
+import '../features/paper/paper_journal.dart';
 import '../features/paper/paper_screen.dart';
 import '../features/pnl/pnl_screen.dart';
 import '../features/reports/compare_screen.dart';
@@ -114,6 +115,14 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
             context,
             state,
             PaperScreen(opportunityId: Int64.tryParseInt(state.uri.queryParameters['opportunity'] ?? '')),
+          ),
+        ),
+        GoRoute(
+          path: '/paper/journal',
+          pageBuilder: (context, state) => _page(
+            context,
+            state,
+            PaperJournalScreen(before: Int64.tryParseInt(state.uri.queryParameters['before'] ?? '') ?? Int64.ZERO),
           ),
         ),
         GoRoute(

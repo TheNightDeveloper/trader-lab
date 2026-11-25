@@ -39,7 +39,14 @@ class PaperScreen extends ConsumerWidget {
     final connected = !accountState.hasError && !accountState.isLoading;
     return PageFrame(
       children: [
-        PageHeader(title: Dest.paper.label(l), subtitle: Dest.paper.subtitle(l), actions: const [_PaperBadge()]),
+        PageHeader(
+          title: Dest.paper.label(l),
+          subtitle: Dest.paper.subtitle(l),
+          actions: [
+            const _PaperBadge(),
+            OutlinedButton(onPressed: () => context.go('/paper/journal'), child: Text(l.paperJournalTitle)),
+          ],
+        ),
         if (snapshot == null)
           AsyncSection(
             value: accountState,

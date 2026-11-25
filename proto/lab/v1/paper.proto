@@ -14,6 +14,7 @@ service PaperService {
   rpc GetPaperPlan(GetPaperPlanRequest) returns (GetPaperPlanResponse);
   rpc ConfirmPaperPlan(ConfirmPaperPlanRequest) returns (ConfirmPaperPlanResponse);
   rpc GetPaperReceipt(GetPaperReceiptRequest) returns (GetPaperReceiptResponse);
+  rpc ListPaperJournal(ListPaperJournalRequest) returns (ListPaperJournalResponse);
   rpc CancelPaperEntry(CancelPaperEntryRequest) returns (CancelPaperEntryResponse);
   rpc ReducePaperPosition(ReducePaperPositionRequest) returns (ReducePaperPositionResponse);
   rpc SetPaperEntryPause(SetPaperEntryPauseRequest) returns (SetPaperEntryPauseResponse);
@@ -91,6 +92,22 @@ message GetPaperReceiptResponse {
   PaperReceipt receipt = 1;
   repeated PaperExecutionEvent events = 2;
   PaperReduction reduction = 3; // latest request, including a terminal outcome
+}
+
+message ListPaperJournalRequest {
+  int64 before_receipt_id = 1; // exclusive, zero starts at the newest receipt
+}
+
+message ListPaperJournalResponse {
+  repeated PaperJournalTrade trades = 1;
+  int64 next_before_receipt_id = 2; // zero means end of history
+}
+
+message PaperJournalTrade {
+  PaperReceipt receipt = 1;
+  Money open_quantity = 2; // absent when no position remains
+  Money fees_paid = 3;
+  Money realized_pnl = 4;
 }
 
 message CancelPaperEntryRequest {

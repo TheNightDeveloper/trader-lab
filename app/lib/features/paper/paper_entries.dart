@@ -23,7 +23,7 @@ import 'paper_providers.dart';
 
 String _receiptPath(Int64 id) => '/paper/receipts/$id';
 
-String _entryState(L10n l, PaperEntryState state) => switch (state) {
+String paperEntryStateLabel(L10n l, PaperEntryState state) => switch (state) {
   PaperEntryState.PAPER_ENTRY_STATE_PENDING => l.paperEntryPending,
   PaperEntryState.PAPER_ENTRY_STATE_PARTIAL => l.paperEntryPartial,
   PaperEntryState.PAPER_ENTRY_STATE_FILLED => l.paperEntryFilled,
@@ -151,8 +151,8 @@ class PaperActivity extends StatelessWidget {
                             Num(moneyValue(position.quantity), unit: position.quantity.asset),
                           ],
                         ),
-                        _PaperMoneyLine(label: l.paperCostBasis, amount: position.costBasis),
-                        _PaperMoneyLine(
+                        PaperMoneyLine(label: l.paperCostBasis, amount: position.costBasis),
+                        PaperMoneyLine(
                           label: l.paperPositionValue,
                           amount: position.marketValue.hasValue() ? position.marketValue.value : null,
                         ),
@@ -182,7 +182,7 @@ class PaperActivity extends StatelessWidget {
                 for (final receipt in receipts)
                   ListTile(
                     title: Mono('${receipt.symbol} · ${receipt.id}'),
-                    subtitle: Text(_entryState(l, receipt.state)),
+                    subtitle: Text(paperEntryStateLabel(l, receipt.state)),
                     onTap: () => context.go(_receiptPath(receipt.id)),
                   ),
               ],
@@ -291,14 +291,14 @@ class _PaperReceiptSummary extends StatelessWidget {
         receipt.state == PaperEntryState.PAPER_ENTRY_STATE_PENDING ||
         receipt.state == PaperEntryState.PAPER_ENTRY_STATE_PARTIAL;
     return SectionCard(
-      title: _entryState(l, receipt.state),
+      title: paperEntryStateLabel(l, receipt.state),
       trailing: Mono('${receipt.account.accountId} · ${receipt.symbol} · ${receipt.id}'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _PaperMoneyLine(label: l.paperQuantity, amount: receipt.requestedQuantity),
-          _PaperMoneyLine(label: l.paperFilledQuantity, amount: receipt.filledQuantity),
-          _PaperMoneyLine(label: l.paperReserved, amount: receipt.reservedCash),
+          PaperMoneyLine(label: l.paperQuantity, amount: receipt.requestedQuantity),
+          PaperMoneyLine(label: l.paperFilledQuantity, amount: receipt.filledQuantity),
+          PaperMoneyLine(label: l.paperReserved, amount: receipt.reservedCash),
           _PaperTimeLine(label: l.paperConfirmedAt, at: receipt.confirmedAtUnixMs),
           _PaperTimeLine(label: l.paperEntryExpires, at: receipt.expiresAtUnixMs),
           if (reduction case final attempt?) PaperReductionStatus(reduction: attempt),
@@ -344,21 +344,21 @@ class _PaperEventRow extends StatelessWidget {
       expandedCrossAxisAlignment: CrossAxisAlignment.start,
       childrenPadding: const EdgeInsets.all(AppSpace.md),
       children: [
-        if (event.hasQuantity()) _PaperMoneyLine(label: l.paperFilledQuantity, amount: event.quantity),
-        if (event.hasReferencePrice()) _PaperMoneyLine(label: l.marketOpportunityPrice, amount: event.referencePrice),
-        if (event.hasFillPrice()) _PaperMoneyLine(label: l.paperExecutionPrice, amount: event.fillPrice),
+        if (event.hasQuantity()) PaperMoneyLine(label: l.paperFilledQuantity, amount: event.quantity),
+        if (event.hasReferencePrice()) PaperMoneyLine(label: l.marketOpportunityPrice, amount: event.referencePrice),
+        if (event.hasFillPrice()) PaperMoneyLine(label: l.paperExecutionPrice, amount: event.fillPrice),
         if (event.hasCandleOpenedAtUnixMs())
           _PaperTimeLine(label: l.paperExecutionCandle, at: event.candleOpenedAtUnixMs),
-        if (event.hasFee()) _PaperMoneyLine(label: l.paperEventFee, amount: event.fee),
-        if (event.hasCash()) _PaperMoneyLine(label: l.paperEventCash, amount: event.cash),
-        if (event.hasRealizedPnl()) _PaperMoneyLine(label: l.paperRealizedPnl, amount: event.realizedPnl),
+        if (event.hasFee()) PaperMoneyLine(label: l.paperEventFee, amount: event.fee),
+        if (event.hasCash()) PaperMoneyLine(label: l.paperEventCash, amount: event.cash),
+        if (event.hasRealizedPnl()) PaperMoneyLine(label: l.paperRealizedPnl, amount: event.realizedPnl),
       ],
     );
   }
 }
 
-class _PaperMoneyLine extends StatelessWidget {
-  const _PaperMoneyLine({required this.label, required this.amount});
+class PaperMoneyLine extends StatelessWidget {
+  const PaperMoneyLine({super.key, required this.label, required this.amount});
 
   final String label;
   final Money? amount;

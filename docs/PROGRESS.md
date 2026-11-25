@@ -2,6 +2,18 @@
 
 Update at the end of every session.
 
+## P3 Paper journal (2026-11-25)
+
+Paper now links to a paginated journal of the account's durable receipts.
+Each row shows the current entry state, open quantity, paid fees and realized
+P&L. PostgreSQL sums exact execution values on the server and returns a
+stable receipt cursor. A receipt remains accessible with its event history
+after refresh, fill, cancellation or close.
+
+The PostgreSQL execution test covers the journal before and after closing a
+partially filled position, reconciles the fee and P&L figures against the
+execution/ledger evidence, and verifies that the next page has no duplicate.
+
 ## P3 Reduce-only controls and ledger reconciliation (2026-11-25)
 
 The Paper account can pause entry confirmation and pending entry fills.
