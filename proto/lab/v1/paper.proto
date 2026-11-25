@@ -1,0 +1,98 @@
+syntax = "proto3";
+
+package lab.v1;
+
+import "lab/v1/account.proto";
+import "lab/v1/common.proto";
+import "lab/v1/workspace.proto";
+
+// PaperService only operates on local, simulated spot accounts.
+service PaperService {
+  rpc GetPaperAccount(GetPaperAccountRequest) returns (GetPaperAccountResponse);
+  rpc InitializePaperAccount(InitializePaperAccountRequest) returns (InitializePaperAccountResponse);
+  rpc PreviewPaperPlan(PreviewPaperPlanRequest) returns (PreviewPaperPlanResponse);
+  rpc GetPaperPlan(GetPaperPlanRequest) returns (GetPaperPlanResponse);
+}
+
+message GetPaperAccountRequest {}
+
+message GetPaperAccountResponse {
+  PaperAccount paper_account = 1; // absent until initialized
+}
+
+message InitializePaperAccountRequest {
+  Money capital = 1;
+  Money max_loss_per_trade = 2;
+  Money max_open_loss = 3;
+  Money max_spot_exposure = 4;
+}
+
+message InitializePaperAccountResponse {
+  PaperAccount paper_account = 1;
+}
+
+message PaperAccount {
+  AccountSnapshot snapshot = 1;
+  Money initial_capital = 2;
+  Money reserved_balance = 3;
+  Money max_loss_per_trade = 4;
+  Money max_open_loss = 5;
+  Money max_spot_exposure = 6;
+  Decimal fee_rate = 7;
+  Decimal slippage_rate = 8;
+}
+
+message PreviewPaperPlanRequest {
+  AccountRef account = 1;
+  int64 opportunity_id = 2;
+  Money stop = 3;
+  Money take_profit = 4;
+}
+
+message PreviewPaperPlanResponse {
+  PaperPlan plan = 1;
+  PaperRestriction restriction = 2; // set when current inputs cannot produce a plan
+}
+
+message GetPaperPlanRequest {
+  string plan_hash = 1;
+}
+
+message GetPaperPlanResponse {
+  PaperPlan plan = 1;
+  PaperRestriction restriction = 2; // the recorded plan may no longer be usable
+}
+
+message PaperRestriction {
+  string code = 1;
+  string detail = 2;
+}
+
+message PaperPlan {
+  string plan_hash = 1;
+  AccountRef account = 2;
+  int64 account_revision = 3;
+  RiskPolicyVersion risk_policy = 4;
+  int64 opportunity_id = 5;
+  InstrumentKey instrument = 6;
+  int64 rule_version_id = 7;
+  string report_id = 8;
+  string snapshot_sha256 = 9;
+  int64 quoted_at_unix_ms = 10;
+  int64 expires_at_unix_ms = 11;
+  Money reference_price = 12;
+  Money estimated_entry = 13;
+  Money max_entry_price = 14;
+  Money stop = 15;
+  Money take_profit = 16;
+  Money quantity = 17;
+  Money notional = 18;
+  Money required_cash = 19;
+  Money planned_loss = 20;
+  Money estimated_cost = 21;
+  Decimal fee_rate = 22;
+  Decimal slippage_rate = 23;
+  string fill_model = 24;
+  int64 reference_candle_closed_at_unix_ms = 25;
+  int32 reference_candle_revision = 26;
+}

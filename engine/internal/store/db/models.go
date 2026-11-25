@@ -239,6 +239,48 @@ type ModelArtifact struct {
 	CreatedAt   time.Time
 }
 
+type PaperAccount struct {
+	ID             string
+	CreatedAt      time.Time
+	Revision       int64
+	PolicyRevision int64
+	InitialCapital int64
+	CashAvailable  int64
+	CashReserved   int64
+}
+
+type PaperPolicyVersion struct {
+	AccountID     string
+	Revision      int64
+	EffectiveAt   time.Time
+	MaxLoss       int64
+	MaxOpenLoss   int64
+	MaxExposure   int64
+	FeePpm        int64
+	SlippagePpm   int64
+	MaxCostPpm    int64
+	EntryDriftPpm int64
+}
+
+type PaperPosting struct {
+	AccountID   string
+	EventKey    string
+	Leg         int32
+	RecordedAt  time.Time
+	Asset       string
+	Source      string
+	Destination string
+	Amount      int64
+}
+
+type PaperTradePlan struct {
+	Hash          string
+	AccountID     string
+	OpportunityID int64
+	ExpiresAt     time.Time
+	Body          []byte
+}
+
 type Promotion struct {
 	ID                int64
 	AlgorithmID       string
