@@ -39,6 +39,9 @@ const (
 	// MarketServiceScanMarketOpportunityProcedure is the fully-qualified name of the MarketService's
 	// ScanMarketOpportunity RPC.
 	MarketServiceScanMarketOpportunityProcedure = "/lab.v1.MarketService/ScanMarketOpportunity"
+	// MarketServiceSetMarketScanSubscriptionProcedure is the fully-qualified name of the
+	// MarketService's SetMarketScanSubscription RPC.
+	MarketServiceSetMarketScanSubscriptionProcedure = "/lab.v1.MarketService/SetMarketScanSubscription"
 )
 
 // MarketServiceClient is a client for the lab.v1.MarketService service.
@@ -47,6 +50,8 @@ type MarketServiceClient interface {
 	GetMarketSnapshot(context.Context, *connect.Request[v1.GetMarketSnapshotRequest]) (*connect.Response[v1.GetMarketSnapshotResponse], error)
 	// Observes a tested rule on the latest complete 1h candle and records a match.
 	ScanMarketOpportunity(context.Context, *connect.Request[v1.ScanMarketOpportunityRequest]) (*connect.Response[v1.ScanMarketOpportunityResponse], error)
+	// Enables an hourly scan for a tested version or pauses that exact subscription.
+	SetMarketScanSubscription(context.Context, *connect.Request[v1.SetMarketScanSubscriptionRequest]) (*connect.Response[v1.SetMarketScanSubscriptionResponse], error)
 }
 
 // NewMarketServiceClient constructs a client for the lab.v1.MarketService service. By default, it
@@ -72,13 +77,20 @@ func NewMarketServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(marketServiceMethods.ByName("ScanMarketOpportunity")),
 			connect.WithClientOptions(opts...),
 		),
+		setMarketScanSubscription: connect.NewClient[v1.SetMarketScanSubscriptionRequest, v1.SetMarketScanSubscriptionResponse](
+			httpClient,
+			baseURL+MarketServiceSetMarketScanSubscriptionProcedure,
+			connect.WithSchema(marketServiceMethods.ByName("SetMarketScanSubscription")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // marketServiceClient implements MarketServiceClient.
 type marketServiceClient struct {
-	getMarketSnapshot     *connect.Client[v1.GetMarketSnapshotRequest, v1.GetMarketSnapshotResponse]
-	scanMarketOpportunity *connect.Client[v1.ScanMarketOpportunityRequest, v1.ScanMarketOpportunityResponse]
+	getMarketSnapshot         *connect.Client[v1.GetMarketSnapshotRequest, v1.GetMarketSnapshotResponse]
+	scanMarketOpportunity     *connect.Client[v1.ScanMarketOpportunityRequest, v1.ScanMarketOpportunityResponse]
+	setMarketScanSubscription *connect.Client[v1.SetMarketScanSubscriptionRequest, v1.SetMarketScanSubscriptionResponse]
 }
 
 // GetMarketSnapshot calls lab.v1.MarketService.GetMarketSnapshot.
@@ -91,12 +103,19 @@ func (c *marketServiceClient) ScanMarketOpportunity(ctx context.Context, req *co
 	return c.scanMarketOpportunity.CallUnary(ctx, req)
 }
 
+// SetMarketScanSubscription calls lab.v1.MarketService.SetMarketScanSubscription.
+func (c *marketServiceClient) SetMarketScanSubscription(ctx context.Context, req *connect.Request[v1.SetMarketScanSubscriptionRequest]) (*connect.Response[v1.SetMarketScanSubscriptionResponse], error) {
+	return c.setMarketScanSubscription.CallUnary(ctx, req)
+}
+
 // MarketServiceHandler is an implementation of the lab.v1.MarketService service.
 type MarketServiceHandler interface {
 	// Returns the configured spot USDT watchlist and its latest known observations.
 	GetMarketSnapshot(context.Context, *connect.Request[v1.GetMarketSnapshotRequest]) (*connect.Response[v1.GetMarketSnapshotResponse], error)
 	// Observes a tested rule on the latest complete 1h candle and records a match.
 	ScanMarketOpportunity(context.Context, *connect.Request[v1.ScanMarketOpportunityRequest]) (*connect.Response[v1.ScanMarketOpportunityResponse], error)
+	// Enables an hourly scan for a tested version or pauses that exact subscription.
+	SetMarketScanSubscription(context.Context, *connect.Request[v1.SetMarketScanSubscriptionRequest]) (*connect.Response[v1.SetMarketScanSubscriptionResponse], error)
 }
 
 // NewMarketServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -118,12 +137,20 @@ func NewMarketServiceHandler(svc MarketServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(marketServiceMethods.ByName("ScanMarketOpportunity")),
 		connect.WithHandlerOptions(opts...),
 	)
+	marketServiceSetMarketScanSubscriptionHandler := connect.NewUnaryHandler(
+		MarketServiceSetMarketScanSubscriptionProcedure,
+		svc.SetMarketScanSubscription,
+		connect.WithSchema(marketServiceMethods.ByName("SetMarketScanSubscription")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/lab.v1.MarketService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case MarketServiceGetMarketSnapshotProcedure:
 			marketServiceGetMarketSnapshotHandler.ServeHTTP(w, r)
 		case MarketServiceScanMarketOpportunityProcedure:
 			marketServiceScanMarketOpportunityHandler.ServeHTTP(w, r)
+		case MarketServiceSetMarketScanSubscriptionProcedure:
+			marketServiceSetMarketScanSubscriptionHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -139,4 +166,8 @@ func (UnimplementedMarketServiceHandler) GetMarketSnapshot(context.Context, *con
 
 func (UnimplementedMarketServiceHandler) ScanMarketOpportunity(context.Context, *connect.Request[v1.ScanMarketOpportunityRequest]) (*connect.Response[v1.ScanMarketOpportunityResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("lab.v1.MarketService.ScanMarketOpportunity is not implemented"))
+}
+
+func (UnimplementedMarketServiceHandler) SetMarketScanSubscription(context.Context, *connect.Request[v1.SetMarketScanSubscriptionRequest]) (*connect.Response[v1.SetMarketScanSubscriptionResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("lab.v1.MarketService.SetMarketScanSubscription is not implemented"))
 }

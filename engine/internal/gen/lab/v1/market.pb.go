@@ -110,12 +110,13 @@ func (*GetMarketSnapshotRequest) Descriptor() ([]byte, []int) {
 }
 
 type GetMarketSnapshotResponse struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	ObservedAtUnixMs int64                  `protobuf:"varint,1,opt,name=observed_at_unix_ms,json=observedAtUnixMs,proto3" json:"observed_at_unix_ms,omitempty"`
-	MarketWatch      []*MarketWatch         `protobuf:"bytes,2,rep,name=market_watch,json=marketWatch,proto3" json:"market_watch,omitempty"`
-	Opportunities    []*MarketOpportunity   `protobuf:"bytes,3,rep,name=opportunities,proto3" json:"opportunities,omitempty"` // newest 25, including expired observations
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	state             protoimpl.MessageState    `protogen:"open.v1"`
+	ObservedAtUnixMs  int64                     `protobuf:"varint,1,opt,name=observed_at_unix_ms,json=observedAtUnixMs,proto3" json:"observed_at_unix_ms,omitempty"`
+	MarketWatch       []*MarketWatch            `protobuf:"bytes,2,rep,name=market_watch,json=marketWatch,proto3" json:"market_watch,omitempty"`
+	Opportunities     []*MarketOpportunity      `protobuf:"bytes,3,rep,name=opportunities,proto3" json:"opportunities,omitempty"` // newest 25, including expired observations
+	ScanSubscriptions []*MarketScanSubscription `protobuf:"bytes,4,rep,name=scan_subscriptions,json=scanSubscriptions,proto3" json:"scan_subscriptions,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *GetMarketSnapshotResponse) Reset() {
@@ -169,6 +170,185 @@ func (x *GetMarketSnapshotResponse) GetOpportunities() []*MarketOpportunity {
 	return nil
 }
 
+func (x *GetMarketSnapshotResponse) GetScanSubscriptions() []*MarketScanSubscription {
+	if x != nil {
+		return x.ScanSubscriptions
+	}
+	return nil
+}
+
+type SetMarketScanSubscriptionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Symbol        string                 `protobuf:"bytes,1,opt,name=symbol,proto3" json:"symbol,omitempty"`
+	RuleVersionId int64                  `protobuf:"varint,2,opt,name=rule_version_id,json=ruleVersionId,proto3" json:"rule_version_id,omitempty"`
+	Enabled       *bool                  `protobuf:"varint,3,opt,name=enabled,proto3,oneof" json:"enabled,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetMarketScanSubscriptionRequest) Reset() {
+	*x = SetMarketScanSubscriptionRequest{}
+	mi := &file_lab_v1_market_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetMarketScanSubscriptionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetMarketScanSubscriptionRequest) ProtoMessage() {}
+
+func (x *SetMarketScanSubscriptionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_market_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetMarketScanSubscriptionRequest.ProtoReflect.Descriptor instead.
+func (*SetMarketScanSubscriptionRequest) Descriptor() ([]byte, []int) {
+	return file_lab_v1_market_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *SetMarketScanSubscriptionRequest) GetSymbol() string {
+	if x != nil {
+		return x.Symbol
+	}
+	return ""
+}
+
+func (x *SetMarketScanSubscriptionRequest) GetRuleVersionId() int64 {
+	if x != nil {
+		return x.RuleVersionId
+	}
+	return 0
+}
+
+func (x *SetMarketScanSubscriptionRequest) GetEnabled() bool {
+	if x != nil && x.Enabled != nil {
+		return *x.Enabled
+	}
+	return false
+}
+
+type SetMarketScanSubscriptionResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetMarketScanSubscriptionResponse) Reset() {
+	*x = SetMarketScanSubscriptionResponse{}
+	mi := &file_lab_v1_market_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetMarketScanSubscriptionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetMarketScanSubscriptionResponse) ProtoMessage() {}
+
+func (x *SetMarketScanSubscriptionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_market_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetMarketScanSubscriptionResponse.ProtoReflect.Descriptor instead.
+func (*SetMarketScanSubscriptionResponse) Descriptor() ([]byte, []int) {
+	return file_lab_v1_market_proto_rawDescGZIP(), []int{3}
+}
+
+type MarketScanSubscription struct {
+	state                    protoimpl.MessageState `protogen:"open.v1"`
+	Symbol                   string                 `protobuf:"bytes,1,opt,name=symbol,proto3" json:"symbol,omitempty"`
+	RuleVersionId            int64                  `protobuf:"varint,2,opt,name=rule_version_id,json=ruleVersionId,proto3" json:"rule_version_id,omitempty"`
+	RuleTitle                string                 `protobuf:"bytes,3,opt,name=rule_title,json=ruleTitle,proto3" json:"rule_title,omitempty"`
+	LastState                MarketScanState        `protobuf:"varint,4,opt,name=last_state,json=lastState,proto3,enum=lab.v1.MarketScanState" json:"last_state,omitempty"`
+	LastCandleClosedAtUnixMs *int64                 `protobuf:"varint,5,opt,name=last_candle_closed_at_unix_ms,json=lastCandleClosedAtUnixMs,proto3,oneof" json:"last_candle_closed_at_unix_ms,omitempty"`
+	unknownFields            protoimpl.UnknownFields
+	sizeCache                protoimpl.SizeCache
+}
+
+func (x *MarketScanSubscription) Reset() {
+	*x = MarketScanSubscription{}
+	mi := &file_lab_v1_market_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MarketScanSubscription) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MarketScanSubscription) ProtoMessage() {}
+
+func (x *MarketScanSubscription) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_market_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MarketScanSubscription.ProtoReflect.Descriptor instead.
+func (*MarketScanSubscription) Descriptor() ([]byte, []int) {
+	return file_lab_v1_market_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *MarketScanSubscription) GetSymbol() string {
+	if x != nil {
+		return x.Symbol
+	}
+	return ""
+}
+
+func (x *MarketScanSubscription) GetRuleVersionId() int64 {
+	if x != nil {
+		return x.RuleVersionId
+	}
+	return 0
+}
+
+func (x *MarketScanSubscription) GetRuleTitle() string {
+	if x != nil {
+		return x.RuleTitle
+	}
+	return ""
+}
+
+func (x *MarketScanSubscription) GetLastState() MarketScanState {
+	if x != nil {
+		return x.LastState
+	}
+	return MarketScanState_MARKET_SCAN_STATE_UNSPECIFIED
+}
+
+func (x *MarketScanSubscription) GetLastCandleClosedAtUnixMs() int64 {
+	if x != nil && x.LastCandleClosedAtUnixMs != nil {
+		return *x.LastCandleClosedAtUnixMs
+	}
+	return 0
+}
+
 type MarketWatch struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Instrument    *InstrumentKey         `protobuf:"bytes,1,opt,name=instrument,proto3" json:"instrument,omitempty"`
@@ -180,7 +360,7 @@ type MarketWatch struct {
 
 func (x *MarketWatch) Reset() {
 	*x = MarketWatch{}
-	mi := &file_lab_v1_market_proto_msgTypes[2]
+	mi := &file_lab_v1_market_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -192,7 +372,7 @@ func (x *MarketWatch) String() string {
 func (*MarketWatch) ProtoMessage() {}
 
 func (x *MarketWatch) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_market_proto_msgTypes[2]
+	mi := &file_lab_v1_market_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -205,7 +385,7 @@ func (x *MarketWatch) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MarketWatch.ProtoReflect.Descriptor instead.
 func (*MarketWatch) Descriptor() ([]byte, []int) {
-	return file_lab_v1_market_proto_rawDescGZIP(), []int{2}
+	return file_lab_v1_market_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *MarketWatch) GetInstrument() *InstrumentKey {
@@ -243,7 +423,7 @@ type MarketCandle struct {
 
 func (x *MarketCandle) Reset() {
 	*x = MarketCandle{}
-	mi := &file_lab_v1_market_proto_msgTypes[3]
+	mi := &file_lab_v1_market_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -255,7 +435,7 @@ func (x *MarketCandle) String() string {
 func (*MarketCandle) ProtoMessage() {}
 
 func (x *MarketCandle) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_market_proto_msgTypes[3]
+	mi := &file_lab_v1_market_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -268,7 +448,7 @@ func (x *MarketCandle) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MarketCandle.ProtoReflect.Descriptor instead.
 func (*MarketCandle) Descriptor() ([]byte, []int) {
-	return file_lab_v1_market_proto_rawDescGZIP(), []int{3}
+	return file_lab_v1_market_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *MarketCandle) GetOpenedAtUnixMs() int64 {
@@ -316,7 +496,7 @@ type ScanMarketOpportunityRequest struct {
 
 func (x *ScanMarketOpportunityRequest) Reset() {
 	*x = ScanMarketOpportunityRequest{}
-	mi := &file_lab_v1_market_proto_msgTypes[4]
+	mi := &file_lab_v1_market_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -328,7 +508,7 @@ func (x *ScanMarketOpportunityRequest) String() string {
 func (*ScanMarketOpportunityRequest) ProtoMessage() {}
 
 func (x *ScanMarketOpportunityRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_market_proto_msgTypes[4]
+	mi := &file_lab_v1_market_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -341,7 +521,7 @@ func (x *ScanMarketOpportunityRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ScanMarketOpportunityRequest.ProtoReflect.Descriptor instead.
 func (*ScanMarketOpportunityRequest) Descriptor() ([]byte, []int) {
-	return file_lab_v1_market_proto_rawDescGZIP(), []int{4}
+	return file_lab_v1_market_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ScanMarketOpportunityRequest) GetRuleVersionId() int64 {
@@ -368,7 +548,7 @@ type ScanMarketOpportunityResponse struct {
 
 func (x *ScanMarketOpportunityResponse) Reset() {
 	*x = ScanMarketOpportunityResponse{}
-	mi := &file_lab_v1_market_proto_msgTypes[5]
+	mi := &file_lab_v1_market_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -380,7 +560,7 @@ func (x *ScanMarketOpportunityResponse) String() string {
 func (*ScanMarketOpportunityResponse) ProtoMessage() {}
 
 func (x *ScanMarketOpportunityResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_market_proto_msgTypes[5]
+	mi := &file_lab_v1_market_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -393,7 +573,7 @@ func (x *ScanMarketOpportunityResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ScanMarketOpportunityResponse.ProtoReflect.Descriptor instead.
 func (*ScanMarketOpportunityResponse) Descriptor() ([]byte, []int) {
-	return file_lab_v1_market_proto_rawDescGZIP(), []int{5}
+	return file_lab_v1_market_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *ScanMarketOpportunityResponse) GetState() MarketScanState {
@@ -429,7 +609,7 @@ type MarketOpportunity struct {
 
 func (x *MarketOpportunity) Reset() {
 	*x = MarketOpportunity{}
-	mi := &file_lab_v1_market_proto_msgTypes[6]
+	mi := &file_lab_v1_market_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -441,7 +621,7 @@ func (x *MarketOpportunity) String() string {
 func (*MarketOpportunity) ProtoMessage() {}
 
 func (x *MarketOpportunity) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_market_proto_msgTypes[6]
+	mi := &file_lab_v1_market_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -454,7 +634,7 @@ func (x *MarketOpportunity) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MarketOpportunity.ProtoReflect.Descriptor instead.
 func (*MarketOpportunity) Descriptor() ([]byte, []int) {
-	return file_lab_v1_market_proto_rawDescGZIP(), []int{6}
+	return file_lab_v1_market_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *MarketOpportunity) GetId() int64 {
@@ -539,11 +719,28 @@ var File_lab_v1_market_proto protoreflect.FileDescriptor
 const file_lab_v1_market_proto_rawDesc = "" +
 	"\n" +
 	"\x13lab/v1/market.proto\x12\x06lab.v1\x1a\x13lab/v1/common.proto\x1a\x13lab/v1/health.proto\x1a\x16lab/v1/workspace.proto\"\x1a\n" +
-	"\x18GetMarketSnapshotRequest\"\xc3\x01\n" +
+	"\x18GetMarketSnapshotRequest\"\x92\x02\n" +
 	"\x19GetMarketSnapshotResponse\x12-\n" +
 	"\x13observed_at_unix_ms\x18\x01 \x01(\x03R\x10observedAtUnixMs\x126\n" +
 	"\fmarket_watch\x18\x02 \x03(\v2\x13.lab.v1.MarketWatchR\vmarketWatch\x12?\n" +
-	"\ropportunities\x18\x03 \x03(\v2\x19.lab.v1.MarketOpportunityR\ropportunities\"\x9b\x01\n" +
+	"\ropportunities\x18\x03 \x03(\v2\x19.lab.v1.MarketOpportunityR\ropportunities\x12M\n" +
+	"\x12scan_subscriptions\x18\x04 \x03(\v2\x1e.lab.v1.MarketScanSubscriptionR\x11scanSubscriptions\"\x8d\x01\n" +
+	" SetMarketScanSubscriptionRequest\x12\x16\n" +
+	"\x06symbol\x18\x01 \x01(\tR\x06symbol\x12&\n" +
+	"\x0frule_version_id\x18\x02 \x01(\x03R\rruleVersionId\x12\x1d\n" +
+	"\aenabled\x18\x03 \x01(\bH\x00R\aenabled\x88\x01\x01B\n" +
+	"\n" +
+	"\b_enabled\"#\n" +
+	"!SetMarketScanSubscriptionResponse\"\x97\x02\n" +
+	"\x16MarketScanSubscription\x12\x16\n" +
+	"\x06symbol\x18\x01 \x01(\tR\x06symbol\x12&\n" +
+	"\x0frule_version_id\x18\x02 \x01(\x03R\rruleVersionId\x12\x1d\n" +
+	"\n" +
+	"rule_title\x18\x03 \x01(\tR\truleTitle\x126\n" +
+	"\n" +
+	"last_state\x18\x04 \x01(\x0e2\x17.lab.v1.MarketScanStateR\tlastState\x12D\n" +
+	"\x1dlast_candle_closed_at_unix_ms\x18\x05 \x01(\x03H\x00R\x18lastCandleClosedAtUnixMs\x88\x01\x01B \n" +
+	"\x1e_last_candle_closed_at_unix_ms\"\x9b\x01\n" +
 	"\vMarketWatch\x125\n" +
 	"\n" +
 	"instrument\x18\x01 \x01(\v2\x15.lab.v1.InstrumentKeyR\n" +
@@ -580,10 +777,11 @@ const file_lab_v1_market_proto_rawDesc = "" +
 	"\x1dMARKET_SCAN_STATE_UNSPECIFIED\x10\x00\x12\x1b\n" +
 	"\x17MARKET_SCAN_STATE_MATCH\x10\x01\x12\x1e\n" +
 	"\x1aMARKET_SCAN_STATE_NO_MATCH\x10\x02\x12%\n" +
-	"!MARKET_SCAN_STATE_INCOMPLETE_DATA\x10\x032\xcf\x01\n" +
+	"!MARKET_SCAN_STATE_INCOMPLETE_DATA\x10\x032\xc1\x02\n" +
 	"\rMarketService\x12X\n" +
 	"\x11GetMarketSnapshot\x12 .lab.v1.GetMarketSnapshotRequest\x1a!.lab.v1.GetMarketSnapshotResponse\x12d\n" +
-	"\x15ScanMarketOpportunity\x12$.lab.v1.ScanMarketOpportunityRequest\x1a%.lab.v1.ScanMarketOpportunityResponseB\x7f\n" +
+	"\x15ScanMarketOpportunity\x12$.lab.v1.ScanMarketOpportunityRequest\x1a%.lab.v1.ScanMarketOpportunityResponse\x12p\n" +
+	"\x19SetMarketScanSubscription\x12(.lab.v1.SetMarketScanSubscriptionRequest\x1a).lab.v1.SetMarketScanSubscriptionResponseB\x7f\n" +
 	"\n" +
 	"com.lab.v1B\vMarketProtoP\x01Z+tradinglab/engine/internal/gen/lab/v1;labv1\xa2\x02\x03LXX\xaa\x02\x06Lab.V1\xca\x02\x06Lab\\V1\xe2\x02\x12Lab\\V1\\GPBMetadata\xea\x02\aLab::V1b\x06proto3"
 
@@ -600,39 +798,46 @@ func file_lab_v1_market_proto_rawDescGZIP() []byte {
 }
 
 var file_lab_v1_market_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_lab_v1_market_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_lab_v1_market_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_lab_v1_market_proto_goTypes = []any{
-	(MarketScanState)(0),                  // 0: lab.v1.MarketScanState
-	(*GetMarketSnapshotRequest)(nil),      // 1: lab.v1.GetMarketSnapshotRequest
-	(*GetMarketSnapshotResponse)(nil),     // 2: lab.v1.GetMarketSnapshotResponse
-	(*MarketWatch)(nil),                   // 3: lab.v1.MarketWatch
-	(*MarketCandle)(nil),                  // 4: lab.v1.MarketCandle
-	(*ScanMarketOpportunityRequest)(nil),  // 5: lab.v1.ScanMarketOpportunityRequest
-	(*ScanMarketOpportunityResponse)(nil), // 6: lab.v1.ScanMarketOpportunityResponse
-	(*MarketOpportunity)(nil),             // 7: lab.v1.MarketOpportunity
-	(*InstrumentKey)(nil),                 // 8: lab.v1.InstrumentKey
-	(LiveState)(0),                        // 9: lab.v1.LiveState
-	(*Money)(nil),                         // 10: lab.v1.Money
+	(MarketScanState)(0),                      // 0: lab.v1.MarketScanState
+	(*GetMarketSnapshotRequest)(nil),          // 1: lab.v1.GetMarketSnapshotRequest
+	(*GetMarketSnapshotResponse)(nil),         // 2: lab.v1.GetMarketSnapshotResponse
+	(*SetMarketScanSubscriptionRequest)(nil),  // 3: lab.v1.SetMarketScanSubscriptionRequest
+	(*SetMarketScanSubscriptionResponse)(nil), // 4: lab.v1.SetMarketScanSubscriptionResponse
+	(*MarketScanSubscription)(nil),            // 5: lab.v1.MarketScanSubscription
+	(*MarketWatch)(nil),                       // 6: lab.v1.MarketWatch
+	(*MarketCandle)(nil),                      // 7: lab.v1.MarketCandle
+	(*ScanMarketOpportunityRequest)(nil),      // 8: lab.v1.ScanMarketOpportunityRequest
+	(*ScanMarketOpportunityResponse)(nil),     // 9: lab.v1.ScanMarketOpportunityResponse
+	(*MarketOpportunity)(nil),                 // 10: lab.v1.MarketOpportunity
+	(*InstrumentKey)(nil),                     // 11: lab.v1.InstrumentKey
+	(LiveState)(0),                            // 12: lab.v1.LiveState
+	(*Money)(nil),                             // 13: lab.v1.Money
 }
 var file_lab_v1_market_proto_depIdxs = []int32{
-	3,  // 0: lab.v1.GetMarketSnapshotResponse.market_watch:type_name -> lab.v1.MarketWatch
-	7,  // 1: lab.v1.GetMarketSnapshotResponse.opportunities:type_name -> lab.v1.MarketOpportunity
-	8,  // 2: lab.v1.MarketWatch.instrument:type_name -> lab.v1.InstrumentKey
-	9,  // 3: lab.v1.MarketWatch.state:type_name -> lab.v1.LiveState
-	4,  // 4: lab.v1.MarketWatch.candle:type_name -> lab.v1.MarketCandle
-	10, // 5: lab.v1.MarketCandle.close:type_name -> lab.v1.Money
-	0,  // 6: lab.v1.ScanMarketOpportunityResponse.state:type_name -> lab.v1.MarketScanState
-	7,  // 7: lab.v1.ScanMarketOpportunityResponse.opportunity:type_name -> lab.v1.MarketOpportunity
-	10, // 8: lab.v1.MarketOpportunity.reference_close:type_name -> lab.v1.Money
-	1,  // 9: lab.v1.MarketService.GetMarketSnapshot:input_type -> lab.v1.GetMarketSnapshotRequest
-	5,  // 10: lab.v1.MarketService.ScanMarketOpportunity:input_type -> lab.v1.ScanMarketOpportunityRequest
-	2,  // 11: lab.v1.MarketService.GetMarketSnapshot:output_type -> lab.v1.GetMarketSnapshotResponse
-	6,  // 12: lab.v1.MarketService.ScanMarketOpportunity:output_type -> lab.v1.ScanMarketOpportunityResponse
-	11, // [11:13] is the sub-list for method output_type
-	9,  // [9:11] is the sub-list for method input_type
-	9,  // [9:9] is the sub-list for extension type_name
-	9,  // [9:9] is the sub-list for extension extendee
-	0,  // [0:9] is the sub-list for field type_name
+	6,  // 0: lab.v1.GetMarketSnapshotResponse.market_watch:type_name -> lab.v1.MarketWatch
+	10, // 1: lab.v1.GetMarketSnapshotResponse.opportunities:type_name -> lab.v1.MarketOpportunity
+	5,  // 2: lab.v1.GetMarketSnapshotResponse.scan_subscriptions:type_name -> lab.v1.MarketScanSubscription
+	0,  // 3: lab.v1.MarketScanSubscription.last_state:type_name -> lab.v1.MarketScanState
+	11, // 4: lab.v1.MarketWatch.instrument:type_name -> lab.v1.InstrumentKey
+	12, // 5: lab.v1.MarketWatch.state:type_name -> lab.v1.LiveState
+	7,  // 6: lab.v1.MarketWatch.candle:type_name -> lab.v1.MarketCandle
+	13, // 7: lab.v1.MarketCandle.close:type_name -> lab.v1.Money
+	0,  // 8: lab.v1.ScanMarketOpportunityResponse.state:type_name -> lab.v1.MarketScanState
+	10, // 9: lab.v1.ScanMarketOpportunityResponse.opportunity:type_name -> lab.v1.MarketOpportunity
+	13, // 10: lab.v1.MarketOpportunity.reference_close:type_name -> lab.v1.Money
+	1,  // 11: lab.v1.MarketService.GetMarketSnapshot:input_type -> lab.v1.GetMarketSnapshotRequest
+	8,  // 12: lab.v1.MarketService.ScanMarketOpportunity:input_type -> lab.v1.ScanMarketOpportunityRequest
+	3,  // 13: lab.v1.MarketService.SetMarketScanSubscription:input_type -> lab.v1.SetMarketScanSubscriptionRequest
+	2,  // 14: lab.v1.MarketService.GetMarketSnapshot:output_type -> lab.v1.GetMarketSnapshotResponse
+	9,  // 15: lab.v1.MarketService.ScanMarketOpportunity:output_type -> lab.v1.ScanMarketOpportunityResponse
+	4,  // 16: lab.v1.MarketService.SetMarketScanSubscription:output_type -> lab.v1.SetMarketScanSubscriptionResponse
+	14, // [14:17] is the sub-list for method output_type
+	11, // [11:14] is the sub-list for method input_type
+	11, // [11:11] is the sub-list for extension type_name
+	11, // [11:11] is the sub-list for extension extendee
+	0,  // [0:11] is the sub-list for field type_name
 }
 
 func init() { file_lab_v1_market_proto_init() }
@@ -643,13 +848,15 @@ func file_lab_v1_market_proto_init() {
 	file_lab_v1_common_proto_init()
 	file_lab_v1_health_proto_init()
 	file_lab_v1_workspace_proto_init()
+	file_lab_v1_market_proto_msgTypes[2].OneofWrappers = []any{}
+	file_lab_v1_market_proto_msgTypes[4].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_lab_v1_market_proto_rawDesc), len(file_lab_v1_market_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   7,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -85,6 +85,21 @@ func (m *Market) GetMarketSnapshot(ctx context.Context, _ *connect.Request[labv1
 			Current: freshSymbols[row.Symbol] && opportunityCurrent(feeds[row.Symbol], now, row.CandleClosedAt, row.ExpiresAt),
 		})
 	}
+	scans, err := m.Store.ListMarketScans(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, row := range scans {
+		scan := &labv1.MarketScanSubscription{
+			Symbol: row.Symbol, RuleVersionId: row.RuleVersionID, RuleTitle: row.RuleTitle,
+			LastState: labv1.MarketScanState(row.LastState),
+		}
+		if row.LastClosedAt != nil {
+			closed := ms(*row.LastClosedAt)
+			scan.LastCandleClosedAtUnixMs = &closed
+		}
+		response.ScanSubscriptions = append(response.ScanSubscriptions, scan)
+	}
 	return connect.NewResponse(response), nil
 }
 

@@ -74,11 +74,14 @@ class GetMarketSnapshotResponse extends $pb.GeneratedMessage {
     $fixnum.Int64? observedAtUnixMs,
     $core.Iterable<MarketWatch>? marketWatch,
     $core.Iterable<MarketOpportunity>? opportunities,
+    $core.Iterable<MarketScanSubscription>? scanSubscriptions,
   }) {
     final result = GetMarketSnapshotResponse._();
     if (observedAtUnixMs != null) result.observedAtUnixMs = observedAtUnixMs;
     if (marketWatch != null) result.marketWatch.addAll(marketWatch);
     if (opportunities != null) result.opportunities.addAll(opportunities);
+    if (scanSubscriptions != null)
+      result.scanSubscriptions.addAll(scanSubscriptions);
     return result;
   }
 
@@ -100,6 +103,8 @@ class GetMarketSnapshotResponse extends $pb.GeneratedMessage {
         subBuilder: MarketWatch.$_createMessage)
     ..pPM<MarketOpportunity>(3, _omitFieldNames ? '' : 'opportunities',
         subBuilder: MarketOpportunity.$_createMessage)
+    ..pPM<MarketScanSubscription>(4, _omitFieldNames ? '' : 'scanSubscriptions',
+        subBuilder: MarketScanSubscription.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -142,6 +147,255 @@ class GetMarketSnapshotResponse extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(3)
   $pb.PbList<MarketOpportunity> get opportunities => $_getList(2);
+
+  @$pb.TagNumber(4)
+  $pb.PbList<MarketScanSubscription> get scanSubscriptions => $_getList(3);
+}
+
+class SetMarketScanSubscriptionRequest extends $pb.GeneratedMessage {
+  factory SetMarketScanSubscriptionRequest({
+    $core.String? symbol,
+    $fixnum.Int64? ruleVersionId,
+    $core.bool? enabled,
+  }) {
+    final result = SetMarketScanSubscriptionRequest._();
+    if (symbol != null) result.symbol = symbol;
+    if (ruleVersionId != null) result.ruleVersionId = ruleVersionId;
+    if (enabled != null) result.enabled = enabled;
+    return result;
+  }
+
+  SetMarketScanSubscriptionRequest._();
+
+  factory SetMarketScanSubscriptionRequest.fromBuffer(
+          $core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      SetMarketScanSubscriptionRequest()..mergeFromBuffer(data, registry);
+  factory SetMarketScanSubscriptionRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      SetMarketScanSubscriptionRequest()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SetMarketScanSubscriptionRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: SetMarketScanSubscriptionRequest.$_createMessage)
+    ..aOS(1, _omitFieldNames ? '' : 'symbol')
+    ..aInt64(2, _omitFieldNames ? '' : 'ruleVersionId')
+    ..aOB(3, _omitFieldNames ? '' : 'enabled')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetMarketScanSubscriptionRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetMarketScanSubscriptionRequest copyWith(
+          void Function(SetMarketScanSubscriptionRequest) updates) =>
+      super.copyWith(
+              (message) => updates(message as SetMarketScanSubscriptionRequest))
+          as SetMarketScanSubscriptionRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use SetMarketScanSubscriptionRequest() / SetMarketScanSubscriptionRequest.new instead')
+  static SetMarketScanSubscriptionRequest create() =>
+      SetMarketScanSubscriptionRequest._();
+  static $pb.GeneratedMessage $_createMessage() =>
+      SetMarketScanSubscriptionRequest._();
+  @$core.override
+  SetMarketScanSubscriptionRequest createEmptyInstance() =>
+      SetMarketScanSubscriptionRequest._();
+  @$core.pragma('dart2js:noInline')
+  static SetMarketScanSubscriptionRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SetMarketScanSubscriptionRequest>(
+          SetMarketScanSubscriptionRequest.$_createMessage);
+  static SetMarketScanSubscriptionRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get symbol => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set symbol($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSymbol() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSymbol() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get ruleVersionId => $_getI64(1);
+  @$pb.TagNumber(2)
+  set ruleVersionId($fixnum.Int64 value) => $_setInt64(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasRuleVersionId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearRuleVersionId() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.bool get enabled => $_getBF(2);
+  @$pb.TagNumber(3)
+  set enabled($core.bool value) => $_setBool(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasEnabled() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearEnabled() => $_clearField(3);
+}
+
+class SetMarketScanSubscriptionResponse extends $pb.GeneratedMessage {
+  factory SetMarketScanSubscriptionResponse() =>
+      SetMarketScanSubscriptionResponse._();
+
+  SetMarketScanSubscriptionResponse._();
+
+  factory SetMarketScanSubscriptionResponse.fromBuffer(
+          $core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      SetMarketScanSubscriptionResponse()..mergeFromBuffer(data, registry);
+  factory SetMarketScanSubscriptionResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      SetMarketScanSubscriptionResponse()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SetMarketScanSubscriptionResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: SetMarketScanSubscriptionResponse.$_createMessage)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetMarketScanSubscriptionResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetMarketScanSubscriptionResponse copyWith(
+          void Function(SetMarketScanSubscriptionResponse) updates) =>
+      super.copyWith((message) =>
+              updates(message as SetMarketScanSubscriptionResponse))
+          as SetMarketScanSubscriptionResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use SetMarketScanSubscriptionResponse() / SetMarketScanSubscriptionResponse.new instead')
+  static SetMarketScanSubscriptionResponse create() =>
+      SetMarketScanSubscriptionResponse._();
+  static $pb.GeneratedMessage $_createMessage() =>
+      SetMarketScanSubscriptionResponse._();
+  @$core.override
+  SetMarketScanSubscriptionResponse createEmptyInstance() =>
+      SetMarketScanSubscriptionResponse._();
+  @$core.pragma('dart2js:noInline')
+  static SetMarketScanSubscriptionResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SetMarketScanSubscriptionResponse>(
+          SetMarketScanSubscriptionResponse.$_createMessage);
+  static SetMarketScanSubscriptionResponse? _defaultInstance;
+}
+
+class MarketScanSubscription extends $pb.GeneratedMessage {
+  factory MarketScanSubscription({
+    $core.String? symbol,
+    $fixnum.Int64? ruleVersionId,
+    $core.String? ruleTitle,
+    MarketScanState? lastState,
+    $fixnum.Int64? lastCandleClosedAtUnixMs,
+  }) {
+    final result = MarketScanSubscription._();
+    if (symbol != null) result.symbol = symbol;
+    if (ruleVersionId != null) result.ruleVersionId = ruleVersionId;
+    if (ruleTitle != null) result.ruleTitle = ruleTitle;
+    if (lastState != null) result.lastState = lastState;
+    if (lastCandleClosedAtUnixMs != null)
+      result.lastCandleClosedAtUnixMs = lastCandleClosedAtUnixMs;
+    return result;
+  }
+
+  MarketScanSubscription._();
+
+  factory MarketScanSubscription.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      MarketScanSubscription()..mergeFromBuffer(data, registry);
+  factory MarketScanSubscription.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      MarketScanSubscription()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'MarketScanSubscription',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: MarketScanSubscription.$_createMessage)
+    ..aOS(1, _omitFieldNames ? '' : 'symbol')
+    ..aInt64(2, _omitFieldNames ? '' : 'ruleVersionId')
+    ..aOS(3, _omitFieldNames ? '' : 'ruleTitle')
+    ..aE<MarketScanState>(4, _omitFieldNames ? '' : 'lastState',
+        enumValues: MarketScanState.values)
+    ..aInt64(5, _omitFieldNames ? '' : 'lastCandleClosedAtUnixMs')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  MarketScanSubscription clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  MarketScanSubscription copyWith(
+          void Function(MarketScanSubscription) updates) =>
+      super.copyWith((message) => updates(message as MarketScanSubscription))
+          as MarketScanSubscription;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use MarketScanSubscription() / MarketScanSubscription.new instead')
+  static MarketScanSubscription create() => MarketScanSubscription._();
+  static $pb.GeneratedMessage $_createMessage() => MarketScanSubscription._();
+  @$core.override
+  MarketScanSubscription createEmptyInstance() => MarketScanSubscription._();
+  @$core.pragma('dart2js:noInline')
+  static MarketScanSubscription getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<MarketScanSubscription>(
+          MarketScanSubscription.$_createMessage);
+  static MarketScanSubscription? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get symbol => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set symbol($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSymbol() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSymbol() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get ruleVersionId => $_getI64(1);
+  @$pb.TagNumber(2)
+  set ruleVersionId($fixnum.Int64 value) => $_setInt64(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasRuleVersionId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearRuleVersionId() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get ruleTitle => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set ruleTitle($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasRuleTitle() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearRuleTitle() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  MarketScanState get lastState => $_getN(3);
+  @$pb.TagNumber(4)
+  set lastState(MarketScanState value) => $_setField(4, value);
+  @$pb.TagNumber(4)
+  $core.bool hasLastState() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearLastState() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $fixnum.Int64 get lastCandleClosedAtUnixMs => $_getI64(4);
+  @$pb.TagNumber(5)
+  set lastCandleClosedAtUnixMs($fixnum.Int64 value) => $_setInt64(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasLastCandleClosedAtUnixMs() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearLastCandleClosedAtUnixMs() => $_clearField(5);
 }
 
 class MarketWatch extends $pb.GeneratedMessage {
@@ -692,6 +946,16 @@ class MarketServiceApi {
           $pb.ClientContext? ctx, ScanMarketOpportunityRequest request) =>
       _client.invoke<ScanMarketOpportunityResponse>(ctx, 'MarketService',
           'ScanMarketOpportunity', request, ScanMarketOpportunityResponse());
+
+  /// Enables an hourly scan for a tested version or pauses that exact subscription.
+  $async.Future<SetMarketScanSubscriptionResponse> setMarketScanSubscription(
+          $pb.ClientContext? ctx, SetMarketScanSubscriptionRequest request) =>
+      _client.invoke<SetMarketScanSubscriptionResponse>(
+          ctx,
+          'MarketService',
+          'SetMarketScanSubscription',
+          request,
+          SetMarketScanSubscriptionResponse());
 }
 
 const $core.bool _omitFieldNames =

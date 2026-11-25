@@ -25,4 +25,12 @@ abstract final class MarketService {
     labv1market.ScanMarketOpportunityRequest.new,
     labv1market.ScanMarketOpportunityResponse.new,
   );
+
+  /// Enables an hourly scan for a tested version or pauses that exact subscription.
+  static const setMarketScanSubscription = connect.Spec(
+    '/$name/SetMarketScanSubscription',
+    connect.StreamType.unary,
+    labv1market.SetMarketScanSubscriptionRequest.new,
+    labv1market.SetMarketScanSubscriptionResponse.new,
+  );
 }

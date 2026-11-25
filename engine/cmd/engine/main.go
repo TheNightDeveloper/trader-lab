@@ -87,6 +87,10 @@ func run() error {
 		}
 		go live.Run(ctx)
 	}
+	market := &api.Market{Store: st, Clock: clock.Wall{}, Live: liveSource(live), Symbols: cfg.LiveSymbols, Limiter: limiter}
+	if live != nil {
+		go market.RunMarketScans(ctx)
+	}
 
 	fxSvc := &api.Fx{Store: st, Clock: clock.Wall{}}
 	health := &api.Health{Clock: clock.Wall{}, Version: version, Workers: int32(cfg.Workers), Every: time.Second, Live: liveSource(live), Rates: fxSvc}
@@ -126,7 +130,7 @@ func run() error {
 	if err := sc.Start(ctx, newServer(cfg,
 		route(labv1connect.NewHealthServiceHandler(health)),
 		route(labv1connect.NewDataServiceHandler(dataSvc)),
-		route(labv1connect.NewMarketServiceHandler(&api.Market{Store: st, Clock: clock.Wall{}, Live: liveSource(live), Symbols: cfg.LiveSymbols, Limiter: limiter})),
+		route(labv1connect.NewMarketServiceHandler(market)),
 		route(labv1connect.NewFxServiceHandler(fxSvc)),
 		route(labv1connect.NewReportServiceHandler(&api.Report{Svc: reports, Limiter: limiter})),
 		route(labv1connect.NewPnlServiceHandler(&api.Pnl{Svc: reports, Limiter: limiter})),

@@ -11,6 +11,8 @@ service MarketService {
   rpc GetMarketSnapshot(GetMarketSnapshotRequest) returns (GetMarketSnapshotResponse);
   // Observes a tested rule on the latest complete 1h candle and records a match.
   rpc ScanMarketOpportunity(ScanMarketOpportunityRequest) returns (ScanMarketOpportunityResponse);
+  // Enables an hourly scan for a tested version or pauses that exact subscription.
+  rpc SetMarketScanSubscription(SetMarketScanSubscriptionRequest) returns (SetMarketScanSubscriptionResponse);
 }
 
 message GetMarketSnapshotRequest {}
@@ -19,6 +21,23 @@ message GetMarketSnapshotResponse {
   int64 observed_at_unix_ms = 1;
   repeated MarketWatch market_watch = 2;
   repeated MarketOpportunity opportunities = 3; // newest 25, including expired observations
+  repeated MarketScanSubscription scan_subscriptions = 4;
+}
+
+message SetMarketScanSubscriptionRequest {
+  string symbol = 1;
+  int64 rule_version_id = 2;
+  optional bool enabled = 3;
+}
+
+message SetMarketScanSubscriptionResponse {}
+
+message MarketScanSubscription {
+  string symbol = 1;
+  int64 rule_version_id = 2;
+  string rule_title = 3;
+  MarketScanState last_state = 4;
+  optional int64 last_candle_closed_at_unix_ms = 5;
 }
 
 message MarketWatch {

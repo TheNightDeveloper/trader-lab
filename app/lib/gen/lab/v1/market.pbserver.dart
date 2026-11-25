@@ -25,6 +25,8 @@ abstract class MarketServiceBase extends $pb.GeneratedService {
       $pb.ServerContext ctx, $3.GetMarketSnapshotRequest request);
   $async.Future<$3.ScanMarketOpportunityResponse> scanMarketOpportunity(
       $pb.ServerContext ctx, $3.ScanMarketOpportunityRequest request);
+  $async.Future<$3.SetMarketScanSubscriptionResponse> setMarketScanSubscription(
+      $pb.ServerContext ctx, $3.SetMarketScanSubscriptionRequest request);
 
   $pb.GeneratedMessage createRequest($core.String methodName) {
     switch (methodName) {
@@ -32,6 +34,8 @@ abstract class MarketServiceBase extends $pb.GeneratedService {
         return $3.GetMarketSnapshotRequest();
       case 'ScanMarketOpportunity':
         return $3.ScanMarketOpportunityRequest();
+      case 'SetMarketScanSubscription':
+        return $3.SetMarketScanSubscriptionRequest();
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }
@@ -45,6 +49,9 @@ abstract class MarketServiceBase extends $pb.GeneratedService {
       case 'ScanMarketOpportunity':
         return scanMarketOpportunity(
             ctx, request as $3.ScanMarketOpportunityRequest);
+      case 'SetMarketScanSubscription':
+        return setMarketScanSubscription(
+            ctx, request as $3.SetMarketScanSubscriptionRequest);
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }

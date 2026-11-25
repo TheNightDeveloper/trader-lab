@@ -221,6 +221,14 @@ type MarketOpportunity struct {
 	SnapshotSha256 string
 }
 
+type MarketScanSubscription struct {
+	Symbol        string
+	RuleVersionID int64
+	ReportID      string
+	LastClosedAt  *time.Time
+	LastState     int32
+}
+
 type ModelArtifact struct {
 	ID          string
 	AlgorithmID string

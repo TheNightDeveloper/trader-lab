@@ -43,4 +43,22 @@ extension type MarketServiceClient (connect.Transport _transport) {
       onTrailer: onTrailer,
     );
   }
+
+  /// Enables an hourly scan for a tested version or pauses that exact subscription.
+  Future<labv1market.SetMarketScanSubscriptionResponse> setMarketScanSubscription(
+    labv1market.SetMarketScanSubscriptionRequest input, {
+    connect.Headers? headers,
+    connect.AbortSignal? signal,
+    Function(connect.Headers)? onHeader,
+    Function(connect.Headers)? onTrailer,
+  }) {
+    return connect.Client(_transport).unary(
+      specs.MarketService.setMarketScanSubscription,
+      input,
+      signal: signal,
+      headers: headers,
+      onHeader: onHeader,
+      onTrailer: onTrailer,
+    );
+  }
 }

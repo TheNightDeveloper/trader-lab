@@ -71,6 +71,14 @@ const GetMarketSnapshotResponse$json = {
       '6': '.lab.v1.MarketOpportunity',
       '10': 'opportunities'
     },
+    {
+      '1': 'scan_subscriptions',
+      '3': 4,
+      '4': 3,
+      '5': 11,
+      '6': '.lab.v1.MarketScanSubscription',
+      '10': 'scanSubscriptions'
+    },
   ],
 };
 
@@ -79,7 +87,84 @@ final $typed_data.Uint8List getMarketSnapshotResponseDescriptor = $convert.base6
     'ChlHZXRNYXJrZXRTbmFwc2hvdFJlc3BvbnNlEi0KE29ic2VydmVkX2F0X3VuaXhfbXMYASABKA'
     'NSEG9ic2VydmVkQXRVbml4TXMSNgoMbWFya2V0X3dhdGNoGAIgAygLMhMubGFiLnYxLk1hcmtl'
     'dFdhdGNoUgttYXJrZXRXYXRjaBI/Cg1vcHBvcnR1bml0aWVzGAMgAygLMhkubGFiLnYxLk1hcm'
-    'tldE9wcG9ydHVuaXR5Ug1vcHBvcnR1bml0aWVz');
+    'tldE9wcG9ydHVuaXR5Ug1vcHBvcnR1bml0aWVzEk0KEnNjYW5fc3Vic2NyaXB0aW9ucxgEIAMo'
+    'CzIeLmxhYi52MS5NYXJrZXRTY2FuU3Vic2NyaXB0aW9uUhFzY2FuU3Vic2NyaXB0aW9ucw==');
+
+@$core.Deprecated('Use setMarketScanSubscriptionRequestDescriptor instead')
+const SetMarketScanSubscriptionRequest$json = {
+  '1': 'SetMarketScanSubscriptionRequest',
+  '2': [
+    {'1': 'symbol', '3': 1, '4': 1, '5': 9, '10': 'symbol'},
+    {'1': 'rule_version_id', '3': 2, '4': 1, '5': 3, '10': 'ruleVersionId'},
+    {
+      '1': 'enabled',
+      '3': 3,
+      '4': 1,
+      '5': 8,
+      '9': 0,
+      '10': 'enabled',
+      '17': true
+    },
+  ],
+  '8': [
+    {'1': '_enabled'},
+  ],
+};
+
+/// Descriptor for `SetMarketScanSubscriptionRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List setMarketScanSubscriptionRequestDescriptor =
+    $convert.base64Decode(
+        'CiBTZXRNYXJrZXRTY2FuU3Vic2NyaXB0aW9uUmVxdWVzdBIWCgZzeW1ib2wYASABKAlSBnN5bW'
+        'JvbBImCg9ydWxlX3ZlcnNpb25faWQYAiABKANSDXJ1bGVWZXJzaW9uSWQSHQoHZW5hYmxlZBgD'
+        'IAEoCEgAUgdlbmFibGVkiAEBQgoKCF9lbmFibGVk');
+
+@$core.Deprecated('Use setMarketScanSubscriptionResponseDescriptor instead')
+const SetMarketScanSubscriptionResponse$json = {
+  '1': 'SetMarketScanSubscriptionResponse',
+};
+
+/// Descriptor for `SetMarketScanSubscriptionResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List setMarketScanSubscriptionResponseDescriptor =
+    $convert.base64Decode('CiFTZXRNYXJrZXRTY2FuU3Vic2NyaXB0aW9uUmVzcG9uc2U=');
+
+@$core.Deprecated('Use marketScanSubscriptionDescriptor instead')
+const MarketScanSubscription$json = {
+  '1': 'MarketScanSubscription',
+  '2': [
+    {'1': 'symbol', '3': 1, '4': 1, '5': 9, '10': 'symbol'},
+    {'1': 'rule_version_id', '3': 2, '4': 1, '5': 3, '10': 'ruleVersionId'},
+    {'1': 'rule_title', '3': 3, '4': 1, '5': 9, '10': 'ruleTitle'},
+    {
+      '1': 'last_state',
+      '3': 4,
+      '4': 1,
+      '5': 14,
+      '6': '.lab.v1.MarketScanState',
+      '10': 'lastState'
+    },
+    {
+      '1': 'last_candle_closed_at_unix_ms',
+      '3': 5,
+      '4': 1,
+      '5': 3,
+      '9': 0,
+      '10': 'lastCandleClosedAtUnixMs',
+      '17': true
+    },
+  ],
+  '8': [
+    {'1': '_last_candle_closed_at_unix_ms'},
+  ],
+};
+
+/// Descriptor for `MarketScanSubscription`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List marketScanSubscriptionDescriptor = $convert.base64Decode(
+    'ChZNYXJrZXRTY2FuU3Vic2NyaXB0aW9uEhYKBnN5bWJvbBgBIAEoCVIGc3ltYm9sEiYKD3J1bG'
+    'VfdmVyc2lvbl9pZBgCIAEoA1INcnVsZVZlcnNpb25JZBIdCgpydWxlX3RpdGxlGAMgASgJUgly'
+    'dWxlVGl0bGUSNgoKbGFzdF9zdGF0ZRgEIAEoDjIXLmxhYi52MS5NYXJrZXRTY2FuU3RhdGVSCW'
+    'xhc3RTdGF0ZRJECh1sYXN0X2NhbmRsZV9jbG9zZWRfYXRfdW5peF9tcxgFIAEoA0gAUhhsYXN0'
+    'Q2FuZGxlQ2xvc2VkQXRVbml4TXOIAQFCIAoeX2xhc3RfY2FuZGxlX2Nsb3NlZF9hdF91bml4X2'
+    '1z');
 
 @$core.Deprecated('Use marketWatchDescriptor instead')
 const MarketWatch$json = {
@@ -262,6 +347,11 @@ const $core.Map<$core.String, $core.dynamic> MarketServiceBase$json = {
       '2': '.lab.v1.ScanMarketOpportunityRequest',
       '3': '.lab.v1.ScanMarketOpportunityResponse'
     },
+    {
+      '1': 'SetMarketScanSubscription',
+      '2': '.lab.v1.SetMarketScanSubscriptionRequest',
+      '3': '.lab.v1.SetMarketScanSubscriptionResponse'
+    },
   ],
 };
 
@@ -275,8 +365,13 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
   '.lab.v1.MarketCandle': MarketCandle$json,
   '.lab.v1.Money': $1.Money$json,
   '.lab.v1.MarketOpportunity': MarketOpportunity$json,
+  '.lab.v1.MarketScanSubscription': MarketScanSubscription$json,
   '.lab.v1.ScanMarketOpportunityRequest': ScanMarketOpportunityRequest$json,
   '.lab.v1.ScanMarketOpportunityResponse': ScanMarketOpportunityResponse$json,
+  '.lab.v1.SetMarketScanSubscriptionRequest':
+      SetMarketScanSubscriptionRequest$json,
+  '.lab.v1.SetMarketScanSubscriptionResponse':
+      SetMarketScanSubscriptionResponse$json,
 };
 
 /// Descriptor for `MarketService`. Decode as a `google.protobuf.ServiceDescriptorProto`.
@@ -284,4 +379,6 @@ final $typed_data.Uint8List marketServiceDescriptor = $convert.base64Decode(
     'Cg1NYXJrZXRTZXJ2aWNlElgKEUdldE1hcmtldFNuYXBzaG90EiAubGFiLnYxLkdldE1hcmtldF'
     'NuYXBzaG90UmVxdWVzdBohLmxhYi52MS5HZXRNYXJrZXRTbmFwc2hvdFJlc3BvbnNlEmQKFVNj'
     'YW5NYXJrZXRPcHBvcnR1bml0eRIkLmxhYi52MS5TY2FuTWFya2V0T3Bwb3J0dW5pdHlSZXF1ZX'
-    'N0GiUubGFiLnYxLlNjYW5NYXJrZXRPcHBvcnR1bml0eVJlc3BvbnNl');
+    'N0GiUubGFiLnYxLlNjYW5NYXJrZXRPcHBvcnR1bml0eVJlc3BvbnNlEnAKGVNldE1hcmtldFNj'
+    'YW5TdWJzY3JpcHRpb24SKC5sYWIudjEuU2V0TWFya2V0U2NhblN1YnNjcmlwdGlvblJlcXVlc3'
+    'QaKS5sYWIudjEuU2V0TWFya2V0U2NhblN1YnNjcmlwdGlvblJlc3BvbnNl');
