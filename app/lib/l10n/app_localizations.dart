@@ -357,6 +357,60 @@ abstract class L10n {
   /// **'نتیجهٔ بررسی از موتور دریافت نشد.'**
   String get marketScanUnexpected;
 
+  /// No description provided for @marketBackgroundTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'اسکن‌های خودکار یک‌ساعته'**
+  String get marketBackgroundTitle;
+
+  /// No description provided for @marketBackgroundEnable.
+  ///
+  /// In fa, this message translates to:
+  /// **'فعال‌سازی اسکن خودکار'**
+  String get marketBackgroundEnable;
+
+  /// No description provided for @marketBackgroundEnabled.
+  ///
+  /// In fa, this message translates to:
+  /// **'اسکن خودکار این نسخه برای نماد فعال است.'**
+  String get marketBackgroundEnabled;
+
+  /// No description provided for @marketBackgroundOccupied.
+  ///
+  /// In fa, this message translates to:
+  /// **'برای این نماد نسخهٔ دیگری فعال است. از فهرست اسکن‌ها آن را مدیریت کنید.'**
+  String get marketBackgroundOccupied;
+
+  /// No description provided for @marketBackgroundPause.
+  ///
+  /// In fa, this message translates to:
+  /// **'توقف اسکن'**
+  String get marketBackgroundPause;
+
+  /// No description provided for @marketBackgroundPausing.
+  ///
+  /// In fa, this message translates to:
+  /// **'در حال توقف…'**
+  String get marketBackgroundPausing;
+
+  /// No description provided for @marketBackgroundWaiting.
+  ///
+  /// In fa, this message translates to:
+  /// **'در انتظار جریان تازهٔ داده'**
+  String get marketBackgroundWaiting;
+
+  /// No description provided for @marketBackgroundFirst.
+  ///
+  /// In fa, this message translates to:
+  /// **'در انتظار نخستین بررسی'**
+  String get marketBackgroundFirst;
+
+  /// No description provided for @marketBackgroundLast.
+  ///
+  /// In fa, this message translates to:
+  /// **'نتیجهٔ بررسی کندل بسته‌شده در'**
+  String get marketBackgroundLast;
+
   /// No description provided for @marketOpportunitiesTitle.
   ///
   /// In fa, this message translates to:

@@ -2,6 +2,22 @@
 
 Update at the end of every session.
 
+## P3 background opportunity scans (2026-11-25)
+
+The Library-to-watchlist flow can enable one tested rule version per spot
+symbol. The engine stores the subscription and scan cursor in PostgreSQL and
+checks the latest closed hour every 30 seconds. It skips stale feeds and
+retries incomplete data. A completed scan and its cursor commit together.
+Pausing a subscription keeps previously recorded opportunities.
+
+Chrome enabled a subscription at 1440 pixels, closed the page while the Go
+worker recorded a match from a seeded feed, and paused it at 390 pixels.
+PostgreSQL integration covers restart, stale and incomplete data, and
+concurrent manual and background scans. Dart analysis, the release build
+and all 57 existing Flutter tests passed.
+
+Trade plans, execution risk checks and Paper accounts remain open.
+
 ## P3 opportunity scan (2026-11-24)
 
 A tested rule version can open a manual spot scan from its Library detail.

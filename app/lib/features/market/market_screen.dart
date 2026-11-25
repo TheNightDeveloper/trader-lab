@@ -61,8 +61,20 @@ class MarketScreen extends ConsumerWidget {
               key: ValueKey(selectedRule),
               ruleId: selectedRule,
               watches: snapshot.marketWatch,
+              subscriptions: snapshot.scanSubscriptions,
               disconnected: disconnected,
               onRecorded: () => ref.invalidate(_marketSnapshotProvider),
+            ),
+          if (snapshot.scanSubscriptions.isNotEmpty)
+            MarketBackgroundScans(
+              subscriptions: snapshot.scanSubscriptions,
+              freshSymbols: {
+                if (!disconnected)
+                  for (final watch in snapshot.marketWatch)
+                    if (watch.state == LiveState.LIVE_STATE_FRESH) watch.instrument.symbol,
+              },
+              disconnected: disconnected,
+              onChanged: () => ref.invalidate(_marketSnapshotProvider),
             ),
           MarketOpportunityHistory(opportunities: snapshot.opportunities, disconnected: disconnected),
           _MarketTimestamp(label: l.marketObservedAt, time: snapshot.observedAtUnixMs),

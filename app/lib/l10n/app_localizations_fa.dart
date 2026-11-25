@@ -154,6 +154,35 @@ class L10nFa extends L10n {
   String get marketScanUnexpected => 'نتیجهٔ بررسی از موتور دریافت نشد.';
 
   @override
+  String get marketBackgroundTitle => 'اسکن‌های خودکار یک‌ساعته';
+
+  @override
+  String get marketBackgroundEnable => 'فعال‌سازی اسکن خودکار';
+
+  @override
+  String get marketBackgroundEnabled =>
+      'اسکن خودکار این نسخه برای نماد فعال است.';
+
+  @override
+  String get marketBackgroundOccupied =>
+      'برای این نماد نسخهٔ دیگری فعال است. از فهرست اسکن‌ها آن را مدیریت کنید.';
+
+  @override
+  String get marketBackgroundPause => 'توقف اسکن';
+
+  @override
+  String get marketBackgroundPausing => 'در حال توقف…';
+
+  @override
+  String get marketBackgroundWaiting => 'در انتظار جریان تازهٔ داده';
+
+  @override
+  String get marketBackgroundFirst => 'در انتظار نخستین بررسی';
+
+  @override
+  String get marketBackgroundLast => 'نتیجهٔ بررسی کندل بسته‌شده در';
+
+  @override
   String get marketOpportunitiesTitle => 'فرصت‌های ثبت‌شده';
 
   @override
