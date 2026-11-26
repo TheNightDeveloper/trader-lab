@@ -167,7 +167,8 @@ func (p *Paper) GetPaperPlan(ctx context.Context, req *connect.Request[labv1.Get
 		AccountID: plan.GetAccount().GetAccountId(), OpportunityID: plan.GetOpportunityId(),
 	})
 	if err == nil {
-		return connect.NewResponse(&labv1.GetPaperPlanResponse{Plan: plan, Receipt: paperReceiptP(entry)}), nil
+		receipt, restriction := paperReceiptForPlan(entry, plan.GetPlanHash())
+		return connect.NewResponse(&labv1.GetPaperPlanResponse{Plan: plan, Receipt: receipt, Restriction: restriction}), nil
 	}
 	if !errors.Is(err, pgx.ErrNoRows) {
 		return nil, err

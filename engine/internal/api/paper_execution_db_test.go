@@ -32,6 +32,11 @@ func TestPaperConfirmationPartialFillCancelAndProtectiveExit(t *testing.T) {
 	require.NoError(t, err)
 	plan := preview.Msg.GetPlan()
 	require.NotNil(t, plan)
+	other, err := client.PreviewPaperPlan(ctx, connect.NewRequest(&labv1.PreviewPaperPlanRequest{
+		Account: paperAccountRef(), OpportunityId: opportunityID, Stop: usdtP(91 * unit), TakeProfit: usdtP(120 * unit),
+	}))
+	require.NoError(t, err)
+	require.NotNil(t, other.Msg.GetPlan())
 	confirm := func() (*labv1.ConfirmPaperPlanResponse, error) {
 		res, err := client.ConfirmPaperPlan(ctx, connect.NewRequest(&labv1.ConfirmPaperPlanRequest{Account: paperAccountRef(), PlanHash: plan.GetPlanHash()}))
 		if err != nil {
@@ -58,6 +63,15 @@ func TestPaperConfirmationPartialFillCancelAndProtectiveExit(t *testing.T) {
 	id := receipts[0]
 	require.Positive(t, id)
 	require.Equal(t, id, receipts[1])
+	otherHash := other.Msg.GetPlan().GetPlanHash()
+	conflict, err := client.ConfirmPaperPlan(ctx, connect.NewRequest(&labv1.ConfirmPaperPlanRequest{Account: paperAccountRef(), PlanHash: otherHash}))
+	require.NoError(t, err)
+	require.Nil(t, conflict.Msg.GetReceipt())
+	require.Equal(t, "opportunity_already_confirmed", conflict.Msg.GetRestriction().GetCode())
+	reopened, err := client.GetPaperPlan(ctx, connect.NewRequest(&labv1.GetPaperPlanRequest{PlanHash: otherHash}))
+	require.NoError(t, err)
+	require.Nil(t, reopened.Msg.GetReceipt())
+	require.Equal(t, "opportunity_already_confirmed", reopened.Msg.GetRestriction().GetCode())
 	read := func() *labv1.GetPaperReceiptResponse {
 		t.Helper()
 		res, err := client.GetPaperReceipt(ctx, connect.NewRequest(&labv1.GetPaperReceiptRequest{ReceiptId: id}))

@@ -79,7 +79,7 @@ func (p *Paper) ConfirmPaperPlan(ctx context.Context, req *connect.Request[labv1
 		}
 		entry, err := q.PaperEntryForOpportunity(ctx, db.PaperEntryForOpportunityParams{AccountID: paperAccountID, OpportunityID: plan.GetOpportunityId()})
 		if err == nil {
-			response.Receipt = paperReceiptP(entry)
+			response.Receipt, response.Restriction = paperReceiptForPlan(entry, plan.GetPlanHash())
 			return nil
 		}
 		if !errors.Is(err, pgx.ErrNoRows) {
@@ -95,6 +95,14 @@ func (p *Paper) ConfirmPaperPlan(ctx context.Context, req *connect.Request[labv1
 		return nil, err
 	}
 	return connect.NewResponse(response), nil
+}
+
+// A retry can recover a receipt only for the exact terms the user approved.
+func paperReceiptForPlan(entry db.PaperEntry, hash string) (*labv1.PaperReceipt, *labv1.PaperRestriction) {
+	if entry.PlanHash != hash {
+		return nil, paperRestriction("opportunity_already_confirmed", "این فرصت با برنامهٔ دیگری تأیید شده است")
+	}
+	return paperReceiptP(entry), nil
 }
 
 // reservePaperPlan runs with the account row locked. The receipt acts as the local outbox.
