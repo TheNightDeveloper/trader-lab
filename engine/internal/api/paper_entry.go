@@ -36,8 +36,8 @@ type paperEntryTerms struct {
 // Decode exact units from the hashed review, never from confirmation inputs.
 func paperEntryTermsFor(plan *labv1.PaperPlan) (paperEntryTerms, error) {
 	var terms paperEntryTerms
-	spec, ok := paperSpotSpec(plan.GetInstrument().GetSymbol())
-	if !ok || plan.GetFillModel() != paperFillModel || spotKey(spec).GetSpecRevision() != plan.GetInstrument().GetSpecRevision() {
+	spec, ok := paperExecutionSpec(plan.GetInstrument())
+	if !ok || plan.GetFillModel() != paperFillModelV1 {
 		return terms, fmt.Errorf("paper plan %s has unsupported execution terms", plan.GetPlanHash())
 	}
 	qty := plan.GetQuantity()
@@ -62,6 +62,25 @@ func paperEntryTermsFor(plan *labv1.PaperPlan) (paperEntryTerms, error) {
 	}
 	terms.spec, terms.quantity, terms.costs = spec, q, paper.Costs{Fee: fee, Slippage: slip}
 	return terms, nil
+}
+
+// Accepted plans use the registered specification identified by their stored hash.
+// Keep old registries here when changing Defaults, so open positions can still exit.
+func paperExecutionSpec(key *labv1.InstrumentKey) (instrument.Spec, bool) {
+	current, _ := paperSpotSpec(key.GetSymbol())
+	return paperExecutionSpecAt(key, current)
+}
+
+func paperExecutionSpecAt(key *labv1.InstrumentKey, current instrument.Spec) (instrument.Spec, bool) {
+	if current.Symbol == key.GetSymbol() && current.Quote == instrument.USDT && spotKey(current).GetSpecRevision() == key.GetSpecRevision() {
+		return current, true
+	}
+	for _, spec := range instrument.SpotSpecsV1() {
+		if spec.Quote == instrument.USDT && spec.Symbol == key.GetSymbol() && spotKey(spec).GetSpecRevision() == key.GetSpecRevision() {
+			return spec, true
+		}
+	}
+	return instrument.Spec{}, false
 }
 
 func (p *Paper) ConfirmPaperPlan(ctx context.Context, req *connect.Request[labv1.ConfirmPaperPlanRequest]) (*connect.Response[labv1.ConfirmPaperPlanResponse], error) {

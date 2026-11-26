@@ -21,7 +21,7 @@ import (
 	"tradinglab/engine/internal/store/db"
 )
 
-const paperFillModel = "spot-closed-1m-v1"
+const paperFillModelV1 = "spot-closed-1m-v1"
 
 func (p *Paper) PreviewPaperPlan(ctx context.Context, req *connect.Request[labv1.PreviewPaperPlanRequest]) (*connect.Response[labv1.PreviewPaperPlanResponse], error) {
 	in := req.Msg
@@ -140,7 +140,7 @@ func (p *Paper) PreviewPaperPlan(ctx context.Context, req *connect.Request[labv1
 		ReferencePrice: usdtP(candle.C), EstimatedEntry: usdtP(size.EntryPrice), MaxEntryPrice: usdtP(entryLimit.V),
 		Stop: usdtP(stop.V), TakeProfit: usdtP(target.V), Quantity: moneyP(money.Amount{V: size.Quantity, Asset: spec.Base}),
 		Notional: usdtP(size.Notional), RequiredCash: usdtP(size.ReservedCash), PlannedLoss: usdtP(size.PlannedLoss),
-		EstimatedCost: usdtP(size.EstimatedCost), FeeRate: ratioP(costs.Fee), SlippageRate: ratioP(costs.Slippage), FillModel: paperFillModel,
+		EstimatedCost: usdtP(size.EstimatedCost), FeeRate: ratioP(costs.Fee), SlippageRate: ratioP(costs.Slippage), FillModel: paperFillModelV1,
 		ReferenceCandleClosedAtUnixMs: ms(candle.CloseTime), ReferenceCandleRevision: candle.Revision,
 		EngineBuildSha256: p.Market.Build,
 	}

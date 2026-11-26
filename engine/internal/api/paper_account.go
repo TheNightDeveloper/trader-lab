@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"connectrpc.com/connect"
@@ -152,7 +153,18 @@ func (p *Paper) readPaperBook(ctx context.Context) (*labv1.GetPaperAccountRespon
 		}
 		var stale bool
 		for _, position := range positions {
-			spec, _ := paperSpotSpec(position.Symbol)
+			entry, err := readPaperEntry(ctx, q, position.EntryID)
+			if err != nil {
+				return err
+			}
+			plan, err := readPaperPlan(ctx, q, entry.PlanHash)
+			if err != nil {
+				return err
+			}
+			spec, ok := paperExecutionSpec(plan.GetInstrument())
+			if !ok {
+				return fmt.Errorf("paper position %d has an unknown instrument revision", position.EntryID)
+			}
 			view := &labv1.PaperPosition{
 				ReceiptId: position.EntryID, Symbol: position.Symbol,
 				Quantity: moneyP(money.Amount{Asset: spec.Base, V: position.Quantity}), CostBasis: usdtP(position.CostBasis),

@@ -32,7 +32,11 @@ func (p *Paper) ReducePaperPosition(ctx context.Context, req *connect.Request[la
 		if err != nil {
 			return err
 		}
-		spec, ok := paperSpotSpec(entry.Symbol)
+		plan, err := readPaperPlan(ctx, q, entry.PlanHash)
+		if err != nil {
+			return err
+		}
+		spec, ok := paperExecutionSpec(plan.GetInstrument())
 		if !ok {
 			return invalid("نماد اسپات قابل کاهش نیست")
 		}

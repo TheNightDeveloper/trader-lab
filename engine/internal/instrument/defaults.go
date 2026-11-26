@@ -19,10 +19,13 @@ func newSpec(symbol, base, quote string, tick, lot, minNotional int64) Spec {
 	}
 }
 
-// Defaults is the v1 registry, from Binance exchangeInfo filters (PRICE_FILTER
+// Defaults supplies the currently supported spot specifications.
+func Defaults() []Spec { return SpotSpecsV1() }
+
+// SpotSpecsV1 is the immutable registry, from Binance exchangeInfo filters (PRICE_FILTER
 // tickSize, LOT_SIZE stepSize, NOTIONAL minNotional) on 2026-10-27.
 // Values are at Scale 8: 0.01 = 1_000_000.
-func Defaults() []Spec {
+func SpotSpecsV1() []Spec {
 	return []Spec{
 		newSpec("BTCUSDT", "BTC", "USDT", 1_000_000, 1_000, 5e8),
 		newSpec("ETHUSDT", "ETH", "USDT", 1_000_000, 10_000, 5e8),
