@@ -31,13 +31,15 @@ type paperEntryTerms struct {
 	spec                          instrument.Spec
 	costs                         paper.Costs
 	quantity, limit, stop, target int64
+	model                         string
 }
 
 // Decode exact units from the hashed review, never from confirmation inputs.
 func paperEntryTermsFor(plan *labv1.PaperPlan) (paperEntryTerms, error) {
 	var terms paperEntryTerms
 	spec, ok := paperExecutionSpec(plan.GetInstrument())
-	if !ok || plan.GetFillModel() != paperFillModelV1 {
+	model := plan.GetFillModel()
+	if !ok || (model != paperFillModelV1 && model != paperFillModelV2) {
 		return terms, fmt.Errorf("paper plan %s has unsupported execution terms", plan.GetPlanHash())
 	}
 	qty := plan.GetQuantity()
@@ -60,7 +62,7 @@ func paperEntryTermsFor(plan *labv1.PaperPlan) (paperEntryTerms, error) {
 	if err != nil || slipErr != nil || !hasFee || !hasSlip || fee < 0 || fee >= money.RatioOne || slip < 0 || slip >= money.RatioOne {
 		return terms, fmt.Errorf("paper plan %s has invalid costs", plan.GetPlanHash())
 	}
-	terms.spec, terms.quantity, terms.costs = spec, q, paper.Costs{Fee: fee, Slippage: slip}
+	terms.spec, terms.quantity, terms.model, terms.costs = spec, q, model, paper.Costs{Fee: fee, Slippage: slip}
 	return terms, nil
 }
 

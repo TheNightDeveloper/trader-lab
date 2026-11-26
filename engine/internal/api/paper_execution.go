@@ -118,13 +118,18 @@ func paperNextCandle(ctx context.Context, q *db.Queries, symbol string, next, no
 	return bar, err
 }
 
+func paperEntryPriceAllowed(terms paperEntryTerms, bar db.NextPaperCandleRow) bool {
+	// Only the legacy model could veto a buy at the open using its later close.
+	return bar.O > terms.stop && (terms.model != paperFillModelV1 || bar.C > terms.stop)
+}
+
 func fillPaperEntry(ctx context.Context, q *db.Queries, entry db.PaperEntry, terms paperEntryTerms, bar db.NextPaperCandleRow, now time.Time) error {
 	// Limit simulated participation to 1% of the observed base volume, rounded down to a lot.
 	qty := min(entry.Quantity-entry.FilledQuantity, bar.Volume/100)
 	qty = qty / terms.spec.Lot.V * terms.spec.Lot.V
 	update := db.UpdatePaperEntryParams{ID: entry.ID, State: entry.State, FilledQuantity: entry.FilledQuantity,
 		ReservedCash: entry.ReservedCash, NextOpenAt: bar.CloseTime}
-	if qty <= 0 || bar.O <= terms.stop || bar.C <= terms.stop {
+	if qty <= 0 || !paperEntryPriceAllowed(terms, bar) {
 		_, err := q.UpdatePaperEntry(ctx, update)
 		return err
 	}

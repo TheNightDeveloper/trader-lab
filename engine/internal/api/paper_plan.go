@@ -21,7 +21,10 @@ import (
 	"tradinglab/engine/internal/store/db"
 )
 
-const paperFillModelV1 = "spot-closed-1m-v1"
+const (
+	paperFillModelV1 = "spot-closed-1m-v1"
+	paperFillModelV2 = "spot-closed-1m-v2"
+)
 
 func (p *Paper) PreviewPaperPlan(ctx context.Context, req *connect.Request[labv1.PreviewPaperPlanRequest]) (*connect.Response[labv1.PreviewPaperPlanResponse], error) {
 	in := req.Msg
