@@ -2,6 +2,38 @@
 
 Update at the end of every session.
 
+## P3 correctness and performance follow-up (2026-11-26)
+
+New Paper plans use `spot-closed-1m-v2`. Entry price eligibility uses the candle
+open, and each partial fill starts protection on its own first eligible
+minute. Older receipts still execute with their recorded model and spot
+specification. Confirming another plan for the same opportunity reports a
+conflict, while a retry with the accepted plan hash recovers its receipt.
+
+The scanner sizes its read window from the compiled rule and keeps up to 24
+candles for review. The worker cleared 60 queued protection candles on each
+of four receipts within a single four-second cycle in the PostgreSQL test.
+Chrome passed J1, J2 and J5 on the release build. The alternate plan displayed
+the conflict, the replay tail exposed the new fill, and the historical step
+made one request over 31 seconds.
+
+On the local PostgreSQL instance, 45 samples per case ran account reads
+alongside a confirmation in a transaction that was rolled back after reserving
+cash. The synthetic history contained two fill events and five postings per
+closed receipt. All numbers are p95 in milliseconds.
+
+| Closed receipts | Concurrent account reads | Account read | Account lock acquisition | Confirmation transaction |
+| ---: | ---: | ---: | ---: | ---: |
+| 1,000 | 1 | 13.38 | 0.52 | 16.15 |
+| 1,000 | 2 | 11.60 | 0.52 | 13.18 |
+| 10,000 | 1 | 101.33 | 0.52 | 119.49 |
+| 10,000 | 2 | 100.19 | 0.52 | 100.02 |
+
+The sample showed increasing history cost and submillisecond lock acquisition
+with up to two account readers. Paper continues to reconcile against the
+authoritative ledger at confirmation and execution. Recheck latency if local
+histories grow past the measured range or compete with a busy execution worker.
+
 ## P3 local acceptance (2026-11-25)
 
 Runtime candidate `a02c848` completed the Paper phase acceptance checks.

@@ -52,16 +52,20 @@ final paperReplayProvider = StreamProvider.autoDispose.family<GetPaperReplayResp
       GetPaperReplayRequest(receiptId: id, cursor: cursor),
       signal: signal,
     ),
+    // An existing successor fixes this historical step. Only the tail can grow.
+    until: (step) => step.hasNextCursor(),
   );
 }, retry: reconnectForever);
 
 /// Revalidation is server-owned. Keep the last complete view if a poll fails.
-Stream<T> _pollPaper<T>(Ref ref, Future<T> Function(AbortSignal) read) async* {
+Stream<T> _pollPaper<T>(Ref ref, Future<T> Function(AbortSignal) read, {bool Function(T)? until}) async* {
   final signal = CancelableSignal();
   ref.onDispose(signal.cancel);
   const interval = Duration(seconds: 5);
   while (ref.mounted) {
-    yield await read(TimeoutSignal(interval, parent: signal));
+    final result = await read(TimeoutSignal(interval, parent: signal));
+    yield result;
+    if (until?.call(result) ?? false) return;
     await Future<void>.delayed(interval);
   }
 }
