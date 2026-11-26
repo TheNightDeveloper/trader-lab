@@ -96,19 +96,19 @@ func (m *Market) scanMarketHour(ctx context.Context, q *db.Queries, symbol strin
 	if !errors.Is(err, pgx.ErrNoRows) {
 		return nil, err
 	}
-	// The validated rules need at most a 1000-bar rolling window and two extra
-	// bars for offsets and crosses. The current incomplete hour is excluded.
+	window, probe, err := rule.def.CompileEntryProbe()
+	if err != nil {
+		return nil, err
+	}
+	// Retain enough evidence for both the rule and the historical review chart.
 	bars, err := (data.Reader{Q: q}).Bars(ctx, data.Query{
-		Symbol: symbol, Timeframe: opportunityTF, From: closedAt.Add(-1002 * hour), To: closedAt, AsOf: now,
+		Symbol: symbol, Timeframe: opportunityTF, From: closedAt.Add(-time.Duration(max(window, 24)) * hour), To: closedAt, AsOf: now,
 	})
 	if err != nil {
 		return nil, err
 	}
 	history := completeMarketSuffix(bars, closedAt, hour)
-	intent, ready, err := rule.def.ProbeEntry(history)
-	if err != nil {
-		return nil, err
-	}
+	intent, ready := probe(history)
 	now = m.Clock.Now()
 	if err := m.requireMarketFeed(ctx, q, symbol, now, closedAt, expires); err != nil {
 		return nil, err

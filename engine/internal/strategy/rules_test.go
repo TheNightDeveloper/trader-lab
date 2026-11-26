@@ -39,6 +39,37 @@ func TestRuleDefinitionContentHash(t *testing.T) {
 	require.NotEqual(t, first, changed)
 }
 
+func TestEntryProbeWindowPreservesResults(t *testing.T) {
+	var simple RuleDefinition
+	require.NoError(t, json.Unmarshal([]byte(ruleFixture), &simple))
+	simple.BaseTimeframe = data.TF1h
+	withBucket := simple
+	withBucket.Entry = Rule{Op: "cross_above", Left: &RuleValue{Kind: "bucket_close", Timeframe: data.TF1d}, Right: simple.Entry.Right}
+	combined, err := ComposeRegimeRules(simple, withBucket, 5, "a")
+	require.NoError(t, err)
+
+	bars := make([]data.Bar, 24*5)
+	for i := range bars {
+		at := time.Unix(0, 0).Add(time.Duration(i) * time.Hour)
+		bars[i] = data.Bar{Instrument: "BTCUSDT", OpenTime: at, CloseTime: at.Add(time.Hour),
+			C: money.Price{V: int64(i%17+1) * 1e8, Scale: 8}}
+	}
+	for _, tc := range []struct {
+		rule RuleDefinition
+		want int
+	}{{simple, 3}, {withBucket, 48}, {combined, 48}} {
+		n, probe, err := tc.rule.CompileEntryProbe()
+		require.NoError(t, err)
+		require.Equal(t, tc.want, n)
+		for end := 1; end <= len(bars); end++ {
+			full, fullReady := probe(bars[:end])
+			bounded, boundedReady := probe(bars[max(0, end-n):end])
+			require.Equal(t, fullReady, boundedReady, "bar %d", end)
+			require.Equal(t, full, bounded, "bar %d", end)
+		}
+	}
+}
+
 func TestRuleDefinitionRejectsUnsupportedInput(t *testing.T) {
 	for _, tt := range []struct{ name, from, to string }{
 		{"version", "rules/v1", "rules/v2"},

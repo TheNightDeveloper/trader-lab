@@ -101,26 +101,44 @@ func (d RuleDefinition) compile() (*ruleStrategy, error) {
 	}
 	return &ruleStrategy{
 		entry: entry.test, exit: exit.test, reason: entry.reason, bars: max(entry.bars, exit.bars),
-		exposure: d.Exposure, base: c.base, long: make(map[string]bool),
+		probeBars: max(entry.bars, exit.bars, c.bucketBars),
+		exposure:  d.Exposure, base: c.base, long: make(map[string]bool),
 	}, nil
 }
 
 // ProbeEntry observes the latest candle from flat exposure without consuming strategy state.
 // ready distinguishes missing indicator inputs from a confirmed absence of an entry.
 func (d RuleDefinition) ProbeEntry(history []data.Bar) (intent Intent, ready bool, err error) {
-	s, err := d.compile()
-	if err != nil || len(history) < s.bars {
+	_, probe, err := d.CompileEntryProbe()
+	if err != nil {
 		return Intent{}, false, err
+	}
+	intent, ready = probe(history)
+	return intent, ready, nil
+}
+
+// CompileEntryProbe returns the history needed by both the entry and its exit veto.
+func (d RuleDefinition) CompileEntryProbe() (int, func([]data.Bar) (Intent, bool), error) {
+	s, err := d.compile()
+	if err != nil {
+		return 0, nil, err
+	}
+	return s.probeBars, s.probeEntry, nil
+}
+
+func (s *ruleStrategy) probeEntry(history []data.Bar) (Intent, bool) {
+	if len(history) < s.bars {
+		return Intent{}, false
 	}
 	exit, ready := s.exit(history)
 	if !ready || exit {
-		return Intent{}, ready, nil
+		return Intent{}, ready
 	}
 	entry, ready := s.entry(history)
 	if !ready || !entry {
-		return Intent{}, ready, nil
+		return Intent{}, ready
 	}
-	return s.entryIntent(history[len(history)-1].Instrument, history), true, nil
+	return s.entryIntent(history[len(history)-1].Instrument, history), true
 }
 
 // ContentHash identifies the validated ordered AST through its canonical JSON.

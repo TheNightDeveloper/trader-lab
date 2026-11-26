@@ -18,8 +18,9 @@ type rulePredicate struct {
 }
 
 type ruleCompiler struct {
-	remaining int
-	base      time.Duration
+	remaining  int
+	base       time.Duration
+	bucketBars int
 }
 
 func (c *ruleCompiler) compile(r Rule, depth int) (rulePredicate, error) {
@@ -130,6 +131,9 @@ func (c *ruleCompiler) compileValue(v RuleValue) (func([]data.Bar) (float64, boo
 			return nil, 0, fmt.Errorf("bucket_close requires a larger timeframe divisible by base_timeframe")
 		}
 		base := c.base
+		// A completed bucket can be followed by width/base-1 bars.
+		// Reserve one more bar for testing the previous side of a cross.
+		c.bucketBars = max(c.bucketBars, 2*int(width/base))
 		return func(history []data.Bar) (float64, bool) { return bucketClose(history, base, width) }, 1, nil
 	}
 	if v.Timeframe != "" {
@@ -195,6 +199,7 @@ type ruleStrategy struct {
 	entry, exit func([]data.Bar) (bool, bool)
 	reason      func([]data.Bar) string
 	bars        int
+	probeBars   int
 	base        time.Duration
 	exposure    money.Ratio
 	long        map[string]bool
