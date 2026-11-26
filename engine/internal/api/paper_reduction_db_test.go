@@ -78,16 +78,16 @@ func TestPaperReductionSurvivesPauseAndReconciles(t *testing.T) {
 	}
 	check(book().GetReconciliation())
 	ingest(1, 100, 101, 99, 100)
-	require.NoError(t, p.runPaperCycle(ctx))
+	require.NoError(t, p.runPaperCycle(ctx, nil))
 	open := book().GetPositions()[0]
 	require.Equal(t, "20000000", open.GetQuantity().GetUnits())
 	pause(true)
 	pause(true)
 	require.Equal(t, "entries_paused", preview().GetRestriction().GetCode())
 	ingest(2, 100, 101, 99, 100)
-	require.NoError(t, p.runPaperCycle(ctx))
+	require.NoError(t, p.runPaperCycle(ctx, nil))
 	pause(false)
-	require.NoError(t, p.runPaperCycle(ctx))
+	require.NoError(t, p.runPaperCycle(ctx, nil))
 	require.Equal(t, "20000000", book().GetPositions()[0].GetQuantity().GetUnits())
 	pause(true)
 	market.Live = nil
@@ -117,7 +117,7 @@ func TestPaperReductionSurvivesPauseAndReconciles(t *testing.T) {
 	require.Equal(t, labv1.PaperReductionState_PAPER_REDUCTION_STATE_PENDING, read().GetReduction().GetState())
 	require.Equal(t, "0", book().GetPaperAccount().GetReservedBalance().GetUnits())
 	ingest(3, 100, 101, 99, 100)
-	require.NoError(t, p.runPaperCycle(ctx))
+	require.NoError(t, p.runPaperCycle(ctx, nil))
 	filled := read()
 	require.Equal(t, labv1.PaperReductionState_PAPER_REDUCTION_STATE_FILLED, filled.GetReduction().GetState())
 	remaining := book().GetPositions()[0]
@@ -136,9 +136,9 @@ func TestPaperReductionSurvivesPauseAndReconciles(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, labv1.PaperReductionState_PAPER_REDUCTION_STATE_PENDING, lastRequest.GetReduction().GetState())
 	// Finish checking the previous candle's intrabar protection, then observe the next opening gap.
-	require.NoError(t, p.runPaperCycle(ctx))
+	require.NoError(t, p.runPaperCycle(ctx, nil))
 	ingest(4, 123, 125, 88, 100)
-	require.NoError(t, p.runPaperCycle(ctx))
+	require.NoError(t, p.runPaperCycle(ctx, nil))
 	closed := read()
 	require.Equal(t, labv1.PaperReductionState_PAPER_REDUCTION_STATE_SUPERSEDED, closed.GetReduction().GetState())
 	last := closed.GetEvents()[len(closed.GetEvents())-1]

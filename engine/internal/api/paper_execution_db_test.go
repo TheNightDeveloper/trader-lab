@@ -109,12 +109,12 @@ func TestPaperConfirmationPartialFillCancelAndProtectiveExit(t *testing.T) {
 		require.NoError(t, wall.Set(at.Add(time.Minute)))
 	}
 	ingest(0, 100, 99, 101, 100) // opened before the confirmation
-	require.NoError(t, p.runPaperCycle(ctx))
+	require.NoError(t, p.runPaperCycle(ctx, nil))
 	require.Len(t, read().GetEvents(), 1)
 	ingest(1, 100, 99, 101, 100)
 	// A fresh service instance consumes the same durable queue after restart.
 	p = &Paper{Market: market}
-	require.NoError(t, p.runPaperCycle(ctx))
+	require.NoError(t, p.runPaperCycle(ctx, nil))
 	partial := read()
 	require.Equal(t, labv1.PaperEntryState_PAPER_ENTRY_STATE_PARTIAL, partial.GetReceipt().GetState())
 	require.EqualValues(t, unit/5, units(partial.GetReceipt().GetFilledQuantity()))
@@ -126,9 +126,9 @@ func TestPaperConfirmationPartialFillCancelAndProtectiveExit(t *testing.T) {
 	require.Equal(t, units(partial.GetReceipt().GetFilledQuantity()), units(journal.Msg.GetTrades()[0].GetOpenQuantity()))
 
 	ingest(2, 100, 99, 101, 100)
-	require.NoError(t, p.runPaperCycle(ctx)) // protection advances before another entry on the same bar
+	require.NoError(t, p.runPaperCycle(ctx, nil)) // protection advances before another entry on the same bar
 	group = errgroup.Group{}
-	group.Go(func() error { return p.runPaperCycle(ctx) })
+	group.Go(func() error { return p.runPaperCycle(ctx, nil) })
 	group.Go(func() error {
 		_, err := client.CancelPaperEntry(ctx, connect.NewRequest(&labv1.CancelPaperEntryRequest{Account: paperAccountRef(), ReceiptId: id}))
 		return err
@@ -147,8 +147,8 @@ func TestPaperConfirmationPartialFillCancelAndProtectiveExit(t *testing.T) {
 
 	market.Live = nil // protecting existing positions never needs entry permission
 	ingest(3, 85, 80, 122, 105)
-	require.NoError(t, p.runPaperCycle(ctx))
-	require.NoError(t, p.runPaperCycle(ctx))
+	require.NoError(t, p.runPaperCycle(ctx, nil))
+	require.NoError(t, p.runPaperCycle(ctx, nil))
 	closed := read()
 	last := closed.GetEvents()[len(closed.GetEvents())-1]
 	require.Equal(t, "stop_exit", last.GetKind())
@@ -249,7 +249,7 @@ func TestPaperPartialFillsKeepTheirProtectionWindows(t *testing.T) {
 				}})
 				require.NoError(t, err)
 				require.NoError(t, wall.Set(available))
-				require.NoError(t, p.runPaperCycle(ctx))
+				require.NoError(t, p.runPaperCycle(ctx, nil))
 			}
 			ingest(1, 88, 89) // A lower close does not veto the buy at the open in v2.
 			ingest(2, 99, 100)
@@ -279,6 +279,77 @@ func TestPaperPartialFillsKeepTheirProtectionWindows(t *testing.T) {
 			require.True(t, paperReconciled(ledger))
 		})
 	}
+}
+
+func TestPaperCycleDrainsFourReceiptsWithAnHourOfCandles(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	market, wall, client, opportunityID := paperFixture(t)
+	st := market.Store
+	const unit = paperTestUnit
+	_, err := client.InitializePaperAccount(ctx, connect.NewRequest(&labv1.InitializePaperAccountRequest{
+		Capital: usdtP(1000 * unit), MaxLossPerTrade: usdtP(10 * unit), MaxOpenLoss: usdtP(100 * unit), MaxSpotExposure: usdtP(800 * unit),
+	}))
+	require.NoError(t, err)
+	original, err := st.PaperReplayOpportunity(ctx, opportunityID)
+	require.NoError(t, err)
+	market.Symbols = []string{"BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT"}
+	var feeds []data.LiveSymbolStatus
+	for _, symbol := range market.Symbols {
+		feeds = append(feeds, data.LiveSymbolStatus{Symbol: symbol, State: data.LiveFresh, LastClose: now})
+	}
+	market.Live = fakeLive{data.LiveStatus{Symbols: feeds}}
+	var receipts []int64
+	for _, symbol := range market.Symbols {
+		price := money.Price{V: 100 * unit, Scale: instrument.Scale}
+		_, err := data.UpsertBars(ctx, st, symbol, "rest", "fixture", []data.Bar{{
+			OpenTime: now.Add(-time.Minute), CloseTime: now, AvailableAt: now, O: price, H: price, L: price, C: price,
+		}})
+		require.NoError(t, err)
+		require.NoError(t, st.InsertMarketOpportunity(ctx, db.InsertMarketOpportunityParams{
+			Symbol: symbol, RuleVersionID: original.RuleVersionID, ReportID: original.ReportID, SpecRevision: marketSpecRevision(symbol),
+			CandleClosedAt: now, ObservedAt: now, ExpiresAt: now.Add(time.Hour), ReferenceClose: price.V,
+			Reason: original.Reason, Snapshot: original.Snapshot, SnapshotSha256: original.SnapshotSha256,
+		}))
+		opp, err := st.MarketOpportunity(ctx, db.MarketOpportunityParams{RuleVersionID: original.RuleVersionID, Symbol: symbol, CandleClosedAt: now})
+		require.NoError(t, err)
+		preview, err := client.PreviewPaperPlan(ctx, connect.NewRequest(&labv1.PreviewPaperPlanRequest{
+			Account: paperAccountRef(), OpportunityId: opp.ID, Stop: usdtP(90 * unit), TakeProfit: usdtP(120 * unit),
+		}))
+		require.NoError(t, err)
+		require.NotNil(t, preview.Msg.GetPlan(), "%s", preview.Msg.GetRestriction().GetDetail())
+		confirmed, err := client.ConfirmPaperPlan(ctx, connect.NewRequest(&labv1.ConfirmPaperPlanRequest{
+			Account: paperAccountRef(), PlanHash: preview.Msg.GetPlan().GetPlanHash(),
+		}))
+		require.NoError(t, err)
+		require.Positive(t, confirmed.Msg.GetReceipt().GetId())
+		receipts = append(receipts, confirmed.Msg.GetReceipt().GetId())
+
+		bars := make([]data.Bar, 61)
+		for i := range bars {
+			open := now.Add(time.Duration(i+1) * time.Minute)
+			bars[i] = data.Bar{OpenTime: open, CloseTime: open.Add(time.Minute), AvailableAt: open.Add(time.Minute),
+				O: price, H: price, L: price, C: price, Volume: money.Qty{V: 1000 * unit, Scale: instrument.Scale}}
+		}
+		bars[len(bars)-1].L.V = 89 * unit
+		_, err = data.UpsertBars(ctx, st, symbol, "rest", "fixture", bars)
+		require.NoError(t, err)
+	}
+	require.NoError(t, wall.Set(now.Add(62*time.Minute)))
+	cycle, stop := context.WithTimeout(ctx, 4*time.Second)
+	defer stop()
+	require.NoError(t, (&Paper{Market: market}).runPaperCycle(cycle, nil))
+	for _, id := range receipts {
+		events, err := st.PaperExecutionEvents(ctx, id)
+		require.NoError(t, err)
+		require.Len(t, events, 3)
+		require.Equal(t, "entry_fill", events[1].Kind)
+		require.Equal(t, "stop_exit", events[2].Kind)
+		require.True(t, events[2].CandleOpenAt.Equal(now.Add(61*time.Minute)))
+	}
+	ledger, err := st.ReconcilePaperBook(ctx, paperAccountID)
+	require.NoError(t, err)
+	require.True(t, paperReconciled(ledger))
 }
 
 func TestPaperEntriesShareCashAcrossSymbols(t *testing.T) {
@@ -341,7 +412,7 @@ func TestPaperEntriesShareCashAcrossSymbols(t *testing.T) {
 	}
 	require.Equal(t, 1, accepted)
 	require.NoError(t, wall.Set(now.Add(11*time.Minute)))
-	require.NoError(t, (&Paper{Market: market}).runPaperCycle(ctx))
+	require.NoError(t, (&Paper{Market: market}).runPaperCycle(ctx, nil))
 	book, err := client.GetPaperAccount(ctx, connect.NewRequest(&labv1.GetPaperAccountRequest{}))
 	require.NoError(t, err)
 	require.Len(t, book.Msg.GetRecentReceipts(), 1)

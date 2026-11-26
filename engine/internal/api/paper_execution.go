@@ -16,9 +16,10 @@ import (
 func (p *Paper) RunPaper(ctx context.Context) {
 	tick := time.NewTicker(2 * time.Second)
 	defer tick.Stop()
+	var lastAttempt int64
 	for ctx.Err() == nil {
 		cycle, cancel := context.WithTimeout(ctx, 4*time.Second)
-		err := p.runPaperCycle(cycle)
+		err := p.runPaperCycle(cycle, &lastAttempt)
 		cancel()
 		if err != nil && ctx.Err() == nil {
 			slog.WarnContext(ctx, "Paper execution deferred", "error", err)
@@ -31,25 +32,45 @@ func (p *Paper) RunPaper(ctx context.Context) {
 	}
 }
 
-func (p *Paper) runPaperCycle(ctx context.Context) error {
+func (p *Paper) runPaperCycle(ctx context.Context, lastAttempt *int64) error {
 	ids, err := p.Market.Store.PendingPaperEntries(ctx, paperAccountID)
 	if err != nil {
 		return err
 	}
+	if lastAttempt != nil {
+		// A timed-out step cannot keep later receipts at the back of the next cycle.
+		for i, id := range ids {
+			if id > *lastAttempt {
+				ids = append(ids[i:], ids[:i]...)
+				break
+			}
+		}
+	}
 	var failures error
-	for _, id := range ids {
-		if ctx.Err() != nil {
-			return errors.Join(failures, ctx.Err())
+	for len(ids) != 0 {
+		next := ids[:0]
+		for _, id := range ids {
+			if ctx.Err() != nil {
+				return errors.Join(failures, ctx.Err())
+			}
+			if lastAttempt != nil {
+				*lastAttempt = id
+			}
+			advanced, err := p.advancePaper(ctx, id)
+			if err != nil {
+				failures = errors.Join(failures, fmt.Errorf("receipt %d: %w", id, err))
+			} else if advanced {
+				next = append(next, id)
+			}
 		}
-		if err := p.advancePaper(ctx, id); err != nil {
-			failures = errors.Join(failures, fmt.Errorf("receipt %d: %w", id, err))
-		}
+		ids = next
 	}
 	return failures
 }
 
-func (p *Paper) advancePaper(ctx context.Context, id int64) error {
-	return p.Market.Store.InTx(ctx, func(q *db.Queries) error {
+func (p *Paper) advancePaper(ctx context.Context, id int64) (bool, error) {
+	var advanced bool
+	err := p.Market.Store.InTx(ctx, func(q *db.Queries) error {
 		if err := q.LockPaperAccount(ctx, paperAccountID); err != nil {
 			return err
 		}
@@ -91,6 +112,7 @@ func (p *Paper) advancePaper(ctx context.Context, id int64) error {
 				if err != nil {
 					return err
 				}
+				advanced = true
 			}
 		}
 		if position.Quantity > 0 {
@@ -101,13 +123,17 @@ func (p *Paper) advancePaper(ctx context.Context, id int64) error {
 			}
 		}
 		if !protect.OpenTime.IsZero() && (buy.OpenTime.IsZero() || !protect.OpenTime.After(buy.OpenTime)) {
-			return protectPaperPosition(ctx, q, entry, position, terms, protect, now)
+			worked, err := protectPaperPosition(ctx, q, entry, position, terms, protect, now)
+			advanced = advanced || worked
+			return err
 		}
 		if !buy.OpenTime.IsZero() {
-			return fillPaperEntry(ctx, q, entry, terms, buy, now)
+			advanced, err = fillPaperEntry(ctx, q, entry, terms, buy, now)
+			return err
 		}
 		return nil
 	})
+	return advanced && err == nil, err
 }
 
 func paperNextCandle(ctx context.Context, q *db.Queries, symbol string, next, now, expires time.Time) (db.NextPaperCandleRow, error) {
@@ -123,7 +149,7 @@ func paperEntryPriceAllowed(terms paperEntryTerms, bar db.NextPaperCandleRow) bo
 	return bar.O > terms.stop && (terms.model != paperFillModelV1 || bar.C > terms.stop)
 }
 
-func fillPaperEntry(ctx context.Context, q *db.Queries, entry db.PaperEntry, terms paperEntryTerms, bar db.NextPaperCandleRow, now time.Time) error {
+func fillPaperEntry(ctx context.Context, q *db.Queries, entry db.PaperEntry, terms paperEntryTerms, bar db.NextPaperCandleRow, now time.Time) (bool, error) {
 	// Limit simulated participation to 1% of the observed base volume, rounded down to a lot.
 	qty := min(entry.Quantity-entry.FilledQuantity, bar.Volume/100)
 	qty = qty / terms.spec.Lot.V * terms.spec.Lot.V
@@ -131,26 +157,26 @@ func fillPaperEntry(ctx context.Context, q *db.Queries, entry db.PaperEntry, ter
 		ReservedCash: entry.ReservedCash, NextOpenAt: bar.CloseTime}
 	if qty <= 0 || !paperEntryPriceAllowed(terms, bar) {
 		_, err := q.UpdatePaperEntry(ctx, update)
-		return err
+		return true, err
 	}
 	fill, err := terms.costs.Fill(terms.spec, true, bar.O, qty)
 	if err != nil {
-		return err
+		return false, err
 	}
 	if fill.Price > terms.limit || fill.Cash > entry.ReservedCash {
 		_, err := q.UpdatePaperEntry(ctx, update)
-		return err
+		return true, err
 	}
 	ledger, err := q.ReconcilePaperBook(ctx, entry.AccountID)
 	if err != nil {
-		return err
+		return false, err
 	}
 	if !paperReconciled(ledger) {
 		if ledger.CashMatches && ledger.ReservationsMatch && !now.Before(entry.ExpiresAt) {
 			_, err := finishPaperEntry(ctx, q, entry, paperExpired, "expired", now)
-			return err
+			return true, err
 		}
-		return nil
+		return false, nil
 	}
 	update.FilledQuantity += qty
 	update.ReservedCash -= fill.Cash
@@ -168,7 +194,7 @@ func fillPaperEntry(ctx context.Context, q *db.Queries, entry db.PaperEntry, ter
 		FillPrice: fill.Price, Fee: fill.Fee, Cash: fill.Cash, CandleOpenAt: &bar.OpenTime, CandleRevision: bar.Revision,
 	})
 	if err != nil {
-		return err
+		return false, err
 	}
 	for leg, posting := range []struct {
 		asset, source, dest string
@@ -180,11 +206,11 @@ func fillPaperEntry(ctx context.Context, q *db.Queries, entry db.PaperEntry, ter
 		{terms.spec.Base.Code, "clearing", "position", qty},
 	} {
 		if err := paperPosting(ctx, q, event, int32(leg), now, posting.asset, posting.source, posting.dest, posting.amount); err != nil {
-			return err
+			return false, err
 		}
 	}
 	if err := q.MovePaperCash(ctx, db.MovePaperCashParams{ID: entry.AccountID, AvailableDelta: released, ReservedDelta: -fill.Cash - released}); err != nil {
-		return err
+		return false, err
 	}
 	// Ignore candles that opened before the fill was observable from the closed bar.
 	protectFrom := firstFullPaperMinute(bar.AvailableAt)
@@ -192,23 +218,23 @@ func fillPaperEntry(ctx context.Context, q *db.Queries, entry db.PaperEntry, ter
 	if err := q.AddPaperPosition(ctx, db.AddPaperPositionParams{
 		EntryID: entry.ID, Quantity: qty, CostBasis: fill.Cash, NextOpenAt: protectFrom, KeepProtectionCursor: perFill,
 	}); err != nil {
-		return err
+		return false, err
 	}
 	if perFill {
 		if err := q.RecordPaperFillProtection(ctx, db.RecordPaperFillProtectionParams{
 			EntryID: entry.ID, FillEventID: event, EligibleAt: protectFrom, Quantity: qty,
 		}); err != nil {
-			return err
+			return false, err
 		}
 	}
 	_, err = q.UpdatePaperEntry(ctx, update)
-	return err
+	return true, err
 }
 
-func protectPaperPosition(ctx context.Context, q *db.Queries, entry db.PaperEntry, position db.PaperPosition, terms paperEntryTerms, bar db.NextPaperCandleRow, now time.Time) error {
+func protectPaperPosition(ctx context.Context, q *db.Queries, entry db.PaperEntry, position db.PaperPosition, terms paperEntryTerms, bar db.NextPaperCandleRow, now time.Time) (bool, error) {
 	reduction, err := q.PendingPaperReduction(ctx, entry.ID)
 	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
-		return err
+		return false, err
 	}
 	var reference int64
 	var kind string
@@ -218,10 +244,10 @@ func protectPaperPosition(ctx context.Context, q *db.Queries, entry db.PaperEntr
 			EntryID: entry.ID, CandleOpen: bar.OpenTime,
 		})
 		if err != nil {
-			return err
+			return false, err
 		}
 		if waiting > qty {
-			return fmt.Errorf("unprotected quantity exceeds held position for receipt %d", entry.ID)
+			return false, fmt.Errorf("unprotected quantity exceeds held position for receipt %d", entry.ID)
 		}
 		qty -= waiting
 	}
@@ -240,35 +266,35 @@ func protectPaperPosition(ctx context.Context, q *db.Queries, entry db.PaperEntr
 	case qty > 0 && bar.H >= terms.target:
 		reference, kind = terms.target, "target_exit"
 	default:
-		return q.AdvancePaperPosition(ctx, db.AdvancePaperPositionParams{EntryID: entry.ID, NextOpenAt: bar.CloseTime})
+		return true, q.AdvancePaperPosition(ctx, db.AdvancePaperPositionParams{EntryID: entry.ID, NextOpenAt: bar.CloseTime})
 	}
 	ledger, err := q.ReconcilePaperBook(ctx, entry.AccountID)
 	if err != nil {
-		return err
+		return false, err
 	}
 	if !ledger.PositionsMatch || (paperEntryActive(entry) && !ledger.ReservationsMatch) {
-		return nil
+		return false, nil
 	}
 	if qty <= 0 || qty > position.Quantity {
-		return fmt.Errorf("reduction quantity exceeds held position for receipt %d", entry.ID)
+		return false, fmt.Errorf("reduction quantity exceeds held position for receipt %d", entry.ID)
 	}
 	if paperEntryActive(entry) {
 		if _, err := finishPaperEntry(ctx, q, entry, paperCancelled, "protection_cancelled_remainder", now); err != nil {
-			return err
+			return false, err
 		}
 	}
 	event, err := executePaperExit(ctx, q, entry, position, terms, bar, now, kind, reference, qty)
 	if err != nil {
-		return err
+		return false, err
 	}
 	if reduction.ID == 0 {
-		return nil
+		return true, nil
 	}
 	state := paperReductionSuperseded
 	if kind == "manual_exit" {
 		state = paperReductionFilled
 	}
-	return q.FinishPaperReduction(ctx, db.FinishPaperReductionParams{ID: reduction.ID, State: state, ResultEventID: &event})
+	return true, q.FinishPaperReduction(ctx, db.FinishPaperReductionParams{ID: reduction.ID, State: state, ResultEventID: &event})
 }
 
 func executePaperExit(ctx context.Context, q *db.Queries, entry db.PaperEntry, position db.PaperPosition, terms paperEntryTerms, bar db.NextPaperCandleRow, now time.Time, kind string, reference, qty int64) (int64, error) {

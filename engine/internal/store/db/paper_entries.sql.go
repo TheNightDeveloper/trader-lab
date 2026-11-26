@@ -396,8 +396,9 @@ func (q *Queries) PaperUnprotectedQuantity(ctx context.Context, arg PaperUnprote
 }
 
 const pendingPaperEntries = `-- name: PendingPaperEntries :many
-SELECT id FROM paper_entries e WHERE account_id = $1
-  AND (state IN (1, 2) OR EXISTS (SELECT 1 FROM paper_positions p WHERE p.entry_id = e.id))
+SELECT pending.id FROM paper_entries pending WHERE pending.account_id = $1 AND pending.state IN (1, 2)
+UNION
+SELECT e.id FROM paper_positions p JOIN paper_entries e ON e.id = p.entry_id WHERE e.account_id = $1
 ORDER BY id
 `
 
