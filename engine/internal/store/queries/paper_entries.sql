@@ -70,7 +70,16 @@ INSERT INTO paper_positions (entry_id, quantity, cost_basis, next_open_at) VALUE
 ON CONFLICT (entry_id) DO UPDATE SET quantity = paper_positions.quantity + EXCLUDED.quantity,
     cost_basis = paper_positions.cost_basis + EXCLUDED.cost_basis,
     revision = paper_positions.revision + 1,
-    next_open_at = GREATEST(paper_positions.next_open_at, EXCLUDED.next_open_at);
+    next_open_at = CASE WHEN @keep_protection_cursor::boolean THEN paper_positions.next_open_at
+                       ELSE GREATEST(paper_positions.next_open_at, EXCLUDED.next_open_at) END;
+
+-- name: RecordPaperFillProtection :exec
+INSERT INTO paper_fill_protection (entry_id, fill_event_id, eligible_at, quantity)
+VALUES ($1, $2, $3, $4);
+
+-- name: PaperUnprotectedQuantity :one
+SELECT coalesce(sum(quantity), 0)::bigint FROM paper_fill_protection
+WHERE entry_id = @entry_id AND eligible_at > @candle_open;
 
 -- name: ReadPaperPosition :one
 SELECT * FROM paper_positions WHERE entry_id = $1;

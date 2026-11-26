@@ -215,6 +215,72 @@ FROM opportunities o JOIN plans ON plans.opportunity_id = o.id`, opportunityID, 
 	require.Zero(t, lastPage.Msg.GetNextBeforeReceiptId())
 }
 
+func TestPaperPartialFillsKeepTheirProtectionWindows(t *testing.T) {
+	for _, name := range []string{"continuous", "restart"} {
+		t.Run(name, func(t *testing.T) {
+			ctx := context.Background()
+			market, wall, client, opportunityID := paperFixture(t)
+			p := &Paper{Market: market}
+			const unit = paperTestUnit
+			_, err := client.InitializePaperAccount(ctx, connect.NewRequest(&labv1.InitializePaperAccountRequest{
+				Capital: usdtP(250 * unit), MaxLossPerTrade: usdtP(15 * unit), MaxOpenLoss: usdtP(20 * unit), MaxSpotExposure: usdtP(200 * unit),
+			}))
+			require.NoError(t, err)
+			preview, err := client.PreviewPaperPlan(ctx, connect.NewRequest(&labv1.PreviewPaperPlanRequest{
+				Account: paperAccountRef(), OpportunityId: opportunityID, Stop: usdtP(90 * unit), TakeProfit: usdtP(120 * unit),
+			}))
+			require.NoError(t, err)
+			plan := preview.Msg.GetPlan()
+			require.Equal(t, paperFillModelV2, plan.GetFillModel())
+			confirmed, err := client.ConfirmPaperPlan(ctx, connect.NewRequest(&labv1.ConfirmPaperPlanRequest{
+				Account: paperAccountRef(), PlanHash: plan.GetPlanHash(),
+			}))
+			require.NoError(t, err)
+			id := confirmed.Msg.GetReceipt().GetId()
+			require.Positive(t, id)
+			ingest := func(minute int, low, close int64) {
+				t.Helper()
+				at := now.Add(time.Duration(minute) * time.Minute)
+				available := at.Add(time.Minute + 5*time.Second)
+				price := func(v int64) money.Price { return money.Price{V: v * unit, Scale: instrument.Scale} }
+				_, err := data.UpsertBars(ctx, market.Store, "BTCUSDT", "rest", "fixture", []data.Bar{{
+					OpenTime: at, CloseTime: at.Add(time.Minute), AvailableAt: available,
+					O: price(100), H: price(101), L: price(low), C: price(close), Volume: money.Qty{V: 20 * unit, Scale: instrument.Scale},
+				}})
+				require.NoError(t, err)
+				require.NoError(t, wall.Set(available))
+				require.NoError(t, p.runPaperCycle(ctx))
+			}
+			ingest(1, 88, 89) // A lower close does not veto the buy at the open in v2.
+			ingest(2, 99, 100)
+			if name == "restart" {
+				p = &Paper{Market: market}
+			}
+			ingest(3, 89, 95) // Only the first fill can exit on this candle.
+			position, err := market.Store.ReadPaperPosition(ctx, id)
+			require.NoError(t, err)
+			require.EqualValues(t, unit/5, position.Quantity)
+			ingest(4, 89, 95)
+			events, err := market.Store.PaperExecutionEvents(ctx, id)
+			require.NoError(t, err)
+			require.Len(t, events, 6)
+			require.Equal(t, "protection_cancelled_remainder", events[3].Kind)
+			for index, minute := range []int{3, 4} {
+				exit := events[4+index]
+				require.Equal(t, "stop_exit", exit.Kind)
+				require.EqualValues(t, unit/5, exit.Quantity)
+				require.True(t, exit.CandleOpenAt.Equal(now.Add(time.Duration(minute)*time.Minute)))
+			}
+			entry, err := readPaperEntry(ctx, market.Store.Queries, id)
+			require.NoError(t, err)
+			require.Zero(t, entry.ReservedCash)
+			ledger, err := market.Store.ReconcilePaperBook(ctx, entry.AccountID)
+			require.NoError(t, err)
+			require.True(t, paperReconciled(ledger))
+		})
+	}
+}
+
 func TestPaperEntriesShareCashAcrossSymbols(t *testing.T) {
 	ctx := context.Background()
 	market, wall, client, btcID := paperFixture(t)

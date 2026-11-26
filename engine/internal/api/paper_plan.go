@@ -143,7 +143,7 @@ func (p *Paper) PreviewPaperPlan(ctx context.Context, req *connect.Request[labv1
 		ReferencePrice: usdtP(candle.C), EstimatedEntry: usdtP(size.EntryPrice), MaxEntryPrice: usdtP(entryLimit.V),
 		Stop: usdtP(stop.V), TakeProfit: usdtP(target.V), Quantity: moneyP(money.Amount{V: size.Quantity, Asset: spec.Base}),
 		Notional: usdtP(size.Notional), RequiredCash: usdtP(size.ReservedCash), PlannedLoss: usdtP(size.PlannedLoss),
-		EstimatedCost: usdtP(size.EstimatedCost), FeeRate: ratioP(costs.Fee), SlippageRate: ratioP(costs.Slippage), FillModel: paperFillModelV1,
+		EstimatedCost: usdtP(size.EstimatedCost), FeeRate: ratioP(costs.Fee), SlippageRate: ratioP(costs.Slippage), FillModel: paperFillModelV2,
 		ReferenceCandleClosedAtUnixMs: ms(candle.CloseTime), ReferenceCandleRevision: candle.Revision,
 		EngineBuildSha256: p.Market.Build,
 	}

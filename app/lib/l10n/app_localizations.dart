@@ -441,6 +441,18 @@ abstract class L10n {
   /// **'ورود با قیمت بازشدن کندل کامل یک‌دقیقه‌ای بعد از تأیید و حداکثر یک درصد از حجم کندل شبیه‌سازی می‌شود. کارمزد و لغزش اعمال می‌شوند و عبور قیمت از حد ضرر می‌تواند زیان بیشتری ایجاد کند. اگر هر دو حد در یک کندل لمس شوند و ترتیب از قیمت بازشدن مشخص نباشد، شبیه‌ساز خروج با حد ضرر را فرض می‌کند.'**
   String get paperFillAssumptions;
 
+  /// No description provided for @paperLegacyFillTiming.
+  ///
+  /// In fa, this message translates to:
+  /// **'در این مدل، بسته‌شدن کندل روی حد ضرر یا پایین‌تر، ورود همان کندل را لغو می‌کند.'**
+  String get paperLegacyFillTiming;
+
+  /// No description provided for @paperPartialFillProtection.
+  ///
+  /// In fa, this message translates to:
+  /// **'حفاظت هر بخش خرید از نخستین دقیقهٔ کامل پس از مشاهدهٔ اجرای همان بخش آغاز می‌شود.'**
+  String get paperPartialFillProtection;
+
   /// No description provided for @paperFeeRate.
   ///
   /// In fa, this message translates to:

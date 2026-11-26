@@ -15,14 +15,16 @@ INSERT INTO paper_positions (entry_id, quantity, cost_basis, next_open_at) VALUE
 ON CONFLICT (entry_id) DO UPDATE SET quantity = paper_positions.quantity + EXCLUDED.quantity,
     cost_basis = paper_positions.cost_basis + EXCLUDED.cost_basis,
     revision = paper_positions.revision + 1,
-    next_open_at = GREATEST(paper_positions.next_open_at, EXCLUDED.next_open_at)
+    next_open_at = CASE WHEN $5::boolean THEN paper_positions.next_open_at
+                       ELSE GREATEST(paper_positions.next_open_at, EXCLUDED.next_open_at) END
 `
 
 type AddPaperPositionParams struct {
-	EntryID    int64
-	Quantity   int64
-	CostBasis  int64
-	NextOpenAt time.Time
+	EntryID              int64
+	Quantity             int64
+	CostBasis            int64
+	NextOpenAt           time.Time
+	KeepProtectionCursor bool
 }
 
 func (q *Queries) AddPaperPosition(ctx context.Context, arg AddPaperPositionParams) error {
@@ -31,6 +33,7 @@ func (q *Queries) AddPaperPosition(ctx context.Context, arg AddPaperPositionPara
 		arg.Quantity,
 		arg.CostBasis,
 		arg.NextOpenAt,
+		arg.KeepProtectionCursor,
 	)
 	return err
 }
@@ -375,6 +378,23 @@ func (q *Queries) PaperExposure(ctx context.Context, arg PaperExposureParams) (P
 	return i, err
 }
 
+const paperUnprotectedQuantity = `-- name: PaperUnprotectedQuantity :one
+SELECT coalesce(sum(quantity), 0)::bigint FROM paper_fill_protection
+WHERE entry_id = $1 AND eligible_at > $2
+`
+
+type PaperUnprotectedQuantityParams struct {
+	EntryID    int64
+	CandleOpen time.Time
+}
+
+func (q *Queries) PaperUnprotectedQuantity(ctx context.Context, arg PaperUnprotectedQuantityParams) (int64, error) {
+	row := q.db.QueryRow(ctx, paperUnprotectedQuantity, arg.EntryID, arg.CandleOpen)
+	var column_1 int64
+	err := row.Scan(&column_1)
+	return column_1, err
+}
+
 const pendingPaperEntries = `-- name: PendingPaperEntries :many
 SELECT id FROM paper_entries e WHERE account_id = $1
   AND (state IN (1, 2) OR EXISTS (SELECT 1 FROM paper_positions p WHERE p.entry_id = e.id))
@@ -486,6 +506,28 @@ func (q *Queries) RecentPaperEntries(ctx context.Context, accountID string) ([]P
 		return nil, err
 	}
 	return items, nil
+}
+
+const recordPaperFillProtection = `-- name: RecordPaperFillProtection :exec
+INSERT INTO paper_fill_protection (entry_id, fill_event_id, eligible_at, quantity)
+VALUES ($1, $2, $3, $4)
+`
+
+type RecordPaperFillProtectionParams struct {
+	EntryID     int64
+	FillEventID int64
+	EligibleAt  time.Time
+	Quantity    int64
+}
+
+func (q *Queries) RecordPaperFillProtection(ctx context.Context, arg RecordPaperFillProtectionParams) error {
+	_, err := q.db.Exec(ctx, recordPaperFillProtection,
+		arg.EntryID,
+		arg.FillEventID,
+		arg.EligibleAt,
+		arg.Quantity,
+	)
+	return err
 }
 
 const removePaperPosition = `-- name: RemovePaperPosition :exec

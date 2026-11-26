@@ -300,6 +300,13 @@ type PaperExecutionEvent struct {
 	CandleRevision int32
 }
 
+type PaperFillProtection struct {
+	EntryID     int64
+	FillEventID int64
+	EligibleAt  time.Time
+	Quantity    int64
+}
+
 type PaperJournalNote struct {
 	EntryID    int64
 	Revision   int64

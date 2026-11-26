@@ -188,8 +188,18 @@ func fillPaperEntry(ctx context.Context, q *db.Queries, entry db.PaperEntry, ter
 	}
 	// Ignore candles that opened before the fill was observable from the closed bar.
 	protectFrom := firstFullPaperMinute(bar.AvailableAt)
-	if err := q.AddPaperPosition(ctx, db.AddPaperPositionParams{EntryID: entry.ID, Quantity: qty, CostBasis: fill.Cash, NextOpenAt: protectFrom}); err != nil {
+	perFill := terms.model == paperFillModelV2
+	if err := q.AddPaperPosition(ctx, db.AddPaperPositionParams{
+		EntryID: entry.ID, Quantity: qty, CostBasis: fill.Cash, NextOpenAt: protectFrom, KeepProtectionCursor: perFill,
+	}); err != nil {
 		return err
+	}
+	if perFill {
+		if err := q.RecordPaperFillProtection(ctx, db.RecordPaperFillProtectionParams{
+			EntryID: entry.ID, FillEventID: event, EligibleAt: protectFrom, Quantity: qty,
+		}); err != nil {
+			return err
+		}
 	}
 	_, err = q.UpdatePaperEntry(ctx, update)
 	return err
@@ -203,19 +213,31 @@ func protectPaperPosition(ctx context.Context, q *db.Queries, entry db.PaperEntr
 	var reference int64
 	var kind string
 	qty := position.Quantity
+	if terms.model == paperFillModelV2 {
+		waiting, err := q.PaperUnprotectedQuantity(ctx, db.PaperUnprotectedQuantityParams{
+			EntryID: entry.ID, CandleOpen: bar.OpenTime,
+		})
+		if err != nil {
+			return err
+		}
+		if waiting > qty {
+			return fmt.Errorf("unprotected quantity exceeds held position for receipt %d", entry.ID)
+		}
+		qty -= waiting
+	}
 	switch {
-	case bar.O >= terms.target:
+	case qty > 0 && bar.O >= terms.target:
 		// An opening gap establishes the target before any intrabar stop touch.
 		reference, kind = terms.target, "target_exit"
-	case bar.O <= terms.stop:
+	case qty > 0 && bar.O <= terms.stop:
 		reference, kind = bar.O, "stop_exit"
-	case reduction.ID != 0 && !bar.OpenTime.Before(reduction.NextOpenAt):
+	case reduction.ID != 0 && reduction.Quantity <= qty && !bar.OpenTime.Before(reduction.NextOpenAt):
 		// A requested reduction at the open precedes intrabar triggers.
 		reference, kind, qty = bar.O, "manual_exit", reduction.Quantity
-	case bar.L <= terms.stop:
+	case qty > 0 && bar.L <= terms.stop:
 		// If both thresholds occur in one OHLC candle, prefer the adverse stop.
 		reference, kind = terms.stop, "stop_exit"
-	case bar.H >= terms.target:
+	case qty > 0 && bar.H >= terms.target:
 		reference, kind = terms.target, "target_exit"
 	default:
 		return q.AdvancePaperPosition(ctx, db.AdvancePaperPositionParams{EntryID: entry.ID, NextOpenAt: bar.CloseTime})
@@ -286,8 +308,12 @@ func executePaperExit(ctx context.Context, q *db.Queries, entry db.PaperEntry, p
 	if qty == position.Quantity {
 		return event, q.RemovePaperPosition(ctx, position.EntryID)
 	}
-	// The remainder is still protected from intrabar moves after a manual sale at the open.
+	next := bar.CloseTime
+	if kind == "manual_exit" {
+		// The remainder is still protected from intrabar moves after a manual sale at the open.
+		next = bar.OpenTime
+	}
 	return event, q.UpdatePaperPositionAfterReduction(ctx, db.UpdatePaperPositionAfterReductionParams{
-		EntryID: position.EntryID, Sold: qty, ReleasedBasis: basis, NextOpenAt: bar.OpenTime,
+		EntryID: position.EntryID, Sold: qty, ReleasedBasis: basis, NextOpenAt: next,
 	})
 }

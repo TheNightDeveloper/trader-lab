@@ -39,6 +39,9 @@ class PaperPlanMarket extends ConsumerWidget {
           PaperTimeLine(label: l.paperCandleTime, at: plan.referenceCandleClosedAtUnixMs),
           PaperTimeLine(label: l.paperPlanQuoteAt, at: plan.quotedAtUnixMs),
           Text(l.paperFillAssumptions, style: AppText.caption),
+          // Historical plans keep the assumptions of the version they used.
+          if (plan.fillModel == 'spot-closed-1m-v1') Text(l.paperLegacyFillTiming, style: AppText.caption),
+          if (plan.fillModel == 'spot-closed-1m-v2') Text(l.paperPartialFillProtection, style: AppText.caption),
           if (plan.engineBuildSha256.isNotEmpty)
             PaperEvidenceHash(label: l.paperPlanEngineBuild, hash: plan.engineBuildSha256),
         ],
