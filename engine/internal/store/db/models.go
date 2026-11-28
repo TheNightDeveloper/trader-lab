@@ -30,8 +30,8 @@ type AlgorithmVersion struct {
 
 type AssistantRun struct {
 	ID             int64
-	OpportunityID  int64
-	SnapshotSha256 string
+	OpportunityID  *int64
+	EvidenceSha256 string
 	Model          string
 	PromptVersion  string
 	StartedAt      time.Time
@@ -40,6 +40,7 @@ type AssistantRun struct {
 	Focus          string
 	InputTokens    pgtype.Int4
 	OutputTokens   pgtype.Int4
+	ReportIds      []string
 }
 
 type Attempt struct {

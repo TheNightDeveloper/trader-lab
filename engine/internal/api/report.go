@@ -369,16 +369,12 @@ func (h *Report) Compare(ctx context.Context, req *connect.Request[labv1.Compare
 			return nil, reportErr(err)
 		}
 		stored = append(stored, st)
-		attempts := 1
-		if st.Spec.Origin != nil {
-			attempts = st.Spec.Origin.Attempts
-		}
-		cs = append(cs, eval.Comparable{ID: id, Spec: st.Spec, Split: st.Split, Metrics: st.Evaluation.OOS.Metrics, Attempts: attempts})
+		cs = append(cs, comparableReport(id, st.Spec, st.Split, st.Evaluation.OOS.Metrics))
 	}
 	c := eval.Compare(cs)
 	res := &labv1.CompareResponse{Conclusion: c.Conclusion}
 	for _, a := range c.Assumptions {
-		res.Assumptions = append(res.Assumptions, &labv1.Assumption{Key: a.Key, Label: a.Label, Values: a.Values, Differs: a.Differs, Blocking: a.Blocking})
+		res.Assumptions = append(res.Assumptions, assumptionP(a))
 	}
 	for i, st := range stored {
 		res.Columns = append(res.Columns, &labv1.CompareColumn{
@@ -387,6 +383,18 @@ func (h *Report) Compare(ctx context.Context, req *connect.Request[labv1.Compare
 		})
 	}
 	return connect.NewResponse(res), nil
+}
+
+func comparableReport(id string, spec eval.Spec, split eval.Split, values []metrics.Metric) eval.Comparable {
+	attempts := 1
+	if spec.Origin != nil {
+		attempts = spec.Origin.Attempts
+	}
+	return eval.Comparable{ID: id, Spec: spec, Split: split, Metrics: values, Attempts: attempts}
+}
+
+func assumptionP(a eval.Assumption) *labv1.Assumption {
+	return &labv1.Assumption{Key: a.Key, Label: a.Label, Values: a.Values, Differs: a.Differs, Blocking: a.Blocking}
 }
 
 func (h *Report) Reproduce(ctx context.Context, req *connect.Request[labv1.ReproduceRequest]) (*connect.Response[labv1.ReproduceResponse], error) {

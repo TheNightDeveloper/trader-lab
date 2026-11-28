@@ -9,10 +9,6 @@ import (
 	"net/http"
 )
 
-const focusPrompt = `Select the best evidence to inspect first for a saved spot strategy observation. Choose rule to inspect the trigger (including regime matches), snapshot to inspect an unusual candle or short validity window, or report to examine historical evidence when the observation alone is routine. Prices use one common integer scale. Return only the focus reference. There are no actions to execute.`
-
-const focusSchema = `{"type":"json_schema","json_schema":{"name":"opportunity_focus","strict":true,"schema":{"type":"object","properties":{"focus":{"type":"string","enum":["rule","snapshot","report"]}},"required":["focus"],"additionalProperties":false}}}`
-
 type OpenAI struct {
 	key    string
 	client *http.Client
@@ -30,8 +26,8 @@ type message struct {
 	Content string `json:"content"`
 }
 
-func (p *OpenAI) Explain(ctx context.Context, evidence Evidence) (string, *Usage, error) {
-	input, err := json.Marshal(evidence)
+func (p *OpenAI) Explain(ctx context.Context, request Request) (string, *Usage, error) {
+	input, err := request.InputJSON()
 	if err != nil {
 		return "", nil, err
 	}
@@ -41,7 +37,7 @@ func (p *OpenAI) Explain(ctx context.Context, evidence Evidence) (string, *Usage
 		MaxCompletion  int             `json:"max_completion_tokens"`
 		ResponseFormat json.RawMessage `json:"response_format"`
 		Store          bool            `json:"store"`
-	}{Model, []message{{"system", focusPrompt}, {"user", string(input)}}, MaxOutput, json.RawMessage(focusSchema), false})
+	}{Model, []message{{"system", request.prompt}, {"user", string(input)}}, MaxOutput, request.schema(), false})
 	if err != nil {
 		return "", nil, err
 	}

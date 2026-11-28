@@ -456,6 +456,30 @@ func (q *Queries) GetReportChartInputs(ctx context.Context, id string) (GetRepor
 	return i, err
 }
 
+const getReportResearchEvidence = `-- name: GetReportResearchEvidence :one
+SELECT title, spec, split, coalesce(evaluation #> '{oos,metrics}', '[]'::jsonb)::jsonb AS metrics
+FROM reports WHERE id = $1
+`
+
+type GetReportResearchEvidenceRow struct {
+	Title   string
+	Spec    []byte
+	Split   []byte
+	Metrics []byte
+}
+
+func (q *Queries) GetReportResearchEvidence(ctx context.Context, id string) (GetReportResearchEvidenceRow, error) {
+	row := q.db.QueryRow(ctx, getReportResearchEvidence, id)
+	var i GetReportResearchEvidenceRow
+	err := row.Scan(
+		&i.Title,
+		&i.Spec,
+		&i.Split,
+		&i.Metrics,
+	)
+	return i, err
+}
+
 const insertHoldoutView = `-- name: InsertHoldoutView :exec
 INSERT INTO holdout_views (report_id) VALUES ($1)
 `

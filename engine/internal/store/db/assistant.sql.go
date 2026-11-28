@@ -78,13 +78,14 @@ func (q *Queries) LockAssistantBudget(ctx context.Context) error {
 }
 
 const reserveAssistantRun = `-- name: ReserveAssistantRun :one
-INSERT INTO assistant_runs (opportunity_id, snapshot_sha256, model, prompt_version, started_at)
-VALUES ($1, $2, $3, $4, $5) RETURNING id
+INSERT INTO assistant_runs (opportunity_id, report_ids, evidence_sha256, model, prompt_version, started_at)
+VALUES (nullif($1::bigint, 0), $2::text[], $3, $4, $5, $6) RETURNING id
 `
 
 type ReserveAssistantRunParams struct {
 	OpportunityID  int64
-	SnapshotSha256 string
+	ReportIds      []string
+	EvidenceSha256 string
 	Model          string
 	PromptVersion  string
 	StartedAt      time.Time
@@ -93,7 +94,8 @@ type ReserveAssistantRunParams struct {
 func (q *Queries) ReserveAssistantRun(ctx context.Context, arg ReserveAssistantRunParams) (int64, error) {
 	row := q.db.QueryRow(ctx, reserveAssistantRun,
 		arg.OpportunityID,
-		arg.SnapshotSha256,
+		arg.ReportIds,
+		arg.EvidenceSha256,
 		arg.Model,
 		arg.PromptVersion,
 		arg.StartedAt,
@@ -104,15 +106,16 @@ func (q *Queries) ReserveAssistantRun(ctx context.Context, arg ReserveAssistantR
 }
 
 const reusableAssistantRun = `-- name: ReusableAssistantRun :one
-SELECT id, opportunity_id, snapshot_sha256, model, prompt_version, started_at, latency_ms, status, focus, input_tokens, output_tokens FROM assistant_runs
-WHERE opportunity_id = $1 AND snapshot_sha256 = $2 AND model = $3 AND prompt_version = $4
+SELECT id, opportunity_id, evidence_sha256, model, prompt_version, started_at, latency_ms, status, focus, input_tokens, output_tokens, report_ids FROM assistant_runs
+WHERE coalesce(opportunity_id, 0) = $1::bigint
+    AND evidence_sha256 = $2 AND model = $3 AND prompt_version = $4
     AND status IN ('running', 'succeeded')
 ORDER BY id DESC LIMIT 1
 `
 
 type ReusableAssistantRunParams struct {
 	OpportunityID  int64
-	SnapshotSha256 string
+	EvidenceSha256 string
 	Model          string
 	PromptVersion  string
 }
@@ -120,7 +123,7 @@ type ReusableAssistantRunParams struct {
 func (q *Queries) ReusableAssistantRun(ctx context.Context, arg ReusableAssistantRunParams) (AssistantRun, error) {
 	row := q.db.QueryRow(ctx, reusableAssistantRun,
 		arg.OpportunityID,
-		arg.SnapshotSha256,
+		arg.EvidenceSha256,
 		arg.Model,
 		arg.PromptVersion,
 	)
@@ -128,7 +131,7 @@ func (q *Queries) ReusableAssistantRun(ctx context.Context, arg ReusableAssistan
 	err := row.Scan(
 		&i.ID,
 		&i.OpportunityID,
-		&i.SnapshotSha256,
+		&i.EvidenceSha256,
 		&i.Model,
 		&i.PromptVersion,
 		&i.StartedAt,
@@ -137,6 +140,7 @@ func (q *Queries) ReusableAssistantRun(ctx context.Context, arg ReusableAssistan
 		&i.Focus,
 		&i.InputTokens,
 		&i.OutputTokens,
+		&i.ReportIds,
 	)
 	return i, err
 }

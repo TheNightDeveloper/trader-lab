@@ -98,6 +98,9 @@ it. The first adapter uses the pinned `gpt-4.1-mini-2025-04-14` model. An explic
 explanation request sends the instrument symbol, recorded rule-match category,
 last candle OHLC, and opportunity validity duration to OpenAI. Successful results
 are reused for the same observation, snapshot, model and prompt version.
+Report review uses the same quota and sends only available out-of-sample return,
+drawdown and closed-trade counts. The engine checks the comparison assumptions
+before inference. When assumptions differ, it returns the differences locally.
 
 ## 5. First use
 

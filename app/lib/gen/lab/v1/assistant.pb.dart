@@ -17,11 +17,302 @@ import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'assistant.pbenum.dart';
-import 'common.pb.dart' as $0;
+import 'common.pb.dart' as $1;
+import 'report.pb.dart' as $0;
 
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
 export 'assistant.pbenum.dart';
+
+class ReviewReportsRequest extends $pb.GeneratedMessage {
+  factory ReviewReportsRequest({
+    $core.Iterable<$core.String>? reportIds,
+  }) {
+    final result = ReviewReportsRequest._();
+    if (reportIds != null) result.reportIds.addAll(reportIds);
+    return result;
+  }
+
+  ReviewReportsRequest._();
+
+  factory ReviewReportsRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ReviewReportsRequest()..mergeFromBuffer(data, registry);
+  factory ReviewReportsRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ReviewReportsRequest()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ReviewReportsRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: ReviewReportsRequest.$_createMessage)
+    ..pPS(1, _omitFieldNames ? '' : 'reportIds')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ReviewReportsRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ReviewReportsRequest copyWith(void Function(ReviewReportsRequest) updates) =>
+      super.copyWith((message) => updates(message as ReviewReportsRequest))
+          as ReviewReportsRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use ReviewReportsRequest() / ReviewReportsRequest.new instead')
+  static ReviewReportsRequest create() => ReviewReportsRequest._();
+  static $pb.GeneratedMessage $_createMessage() => ReviewReportsRequest._();
+  @$core.override
+  ReviewReportsRequest createEmptyInstance() => ReviewReportsRequest._();
+  @$core.pragma('dart2js:noInline')
+  static ReviewReportsRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ReviewReportsRequest>(
+          ReviewReportsRequest.$_createMessage);
+  static ReviewReportsRequest? _defaultInstance;
+
+  /// The first report is the baseline for the engine's comparability checks.
+  @$pb.TagNumber(1)
+  $pb.PbList<$core.String> get reportIds => $_getList(0);
+}
+
+class ResearchReference extends $pb.GeneratedMessage {
+  factory ResearchReference({
+    $core.String? reportId,
+    $core.String? title,
+    $0.Window? oosWindow,
+    $1.Metric? metric,
+  }) {
+    final result = ResearchReference._();
+    if (reportId != null) result.reportId = reportId;
+    if (title != null) result.title = title;
+    if (oosWindow != null) result.oosWindow = oosWindow;
+    if (metric != null) result.metric = metric;
+    return result;
+  }
+
+  ResearchReference._();
+
+  factory ResearchReference.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ResearchReference()..mergeFromBuffer(data, registry);
+  factory ResearchReference.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ResearchReference()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ResearchReference',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: ResearchReference.$_createMessage)
+    ..aOS(1, _omitFieldNames ? '' : 'reportId')
+    ..aOS(2, _omitFieldNames ? '' : 'title')
+    ..aOM<$0.Window>(3, _omitFieldNames ? '' : 'oosWindow',
+        subBuilder: $0.Window.$_createMessage)
+    ..aOM<$1.Metric>(4, _omitFieldNames ? '' : 'metric',
+        subBuilder: $1.Metric.$_createMessage)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ResearchReference clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ResearchReference copyWith(void Function(ResearchReference) updates) =>
+      super.copyWith((message) => updates(message as ResearchReference))
+          as ResearchReference;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use ResearchReference() / ResearchReference.new instead')
+  static ResearchReference create() => ResearchReference._();
+  static $pb.GeneratedMessage $_createMessage() => ResearchReference._();
+  @$core.override
+  ResearchReference createEmptyInstance() => ResearchReference._();
+  @$core.pragma('dart2js:noInline')
+  static ResearchReference getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ResearchReference>(
+          ResearchReference.$_createMessage);
+  static ResearchReference? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get reportId => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set reportId($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasReportId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearReportId() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get title => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set title($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasTitle() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearTitle() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $0.Window get oosWindow => $_getN(2);
+  @$pb.TagNumber(3)
+  set oosWindow($0.Window value) => $_setField(3, value);
+  @$pb.TagNumber(3)
+  $core.bool hasOosWindow() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearOosWindow() => $_clearField(3);
+  @$pb.TagNumber(3)
+  $0.Window ensureOosWindow() => $_ensure(2);
+
+  /// Only present for a metric focus and if that metric was recorded.
+  @$pb.TagNumber(4)
+  $1.Metric get metric => $_getN(3);
+  @$pb.TagNumber(4)
+  set metric($1.Metric value) => $_setField(4, value);
+  @$pb.TagNumber(4)
+  $core.bool hasMetric() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearMetric() => $_clearField(4);
+  @$pb.TagNumber(4)
+  $1.Metric ensureMetric() => $_ensure(3);
+}
+
+class ReviewReportsResponse extends $pb.GeneratedMessage {
+  factory ReviewReportsResponse({
+    ResearchFocus? focus,
+    $core.Iterable<ResearchReference>? references,
+    $core.Iterable<$0.Assumption>? blockingAssumptions,
+    $core.int? minimumClosedTrades,
+    $core.String? model,
+    $core.int? inputTokens,
+    $core.int? outputTokens,
+    $core.bool? cached,
+  }) {
+    final result = ReviewReportsResponse._();
+    if (focus != null) result.focus = focus;
+    if (references != null) result.references.addAll(references);
+    if (blockingAssumptions != null)
+      result.blockingAssumptions.addAll(blockingAssumptions);
+    if (minimumClosedTrades != null)
+      result.minimumClosedTrades = minimumClosedTrades;
+    if (model != null) result.model = model;
+    if (inputTokens != null) result.inputTokens = inputTokens;
+    if (outputTokens != null) result.outputTokens = outputTokens;
+    if (cached != null) result.cached = cached;
+    return result;
+  }
+
+  ReviewReportsResponse._();
+
+  factory ReviewReportsResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ReviewReportsResponse()..mergeFromBuffer(data, registry);
+  factory ReviewReportsResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ReviewReportsResponse()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ReviewReportsResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: ReviewReportsResponse.$_createMessage)
+    ..aE<ResearchFocus>(1, _omitFieldNames ? '' : 'focus',
+        enumValues: ResearchFocus.values)
+    ..pPM<ResearchReference>(2, _omitFieldNames ? '' : 'references',
+        subBuilder: ResearchReference.$_createMessage)
+    ..pPM<$0.Assumption>(3, _omitFieldNames ? '' : 'blockingAssumptions',
+        subBuilder: $0.Assumption.$_createMessage)
+    ..aI(4, _omitFieldNames ? '' : 'minimumClosedTrades')
+    ..aOS(5, _omitFieldNames ? '' : 'model')
+    ..aI(6, _omitFieldNames ? '' : 'inputTokens')
+    ..aI(7, _omitFieldNames ? '' : 'outputTokens')
+    ..aOB(8, _omitFieldNames ? '' : 'cached')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ReviewReportsResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ReviewReportsResponse copyWith(
+          void Function(ReviewReportsResponse) updates) =>
+      super.copyWith((message) => updates(message as ReviewReportsResponse))
+          as ReviewReportsResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use ReviewReportsResponse() / ReviewReportsResponse.new instead')
+  static ReviewReportsResponse create() => ReviewReportsResponse._();
+  static $pb.GeneratedMessage $_createMessage() => ReviewReportsResponse._();
+  @$core.override
+  ReviewReportsResponse createEmptyInstance() => ReviewReportsResponse._();
+  @$core.pragma('dart2js:noInline')
+  static ReviewReportsResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ReviewReportsResponse>(
+          ReviewReportsResponse.$_createMessage);
+  static ReviewReportsResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  ResearchFocus get focus => $_getN(0);
+  @$pb.TagNumber(1)
+  set focus(ResearchFocus value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasFocus() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearFocus() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $pb.PbList<ResearchReference> get references => $_getList(1);
+
+  @$pb.TagNumber(3)
+  $pb.PbList<$0.Assumption> get blockingAssumptions => $_getList(2);
+
+  /// Presence means at least one report falls short of the sample requirement.
+  @$pb.TagNumber(4)
+  $core.int get minimumClosedTrades => $_getIZ(3);
+  @$pb.TagNumber(4)
+  set minimumClosedTrades($core.int value) => $_setSignedInt32(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasMinimumClosedTrades() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearMinimumClosedTrades() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.String get model => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set model($core.String value) => $_setString(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasModel() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearModel() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.int get inputTokens => $_getIZ(5);
+  @$pb.TagNumber(6)
+  set inputTokens($core.int value) => $_setSignedInt32(5, value);
+  @$pb.TagNumber(6)
+  $core.bool hasInputTokens() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearInputTokens() => $_clearField(6);
+
+  @$pb.TagNumber(7)
+  $core.int get outputTokens => $_getIZ(6);
+  @$pb.TagNumber(7)
+  set outputTokens($core.int value) => $_setSignedInt32(6, value);
+  @$pb.TagNumber(7)
+  $core.bool hasOutputTokens() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearOutputTokens() => $_clearField(7);
+
+  @$pb.TagNumber(8)
+  $core.bool get cached => $_getBF(7);
+  @$pb.TagNumber(8)
+  set cached($core.bool value) => $_setBool(7, value);
+  @$pb.TagNumber(8)
+  $core.bool hasCached() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearCached() => $_clearField(8);
+}
 
 class ExplainOpportunityRequest extends $pb.GeneratedMessage {
   factory ExplainOpportunityRequest({
@@ -90,7 +381,7 @@ class ExplainOpportunityResponse extends $pb.GeneratedMessage {
     $fixnum.Int64? ruleVersionId,
     $core.String? reportId,
     $core.String? reason,
-    $0.Money? referenceClose,
+    $1.Money? referenceClose,
     $fixnum.Int64? candleClosedAtUnixMs,
     $fixnum.Int64? expiresAtUnixMs,
     $core.String? model,
@@ -132,8 +423,8 @@ class ExplainOpportunityResponse extends $pb.GeneratedMessage {
     ..aInt64(2, _omitFieldNames ? '' : 'ruleVersionId')
     ..aOS(3, _omitFieldNames ? '' : 'reportId')
     ..aOS(4, _omitFieldNames ? '' : 'reason')
-    ..aOM<$0.Money>(5, _omitFieldNames ? '' : 'referenceClose',
-        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$1.Money>(5, _omitFieldNames ? '' : 'referenceClose',
+        subBuilder: $1.Money.$_createMessage)
     ..aInt64(6, _omitFieldNames ? '' : 'candleClosedAtUnixMs')
     ..aInt64(7, _omitFieldNames ? '' : 'expiresAtUnixMs')
     ..aOS(8, _omitFieldNames ? '' : 'model')
@@ -207,15 +498,15 @@ class ExplainOpportunityResponse extends $pb.GeneratedMessage {
   void clearReason() => $_clearField(4);
 
   @$pb.TagNumber(5)
-  $0.Money get referenceClose => $_getN(4);
+  $1.Money get referenceClose => $_getN(4);
   @$pb.TagNumber(5)
-  set referenceClose($0.Money value) => $_setField(5, value);
+  set referenceClose($1.Money value) => $_setField(5, value);
   @$pb.TagNumber(5)
   $core.bool hasReferenceClose() => $_has(4);
   @$pb.TagNumber(5)
   void clearReferenceClose() => $_clearField(5);
   @$pb.TagNumber(5)
-  $0.Money ensureReferenceClose() => $_ensure(4);
+  $1.Money ensureReferenceClose() => $_ensure(4);
 
   @$pb.TagNumber(6)
   $fixnum.Int64 get candleClosedAtUnixMs => $_getI64(5);
@@ -282,6 +573,12 @@ class AssistantServiceApi {
           $pb.ClientContext? ctx, ExplainOpportunityRequest request) =>
       _client.invoke<ExplainOpportunityResponse>(ctx, 'AssistantService',
           'ExplainOpportunity', request, ExplainOpportunityResponse());
+
+  /// Review the out-of-sample evidence of one report or compare up to six reports.
+  $async.Future<ReviewReportsResponse> reviewReports(
+          $pb.ClientContext? ctx, ReviewReportsRequest request) =>
+      _client.invoke<ReviewReportsResponse>(ctx, 'AssistantService',
+          'ReviewReports', request, ReviewReportsResponse());
 }
 
 const $core.bool _omitFieldNames =

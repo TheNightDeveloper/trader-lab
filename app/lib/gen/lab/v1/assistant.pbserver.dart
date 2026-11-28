@@ -15,19 +15,23 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import 'assistant.pb.dart' as $1;
+import 'assistant.pb.dart' as $2;
 import 'assistant.pbjson.dart';
 
 export 'assistant.pb.dart';
 
 abstract class AssistantServiceBase extends $pb.GeneratedService {
-  $async.Future<$1.ExplainOpportunityResponse> explainOpportunity(
-      $pb.ServerContext ctx, $1.ExplainOpportunityRequest request);
+  $async.Future<$2.ExplainOpportunityResponse> explainOpportunity(
+      $pb.ServerContext ctx, $2.ExplainOpportunityRequest request);
+  $async.Future<$2.ReviewReportsResponse> reviewReports(
+      $pb.ServerContext ctx, $2.ReviewReportsRequest request);
 
   $pb.GeneratedMessage createRequest($core.String methodName) {
     switch (methodName) {
       case 'ExplainOpportunity':
-        return $1.ExplainOpportunityRequest();
+        return $2.ExplainOpportunityRequest();
+      case 'ReviewReports':
+        return $2.ReviewReportsRequest();
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }
@@ -37,7 +41,9 @@ abstract class AssistantServiceBase extends $pb.GeneratedService {
       $core.String methodName, $pb.GeneratedMessage request) {
     switch (methodName) {
       case 'ExplainOpportunity':
-        return explainOpportunity(ctx, request as $1.ExplainOpportunityRequest);
+        return explainOpportunity(ctx, request as $2.ExplainOpportunityRequest);
+      case 'ReviewReports':
+        return reviewReports(ctx, request as $2.ReviewReportsRequest);
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }

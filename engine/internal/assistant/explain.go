@@ -6,12 +6,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 )
 
 const (
-	PromptVersion = "opportunity-focus-v1"
-	Model         = "gpt-4.1-mini-2025-04-14"
-	MaxOutput     = 96
+	Model     = "gpt-4.1-mini-2025-04-14"
+	MaxOutput = 96
 )
 
 var ErrInvalidOutput = errors.New("invalid assistant output")
@@ -33,24 +33,47 @@ type Usage struct {
 }
 
 type Provider interface {
-	Explain(context.Context, Evidence) (string, *Usage, error)
+	Explain(context.Context, Request) (string, *Usage, error)
 }
 
-// ParseFocus accepts one known reference. Compaction permits JSON whitespace while
-// the exact shape also rejects duplicate keys, unsupported fields and model numbers.
-func ParseFocus(raw string) (string, error) {
+// Request uses a pinned prompt and a per-request evidence allowlist.
+type Request struct {
+	version, prompt string
+	input           any
+	focus           []string
+}
+
+func Opportunity(e Evidence) Request {
+	return Request{"opportunity-focus-v1", `Select the best evidence to inspect first for a saved spot strategy observation. Choose rule to inspect the trigger (including regime matches), snapshot to inspect an unusual candle or short validity window, or report to examine historical evidence when the observation alone is routine. Prices use one common integer scale. Return only the focus reference. There are no actions to execute.`,
+		e, []string{"rule", "snapshot", "report"}}
+}
+
+// Research receives only fixed-point out-of-sample metrics, in displayed order.
+func Research(columns []map[string]string, focus []string) Request {
+	return Request{"research-focus-v1", `Pick the out-of-sample metric most useful to review for these saved research runs. Ratios are integer parts per million and closed trades are counts. For low counts prefer closed_trades when available. Otherwise draw attention to the return or worst peak-to-trough loss, especially a large difference. Missing fields are unavailable. No ranking, new numbers, trade advice, or actions. Return only the focus reference.`,
+		columns, focus}
+}
+
+func (r Request) Version() string { return r.version }
+
+func (r Request) InputJSON() ([]byte, error) { return json.Marshal(r.input) }
+
+func (r Request) schema() json.RawMessage {
+	values, _ := json.Marshal(r.focus) // strings always encode
+	return json.RawMessage(fmt.Sprintf(`{"type":"json_schema","json_schema":{"name":"evidence_focus","strict":true,"schema":{"type":"object","properties":{"focus":{"type":"string","enum":%s}},"required":["focus"],"additionalProperties":false}}}`, values))
+}
+
+// ParseFocus allows JSON whitespace. The exact shape rejects duplicate keys,
+// unsupported references, extra fields and model-generated numbers.
+func (r Request) ParseFocus(raw string) (string, error) {
 	var compact bytes.Buffer
 	if err := json.Compact(&compact, []byte(raw)); err != nil {
 		return "", ErrInvalidOutput
 	}
-	switch compact.String() {
-	case `{"focus":"rule"}`:
-		return "rule", nil
-	case `{"focus":"snapshot"}`:
-		return "snapshot", nil
-	case `{"focus":"report"}`:
-		return "report", nil
-	default:
-		return "", ErrInvalidOutput
+	for _, focus := range r.focus {
+		if compact.String() == `{"focus":`+fmt.Sprintf("%q", focus)+`}` {
+			return focus, nil
+		}
 	}
+	return "", ErrInvalidOutput
 }

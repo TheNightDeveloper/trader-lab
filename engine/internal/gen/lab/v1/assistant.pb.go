@@ -21,6 +21,61 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type ResearchFocus int32
+
+const (
+	ResearchFocus_RESEARCH_FOCUS_UNSPECIFIED ResearchFocus = 0
+	ResearchFocus_RESEARCH_FOCUS_ASSUMPTIONS ResearchFocus = 1
+	ResearchFocus_RESEARCH_FOCUS_RETURN      ResearchFocus = 2
+	ResearchFocus_RESEARCH_FOCUS_DRAWDOWN    ResearchFocus = 3
+	ResearchFocus_RESEARCH_FOCUS_SAMPLE      ResearchFocus = 4
+)
+
+// Enum value maps for ResearchFocus.
+var (
+	ResearchFocus_name = map[int32]string{
+		0: "RESEARCH_FOCUS_UNSPECIFIED",
+		1: "RESEARCH_FOCUS_ASSUMPTIONS",
+		2: "RESEARCH_FOCUS_RETURN",
+		3: "RESEARCH_FOCUS_DRAWDOWN",
+		4: "RESEARCH_FOCUS_SAMPLE",
+	}
+	ResearchFocus_value = map[string]int32{
+		"RESEARCH_FOCUS_UNSPECIFIED": 0,
+		"RESEARCH_FOCUS_ASSUMPTIONS": 1,
+		"RESEARCH_FOCUS_RETURN":      2,
+		"RESEARCH_FOCUS_DRAWDOWN":    3,
+		"RESEARCH_FOCUS_SAMPLE":      4,
+	}
+)
+
+func (x ResearchFocus) Enum() *ResearchFocus {
+	p := new(ResearchFocus)
+	*p = x
+	return p
+}
+
+func (x ResearchFocus) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ResearchFocus) Descriptor() protoreflect.EnumDescriptor {
+	return file_lab_v1_assistant_proto_enumTypes[0].Descriptor()
+}
+
+func (ResearchFocus) Type() protoreflect.EnumType {
+	return &file_lab_v1_assistant_proto_enumTypes[0]
+}
+
+func (x ResearchFocus) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ResearchFocus.Descriptor instead.
+func (ResearchFocus) EnumDescriptor() ([]byte, []int) {
+	return file_lab_v1_assistant_proto_rawDescGZIP(), []int{0}
+}
+
 type ExplanationFocus int32
 
 const (
@@ -57,11 +112,11 @@ func (x ExplanationFocus) String() string {
 }
 
 func (ExplanationFocus) Descriptor() protoreflect.EnumDescriptor {
-	return file_lab_v1_assistant_proto_enumTypes[0].Descriptor()
+	return file_lab_v1_assistant_proto_enumTypes[1].Descriptor()
 }
 
 func (ExplanationFocus) Type() protoreflect.EnumType {
-	return &file_lab_v1_assistant_proto_enumTypes[0]
+	return &file_lab_v1_assistant_proto_enumTypes[1]
 }
 
 func (x ExplanationFocus) Number() protoreflect.EnumNumber {
@@ -70,7 +125,222 @@ func (x ExplanationFocus) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ExplanationFocus.Descriptor instead.
 func (ExplanationFocus) EnumDescriptor() ([]byte, []int) {
+	return file_lab_v1_assistant_proto_rawDescGZIP(), []int{1}
+}
+
+type ReviewReportsRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The first report is the baseline for the engine's comparability checks.
+	ReportIds     []string `protobuf:"bytes,1,rep,name=report_ids,json=reportIds,proto3" json:"report_ids,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReviewReportsRequest) Reset() {
+	*x = ReviewReportsRequest{}
+	mi := &file_lab_v1_assistant_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReviewReportsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReviewReportsRequest) ProtoMessage() {}
+
+func (x *ReviewReportsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_assistant_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReviewReportsRequest.ProtoReflect.Descriptor instead.
+func (*ReviewReportsRequest) Descriptor() ([]byte, []int) {
 	return file_lab_v1_assistant_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *ReviewReportsRequest) GetReportIds() []string {
+	if x != nil {
+		return x.ReportIds
+	}
+	return nil
+}
+
+type ResearchReference struct {
+	state     protoimpl.MessageState `protogen:"open.v1"`
+	ReportId  string                 `protobuf:"bytes,1,opt,name=report_id,json=reportId,proto3" json:"report_id,omitempty"`
+	Title     string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	OosWindow *Window                `protobuf:"bytes,3,opt,name=oos_window,json=oosWindow,proto3" json:"oos_window,omitempty"`
+	// Only present for a metric focus and if that metric was recorded.
+	Metric        *Metric `protobuf:"bytes,4,opt,name=metric,proto3" json:"metric,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ResearchReference) Reset() {
+	*x = ResearchReference{}
+	mi := &file_lab_v1_assistant_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ResearchReference) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResearchReference) ProtoMessage() {}
+
+func (x *ResearchReference) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_assistant_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResearchReference.ProtoReflect.Descriptor instead.
+func (*ResearchReference) Descriptor() ([]byte, []int) {
+	return file_lab_v1_assistant_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *ResearchReference) GetReportId() string {
+	if x != nil {
+		return x.ReportId
+	}
+	return ""
+}
+
+func (x *ResearchReference) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *ResearchReference) GetOosWindow() *Window {
+	if x != nil {
+		return x.OosWindow
+	}
+	return nil
+}
+
+func (x *ResearchReference) GetMetric() *Metric {
+	if x != nil {
+		return x.Metric
+	}
+	return nil
+}
+
+type ReviewReportsResponse struct {
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	Focus               ResearchFocus          `protobuf:"varint,1,opt,name=focus,proto3,enum=lab.v1.ResearchFocus" json:"focus,omitempty"`
+	References          []*ResearchReference   `protobuf:"bytes,2,rep,name=references,proto3" json:"references,omitempty"`
+	BlockingAssumptions []*Assumption          `protobuf:"bytes,3,rep,name=blocking_assumptions,json=blockingAssumptions,proto3" json:"blocking_assumptions,omitempty"`
+	// Presence means at least one report falls short of the sample requirement.
+	MinimumClosedTrades *int32 `protobuf:"varint,4,opt,name=minimum_closed_trades,json=minimumClosedTrades,proto3,oneof" json:"minimum_closed_trades,omitempty"`
+	Model               string `protobuf:"bytes,5,opt,name=model,proto3" json:"model,omitempty"`
+	InputTokens         int32  `protobuf:"varint,6,opt,name=input_tokens,json=inputTokens,proto3" json:"input_tokens,omitempty"`
+	OutputTokens        int32  `protobuf:"varint,7,opt,name=output_tokens,json=outputTokens,proto3" json:"output_tokens,omitempty"`
+	Cached              bool   `protobuf:"varint,8,opt,name=cached,proto3" json:"cached,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *ReviewReportsResponse) Reset() {
+	*x = ReviewReportsResponse{}
+	mi := &file_lab_v1_assistant_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReviewReportsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReviewReportsResponse) ProtoMessage() {}
+
+func (x *ReviewReportsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_assistant_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReviewReportsResponse.ProtoReflect.Descriptor instead.
+func (*ReviewReportsResponse) Descriptor() ([]byte, []int) {
+	return file_lab_v1_assistant_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ReviewReportsResponse) GetFocus() ResearchFocus {
+	if x != nil {
+		return x.Focus
+	}
+	return ResearchFocus_RESEARCH_FOCUS_UNSPECIFIED
+}
+
+func (x *ReviewReportsResponse) GetReferences() []*ResearchReference {
+	if x != nil {
+		return x.References
+	}
+	return nil
+}
+
+func (x *ReviewReportsResponse) GetBlockingAssumptions() []*Assumption {
+	if x != nil {
+		return x.BlockingAssumptions
+	}
+	return nil
+}
+
+func (x *ReviewReportsResponse) GetMinimumClosedTrades() int32 {
+	if x != nil && x.MinimumClosedTrades != nil {
+		return *x.MinimumClosedTrades
+	}
+	return 0
+}
+
+func (x *ReviewReportsResponse) GetModel() string {
+	if x != nil {
+		return x.Model
+	}
+	return ""
+}
+
+func (x *ReviewReportsResponse) GetInputTokens() int32 {
+	if x != nil {
+		return x.InputTokens
+	}
+	return 0
+}
+
+func (x *ReviewReportsResponse) GetOutputTokens() int32 {
+	if x != nil {
+		return x.OutputTokens
+	}
+	return 0
+}
+
+func (x *ReviewReportsResponse) GetCached() bool {
+	if x != nil {
+		return x.Cached
+	}
+	return false
 }
 
 type ExplainOpportunityRequest struct {
@@ -82,7 +352,7 @@ type ExplainOpportunityRequest struct {
 
 func (x *ExplainOpportunityRequest) Reset() {
 	*x = ExplainOpportunityRequest{}
-	mi := &file_lab_v1_assistant_proto_msgTypes[0]
+	mi := &file_lab_v1_assistant_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -94,7 +364,7 @@ func (x *ExplainOpportunityRequest) String() string {
 func (*ExplainOpportunityRequest) ProtoMessage() {}
 
 func (x *ExplainOpportunityRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_assistant_proto_msgTypes[0]
+	mi := &file_lab_v1_assistant_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -107,7 +377,7 @@ func (x *ExplainOpportunityRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExplainOpportunityRequest.ProtoReflect.Descriptor instead.
 func (*ExplainOpportunityRequest) Descriptor() ([]byte, []int) {
-	return file_lab_v1_assistant_proto_rawDescGZIP(), []int{0}
+	return file_lab_v1_assistant_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *ExplainOpportunityRequest) GetOpportunityId() int64 {
@@ -137,7 +407,7 @@ type ExplainOpportunityResponse struct {
 
 func (x *ExplainOpportunityResponse) Reset() {
 	*x = ExplainOpportunityResponse{}
-	mi := &file_lab_v1_assistant_proto_msgTypes[1]
+	mi := &file_lab_v1_assistant_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -149,7 +419,7 @@ func (x *ExplainOpportunityResponse) String() string {
 func (*ExplainOpportunityResponse) ProtoMessage() {}
 
 func (x *ExplainOpportunityResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_assistant_proto_msgTypes[1]
+	mi := &file_lab_v1_assistant_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -162,7 +432,7 @@ func (x *ExplainOpportunityResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExplainOpportunityResponse.ProtoReflect.Descriptor instead.
 func (*ExplainOpportunityResponse) Descriptor() ([]byte, []int) {
-	return file_lab_v1_assistant_proto_rawDescGZIP(), []int{1}
+	return file_lab_v1_assistant_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ExplainOpportunityResponse) GetFocus() ExplanationFocus {
@@ -246,7 +516,28 @@ var File_lab_v1_assistant_proto protoreflect.FileDescriptor
 
 const file_lab_v1_assistant_proto_rawDesc = "" +
 	"\n" +
-	"\x16lab/v1/assistant.proto\x12\x06lab.v1\x1a\x13lab/v1/common.proto\"B\n" +
+	"\x16lab/v1/assistant.proto\x12\x06lab.v1\x1a\x13lab/v1/common.proto\x1a\x13lab/v1/report.proto\"5\n" +
+	"\x14ReviewReportsRequest\x12\x1d\n" +
+	"\n" +
+	"report_ids\x18\x01 \x03(\tR\treportIds\"\x9d\x01\n" +
+	"\x11ResearchReference\x12\x1b\n" +
+	"\treport_id\x18\x01 \x01(\tR\breportId\x12\x14\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12-\n" +
+	"\n" +
+	"oos_window\x18\x03 \x01(\v2\x0e.lab.v1.WindowR\toosWindow\x12&\n" +
+	"\x06metric\x18\x04 \x01(\v2\x0e.lab.v1.MetricR\x06metric\"\x8f\x03\n" +
+	"\x15ReviewReportsResponse\x12+\n" +
+	"\x05focus\x18\x01 \x01(\x0e2\x15.lab.v1.ResearchFocusR\x05focus\x129\n" +
+	"\n" +
+	"references\x18\x02 \x03(\v2\x19.lab.v1.ResearchReferenceR\n" +
+	"references\x12E\n" +
+	"\x14blocking_assumptions\x18\x03 \x03(\v2\x12.lab.v1.AssumptionR\x13blockingAssumptions\x127\n" +
+	"\x15minimum_closed_trades\x18\x04 \x01(\x05H\x00R\x13minimumClosedTrades\x88\x01\x01\x12\x14\n" +
+	"\x05model\x18\x05 \x01(\tR\x05model\x12!\n" +
+	"\finput_tokens\x18\x06 \x01(\x05R\vinputTokens\x12#\n" +
+	"\routput_tokens\x18\a \x01(\x05R\foutputTokens\x12\x16\n" +
+	"\x06cached\x18\b \x01(\bR\x06cachedB\x18\n" +
+	"\x16_minimum_closed_trades\"B\n" +
 	"\x19ExplainOpportunityRequest\x12%\n" +
 	"\x0eopportunity_id\x18\x01 \x01(\x03R\ropportunityId\"\xbc\x03\n" +
 	"\x1aExplainOpportunityResponse\x12.\n" +
@@ -261,14 +552,21 @@ const file_lab_v1_assistant_proto_rawDesc = "" +
 	"\finput_tokens\x18\t \x01(\x05R\vinputTokens\x12#\n" +
 	"\routput_tokens\x18\n" +
 	" \x01(\x05R\foutputTokens\x12\x16\n" +
-	"\x06cached\x18\v \x01(\bR\x06cached*\x8f\x01\n" +
+	"\x06cached\x18\v \x01(\bR\x06cached*\xa2\x01\n" +
+	"\rResearchFocus\x12\x1e\n" +
+	"\x1aRESEARCH_FOCUS_UNSPECIFIED\x10\x00\x12\x1e\n" +
+	"\x1aRESEARCH_FOCUS_ASSUMPTIONS\x10\x01\x12\x19\n" +
+	"\x15RESEARCH_FOCUS_RETURN\x10\x02\x12\x1b\n" +
+	"\x17RESEARCH_FOCUS_DRAWDOWN\x10\x03\x12\x19\n" +
+	"\x15RESEARCH_FOCUS_SAMPLE\x10\x04*\x8f\x01\n" +
 	"\x10ExplanationFocus\x12!\n" +
 	"\x1dEXPLANATION_FOCUS_UNSPECIFIED\x10\x00\x12\x1a\n" +
 	"\x16EXPLANATION_FOCUS_RULE\x10\x01\x12\x1e\n" +
 	"\x1aEXPLANATION_FOCUS_SNAPSHOT\x10\x02\x12\x1c\n" +
-	"\x18EXPLANATION_FOCUS_REPORT\x10\x032o\n" +
+	"\x18EXPLANATION_FOCUS_REPORT\x10\x032\xbd\x01\n" +
 	"\x10AssistantService\x12[\n" +
-	"\x12ExplainOpportunity\x12!.lab.v1.ExplainOpportunityRequest\x1a\".lab.v1.ExplainOpportunityResponseB\x82\x01\n" +
+	"\x12ExplainOpportunity\x12!.lab.v1.ExplainOpportunityRequest\x1a\".lab.v1.ExplainOpportunityResponse\x12L\n" +
+	"\rReviewReports\x12\x1c.lab.v1.ReviewReportsRequest\x1a\x1d.lab.v1.ReviewReportsResponseB\x82\x01\n" +
 	"\n" +
 	"com.lab.v1B\x0eAssistantProtoP\x01Z+tradinglab/engine/internal/gen/lab/v1;labv1\xa2\x02\x03LXX\xaa\x02\x06Lab.V1\xca\x02\x06Lab\\V1\xe2\x02\x12Lab\\V1\\GPBMetadata\xea\x02\aLab::V1b\x06proto3"
 
@@ -284,24 +582,38 @@ func file_lab_v1_assistant_proto_rawDescGZIP() []byte {
 	return file_lab_v1_assistant_proto_rawDescData
 }
 
-var file_lab_v1_assistant_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_lab_v1_assistant_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_lab_v1_assistant_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_lab_v1_assistant_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_lab_v1_assistant_proto_goTypes = []any{
-	(ExplanationFocus)(0),              // 0: lab.v1.ExplanationFocus
-	(*ExplainOpportunityRequest)(nil),  // 1: lab.v1.ExplainOpportunityRequest
-	(*ExplainOpportunityResponse)(nil), // 2: lab.v1.ExplainOpportunityResponse
-	(*Money)(nil),                      // 3: lab.v1.Money
+	(ResearchFocus)(0),                 // 0: lab.v1.ResearchFocus
+	(ExplanationFocus)(0),              // 1: lab.v1.ExplanationFocus
+	(*ReviewReportsRequest)(nil),       // 2: lab.v1.ReviewReportsRequest
+	(*ResearchReference)(nil),          // 3: lab.v1.ResearchReference
+	(*ReviewReportsResponse)(nil),      // 4: lab.v1.ReviewReportsResponse
+	(*ExplainOpportunityRequest)(nil),  // 5: lab.v1.ExplainOpportunityRequest
+	(*ExplainOpportunityResponse)(nil), // 6: lab.v1.ExplainOpportunityResponse
+	(*Window)(nil),                     // 7: lab.v1.Window
+	(*Metric)(nil),                     // 8: lab.v1.Metric
+	(*Assumption)(nil),                 // 9: lab.v1.Assumption
+	(*Money)(nil),                      // 10: lab.v1.Money
 }
 var file_lab_v1_assistant_proto_depIdxs = []int32{
-	0, // 0: lab.v1.ExplainOpportunityResponse.focus:type_name -> lab.v1.ExplanationFocus
-	3, // 1: lab.v1.ExplainOpportunityResponse.reference_close:type_name -> lab.v1.Money
-	1, // 2: lab.v1.AssistantService.ExplainOpportunity:input_type -> lab.v1.ExplainOpportunityRequest
-	2, // 3: lab.v1.AssistantService.ExplainOpportunity:output_type -> lab.v1.ExplainOpportunityResponse
-	3, // [3:4] is the sub-list for method output_type
-	2, // [2:3] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	7,  // 0: lab.v1.ResearchReference.oos_window:type_name -> lab.v1.Window
+	8,  // 1: lab.v1.ResearchReference.metric:type_name -> lab.v1.Metric
+	0,  // 2: lab.v1.ReviewReportsResponse.focus:type_name -> lab.v1.ResearchFocus
+	3,  // 3: lab.v1.ReviewReportsResponse.references:type_name -> lab.v1.ResearchReference
+	9,  // 4: lab.v1.ReviewReportsResponse.blocking_assumptions:type_name -> lab.v1.Assumption
+	1,  // 5: lab.v1.ExplainOpportunityResponse.focus:type_name -> lab.v1.ExplanationFocus
+	10, // 6: lab.v1.ExplainOpportunityResponse.reference_close:type_name -> lab.v1.Money
+	5,  // 7: lab.v1.AssistantService.ExplainOpportunity:input_type -> lab.v1.ExplainOpportunityRequest
+	2,  // 8: lab.v1.AssistantService.ReviewReports:input_type -> lab.v1.ReviewReportsRequest
+	6,  // 9: lab.v1.AssistantService.ExplainOpportunity:output_type -> lab.v1.ExplainOpportunityResponse
+	4,  // 10: lab.v1.AssistantService.ReviewReports:output_type -> lab.v1.ReviewReportsResponse
+	9,  // [9:11] is the sub-list for method output_type
+	7,  // [7:9] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_lab_v1_assistant_proto_init() }
@@ -310,13 +622,15 @@ func file_lab_v1_assistant_proto_init() {
 		return
 	}
 	file_lab_v1_common_proto_init()
+	file_lab_v1_report_proto_init()
+	file_lab_v1_assistant_proto_msgTypes[2].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_lab_v1_assistant_proto_rawDesc), len(file_lab_v1_assistant_proto_rawDesc)),
-			NumEnums:      1,
-			NumMessages:   2,
+			NumEnums:      2,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -25,4 +25,22 @@ extension type AssistantServiceClient (connect.Transport _transport) {
       onTrailer: onTrailer,
     );
   }
+
+  /// Review the out-of-sample evidence of one report or compare up to six reports.
+  Future<labv1assistant.ReviewReportsResponse> reviewReports(
+    labv1assistant.ReviewReportsRequest input, {
+    connect.Headers? headers,
+    connect.AbortSignal? signal,
+    Function(connect.Headers)? onHeader,
+    Function(connect.Headers)? onTrailer,
+  }) {
+    return connect.Client(_transport).unary(
+      specs.AssistantService.reviewReports,
+      input,
+      signal: signal,
+      headers: headers,
+      onHeader: onHeader,
+      onTrailer: onTrailer,
+    );
+  }
 }

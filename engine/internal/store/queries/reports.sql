@@ -8,6 +8,10 @@ SELECT * FROM reports WHERE id = $1;
 -- name: GetReportChartInputs :one
 SELECT title, spec, split FROM reports WHERE id = $1;
 
+-- name: GetReportResearchEvidence :one
+SELECT title, spec, split, coalesce(evaluation #> '{oos,metrics}', '[]'::jsonb)::jsonb AS metrics
+FROM reports WHERE id = $1;
+
 -- name: ListReports :many
 SELECT r.id, r.created_at, r.title, r.oos_net, r.oos_return, r.closed_trades, r.verdict, r.tone,
        (SELECT count(*) FROM holdout_views v WHERE v.report_id = r.id) AS holdout_views

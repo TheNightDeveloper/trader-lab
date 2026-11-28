@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"sync/atomic"
 	"testing"
@@ -15,9 +16,9 @@ import (
 	"tradinglab/engine/internal/gen/lab/v1/labv1connect"
 )
 
-type assistantFunc func(context.Context, assistant.Evidence) (string, *assistant.Usage, error)
+type assistantFunc func(context.Context, assistant.Request) (string, *assistant.Usage, error)
 
-func (f assistantFunc) Explain(ctx context.Context, e assistant.Evidence) (string, *assistant.Usage, error) {
+func (f assistantFunc) Explain(ctx context.Context, e assistant.Request) (string, *assistant.Usage, error) {
 	return f(ctx, e)
 }
 
@@ -26,7 +27,11 @@ func TestAssistantAuditsFailureAndReusesRecordedEvidence(t *testing.T) {
 	market, wall, _, id := paperFixture(t)
 	usage := &assistant.Usage{InputTokens: 120, OutputTokens: 8}
 	var calls atomic.Int32
-	a := &Assistant{Store: market.Store, Clock: wall, DailyRequests: 1, Provider: assistantFunc(func(_ context.Context, input assistant.Evidence) (string, *assistant.Usage, error) {
+	a := &Assistant{Store: market.Store, Clock: wall, DailyRequests: 1, Provider: assistantFunc(func(_ context.Context, prompt assistant.Request) (string, *assistant.Usage, error) {
+		raw, err := prompt.InputJSON()
+		require.NoError(t, err)
+		var input assistant.Evidence
+		require.NoError(t, json.Unmarshal(raw, &input))
 		require.Equal(t, "rule entry", input.Match)
 		require.EqualValues(t, 100*paperTestUnit, input.Close)
 		if calls.Add(1) == 1 {
@@ -71,7 +76,7 @@ func TestAssistantAuditsFailureAndReusesRecordedEvidence(t *testing.T) {
 func TestAssistantDeduplicatesConcurrentRequestsAndPersistsCancellation(t *testing.T) {
 	market, wall, _, id := paperFixture(t)
 	started := make(chan struct{})
-	a := &Assistant{Store: market.Store, Clock: wall, DailyRequests: 2, Provider: assistantFunc(func(ctx context.Context, _ assistant.Evidence) (string, *assistant.Usage, error) {
+	a := &Assistant{Store: market.Store, Clock: wall, DailyRequests: 2, Provider: assistantFunc(func(ctx context.Context, _ assistant.Request) (string, *assistant.Usage, error) {
 		close(started)
 		<-ctx.Done()
 		return "", nil, ctx.Err()

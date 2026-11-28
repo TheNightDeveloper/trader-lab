@@ -561,3 +561,9 @@ the provider, and reuses successes by opportunity, snapshot, model and prompt.
 Failed and interrupted attempts count against the cap. Provider-reported token
 counts and elapsed time are recorded when they are available. This controls
 request volume. Monetary attribution will require pinned price metadata.
+
+Report review extends the same budget and audit history with ordered report IDs
+and an evidence digest. The model sees only approved OOS metrics. The comparison
+engine's blocking assumptions take precedence, and the API returns those values
+without inference when they differ. The database refuses a downgrade to migration
+21 while research assistant audit rows exist.

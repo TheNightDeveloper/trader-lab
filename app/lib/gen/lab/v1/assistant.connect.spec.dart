@@ -17,4 +17,12 @@ abstract final class AssistantService {
     labv1assistant.ExplainOpportunityRequest.new,
     labv1assistant.ExplainOpportunityResponse.new,
   );
+
+  /// Review the out-of-sample evidence of one report or compare up to six reports.
+  static const reviewReports = connect.Spec(
+    '/$name/ReviewReports',
+    connect.StreamType.unary,
+    labv1assistant.ReviewReportsRequest.new,
+    labv1assistant.ReviewReportsResponse.new,
+  );
 }

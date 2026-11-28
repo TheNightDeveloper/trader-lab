@@ -3,10 +3,46 @@ syntax = "proto3";
 package lab.v1;
 
 import "lab/v1/common.proto";
+import "lab/v1/report.proto";
 
 service AssistantService {
   // Explain a saved engine observation. This can spend assistant budget.
   rpc ExplainOpportunity(ExplainOpportunityRequest) returns (ExplainOpportunityResponse);
+  // Review the out-of-sample evidence of one report or compare up to six reports.
+  rpc ReviewReports(ReviewReportsRequest) returns (ReviewReportsResponse);
+}
+
+message ReviewReportsRequest {
+  // The first report is the baseline for the engine's comparability checks.
+  repeated string report_ids = 1;
+}
+
+enum ResearchFocus {
+  RESEARCH_FOCUS_UNSPECIFIED = 0;
+  RESEARCH_FOCUS_ASSUMPTIONS = 1;
+  RESEARCH_FOCUS_RETURN = 2;
+  RESEARCH_FOCUS_DRAWDOWN = 3;
+  RESEARCH_FOCUS_SAMPLE = 4;
+}
+
+message ResearchReference {
+  string report_id = 1;
+  string title = 2;
+  Window oos_window = 3;
+  // Only present for a metric focus and if that metric was recorded.
+  Metric metric = 4;
+}
+
+message ReviewReportsResponse {
+  ResearchFocus focus = 1;
+  repeated ResearchReference references = 2;
+  repeated Assumption blocking_assumptions = 3;
+  // Presence means at least one report falls short of the sample requirement.
+  optional int32 minimum_closed_trades = 4;
+  string model = 5;
+  int32 input_tokens = 6;
+  int32 output_tokens = 7;
+  bool cached = 8;
 }
 
 enum ExplanationFocus {

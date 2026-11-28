@@ -14,6 +14,34 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
+class ResearchFocus extends $pb.ProtobufEnum {
+  static const ResearchFocus RESEARCH_FOCUS_UNSPECIFIED =
+      ResearchFocus._(0, _omitEnumNames ? '' : 'RESEARCH_FOCUS_UNSPECIFIED');
+  static const ResearchFocus RESEARCH_FOCUS_ASSUMPTIONS =
+      ResearchFocus._(1, _omitEnumNames ? '' : 'RESEARCH_FOCUS_ASSUMPTIONS');
+  static const ResearchFocus RESEARCH_FOCUS_RETURN =
+      ResearchFocus._(2, _omitEnumNames ? '' : 'RESEARCH_FOCUS_RETURN');
+  static const ResearchFocus RESEARCH_FOCUS_DRAWDOWN =
+      ResearchFocus._(3, _omitEnumNames ? '' : 'RESEARCH_FOCUS_DRAWDOWN');
+  static const ResearchFocus RESEARCH_FOCUS_SAMPLE =
+      ResearchFocus._(4, _omitEnumNames ? '' : 'RESEARCH_FOCUS_SAMPLE');
+
+  static const $core.List<ResearchFocus> values = <ResearchFocus>[
+    RESEARCH_FOCUS_UNSPECIFIED,
+    RESEARCH_FOCUS_ASSUMPTIONS,
+    RESEARCH_FOCUS_RETURN,
+    RESEARCH_FOCUS_DRAWDOWN,
+    RESEARCH_FOCUS_SAMPLE,
+  ];
+
+  static final $core.List<ResearchFocus?> _byValue =
+      $pb.ProtobufEnum.$_initByValueList(values, 4);
+  static ResearchFocus? valueOf($core.int value) =>
+      value < 0 || value >= _byValue.length ? null : _byValue[value];
+
+  const ResearchFocus._(super.value, super.name);
+}
+
 class ExplanationFocus extends $pb.ProtobufEnum {
   static const ExplanationFocus EXPLANATION_FOCUS_UNSPECIFIED =
       ExplanationFocus._(

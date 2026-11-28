@@ -36,12 +36,17 @@ const (
 	// AssistantServiceExplainOpportunityProcedure is the fully-qualified name of the AssistantService's
 	// ExplainOpportunity RPC.
 	AssistantServiceExplainOpportunityProcedure = "/lab.v1.AssistantService/ExplainOpportunity"
+	// AssistantServiceReviewReportsProcedure is the fully-qualified name of the AssistantService's
+	// ReviewReports RPC.
+	AssistantServiceReviewReportsProcedure = "/lab.v1.AssistantService/ReviewReports"
 )
 
 // AssistantServiceClient is a client for the lab.v1.AssistantService service.
 type AssistantServiceClient interface {
 	// Explain a saved engine observation. This can spend assistant budget.
 	ExplainOpportunity(context.Context, *connect.Request[v1.ExplainOpportunityRequest]) (*connect.Response[v1.ExplainOpportunityResponse], error)
+	// Review the out-of-sample evidence of one report or compare up to six reports.
+	ReviewReports(context.Context, *connect.Request[v1.ReviewReportsRequest]) (*connect.Response[v1.ReviewReportsResponse], error)
 }
 
 // NewAssistantServiceClient constructs a client for the lab.v1.AssistantService service. By
@@ -61,12 +66,19 @@ func NewAssistantServiceClient(httpClient connect.HTTPClient, baseURL string, op
 			connect.WithSchema(assistantServiceMethods.ByName("ExplainOpportunity")),
 			connect.WithClientOptions(opts...),
 		),
+		reviewReports: connect.NewClient[v1.ReviewReportsRequest, v1.ReviewReportsResponse](
+			httpClient,
+			baseURL+AssistantServiceReviewReportsProcedure,
+			connect.WithSchema(assistantServiceMethods.ByName("ReviewReports")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // assistantServiceClient implements AssistantServiceClient.
 type assistantServiceClient struct {
 	explainOpportunity *connect.Client[v1.ExplainOpportunityRequest, v1.ExplainOpportunityResponse]
+	reviewReports      *connect.Client[v1.ReviewReportsRequest, v1.ReviewReportsResponse]
 }
 
 // ExplainOpportunity calls lab.v1.AssistantService.ExplainOpportunity.
@@ -74,10 +86,17 @@ func (c *assistantServiceClient) ExplainOpportunity(ctx context.Context, req *co
 	return c.explainOpportunity.CallUnary(ctx, req)
 }
 
+// ReviewReports calls lab.v1.AssistantService.ReviewReports.
+func (c *assistantServiceClient) ReviewReports(ctx context.Context, req *connect.Request[v1.ReviewReportsRequest]) (*connect.Response[v1.ReviewReportsResponse], error) {
+	return c.reviewReports.CallUnary(ctx, req)
+}
+
 // AssistantServiceHandler is an implementation of the lab.v1.AssistantService service.
 type AssistantServiceHandler interface {
 	// Explain a saved engine observation. This can spend assistant budget.
 	ExplainOpportunity(context.Context, *connect.Request[v1.ExplainOpportunityRequest]) (*connect.Response[v1.ExplainOpportunityResponse], error)
+	// Review the out-of-sample evidence of one report or compare up to six reports.
+	ReviewReports(context.Context, *connect.Request[v1.ReviewReportsRequest]) (*connect.Response[v1.ReviewReportsResponse], error)
 }
 
 // NewAssistantServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -93,10 +112,18 @@ func NewAssistantServiceHandler(svc AssistantServiceHandler, opts ...connect.Han
 		connect.WithSchema(assistantServiceMethods.ByName("ExplainOpportunity")),
 		connect.WithHandlerOptions(opts...),
 	)
+	assistantServiceReviewReportsHandler := connect.NewUnaryHandler(
+		AssistantServiceReviewReportsProcedure,
+		svc.ReviewReports,
+		connect.WithSchema(assistantServiceMethods.ByName("ReviewReports")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/lab.v1.AssistantService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case AssistantServiceExplainOpportunityProcedure:
 			assistantServiceExplainOpportunityHandler.ServeHTTP(w, r)
+		case AssistantServiceReviewReportsProcedure:
+			assistantServiceReviewReportsHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -108,4 +135,8 @@ type UnimplementedAssistantServiceHandler struct{}
 
 func (UnimplementedAssistantServiceHandler) ExplainOpportunity(context.Context, *connect.Request[v1.ExplainOpportunityRequest]) (*connect.Response[v1.ExplainOpportunityResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("lab.v1.AssistantService.ExplainOpportunity is not implemented"))
+}
+
+func (UnimplementedAssistantServiceHandler) ReviewReports(context.Context, *connect.Request[v1.ReviewReportsRequest]) (*connect.Response[v1.ReviewReportsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("lab.v1.AssistantService.ReviewReports is not implemented"))
 }
