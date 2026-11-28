@@ -243,6 +243,180 @@ abstract class L10n {
   /// **'حساب مجازی'**
   String get navPaper;
 
+  /// No description provided for @navDailyReview.
+  ///
+  /// In fa, this message translates to:
+  /// **'مرور روزانه'**
+  String get navDailyReview;
+
+  /// No description provided for @screenDailyReviewSub.
+  ///
+  /// In fa, this message translates to:
+  /// **'موقعیت‌های مجازی، فرصت‌ها، اجرای سایه و رویدادهای ثبت‌شدهٔ امروز'**
+  String get screenDailyReviewSub;
+
+  /// No description provided for @dailyReviewLoading.
+  ///
+  /// In fa, this message translates to:
+  /// **'در حال دریافت مرور روزانه…'**
+  String get dailyReviewLoading;
+
+  /// No description provided for @dailyReviewRefresh.
+  ///
+  /// In fa, this message translates to:
+  /// **'به‌روزرسانی مرور'**
+  String get dailyReviewRefresh;
+
+  /// No description provided for @dailyReviewDay.
+  ///
+  /// In fa, this message translates to:
+  /// **'روز مرور'**
+  String get dailyReviewDay;
+
+  /// No description provided for @dailyReviewAsOf.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان دریافت داده'**
+  String get dailyReviewAsOf;
+
+  /// No description provided for @dailyReviewReminder.
+  ///
+  /// In fa, this message translates to:
+  /// **'یادآوری مرور روزانه در برنامه'**
+  String get dailyReviewReminder;
+
+  /// No description provided for @dailyReviewPending.
+  ///
+  /// In fa, this message translates to:
+  /// **'مرور امروز در انتظار بررسی است'**
+  String get dailyReviewPending;
+
+  /// No description provided for @dailyReviewMarkRead.
+  ///
+  /// In fa, this message translates to:
+  /// **'ثبت پایان مرور امروز'**
+  String get dailyReviewMarkRead;
+
+  /// No description provided for @dailyReviewRead.
+  ///
+  /// In fa, this message translates to:
+  /// **'مرور امروز ثبت شد'**
+  String get dailyReviewRead;
+
+  /// No description provided for @dailyReviewNoPaper.
+  ///
+  /// In fa, this message translates to:
+  /// **'برای این محیط هنوز حساب مجازی ساخته نشده است.'**
+  String get dailyReviewNoPaper;
+
+  /// No description provided for @dailyReviewNoPositions.
+  ///
+  /// In fa, this message translates to:
+  /// **'موقعیت بازی ثبت نشده است.'**
+  String get dailyReviewNoPositions;
+
+  /// No description provided for @dailyReviewConcentration.
+  ///
+  /// In fa, this message translates to:
+  /// **'تمرکز موقعیت‌های باز'**
+  String get dailyReviewConcentration;
+
+  /// No description provided for @dailyReviewExposureHelp.
+  ///
+  /// In fa, this message translates to:
+  /// **'سهم هر نماد از ارزش بازار همهٔ موقعیت‌های باز حساب مجازی'**
+  String get dailyReviewExposureHelp;
+
+  /// No description provided for @dailyReviewExposureUnavailable.
+  ///
+  /// In fa, this message translates to:
+  /// **'برای محاسبهٔ سهم نمادها، قیمت تازهٔ همهٔ موقعیت‌ها و ارزش کل مثبت لازم است.'**
+  String get dailyReviewExposureUnavailable;
+
+  /// No description provided for @dailyReviewOpenWindow.
+  ///
+  /// In fa, this message translates to:
+  /// **'فرصت‌های در مهلت امروز'**
+  String get dailyReviewOpenWindow;
+
+  /// No description provided for @dailyReviewExpired.
+  ///
+  /// In fa, this message translates to:
+  /// **'فرصت‌های منقضی‌شدهٔ امروز'**
+  String get dailyReviewExpired;
+
+  /// No description provided for @dailyReviewNoOpportunities.
+  ///
+  /// In fa, this message translates to:
+  /// **'فرصتی برای این وضعیت ثبت نشده است.'**
+  String get dailyReviewNoOpportunities;
+
+  /// No description provided for @dailyReviewPreviewCount.
+  ///
+  /// In fa, this message translates to:
+  /// **'نمایش {shown} مورد از {total} فرصت'**
+  String dailyReviewPreviewCount(int shown, String total);
+
+  /// No description provided for @dailyReviewUnverified.
+  ///
+  /// In fa, this message translates to:
+  /// **'اعتبار فرصت نیاز به دادهٔ تازه دارد'**
+  String get dailyReviewUnverified;
+
+  /// No description provided for @dailyReviewExpiredStatus.
+  ///
+  /// In fa, this message translates to:
+  /// **'منقضی‌شده'**
+  String get dailyReviewExpiredStatus;
+
+  /// No description provided for @dailyReviewShadow.
+  ///
+  /// In fa, this message translates to:
+  /// **'استراتژی تحت بررسی'**
+  String get dailyReviewShadow;
+
+  /// No description provided for @dailyReviewOpenShadow.
+  ///
+  /// In fa, this message translates to:
+  /// **'مشاهدهٔ اجرای سایه'**
+  String get dailyReviewOpenShadow;
+
+  /// No description provided for @dailyReviewEvents.
+  ///
+  /// In fa, this message translates to:
+  /// **'رویدادهای کیفیت داده'**
+  String get dailyReviewEvents;
+
+  /// No description provided for @dailyReviewNoEvents.
+  ///
+  /// In fa, this message translates to:
+  /// **'امروز برای نمادهای مرتبط رویداد کیفیت داده‌ای ثبت نشده است.'**
+  String get dailyReviewNoEvents;
+
+  /// No description provided for @dailyReviewNext.
+  ///
+  /// In fa, this message translates to:
+  /// **'ادامهٔ بررسی'**
+  String get dailyReviewNext;
+
+  /// No description provided for @dailyReviewCheckPositions.
+  ///
+  /// In fa, this message translates to:
+  /// **'بررسی موقعیت‌ها و وضعیت حساب مجازی'**
+  String get dailyReviewCheckPositions;
+
+  /// No description provided for @dailyReviewCheckMarket.
+  ///
+  /// In fa, this message translates to:
+  /// **'بررسی فرصت‌ها در دیدبان بازار'**
+  String get dailyReviewCheckMarket;
+
+  /// No description provided for @dailyReviewCheckData.
+  ///
+  /// In fa, this message translates to:
+  /// **'بررسی کیفیت دادهٔ نمادها'**
+  String get dailyReviewCheckData;
+
   /// No description provided for @navShadow.
   ///
   /// In fa, this message translates to:

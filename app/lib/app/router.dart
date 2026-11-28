@@ -23,6 +23,7 @@ import '../features/reports/report_screen.dart';
 import '../features/reports/reports_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/shadow/shadow_screen.dart';
+import '../features/daily_review/daily_review_screen.dart';
 import '../shell/app_shell.dart';
 import 'nav.dart';
 
@@ -112,6 +113,10 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
               _page(context, state, ChartScreen(report: state.uri.queryParameters['report'])),
         ),
         GoRoute(path: Dest.data.path, pageBuilder: (context, state) => _page(context, state, const DataScreen())),
+        GoRoute(
+          path: Dest.dailyReview.path,
+          pageBuilder: (context, state) => _page(context, state, const DailyReviewScreen()),
+        ),
         GoRoute(
           path: Dest.market.path,
           pageBuilder: (context, state) => _page(

@@ -90,6 +90,100 @@ class L10nFa extends L10n {
   String get navPaper => 'حساب مجازی';
 
   @override
+  String get navDailyReview => 'مرور روزانه';
+
+  @override
+  String get screenDailyReviewSub =>
+      'موقعیت‌های مجازی، فرصت‌ها، اجرای سایه و رویدادهای ثبت‌شدهٔ امروز';
+
+  @override
+  String get dailyReviewLoading => 'در حال دریافت مرور روزانه…';
+
+  @override
+  String get dailyReviewRefresh => 'به‌روزرسانی مرور';
+
+  @override
+  String get dailyReviewDay => 'روز مرور';
+
+  @override
+  String get dailyReviewAsOf => 'زمان دریافت داده';
+
+  @override
+  String get dailyReviewReminder => 'یادآوری مرور روزانه در برنامه';
+
+  @override
+  String get dailyReviewPending => 'مرور امروز در انتظار بررسی است';
+
+  @override
+  String get dailyReviewMarkRead => 'ثبت پایان مرور امروز';
+
+  @override
+  String get dailyReviewRead => 'مرور امروز ثبت شد';
+
+  @override
+  String get dailyReviewNoPaper =>
+      'برای این محیط هنوز حساب مجازی ساخته نشده است.';
+
+  @override
+  String get dailyReviewNoPositions => 'موقعیت بازی ثبت نشده است.';
+
+  @override
+  String get dailyReviewConcentration => 'تمرکز موقعیت‌های باز';
+
+  @override
+  String get dailyReviewExposureHelp =>
+      'سهم هر نماد از ارزش بازار همهٔ موقعیت‌های باز حساب مجازی';
+
+  @override
+  String get dailyReviewExposureUnavailable =>
+      'برای محاسبهٔ سهم نمادها، قیمت تازهٔ همهٔ موقعیت‌ها و ارزش کل مثبت لازم است.';
+
+  @override
+  String get dailyReviewOpenWindow => 'فرصت‌های در مهلت امروز';
+
+  @override
+  String get dailyReviewExpired => 'فرصت‌های منقضی‌شدهٔ امروز';
+
+  @override
+  String get dailyReviewNoOpportunities => 'فرصتی برای این وضعیت ثبت نشده است.';
+
+  @override
+  String dailyReviewPreviewCount(int shown, String total) {
+    return 'نمایش $shown مورد از $total فرصت';
+  }
+
+  @override
+  String get dailyReviewUnverified => 'اعتبار فرصت نیاز به دادهٔ تازه دارد';
+
+  @override
+  String get dailyReviewExpiredStatus => 'منقضی‌شده';
+
+  @override
+  String get dailyReviewShadow => 'استراتژی تحت بررسی';
+
+  @override
+  String get dailyReviewOpenShadow => 'مشاهدهٔ اجرای سایه';
+
+  @override
+  String get dailyReviewEvents => 'رویدادهای کیفیت داده';
+
+  @override
+  String get dailyReviewNoEvents =>
+      'امروز برای نمادهای مرتبط رویداد کیفیت داده‌ای ثبت نشده است.';
+
+  @override
+  String get dailyReviewNext => 'ادامهٔ بررسی';
+
+  @override
+  String get dailyReviewCheckPositions => 'بررسی موقعیت‌ها و وضعیت حساب مجازی';
+
+  @override
+  String get dailyReviewCheckMarket => 'بررسی فرصت‌ها در دیدبان بازار';
+
+  @override
+  String get dailyReviewCheckData => 'بررسی کیفیت دادهٔ نمادها';
+
+  @override
   String get navShadow => 'اجرای سایه';
 
   @override

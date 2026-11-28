@@ -1,12 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
+import '../app/nav.dart';
 import '../core/api/engine.dart';
 import '../core/format.dart';
 import '../core/theme/tokens.dart';
 import '../core/widgets/layout.dart';
 import '../core/widgets/workspace_status.dart';
+import '../features/daily_review/daily_review_api.dart';
 import '../l10n/app_localizations.dart';
 import 'sidebar.dart';
 
@@ -42,7 +45,7 @@ class AppShell extends StatelessWidget {
             child: SafeArea(
               child: Column(
                 children: [
-                  _WorkspaceHeader(docked: docked),
+                  _WorkspaceHeader(docked: docked, showReview: !Dest.dailyReview.matches(location)),
                   const _StaleBanner(),
                   Expanded(child: child),
                 ],
@@ -56,9 +59,10 @@ class AppShell extends StatelessWidget {
 }
 
 class _WorkspaceHeader extends StatelessWidget {
-  const _WorkspaceHeader({required this.docked});
+  const _WorkspaceHeader({required this.docked, required this.showReview});
 
   final bool docked;
+  final bool showReview;
 
   @override
   Widget build(BuildContext context) {
@@ -79,9 +83,25 @@ class _WorkspaceHeader extends StatelessWidget {
               const SizedBox(width: AppSpace.sm),
             ],
             const Flexible(child: CurrentEnvironmentBadge()),
+            if (showReview) const _ReviewReminderButton(),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ReviewReminderButton extends ConsumerWidget {
+  const _ReviewReminderButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final reminder = ref.watch(dailyReviewReminderProvider);
+    if (reminder.hasError || reminder.value != true) return const SizedBox.shrink();
+    return IconButton(
+      tooltip: L10n.of(context).dailyReviewPending,
+      icon: const Icon(Icons.notifications_active_outlined),
+      onPressed: () => context.go(Dest.dailyReview.path),
     );
   }
 }

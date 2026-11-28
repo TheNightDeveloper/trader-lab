@@ -39,9 +39,10 @@ abstract final class Dest {
   static final data = NavDest('/data', (l) => l.navData, (l) => l.screenDataSub);
   static final market = NavDest('/market', (l) => l.navMarket, (l) => l.screenMarketSub);
   static final paper = NavDest('/paper', (l) => l.navPaper, (l) => l.screenPaperSub);
+  static final dailyReview = NavDest('/daily-review', (l) => l.navDailyReview, (l) => l.screenDailyReviewSub);
   static final settings = NavDest('/settings', (l) => l.navSettings, (l) => l.screenSettingsSub);
 
-  static final all = [home, library, builder, queue, reports, compare, pnl, learning, shadow, chart, data, market, paper, settings];
+  static final all = [home, library, builder, queue, reports, compare, pnl, learning, shadow, chart, data, market, paper, dailyReview, settings];
 
   /// Published routes grouped by the tasks available in the research workspace.
   static final sidebar = <NavEntry>[
@@ -56,6 +57,7 @@ abstract final class Dest {
     NavLink(learning),
     NavLink(shadow),
     NavHeader((l) => l.navGroupReview),
+    NavLink(dailyReview),
     NavLink(chart),
     NavLink(pnl),
     NavLink(market),

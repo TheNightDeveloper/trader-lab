@@ -125,6 +125,12 @@ The optional `shadow_model_rates` engine setting accepts decimal USDT strings
 these rates for its operational cost estimate. The estimate uses the provider's
 recorded token counts at the configured rates. Unknown usage is shown separately.
 
+Open **Daily Review (مرور روزانه)** from the sidebar to review the engine's
+current UTC day. It links to Paper receipts, the reports that support observed
+opportunities, the selected Shadow deployment, and data-quality issues.
+Enable the in-app reminder on the review page if desired. Marking the day as
+reviewed clears its reminder across sessions. The next UTC day starts unread.
+
 ## 5. First use
 
 The sidebar and all text are in Persian. Screen names below are the sidebar labels.

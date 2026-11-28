@@ -2,6 +2,27 @@
 
 Update at the end of every session.
 
+## P4 Daily Review (2026-11-28)
+
+Daily Review shows open Paper positions, concentration by marked value, open
+and expired opportunities, the selected Shadow strategy, and local data-quality
+events for the current engine UTC day. It links to the underlying records and
+offers a next step for review. Concentration is unavailable when an open position
+lacks a fresh mark. The opportunity previews show up to five records per group.
+
+The optional in-app reminder and today's acknowledgement are stored in
+PostgreSQL. Acknowledgement clears the reminder across tabs and restarts. A new
+UTC day has its own acknowledgement. External events and delivery channels are
+outside this slice.
+
+Go with PostgreSQL and the 57 existing Flutter tests passed. Chrome exercised
+open positions, missing marks, opportunity expiry, Shadow links and reminder
+rollover at 390 and 1440 pixels with a controlled feed. Release web built and
+the changed Dart files passed static analysis. Full-app analysis reports four
+existing lint infos in the Learning screen.
+
+The seven-day live observation gate remains open.
+
 ## P4 Shadow user decisions and attribution (2026-11-28)
 
 Shadow can register an optional user-decision track alongside the baseline and
@@ -18,9 +39,6 @@ PostgreSQL tests covered concurrent retries, the exact cutoff, and fill
 differences across tracks. The Go and existing Flutter suites passed. Chrome
 exercised registration, approval, all three results, and the 24-hour table at
 390 pixels, plus stopping at 1440 pixels with a controlled market and provider.
-
-The next P4 slice is daily review. The seven-day live observation gate remains
-open.
 
 ## P4 prospective Shadow deployment (2026-11-28)
 

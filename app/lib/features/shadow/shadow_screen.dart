@@ -207,7 +207,7 @@ class _FrozenAssumptions extends StatelessWidget {
             runSpacing: AppSpace.xs,
             children: [
               Mono(d.symbol),
-              Text(_shadowState(l, d.state)),
+              Text(shadowStateLabel(l, d.state)),
               TextButton(
                 onPressed: () => context.go(ruleVersionPath(d.ruleVersionId)),
                 child: Text(l.marketOpportunityRule),
@@ -268,12 +268,3 @@ class _FrozenAssumptions extends StatelessWidget {
 }
 
 String _utc(Int64 t) => fmtDateTime(utcMs(t));
-
-String _shadowState(L10n l, ShadowState state) => switch (state) {
-  ShadowState.SHADOW_STATE_ACTIVE => l.shadowActive,
-  ShadowState.SHADOW_STATE_COMPLETE => l.shadowComplete,
-  ShadowState.SHADOW_STATE_STOPPED => l.shadowStopped,
-  ShadowState.SHADOW_STATE_GAP => l.shadowGap,
-  ShadowState.SHADOW_STATE_BUILD_CHANGED => l.shadowBuildChanged,
-  _ => l.invalid,
-};

@@ -319,6 +319,15 @@ String _utc(Int64 unixMs) {
   return '${fmtDateTime(utc)}:${two(utc.second)}';
 }
 
+String shadowStateLabel(L10n l, ShadowState state) => switch (state) {
+  ShadowState.SHADOW_STATE_ACTIVE => l.shadowActive,
+  ShadowState.SHADOW_STATE_COMPLETE => l.shadowComplete,
+  ShadowState.SHADOW_STATE_STOPPED => l.shadowStopped,
+  ShadowState.SHADOW_STATE_GAP => l.shadowGap,
+  ShadowState.SHADOW_STATE_BUILD_CHANGED => l.shadowBuildChanged,
+  _ => l.invalid,
+};
+
 String _shadowGate(L10n l, ShadowGate gate) => switch (gate) {
   ShadowGate.SHADOW_GATE_NO_SIGNAL => l.shadowNoSignal,
   ShadowGate.SHADOW_GATE_PENDING => l.shadowPending,
