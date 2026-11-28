@@ -33,8 +33,9 @@ final learningProvider = FutureProvider<GetLearningResponse>(
 );
 
 final cyclesProvider = FutureProvider.family<ListCyclesResponse, int>(
-  (ref, offset) =>
-      ref.watch(learningClientProvider).listCycles(ListCyclesRequest(pageSize: cyclesPageSize, offset: offset)),
+  (ref, offset) => ref
+      .watch(learningClientProvider)
+      .listCycles(ListCyclesRequest(pageSize: cyclesPageSize, offset: offset)),
 );
 
 final modelsProvider = FutureProvider<ListModelsResponse>(
@@ -42,7 +43,9 @@ final modelsProvider = FutureProvider<ListModelsResponse>(
 );
 
 final candidatesProvider = FutureProvider.family<ListCandidatesResponse, Int64>(
-  (ref, id) => ref.watch(learningClientProvider).listCandidates(ListCandidatesRequest(cycleId: id)),
+  (ref, id) => ref
+      .watch(learningClientProvider)
+      .listCandidates(ListCandidatesRequest(cycleId: id)),
 );
 
 const _running = {'collect', 'labels', 'generate', 'train', 'walk_forward'};
@@ -100,7 +103,10 @@ class _Columns extends StatelessWidget {
         ? Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              for (final (i, c) in children.indexed) ...[if (i > 0) const SizedBox(height: AppSpace.lg), c],
+              for (final (i, c) in children.indexed) ...[
+                if (i > 0) const SizedBox(height: AppSpace.lg),
+                c,
+              ],
             ],
           )
         : Row(
@@ -160,11 +166,15 @@ class _LearningScreenState extends ConsumerState<LearningScreen> {
     try {
       final done = await call();
       _refresh();
-      if (done != null && mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(done)));
+      if (done != null && mounted)
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(done)));
     } catch (e) {
       // Reload stale state before the next user decision.
       if (mounted) _refresh();
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errorText(e))));
+      if (mounted)
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(errorText(e))));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -210,15 +220,27 @@ class _LearningScreenState extends ConsumerState<LearningScreen> {
           onRetry: _refresh,
           skeleton: const SectionCard(child: SizedBox(height: 160)),
           builder: (r) => !r.hasCurrent()
-              ? SectionCard(child: EmptyState(l.lHistoryEmpty, icon: Icons.autorenew_rounded))
+              ? SectionCard(
+                  child: EmptyState(
+                    l.lHistoryEmpty,
+                    icon: Icons.autorenew_rounded,
+                  ),
+                )
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _CycleCard(r.current),
                     const SizedBox(height: AppSpace.lg),
                     _Columns([
-                      _ContenderCard(r.current.champion, active: r.active, champion: true),
-                      _ContenderCard(r.current.hasChallenger() ? r.current.challenger : null, champion: false),
+                      _ContenderCard(
+                        r.current.champion,
+                        active: r.active,
+                        champion: true,
+                      ),
+                      _ContenderCard(
+                        r.current.hasChallenger() ? r.current.challenger : null,
+                        champion: false,
+                      ),
                       _GateCard(
                         r.current,
                         busy: _busy,
@@ -228,21 +250,41 @@ class _LearningScreenState extends ConsumerState<LearningScreen> {
                             context,
                             title: l.lApprove,
                             body: l.lApproveConfirm(
-                              r.active.versionId.isEmpty ? l.lNone : r.active.versionId,
+                              r.active.versionId.isEmpty
+                                  ? l.lNone
+                                  : r.active.versionId,
                               c.challenger.change,
                               c.challenger.modelId,
                             ),
                           );
                           if (ok) {
-                            await _act(() => _quiet(client.approveCycle(ApproveCycleRequest(
-                              cycleId: c.id, expectedRevision: r.active.lifecycleRevision,
-                            ))));
+                            await _act(
+                              () => _quiet(
+                                client.approveCycle(
+                                  ApproveCycleRequest(
+                                    cycleId: c.id,
+                                    expectedRevision:
+                                        r.active.lifecycleRevision,
+                                  ),
+                                ),
+                              ),
+                            );
                           }
                         },
                         onReject: () async {
-                          final ok = await confirmAction(context, title: l.lReject, body: l.lRejectConfirm);
+                          final ok = await confirmAction(
+                            context,
+                            title: l.lReject,
+                            body: l.lRejectConfirm,
+                          );
                           if (!ok) return;
-                          await _act(() => _quiet(client.rejectCycle(RejectCycleRequest(cycleId: r.current.id))));
+                          await _act(
+                            () => _quiet(
+                              client.rejectCycle(
+                                RejectCycleRequest(cycleId: r.current.id),
+                              ),
+                            ),
+                          );
                         },
                       ),
                     ]),
@@ -254,22 +296,39 @@ class _LearningScreenState extends ConsumerState<LearningScreen> {
         _Columns(
           flex: const [3, 2],
           [
-            _History(offset: _offset, onOffset: (o) => setState(() => _offset = o)),
+            _History(
+              offset: _offset,
+              onOffset: (o) => setState(() => _offset = o),
+            ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _Models(
                   canRollback: r?.canRollback ?? false,
                   onRollback: () async {
-                    final ok = await confirmAction(context, title: l.lRollback, body: l.lRollbackConfirm);
+                    final ok = await confirmAction(
+                      context,
+                      title: l.lRollback,
+                      body: l.lRollbackConfirm,
+                    );
                     if (ok) {
-                      await _act(() => _quiet(client.rollback(RollbackRequest(
-                        algorithmId: r?.active.algorithmId, expectedRevision: r?.active.lifecycleRevision,
-                      ))));
+                      await _act(
+                        () => _quiet(
+                          client.rollback(
+                            RollbackRequest(
+                              algorithmId: r?.active.algorithmId,
+                              expectedRevision: r?.active.lifecycleRevision,
+                            ),
+                          ),
+                        ),
+                      );
                     }
                   },
                 ),
-                if (r != null && r.hasCurrent()) ...[const SizedBox(height: AppSpace.lg), _Budget(r.current.usage)],
+                if (r != null && r.hasCurrent()) ...[
+                  const SizedBox(height: AppSpace.lg),
+                  _Budget(r.current.usage),
+                ],
               ],
             ),
           ],
@@ -285,7 +344,8 @@ class _LearningScreenState extends ConsumerState<LearningScreen> {
     );
     if (saved == true && mounted) {
       _refresh();
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(L10n.of(context).lcSaved)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(L10n.of(context).lcSaved)));
     }
   }
 }
@@ -297,7 +357,9 @@ class _CycleCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = L10n.of(context);
-    final current = c.steps.where((s) => s.status == 'running' || s.status == 'waiting').firstOrNull;
+    final current = c.steps
+        .where((s) => s.status == 'running' || s.status == 'waiting')
+        .firstOrNull;
     final (oText, oColor) = outcome(l, c.outcome);
     return SectionCard(
       title: '${l.lCurrent} #${c.id}',
@@ -305,9 +367,13 @@ class _CycleCard extends StatelessWidget {
         spacing: AppSpace.md,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          if (current != null) Text(l.lStage(stepLabel(l, current.key)), style: AppText.label),
+          if (current != null)
+            Text(l.lStage(stepLabel(l, current.key)), style: AppText.label),
           if (current?.key == 'forward_test')
-            Text(l.lForwardDay(c.forwardDays, c.forwardDaysTarget), style: AppText.label),
+            Text(
+              l.lForwardDay(c.forwardDays, c.forwardDaysTarget),
+              style: AppText.label,
+            ),
           StatusText((oText, oColor)),
         ],
       ),
@@ -317,7 +383,13 @@ class _CycleCard extends StatelessWidget {
           LayoutBuilder(
             builder: (context, box) {
               const gap = AppSpace.sm;
-              final cols = max(1, min(c.steps.length, ((box.maxWidth + gap) / (120 + gap)).floor()));
+              final cols = max(
+                1,
+                min(
+                  c.steps.length,
+                  ((box.maxWidth + gap) / (120 + gap)).floor(),
+                ),
+              );
               final w = (box.maxWidth - gap * (cols - 1)) / cols;
               return Wrap(
                 spacing: gap,
@@ -325,8 +397,12 @@ class _CycleCard extends StatelessWidget {
                 children: [
                   for (final (i, s) in c.steps.indexed)
                     SizedBox(width: w, child: StepTile(s))
-                        .animate(delay: AppMotion.of(context, AppMotion.stagger) * i)
-                        .fadeIn(duration: AppMotion.of(context, AppMotion.normal)),
+                        .animate(
+                          delay: AppMotion.of(context, AppMotion.stagger) * i,
+                        )
+                        .fadeIn(
+                          duration: AppMotion.of(context, AppMotion.normal),
+                        ),
                 ],
               );
             },
@@ -356,14 +432,28 @@ class StepTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: live ? AppColors.accentStrongBg : AppColors.surface,
         borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: live ? AppColors.accentBorder : AppColors.border),
+        border: Border.all(
+          color: live ? AppColors.accentBorder : AppColors.border,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label, style: AppText.caption.copyWith(color: color)),
-          Text(stepLabel(l, s.key), style: AppText.body.copyWith(fontWeight: FontWeight.w700, height: 1.5)),
-          Mono(s.meta.isEmpty ? '—' : s.meta, style: AppText.mono.copyWith(fontSize: 12, color: AppColors.textMuted)),
+          Text(
+            stepLabel(l, s.key),
+            style: AppText.body.copyWith(
+              fontWeight: FontWeight.w700,
+              height: 1.5,
+            ),
+          ),
+          Mono(
+            s.meta.isEmpty ? '—' : s.meta,
+            style: AppText.mono.copyWith(
+              fontSize: 12,
+              color: AppColors.textMuted,
+            ),
+          ),
         ],
       ),
     );
@@ -420,14 +510,23 @@ class _ContenderCard extends StatelessWidget {
             Text(
               champion
                   ? c.active && active != null && active!.modelId.isNotEmpty
-                        ? l.lModelSince(c.modelId, fmtDate(utcMs(active!.modelAsOfUnixMs)))
+                        ? l.lModelSince(
+                            c.modelId,
+                            fmtDate(utcMs(active!.modelAsOfUnixMs)),
+                          )
                         : l.lBaselineDesc
                   : l.lChange(c.change, c.seq),
               style: AppText.caption,
             ),
           const SizedBox(height: AppSpace.sm),
-          row(fwd ? l.lFwdReturn : l.lWalkReturn, metricText(l, metricOf(ms, 'total_return'))),
-          row(l.lMaxDd, metricText(l, metricOf(ms, 'max_drawdown'), tone: false)),
+          row(
+            fwd ? l.lFwdReturn : l.lWalkReturn,
+            metricText(l, metricOf(ms, 'total_return')),
+          ),
+          row(
+            l.lMaxDd,
+            metricText(l, metricOf(ms, 'max_drawdown'), tone: false),
+          ),
           row(l.lTrades, metricText(l, metricOf(ms, 'trades'), tone: false)),
           row(l.lFees, metricText(l, metricOf(ms, 'fees'))),
         ],
@@ -437,7 +536,12 @@ class _ContenderCard extends StatelessWidget {
 }
 
 class _GateCard extends StatelessWidget {
-  const _GateCard(this.c, {required this.onApprove, required this.onReject, required this.busy});
+  const _GateCard(
+    this.c, {
+    required this.onApprove,
+    required this.onReject,
+    required this.busy,
+  });
   final Cycle c;
   final VoidCallback onApprove, onReject;
   final bool busy;
@@ -445,7 +549,8 @@ class _GateCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = L10n.of(context);
-    final allPass = c.gate.isNotEmpty && c.gate.every((g) => g.status == 'pass');
+    final allPass =
+        c.gate.isNotEmpty && c.gate.every((g) => g.status == 'pass');
     return SectionCard(
       title: l.lGate,
       child: Column(
@@ -460,7 +565,12 @@ class _GateCard extends StatelessWidget {
                 children: [
                   _Pill(g.status),
                   const SizedBox(width: AppSpace.sm),
-                  Expanded(child: Text(g.text, style: AppText.body.copyWith(fontSize: 13, height: 1.7))),
+                  Expanded(
+                    child: Text(
+                      g.text,
+                      style: AppText.body.copyWith(fontSize: 13, height: 1.7),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -476,9 +586,14 @@ class _GateCard extends StatelessWidget {
                 label: Text(l.lApprove),
               ),
               OutlinedButton(
-                style: OutlinedButton.styleFrom(foregroundColor: AppColors.negativeText),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.negativeText,
+                ),
                 // Stale recommendations stay rejectable so a new cycle can run.
-                onPressed: c.state == 'decision' && c.outcome == 'recommended' && !busy ? onReject : null,
+                onPressed:
+                    c.state == 'decision' && c.outcome == 'recommended' && !busy
+                    ? onReject
+                    : null,
                 child: Text(l.lReject),
               ),
             ],
@@ -505,10 +620,16 @@ class _Pill extends StatelessWidget {
       constraints: const BoxConstraints(minWidth: 64),
       padding: const EdgeInsets.symmetric(horizontal: AppSpace.sm, vertical: 2),
       alignment: Alignment.center,
-      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(AppRadius.sm)),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+      ),
       child: Text(
         text,
-        style: AppText.caption.copyWith(color: AppColors.onAccent, fontWeight: FontWeight.w700),
+        style: AppText.caption.copyWith(
+          color: AppColors.onAccent,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
@@ -552,7 +673,10 @@ class _CandidatesState extends ConsumerState<_Candidates> {
             alignment: AlignmentDirectional.topStart,
             child: !_open
                 ? const SizedBox(width: double.infinity)
-                : _table(l, ref.watch(candidatesProvider(Int64(widget.c.id.toInt())))),
+                : _table(
+                    l,
+                    ref.watch(candidatesProvider(Int64(widget.c.id.toInt()))),
+                  ),
           ),
         ],
       ),
@@ -560,7 +684,15 @@ class _CandidatesState extends ConsumerState<_Candidates> {
   }
 
   Widget _table(L10n l, AsyncValue<ListCandidatesResponse> v) {
-    final cols = ['#', l.cChange, l.qColStatus, l.lWalkReturn, l.lMaxDd, l.cWins, l.qColConstraints];
+    final cols = [
+      '#',
+      l.cChange,
+      l.qColStatus,
+      l.lWalkReturn,
+      l.lMaxDd,
+      l.cWins,
+      l.qColConstraints,
+    ];
     return AsyncSection(
       value: v,
       onRetry: () => ref.invalidate(candidatesProvider(widget.c.id)),
@@ -575,15 +707,34 @@ class _CandidatesState extends ConsumerState<_Candidates> {
               Mono(c.change),
               c.failure.isEmpty
                   ? StatusText(runStatus(l, c.status))
-                  : Tooltip(message: c.failure, child: StatusText(runStatus(l, c.status))),
+                  : Tooltip(
+                      message: c.failure,
+                      child: StatusText(runStatus(l, c.status)),
+                    ),
               metricText(l, c.hasTotalReturn() ? c.totalReturn : null),
-              metricText(l, c.hasMaxDrawdown() ? c.maxDrawdown : null, tone: false),
+              metricText(
+                l,
+                c.hasMaxDrawdown() ? c.maxDrawdown : null,
+                tone: false,
+              ),
               Mono('${c.wins}'),
               c.status != 'done'
                   ? const Mono('—')
                   : c.eligible
-                  ? Text(l.qEligible, style: AppText.body.copyWith(color: AppColors.positive, height: 1.4))
-                  : Text(c.why, style: AppText.body.copyWith(color: AppColors.textMuted, height: 1.4)),
+                  ? Text(
+                      l.qEligible,
+                      style: AppText.body.copyWith(
+                        color: AppColors.positive,
+                        height: 1.4,
+                      ),
+                    )
+                  : Text(
+                      c.why,
+                      style: AppText.body.copyWith(
+                        color: AppColors.textMuted,
+                        height: 1.4,
+                      ),
+                    ),
             ],
         ],
       ),
@@ -615,15 +766,31 @@ class _History extends ConsumerWidget {
             builder: (r) => DataTableBox(
               minWidth: 560,
               columns: cols,
-              paging: Paging(offset: offset, pageSize: cyclesPageSize, total: r.total.toInt(), onOffset: onOffset),
+              paging: Paging(
+                offset: offset,
+                pageSize: cyclesPageSize,
+                total: r.total.toInt(),
+                onOffset: onOffset,
+              ),
               rows: [
                 for (final c in r.cycles)
                   [
                     Mono('#${c.id}'),
-                    Text(c.trigger == 'schedule' ? l.trig_schedule : l.trig_manual, style: AppText.body),
+                    Text(
+                      c.trigger == 'schedule' ? l.trig_schedule : l.trig_manual,
+                      style: AppText.body,
+                    ),
                     Mono('${c.candidates}'),
-                    metricText(l, c.hasChallenger() ? metricOf(c.challenger.forward, 'total_return') : null),
-                    Tooltip(message: c.reason, child: StatusText(outcome(l, c.outcome))),
+                    metricText(
+                      l,
+                      c.hasChallenger()
+                          ? metricOf(c.challenger.forward, 'total_return')
+                          : null,
+                    ),
+                    Tooltip(
+                      message: c.reason,
+                      child: StatusText(outcome(l, c.outcome)),
+                    ),
                   ],
               ],
             ),
@@ -662,7 +829,10 @@ class _Models extends ConsumerWidget {
                 for (final m in r.models.take(8))
                   Container(
                     margin: const EdgeInsets.only(bottom: AppSpace.sm),
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpace.md, vertical: AppSpace.sm),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpace.md,
+                      vertical: AppSpace.sm,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.surfaceRaised,
                       borderRadius: BorderRadius.circular(AppRadius.md),
@@ -674,13 +844,18 @@ class _Models extends ConsumerWidget {
                           children: [
                             Expanded(
                               child: Mono(
-                                m.versionId.isEmpty ? m.id : '${m.id} · ${m.versionId}',
+                                m.versionId.isEmpty
+                                    ? m.id
+                                    : '${m.id} · ${m.versionId}',
                                 style: AppText.mono.copyWith(fontSize: 13),
                               ),
                             ),
                             StatusText(switch (m.status) {
                               'active' => (l.ms_active, AppColors.positive),
-                              'challenger' => (l.ms_challenger, AppColors.accent),
+                              'challenger' => (
+                                l.ms_challenger,
+                                AppColors.accent,
+                              ),
                               'baseline' => (l.ms_baseline, AppColors.warning),
                               _ => (l.ms_archived, AppColors.textMuted),
                             }),
@@ -688,7 +863,10 @@ class _Models extends ConsumerWidget {
                         ),
                         Mono(
                           'train ≤ ${fmtDate(utcMs(m.asOfUnixMs))} · seed ${m.seed} · sha ${shortHash(m.recipeHash, prefix: '')}',
-                          style: AppText.mono.copyWith(fontSize: 12, color: AppColors.textMuted),
+                          style: AppText.mono.copyWith(
+                            fontSize: 12,
+                            color: AppColors.textMuted,
+                          ),
                         ),
                       ],
                     ),
@@ -718,31 +896,54 @@ class _Budget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = L10n.of(context);
-    Widget row(String k, String v, int n, int of, {bool words = false}) => Padding(
-      padding: const EdgeInsets.only(bottom: AppSpace.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
+    Widget row(String k, String v, int n, int of, {bool words = false}) =>
+        Padding(
+          padding: const EdgeInsets.only(bottom: AppSpace.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(child: Text(k, style: AppText.label)),
-              words ? Text(v, style: AppText.body.copyWith(height: 1.4)) : Mono(v),
+              Row(
+                children: [
+                  Expanded(child: Text(k, style: AppText.label)),
+                  words
+                      ? Text(v, style: AppText.body.copyWith(height: 1.4))
+                      : Mono(v),
+                ],
+              ),
+              const SizedBox(height: AppSpace.xs),
+              StackedBar(
+                height: 6,
+                total: of,
+                segments: [(n, n > of ? AppColors.negative : AppColors.accent)],
+              ),
             ],
           ),
-          const SizedBox(height: AppSpace.xs),
-          StackedBar(height: 6, total: of, segments: [(n, n > of ? AppColors.negative : AppColors.accent)]),
-        ],
-      ),
-    );
+        );
     String count(Int64 v) => formatDecimal(Decimal.parse(v.toString()));
     final cpu = u.cpuSeconds.toInt(), cpuMax = u.cpuBudgetSeconds.toInt();
     return SectionCard(
       title: l.lBudget,
       child: Column(
         children: [
-          row(l.bCpu, '${humanDuration(l, cpu)} / ${humanDuration(l, cpuMax)}', cpu, cpuMax, words: true),
-          row(l.bBars, '${count(u.bars)} / ${count(u.maxBars)}', u.bars.toInt(), u.maxBars.toInt()),
-          row(l.bCands, '${u.candidates} / ${u.maxCandidates}', u.candidates, u.maxCandidates),
+          row(
+            l.bCpu,
+            '${humanDuration(l, cpu)} / ${humanDuration(l, cpuMax)}',
+            cpu,
+            cpuMax,
+            words: true,
+          ),
+          row(
+            l.bBars,
+            '${count(u.bars)} / ${count(u.maxBars)}',
+            u.bars.toInt(),
+            u.maxBars.toInt(),
+          ),
+          row(
+            l.bCands,
+            '${u.candidates} / ${u.maxCandidates}',
+            u.candidates,
+            u.maxCandidates,
+          ),
         ],
       ),
     );
@@ -808,11 +1009,19 @@ class _ConfigDialogState extends ConsumerState<_ConfigDialog> {
 
   Future<void> _save(L10n l) async {
     final allowed =
-        ref.read(overviewProvider).value?.researchCapabilities.where((c) => c.supported).map((c) => c.symbol).toSet() ??
+        ref
+            .read(overviewProvider)
+            .value
+            ?.researchCapabilities
+            .where((c) => c.supported)
+            .map((c) => c.symbol)
+            .toSet() ??
         <String>{};
-    if (_symbols.isEmpty || !allowed.containsAll(_symbols)) return setState(() => _error = l.errPickPair);
+    if (_symbols.isEmpty || !allowed.containsAll(_symbols))
+      return setState(() => _error = l.errPickPair);
     final rules = _rules(l);
-    if (rules.entries.any((e) => e.value(f[e.key]!) != null)) return setState(() => _tried = true);
+    if (rules.entries.any((e) => e.value(f[e.key]!) != null))
+      return setState(() => _tried = true);
     final c = widget.cfg.deepCopy()
       ..algorithmId = _alg
       ..enabled = _enabled
@@ -838,7 +1047,9 @@ class _ConfigDialogState extends ConsumerState<_ConfigDialog> {
       _error = null;
     });
     try {
-      await ref.read(learningClientProvider).saveConfig(SaveConfigRequest(config: c));
+      await ref
+          .read(learningClientProvider)
+          .saveConfig(SaveConfigRequest(config: c));
       if (mounted) Navigator.pop(context, true);
     } catch (e) {
       if (mounted) setState(() => _error = e);
@@ -860,23 +1071,25 @@ class _ConfigDialogState extends ConsumerState<_ConfigDialog> {
             .map((c) => c.symbol)
             .toSet() ??
         <String>{};
-    Widget field(String k, String label, {String? unit, String? help}) => SizedBox(
-      width: 280,
-      child: TextFormField(
-        initialValue: f[k],
-        textDirection: TextDirection.ltr,
-        style: AppText.mono,
-        onChanged: (v) => setState(() => f[k] = v),
-        decoration: InputDecoration(
-          labelText: label,
-          suffix: unitSuffix(unit),
-          helperText: help,
-          helperMaxLines: 3,
-          errorText: _tried ? rules[k]!(f[k]!) : null,
-        ),
-      ),
-    );
-    Widget group(List<Widget> c) => Wrap(spacing: AppSpace.md, runSpacing: AppSpace.md, children: c);
+    Widget field(String k, String label, {String? unit, String? help}) =>
+        SizedBox(
+          width: 280,
+          child: TextFormField(
+            initialValue: f[k],
+            textDirection: TextDirection.ltr,
+            style: AppText.mono,
+            onChanged: (v) => setState(() => f[k] = v),
+            decoration: InputDecoration(
+              labelText: label,
+              suffix: unitSuffix(unit),
+              helperText: help,
+              helperMaxLines: 3,
+              errorText: _tried ? rules[k]!(f[k]!) : null,
+            ),
+          ),
+        );
+    Widget group(List<Widget> c) =>
+        Wrap(spacing: AppSpace.md, runSpacing: AppSpace.md, children: c);
     return AlertDialog(
       backgroundColor: AppColors.surfaceRaised,
       title: Text(L10n.of(context).lConfig, style: AppText.sectionTitle),
@@ -902,7 +1115,10 @@ class _ConfigDialogState extends ConsumerState<_ConfigDialog> {
                 contentPadding: EdgeInsets.zero,
               ),
               Text(l.researchPairs, style: AppText.label),
-              ResearchSymbolPicker(selected: _symbols, onChanged: (v) => setState(() => _symbols = v)),
+              ResearchSymbolPicker(
+                selected: _symbols,
+                onChanged: (v) => setState(() => _symbols = v),
+              ),
               const ResearchCapabilityNotice(),
               const SizedBox(height: AppSpace.md),
               group([
@@ -921,22 +1137,41 @@ class _ConfigDialogState extends ConsumerState<_ConfigDialog> {
                 field('maxDd', l.lcMaxDd, unit: '%', help: l.lcHelpMaxDd),
                 field('trades', l.lcTrades, help: l.lcHelpTrades),
                 field('days', l.lcFwdDays, help: l.lcHelpFwd),
-                field('improve', l.lcImprove, unit: l.lcPoints, help: l.lcHelpImprove),
-                field('ddDeg', l.lcDdDeg, unit: l.lcPoints, help: l.lcHelpDdDeg),
+                field(
+                  'improve',
+                  l.lcImprove,
+                  unit: l.lcPoints,
+                  help: l.lcHelpImprove,
+                ),
+                field(
+                  'ddDeg',
+                  l.lcDdDeg,
+                  unit: l.lcPoints,
+                  help: l.lcHelpDdDeg,
+                ),
                 field('wins', l.lcWins, help: l.lcHelpWins),
               ]),
               if (_error != null) ...[
                 const SizedBox(height: AppSpace.md),
-                Text(errorText(_error!), style: AppText.body.copyWith(color: AppColors.negativeText)),
+                Text(
+                  errorText(_error!),
+                  style: AppText.body.copyWith(color: AppColors.negativeText),
+                ),
               ],
             ],
           ),
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l.cancel)),
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: Text(l.cancel),
+        ),
         FilledButton(
-          onPressed: _saving || _symbols.isEmpty || !allowed.containsAll(_symbols) ? null : () => _save(l),
+          onPressed:
+              _saving || _symbols.isEmpty || !allowed.containsAll(_symbols)
+              ? null
+              : () => _save(l),
           child: Text(l.save),
         ),
       ],

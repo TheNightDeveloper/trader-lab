@@ -2,6 +2,26 @@
 
 Update at the end of every session.
 
+## P4 Shadow user decisions and attribution (2026-11-28)
+
+Shadow can register an optional user-decision track alongside the baseline and
+AI tracks. Each observed signal accepts one approval or skip before the common
+cutoff. Retrying the same decision returns the original receipt. An unanswered
+signal skips the entry in the user track.
+
+All tracks replay the same captured candles. The Shadow page shows simulated
+entry and fill evidence, net PnL and return deltas from baseline, entry overlap,
+24-hour PnL, and a warning for small trade samples. The cost estimate uses the
+rates recorded at registration and flags attempts with missing token usage.
+
+PostgreSQL tests covered concurrent retries, the exact cutoff, and fill
+differences across tracks. The Go and existing Flutter suites passed. Chrome
+exercised registration, approval, all three results, and the 24-hour table at
+390 pixels, plus stopping at 1440 pixels with a controlled market and provider.
+
+The next P4 slice is daily review. The seven-day live observation gate remains
+open.
+
 ## P4 prospective Shadow deployment (2026-11-28)
 
 Shadow registers one active hourly run for a USDT spot symbol. It pins the
@@ -20,9 +40,6 @@ PostgreSQL tests covered the common decision cutoff, missed-hour termination,
 immutable candle evidence, continued exits after model failure and an unchanged
 Paper ledger. Chrome verified registration, live capture, review and stopping at
 390 and 1440 pixels against a controlled market clock and provider.
-
-The user-decision track, attribution dashboard, and daily review are the next
-Shadow and P4 slices. The seven-day live observation gate is still open.
 
 ## P4 natural-language strategy draft (2026-11-28)
 

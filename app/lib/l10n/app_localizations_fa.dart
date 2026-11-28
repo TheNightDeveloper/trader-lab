@@ -94,7 +94,7 @@ class L10nFa extends L10n {
 
   @override
   String get screenShadowSub =>
-      'مقایسهٔ آینده‌نگر دو اجرای شبیه‌سازی‌شده با قواعد مشترک و فیلتر ورود AI';
+      'مقایسهٔ آینده‌نگر سیاست پایه، فیلتر ورود AI و مسیر اختیاری تصمیم کاربر';
 
   @override
   String get shadowStart => 'اجرای سایهٔ جدید';
@@ -204,6 +204,109 @@ class L10nFa extends L10n {
 
   @override
   String get shadowGateUnavailable => 'فیلتر در دسترس نبود و ورود انجام نشد';
+
+  @override
+  String get shadowUserTrack => 'مسیر کاربر';
+
+  @override
+  String get shadowUserTrackEnable => 'فعال‌کردن مسیر تصمیم کاربر';
+
+  @override
+  String get shadowUserTrackHelp =>
+      'برای هر سیگنال، اجازه یا رد ورود را تا زمان تصمیم مشترک ثبت کنید. در صورت بی‌پاسخ ماندن، مسیر کاربر از آن ورود می‌گذرد.';
+
+  @override
+  String get shadowUserDecisionTitle => 'تصمیم کاربر برای سیگنال';
+
+  @override
+  String get shadowUserDecisionHelp =>
+      'تصمیم شما به مسیر شبیه‌سازی کاربر اعمال می‌شود.';
+
+  @override
+  String get shadowUserDeadline => 'مهلت ثبت';
+
+  @override
+  String get shadowUserAllow => 'اجازهٔ ورود در مسیر کاربر';
+
+  @override
+  String get shadowUserSkip => 'رد ورود در مسیر کاربر';
+
+  @override
+  String get shadowUserConfirm =>
+      'اولین تصمیم ثبت‌شده برای همین سیگنال اعمال می‌شود و قطعی است.';
+
+  @override
+  String get shadowUserRecorded => 'تصمیم ثبت شد.';
+
+  @override
+  String get shadowUserOpen => 'منتظر تصمیم کاربر';
+
+  @override
+  String get shadowUserUnanswered => 'مهلت بسته شد؛ بدون تصمیم';
+
+  @override
+  String get shadowComparisonHelp =>
+      'اختلاف‌ها به همین شبیه‌سازی و نمونهٔ مشترک تعلق دارند. شمار تصمیم‌ها بر اساس کندل سیگنال است.';
+
+  @override
+  String shadowSmallSample(int minimum) {
+    return 'دست‌کم یک مسیر کمتر از $minimum معاملهٔ بسته دارد. نتیجهٔ این نمونه محدود است.';
+  }
+
+  @override
+  String get shadowPnlDelta => 'اختلاف سود خالص با پایه';
+
+  @override
+  String get shadowReturnDelta => 'اختلاف بازده با پایه';
+
+  @override
+  String get shadowPercentagePoints => 'واحد درصد';
+
+  @override
+  String get shadowSharedEntries => 'تصمیم ورود مشترک با پایه';
+
+  @override
+  String get shadowBaselineOnlyEntries => 'تصمیم ورود فقط در پایه';
+
+  @override
+  String get shadowTrackOnlyEntries => 'تصمیم ورود فقط در این مسیر';
+
+  @override
+  String get shadowDailyPnl => 'سود خالص در بازه‌های ۲۴ساعته';
+
+  @override
+  String get shadowPeriodStart => 'شروع بازه';
+
+  @override
+  String get shadowPeriodHours => 'تعداد کندل‌های مشاهده‌شده';
+
+  @override
+  String get shadowOperationalCost => 'برآورد هزینهٔ عملیاتی مدل';
+
+  @override
+  String shadowModelAttempts(int attempts) {
+    return '$attempts تلاش مدل';
+  }
+
+  @override
+  String get shadowCostUnavailable => 'برآورد هزینه در دسترس نیست.';
+
+  @override
+  String shadowMissingUsage(int count) {
+    return 'مصرف کامل $count تلاش در دسترس نیست. هزینه بر پایهٔ مصرف ثبت‌شده است.';
+  }
+
+  @override
+  String get shadowInputRate => 'نرخ هر میلیون توکن ورودی';
+
+  @override
+  String get shadowOutputRate => 'نرخ هر میلیون توکن خروجی';
+
+  @override
+  String get shadowExecutionEvidence => 'زمان پرشدن ورود در مسیرها';
+
+  @override
+  String get shadowUnfilled => 'تصمیم ورود ثبت شد؛ بدون پرشدن';
 
   @override
   String get screenPaperSub => 'موجودی USDT و حدود ریسک معاملات آزمایشی اسپات';

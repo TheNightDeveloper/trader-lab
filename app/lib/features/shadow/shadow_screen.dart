@@ -18,7 +18,9 @@ import '../../gen/lab/v1/shadow.pb.dart';
 import '../../l10n/app_localizations.dart';
 import '../library/rule_draft_dialog.dart' show ruleVersionPath;
 import '../page_frame.dart';
+import 'shadow_results.dart';
 import 'shadow_start_dialog.dart';
+import 'shadow_user_decision.dart';
 
 final _snapshot = StreamProvider.autoDispose
     .family<GetShadowSnapshotResponse, Int64?>((ref, id) async* {
@@ -91,6 +93,12 @@ class _ShadowScreenState extends ConsumerState<ShadowScreen> {
     final value = ref.watch(provider);
     final data = value.value;
     final d = data?.hasSelected() == true ? data!.selected : null;
+    final openSignal = data?.observations
+        .where(
+          (row) =>
+              row.userDecision == ShadowUserDecision.SHADOW_USER_DECISION_OPEN,
+        )
+        .firstOrNull;
     final active =
         data?.deployments.any(
           (row) => row.state == ShadowState.SHADOW_STATE_ACTIVE,
@@ -150,8 +158,16 @@ class _ShadowScreenState extends ConsumerState<ShadowScreen> {
                   ? () => _stop(d.id)
                   : null,
             ),
+            if (openSignal != null)
+              ShadowUserDecisionCard(
+                key: ValueKey(openSignal.id),
+                deploymentId: d.id,
+                observation: openSignal,
+                connected: !value.hasError,
+                onRefresh: () => ref.invalidate(provider),
+              ),
             if (data.hasBaseline() && data.hasAi())
-              _ShadowResults(snapshot: data)
+              ShadowResults(snapshot: data)
             else
               SectionCard(
                 child: Text(
@@ -160,8 +176,10 @@ class _ShadowScreenState extends ConsumerState<ShadowScreen> {
                       : l.shadowCommonHours(0),
                 ),
               ),
+            if (data.modelAttempts > 0 || d.hasModelInputPerMillion())
+              ShadowModelUsage(snapshot: data),
             if (data.observations.isNotEmpty)
-              _Observations(observations: data.observations),
+              ShadowObservations(snapshot: data),
           ],
         ],
       ],
@@ -249,112 +267,6 @@ class _FrozenAssumptions extends StatelessWidget {
   }
 }
 
-class _ShadowResults extends StatelessWidget {
-  const _ShadowResults({required this.snapshot});
-
-  final GetShadowSnapshotResponse snapshot;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = L10n.of(context);
-    final a = snapshot.baseline;
-    final b = snapshot.ai;
-    return SectionCard(
-      title: l.shadowResults,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            l.shadowCommonHours(snapshot.sampledHours),
-            style: AppText.caption,
-          ),
-          const SizedBox(height: AppSpace.sm),
-          DataTableBox(
-            minWidth: 390,
-            columns: [l.compareMetric, l.shadowBaseline, l.shadowAi],
-            rows: [
-              [
-                Text(l.shadowEntries),
-                Mono('${a.entries}'),
-                Mono('${b.entries}'),
-              ],
-              for (final metric in a.metrics)
-                [
-                  Text(metric.label),
-                  _ShadowMetric(value: formatMetric(l, metric)),
-                  if (metricOf(b.metrics, metric.key) case final other?)
-                    _ShadowMetric(value: formatMetric(l, other))
-                  else
-                    const Text('—'),
-                ],
-            ],
-          ),
-          const SizedBox(height: AppSpace.sm),
-          Text(
-            l.shadowUsage(
-              snapshot.inputTokens.toString(),
-              snapshot.outputTokens.toString(),
-            ),
-            style: AppText.caption,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ShadowMetric extends StatelessWidget {
-  const _ShadowMetric({required this.value});
-
-  final MetricText value;
-
-  @override
-  Widget build(BuildContext context) =>
-      Mono([value.text, ?value.unit].join(' '));
-}
-
-class _Observations extends StatelessWidget {
-  const _Observations({required this.observations});
-
-  final List<ShadowObservation> observations;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = L10n.of(context);
-    return SectionCard(
-      title: l.shadowObservations,
-      child: DataTableBox(
-        minWidth: 860,
-        columns: [
-          l.marketClosedAt,
-          l.marketObservedAt,
-          l.shadowDecisionAt,
-          l.marketOpportunityPrice,
-          l.shadowAi,
-          l.shadowGateAt,
-        ],
-        rows: [
-          for (final item in observations)
-            [
-              Mono('${_utc(item.candleClosedAtUnixMs)} UTC'),
-              Mono('${_utc(item.observedAtUnixMs)} UTC'),
-              Mono('${_utc(item.decisionAtUnixMs)} UTC'),
-              Num(
-                moneyValue(item.referenceClose),
-                unit: item.referenceClose.asset,
-              ),
-              Text(_shadowGate(l, item.gate)),
-              if (item.gateResolvedAtUnixMs > Int64.ZERO)
-                Mono('${_utc(item.gateResolvedAtUnixMs)} UTC')
-              else
-                const Text('—'),
-            ],
-        ],
-      ),
-    );
-  }
-}
-
 String _utc(Int64 t) => fmtDateTime(utcMs(t));
 
 String _shadowState(L10n l, ShadowState state) => switch (state) {
@@ -363,14 +275,5 @@ String _shadowState(L10n l, ShadowState state) => switch (state) {
   ShadowState.SHADOW_STATE_STOPPED => l.shadowStopped,
   ShadowState.SHADOW_STATE_GAP => l.shadowGap,
   ShadowState.SHADOW_STATE_BUILD_CHANGED => l.shadowBuildChanged,
-  _ => l.invalid,
-};
-
-String _shadowGate(L10n l, ShadowGate gate) => switch (gate) {
-  ShadowGate.SHADOW_GATE_NO_SIGNAL => l.shadowNoSignal,
-  ShadowGate.SHADOW_GATE_PENDING => l.shadowPending,
-  ShadowGate.SHADOW_GATE_ALLOW => l.shadowAllow,
-  ShadowGate.SHADOW_GATE_BLOCK => l.shadowBlock,
-  ShadowGate.SHADOW_GATE_UNAVAILABLE => l.shadowGateUnavailable,
   _ => l.invalid,
 };

@@ -252,7 +252,7 @@ abstract class L10n {
   /// No description provided for @screenShadowSub.
   ///
   /// In fa, this message translates to:
-  /// **'مقایسهٔ آینده‌نگر دو اجرای شبیه‌سازی‌شده با قواعد مشترک و فیلتر ورود AI'**
+  /// **'مقایسهٔ آینده‌نگر سیاست پایه، فیلتر ورود AI و مسیر اختیاری تصمیم کاربر'**
   String get screenShadowSub;
 
   /// No description provided for @shadowStart.
@@ -452,6 +452,192 @@ abstract class L10n {
   /// In fa, this message translates to:
   /// **'فیلتر در دسترس نبود و ورود انجام نشد'**
   String get shadowGateUnavailable;
+
+  /// No description provided for @shadowUserTrack.
+  ///
+  /// In fa, this message translates to:
+  /// **'مسیر کاربر'**
+  String get shadowUserTrack;
+
+  /// No description provided for @shadowUserTrackEnable.
+  ///
+  /// In fa, this message translates to:
+  /// **'فعال‌کردن مسیر تصمیم کاربر'**
+  String get shadowUserTrackEnable;
+
+  /// No description provided for @shadowUserTrackHelp.
+  ///
+  /// In fa, this message translates to:
+  /// **'برای هر سیگنال، اجازه یا رد ورود را تا زمان تصمیم مشترک ثبت کنید. در صورت بی‌پاسخ ماندن، مسیر کاربر از آن ورود می‌گذرد.'**
+  String get shadowUserTrackHelp;
+
+  /// No description provided for @shadowUserDecisionTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'تصمیم کاربر برای سیگنال'**
+  String get shadowUserDecisionTitle;
+
+  /// No description provided for @shadowUserDecisionHelp.
+  ///
+  /// In fa, this message translates to:
+  /// **'تصمیم شما به مسیر شبیه‌سازی کاربر اعمال می‌شود.'**
+  String get shadowUserDecisionHelp;
+
+  /// No description provided for @shadowUserDeadline.
+  ///
+  /// In fa, this message translates to:
+  /// **'مهلت ثبت'**
+  String get shadowUserDeadline;
+
+  /// No description provided for @shadowUserAllow.
+  ///
+  /// In fa, this message translates to:
+  /// **'اجازهٔ ورود در مسیر کاربر'**
+  String get shadowUserAllow;
+
+  /// No description provided for @shadowUserSkip.
+  ///
+  /// In fa, this message translates to:
+  /// **'رد ورود در مسیر کاربر'**
+  String get shadowUserSkip;
+
+  /// No description provided for @shadowUserConfirm.
+  ///
+  /// In fa, this message translates to:
+  /// **'اولین تصمیم ثبت‌شده برای همین سیگنال اعمال می‌شود و قطعی است.'**
+  String get shadowUserConfirm;
+
+  /// No description provided for @shadowUserRecorded.
+  ///
+  /// In fa, this message translates to:
+  /// **'تصمیم ثبت شد.'**
+  String get shadowUserRecorded;
+
+  /// No description provided for @shadowUserOpen.
+  ///
+  /// In fa, this message translates to:
+  /// **'منتظر تصمیم کاربر'**
+  String get shadowUserOpen;
+
+  /// No description provided for @shadowUserUnanswered.
+  ///
+  /// In fa, this message translates to:
+  /// **'مهلت بسته شد؛ بدون تصمیم'**
+  String get shadowUserUnanswered;
+
+  /// No description provided for @shadowComparisonHelp.
+  ///
+  /// In fa, this message translates to:
+  /// **'اختلاف‌ها به همین شبیه‌سازی و نمونهٔ مشترک تعلق دارند. شمار تصمیم‌ها بر اساس کندل سیگنال است.'**
+  String get shadowComparisonHelp;
+
+  /// No description provided for @shadowSmallSample.
+  ///
+  /// In fa, this message translates to:
+  /// **'دست‌کم یک مسیر کمتر از {minimum} معاملهٔ بسته دارد. نتیجهٔ این نمونه محدود است.'**
+  String shadowSmallSample(int minimum);
+
+  /// No description provided for @shadowPnlDelta.
+  ///
+  /// In fa, this message translates to:
+  /// **'اختلاف سود خالص با پایه'**
+  String get shadowPnlDelta;
+
+  /// No description provided for @shadowReturnDelta.
+  ///
+  /// In fa, this message translates to:
+  /// **'اختلاف بازده با پایه'**
+  String get shadowReturnDelta;
+
+  /// No description provided for @shadowPercentagePoints.
+  ///
+  /// In fa, this message translates to:
+  /// **'واحد درصد'**
+  String get shadowPercentagePoints;
+
+  /// No description provided for @shadowSharedEntries.
+  ///
+  /// In fa, this message translates to:
+  /// **'تصمیم ورود مشترک با پایه'**
+  String get shadowSharedEntries;
+
+  /// No description provided for @shadowBaselineOnlyEntries.
+  ///
+  /// In fa, this message translates to:
+  /// **'تصمیم ورود فقط در پایه'**
+  String get shadowBaselineOnlyEntries;
+
+  /// No description provided for @shadowTrackOnlyEntries.
+  ///
+  /// In fa, this message translates to:
+  /// **'تصمیم ورود فقط در این مسیر'**
+  String get shadowTrackOnlyEntries;
+
+  /// No description provided for @shadowDailyPnl.
+  ///
+  /// In fa, this message translates to:
+  /// **'سود خالص در بازه‌های ۲۴ساعته'**
+  String get shadowDailyPnl;
+
+  /// No description provided for @shadowPeriodStart.
+  ///
+  /// In fa, this message translates to:
+  /// **'شروع بازه'**
+  String get shadowPeriodStart;
+
+  /// No description provided for @shadowPeriodHours.
+  ///
+  /// In fa, this message translates to:
+  /// **'تعداد کندل‌های مشاهده‌شده'**
+  String get shadowPeriodHours;
+
+  /// No description provided for @shadowOperationalCost.
+  ///
+  /// In fa, this message translates to:
+  /// **'برآورد هزینهٔ عملیاتی مدل'**
+  String get shadowOperationalCost;
+
+  /// No description provided for @shadowModelAttempts.
+  ///
+  /// In fa, this message translates to:
+  /// **'{attempts} تلاش مدل'**
+  String shadowModelAttempts(int attempts);
+
+  /// No description provided for @shadowCostUnavailable.
+  ///
+  /// In fa, this message translates to:
+  /// **'برآورد هزینه در دسترس نیست.'**
+  String get shadowCostUnavailable;
+
+  /// No description provided for @shadowMissingUsage.
+  ///
+  /// In fa, this message translates to:
+  /// **'مصرف کامل {count} تلاش در دسترس نیست. هزینه بر پایهٔ مصرف ثبت‌شده است.'**
+  String shadowMissingUsage(int count);
+
+  /// No description provided for @shadowInputRate.
+  ///
+  /// In fa, this message translates to:
+  /// **'نرخ هر میلیون توکن ورودی'**
+  String get shadowInputRate;
+
+  /// No description provided for @shadowOutputRate.
+  ///
+  /// In fa, this message translates to:
+  /// **'نرخ هر میلیون توکن خروجی'**
+  String get shadowOutputRate;
+
+  /// No description provided for @shadowExecutionEvidence.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان پرشدن ورود در مسیرها'**
+  String get shadowExecutionEvidence;
+
+  /// No description provided for @shadowUnfilled.
+  ///
+  /// In fa, this message translates to:
+  /// **'تصمیم ورود ثبت شد؛ بدون پرشدن'**
+  String get shadowUnfilled;
 
   /// No description provided for @screenPaperSub.
   ///

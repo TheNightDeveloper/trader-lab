@@ -25,6 +25,7 @@ class ShadowStartDialog extends ConsumerStatefulWidget {
 class _ShadowStartDialogState extends ConsumerState<ShadowStartDialog> {
   String? _symbol;
   RuleVersionSummary? _rule;
+  bool _userTrack = false;
   bool _saving = false;
   Object? _error;
 
@@ -42,6 +43,7 @@ class _ShadowStartDialogState extends ConsumerState<ShadowStartDialog> {
             StartShadowDeploymentRequest(
               symbol: symbol,
               ruleVersionId: rule.id,
+              userTrack: _userTrack,
             ),
             signal: TimeoutSignal(const Duration(seconds: 12)),
           );
@@ -87,6 +89,14 @@ class _ShadowStartDialogState extends ConsumerState<ShadowStartDialog> {
                   showEvidence: true,
                   selected: _rule?.id,
                   onPick: (rule) => setState(() => _rule = rule),
+                ),
+                CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l.shadowUserTrackEnable),
+                  subtitle: Text(l.shadowUserTrackHelp),
+                  value: _userTrack,
+                  onChanged: (value) =>
+                      setState(() => _userTrack = value ?? false),
                 ),
                 if (_rule case final rule?)
                   Text(rule.title, style: AppText.label),
