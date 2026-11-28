@@ -87,6 +87,12 @@ func (a *Assistant) explain(ctx context.Context, reservation db.ReserveAssistant
 			return err
 		}
 		now := a.Clock.Now()
+		if reservation.ShadowHourID != 0 {
+			// A stop or an expired cutoff can close the claim before paid admission.
+			if _, err := q.LockShadowGate(ctx, db.LockShadowGateParams{ID: reservation.ShadowHourID, AsOf: now}); err != nil {
+				return err
+			}
+		}
 		// A dead worker cannot keep the same observation locked after its deadline.
 		if err := q.InterruptAssistantRuns(ctx, now.Add(-time.Minute)); err != nil {
 			return err

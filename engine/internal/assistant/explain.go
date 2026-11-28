@@ -51,6 +51,14 @@ func Research(columns []map[string]string, focus []string) Request {
 		columns, focus}
 }
 
+const ShadowPromptVersion = "shadow-hourly-entry-v1"
+
+// Shadow receives only the closed candidate candle. Both policies decide on a common clock.
+func Shadow(e Evidence) Request {
+	return Request{ShadowPromptVersion, `Choose whether to allow a simulated spot entry already triggered by a rule. Use only this saved hourly candle's open, high, low and close, expressed on the same fixed-point scale. Block if the close is below the open or an upper wick dominates the candle. When uncertain, block. Return only allow or block as the focus. This cannot send orders or change exits.`,
+		e, []string{"allow", "block"}}
+}
+
 func (r Request) Version() string { return r.version }
 
 func (r Request) InputJSON() ([]byte, error) { return json.Marshal(r.input) }

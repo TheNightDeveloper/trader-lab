@@ -76,6 +76,16 @@ func (d RuleDefinition) Build() (Strategy, error) {
 	return s, nil
 }
 
+// BuildWithEntryGate leaves rejected entries flat and always evaluates exits.
+func (d RuleDefinition) BuildWithEntryGate(allow func(data.Bar) bool) (Strategy, error) {
+	s, err := d.compile()
+	if err != nil {
+		return nil, err
+	}
+	s.allowEntry = allow
+	return s, nil
+}
+
 func (d RuleDefinition) compile() (*ruleStrategy, error) {
 	if d.Format != RuleFormatV1 {
 		return nil, fmt.Errorf("strategy: unsupported rule definition format %q", d.Format)

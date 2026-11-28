@@ -203,6 +203,7 @@ type ruleStrategy struct {
 	base        time.Duration
 	exposure    money.Ratio
 	long        map[string]bool
+	allowEntry  func(data.Bar) bool
 }
 
 func (s *ruleStrategy) OnBar(ctx RunContext, b data.Bar) ([]Intent, error) {
@@ -226,7 +227,7 @@ func (s *ruleStrategy) OnBar(ctx RunContext, b data.Bar) ([]Intent, error) {
 			return []Intent{{Instrument: b.Instrument, Reason: "rule exit"}}, nil
 		}
 	} else if !wasLong {
-		if entry, ready := s.entry(history); ready && entry {
+		if entry, ready := s.entry(history); ready && entry && (s.allowEntry == nil || s.allowEntry(b)) {
 			s.long[b.Instrument] = true
 			return []Intent{s.entryIntent(b.Instrument, history)}, nil
 		}

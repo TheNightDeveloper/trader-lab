@@ -581,3 +581,20 @@ Draft attempts share the assistant quota and record a description digest,
 status, usage and latency. PostgreSQL deduplicates concurrent submissions of
 the same text. The description and generated AST are transient. Only the regular
 explicit save stores the edited definition as a strategy version.
+
+## ADR-066 Register the first prospective Shadow comparison
+
+One active deployment pins a USDT spot symbol, a saved hourly rule and its
+report. The simulator configuration, instrument specification, engine build,
+model and prompt are stored before the next full UTC hour. The window spans
+seven days. Both tracks use the causal hourly simulator with separate capital
+and the same fees, latency and slippage. Each captured candle has a common
+decision cutoff two minutes after close. A gap ends the observed prefix.
+
+The baseline uses the validated rule. The filtered track evaluates the same
+entry plus a bounded model gate from the recorded candle. Declined, unavailable
+or late gates suppress only that entry. Both tracks keep rule exits and continue
+with their own simulation state. A committed gate claim is expired after its
+deadline if the engine restarts. Candle revisions arriving after capture stay
+outside the comparison. Assistant token usage shares the existing quota and is
+reported separately from simulated execution costs.

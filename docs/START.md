@@ -109,6 +109,12 @@ OpenAI under the same quota. A complete draft opens in the standard rule editor
 for review and an explicit save. For ambiguous text, edit the description with
 the requested details and submit again.
 
+In **اجرای سایه**, select a live-watch symbol and a rule with a current hourly
+report. Registration freezes the report's simulation assumptions and starts
+at the next UTC hour for seven days. Each observed signal can consume assistant
+budget. The simulator processes the recorded prefix on its own timeline, and a
+manual stop keeps the observed results available for review.
+
 ## 5. First use
 
 The sidebar and all text are in Persian. Screen names below are the sidebar labels.

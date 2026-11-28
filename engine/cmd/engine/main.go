@@ -93,6 +93,8 @@ func run() error {
 	if key := strings.TrimSpace(os.Getenv("TRADINGLAB_ASSISTANT_API_KEY")); key != "" && cfg.AssistantDailyRequests > 0 {
 		assistantService.Provider = assistant.NewOpenAI(key)
 	}
+	shadowService := &api.Shadow{Market: market, Assistant: assistantService}
+	go shadowService.RunShadow(ctx)
 	paperService := &api.Paper{Market: market}
 	go paperService.RunPaper(ctx)
 	if live != nil {
@@ -139,6 +141,7 @@ func run() error {
 		route(labv1connect.NewDataServiceHandler(dataSvc)),
 		route(labv1connect.NewMarketServiceHandler(market)),
 		route(labv1connect.NewAssistantServiceHandler(assistantService)),
+		route(labv1connect.NewShadowServiceHandler(shadowService)),
 		route(labv1connect.NewPaperServiceHandler(paperService)),
 		route(labv1connect.NewFxServiceHandler(fxSvc)),
 		route(labv1connect.NewReportServiceHandler(&api.Report{Svc: reports, Limiter: limiter})),

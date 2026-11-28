@@ -42,6 +42,7 @@ type AssistantRun struct {
 	OutputTokens   pgtype.Int4
 	ReportIds      []string
 	RuleDraft      bool
+	ShadowHourID   *int64
 }
 
 type Attempt struct {
@@ -430,6 +431,39 @@ type Setting struct {
 	Key       string
 	Value     []byte
 	UpdatedAt time.Time
+}
+
+type ShadowDeployment struct {
+	ID              int64
+	Symbol          string
+	RuleVersionID   int64
+	RuleContentHash string
+	ReportID        string
+	RegisteredAt    time.Time
+	StartAt         time.Time
+	EndAt           time.Time
+	SettledAt       *time.Time
+	State           string
+	SimConfig       []byte
+	SpecRevision    string
+	RuntimePolicy   string
+	FillModel       string
+	AiModel         string
+	AiPromptVersion string
+	EngineBuild     string
+}
+
+type ShadowHour struct {
+	ID             int64
+	DeploymentID   int64
+	ClosedAt       time.Time
+	ObservedAt     time.Time
+	DecisionAt     time.Time
+	Bar            []byte
+	Warmup         []byte
+	Reason         string
+	Gate           string
+	GateResolvedAt *time.Time
 }
 
 type StrategyRuleVersion struct {

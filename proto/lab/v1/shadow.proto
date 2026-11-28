@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+package lab.v1;
+
+import "lab/v1/common.proto";
+
+service ShadowService {
+  rpc StartShadowDeployment(StartShadowDeploymentRequest) returns (StartShadowDeploymentResponse);
+  rpc StopShadowDeployment(StopShadowDeploymentRequest) returns (StopShadowDeploymentResponse);
+  rpc GetShadowSnapshot(GetShadowSnapshotRequest) returns (GetShadowSnapshotResponse);
+}
+
+message StartShadowDeploymentRequest {
+  string symbol = 1;
+  int64 rule_version_id = 2;
+}
+
+message StartShadowDeploymentResponse {
+  int64 deployment_id = 1;
+}
+
+message StopShadowDeploymentRequest {
+  int64 deployment_id = 1;
+}
+
+message StopShadowDeploymentResponse {}
+
+message GetShadowSnapshotRequest {
+  // Zero selects the active deployment or, if none is active, the most recent one.
+  int64 deployment_id = 1;
+}
+
+enum ShadowState {
+  SHADOW_STATE_UNSPECIFIED = 0;
+  SHADOW_STATE_ACTIVE = 1;
+  SHADOW_STATE_COMPLETE = 2;
+  SHADOW_STATE_STOPPED = 3;
+  SHADOW_STATE_GAP = 4;
+  SHADOW_STATE_BUILD_CHANGED = 5;
+}
+
+enum ShadowGate {
+  SHADOW_GATE_UNSPECIFIED = 0;
+  SHADOW_GATE_NO_SIGNAL = 1;
+  SHADOW_GATE_PENDING = 2;
+  SHADOW_GATE_ALLOW = 3;
+  SHADOW_GATE_BLOCK = 4;
+  SHADOW_GATE_UNAVAILABLE = 5;
+}
+
+message ShadowDeployment {
+  int64 id = 1;
+  string symbol = 2;
+  int64 rule_version_id = 3;
+  string report_id = 4;
+  int64 registered_at_unix_ms = 5;
+  int64 start_at_unix_ms = 6;
+  int64 end_at_unix_ms = 7;
+  ShadowState state = 8;
+  Money capital = 9;
+  Decimal fee_rate = 10;
+  Decimal slippage_rate = 11;
+  string fill_model = 12;
+  string ai_model = 13;
+  string ai_prompt_version = 14;
+  string rule_content_hash = 15;
+  string engine_build = 16;
+}
+
+message ShadowObservation {
+  int64 candle_closed_at_unix_ms = 1;
+  int64 observed_at_unix_ms = 2;
+  int64 decision_at_unix_ms = 3;
+  ShadowGate gate = 4;
+  Money reference_close = 5;
+  int64 gate_resolved_at_unix_ms = 6;
+}
+
+message ShadowTrack {
+  repeated Metric metrics = 1;
+  int32 entries = 2;
+}
+
+message GetShadowSnapshotResponse {
+  repeated ShadowDeployment deployments = 1;
+  ShadowDeployment selected = 2;
+  repeated ShadowObservation observations = 3;
+  ShadowTrack baseline = 4;
+  ShadowTrack ai = 5;
+  int32 sampled_hours = 6;
+  int64 input_tokens = 7;
+  int64 output_tokens = 8;
+  repeated string symbols = 9;
+  bool assistant_enabled = 10;
+}
