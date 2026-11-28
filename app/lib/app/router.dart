@@ -22,6 +22,7 @@ import '../features/reports/compare_screen.dart';
 import '../features/reports/report_screen.dart';
 import '../features/reports/reports_screen.dart';
 import '../features/settings/settings_screen.dart';
+import '../features/shadow/shadow_screen.dart';
 import '../shell/app_shell.dart';
 import 'nav.dart';
 
@@ -95,6 +96,15 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
         GoRoute(
           path: Dest.learning.path,
           pageBuilder: (context, state) => _page(context, state, const LearningScreen()),
+        ),
+        GoRoute(path: Dest.shadow.path, pageBuilder: (context, state) => _page(context, state, const ShadowScreen())),
+        GoRoute(
+          path: '/shadow/:id',
+          redirect: (context, state) {
+            final id = Int64.tryParseInt(state.pathParameters['id'] ?? '');
+            return id == null || id <= Int64.ZERO ? Dest.shadow.path : null;
+          },
+          pageBuilder: (context, state) => _page(context, state, ShadowScreen(id: Int64.parseInt(state.pathParameters['id']!))),
         ),
         GoRoute(
           path: Dest.chart.path,

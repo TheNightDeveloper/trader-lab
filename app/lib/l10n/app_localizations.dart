@@ -243,6 +243,216 @@ abstract class L10n {
   /// **'حساب مجازی'**
   String get navPaper;
 
+  /// No description provided for @navShadow.
+  ///
+  /// In fa, this message translates to:
+  /// **'اجرای سایه'**
+  String get navShadow;
+
+  /// No description provided for @screenShadowSub.
+  ///
+  /// In fa, this message translates to:
+  /// **'مقایسهٔ آینده‌نگر دو اجرای شبیه‌سازی‌شده با قواعد مشترک و فیلتر ورود AI'**
+  String get screenShadowSub;
+
+  /// No description provided for @shadowStart.
+  ///
+  /// In fa, this message translates to:
+  /// **'اجرای سایهٔ جدید'**
+  String get shadowStart;
+
+  /// No description provided for @shadowStartHelp.
+  ///
+  /// In fa, this message translates to:
+  /// **'نماد و نسخهٔ دارای بک‌تست ساعتی را انتخاب کنید. سرمایه و هزینه‌ها از همان گزارش ثبت می‌شوند. اجرا از ساعت کامل بعدی به مدت ۷ روز نمونه می‌گیرد و برای سیگنال‌های ورود از سهمیهٔ روزانهٔ دستیار استفاده می‌کند.'**
+  String get shadowStartHelp;
+
+  /// No description provided for @shadowLoading.
+  ///
+  /// In fa, this message translates to:
+  /// **'در حال دریافت وضعیت اجرای سایه…'**
+  String get shadowLoading;
+
+  /// No description provided for @shadowEmpty.
+  ///
+  /// In fa, this message translates to:
+  /// **'هنوز اجرای سایه‌ای ثبت نشده است.'**
+  String get shadowEmpty;
+
+  /// No description provided for @shadowProviderUnavailable.
+  ///
+  /// In fa, this message translates to:
+  /// **'برای ثبت اجرای تازه، جریان بازار و دستیار را در موتور فعال کنید.'**
+  String get shadowProviderUnavailable;
+
+  /// No description provided for @shadowRegister.
+  ///
+  /// In fa, this message translates to:
+  /// **'ثبت اجرای آینده‌نگر'**
+  String get shadowRegister;
+
+  /// No description provided for @shadowRegistering.
+  ///
+  /// In fa, this message translates to:
+  /// **'در حال ثبت اجرا…'**
+  String get shadowRegistering;
+
+  /// No description provided for @shadowStop.
+  ///
+  /// In fa, this message translates to:
+  /// **'توقف اجرا'**
+  String get shadowStop;
+
+  /// No description provided for @shadowStopConfirm.
+  ///
+  /// In fa, this message translates to:
+  /// **'با توقف، نمونه‌برداری آینده پایان می‌یابد و نتایج ثبت‌شده برای مرور در دسترس می‌مانند.'**
+  String get shadowStopConfirm;
+
+  /// No description provided for @shadowAssumptions.
+  ///
+  /// In fa, this message translates to:
+  /// **'فرض‌های ثبت‌شدهٔ اجرا'**
+  String get shadowAssumptions;
+
+  /// No description provided for @shadowRegisteredAt.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان ثبت اجرا'**
+  String get shadowRegisteredAt;
+
+  /// No description provided for @shadowWindow.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازهٔ ثبت‌شده'**
+  String get shadowWindow;
+
+  /// No description provided for @shadowFillAssumption.
+  ///
+  /// In fa, this message translates to:
+  /// **'تصمیم مشترک دو دقیقه بعد از بسته‌شدن کندل ساعتی ثبت می‌شود. اجرای فرضی از اولین بازشدن مجاز بعد از تصمیم استفاده می‌کند. فیلتر AI فقط ورود را بررسی می‌کند.'**
+  String get shadowFillAssumption;
+
+  /// No description provided for @shadowAwaiting.
+  ///
+  /// In fa, this message translates to:
+  /// **'نتیجهٔ مقایسه پس از نخستین کندل کامل و رسیدن به زمان تصمیم مشترک نمایش داده می‌شود.'**
+  String get shadowAwaiting;
+
+  /// No description provided for @shadowResults.
+  ///
+  /// In fa, this message translates to:
+  /// **'نتیجهٔ شبیه‌سازی'**
+  String get shadowResults;
+
+  /// No description provided for @shadowBaseline.
+  ///
+  /// In fa, this message translates to:
+  /// **'سیاست پایه'**
+  String get shadowBaseline;
+
+  /// No description provided for @shadowAi.
+  ///
+  /// In fa, this message translates to:
+  /// **'فیلتر AI'**
+  String get shadowAi;
+
+  /// No description provided for @shadowEntries.
+  ///
+  /// In fa, this message translates to:
+  /// **'ورودهای شبیه‌سازی‌شده'**
+  String get shadowEntries;
+
+  /// No description provided for @shadowCommonHours.
+  ///
+  /// In fa, this message translates to:
+  /// **'نمونهٔ مشترک {hours} کندل ساعتی'**
+  String shadowCommonHours(int hours);
+
+  /// No description provided for @shadowUsage.
+  ///
+  /// In fa, this message translates to:
+  /// **'مصرف مدل {input} توکن ورودی و {output} توکن خروجی'**
+  String shadowUsage(String input, String output);
+
+  /// No description provided for @shadowObservations.
+  ///
+  /// In fa, this message translates to:
+  /// **'شواهد کندل و تصمیم فیلتر'**
+  String get shadowObservations;
+
+  /// No description provided for @shadowDecisionAt.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان تصمیم مشترک'**
+  String get shadowDecisionAt;
+
+  /// No description provided for @shadowGateAt.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان پاسخ فیلتر'**
+  String get shadowGateAt;
+
+  /// No description provided for @shadowActive.
+  ///
+  /// In fa, this message translates to:
+  /// **'اجرای فعال'**
+  String get shadowActive;
+
+  /// No description provided for @shadowComplete.
+  ///
+  /// In fa, this message translates to:
+  /// **'دوره کامل شد'**
+  String get shadowComplete;
+
+  /// No description provided for @shadowStopped.
+  ///
+  /// In fa, this message translates to:
+  /// **'متوقف‌شده'**
+  String get shadowStopped;
+
+  /// No description provided for @shadowGap.
+  ///
+  /// In fa, this message translates to:
+  /// **'پایان نمونه‌برداری به‌دلیل وقفهٔ داده'**
+  String get shadowGap;
+
+  /// No description provided for @shadowBuildChanged.
+  ///
+  /// In fa, this message translates to:
+  /// **'پایان نمونه‌برداری به‌دلیل تغییر نسخهٔ موتور یا سیاست'**
+  String get shadowBuildChanged;
+
+  /// No description provided for @shadowNoSignal.
+  ///
+  /// In fa, this message translates to:
+  /// **'بدون سیگنال ورود'**
+  String get shadowNoSignal;
+
+  /// No description provided for @shadowPending.
+  ///
+  /// In fa, this message translates to:
+  /// **'در حال بررسی'**
+  String get shadowPending;
+
+  /// No description provided for @shadowAllow.
+  ///
+  /// In fa, this message translates to:
+  /// **'ورود مجاز'**
+  String get shadowAllow;
+
+  /// No description provided for @shadowBlock.
+  ///
+  /// In fa, this message translates to:
+  /// **'ورود رد شد'**
+  String get shadowBlock;
+
+  /// No description provided for @shadowGateUnavailable.
+  ///
+  /// In fa, this message translates to:
+  /// **'فیلتر در دسترس نبود و ورود انجام نشد'**
+  String get shadowGateUnavailable;
+
   /// No description provided for @screenPaperSub.
   ///
   /// In fa, this message translates to:

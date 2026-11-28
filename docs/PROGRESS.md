@@ -2,6 +2,28 @@
 
 Update at the end of every session.
 
+## P4 prospective Shadow deployment (2026-11-28)
+
+Shadow registers one active hourly run for a USDT spot symbol. It pins the
+rule, report, simulation assumptions and AI policy for a seven-day window
+starting at the next full UTC hour. The worker captures each candle before a
+fixed cutoff. Both tracks reuse the causal simulator with independent capital.
+The AI filter can veto an entry. The rule governs exits on both tracks.
+
+The Shadow page lists registered assumptions, captured candle times, gate
+outcomes, simulated metrics and separate token usage. An interrupted data
+window retains its observed prefix. Model unavailability vetoes new filtered
+entries and leaves baseline and exits running. Existing Paper accounts are
+independent of the Shadow simulation.
+
+PostgreSQL tests covered the common decision cutoff, missed-hour termination,
+immutable candle evidence, continued exits after model failure and an unchanged
+Paper ledger. Chrome verified registration, live capture, review and stopping at
+390 and 1440 pixels against a controlled market clock and provider.
+
+The user-decision track, attribution dashboard, and daily review are the next
+Shadow and P4 slices. The seven-day live observation gate is still open.
+
 ## P4 natural-language strategy draft (2026-11-28)
 
 The rule library accepts a Persian strategy description with entry, exit,

@@ -90,6 +90,122 @@ class L10nFa extends L10n {
   String get navPaper => 'حساب مجازی';
 
   @override
+  String get navShadow => 'اجرای سایه';
+
+  @override
+  String get screenShadowSub =>
+      'مقایسهٔ آینده‌نگر دو اجرای شبیه‌سازی‌شده با قواعد مشترک و فیلتر ورود AI';
+
+  @override
+  String get shadowStart => 'اجرای سایهٔ جدید';
+
+  @override
+  String get shadowStartHelp =>
+      'نماد و نسخهٔ دارای بک‌تست ساعتی را انتخاب کنید. سرمایه و هزینه‌ها از همان گزارش ثبت می‌شوند. اجرا از ساعت کامل بعدی به مدت ۷ روز نمونه می‌گیرد و برای سیگنال‌های ورود از سهمیهٔ روزانهٔ دستیار استفاده می‌کند.';
+
+  @override
+  String get shadowLoading => 'در حال دریافت وضعیت اجرای سایه…';
+
+  @override
+  String get shadowEmpty => 'هنوز اجرای سایه‌ای ثبت نشده است.';
+
+  @override
+  String get shadowProviderUnavailable =>
+      'برای ثبت اجرای تازه، جریان بازار و دستیار را در موتور فعال کنید.';
+
+  @override
+  String get shadowRegister => 'ثبت اجرای آینده‌نگر';
+
+  @override
+  String get shadowRegistering => 'در حال ثبت اجرا…';
+
+  @override
+  String get shadowStop => 'توقف اجرا';
+
+  @override
+  String get shadowStopConfirm =>
+      'با توقف، نمونه‌برداری آینده پایان می‌یابد و نتایج ثبت‌شده برای مرور در دسترس می‌مانند.';
+
+  @override
+  String get shadowAssumptions => 'فرض‌های ثبت‌شدهٔ اجرا';
+
+  @override
+  String get shadowRegisteredAt => 'زمان ثبت اجرا';
+
+  @override
+  String get shadowWindow => 'بازهٔ ثبت‌شده';
+
+  @override
+  String get shadowFillAssumption =>
+      'تصمیم مشترک دو دقیقه بعد از بسته‌شدن کندل ساعتی ثبت می‌شود. اجرای فرضی از اولین بازشدن مجاز بعد از تصمیم استفاده می‌کند. فیلتر AI فقط ورود را بررسی می‌کند.';
+
+  @override
+  String get shadowAwaiting =>
+      'نتیجهٔ مقایسه پس از نخستین کندل کامل و رسیدن به زمان تصمیم مشترک نمایش داده می‌شود.';
+
+  @override
+  String get shadowResults => 'نتیجهٔ شبیه‌سازی';
+
+  @override
+  String get shadowBaseline => 'سیاست پایه';
+
+  @override
+  String get shadowAi => 'فیلتر AI';
+
+  @override
+  String get shadowEntries => 'ورودهای شبیه‌سازی‌شده';
+
+  @override
+  String shadowCommonHours(int hours) {
+    return 'نمونهٔ مشترک $hours کندل ساعتی';
+  }
+
+  @override
+  String shadowUsage(String input, String output) {
+    return 'مصرف مدل $input توکن ورودی و $output توکن خروجی';
+  }
+
+  @override
+  String get shadowObservations => 'شواهد کندل و تصمیم فیلتر';
+
+  @override
+  String get shadowDecisionAt => 'زمان تصمیم مشترک';
+
+  @override
+  String get shadowGateAt => 'زمان پاسخ فیلتر';
+
+  @override
+  String get shadowActive => 'اجرای فعال';
+
+  @override
+  String get shadowComplete => 'دوره کامل شد';
+
+  @override
+  String get shadowStopped => 'متوقف‌شده';
+
+  @override
+  String get shadowGap => 'پایان نمونه‌برداری به‌دلیل وقفهٔ داده';
+
+  @override
+  String get shadowBuildChanged =>
+      'پایان نمونه‌برداری به‌دلیل تغییر نسخهٔ موتور یا سیاست';
+
+  @override
+  String get shadowNoSignal => 'بدون سیگنال ورود';
+
+  @override
+  String get shadowPending => 'در حال بررسی';
+
+  @override
+  String get shadowAllow => 'ورود مجاز';
+
+  @override
+  String get shadowBlock => 'ورود رد شد';
+
+  @override
+  String get shadowGateUnavailable => 'فیلتر در دسترس نبود و ورود انجام نشد';
+
+  @override
   String get screenPaperSub => 'موجودی USDT و حدود ریسک معاملات آزمایشی اسپات';
 
   @override
