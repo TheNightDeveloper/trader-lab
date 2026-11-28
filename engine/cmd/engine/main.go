@@ -147,6 +147,7 @@ func run() error {
 		route(labv1connect.NewAssistantServiceHandler(assistantService)),
 		route(labv1connect.NewShadowServiceHandler(shadowService)),
 		route(labv1connect.NewPaperServiceHandler(paperService)),
+		route(labv1connect.NewDailyReviewServiceHandler(&api.DailyReview{Paper: paperService})),
 		route(labv1connect.NewFxServiceHandler(fxSvc)),
 		route(labv1connect.NewReportServiceHandler(&api.Report{Svc: reports, Limiter: limiter})),
 		route(labv1connect.NewPnlServiceHandler(&api.Pnl{Svc: reports, Limiter: limiter})),

@@ -92,6 +92,12 @@ type CycleCandidate struct {
 	Result     []byte
 }
 
+type DailyReviewStatus struct {
+	Singleton       bool
+	ReminderEnabled bool
+	ReviewedDay     *time.Time
+}
+
 type Dataset struct {
 	ID        string
 	Symbol    string

@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package lab.v1;
+
+import "lab/v1/common.proto";
+import "lab/v1/market.proto";
+import "lab/v1/paper.proto";
+import "lab/v1/shadow.proto";
+
+service DailyReviewService {
+  rpc GetDailyReview(GetDailyReviewRequest) returns (GetDailyReviewResponse);
+  rpc GetDailyReviewStatus(GetDailyReviewStatusRequest) returns (GetDailyReviewStatusResponse);
+  rpc SetDailyReviewReminder(SetDailyReviewReminderRequest) returns (SetDailyReviewReminderResponse);
+  rpc MarkDailyReviewRead(MarkDailyReviewReadRequest) returns (MarkDailyReviewReadResponse);
+}
+
+message GetDailyReviewRequest {}
+
+message GetDailyReviewResponse {
+  DailyReviewStatus status = 1;
+  int64 as_of_unix_ms = 2;
+  PaperAccount paper_account = 3;
+  repeated PaperPosition positions = 4;
+  PaperReconciliation reconciliation = 5;
+  // Empty when an open position has no valid mark or the total mark is zero.
+  repeated DailyReviewExposure exposure = 6;
+  repeated MarketOpportunity open_window = 7;
+  repeated MarketOpportunity expired = 8;
+  int64 open_window_count = 9;
+  int64 expired_count = 10;
+  ShadowDeployment shadow = 11;
+  repeated DailyReviewEvent events = 12;
+  string shadow_rule_title = 13;
+}
+
+message DailyReviewExposure {
+  string symbol = 1;
+  Money market_value = 2;
+  Decimal share_of_open_value = 3;
+}
+
+message DailyReviewEvent {
+  string symbol = 1;
+  string kind = 2;
+  int64 detected_at_unix_ms = 3;
+  string detail = 4;
+}
+
+message DailyReviewStatus {
+  int64 day_start_unix_ms = 1;
+  bool reminder_enabled = 2;
+  bool reviewed_today = 3;
+}
+
+message GetDailyReviewStatusRequest {}
+message GetDailyReviewStatusResponse {
+  DailyReviewStatus status = 1;
+}
+
+message SetDailyReviewReminderRequest {
+  optional bool enabled = 1;
+}
+message SetDailyReviewReminderResponse {
+  DailyReviewStatus status = 1;
+}
+
+message MarkDailyReviewReadRequest {
+  int64 day_start_unix_ms = 1;
+}
+message MarkDailyReviewReadResponse {
+  DailyReviewStatus status = 1;
+}

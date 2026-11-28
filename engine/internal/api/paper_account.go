@@ -126,105 +126,109 @@ func (p *Paper) InitializePaperAccount(ctx context.Context, req *connect.Request
 func (p *Paper) readPaperBook(ctx context.Context) (*labv1.GetPaperAccountResponse, error) {
 	book := &labv1.GetPaperAccountResponse{}
 	err := p.Market.Store.InTxOptions(ctx, pgx.TxOptions{IsoLevel: pgx.RepeatableRead, AccessMode: pgx.ReadOnly}, func(q *db.Queries) error {
-		row, err := q.ReadPaperAccount(ctx, paperAccountID)
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil
-		}
-		if err != nil {
-			return err
-		}
-		positions, err := q.ListPaperPositions(ctx, row.ID)
-		if err != nil {
-			return err
-		}
-		now := p.Market.Clock.Now()
-		ledger, err := q.ReconcilePaperBook(ctx, row.ID)
-		if err != nil {
-			return err
-		}
-		book.Reconciliation = paperReconciliationP(ledger, now)
-		var equity int64
-		matched := paperReconciled(ledger)
-		if matched {
-			equity, err = money.AddInt64(row.CashAvailable, row.CashReserved)
-			if err != nil {
-				return err
-			}
-		}
-		var stale bool
-		for _, position := range positions {
-			entry, err := readPaperEntry(ctx, q, position.EntryID)
-			if err != nil {
-				return err
-			}
-			plan, err := readPaperPlan(ctx, q, entry.PlanHash)
-			if err != nil {
-				return err
-			}
-			spec, ok := paperExecutionSpec(plan.GetInstrument())
-			if !ok {
-				return fmt.Errorf("paper position %d has an unknown instrument revision", position.EntryID)
-			}
-			view := &labv1.PaperPosition{
-				ReceiptId: position.EntryID, Symbol: position.Symbol,
-				Quantity: moneyP(money.Amount{Asset: spec.Base, V: position.Quantity}), CostBasis: usdtP(position.CostBasis),
-				Revision: position.Revision, Lot: moneyP(money.Amount{Asset: spec.Base, V: spec.Lot.V}),
-			}
-			reduction, err := q.PendingPaperReduction(ctx, position.EntryID)
-			if err == nil {
-				view.PendingReduction = paperReductionP(position.Symbol, reduction)
-			} else if !errors.Is(err, pgx.ErrNoRows) {
-				return err
-			}
-			if !ledger.PositionsMatch {
-				view.MarketValue = invalidPaperValue()
-				book.Positions = append(book.Positions, view)
-				continue
-			}
-			candle, err := p.paperCandle(ctx, q, position.Symbol, now, time.Time{})
-			if errors.Is(err, errMarketFeed) {
-				stale = true
-				view.MarketValue = stalePaperValue()
-			} else {
-				if err != nil {
-					return err
-				}
-				value, err := money.MulScaled(position.Quantity, spec.Base.Scale, candle.C, instrument.Scale, instrument.Scale, money.Floor)
-				if err != nil {
-					return err
-				}
-				if matched {
-					equity, err = money.AddInt64(equity, value)
-					if err != nil {
-						return err
-					}
-				}
-				view.MarketValue = paperMoneyValue(value)
-			}
-			book.Positions = append(book.Positions, view)
-		}
-		mark := paperMoneyValue(equity)
-		if stale {
-			mark = stalePaperValue()
-		}
-		if !matched {
-			mark = invalidPaperValue()
-		}
-		book.PaperAccount = paperAccountP(row, now, mark)
-		if !ledger.CashMatches || !ledger.ReservationsMatch {
-			book.PaperAccount.Snapshot.AvailableBalance = invalidPaperValue()
-			book.PaperAccount.ReservedBalance = nil
-		}
-		entries, err := q.RecentPaperEntries(ctx, row.ID)
-		if err != nil {
-			return err
-		}
-		for _, entry := range entries {
-			book.RecentReceipts = append(book.RecentReceipts, paperReceiptP(entry))
-		}
-		return nil
+		return p.readPaperBookAt(ctx, q, book, p.Market.Clock.Now())
 	})
 	return book, err
+}
+
+// Keep Paper and Daily Review on the same reconciliation and mark-to-market path.
+func (p *Paper) readPaperBookAt(ctx context.Context, q *db.Queries, book *labv1.GetPaperAccountResponse, now time.Time) error {
+	row, err := q.ReadPaperAccount(ctx, paperAccountID)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	positions, err := q.ListPaperPositions(ctx, row.ID)
+	if err != nil {
+		return err
+	}
+	ledger, err := q.ReconcilePaperBook(ctx, row.ID)
+	if err != nil {
+		return err
+	}
+	book.Reconciliation = paperReconciliationP(ledger, now)
+	var equity int64
+	matched := paperReconciled(ledger)
+	if matched {
+		equity, err = money.AddInt64(row.CashAvailable, row.CashReserved)
+		if err != nil {
+			return err
+		}
+	}
+	var stale bool
+	for _, position := range positions {
+		entry, err := readPaperEntry(ctx, q, position.EntryID)
+		if err != nil {
+			return err
+		}
+		plan, err := readPaperPlan(ctx, q, entry.PlanHash)
+		if err != nil {
+			return err
+		}
+		spec, ok := paperExecutionSpec(plan.GetInstrument())
+		if !ok {
+			return fmt.Errorf("paper position %d has an unknown instrument revision", position.EntryID)
+		}
+		view := &labv1.PaperPosition{
+			ReceiptId: position.EntryID, Symbol: position.Symbol,
+			Quantity: moneyP(money.Amount{Asset: spec.Base, V: position.Quantity}), CostBasis: usdtP(position.CostBasis),
+			Revision: position.Revision, Lot: moneyP(money.Amount{Asset: spec.Base, V: spec.Lot.V}),
+		}
+		reduction, err := q.PendingPaperReduction(ctx, position.EntryID)
+		if err == nil {
+			view.PendingReduction = paperReductionP(position.Symbol, reduction)
+		} else if !errors.Is(err, pgx.ErrNoRows) {
+			return err
+		}
+		if !ledger.PositionsMatch {
+			view.MarketValue = invalidPaperValue()
+			book.Positions = append(book.Positions, view)
+			continue
+		}
+		candle, err := p.paperCandle(ctx, q, position.Symbol, now, time.Time{})
+		if errors.Is(err, errMarketFeed) {
+			stale = true
+			view.MarketValue = stalePaperValue()
+		} else {
+			if err != nil {
+				return err
+			}
+			value, err := money.MulScaled(position.Quantity, spec.Base.Scale, candle.C, instrument.Scale, instrument.Scale, money.Floor)
+			if err != nil {
+				return err
+			}
+			if matched {
+				equity, err = money.AddInt64(equity, value)
+				if err != nil {
+					return err
+				}
+			}
+			view.MarketValue = paperMoneyValue(value)
+		}
+		book.Positions = append(book.Positions, view)
+	}
+	mark := paperMoneyValue(equity)
+	if stale {
+		mark = stalePaperValue()
+	}
+	if !matched {
+		mark = invalidPaperValue()
+	}
+	book.PaperAccount = paperAccountP(row, now, mark)
+	if !ledger.CashMatches || !ledger.ReservationsMatch {
+		book.PaperAccount.Snapshot.AvailableBalance = invalidPaperValue()
+		book.PaperAccount.ReservedBalance = nil
+	}
+	entries, err := q.RecentPaperEntries(ctx, row.ID)
+	if err != nil {
+		return err
+	}
+	for _, entry := range entries {
+		book.RecentReceipts = append(book.RecentReceipts, paperReceiptP(entry))
+	}
+	return nil
 }
 
 func paperPolicyP(row db.ReadPaperAccountRow) *labv1.RiskPolicyVersion {

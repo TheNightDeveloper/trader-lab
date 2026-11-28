@@ -611,3 +611,18 @@ Attribution compares observed-prefix metrics and sets of emitted entry decisions
 against baseline, keyed by the signal candle. A decision and its simulated fill
 are separate evidence. Operator-provided token rates are immutable per deployment
 and are applied to observed usage outside the simulated trading metrics.
+
+## ADR-068 Compose Daily Review from recorded workspace data
+
+Daily Review uses the engine's UTC day and one read-only database snapshot.
+It reads reconciled Paper positions, checks open opportunities against committed
+feed candles, and links to the active or most recent Shadow run. Concentration
+is each symbol's share of the total marked value of open Paper positions. A
+missing mark suppresses the concentration calculation. Data-quality events come
+from issues detected today for watched symbols, open positions, or the selected
+Shadow run.
+
+The in-app reminder is opt-in. PostgreSQL stores the setting and the last
+acknowledged UTC day. Opening the review leaves it unread until explicitly
+marked. Duplicate acknowledgements of the same day are idempotent. An open page
+from the previous day cannot mark the new day as reviewed.
