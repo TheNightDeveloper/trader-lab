@@ -1263,11 +1263,11 @@ abstract class L10n {
   /// **'دریافت توضیح دستیار ممکن نشد. شواهد موتور در همین بخش قابل بررسی‌اند.'**
   String get assistantOpportunityFailed;
 
-  /// No description provided for @assistantOpportunityDisabled.
+  /// No description provided for @assistantUnavailable.
   ///
   /// In fa, this message translates to:
-  /// **'دستیار برای این فرصت در دسترس نیست.'**
-  String get assistantOpportunityDisabled;
+  /// **'دستیار برای این شواهد در دسترس نیست.'**
+  String get assistantUnavailable;
 
   /// No description provided for @assistantOpportunityQuota.
   ///
@@ -1278,7 +1278,7 @@ abstract class L10n {
   /// No description provided for @assistantOpportunityInProgress.
   ///
   /// In fa, this message translates to:
-  /// **'توضیح همین فرصت در حال دریافت است. کمی بعد دوباره بررسی کنید.'**
+  /// **'توضیح همین شواهد در حال دریافت است. کمی بعد دوباره بررسی کنید.'**
   String get assistantOpportunityInProgress;
 
   /// No description provided for @assistantOpportunityRule.
@@ -1310,6 +1310,72 @@ abstract class L10n {
   /// In fa, this message translates to:
   /// **'توضیح ذخیره‌شده'**
   String get assistantOpportunityCached;
+
+  /// No description provided for @assistantResearchTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'دستیار مرور گزارش'**
+  String get assistantResearchTitle;
+
+  /// No description provided for @assistantResearchCompareTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'دستیار مقایسهٔ گزارش‌ها'**
+  String get assistantResearchCompareTitle;
+
+  /// No description provided for @assistantResearchProvider.
+  ///
+  /// In fa, this message translates to:
+  /// **'برای مرور با مدل، فقط معیارهای بازده، افت سرمایه و تعداد معاملات بستهٔ خارج از نمونه به OpenAI فرستاده می‌شوند.'**
+  String get assistantResearchProvider;
+
+  /// No description provided for @assistantResearchAssumptions.
+  ///
+  /// In fa, this message translates to:
+  /// **'موتور اختلاف‌هایی در فرض‌های اجرا پیدا کرد. مرور را از همین اختلاف‌ها شروع کنید.'**
+  String get assistantResearchAssumptions;
+
+  /// No description provided for @assistantResearchReturn.
+  ///
+  /// In fa, this message translates to:
+  /// **'مرور را از بازده خالص خارج از نمونه شروع کنید. این معیار به دورهٔ ثبت‌شده در گزارش محدود است.'**
+  String get assistantResearchReturn;
+
+  /// No description provided for @assistantResearchDrawdown.
+  ///
+  /// In fa, this message translates to:
+  /// **'مرور را از بیشترین افت سرمایه خارج از نمونه شروع کنید. این افت فاصلهٔ یک قله تا کف بعدی را نشان می‌دهد.'**
+  String get assistantResearchDrawdown;
+
+  /// No description provided for @assistantResearchSample.
+  ///
+  /// In fa, this message translates to:
+  /// **'مرور را از تعداد معاملات بستهٔ خارج از نمونه شروع کنید. نمونهٔ کوچک دامنهٔ نتیجه‌گیری را محدود می‌کند.'**
+  String get assistantResearchSample;
+
+  /// No description provided for @assistantResearchThin.
+  ///
+  /// In fa, this message translates to:
+  /// **'رسیدن دست‌کم به {minimum} معاملهٔ بسته برای همهٔ گزارش‌ها احراز نشده است. نتیجه را با توجه به محدودیت نمونه بخوانید.'**
+  String assistantResearchThin(int minimum);
+
+  /// No description provided for @assistantResearchSources.
+  ///
+  /// In fa, this message translates to:
+  /// **'مشاهدهٔ منابع گزارش'**
+  String get assistantResearchSources;
+
+  /// No description provided for @assistantResearchOos.
+  ///
+  /// In fa, this message translates to:
+  /// **'دورهٔ خارج از نمونه'**
+  String get assistantResearchOos;
+
+  /// No description provided for @assistantResearchMissingMetric.
+  ///
+  /// In fa, this message translates to:
+  /// **'این معیار برای این گزارش در دسترس نیست.'**
+  String get assistantResearchMissingMetric;
 
   /// No description provided for @assistantOpportunityTokens.
   ///

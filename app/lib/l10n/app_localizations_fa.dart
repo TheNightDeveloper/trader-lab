@@ -624,8 +624,7 @@ class L10nFa extends L10n {
       'دریافت توضیح دستیار ممکن نشد. شواهد موتور در همین بخش قابل بررسی‌اند.';
 
   @override
-  String get assistantOpportunityDisabled =>
-      'دستیار برای این فرصت در دسترس نیست.';
+  String get assistantUnavailable => 'دستیار برای این شواهد در دسترس نیست.';
 
   @override
   String get assistantOpportunityQuota =>
@@ -633,7 +632,7 @@ class L10nFa extends L10n {
 
   @override
   String get assistantOpportunityInProgress =>
-      'توضیح همین فرصت در حال دریافت است. کمی بعد دوباره بررسی کنید.';
+      'توضیح همین شواهد در حال دریافت است. کمی بعد دوباره بررسی کنید.';
 
   @override
   String get assistantOpportunityRule =>
@@ -652,6 +651,47 @@ class L10nFa extends L10n {
 
   @override
   String get assistantOpportunityCached => 'توضیح ذخیره‌شده';
+
+  @override
+  String get assistantResearchTitle => 'دستیار مرور گزارش';
+
+  @override
+  String get assistantResearchCompareTitle => 'دستیار مقایسهٔ گزارش‌ها';
+
+  @override
+  String get assistantResearchProvider =>
+      'برای مرور با مدل، فقط معیارهای بازده، افت سرمایه و تعداد معاملات بستهٔ خارج از نمونه به OpenAI فرستاده می‌شوند.';
+
+  @override
+  String get assistantResearchAssumptions =>
+      'موتور اختلاف‌هایی در فرض‌های اجرا پیدا کرد. مرور را از همین اختلاف‌ها شروع کنید.';
+
+  @override
+  String get assistantResearchReturn =>
+      'مرور را از بازده خالص خارج از نمونه شروع کنید. این معیار به دورهٔ ثبت‌شده در گزارش محدود است.';
+
+  @override
+  String get assistantResearchDrawdown =>
+      'مرور را از بیشترین افت سرمایه خارج از نمونه شروع کنید. این افت فاصلهٔ یک قله تا کف بعدی را نشان می‌دهد.';
+
+  @override
+  String get assistantResearchSample =>
+      'مرور را از تعداد معاملات بستهٔ خارج از نمونه شروع کنید. نمونهٔ کوچک دامنهٔ نتیجه‌گیری را محدود می‌کند.';
+
+  @override
+  String assistantResearchThin(int minimum) {
+    return 'رسیدن دست‌کم به $minimum معاملهٔ بسته برای همهٔ گزارش‌ها احراز نشده است. نتیجه را با توجه به محدودیت نمونه بخوانید.';
+  }
+
+  @override
+  String get assistantResearchSources => 'مشاهدهٔ منابع گزارش';
+
+  @override
+  String get assistantResearchOos => 'دورهٔ خارج از نمونه';
+
+  @override
+  String get assistantResearchMissingMetric =>
+      'این معیار برای این گزارش در دسترس نیست.';
 
   @override
   String assistantOpportunityTokens(int input, int output) {

@@ -15,6 +15,7 @@ import '../../gen/lab/v1/common.pb.dart' as pb;
 import '../../gen/lab/v1/report.pb.dart';
 import '../../l10n/app_localizations.dart';
 import '../page_frame.dart';
+import 'report_assistant.dart';
 import 'report_providers.dart';
 import 'report_screen.dart';
 
@@ -115,6 +116,10 @@ class CompareScreen extends ConsumerWidget {
               ],
           ],
         ),
+      ),
+      ReportAssistant(
+        reportIds: [for (final col in c.columns) col.reportId],
+        labels: [for (final (i, _) in c.columns.indexed) _label(i)],
       ),
       SectionCard(
         title: l.compareEquity,

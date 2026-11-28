@@ -19,6 +19,7 @@ import '../../gen/lab/v1/common.pb.dart' as pb;
 import '../../gen/lab/v1/report.pb.dart';
 import '../../l10n/app_localizations.dart';
 import '../page_frame.dart';
+import 'report_assistant.dart';
 import 'report_providers.dart';
 
 List<(DateTime, double)> equityPoints(List<pb.EquityPoint> pts) => [
@@ -95,6 +96,7 @@ class _ReportBody extends ConsumerWidget {
         ),
         if (r.spec.ruleVersionId > Int64.ZERO) _RuleRunProfile(report: r),
         pair(_Summary(r: r), _Waterfall(r: r)),
+        ReportAssistant(reportIds: [r.id]),
         SectionCard(
           title: l.reportEquity,
           trailing: Text('USDT', style: AppText.caption),

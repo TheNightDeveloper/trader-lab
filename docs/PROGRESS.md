@@ -2,6 +2,24 @@
 
 Update at the end of every session.
 
+## P4 strategy report assistant (2026-11-28)
+
+The report and comparison screens can request a review of one saved strategy
+run or up to six reports. The model can cite an available out-of-sample return,
+drawdown or closed-trade count. The engine supplies the values, report sources
+and sample-size warning. Comparisons with blocking differences show the exact
+assumptions from the comparison engine without spending assistant budget.
+
+The research review shares the opportunity assistant's daily cap, timeout,
+deduplication and durable usage records. The Flutter panels share the existing
+request, cancellation and retry flow. The Chrome release build passed at 390
+and 1440 pixels with a controlled provider, covering single-report review,
+matched comparison, reopening a cached result and mismatched assumptions.
+The verification opened no holdout results and made no paid model calls.
+
+The next P4 slice is natural-language drafts through the existing rule
+validator. Prospective Shadow policies, attribution and daily review follow.
+
 ## P4 opportunity assistant (2026-11-28)
 
 The first P4 slice explains where to start reviewing a recorded opportunity in
