@@ -611,7 +611,7 @@ class L10nFa extends L10n {
   String get assistantOpportunityRequest => 'دریافت توضیح';
 
   @override
-  String get assistantOpportunityLoading => 'در حال دریافت توضیح…';
+  String get assistantOpportunityLoading => 'در حال دریافت پاسخ دستیار…';
 
   @override
   String get assistantOpportunityCancel => 'لغو درخواست';
@@ -621,7 +621,7 @@ class L10nFa extends L10n {
 
   @override
   String get assistantOpportunityFailed =>
-      'دریافت توضیح دستیار ممکن نشد. شواهد موتور در همین بخش قابل بررسی‌اند.';
+      'دریافت پاسخ دستیار ممکن نشد. می‌توانید دوباره تلاش کنید.';
 
   @override
   String get assistantUnavailable => 'دستیار برای این شواهد در دسترس نیست.';
@@ -632,7 +632,7 @@ class L10nFa extends L10n {
 
   @override
   String get assistantOpportunityInProgress =>
-      'توضیح همین شواهد در حال دریافت است. کمی بعد دوباره بررسی کنید.';
+      'همین درخواست در حال پردازش است. کمی بعد دوباره بررسی کنید.';
 
   @override
   String get assistantOpportunityRule =>
@@ -692,6 +692,75 @@ class L10nFa extends L10n {
   @override
   String get assistantResearchMissingMetric =>
       'این معیار برای این گزارش در دسترس نیست.';
+
+  @override
+  String get assistantDraftTitle => 'پیش‌نویس از متن';
+
+  @override
+  String get assistantDraftDescription => 'توضیح استراتژی';
+
+  @override
+  String get assistantDraftExample =>
+      'مثال: روی کندل ۱ ساعته، بالای میانگین ۲۰ کندلی وارد شو و زیر میانگین ۱۰ کندلی خارج شو. سهم سرمایه ۲۵٪.';
+
+  @override
+  String get assistantDraftDisclosure =>
+      'متنی که اینجا وارد می‌کنید برای ساخت پیش‌نویس به OpenAI ارسال می‌شود.';
+
+  @override
+  String get assistantDraftSubmit => 'ساخت پیش‌نویس';
+
+  @override
+  String get assistantDraftReady => 'پیش‌نویس آمادهٔ بازبینی است';
+
+  @override
+  String get assistantDraftNeedsDefinition =>
+      'برای تهیهٔ پیش‌نویس، این موارد را در متن مشخص کنید';
+
+  @override
+  String get assistantDraftAskEntry =>
+      'در بسته‌شدن کندل کدام شرط باعث ورود می‌شود؟';
+
+  @override
+  String get assistantDraftAskExit =>
+      'کدام شرط روی کندل بسته‌شده باعث خروج می‌شود؟';
+
+  @override
+  String get assistantDraftAskExposure =>
+      'چه درصدی از سرمایه به موقعیت اختصاص یابد؟ درصد را با رقم بنویسید.';
+
+  @override
+  String get assistantDraftAskTimeframe =>
+      'بازهٔ پایهٔ کندل کدام است؟ ۱ یا ۱۵ دقیقه، ۱ یا ۴ ساعت، یا ۱ روز.';
+
+  @override
+  String get assistantDraftAskSupported =>
+      'شرط را با قواعد ورود و خروج اسپات و دادهٔ کندل بسته‌شده تعریف کنید.';
+
+  @override
+  String get assistantDraftAskParameters =>
+      'نام اندیکاتور، دوره و آستانه‌های لازم را مشخص کنید و عددها را با رقم بنویسید.';
+
+  @override
+  String assistantDraftEntry(String rule) {
+    return 'ورود وقتی $rule باشد.';
+  }
+
+  @override
+  String assistantDraftExit(String rule) {
+    return 'خروج وقتی $rule باشد.';
+  }
+
+  @override
+  String get assistantDraftExposure => 'سهم سرمایه';
+
+  @override
+  String assistantDraftData(String timeframe, int bars) {
+    return 'بازهٔ پایه $timeframe، با حداقل $bars کندل بسته برای بررسی قواعد';
+  }
+
+  @override
+  String get assistantDraftOpenEditor => 'بازبینی در ویرایشگر قواعد';
 
   @override
   String assistantOpportunityTokens(int input, int output) {

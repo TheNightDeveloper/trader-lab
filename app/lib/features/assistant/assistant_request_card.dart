@@ -13,18 +13,22 @@ import '../../l10n/app_localizations.dart';
 class AssistantRequestCard<T extends Object> extends ConsumerStatefulWidget {
   const AssistantRequestCard({
     super.key,
-    required this.title,
+    this.title,
     required this.disclosure,
     required this.request,
     required this.result,
+    this.requestLabel,
+    this.timeout = const Duration(seconds: 17),
     this.connected = true,
   });
 
-  final String title;
+  final String? title;
   final String disclosure;
   final Future<T> Function(AssistantServiceClient client, AbortSignal signal)
   request;
   final Widget Function(T reply) result;
+  final String? requestLabel;
+  final Duration timeout;
   final bool connected;
 
   @override
@@ -54,7 +58,7 @@ class _AssistantRequestCardState<T extends Object>
     try {
       final reply = await widget.request(
         client,
-        TimeoutSignal(const Duration(seconds: 17), parent: request),
+        TimeoutSignal(widget.timeout, parent: request),
       );
       if (!mounted || _request != request) return;
       setState(() => _reply = reply);
@@ -112,7 +116,8 @@ class _AssistantRequestCardState<T extends Object>
                       onPressed: widget.connected ? _explain : null,
                       child: Text(
                         error == null
-                            ? l.assistantOpportunityRequest
+                            ? widget.requestLabel ??
+                                  l.assistantOpportunityRequest
                             : l.assistantOpportunityRetry,
                       ),
                     ),

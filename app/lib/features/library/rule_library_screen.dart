@@ -15,6 +15,7 @@ import '../../core/widgets/num.dart';
 import '../../gen/lab/v1/library.pb.dart';
 import '../../l10n/app_localizations.dart';
 import '../page_frame.dart';
+import 'assistant_draft_dialog.dart';
 import 'rule_composer.dart';
 import 'rule_draft_dialog.dart';
 import 'rule_editor.dart';
@@ -34,14 +35,25 @@ class RuleLibraryScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _draft(BuildContext context, {RuleTemplate? template}) async {
+  Future<void> _draft(BuildContext context, {RuleTemplate? template, String? definition}) async {
     final version = await showDialog<RuleVersionSummary>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => RuleDraftDialog(template: template),
+      builder: (_) => RuleDraftDialog(template: template, definition: definition),
     );
     if (context.mounted && version != null) {
       context.go(ruleVersionPath(version.id));
+    }
+  }
+
+  Future<void> _draftFromText(BuildContext context) async {
+    final definition = await showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const AssistantDraftDialog(),
+    );
+    if (context.mounted && definition != null) {
+      await _draft(context, definition: definition);
     }
   }
 
@@ -59,6 +71,10 @@ class RuleLibraryScreen extends ConsumerWidget {
             onPressed: () => _compose(context),
             icon: const Icon(Icons.merge_type),
             label: const Text('ترکیب نسخه‌ها'),
+          ),
+          OutlinedButton(
+            onPressed: () => _draftFromText(context),
+            child: Text(L10n.of(context).assistantDraftTitle),
           ),
           FilledButton.icon(
             onPressed: () => _draft(context),

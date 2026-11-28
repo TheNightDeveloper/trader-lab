@@ -2,6 +2,23 @@
 
 Update at the end of every session.
 
+## P4 natural-language strategy draft (2026-11-28)
+
+The rule library accepts a Persian strategy description with entry, exit,
+capital percentage and base timeframe. The assistant returns clarification
+questions or an editable `rules/v1` AST and its required candle history. The
+engine compiles the AST and checks numeric literals against the input before
+presenting it. The existing editor handles review and explicit version saving.
+
+Draft inference shares the assistant quota. Concurrent identical submissions
+are deduplicated, with only a fingerprint and usage metadata kept in the audit.
+Chrome verified clarification, preview, editing and explicit saving at 390
+pixels, and opening the draft dialog at 1440 pixels. The flow used PostgreSQL
+and a controlled provider.
+
+The next P4 slice is prospective Shadow deployment, followed by attribution
+and daily review.
+
 ## P4 strategy report assistant (2026-11-28)
 
 The report and comparison screens can request a review of one saved strategy

@@ -1242,7 +1242,7 @@ abstract class L10n {
   /// No description provided for @assistantOpportunityLoading.
   ///
   /// In fa, this message translates to:
-  /// **'در حال دریافت توضیح…'**
+  /// **'در حال دریافت پاسخ دستیار…'**
   String get assistantOpportunityLoading;
 
   /// No description provided for @assistantOpportunityCancel.
@@ -1260,7 +1260,7 @@ abstract class L10n {
   /// No description provided for @assistantOpportunityFailed.
   ///
   /// In fa, this message translates to:
-  /// **'دریافت توضیح دستیار ممکن نشد. شواهد موتور در همین بخش قابل بررسی‌اند.'**
+  /// **'دریافت پاسخ دستیار ممکن نشد. می‌توانید دوباره تلاش کنید.'**
   String get assistantOpportunityFailed;
 
   /// No description provided for @assistantUnavailable.
@@ -1278,7 +1278,7 @@ abstract class L10n {
   /// No description provided for @assistantOpportunityInProgress.
   ///
   /// In fa, this message translates to:
-  /// **'توضیح همین شواهد در حال دریافت است. کمی بعد دوباره بررسی کنید.'**
+  /// **'همین درخواست در حال پردازش است. کمی بعد دوباره بررسی کنید.'**
   String get assistantOpportunityInProgress;
 
   /// No description provided for @assistantOpportunityRule.
@@ -1376,6 +1376,114 @@ abstract class L10n {
   /// In fa, this message translates to:
   /// **'این معیار برای این گزارش در دسترس نیست.'**
   String get assistantResearchMissingMetric;
+
+  /// No description provided for @assistantDraftTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'پیش‌نویس از متن'**
+  String get assistantDraftTitle;
+
+  /// No description provided for @assistantDraftDescription.
+  ///
+  /// In fa, this message translates to:
+  /// **'توضیح استراتژی'**
+  String get assistantDraftDescription;
+
+  /// No description provided for @assistantDraftExample.
+  ///
+  /// In fa, this message translates to:
+  /// **'مثال: روی کندل ۱ ساعته، بالای میانگین ۲۰ کندلی وارد شو و زیر میانگین ۱۰ کندلی خارج شو. سهم سرمایه ۲۵٪.'**
+  String get assistantDraftExample;
+
+  /// No description provided for @assistantDraftDisclosure.
+  ///
+  /// In fa, this message translates to:
+  /// **'متنی که اینجا وارد می‌کنید برای ساخت پیش‌نویس به OpenAI ارسال می‌شود.'**
+  String get assistantDraftDisclosure;
+
+  /// No description provided for @assistantDraftSubmit.
+  ///
+  /// In fa, this message translates to:
+  /// **'ساخت پیش‌نویس'**
+  String get assistantDraftSubmit;
+
+  /// No description provided for @assistantDraftReady.
+  ///
+  /// In fa, this message translates to:
+  /// **'پیش‌نویس آمادهٔ بازبینی است'**
+  String get assistantDraftReady;
+
+  /// No description provided for @assistantDraftNeedsDefinition.
+  ///
+  /// In fa, this message translates to:
+  /// **'برای تهیهٔ پیش‌نویس، این موارد را در متن مشخص کنید'**
+  String get assistantDraftNeedsDefinition;
+
+  /// No description provided for @assistantDraftAskEntry.
+  ///
+  /// In fa, this message translates to:
+  /// **'در بسته‌شدن کندل کدام شرط باعث ورود می‌شود؟'**
+  String get assistantDraftAskEntry;
+
+  /// No description provided for @assistantDraftAskExit.
+  ///
+  /// In fa, this message translates to:
+  /// **'کدام شرط روی کندل بسته‌شده باعث خروج می‌شود؟'**
+  String get assistantDraftAskExit;
+
+  /// No description provided for @assistantDraftAskExposure.
+  ///
+  /// In fa, this message translates to:
+  /// **'چه درصدی از سرمایه به موقعیت اختصاص یابد؟ درصد را با رقم بنویسید.'**
+  String get assistantDraftAskExposure;
+
+  /// No description provided for @assistantDraftAskTimeframe.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازهٔ پایهٔ کندل کدام است؟ ۱ یا ۱۵ دقیقه، ۱ یا ۴ ساعت، یا ۱ روز.'**
+  String get assistantDraftAskTimeframe;
+
+  /// No description provided for @assistantDraftAskSupported.
+  ///
+  /// In fa, this message translates to:
+  /// **'شرط را با قواعد ورود و خروج اسپات و دادهٔ کندل بسته‌شده تعریف کنید.'**
+  String get assistantDraftAskSupported;
+
+  /// No description provided for @assistantDraftAskParameters.
+  ///
+  /// In fa, this message translates to:
+  /// **'نام اندیکاتور، دوره و آستانه‌های لازم را مشخص کنید و عددها را با رقم بنویسید.'**
+  String get assistantDraftAskParameters;
+
+  /// No description provided for @assistantDraftEntry.
+  ///
+  /// In fa, this message translates to:
+  /// **'ورود وقتی {rule} باشد.'**
+  String assistantDraftEntry(String rule);
+
+  /// No description provided for @assistantDraftExit.
+  ///
+  /// In fa, this message translates to:
+  /// **'خروج وقتی {rule} باشد.'**
+  String assistantDraftExit(String rule);
+
+  /// No description provided for @assistantDraftExposure.
+  ///
+  /// In fa, this message translates to:
+  /// **'سهم سرمایه'**
+  String get assistantDraftExposure;
+
+  /// No description provided for @assistantDraftData.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازهٔ پایه {timeframe}، با حداقل {bars} کندل بسته برای بررسی قواعد'**
+  String assistantDraftData(String timeframe, int bars);
+
+  /// No description provided for @assistantDraftOpenEditor.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازبینی در ویرایشگر قواعد'**
+  String get assistantDraftOpenEditor;
 
   /// No description provided for @assistantOpportunityTokens.
   ///
