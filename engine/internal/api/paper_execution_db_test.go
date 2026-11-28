@@ -291,7 +291,7 @@ func TestPaperCycleDrainsFourReceiptsWithAnHourOfCandles(t *testing.T) {
 		Capital: usdtP(1000 * unit), MaxLossPerTrade: usdtP(10 * unit), MaxOpenLoss: usdtP(100 * unit), MaxSpotExposure: usdtP(800 * unit),
 	}))
 	require.NoError(t, err)
-	original, err := st.PaperReplayOpportunity(ctx, opportunityID)
+	original, err := st.RecordedMarketOpportunity(ctx, opportunityID)
 	require.NoError(t, err)
 	market.Symbols = []string{"BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT"}
 	var feeds []data.LiveSymbolStatus

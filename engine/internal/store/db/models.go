@@ -28,6 +28,20 @@ type AlgorithmVersion struct {
 	CreatedAt   time.Time
 }
 
+type AssistantRun struct {
+	ID             int64
+	OpportunityID  int64
+	SnapshotSha256 string
+	Model          string
+	PromptVersion  string
+	StartedAt      time.Time
+	LatencyMs      *int64
+	Status         string
+	Focus          string
+	InputTokens    pgtype.Int4
+	OutputTokens   pgtype.Int4
+}
+
 type Attempt struct {
 	ExperimentID string
 	Seq          int32

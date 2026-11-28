@@ -48,7 +48,7 @@ func violations(name string, src any) ([]string, error) {
 				if sel.Sel.Name == "NewRequestWithContext" {
 					i = 1
 				}
-				if len(x.Args) <= i || !isGet(x.Args[i]) {
+				if (len(x.Args) <= i || !isGet(x.Args[i])) && !isAssistantInference(name, sel, x.Args) {
 					out = append(out, fmt.Sprintf("%s: outbound request that is not a GET", name))
 				}
 			}
@@ -69,9 +69,28 @@ func isGet(e ast.Expr) bool {
 	return false
 }
 
-// Release gate: no code path can send a real order. Every outbound HTTP request
-// in the engine is a GET, nothing posts, no source names an order or account
-// endpoint, and the API has no RPC that could ask for one.
+const assistantAdapter = "../../internal/assistant/openai.go"
+
+// Permit just the literal inference POST. The rest of the adapter is still scanned.
+func isAssistantInference(name string, call *ast.SelectorExpr, args []ast.Expr) bool {
+	if filepath.ToSlash(filepath.Clean(name)) != assistantAdapter || call.Sel.Name != "NewRequestWithContext" || len(args) != 4 {
+		return false
+	}
+	pkg, ok := call.X.(*ast.Ident)
+	if !ok || pkg.Name != "http" {
+		return false
+	}
+	method, ok := args[1].(*ast.SelectorExpr)
+	if !ok || method.Sel.Name != "MethodPost" {
+		return false
+	}
+	methodPkg, ok := method.X.(*ast.Ident)
+	endpoint, literal := args[2].(*ast.BasicLit)
+	return ok && methodPkg.Name == "http" && literal && endpoint.Value == `"https://api.openai.com/v1/chat/completions"`
+}
+
+// Release gate: outbound requests are GETs or the pinned assistant inference
+// POST. Order and account endpoints, signed requests, and order RPCs stay banned.
 func TestNoCodePathCanSendARealOrder(t *testing.T) {
 	root := filepath.Join("..", "..")
 	files := 0
@@ -119,4 +138,19 @@ func f(c *http.Client) {
 }`)
 	require.NoError(t, err)
 	require.Len(t, v, 4, "%v", v) // the URL, the Post call, the POST request, the API-key header
+}
+
+func TestAssistantInferenceExceptionIsScoped(t *testing.T) {
+	const src = `package assistant
+import "net/http"
+func f() { http.NewRequestWithContext(ctx, http.MethodPost, "https://api.openai.com/v1/chat/completions", nil) }`
+	v, err := violations(assistantAdapter, src)
+	require.NoError(t, err)
+	require.Empty(t, v)
+	v, err = violations("internal/api/probe.go", src)
+	require.NoError(t, err)
+	require.Len(t, v, 1)
+	v, err = violations(assistantAdapter, strings.Replace(src, "https://api.openai.com/v1/chat/completions", "https://api.binance.com/api/v3/order", 1))
+	require.NoError(t, err)
+	require.Len(t, v, 2)
 }

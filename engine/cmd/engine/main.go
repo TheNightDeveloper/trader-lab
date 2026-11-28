@@ -23,6 +23,7 @@ import (
 	"github.com/labstack/echo/v5/middleware"
 
 	"tradinglab/engine/internal/api"
+	"tradinglab/engine/internal/assistant"
 	"tradinglab/engine/internal/backup"
 	"tradinglab/engine/internal/clock"
 	"tradinglab/engine/internal/data"
@@ -88,6 +89,10 @@ func run() error {
 		go live.Run(ctx)
 	}
 	market := &api.Market{Store: st, Clock: clock.Wall{}, Live: liveSource(live), Build: build, Symbols: cfg.LiveSymbols, Limiter: limiter}
+	assistantService := &api.Assistant{Store: st, Clock: clock.Wall{}, DailyRequests: cfg.AssistantDailyRequests}
+	if key := strings.TrimSpace(os.Getenv("TRADINGLAB_ASSISTANT_API_KEY")); key != "" && cfg.AssistantDailyRequests > 0 {
+		assistantService.Provider = assistant.NewOpenAI(key)
+	}
 	paperService := &api.Paper{Market: market}
 	go paperService.RunPaper(ctx)
 	if live != nil {
@@ -133,6 +138,7 @@ func run() error {
 		route(labv1connect.NewHealthServiceHandler(health)),
 		route(labv1connect.NewDataServiceHandler(dataSvc)),
 		route(labv1connect.NewMarketServiceHandler(market)),
+		route(labv1connect.NewAssistantServiceHandler(assistantService)),
 		route(labv1connect.NewPaperServiceHandler(paperService)),
 		route(labv1connect.NewFxServiceHandler(fxSvc)),
 		route(labv1connect.NewReportServiceHandler(&api.Report{Svc: reports, Limiter: limiter})),

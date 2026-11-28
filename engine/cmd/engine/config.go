@@ -30,6 +30,8 @@ type Config struct {
 	BackupDir     string `json:"backup_dir"`
 	BackupHourUTC int    `json:"backup_hour_utc"`
 	BackupKeep    int    `json:"backup_keep"`
+	// AssistantDailyRequests is a UTC-day cap. Zero disables paid inference.
+	AssistantDailyRequests int `json:"assistant_daily_requests"`
 }
 
 func defaultConfig() Config {
@@ -83,6 +85,9 @@ func (c Config) validate() error {
 	}
 	if c.Workers < 1 {
 		return fmt.Errorf("workers must be >= 1, got %d", c.Workers)
+	}
+	if c.AssistantDailyRequests < 0 {
+		return errors.New("assistant_daily_requests must be non-negative")
 	}
 	return nil
 }

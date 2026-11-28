@@ -5,9 +5,6 @@ VALUES ($1, $2, $3, $4, $5, $6, $7);
 -- name: PaperConfirmationEvidence :one
 SELECT * FROM paper_confirmation_evidence WHERE event_id = $1;
 
--- name: PaperReplayOpportunity :one
-SELECT * FROM market_opportunities WHERE id = $1;
-
 -- name: FirstPaperReplayEvent :one
 SELECT coalesce(min(id), 0)::bigint FROM paper_execution_events WHERE entry_id = $1;
 

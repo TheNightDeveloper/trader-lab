@@ -29,3 +29,6 @@ FROM market_opportunities o
 JOIN strategy_rule_versions v ON v.id = o.rule_version_id
 ORDER BY o.id DESC
 LIMIT 25;
+
+-- name: RecordedMarketOpportunity :one
+SELECT * FROM market_opportunities WHERE id = $1;

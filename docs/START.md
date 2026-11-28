@@ -90,6 +90,14 @@ The engine reads `engine.json` from its working directory (`engine/engine.json` 
 | `research_share` | Concurrent research slots as a percentage of CPU count (1..100); this is not an OS CPU quota |
 | `research_memory_mib` | Shared conservative active-work budget, default 1024 MiB, valid 16..65536; exhaustion rejects the job with a reason |
 | `live_symbols` | Pairs kept current from the REST mirror; `[]` turns live data off |
+| `assistant_daily_requests` | Maximum paid explanation attempts per UTC day. Default `0` disables inference |
+
+To enable explanations, set a positive `assistant_daily_requests` and provide
+`TRADINGLAB_ASSISTANT_API_KEY` in the engine process environment before starting
+it. The first adapter uses the pinned `gpt-4.1-mini-2025-04-14` model. An explicit
+explanation request sends the instrument symbol, recorded rule-match category,
+last candle OHLC, and opportunity validity duration to OpenAI. Successful results
+are reused for the same observation, snapshot, model and prompt version.
 
 ## 5. First use
 

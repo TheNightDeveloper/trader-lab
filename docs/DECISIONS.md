@@ -542,3 +542,22 @@ recorded opportunity and rule, the hashed plan, the revalidation candle and one
 execution event at a time. Older receipts can lack revalidation candle evidence.
 Personal notes use separate append-only revisions so editing them leaves the
 trade history and replay stable.
+
+## ADR-064 Constrain the first assistant action to recorded evidence
+
+The opportunity assistant gives a replaceable provider a fixed observation
+payload. Its structured reply selects one of three evidence references. The API
+resolves prices, timestamps and links from the verified market record. Prompt
+inputs contain the engine's match category and OHLC, with strategy definitions,
+workspace records and user text kept local.
+
+The outbound-order guard permits the literal OpenAI inference POST in the
+adapter and continues to scan that file for order endpoints and signed requests.
+The adapter refuses redirects. A planted order request in the same file fails
+the guard.
+
+PostgreSQL serializes admission, reserves one UTC daily request before calling
+the provider, and reuses successes by opportunity, snapshot, model and prompt.
+Failed and interrupted attempts count against the cap. Provider-reported token
+counts and elapsed time are recorded when they are available. This controls
+request volume. Monetary attribution will require pinned price metadata.

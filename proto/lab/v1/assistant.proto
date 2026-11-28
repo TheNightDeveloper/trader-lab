@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package lab.v1;
+
+import "lab/v1/common.proto";
+
+service AssistantService {
+  // Explain a saved engine observation. This can spend assistant budget.
+  rpc ExplainOpportunity(ExplainOpportunityRequest) returns (ExplainOpportunityResponse);
+}
+
+enum ExplanationFocus {
+  EXPLANATION_FOCUS_UNSPECIFIED = 0;
+  EXPLANATION_FOCUS_RULE = 1;
+  EXPLANATION_FOCUS_SNAPSHOT = 2;
+  EXPLANATION_FOCUS_REPORT = 3;
+}
+
+message ExplainOpportunityRequest {
+  int64 opportunity_id = 1;
+}
+
+message ExplainOpportunityResponse {
+  // The model selects a focus. The following references come from the engine.
+  ExplanationFocus focus = 1;
+  int64 rule_version_id = 2;
+  string report_id = 3;
+  string reason = 4;
+  Money reference_close = 5;
+  int64 candle_closed_at_unix_ms = 6;
+  int64 expires_at_unix_ms = 7;
+  string model = 8;
+  int32 input_tokens = 9;
+  int32 output_tokens = 10;
+  bool cached = 11;
+}

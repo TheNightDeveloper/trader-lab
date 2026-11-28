@@ -165,3 +165,28 @@ func (q *Queries) RecentMarketOpportunities(ctx context.Context) ([]RecentMarket
 	}
 	return items, nil
 }
+
+const recordedMarketOpportunity = `-- name: RecordedMarketOpportunity :one
+SELECT id, symbol, rule_version_id, report_id, spec_revision, candle_closed_at, observed_at, expires_at, reference_close, reason, snapshot, snapshot_sha256, engine_build_sha256 FROM market_opportunities WHERE id = $1
+`
+
+func (q *Queries) RecordedMarketOpportunity(ctx context.Context, id int64) (MarketOpportunity, error) {
+	row := q.db.QueryRow(ctx, recordedMarketOpportunity, id)
+	var i MarketOpportunity
+	err := row.Scan(
+		&i.ID,
+		&i.Symbol,
+		&i.RuleVersionID,
+		&i.ReportID,
+		&i.SpecRevision,
+		&i.CandleClosedAt,
+		&i.ObservedAt,
+		&i.ExpiresAt,
+		&i.ReferenceClose,
+		&i.Reason,
+		&i.Snapshot,
+		&i.SnapshotSha256,
+		&i.EngineBuildSha256,
+	)
+	return i, err
+}
