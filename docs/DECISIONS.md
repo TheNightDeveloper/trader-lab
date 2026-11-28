@@ -598,3 +598,16 @@ with their own simulation state. A committed gate claim is expired after its
 deadline if the engine restarts. Candle revisions arriving after capture stay
 outside the comparison. Assistant token usage shares the existing quota and is
 reported separately from simulated execution costs.
+
+## ADR-067 Freeze user intervention and report Shadow differences
+
+An optional user track is registered with the deployment. Its only intervention
+is an allow or skip decision for a recorded entry signal before the common
+cutoff. The first decision is immutable and an identical retry recovers its
+receipt. Signals without a decision default to skip. The user track keeps the
+same execution assumptions and rule exits as both other tracks.
+
+Attribution compares observed-prefix metrics and sets of emitted entry decisions
+against baseline, keyed by the signal candle. A decision and its simulated fill
+are separate evidence. Operator-provided token rates are immutable per deployment
+and are applied to observed usage outside the simulated trading metrics.

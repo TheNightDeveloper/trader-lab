@@ -396,3 +396,23 @@ evaluation stays p0.3, with the same simulator goldens and training version.
 - The h-bar label still measures close-to-close price return, not executable net PnL. With
   delayed availability and h=1 its endpoint may be at/before the earliest causal fill. Aligning
   that target with execution/costs requires a separate versioned change and OOS validation.
+
+## Shadow attribution
+
+Each optional track uses the same captured sample as baseline. Net P&L and
+return deltas subtract baseline from the track. Shared, baseline-only and
+track-only entry decisions compare the input candle keys of positive strategy
+intents, including decisions that do not fill. The observation table links a
+decision to its first simulated fill time when available.
+
+`shadow_net_expectancy` is total net P&L of fully closed trades divided by the
+number of those trades. It uses fixed-8 USDT, truncates toward zero and is
+unavailable without closed trades. `shadow_turnover` sums executed buy and sell
+notional in USDT before fees, including open trades. Period P&L is the net equity
+change in consecutive 24-hour blocks anchored to the deployment start. The
+last block can contain a partial common sample.
+
+Model cost estimates sum the reported token counts times the respective frozen
+input and output USDT rates per million. Each leg rounds half-even to fixed-8.
+Attempts without complete usage are disclosed. The estimate is separate from
+simulated trading fees and slippage.

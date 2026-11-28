@@ -137,10 +137,66 @@ func (ShadowGate) EnumDescriptor() ([]byte, []int) {
 	return file_lab_v1_shadow_proto_rawDescGZIP(), []int{1}
 }
 
+type ShadowUserDecision int32
+
+const (
+	ShadowUserDecision_SHADOW_USER_DECISION_UNSPECIFIED ShadowUserDecision = 0
+	ShadowUserDecision_SHADOW_USER_DECISION_OPEN        ShadowUserDecision = 1
+	ShadowUserDecision_SHADOW_USER_DECISION_ALLOW       ShadowUserDecision = 2
+	ShadowUserDecision_SHADOW_USER_DECISION_SKIP        ShadowUserDecision = 3
+	ShadowUserDecision_SHADOW_USER_DECISION_UNANSWERED  ShadowUserDecision = 4
+)
+
+// Enum value maps for ShadowUserDecision.
+var (
+	ShadowUserDecision_name = map[int32]string{
+		0: "SHADOW_USER_DECISION_UNSPECIFIED",
+		1: "SHADOW_USER_DECISION_OPEN",
+		2: "SHADOW_USER_DECISION_ALLOW",
+		3: "SHADOW_USER_DECISION_SKIP",
+		4: "SHADOW_USER_DECISION_UNANSWERED",
+	}
+	ShadowUserDecision_value = map[string]int32{
+		"SHADOW_USER_DECISION_UNSPECIFIED": 0,
+		"SHADOW_USER_DECISION_OPEN":        1,
+		"SHADOW_USER_DECISION_ALLOW":       2,
+		"SHADOW_USER_DECISION_SKIP":        3,
+		"SHADOW_USER_DECISION_UNANSWERED":  4,
+	}
+)
+
+func (x ShadowUserDecision) Enum() *ShadowUserDecision {
+	p := new(ShadowUserDecision)
+	*p = x
+	return p
+}
+
+func (x ShadowUserDecision) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ShadowUserDecision) Descriptor() protoreflect.EnumDescriptor {
+	return file_lab_v1_shadow_proto_enumTypes[2].Descriptor()
+}
+
+func (ShadowUserDecision) Type() protoreflect.EnumType {
+	return &file_lab_v1_shadow_proto_enumTypes[2]
+}
+
+func (x ShadowUserDecision) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ShadowUserDecision.Descriptor instead.
+func (ShadowUserDecision) EnumDescriptor() ([]byte, []int) {
+	return file_lab_v1_shadow_proto_rawDescGZIP(), []int{2}
+}
+
 type StartShadowDeploymentRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Symbol        string                 `protobuf:"bytes,1,opt,name=symbol,proto3" json:"symbol,omitempty"`
 	RuleVersionId int64                  `protobuf:"varint,2,opt,name=rule_version_id,json=ruleVersionId,proto3" json:"rule_version_id,omitempty"`
+	UserTrack     bool                   `protobuf:"varint,3,opt,name=user_track,json=userTrack,proto3" json:"user_track,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -187,6 +243,13 @@ func (x *StartShadowDeploymentRequest) GetRuleVersionId() int64 {
 		return x.RuleVersionId
 	}
 	return 0
+}
+
+func (x *StartShadowDeploymentRequest) GetUserTrack() bool {
+	if x != nil {
+		return x.UserTrack
+	}
+	return false
 }
 
 type StartShadowDeploymentResponse struct {
@@ -313,6 +376,110 @@ func (*StopShadowDeploymentResponse) Descriptor() ([]byte, []int) {
 	return file_lab_v1_shadow_proto_rawDescGZIP(), []int{3}
 }
 
+type SetShadowUserDecisionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DeploymentId  int64                  `protobuf:"varint,1,opt,name=deployment_id,json=deploymentId,proto3" json:"deployment_id,omitempty"`
+	ObservationId int64                  `protobuf:"varint,2,opt,name=observation_id,json=observationId,proto3" json:"observation_id,omitempty"`
+	Allow         *bool                  `protobuf:"varint,3,opt,name=allow,proto3,oneof" json:"allow,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetShadowUserDecisionRequest) Reset() {
+	*x = SetShadowUserDecisionRequest{}
+	mi := &file_lab_v1_shadow_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetShadowUserDecisionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetShadowUserDecisionRequest) ProtoMessage() {}
+
+func (x *SetShadowUserDecisionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_shadow_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetShadowUserDecisionRequest.ProtoReflect.Descriptor instead.
+func (*SetShadowUserDecisionRequest) Descriptor() ([]byte, []int) {
+	return file_lab_v1_shadow_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *SetShadowUserDecisionRequest) GetDeploymentId() int64 {
+	if x != nil {
+		return x.DeploymentId
+	}
+	return 0
+}
+
+func (x *SetShadowUserDecisionRequest) GetObservationId() int64 {
+	if x != nil {
+		return x.ObservationId
+	}
+	return 0
+}
+
+func (x *SetShadowUserDecisionRequest) GetAllow() bool {
+	if x != nil && x.Allow != nil {
+		return *x.Allow
+	}
+	return false
+}
+
+type SetShadowUserDecisionResponse struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	DecidedAtUnixMs int64                  `protobuf:"varint,1,opt,name=decided_at_unix_ms,json=decidedAtUnixMs,proto3" json:"decided_at_unix_ms,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *SetShadowUserDecisionResponse) Reset() {
+	*x = SetShadowUserDecisionResponse{}
+	mi := &file_lab_v1_shadow_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetShadowUserDecisionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetShadowUserDecisionResponse) ProtoMessage() {}
+
+func (x *SetShadowUserDecisionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_shadow_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetShadowUserDecisionResponse.ProtoReflect.Descriptor instead.
+func (*SetShadowUserDecisionResponse) Descriptor() ([]byte, []int) {
+	return file_lab_v1_shadow_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *SetShadowUserDecisionResponse) GetDecidedAtUnixMs() int64 {
+	if x != nil {
+		return x.DecidedAtUnixMs
+	}
+	return 0
+}
+
 type GetShadowSnapshotRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Zero selects the active deployment or, if none is active, the most recent one.
@@ -323,7 +490,7 @@ type GetShadowSnapshotRequest struct {
 
 func (x *GetShadowSnapshotRequest) Reset() {
 	*x = GetShadowSnapshotRequest{}
-	mi := &file_lab_v1_shadow_proto_msgTypes[4]
+	mi := &file_lab_v1_shadow_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -335,7 +502,7 @@ func (x *GetShadowSnapshotRequest) String() string {
 func (*GetShadowSnapshotRequest) ProtoMessage() {}
 
 func (x *GetShadowSnapshotRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_shadow_proto_msgTypes[4]
+	mi := &file_lab_v1_shadow_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -348,7 +515,7 @@ func (x *GetShadowSnapshotRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetShadowSnapshotRequest.ProtoReflect.Descriptor instead.
 func (*GetShadowSnapshotRequest) Descriptor() ([]byte, []int) {
-	return file_lab_v1_shadow_proto_rawDescGZIP(), []int{4}
+	return file_lab_v1_shadow_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *GetShadowSnapshotRequest) GetDeploymentId() int64 {
@@ -359,30 +526,33 @@ func (x *GetShadowSnapshotRequest) GetDeploymentId() int64 {
 }
 
 type ShadowDeployment struct {
-	state              protoimpl.MessageState `protogen:"open.v1"`
-	Id                 int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Symbol             string                 `protobuf:"bytes,2,opt,name=symbol,proto3" json:"symbol,omitempty"`
-	RuleVersionId      int64                  `protobuf:"varint,3,opt,name=rule_version_id,json=ruleVersionId,proto3" json:"rule_version_id,omitempty"`
-	ReportId           string                 `protobuf:"bytes,4,opt,name=report_id,json=reportId,proto3" json:"report_id,omitempty"`
-	RegisteredAtUnixMs int64                  `protobuf:"varint,5,opt,name=registered_at_unix_ms,json=registeredAtUnixMs,proto3" json:"registered_at_unix_ms,omitempty"`
-	StartAtUnixMs      int64                  `protobuf:"varint,6,opt,name=start_at_unix_ms,json=startAtUnixMs,proto3" json:"start_at_unix_ms,omitempty"`
-	EndAtUnixMs        int64                  `protobuf:"varint,7,opt,name=end_at_unix_ms,json=endAtUnixMs,proto3" json:"end_at_unix_ms,omitempty"`
-	State              ShadowState            `protobuf:"varint,8,opt,name=state,proto3,enum=lab.v1.ShadowState" json:"state,omitempty"`
-	Capital            *Money                 `protobuf:"bytes,9,opt,name=capital,proto3" json:"capital,omitempty"`
-	FeeRate            *Decimal               `protobuf:"bytes,10,opt,name=fee_rate,json=feeRate,proto3" json:"fee_rate,omitempty"`
-	SlippageRate       *Decimal               `protobuf:"bytes,11,opt,name=slippage_rate,json=slippageRate,proto3" json:"slippage_rate,omitempty"`
-	FillModel          string                 `protobuf:"bytes,12,opt,name=fill_model,json=fillModel,proto3" json:"fill_model,omitempty"`
-	AiModel            string                 `protobuf:"bytes,13,opt,name=ai_model,json=aiModel,proto3" json:"ai_model,omitempty"`
-	AiPromptVersion    string                 `protobuf:"bytes,14,opt,name=ai_prompt_version,json=aiPromptVersion,proto3" json:"ai_prompt_version,omitempty"`
-	RuleContentHash    string                 `protobuf:"bytes,15,opt,name=rule_content_hash,json=ruleContentHash,proto3" json:"rule_content_hash,omitempty"`
-	EngineBuild        string                 `protobuf:"bytes,16,opt,name=engine_build,json=engineBuild,proto3" json:"engine_build,omitempty"`
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
+	state                 protoimpl.MessageState `protogen:"open.v1"`
+	Id                    int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Symbol                string                 `protobuf:"bytes,2,opt,name=symbol,proto3" json:"symbol,omitempty"`
+	RuleVersionId         int64                  `protobuf:"varint,3,opt,name=rule_version_id,json=ruleVersionId,proto3" json:"rule_version_id,omitempty"`
+	ReportId              string                 `protobuf:"bytes,4,opt,name=report_id,json=reportId,proto3" json:"report_id,omitempty"`
+	RegisteredAtUnixMs    int64                  `protobuf:"varint,5,opt,name=registered_at_unix_ms,json=registeredAtUnixMs,proto3" json:"registered_at_unix_ms,omitempty"`
+	StartAtUnixMs         int64                  `protobuf:"varint,6,opt,name=start_at_unix_ms,json=startAtUnixMs,proto3" json:"start_at_unix_ms,omitempty"`
+	EndAtUnixMs           int64                  `protobuf:"varint,7,opt,name=end_at_unix_ms,json=endAtUnixMs,proto3" json:"end_at_unix_ms,omitempty"`
+	State                 ShadowState            `protobuf:"varint,8,opt,name=state,proto3,enum=lab.v1.ShadowState" json:"state,omitempty"`
+	Capital               *Money                 `protobuf:"bytes,9,opt,name=capital,proto3" json:"capital,omitempty"`
+	FeeRate               *Decimal               `protobuf:"bytes,10,opt,name=fee_rate,json=feeRate,proto3" json:"fee_rate,omitempty"`
+	SlippageRate          *Decimal               `protobuf:"bytes,11,opt,name=slippage_rate,json=slippageRate,proto3" json:"slippage_rate,omitempty"`
+	FillModel             string                 `protobuf:"bytes,12,opt,name=fill_model,json=fillModel,proto3" json:"fill_model,omitempty"`
+	AiModel               string                 `protobuf:"bytes,13,opt,name=ai_model,json=aiModel,proto3" json:"ai_model,omitempty"`
+	AiPromptVersion       string                 `protobuf:"bytes,14,opt,name=ai_prompt_version,json=aiPromptVersion,proto3" json:"ai_prompt_version,omitempty"`
+	RuleContentHash       string                 `protobuf:"bytes,15,opt,name=rule_content_hash,json=ruleContentHash,proto3" json:"rule_content_hash,omitempty"`
+	EngineBuild           string                 `protobuf:"bytes,16,opt,name=engine_build,json=engineBuild,proto3" json:"engine_build,omitempty"`
+	UserTrack             bool                   `protobuf:"varint,17,opt,name=user_track,json=userTrack,proto3" json:"user_track,omitempty"`
+	ModelInputPerMillion  *Money                 `protobuf:"bytes,18,opt,name=model_input_per_million,json=modelInputPerMillion,proto3" json:"model_input_per_million,omitempty"`
+	ModelOutputPerMillion *Money                 `protobuf:"bytes,19,opt,name=model_output_per_million,json=modelOutputPerMillion,proto3" json:"model_output_per_million,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
 }
 
 func (x *ShadowDeployment) Reset() {
 	*x = ShadowDeployment{}
-	mi := &file_lab_v1_shadow_proto_msgTypes[5]
+	mi := &file_lab_v1_shadow_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -394,7 +564,7 @@ func (x *ShadowDeployment) String() string {
 func (*ShadowDeployment) ProtoMessage() {}
 
 func (x *ShadowDeployment) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_shadow_proto_msgTypes[5]
+	mi := &file_lab_v1_shadow_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -407,7 +577,7 @@ func (x *ShadowDeployment) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ShadowDeployment.ProtoReflect.Descriptor instead.
 func (*ShadowDeployment) Descriptor() ([]byte, []int) {
-	return file_lab_v1_shadow_proto_rawDescGZIP(), []int{5}
+	return file_lab_v1_shadow_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ShadowDeployment) GetId() int64 {
@@ -522,6 +692,27 @@ func (x *ShadowDeployment) GetEngineBuild() string {
 	return ""
 }
 
+func (x *ShadowDeployment) GetUserTrack() bool {
+	if x != nil {
+		return x.UserTrack
+	}
+	return false
+}
+
+func (x *ShadowDeployment) GetModelInputPerMillion() *Money {
+	if x != nil {
+		return x.ModelInputPerMillion
+	}
+	return nil
+}
+
+func (x *ShadowDeployment) GetModelOutputPerMillion() *Money {
+	if x != nil {
+		return x.ModelOutputPerMillion
+	}
+	return nil
+}
+
 type ShadowObservation struct {
 	state                protoimpl.MessageState `protogen:"open.v1"`
 	CandleClosedAtUnixMs int64                  `protobuf:"varint,1,opt,name=candle_closed_at_unix_ms,json=candleClosedAtUnixMs,proto3" json:"candle_closed_at_unix_ms,omitempty"`
@@ -530,13 +721,19 @@ type ShadowObservation struct {
 	Gate                 ShadowGate             `protobuf:"varint,4,opt,name=gate,proto3,enum=lab.v1.ShadowGate" json:"gate,omitempty"`
 	ReferenceClose       *Money                 `protobuf:"bytes,5,opt,name=reference_close,json=referenceClose,proto3" json:"reference_close,omitempty"`
 	GateResolvedAtUnixMs int64                  `protobuf:"varint,6,opt,name=gate_resolved_at_unix_ms,json=gateResolvedAtUnixMs,proto3" json:"gate_resolved_at_unix_ms,omitempty"`
+	Id                   int64                  `protobuf:"varint,7,opt,name=id,proto3" json:"id,omitempty"`
+	UserDecision         ShadowUserDecision     `protobuf:"varint,8,opt,name=user_decision,json=userDecision,proto3,enum=lab.v1.ShadowUserDecision" json:"user_decision,omitempty"`
+	UserDecidedAtUnixMs  int64                  `protobuf:"varint,9,opt,name=user_decided_at_unix_ms,json=userDecidedAtUnixMs,proto3" json:"user_decided_at_unix_ms,omitempty"`
+	BaselineEntry        *ShadowEntryEvidence   `protobuf:"bytes,10,opt,name=baseline_entry,json=baselineEntry,proto3" json:"baseline_entry,omitempty"`
+	AiEntry              *ShadowEntryEvidence   `protobuf:"bytes,11,opt,name=ai_entry,json=aiEntry,proto3" json:"ai_entry,omitempty"`
+	UserEntry            *ShadowEntryEvidence   `protobuf:"bytes,12,opt,name=user_entry,json=userEntry,proto3" json:"user_entry,omitempty"`
 	unknownFields        protoimpl.UnknownFields
 	sizeCache            protoimpl.SizeCache
 }
 
 func (x *ShadowObservation) Reset() {
 	*x = ShadowObservation{}
-	mi := &file_lab_v1_shadow_proto_msgTypes[6]
+	mi := &file_lab_v1_shadow_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -548,7 +745,7 @@ func (x *ShadowObservation) String() string {
 func (*ShadowObservation) ProtoMessage() {}
 
 func (x *ShadowObservation) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_shadow_proto_msgTypes[6]
+	mi := &file_lab_v1_shadow_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -561,7 +758,7 @@ func (x *ShadowObservation) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ShadowObservation.ProtoReflect.Descriptor instead.
 func (*ShadowObservation) Descriptor() ([]byte, []int) {
-	return file_lab_v1_shadow_proto_rawDescGZIP(), []int{6}
+	return file_lab_v1_shadow_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *ShadowObservation) GetCandleClosedAtUnixMs() int64 {
@@ -606,17 +803,243 @@ func (x *ShadowObservation) GetGateResolvedAtUnixMs() int64 {
 	return 0
 }
 
+func (x *ShadowObservation) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *ShadowObservation) GetUserDecision() ShadowUserDecision {
+	if x != nil {
+		return x.UserDecision
+	}
+	return ShadowUserDecision_SHADOW_USER_DECISION_UNSPECIFIED
+}
+
+func (x *ShadowObservation) GetUserDecidedAtUnixMs() int64 {
+	if x != nil {
+		return x.UserDecidedAtUnixMs
+	}
+	return 0
+}
+
+func (x *ShadowObservation) GetBaselineEntry() *ShadowEntryEvidence {
+	if x != nil {
+		return x.BaselineEntry
+	}
+	return nil
+}
+
+func (x *ShadowObservation) GetAiEntry() *ShadowEntryEvidence {
+	if x != nil {
+		return x.AiEntry
+	}
+	return nil
+}
+
+func (x *ShadowObservation) GetUserEntry() *ShadowEntryEvidence {
+	if x != nil {
+		return x.UserEntry
+	}
+	return nil
+}
+
+// Presence identifies a policy's emitted entry. A fill may still be pending or rejected.
+type ShadowEntryEvidence struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	FilledAtUnixMs int64                  `protobuf:"varint,1,opt,name=filled_at_unix_ms,json=filledAtUnixMs,proto3" json:"filled_at_unix_ms,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *ShadowEntryEvidence) Reset() {
+	*x = ShadowEntryEvidence{}
+	mi := &file_lab_v1_shadow_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ShadowEntryEvidence) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ShadowEntryEvidence) ProtoMessage() {}
+
+func (x *ShadowEntryEvidence) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_shadow_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ShadowEntryEvidence.ProtoReflect.Descriptor instead.
+func (*ShadowEntryEvidence) Descriptor() ([]byte, []int) {
+	return file_lab_v1_shadow_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *ShadowEntryEvidence) GetFilledAtUnixMs() int64 {
+	if x != nil {
+		return x.FilledAtUnixMs
+	}
+	return 0
+}
+
+type ShadowAttribution struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// All deltas are this track minus baseline on the observed common prefix.
+	NetPnlDelta         *Money   `protobuf:"bytes,1,opt,name=net_pnl_delta,json=netPnlDelta,proto3" json:"net_pnl_delta,omitempty"`
+	ReturnDelta         *Decimal `protobuf:"bytes,2,opt,name=return_delta,json=returnDelta,proto3" json:"return_delta,omitempty"`
+	SharedEntries       int32    `protobuf:"varint,3,opt,name=shared_entries,json=sharedEntries,proto3" json:"shared_entries,omitempty"`
+	BaselineOnlyEntries int32    `protobuf:"varint,4,opt,name=baseline_only_entries,json=baselineOnlyEntries,proto3" json:"baseline_only_entries,omitempty"`
+	TrackOnlyEntries    int32    `protobuf:"varint,5,opt,name=track_only_entries,json=trackOnlyEntries,proto3" json:"track_only_entries,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *ShadowAttribution) Reset() {
+	*x = ShadowAttribution{}
+	mi := &file_lab_v1_shadow_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ShadowAttribution) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ShadowAttribution) ProtoMessage() {}
+
+func (x *ShadowAttribution) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_shadow_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ShadowAttribution.ProtoReflect.Descriptor instead.
+func (*ShadowAttribution) Descriptor() ([]byte, []int) {
+	return file_lab_v1_shadow_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *ShadowAttribution) GetNetPnlDelta() *Money {
+	if x != nil {
+		return x.NetPnlDelta
+	}
+	return nil
+}
+
+func (x *ShadowAttribution) GetReturnDelta() *Decimal {
+	if x != nil {
+		return x.ReturnDelta
+	}
+	return nil
+}
+
+func (x *ShadowAttribution) GetSharedEntries() int32 {
+	if x != nil {
+		return x.SharedEntries
+	}
+	return 0
+}
+
+func (x *ShadowAttribution) GetBaselineOnlyEntries() int32 {
+	if x != nil {
+		return x.BaselineOnlyEntries
+	}
+	return 0
+}
+
+func (x *ShadowAttribution) GetTrackOnlyEntries() int32 {
+	if x != nil {
+		return x.TrackOnlyEntries
+	}
+	return 0
+}
+
+type ShadowPeriodResult struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	FromUnixMs    int64                  `protobuf:"varint,1,opt,name=from_unix_ms,json=fromUnixMs,proto3" json:"from_unix_ms,omitempty"`
+	SampledHours  int32                  `protobuf:"varint,2,opt,name=sampled_hours,json=sampledHours,proto3" json:"sampled_hours,omitempty"`
+	NetPnl        *Money                 `protobuf:"bytes,3,opt,name=net_pnl,json=netPnl,proto3" json:"net_pnl,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ShadowPeriodResult) Reset() {
+	*x = ShadowPeriodResult{}
+	mi := &file_lab_v1_shadow_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ShadowPeriodResult) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ShadowPeriodResult) ProtoMessage() {}
+
+func (x *ShadowPeriodResult) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_shadow_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ShadowPeriodResult.ProtoReflect.Descriptor instead.
+func (*ShadowPeriodResult) Descriptor() ([]byte, []int) {
+	return file_lab_v1_shadow_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *ShadowPeriodResult) GetFromUnixMs() int64 {
+	if x != nil {
+		return x.FromUnixMs
+	}
+	return 0
+}
+
+func (x *ShadowPeriodResult) GetSampledHours() int32 {
+	if x != nil {
+		return x.SampledHours
+	}
+	return 0
+}
+
+func (x *ShadowPeriodResult) GetNetPnl() *Money {
+	if x != nil {
+		return x.NetPnl
+	}
+	return nil
+}
+
 type ShadowTrack struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Metrics       []*Metric              `protobuf:"bytes,1,rep,name=metrics,proto3" json:"metrics,omitempty"`
 	Entries       int32                  `protobuf:"varint,2,opt,name=entries,proto3" json:"entries,omitempty"`
+	Attribution   *ShadowAttribution     `protobuf:"bytes,3,opt,name=attribution,proto3" json:"attribution,omitempty"`
+	Periods       []*ShadowPeriodResult  `protobuf:"bytes,4,rep,name=periods,proto3" json:"periods,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ShadowTrack) Reset() {
 	*x = ShadowTrack{}
-	mi := &file_lab_v1_shadow_proto_msgTypes[7]
+	mi := &file_lab_v1_shadow_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -628,7 +1051,7 @@ func (x *ShadowTrack) String() string {
 func (*ShadowTrack) ProtoMessage() {}
 
 func (x *ShadowTrack) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_shadow_proto_msgTypes[7]
+	mi := &file_lab_v1_shadow_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -641,7 +1064,7 @@ func (x *ShadowTrack) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ShadowTrack.ProtoReflect.Descriptor instead.
 func (*ShadowTrack) Descriptor() ([]byte, []int) {
-	return file_lab_v1_shadow_proto_rawDescGZIP(), []int{7}
+	return file_lab_v1_shadow_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *ShadowTrack) GetMetrics() []*Metric {
@@ -658,25 +1081,44 @@ func (x *ShadowTrack) GetEntries() int32 {
 	return 0
 }
 
+func (x *ShadowTrack) GetAttribution() *ShadowAttribution {
+	if x != nil {
+		return x.Attribution
+	}
+	return nil
+}
+
+func (x *ShadowTrack) GetPeriods() []*ShadowPeriodResult {
+	if x != nil {
+		return x.Periods
+	}
+	return nil
+}
+
 type GetShadowSnapshotResponse struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	Deployments      []*ShadowDeployment    `protobuf:"bytes,1,rep,name=deployments,proto3" json:"deployments,omitempty"`
-	Selected         *ShadowDeployment      `protobuf:"bytes,2,opt,name=selected,proto3" json:"selected,omitempty"`
-	Observations     []*ShadowObservation   `protobuf:"bytes,3,rep,name=observations,proto3" json:"observations,omitempty"`
-	Baseline         *ShadowTrack           `protobuf:"bytes,4,opt,name=baseline,proto3" json:"baseline,omitempty"`
-	Ai               *ShadowTrack           `protobuf:"bytes,5,opt,name=ai,proto3" json:"ai,omitempty"`
-	SampledHours     int32                  `protobuf:"varint,6,opt,name=sampled_hours,json=sampledHours,proto3" json:"sampled_hours,omitempty"`
-	InputTokens      int64                  `protobuf:"varint,7,opt,name=input_tokens,json=inputTokens,proto3" json:"input_tokens,omitempty"`
-	OutputTokens     int64                  `protobuf:"varint,8,opt,name=output_tokens,json=outputTokens,proto3" json:"output_tokens,omitempty"`
-	Symbols          []string               `protobuf:"bytes,9,rep,name=symbols,proto3" json:"symbols,omitempty"`
-	AssistantEnabled bool                   `protobuf:"varint,10,opt,name=assistant_enabled,json=assistantEnabled,proto3" json:"assistant_enabled,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	Deployments         []*ShadowDeployment    `protobuf:"bytes,1,rep,name=deployments,proto3" json:"deployments,omitempty"`
+	Selected            *ShadowDeployment      `protobuf:"bytes,2,opt,name=selected,proto3" json:"selected,omitempty"`
+	Observations        []*ShadowObservation   `protobuf:"bytes,3,rep,name=observations,proto3" json:"observations,omitempty"`
+	Baseline            *ShadowTrack           `protobuf:"bytes,4,opt,name=baseline,proto3" json:"baseline,omitempty"`
+	Ai                  *ShadowTrack           `protobuf:"bytes,5,opt,name=ai,proto3" json:"ai,omitempty"`
+	SampledHours        int32                  `protobuf:"varint,6,opt,name=sampled_hours,json=sampledHours,proto3" json:"sampled_hours,omitempty"`
+	InputTokens         int64                  `protobuf:"varint,7,opt,name=input_tokens,json=inputTokens,proto3" json:"input_tokens,omitempty"`
+	OutputTokens        int64                  `protobuf:"varint,8,opt,name=output_tokens,json=outputTokens,proto3" json:"output_tokens,omitempty"`
+	Symbols             []string               `protobuf:"bytes,9,rep,name=symbols,proto3" json:"symbols,omitempty"`
+	AssistantEnabled    bool                   `protobuf:"varint,10,opt,name=assistant_enabled,json=assistantEnabled,proto3" json:"assistant_enabled,omitempty"`
+	User                *ShadowTrack           `protobuf:"bytes,11,opt,name=user,proto3" json:"user,omitempty"`
+	EstimatedModelCost  *Money                 `protobuf:"bytes,12,opt,name=estimated_model_cost,json=estimatedModelCost,proto3" json:"estimated_model_cost,omitempty"`
+	ModelAttempts       int32                  `protobuf:"varint,13,opt,name=model_attempts,json=modelAttempts,proto3" json:"model_attempts,omitempty"`
+	MissingModelUsage   int32                  `protobuf:"varint,14,opt,name=missing_model_usage,json=missingModelUsage,proto3" json:"missing_model_usage,omitempty"`
+	MinimumClosedTrades *int32                 `protobuf:"varint,15,opt,name=minimum_closed_trades,json=minimumClosedTrades,proto3,oneof" json:"minimum_closed_trades,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
 }
 
 func (x *GetShadowSnapshotResponse) Reset() {
 	*x = GetShadowSnapshotResponse{}
-	mi := &file_lab_v1_shadow_proto_msgTypes[8]
+	mi := &file_lab_v1_shadow_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -688,7 +1130,7 @@ func (x *GetShadowSnapshotResponse) String() string {
 func (*GetShadowSnapshotResponse) ProtoMessage() {}
 
 func (x *GetShadowSnapshotResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_shadow_proto_msgTypes[8]
+	mi := &file_lab_v1_shadow_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -701,7 +1143,7 @@ func (x *GetShadowSnapshotResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetShadowSnapshotResponse.ProtoReflect.Descriptor instead.
 func (*GetShadowSnapshotResponse) Descriptor() ([]byte, []int) {
-	return file_lab_v1_shadow_proto_rawDescGZIP(), []int{8}
+	return file_lab_v1_shadow_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *GetShadowSnapshotResponse) GetDeployments() []*ShadowDeployment {
@@ -774,21 +1216,65 @@ func (x *GetShadowSnapshotResponse) GetAssistantEnabled() bool {
 	return false
 }
 
+func (x *GetShadowSnapshotResponse) GetUser() *ShadowTrack {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+func (x *GetShadowSnapshotResponse) GetEstimatedModelCost() *Money {
+	if x != nil {
+		return x.EstimatedModelCost
+	}
+	return nil
+}
+
+func (x *GetShadowSnapshotResponse) GetModelAttempts() int32 {
+	if x != nil {
+		return x.ModelAttempts
+	}
+	return 0
+}
+
+func (x *GetShadowSnapshotResponse) GetMissingModelUsage() int32 {
+	if x != nil {
+		return x.MissingModelUsage
+	}
+	return 0
+}
+
+func (x *GetShadowSnapshotResponse) GetMinimumClosedTrades() int32 {
+	if x != nil && x.MinimumClosedTrades != nil {
+		return *x.MinimumClosedTrades
+	}
+	return 0
+}
+
 var File_lab_v1_shadow_proto protoreflect.FileDescriptor
 
 const file_lab_v1_shadow_proto_rawDesc = "" +
 	"\n" +
-	"\x13lab/v1/shadow.proto\x12\x06lab.v1\x1a\x13lab/v1/common.proto\"^\n" +
+	"\x13lab/v1/shadow.proto\x12\x06lab.v1\x1a\x13lab/v1/common.proto\"}\n" +
 	"\x1cStartShadowDeploymentRequest\x12\x16\n" +
 	"\x06symbol\x18\x01 \x01(\tR\x06symbol\x12&\n" +
-	"\x0frule_version_id\x18\x02 \x01(\x03R\rruleVersionId\"D\n" +
+	"\x0frule_version_id\x18\x02 \x01(\x03R\rruleVersionId\x12\x1d\n" +
+	"\n" +
+	"user_track\x18\x03 \x01(\bR\tuserTrack\"D\n" +
 	"\x1dStartShadowDeploymentResponse\x12#\n" +
 	"\rdeployment_id\x18\x01 \x01(\x03R\fdeploymentId\"B\n" +
 	"\x1bStopShadowDeploymentRequest\x12#\n" +
 	"\rdeployment_id\x18\x01 \x01(\x03R\fdeploymentId\"\x1e\n" +
-	"\x1cStopShadowDeploymentResponse\"?\n" +
+	"\x1cStopShadowDeploymentResponse\"\x8f\x01\n" +
+	"\x1cSetShadowUserDecisionRequest\x12#\n" +
+	"\rdeployment_id\x18\x01 \x01(\x03R\fdeploymentId\x12%\n" +
+	"\x0eobservation_id\x18\x02 \x01(\x03R\robservationId\x12\x19\n" +
+	"\x05allow\x18\x03 \x01(\bH\x00R\x05allow\x88\x01\x01B\b\n" +
+	"\x06_allow\"L\n" +
+	"\x1dSetShadowUserDecisionResponse\x12+\n" +
+	"\x12decided_at_unix_ms\x18\x01 \x01(\x03R\x0fdecidedAtUnixMs\"?\n" +
 	"\x18GetShadowSnapshotRequest\x12#\n" +
-	"\rdeployment_id\x18\x01 \x01(\x03R\fdeploymentId\"\xeb\x04\n" +
+	"\rdeployment_id\x18\x01 \x01(\x03R\fdeploymentId\"\x98\x06\n" +
 	"\x10ShadowDeployment\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x16\n" +
 	"\x06symbol\x18\x02 \x01(\tR\x06symbol\x12&\n" +
@@ -807,17 +1293,44 @@ const file_lab_v1_shadow_proto_rawDesc = "" +
 	"\bai_model\x18\r \x01(\tR\aaiModel\x12*\n" +
 	"\x11ai_prompt_version\x18\x0e \x01(\tR\x0faiPromptVersion\x12*\n" +
 	"\x11rule_content_hash\x18\x0f \x01(\tR\x0fruleContentHash\x12!\n" +
-	"\fengine_build\x18\x10 \x01(\tR\vengineBuild\"\xc1\x02\n" +
+	"\fengine_build\x18\x10 \x01(\tR\vengineBuild\x12\x1d\n" +
+	"\n" +
+	"user_track\x18\x11 \x01(\bR\tuserTrack\x12D\n" +
+	"\x17model_input_per_million\x18\x12 \x01(\v2\r.lab.v1.MoneyR\x14modelInputPerMillion\x12F\n" +
+	"\x18model_output_per_million\x18\x13 \x01(\v2\r.lab.v1.MoneyR\x15modelOutputPerMillion\"\x80\x05\n" +
 	"\x11ShadowObservation\x126\n" +
 	"\x18candle_closed_at_unix_ms\x18\x01 \x01(\x03R\x14candleClosedAtUnixMs\x12-\n" +
 	"\x13observed_at_unix_ms\x18\x02 \x01(\x03R\x10observedAtUnixMs\x12-\n" +
 	"\x13decision_at_unix_ms\x18\x03 \x01(\x03R\x10decisionAtUnixMs\x12&\n" +
 	"\x04gate\x18\x04 \x01(\x0e2\x12.lab.v1.ShadowGateR\x04gate\x126\n" +
 	"\x0freference_close\x18\x05 \x01(\v2\r.lab.v1.MoneyR\x0ereferenceClose\x126\n" +
-	"\x18gate_resolved_at_unix_ms\x18\x06 \x01(\x03R\x14gateResolvedAtUnixMs\"Q\n" +
+	"\x18gate_resolved_at_unix_ms\x18\x06 \x01(\x03R\x14gateResolvedAtUnixMs\x12\x0e\n" +
+	"\x02id\x18\a \x01(\x03R\x02id\x12?\n" +
+	"\ruser_decision\x18\b \x01(\x0e2\x1a.lab.v1.ShadowUserDecisionR\fuserDecision\x124\n" +
+	"\x17user_decided_at_unix_ms\x18\t \x01(\x03R\x13userDecidedAtUnixMs\x12B\n" +
+	"\x0ebaseline_entry\x18\n" +
+	" \x01(\v2\x1b.lab.v1.ShadowEntryEvidenceR\rbaselineEntry\x126\n" +
+	"\bai_entry\x18\v \x01(\v2\x1b.lab.v1.ShadowEntryEvidenceR\aaiEntry\x12:\n" +
+	"\n" +
+	"user_entry\x18\f \x01(\v2\x1b.lab.v1.ShadowEntryEvidenceR\tuserEntry\"@\n" +
+	"\x13ShadowEntryEvidence\x12)\n" +
+	"\x11filled_at_unix_ms\x18\x01 \x01(\x03R\x0efilledAtUnixMs\"\x83\x02\n" +
+	"\x11ShadowAttribution\x121\n" +
+	"\rnet_pnl_delta\x18\x01 \x01(\v2\r.lab.v1.MoneyR\vnetPnlDelta\x122\n" +
+	"\freturn_delta\x18\x02 \x01(\v2\x0f.lab.v1.DecimalR\vreturnDelta\x12%\n" +
+	"\x0eshared_entries\x18\x03 \x01(\x05R\rsharedEntries\x122\n" +
+	"\x15baseline_only_entries\x18\x04 \x01(\x05R\x13baselineOnlyEntries\x12,\n" +
+	"\x12track_only_entries\x18\x05 \x01(\x05R\x10trackOnlyEntries\"\x83\x01\n" +
+	"\x12ShadowPeriodResult\x12 \n" +
+	"\ffrom_unix_ms\x18\x01 \x01(\x03R\n" +
+	"fromUnixMs\x12#\n" +
+	"\rsampled_hours\x18\x02 \x01(\x05R\fsampledHours\x12&\n" +
+	"\anet_pnl\x18\x03 \x01(\v2\r.lab.v1.MoneyR\x06netPnl\"\xc4\x01\n" +
 	"\vShadowTrack\x12(\n" +
 	"\ametrics\x18\x01 \x03(\v2\x0e.lab.v1.MetricR\ametrics\x12\x18\n" +
-	"\aentries\x18\x02 \x01(\x05R\aentries\"\xd6\x03\n" +
+	"\aentries\x18\x02 \x01(\x05R\aentries\x12;\n" +
+	"\vattribution\x18\x03 \x01(\v2\x19.lab.v1.ShadowAttributionR\vattribution\x124\n" +
+	"\aperiods\x18\x04 \x03(\v2\x1a.lab.v1.ShadowPeriodResultR\aperiods\"\xea\x05\n" +
 	"\x19GetShadowSnapshotResponse\x12:\n" +
 	"\vdeployments\x18\x01 \x03(\v2\x18.lab.v1.ShadowDeploymentR\vdeployments\x124\n" +
 	"\bselected\x18\x02 \x01(\v2\x18.lab.v1.ShadowDeploymentR\bselected\x12=\n" +
@@ -829,7 +1342,13 @@ const file_lab_v1_shadow_proto_rawDesc = "" +
 	"\routput_tokens\x18\b \x01(\x03R\foutputTokens\x12\x18\n" +
 	"\asymbols\x18\t \x03(\tR\asymbols\x12+\n" +
 	"\x11assistant_enabled\x18\n" +
-	" \x01(\bR\x10assistantEnabled*\xaf\x01\n" +
+	" \x01(\bR\x10assistantEnabled\x12'\n" +
+	"\x04user\x18\v \x01(\v2\x13.lab.v1.ShadowTrackR\x04user\x12?\n" +
+	"\x14estimated_model_cost\x18\f \x01(\v2\r.lab.v1.MoneyR\x12estimatedModelCost\x12%\n" +
+	"\x0emodel_attempts\x18\r \x01(\x05R\rmodelAttempts\x12.\n" +
+	"\x13missing_model_usage\x18\x0e \x01(\x05R\x11missingModelUsage\x127\n" +
+	"\x15minimum_closed_trades\x18\x0f \x01(\x05H\x00R\x13minimumClosedTrades\x88\x01\x01B\x18\n" +
+	"\x16_minimum_closed_trades*\xaf\x01\n" +
 	"\vShadowState\x12\x1c\n" +
 	"\x18SHADOW_STATE_UNSPECIFIED\x10\x00\x12\x17\n" +
 	"\x13SHADOW_STATE_ACTIVE\x10\x01\x12\x19\n" +
@@ -844,11 +1363,18 @@ const file_lab_v1_shadow_proto_rawDesc = "" +
 	"\x13SHADOW_GATE_PENDING\x10\x02\x12\x15\n" +
 	"\x11SHADOW_GATE_ALLOW\x10\x03\x12\x15\n" +
 	"\x11SHADOW_GATE_BLOCK\x10\x04\x12\x1b\n" +
-	"\x17SHADOW_GATE_UNAVAILABLE\x10\x052\xb2\x02\n" +
+	"\x17SHADOW_GATE_UNAVAILABLE\x10\x05*\xbd\x01\n" +
+	"\x12ShadowUserDecision\x12$\n" +
+	" SHADOW_USER_DECISION_UNSPECIFIED\x10\x00\x12\x1d\n" +
+	"\x19SHADOW_USER_DECISION_OPEN\x10\x01\x12\x1e\n" +
+	"\x1aSHADOW_USER_DECISION_ALLOW\x10\x02\x12\x1d\n" +
+	"\x19SHADOW_USER_DECISION_SKIP\x10\x03\x12#\n" +
+	"\x1fSHADOW_USER_DECISION_UNANSWERED\x10\x042\x98\x03\n" +
 	"\rShadowService\x12d\n" +
 	"\x15StartShadowDeployment\x12$.lab.v1.StartShadowDeploymentRequest\x1a%.lab.v1.StartShadowDeploymentResponse\x12a\n" +
 	"\x14StopShadowDeployment\x12#.lab.v1.StopShadowDeploymentRequest\x1a$.lab.v1.StopShadowDeploymentResponse\x12X\n" +
-	"\x11GetShadowSnapshot\x12 .lab.v1.GetShadowSnapshotRequest\x1a!.lab.v1.GetShadowSnapshotResponseB\x7f\n" +
+	"\x11GetShadowSnapshot\x12 .lab.v1.GetShadowSnapshotRequest\x1a!.lab.v1.GetShadowSnapshotResponse\x12d\n" +
+	"\x15SetShadowUserDecision\x12$.lab.v1.SetShadowUserDecisionRequest\x1a%.lab.v1.SetShadowUserDecisionResponseB\x7f\n" +
 	"\n" +
 	"com.lab.v1B\vShadowProtoP\x01Z+tradinglab/engine/internal/gen/lab/v1;labv1\xa2\x02\x03LXX\xaa\x02\x06Lab.V1\xca\x02\x06Lab\\V1\xe2\x02\x12Lab\\V1\\GPBMetadata\xea\x02\aLab::V1b\x06proto3"
 
@@ -864,48 +1390,69 @@ func file_lab_v1_shadow_proto_rawDescGZIP() []byte {
 	return file_lab_v1_shadow_proto_rawDescData
 }
 
-var file_lab_v1_shadow_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_lab_v1_shadow_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_lab_v1_shadow_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_lab_v1_shadow_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_lab_v1_shadow_proto_goTypes = []any{
 	(ShadowState)(0),                      // 0: lab.v1.ShadowState
 	(ShadowGate)(0),                       // 1: lab.v1.ShadowGate
-	(*StartShadowDeploymentRequest)(nil),  // 2: lab.v1.StartShadowDeploymentRequest
-	(*StartShadowDeploymentResponse)(nil), // 3: lab.v1.StartShadowDeploymentResponse
-	(*StopShadowDeploymentRequest)(nil),   // 4: lab.v1.StopShadowDeploymentRequest
-	(*StopShadowDeploymentResponse)(nil),  // 5: lab.v1.StopShadowDeploymentResponse
-	(*GetShadowSnapshotRequest)(nil),      // 6: lab.v1.GetShadowSnapshotRequest
-	(*ShadowDeployment)(nil),              // 7: lab.v1.ShadowDeployment
-	(*ShadowObservation)(nil),             // 8: lab.v1.ShadowObservation
-	(*ShadowTrack)(nil),                   // 9: lab.v1.ShadowTrack
-	(*GetShadowSnapshotResponse)(nil),     // 10: lab.v1.GetShadowSnapshotResponse
-	(*Money)(nil),                         // 11: lab.v1.Money
-	(*Decimal)(nil),                       // 12: lab.v1.Decimal
-	(*Metric)(nil),                        // 13: lab.v1.Metric
+	(ShadowUserDecision)(0),               // 2: lab.v1.ShadowUserDecision
+	(*StartShadowDeploymentRequest)(nil),  // 3: lab.v1.StartShadowDeploymentRequest
+	(*StartShadowDeploymentResponse)(nil), // 4: lab.v1.StartShadowDeploymentResponse
+	(*StopShadowDeploymentRequest)(nil),   // 5: lab.v1.StopShadowDeploymentRequest
+	(*StopShadowDeploymentResponse)(nil),  // 6: lab.v1.StopShadowDeploymentResponse
+	(*SetShadowUserDecisionRequest)(nil),  // 7: lab.v1.SetShadowUserDecisionRequest
+	(*SetShadowUserDecisionResponse)(nil), // 8: lab.v1.SetShadowUserDecisionResponse
+	(*GetShadowSnapshotRequest)(nil),      // 9: lab.v1.GetShadowSnapshotRequest
+	(*ShadowDeployment)(nil),              // 10: lab.v1.ShadowDeployment
+	(*ShadowObservation)(nil),             // 11: lab.v1.ShadowObservation
+	(*ShadowEntryEvidence)(nil),           // 12: lab.v1.ShadowEntryEvidence
+	(*ShadowAttribution)(nil),             // 13: lab.v1.ShadowAttribution
+	(*ShadowPeriodResult)(nil),            // 14: lab.v1.ShadowPeriodResult
+	(*ShadowTrack)(nil),                   // 15: lab.v1.ShadowTrack
+	(*GetShadowSnapshotResponse)(nil),     // 16: lab.v1.GetShadowSnapshotResponse
+	(*Money)(nil),                         // 17: lab.v1.Money
+	(*Decimal)(nil),                       // 18: lab.v1.Decimal
+	(*Metric)(nil),                        // 19: lab.v1.Metric
 }
 var file_lab_v1_shadow_proto_depIdxs = []int32{
 	0,  // 0: lab.v1.ShadowDeployment.state:type_name -> lab.v1.ShadowState
-	11, // 1: lab.v1.ShadowDeployment.capital:type_name -> lab.v1.Money
-	12, // 2: lab.v1.ShadowDeployment.fee_rate:type_name -> lab.v1.Decimal
-	12, // 3: lab.v1.ShadowDeployment.slippage_rate:type_name -> lab.v1.Decimal
-	1,  // 4: lab.v1.ShadowObservation.gate:type_name -> lab.v1.ShadowGate
-	11, // 5: lab.v1.ShadowObservation.reference_close:type_name -> lab.v1.Money
-	13, // 6: lab.v1.ShadowTrack.metrics:type_name -> lab.v1.Metric
-	7,  // 7: lab.v1.GetShadowSnapshotResponse.deployments:type_name -> lab.v1.ShadowDeployment
-	7,  // 8: lab.v1.GetShadowSnapshotResponse.selected:type_name -> lab.v1.ShadowDeployment
-	8,  // 9: lab.v1.GetShadowSnapshotResponse.observations:type_name -> lab.v1.ShadowObservation
-	9,  // 10: lab.v1.GetShadowSnapshotResponse.baseline:type_name -> lab.v1.ShadowTrack
-	9,  // 11: lab.v1.GetShadowSnapshotResponse.ai:type_name -> lab.v1.ShadowTrack
-	2,  // 12: lab.v1.ShadowService.StartShadowDeployment:input_type -> lab.v1.StartShadowDeploymentRequest
-	4,  // 13: lab.v1.ShadowService.StopShadowDeployment:input_type -> lab.v1.StopShadowDeploymentRequest
-	6,  // 14: lab.v1.ShadowService.GetShadowSnapshot:input_type -> lab.v1.GetShadowSnapshotRequest
-	3,  // 15: lab.v1.ShadowService.StartShadowDeployment:output_type -> lab.v1.StartShadowDeploymentResponse
-	5,  // 16: lab.v1.ShadowService.StopShadowDeployment:output_type -> lab.v1.StopShadowDeploymentResponse
-	10, // 17: lab.v1.ShadowService.GetShadowSnapshot:output_type -> lab.v1.GetShadowSnapshotResponse
-	15, // [15:18] is the sub-list for method output_type
-	12, // [12:15] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	17, // 1: lab.v1.ShadowDeployment.capital:type_name -> lab.v1.Money
+	18, // 2: lab.v1.ShadowDeployment.fee_rate:type_name -> lab.v1.Decimal
+	18, // 3: lab.v1.ShadowDeployment.slippage_rate:type_name -> lab.v1.Decimal
+	17, // 4: lab.v1.ShadowDeployment.model_input_per_million:type_name -> lab.v1.Money
+	17, // 5: lab.v1.ShadowDeployment.model_output_per_million:type_name -> lab.v1.Money
+	1,  // 6: lab.v1.ShadowObservation.gate:type_name -> lab.v1.ShadowGate
+	17, // 7: lab.v1.ShadowObservation.reference_close:type_name -> lab.v1.Money
+	2,  // 8: lab.v1.ShadowObservation.user_decision:type_name -> lab.v1.ShadowUserDecision
+	12, // 9: lab.v1.ShadowObservation.baseline_entry:type_name -> lab.v1.ShadowEntryEvidence
+	12, // 10: lab.v1.ShadowObservation.ai_entry:type_name -> lab.v1.ShadowEntryEvidence
+	12, // 11: lab.v1.ShadowObservation.user_entry:type_name -> lab.v1.ShadowEntryEvidence
+	17, // 12: lab.v1.ShadowAttribution.net_pnl_delta:type_name -> lab.v1.Money
+	18, // 13: lab.v1.ShadowAttribution.return_delta:type_name -> lab.v1.Decimal
+	17, // 14: lab.v1.ShadowPeriodResult.net_pnl:type_name -> lab.v1.Money
+	19, // 15: lab.v1.ShadowTrack.metrics:type_name -> lab.v1.Metric
+	13, // 16: lab.v1.ShadowTrack.attribution:type_name -> lab.v1.ShadowAttribution
+	14, // 17: lab.v1.ShadowTrack.periods:type_name -> lab.v1.ShadowPeriodResult
+	10, // 18: lab.v1.GetShadowSnapshotResponse.deployments:type_name -> lab.v1.ShadowDeployment
+	10, // 19: lab.v1.GetShadowSnapshotResponse.selected:type_name -> lab.v1.ShadowDeployment
+	11, // 20: lab.v1.GetShadowSnapshotResponse.observations:type_name -> lab.v1.ShadowObservation
+	15, // 21: lab.v1.GetShadowSnapshotResponse.baseline:type_name -> lab.v1.ShadowTrack
+	15, // 22: lab.v1.GetShadowSnapshotResponse.ai:type_name -> lab.v1.ShadowTrack
+	15, // 23: lab.v1.GetShadowSnapshotResponse.user:type_name -> lab.v1.ShadowTrack
+	17, // 24: lab.v1.GetShadowSnapshotResponse.estimated_model_cost:type_name -> lab.v1.Money
+	3,  // 25: lab.v1.ShadowService.StartShadowDeployment:input_type -> lab.v1.StartShadowDeploymentRequest
+	5,  // 26: lab.v1.ShadowService.StopShadowDeployment:input_type -> lab.v1.StopShadowDeploymentRequest
+	9,  // 27: lab.v1.ShadowService.GetShadowSnapshot:input_type -> lab.v1.GetShadowSnapshotRequest
+	7,  // 28: lab.v1.ShadowService.SetShadowUserDecision:input_type -> lab.v1.SetShadowUserDecisionRequest
+	4,  // 29: lab.v1.ShadowService.StartShadowDeployment:output_type -> lab.v1.StartShadowDeploymentResponse
+	6,  // 30: lab.v1.ShadowService.StopShadowDeployment:output_type -> lab.v1.StopShadowDeploymentResponse
+	16, // 31: lab.v1.ShadowService.GetShadowSnapshot:output_type -> lab.v1.GetShadowSnapshotResponse
+	8,  // 32: lab.v1.ShadowService.SetShadowUserDecision:output_type -> lab.v1.SetShadowUserDecisionResponse
+	29, // [29:33] is the sub-list for method output_type
+	25, // [25:29] is the sub-list for method input_type
+	25, // [25:25] is the sub-list for extension type_name
+	25, // [25:25] is the sub-list for extension extendee
+	0,  // [0:25] is the sub-list for field type_name
 }
 
 func init() { file_lab_v1_shadow_proto_init() }
@@ -914,13 +1461,15 @@ func file_lab_v1_shadow_proto_init() {
 		return
 	}
 	file_lab_v1_common_proto_init()
+	file_lab_v1_shadow_proto_msgTypes[4].OneofWrappers = []any{}
+	file_lab_v1_shadow_proto_msgTypes[13].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_lab_v1_shadow_proto_rawDesc), len(file_lab_v1_shadow_proto_rawDesc)),
-			NumEnums:      2,
-			NumMessages:   9,
+			NumEnums:      3,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -76,5 +76,38 @@ class ShadowGate extends $pb.ProtobufEnum {
   const ShadowGate._(super.value, super.name);
 }
 
+class ShadowUserDecision extends $pb.ProtobufEnum {
+  static const ShadowUserDecision SHADOW_USER_DECISION_UNSPECIFIED =
+      ShadowUserDecision._(
+          0, _omitEnumNames ? '' : 'SHADOW_USER_DECISION_UNSPECIFIED');
+  static const ShadowUserDecision SHADOW_USER_DECISION_OPEN =
+      ShadowUserDecision._(
+          1, _omitEnumNames ? '' : 'SHADOW_USER_DECISION_OPEN');
+  static const ShadowUserDecision SHADOW_USER_DECISION_ALLOW =
+      ShadowUserDecision._(
+          2, _omitEnumNames ? '' : 'SHADOW_USER_DECISION_ALLOW');
+  static const ShadowUserDecision SHADOW_USER_DECISION_SKIP =
+      ShadowUserDecision._(
+          3, _omitEnumNames ? '' : 'SHADOW_USER_DECISION_SKIP');
+  static const ShadowUserDecision SHADOW_USER_DECISION_UNANSWERED =
+      ShadowUserDecision._(
+          4, _omitEnumNames ? '' : 'SHADOW_USER_DECISION_UNANSWERED');
+
+  static const $core.List<ShadowUserDecision> values = <ShadowUserDecision>[
+    SHADOW_USER_DECISION_UNSPECIFIED,
+    SHADOW_USER_DECISION_OPEN,
+    SHADOW_USER_DECISION_ALLOW,
+    SHADOW_USER_DECISION_SKIP,
+    SHADOW_USER_DECISION_UNANSWERED,
+  ];
+
+  static final $core.List<ShadowUserDecision?> _byValue =
+      $pb.ProtobufEnum.$_initByValueList(values, 4);
+  static ShadowUserDecision? valueOf($core.int value) =>
+      value < 0 || value >= _byValue.length ? null : _byValue[value];
+
+  const ShadowUserDecision._(super.value, super.name);
+}
+
 const $core.bool _omitEnumNames =
     $core.bool.fromEnvironment('protobuf.omit_enum_names');

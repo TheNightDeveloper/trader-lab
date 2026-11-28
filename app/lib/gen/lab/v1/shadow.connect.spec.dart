@@ -30,4 +30,12 @@ abstract final class ShadowService {
     labv1shadow.GetShadowSnapshotRequest.new,
     labv1shadow.GetShadowSnapshotResponse.new,
   );
+
+  /// Record one immutable decision while the observed signal's cutoff is still open.
+  static const setShadowUserDecision = connect.Spec(
+    '/$name/SetShadowUserDecision',
+    connect.StreamType.unary,
+    labv1shadow.SetShadowUserDecisionRequest.new,
+    labv1shadow.SetShadowUserDecisionResponse.new,
+  );
 }

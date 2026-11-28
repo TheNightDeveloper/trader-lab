@@ -27,10 +27,12 @@ class StartShadowDeploymentRequest extends $pb.GeneratedMessage {
   factory StartShadowDeploymentRequest({
     $core.String? symbol,
     $fixnum.Int64? ruleVersionId,
+    $core.bool? userTrack,
   }) {
     final result = StartShadowDeploymentRequest._();
     if (symbol != null) result.symbol = symbol;
     if (ruleVersionId != null) result.ruleVersionId = ruleVersionId;
+    if (userTrack != null) result.userTrack = userTrack;
     return result;
   }
 
@@ -49,6 +51,7 @@ class StartShadowDeploymentRequest extends $pb.GeneratedMessage {
       createEmptyInstance: StartShadowDeploymentRequest.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'symbol')
     ..aInt64(2, _omitFieldNames ? '' : 'ruleVersionId')
+    ..aOB(3, _omitFieldNames ? '' : 'userTrack')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -96,6 +99,15 @@ class StartShadowDeploymentRequest extends $pb.GeneratedMessage {
   $core.bool hasRuleVersionId() => $_has(1);
   @$pb.TagNumber(2)
   void clearRuleVersionId() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.bool get userTrack => $_getBF(2);
+  @$pb.TagNumber(3)
+  set userTrack($core.bool value) => $_setBool(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasUserTrack() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearUserTrack() => $_clearField(3);
 }
 
 class StartShadowDeploymentResponse extends $pb.GeneratedMessage {
@@ -271,6 +283,156 @@ class StopShadowDeploymentResponse extends $pb.GeneratedMessage {
   static StopShadowDeploymentResponse? _defaultInstance;
 }
 
+class SetShadowUserDecisionRequest extends $pb.GeneratedMessage {
+  factory SetShadowUserDecisionRequest({
+    $fixnum.Int64? deploymentId,
+    $fixnum.Int64? observationId,
+    $core.bool? allow,
+  }) {
+    final result = SetShadowUserDecisionRequest._();
+    if (deploymentId != null) result.deploymentId = deploymentId;
+    if (observationId != null) result.observationId = observationId;
+    if (allow != null) result.allow = allow;
+    return result;
+  }
+
+  SetShadowUserDecisionRequest._();
+
+  factory SetShadowUserDecisionRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      SetShadowUserDecisionRequest()..mergeFromBuffer(data, registry);
+  factory SetShadowUserDecisionRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      SetShadowUserDecisionRequest()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SetShadowUserDecisionRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: SetShadowUserDecisionRequest.$_createMessage)
+    ..aInt64(1, _omitFieldNames ? '' : 'deploymentId')
+    ..aInt64(2, _omitFieldNames ? '' : 'observationId')
+    ..aOB(3, _omitFieldNames ? '' : 'allow')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetShadowUserDecisionRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetShadowUserDecisionRequest copyWith(
+          void Function(SetShadowUserDecisionRequest) updates) =>
+      super.copyWith(
+              (message) => updates(message as SetShadowUserDecisionRequest))
+          as SetShadowUserDecisionRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use SetShadowUserDecisionRequest() / SetShadowUserDecisionRequest.new instead')
+  static SetShadowUserDecisionRequest create() =>
+      SetShadowUserDecisionRequest._();
+  static $pb.GeneratedMessage $_createMessage() =>
+      SetShadowUserDecisionRequest._();
+  @$core.override
+  SetShadowUserDecisionRequest createEmptyInstance() =>
+      SetShadowUserDecisionRequest._();
+  @$core.pragma('dart2js:noInline')
+  static SetShadowUserDecisionRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SetShadowUserDecisionRequest>(
+          SetShadowUserDecisionRequest.$_createMessage);
+  static SetShadowUserDecisionRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get deploymentId => $_getI64(0);
+  @$pb.TagNumber(1)
+  set deploymentId($fixnum.Int64 value) => $_setInt64(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasDeploymentId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearDeploymentId() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get observationId => $_getI64(1);
+  @$pb.TagNumber(2)
+  set observationId($fixnum.Int64 value) => $_setInt64(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasObservationId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearObservationId() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.bool get allow => $_getBF(2);
+  @$pb.TagNumber(3)
+  set allow($core.bool value) => $_setBool(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasAllow() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearAllow() => $_clearField(3);
+}
+
+class SetShadowUserDecisionResponse extends $pb.GeneratedMessage {
+  factory SetShadowUserDecisionResponse({
+    $fixnum.Int64? decidedAtUnixMs,
+  }) {
+    final result = SetShadowUserDecisionResponse._();
+    if (decidedAtUnixMs != null) result.decidedAtUnixMs = decidedAtUnixMs;
+    return result;
+  }
+
+  SetShadowUserDecisionResponse._();
+
+  factory SetShadowUserDecisionResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      SetShadowUserDecisionResponse()..mergeFromBuffer(data, registry);
+  factory SetShadowUserDecisionResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      SetShadowUserDecisionResponse()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SetShadowUserDecisionResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: SetShadowUserDecisionResponse.$_createMessage)
+    ..aInt64(1, _omitFieldNames ? '' : 'decidedAtUnixMs')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetShadowUserDecisionResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetShadowUserDecisionResponse copyWith(
+          void Function(SetShadowUserDecisionResponse) updates) =>
+      super.copyWith(
+              (message) => updates(message as SetShadowUserDecisionResponse))
+          as SetShadowUserDecisionResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use SetShadowUserDecisionResponse() / SetShadowUserDecisionResponse.new instead')
+  static SetShadowUserDecisionResponse create() =>
+      SetShadowUserDecisionResponse._();
+  static $pb.GeneratedMessage $_createMessage() =>
+      SetShadowUserDecisionResponse._();
+  @$core.override
+  SetShadowUserDecisionResponse createEmptyInstance() =>
+      SetShadowUserDecisionResponse._();
+  @$core.pragma('dart2js:noInline')
+  static SetShadowUserDecisionResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SetShadowUserDecisionResponse>(
+          SetShadowUserDecisionResponse.$_createMessage);
+  static SetShadowUserDecisionResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get decidedAtUnixMs => $_getI64(0);
+  @$pb.TagNumber(1)
+  set decidedAtUnixMs($fixnum.Int64 value) => $_setInt64(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasDecidedAtUnixMs() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearDecidedAtUnixMs() => $_clearField(1);
+}
+
 class GetShadowSnapshotRequest extends $pb.GeneratedMessage {
   factory GetShadowSnapshotRequest({
     $fixnum.Int64? deploymentId,
@@ -350,6 +512,9 @@ class ShadowDeployment extends $pb.GeneratedMessage {
     $core.String? aiPromptVersion,
     $core.String? ruleContentHash,
     $core.String? engineBuild,
+    $core.bool? userTrack,
+    $0.Money? modelInputPerMillion,
+    $0.Money? modelOutputPerMillion,
   }) {
     final result = ShadowDeployment._();
     if (id != null) result.id = id;
@@ -369,6 +534,11 @@ class ShadowDeployment extends $pb.GeneratedMessage {
     if (aiPromptVersion != null) result.aiPromptVersion = aiPromptVersion;
     if (ruleContentHash != null) result.ruleContentHash = ruleContentHash;
     if (engineBuild != null) result.engineBuild = engineBuild;
+    if (userTrack != null) result.userTrack = userTrack;
+    if (modelInputPerMillion != null)
+      result.modelInputPerMillion = modelInputPerMillion;
+    if (modelOutputPerMillion != null)
+      result.modelOutputPerMillion = modelOutputPerMillion;
     return result;
   }
 
@@ -405,6 +575,11 @@ class ShadowDeployment extends $pb.GeneratedMessage {
     ..aOS(14, _omitFieldNames ? '' : 'aiPromptVersion')
     ..aOS(15, _omitFieldNames ? '' : 'ruleContentHash')
     ..aOS(16, _omitFieldNames ? '' : 'engineBuild')
+    ..aOB(17, _omitFieldNames ? '' : 'userTrack')
+    ..aOM<$0.Money>(18, _omitFieldNames ? '' : 'modelInputPerMillion',
+        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Money>(19, _omitFieldNames ? '' : 'modelOutputPerMillion',
+        subBuilder: $0.Money.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -578,6 +753,37 @@ class ShadowDeployment extends $pb.GeneratedMessage {
   $core.bool hasEngineBuild() => $_has(15);
   @$pb.TagNumber(16)
   void clearEngineBuild() => $_clearField(16);
+
+  @$pb.TagNumber(17)
+  $core.bool get userTrack => $_getBF(16);
+  @$pb.TagNumber(17)
+  set userTrack($core.bool value) => $_setBool(16, value);
+  @$pb.TagNumber(17)
+  $core.bool hasUserTrack() => $_has(16);
+  @$pb.TagNumber(17)
+  void clearUserTrack() => $_clearField(17);
+
+  @$pb.TagNumber(18)
+  $0.Money get modelInputPerMillion => $_getN(17);
+  @$pb.TagNumber(18)
+  set modelInputPerMillion($0.Money value) => $_setField(18, value);
+  @$pb.TagNumber(18)
+  $core.bool hasModelInputPerMillion() => $_has(17);
+  @$pb.TagNumber(18)
+  void clearModelInputPerMillion() => $_clearField(18);
+  @$pb.TagNumber(18)
+  $0.Money ensureModelInputPerMillion() => $_ensure(17);
+
+  @$pb.TagNumber(19)
+  $0.Money get modelOutputPerMillion => $_getN(18);
+  @$pb.TagNumber(19)
+  set modelOutputPerMillion($0.Money value) => $_setField(19, value);
+  @$pb.TagNumber(19)
+  $core.bool hasModelOutputPerMillion() => $_has(18);
+  @$pb.TagNumber(19)
+  void clearModelOutputPerMillion() => $_clearField(19);
+  @$pb.TagNumber(19)
+  $0.Money ensureModelOutputPerMillion() => $_ensure(18);
 }
 
 class ShadowObservation extends $pb.GeneratedMessage {
@@ -588,6 +794,12 @@ class ShadowObservation extends $pb.GeneratedMessage {
     ShadowGate? gate,
     $0.Money? referenceClose,
     $fixnum.Int64? gateResolvedAtUnixMs,
+    $fixnum.Int64? id,
+    ShadowUserDecision? userDecision,
+    $fixnum.Int64? userDecidedAtUnixMs,
+    ShadowEntryEvidence? baselineEntry,
+    ShadowEntryEvidence? aiEntry,
+    ShadowEntryEvidence? userEntry,
   }) {
     final result = ShadowObservation._();
     if (candleClosedAtUnixMs != null)
@@ -598,6 +810,13 @@ class ShadowObservation extends $pb.GeneratedMessage {
     if (referenceClose != null) result.referenceClose = referenceClose;
     if (gateResolvedAtUnixMs != null)
       result.gateResolvedAtUnixMs = gateResolvedAtUnixMs;
+    if (id != null) result.id = id;
+    if (userDecision != null) result.userDecision = userDecision;
+    if (userDecidedAtUnixMs != null)
+      result.userDecidedAtUnixMs = userDecidedAtUnixMs;
+    if (baselineEntry != null) result.baselineEntry = baselineEntry;
+    if (aiEntry != null) result.aiEntry = aiEntry;
+    if (userEntry != null) result.userEntry = userEntry;
     return result;
   }
 
@@ -622,6 +841,16 @@ class ShadowObservation extends $pb.GeneratedMessage {
     ..aOM<$0.Money>(5, _omitFieldNames ? '' : 'referenceClose',
         subBuilder: $0.Money.$_createMessage)
     ..aInt64(6, _omitFieldNames ? '' : 'gateResolvedAtUnixMs')
+    ..aInt64(7, _omitFieldNames ? '' : 'id')
+    ..aE<ShadowUserDecision>(8, _omitFieldNames ? '' : 'userDecision',
+        enumValues: ShadowUserDecision.values)
+    ..aInt64(9, _omitFieldNames ? '' : 'userDecidedAtUnixMs')
+    ..aOM<ShadowEntryEvidence>(10, _omitFieldNames ? '' : 'baselineEntry',
+        subBuilder: ShadowEntryEvidence.$_createMessage)
+    ..aOM<ShadowEntryEvidence>(11, _omitFieldNames ? '' : 'aiEntry',
+        subBuilder: ShadowEntryEvidence.$_createMessage)
+    ..aOM<ShadowEntryEvidence>(12, _omitFieldNames ? '' : 'userEntry',
+        subBuilder: ShadowEntryEvidence.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -701,16 +930,336 @@ class ShadowObservation extends $pb.GeneratedMessage {
   $core.bool hasGateResolvedAtUnixMs() => $_has(5);
   @$pb.TagNumber(6)
   void clearGateResolvedAtUnixMs() => $_clearField(6);
+
+  @$pb.TagNumber(7)
+  $fixnum.Int64 get id => $_getI64(6);
+  @$pb.TagNumber(7)
+  set id($fixnum.Int64 value) => $_setInt64(6, value);
+  @$pb.TagNumber(7)
+  $core.bool hasId() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearId() => $_clearField(7);
+
+  @$pb.TagNumber(8)
+  ShadowUserDecision get userDecision => $_getN(7);
+  @$pb.TagNumber(8)
+  set userDecision(ShadowUserDecision value) => $_setField(8, value);
+  @$pb.TagNumber(8)
+  $core.bool hasUserDecision() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearUserDecision() => $_clearField(8);
+
+  @$pb.TagNumber(9)
+  $fixnum.Int64 get userDecidedAtUnixMs => $_getI64(8);
+  @$pb.TagNumber(9)
+  set userDecidedAtUnixMs($fixnum.Int64 value) => $_setInt64(8, value);
+  @$pb.TagNumber(9)
+  $core.bool hasUserDecidedAtUnixMs() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearUserDecidedAtUnixMs() => $_clearField(9);
+
+  @$pb.TagNumber(10)
+  ShadowEntryEvidence get baselineEntry => $_getN(9);
+  @$pb.TagNumber(10)
+  set baselineEntry(ShadowEntryEvidence value) => $_setField(10, value);
+  @$pb.TagNumber(10)
+  $core.bool hasBaselineEntry() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearBaselineEntry() => $_clearField(10);
+  @$pb.TagNumber(10)
+  ShadowEntryEvidence ensureBaselineEntry() => $_ensure(9);
+
+  @$pb.TagNumber(11)
+  ShadowEntryEvidence get aiEntry => $_getN(10);
+  @$pb.TagNumber(11)
+  set aiEntry(ShadowEntryEvidence value) => $_setField(11, value);
+  @$pb.TagNumber(11)
+  $core.bool hasAiEntry() => $_has(10);
+  @$pb.TagNumber(11)
+  void clearAiEntry() => $_clearField(11);
+  @$pb.TagNumber(11)
+  ShadowEntryEvidence ensureAiEntry() => $_ensure(10);
+
+  @$pb.TagNumber(12)
+  ShadowEntryEvidence get userEntry => $_getN(11);
+  @$pb.TagNumber(12)
+  set userEntry(ShadowEntryEvidence value) => $_setField(12, value);
+  @$pb.TagNumber(12)
+  $core.bool hasUserEntry() => $_has(11);
+  @$pb.TagNumber(12)
+  void clearUserEntry() => $_clearField(12);
+  @$pb.TagNumber(12)
+  ShadowEntryEvidence ensureUserEntry() => $_ensure(11);
+}
+
+/// Presence identifies a policy's emitted entry. A fill may still be pending or rejected.
+class ShadowEntryEvidence extends $pb.GeneratedMessage {
+  factory ShadowEntryEvidence({
+    $fixnum.Int64? filledAtUnixMs,
+  }) {
+    final result = ShadowEntryEvidence._();
+    if (filledAtUnixMs != null) result.filledAtUnixMs = filledAtUnixMs;
+    return result;
+  }
+
+  ShadowEntryEvidence._();
+
+  factory ShadowEntryEvidence.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ShadowEntryEvidence()..mergeFromBuffer(data, registry);
+  factory ShadowEntryEvidence.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ShadowEntryEvidence()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ShadowEntryEvidence',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: ShadowEntryEvidence.$_createMessage)
+    ..aInt64(1, _omitFieldNames ? '' : 'filledAtUnixMs')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ShadowEntryEvidence clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ShadowEntryEvidence copyWith(void Function(ShadowEntryEvidence) updates) =>
+      super.copyWith((message) => updates(message as ShadowEntryEvidence))
+          as ShadowEntryEvidence;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core
+      .Deprecated('Use ShadowEntryEvidence() / ShadowEntryEvidence.new instead')
+  static ShadowEntryEvidence create() => ShadowEntryEvidence._();
+  static $pb.GeneratedMessage $_createMessage() => ShadowEntryEvidence._();
+  @$core.override
+  ShadowEntryEvidence createEmptyInstance() => ShadowEntryEvidence._();
+  @$core.pragma('dart2js:noInline')
+  static ShadowEntryEvidence getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ShadowEntryEvidence>(
+          ShadowEntryEvidence.$_createMessage);
+  static ShadowEntryEvidence? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get filledAtUnixMs => $_getI64(0);
+  @$pb.TagNumber(1)
+  set filledAtUnixMs($fixnum.Int64 value) => $_setInt64(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasFilledAtUnixMs() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearFilledAtUnixMs() => $_clearField(1);
+}
+
+class ShadowAttribution extends $pb.GeneratedMessage {
+  factory ShadowAttribution({
+    $0.Money? netPnlDelta,
+    $0.Decimal? returnDelta,
+    $core.int? sharedEntries,
+    $core.int? baselineOnlyEntries,
+    $core.int? trackOnlyEntries,
+  }) {
+    final result = ShadowAttribution._();
+    if (netPnlDelta != null) result.netPnlDelta = netPnlDelta;
+    if (returnDelta != null) result.returnDelta = returnDelta;
+    if (sharedEntries != null) result.sharedEntries = sharedEntries;
+    if (baselineOnlyEntries != null)
+      result.baselineOnlyEntries = baselineOnlyEntries;
+    if (trackOnlyEntries != null) result.trackOnlyEntries = trackOnlyEntries;
+    return result;
+  }
+
+  ShadowAttribution._();
+
+  factory ShadowAttribution.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ShadowAttribution()..mergeFromBuffer(data, registry);
+  factory ShadowAttribution.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ShadowAttribution()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ShadowAttribution',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: ShadowAttribution.$_createMessage)
+    ..aOM<$0.Money>(1, _omitFieldNames ? '' : 'netPnlDelta',
+        subBuilder: $0.Money.$_createMessage)
+    ..aOM<$0.Decimal>(2, _omitFieldNames ? '' : 'returnDelta',
+        subBuilder: $0.Decimal.$_createMessage)
+    ..aI(3, _omitFieldNames ? '' : 'sharedEntries')
+    ..aI(4, _omitFieldNames ? '' : 'baselineOnlyEntries')
+    ..aI(5, _omitFieldNames ? '' : 'trackOnlyEntries')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ShadowAttribution clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ShadowAttribution copyWith(void Function(ShadowAttribution) updates) =>
+      super.copyWith((message) => updates(message as ShadowAttribution))
+          as ShadowAttribution;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use ShadowAttribution() / ShadowAttribution.new instead')
+  static ShadowAttribution create() => ShadowAttribution._();
+  static $pb.GeneratedMessage $_createMessage() => ShadowAttribution._();
+  @$core.override
+  ShadowAttribution createEmptyInstance() => ShadowAttribution._();
+  @$core.pragma('dart2js:noInline')
+  static ShadowAttribution getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ShadowAttribution>(
+          ShadowAttribution.$_createMessage);
+  static ShadowAttribution? _defaultInstance;
+
+  /// All deltas are this track minus baseline on the observed common prefix.
+  @$pb.TagNumber(1)
+  $0.Money get netPnlDelta => $_getN(0);
+  @$pb.TagNumber(1)
+  set netPnlDelta($0.Money value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasNetPnlDelta() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearNetPnlDelta() => $_clearField(1);
+  @$pb.TagNumber(1)
+  $0.Money ensureNetPnlDelta() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $0.Decimal get returnDelta => $_getN(1);
+  @$pb.TagNumber(2)
+  set returnDelta($0.Decimal value) => $_setField(2, value);
+  @$pb.TagNumber(2)
+  $core.bool hasReturnDelta() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearReturnDelta() => $_clearField(2);
+  @$pb.TagNumber(2)
+  $0.Decimal ensureReturnDelta() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  $core.int get sharedEntries => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set sharedEntries($core.int value) => $_setSignedInt32(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasSharedEntries() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearSharedEntries() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.int get baselineOnlyEntries => $_getIZ(3);
+  @$pb.TagNumber(4)
+  set baselineOnlyEntries($core.int value) => $_setSignedInt32(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasBaselineOnlyEntries() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearBaselineOnlyEntries() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.int get trackOnlyEntries => $_getIZ(4);
+  @$pb.TagNumber(5)
+  set trackOnlyEntries($core.int value) => $_setSignedInt32(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasTrackOnlyEntries() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearTrackOnlyEntries() => $_clearField(5);
+}
+
+class ShadowPeriodResult extends $pb.GeneratedMessage {
+  factory ShadowPeriodResult({
+    $fixnum.Int64? fromUnixMs,
+    $core.int? sampledHours,
+    $0.Money? netPnl,
+  }) {
+    final result = ShadowPeriodResult._();
+    if (fromUnixMs != null) result.fromUnixMs = fromUnixMs;
+    if (sampledHours != null) result.sampledHours = sampledHours;
+    if (netPnl != null) result.netPnl = netPnl;
+    return result;
+  }
+
+  ShadowPeriodResult._();
+
+  factory ShadowPeriodResult.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ShadowPeriodResult()..mergeFromBuffer(data, registry);
+  factory ShadowPeriodResult.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ShadowPeriodResult()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ShadowPeriodResult',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: ShadowPeriodResult.$_createMessage)
+    ..aInt64(1, _omitFieldNames ? '' : 'fromUnixMs')
+    ..aI(2, _omitFieldNames ? '' : 'sampledHours')
+    ..aOM<$0.Money>(3, _omitFieldNames ? '' : 'netPnl',
+        subBuilder: $0.Money.$_createMessage)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ShadowPeriodResult clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ShadowPeriodResult copyWith(void Function(ShadowPeriodResult) updates) =>
+      super.copyWith((message) => updates(message as ShadowPeriodResult))
+          as ShadowPeriodResult;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use ShadowPeriodResult() / ShadowPeriodResult.new instead')
+  static ShadowPeriodResult create() => ShadowPeriodResult._();
+  static $pb.GeneratedMessage $_createMessage() => ShadowPeriodResult._();
+  @$core.override
+  ShadowPeriodResult createEmptyInstance() => ShadowPeriodResult._();
+  @$core.pragma('dart2js:noInline')
+  static ShadowPeriodResult getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ShadowPeriodResult>(
+          ShadowPeriodResult.$_createMessage);
+  static ShadowPeriodResult? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get fromUnixMs => $_getI64(0);
+  @$pb.TagNumber(1)
+  set fromUnixMs($fixnum.Int64 value) => $_setInt64(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasFromUnixMs() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearFromUnixMs() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get sampledHours => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set sampledHours($core.int value) => $_setSignedInt32(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasSampledHours() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearSampledHours() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $0.Money get netPnl => $_getN(2);
+  @$pb.TagNumber(3)
+  set netPnl($0.Money value) => $_setField(3, value);
+  @$pb.TagNumber(3)
+  $core.bool hasNetPnl() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearNetPnl() => $_clearField(3);
+  @$pb.TagNumber(3)
+  $0.Money ensureNetPnl() => $_ensure(2);
 }
 
 class ShadowTrack extends $pb.GeneratedMessage {
   factory ShadowTrack({
     $core.Iterable<$0.Metric>? metrics,
     $core.int? entries,
+    ShadowAttribution? attribution,
+    $core.Iterable<ShadowPeriodResult>? periods,
   }) {
     final result = ShadowTrack._();
     if (metrics != null) result.metrics.addAll(metrics);
     if (entries != null) result.entries = entries;
+    if (attribution != null) result.attribution = attribution;
+    if (periods != null) result.periods.addAll(periods);
     return result;
   }
 
@@ -730,6 +1279,10 @@ class ShadowTrack extends $pb.GeneratedMessage {
     ..pPM<$0.Metric>(1, _omitFieldNames ? '' : 'metrics',
         subBuilder: $0.Metric.$_createMessage)
     ..aI(2, _omitFieldNames ? '' : 'entries')
+    ..aOM<ShadowAttribution>(3, _omitFieldNames ? '' : 'attribution',
+        subBuilder: ShadowAttribution.$_createMessage)
+    ..pPM<ShadowPeriodResult>(4, _omitFieldNames ? '' : 'periods',
+        subBuilder: ShadowPeriodResult.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -765,6 +1318,20 @@ class ShadowTrack extends $pb.GeneratedMessage {
   $core.bool hasEntries() => $_has(1);
   @$pb.TagNumber(2)
   void clearEntries() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  ShadowAttribution get attribution => $_getN(2);
+  @$pb.TagNumber(3)
+  set attribution(ShadowAttribution value) => $_setField(3, value);
+  @$pb.TagNumber(3)
+  $core.bool hasAttribution() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearAttribution() => $_clearField(3);
+  @$pb.TagNumber(3)
+  ShadowAttribution ensureAttribution() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  $pb.PbList<ShadowPeriodResult> get periods => $_getList(3);
 }
 
 class GetShadowSnapshotResponse extends $pb.GeneratedMessage {
@@ -779,6 +1346,11 @@ class GetShadowSnapshotResponse extends $pb.GeneratedMessage {
     $fixnum.Int64? outputTokens,
     $core.Iterable<$core.String>? symbols,
     $core.bool? assistantEnabled,
+    ShadowTrack? user,
+    $0.Money? estimatedModelCost,
+    $core.int? modelAttempts,
+    $core.int? missingModelUsage,
+    $core.int? minimumClosedTrades,
   }) {
     final result = GetShadowSnapshotResponse._();
     if (deployments != null) result.deployments.addAll(deployments);
@@ -791,6 +1363,13 @@ class GetShadowSnapshotResponse extends $pb.GeneratedMessage {
     if (outputTokens != null) result.outputTokens = outputTokens;
     if (symbols != null) result.symbols.addAll(symbols);
     if (assistantEnabled != null) result.assistantEnabled = assistantEnabled;
+    if (user != null) result.user = user;
+    if (estimatedModelCost != null)
+      result.estimatedModelCost = estimatedModelCost;
+    if (modelAttempts != null) result.modelAttempts = modelAttempts;
+    if (missingModelUsage != null) result.missingModelUsage = missingModelUsage;
+    if (minimumClosedTrades != null)
+      result.minimumClosedTrades = minimumClosedTrades;
     return result;
   }
 
@@ -822,6 +1401,13 @@ class GetShadowSnapshotResponse extends $pb.GeneratedMessage {
     ..aInt64(8, _omitFieldNames ? '' : 'outputTokens')
     ..pPS(9, _omitFieldNames ? '' : 'symbols')
     ..aOB(10, _omitFieldNames ? '' : 'assistantEnabled')
+    ..aOM<ShadowTrack>(11, _omitFieldNames ? '' : 'user',
+        subBuilder: ShadowTrack.$_createMessage)
+    ..aOM<$0.Money>(12, _omitFieldNames ? '' : 'estimatedModelCost',
+        subBuilder: $0.Money.$_createMessage)
+    ..aI(13, _omitFieldNames ? '' : 'modelAttempts')
+    ..aI(14, _omitFieldNames ? '' : 'missingModelUsage')
+    ..aI(15, _omitFieldNames ? '' : 'minimumClosedTrades')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -927,6 +1513,55 @@ class GetShadowSnapshotResponse extends $pb.GeneratedMessage {
   $core.bool hasAssistantEnabled() => $_has(9);
   @$pb.TagNumber(10)
   void clearAssistantEnabled() => $_clearField(10);
+
+  @$pb.TagNumber(11)
+  ShadowTrack get user => $_getN(10);
+  @$pb.TagNumber(11)
+  set user(ShadowTrack value) => $_setField(11, value);
+  @$pb.TagNumber(11)
+  $core.bool hasUser() => $_has(10);
+  @$pb.TagNumber(11)
+  void clearUser() => $_clearField(11);
+  @$pb.TagNumber(11)
+  ShadowTrack ensureUser() => $_ensure(10);
+
+  @$pb.TagNumber(12)
+  $0.Money get estimatedModelCost => $_getN(11);
+  @$pb.TagNumber(12)
+  set estimatedModelCost($0.Money value) => $_setField(12, value);
+  @$pb.TagNumber(12)
+  $core.bool hasEstimatedModelCost() => $_has(11);
+  @$pb.TagNumber(12)
+  void clearEstimatedModelCost() => $_clearField(12);
+  @$pb.TagNumber(12)
+  $0.Money ensureEstimatedModelCost() => $_ensure(11);
+
+  @$pb.TagNumber(13)
+  $core.int get modelAttempts => $_getIZ(12);
+  @$pb.TagNumber(13)
+  set modelAttempts($core.int value) => $_setSignedInt32(12, value);
+  @$pb.TagNumber(13)
+  $core.bool hasModelAttempts() => $_has(12);
+  @$pb.TagNumber(13)
+  void clearModelAttempts() => $_clearField(13);
+
+  @$pb.TagNumber(14)
+  $core.int get missingModelUsage => $_getIZ(13);
+  @$pb.TagNumber(14)
+  set missingModelUsage($core.int value) => $_setSignedInt32(13, value);
+  @$pb.TagNumber(14)
+  $core.bool hasMissingModelUsage() => $_has(13);
+  @$pb.TagNumber(14)
+  void clearMissingModelUsage() => $_clearField(14);
+
+  @$pb.TagNumber(15)
+  $core.int get minimumClosedTrades => $_getIZ(14);
+  @$pb.TagNumber(15)
+  set minimumClosedTrades($core.int value) => $_setSignedInt32(14, value);
+  @$pb.TagNumber(15)
+  $core.bool hasMinimumClosedTrades() => $_has(14);
+  @$pb.TagNumber(15)
+  void clearMinimumClosedTrades() => $_clearField(15);
 }
 
 class ShadowServiceApi {
@@ -946,6 +1581,12 @@ class ShadowServiceApi {
           $pb.ClientContext? ctx, GetShadowSnapshotRequest request) =>
       _client.invoke<GetShadowSnapshotResponse>(ctx, 'ShadowService',
           'GetShadowSnapshot', request, GetShadowSnapshotResponse());
+
+  /// Record one immutable decision while the observed signal's cutoff is still open.
+  $async.Future<SetShadowUserDecisionResponse> setShadowUserDecision(
+          $pb.ClientContext? ctx, SetShadowUserDecisionRequest request) =>
+      _client.invoke<SetShadowUserDecisionResponse>(ctx, 'ShadowService',
+          'SetShadowUserDecision', request, SetShadowUserDecisionResponse());
 }
 
 const $core.bool _omitFieldNames =

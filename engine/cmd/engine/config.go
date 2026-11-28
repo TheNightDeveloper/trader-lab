@@ -7,6 +7,10 @@ import (
 	"net"
 	"os"
 	"time"
+
+	"tradinglab/engine/internal/api"
+	"tradinglab/engine/internal/instrument"
+	"tradinglab/engine/internal/money"
 )
 
 type Config struct {
@@ -32,6 +36,11 @@ type Config struct {
 	BackupKeep    int    `json:"backup_keep"`
 	// AssistantDailyRequests is a UTC-day cap. Zero disables paid inference.
 	AssistantDailyRequests int `json:"assistant_daily_requests"`
+	// Optional model rates, decimal USDT per million tokens, frozen at Shadow registration.
+	ShadowModelRates *struct {
+		Input  string `json:"input_usdt_per_million"`
+		Output string `json:"output_usdt_per_million"`
+	} `json:"shadow_model_rates"`
 }
 
 func defaultConfig() Config {
@@ -95,4 +104,16 @@ func (c Config) validate() error {
 func (c Config) ingestDelay() time.Duration {
 	d, _ := time.ParseDuration(c.IngestDelay) // validated
 	return d
+}
+
+func (c Config) shadowModelRates() (*api.ShadowModelRates, error) {
+	if c.ShadowModelRates == nil {
+		return nil, nil
+	}
+	input, inErr := money.Parse(c.ShadowModelRates.Input, instrument.Scale)
+	output, outErr := money.Parse(c.ShadowModelRates.Output, instrument.Scale)
+	if inErr != nil || outErr != nil || input < 0 || output < 0 {
+		return nil, errors.New("shadow_model_rates requires two non-negative decimal USDT strings at scale 8 or less")
+	}
+	return &api.ShadowModelRates{InputPerMillion: input, OutputPerMillion: output}, nil
 }

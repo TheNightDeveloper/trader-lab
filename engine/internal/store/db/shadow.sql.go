@@ -11,7 +11,7 @@ import (
 )
 
 const activeShadowDeployment = `-- name: ActiveShadowDeployment :one
-SELECT id, symbol, rule_version_id, rule_content_hash, report_id, registered_at, start_at, end_at, settled_at, state, sim_config, spec_revision, runtime_policy, fill_model, ai_model, ai_prompt_version, engine_build FROM shadow_deployments WHERE state = 'active'
+SELECT id, symbol, rule_version_id, rule_content_hash, report_id, registered_at, start_at, end_at, settled_at, state, sim_config, spec_revision, runtime_policy, fill_model, ai_model, ai_prompt_version, engine_build, user_track, model_input_per_million, model_output_per_million FROM shadow_deployments WHERE state = 'active'
 `
 
 func (q *Queries) ActiveShadowDeployment(ctx context.Context) (ShadowDeployment, error) {
@@ -35,12 +35,15 @@ func (q *Queries) ActiveShadowDeployment(ctx context.Context) (ShadowDeployment,
 		&i.AiModel,
 		&i.AiPromptVersion,
 		&i.EngineBuild,
+		&i.UserTrack,
+		&i.ModelInputPerMillion,
+		&i.ModelOutputPerMillion,
 	)
 	return i, err
 }
 
 const getShadowDeployment = `-- name: GetShadowDeployment :one
-SELECT id, symbol, rule_version_id, rule_content_hash, report_id, registered_at, start_at, end_at, settled_at, state, sim_config, spec_revision, runtime_policy, fill_model, ai_model, ai_prompt_version, engine_build FROM shadow_deployments WHERE id = $1
+SELECT id, symbol, rule_version_id, rule_content_hash, report_id, registered_at, start_at, end_at, settled_at, state, sim_config, spec_revision, runtime_policy, fill_model, ai_model, ai_prompt_version, engine_build, user_track, model_input_per_million, model_output_per_million FROM shadow_deployments WHERE id = $1
 `
 
 func (q *Queries) GetShadowDeployment(ctx context.Context, id int64) (ShadowDeployment, error) {
@@ -64,7 +67,48 @@ func (q *Queries) GetShadowDeployment(ctx context.Context, id int64) (ShadowDepl
 		&i.AiModel,
 		&i.AiPromptVersion,
 		&i.EngineBuild,
+		&i.UserTrack,
+		&i.ModelInputPerMillion,
+		&i.ModelOutputPerMillion,
 	)
+	return i, err
+}
+
+const getShadowHour = `-- name: GetShadowHour :one
+SELECT id, deployment_id, closed_at, observed_at, decision_at, bar, warmup, reason, gate, gate_resolved_at FROM shadow_hours WHERE deployment_id = $1 AND id = $2
+`
+
+type GetShadowHourParams struct {
+	DeploymentID int64
+	ID           int64
+}
+
+func (q *Queries) GetShadowHour(ctx context.Context, arg GetShadowHourParams) (ShadowHour, error) {
+	row := q.db.QueryRow(ctx, getShadowHour, arg.DeploymentID, arg.ID)
+	var i ShadowHour
+	err := row.Scan(
+		&i.ID,
+		&i.DeploymentID,
+		&i.ClosedAt,
+		&i.ObservedAt,
+		&i.DecisionAt,
+		&i.Bar,
+		&i.Warmup,
+		&i.Reason,
+		&i.Gate,
+		&i.GateResolvedAt,
+	)
+	return i, err
+}
+
+const getShadowUserDecision = `-- name: GetShadowUserDecision :one
+SELECT hour_id, allow, decided_at FROM shadow_user_decisions WHERE hour_id = $1
+`
+
+func (q *Queries) GetShadowUserDecision(ctx context.Context, hourID int64) (ShadowUserDecision, error) {
+	row := q.db.QueryRow(ctx, getShadowUserDecision, hourID)
+	var i ShadowUserDecision
+	err := row.Scan(&i.HourID, &i.Allow, &i.DecidedAt)
 	return i, err
 }
 
@@ -134,7 +178,7 @@ func (q *Queries) LatestShadowHour(ctx context.Context, deploymentID int64) (Sha
 }
 
 const listShadowDeployments = `-- name: ListShadowDeployments :many
-SELECT id, symbol, rule_version_id, rule_content_hash, report_id, registered_at, start_at, end_at, settled_at, state, sim_config, spec_revision, runtime_policy, fill_model, ai_model, ai_prompt_version, engine_build FROM shadow_deployments ORDER BY (state = 'active') DESC, id DESC LIMIT 12
+SELECT id, symbol, rule_version_id, rule_content_hash, report_id, registered_at, start_at, end_at, settled_at, state, sim_config, spec_revision, runtime_policy, fill_model, ai_model, ai_prompt_version, engine_build, user_track, model_input_per_million, model_output_per_million FROM shadow_deployments ORDER BY (state = 'active') DESC, id DESC LIMIT 12
 `
 
 func (q *Queries) ListShadowDeployments(ctx context.Context) ([]ShadowDeployment, error) {
@@ -164,6 +208,9 @@ func (q *Queries) ListShadowDeployments(ctx context.Context) ([]ShadowDeployment
 			&i.AiModel,
 			&i.AiPromptVersion,
 			&i.EngineBuild,
+			&i.UserTrack,
+			&i.ModelInputPerMillion,
+			&i.ModelOutputPerMillion,
 		); err != nil {
 			return nil, err
 		}
@@ -176,7 +223,7 @@ func (q *Queries) ListShadowDeployments(ctx context.Context) ([]ShadowDeployment
 }
 
 const lockShadowDeployment = `-- name: LockShadowDeployment :one
-SELECT id, symbol, rule_version_id, rule_content_hash, report_id, registered_at, start_at, end_at, settled_at, state, sim_config, spec_revision, runtime_policy, fill_model, ai_model, ai_prompt_version, engine_build FROM shadow_deployments WHERE id = $1 FOR UPDATE
+SELECT id, symbol, rule_version_id, rule_content_hash, report_id, registered_at, start_at, end_at, settled_at, state, sim_config, spec_revision, runtime_policy, fill_model, ai_model, ai_prompt_version, engine_build, user_track, model_input_per_million, model_output_per_million FROM shadow_deployments WHERE id = $1 FOR UPDATE
 `
 
 func (q *Queries) LockShadowDeployment(ctx context.Context, id int64) (ShadowDeployment, error) {
@@ -200,6 +247,9 @@ func (q *Queries) LockShadowDeployment(ctx context.Context, id int64) (ShadowDep
 		&i.AiModel,
 		&i.AiPromptVersion,
 		&i.EngineBuild,
+		&i.UserTrack,
+		&i.ModelInputPerMillion,
+		&i.ModelOutputPerMillion,
 	)
 	return i, err
 }
@@ -218,6 +268,23 @@ func (q *Queries) LockShadowGate(ctx context.Context, arg LockShadowGateParams) 
 	var id int64
 	err := row.Scan(&id)
 	return id, err
+}
+
+const recordShadowUserDecision = `-- name: RecordShadowUserDecision :one
+INSERT INTO shadow_user_decisions (hour_id, allow, decided_at) VALUES ($1, $2, $3) RETURNING hour_id, allow, decided_at
+`
+
+type RecordShadowUserDecisionParams struct {
+	HourID    int64
+	Allow     bool
+	DecidedAt time.Time
+}
+
+func (q *Queries) RecordShadowUserDecision(ctx context.Context, arg RecordShadowUserDecisionParams) (ShadowUserDecision, error) {
+	row := q.db.QueryRow(ctx, recordShadowUserDecision, arg.HourID, arg.Allow, arg.DecidedAt)
+	var i ShadowUserDecision
+	err := row.Scan(&i.HourID, &i.Allow, &i.DecidedAt)
+	return i, err
 }
 
 const resolveShadowGate = `-- name: ResolveShadowGate :exec
@@ -287,7 +354,9 @@ func (q *Queries) ShadowHours(ctx context.Context, deploymentID int64) ([]Shadow
 
 const shadowUsage = `-- name: ShadowUsage :one
 SELECT coalesce(sum(a.input_tokens), 0)::bigint AS input_tokens,
-       coalesce(sum(a.output_tokens), 0)::bigint AS output_tokens
+       coalesce(sum(a.output_tokens), 0)::bigint AS output_tokens,
+       count(*)::int AS attempts,
+       count(*) FILTER (WHERE a.input_tokens IS NULL OR a.output_tokens IS NULL)::int AS missing_usage
 FROM shadow_hours h JOIN assistant_runs a ON a.shadow_hour_id = h.id
 WHERE h.deployment_id = $1
 `
@@ -295,37 +364,72 @@ WHERE h.deployment_id = $1
 type ShadowUsageRow struct {
 	InputTokens  int64
 	OutputTokens int64
+	Attempts     int32
+	MissingUsage int32
 }
 
 func (q *Queries) ShadowUsage(ctx context.Context, deploymentID int64) (ShadowUsageRow, error) {
 	row := q.db.QueryRow(ctx, shadowUsage, deploymentID)
 	var i ShadowUsageRow
-	err := row.Scan(&i.InputTokens, &i.OutputTokens)
+	err := row.Scan(
+		&i.InputTokens,
+		&i.OutputTokens,
+		&i.Attempts,
+		&i.MissingUsage,
+	)
 	return i, err
+}
+
+const shadowUserDecisions = `-- name: ShadowUserDecisions :many
+SELECT d.hour_id, d.allow, d.decided_at FROM shadow_user_decisions d JOIN shadow_hours h ON h.id = d.hour_id WHERE h.deployment_id = $1
+`
+
+func (q *Queries) ShadowUserDecisions(ctx context.Context, deploymentID int64) ([]ShadowUserDecision, error) {
+	rows, err := q.db.Query(ctx, shadowUserDecisions, deploymentID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ShadowUserDecision
+	for rows.Next() {
+		var i ShadowUserDecision
+		if err := rows.Scan(&i.HourID, &i.Allow, &i.DecidedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const startShadowDeployment = `-- name: StartShadowDeployment :one
 INSERT INTO shadow_deployments (symbol, rule_version_id, rule_content_hash, report_id, registered_at, start_at,
-    end_at, sim_config, spec_revision, runtime_policy, fill_model, ai_model, ai_prompt_version, engine_build)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+    end_at, sim_config, spec_revision, runtime_policy, fill_model, ai_model, ai_prompt_version, engine_build,
+    user_track, model_input_per_million, model_output_per_million)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
 ON CONFLICT DO NOTHING RETURNING id
 `
 
 type StartShadowDeploymentParams struct {
-	Symbol          string
-	RuleVersionID   int64
-	RuleContentHash string
-	ReportID        string
-	RegisteredAt    time.Time
-	StartAt         time.Time
-	EndAt           time.Time
-	SimConfig       []byte
-	SpecRevision    string
-	RuntimePolicy   string
-	FillModel       string
-	AiModel         string
-	AiPromptVersion string
-	EngineBuild     string
+	Symbol                string
+	RuleVersionID         int64
+	RuleContentHash       string
+	ReportID              string
+	RegisteredAt          time.Time
+	StartAt               time.Time
+	EndAt                 time.Time
+	SimConfig             []byte
+	SpecRevision          string
+	RuntimePolicy         string
+	FillModel             string
+	AiModel               string
+	AiPromptVersion       string
+	EngineBuild           string
+	UserTrack             bool
+	ModelInputPerMillion  *int64
+	ModelOutputPerMillion *int64
 }
 
 func (q *Queries) StartShadowDeployment(ctx context.Context, arg StartShadowDeploymentParams) (int64, error) {
@@ -344,6 +448,9 @@ func (q *Queries) StartShadowDeployment(ctx context.Context, arg StartShadowDepl
 		arg.AiModel,
 		arg.AiPromptVersion,
 		arg.EngineBuild,
+		arg.UserTrack,
+		arg.ModelInputPerMillion,
+		arg.ModelOutputPerMillion,
 	)
 	var id int64
 	err := row.Scan(&id)

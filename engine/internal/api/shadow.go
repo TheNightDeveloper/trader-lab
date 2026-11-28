@@ -26,8 +26,14 @@ const (
 )
 
 type Shadow struct {
-	Market    *Market
-	Assistant *Assistant
+	Market     *Market
+	Assistant  *Assistant
+	ModelRates *ShadowModelRates
+}
+
+// ShadowModelRates are configured estimates in fixed-8 USDT per million tokens.
+type ShadowModelRates struct {
+	InputPerMillion, OutputPerMillion int64
 }
 
 func (s *Shadow) assistantEnabled() bool {
@@ -41,7 +47,7 @@ func (s *Shadow) StartShadowDeployment(ctx context.Context, req *connect.Request
 	}
 	st := s.Market.Store
 	if active, err := st.ActiveShadowDeployment(ctx); err == nil {
-		return shadowStartResult(active, symbol, id)
+		return shadowStartResult(active, symbol, id, req.Msg.GetUserTrack())
 	} else if !errors.Is(err, pgx.ErrNoRows) {
 		return nil, err
 	}
@@ -76,12 +82,18 @@ func (s *Shadow) StartShadowDeployment(ctx context.Context, req *connect.Request
 	}
 	now := s.Market.Clock.Now().UTC()
 	start := now.Truncate(time.Hour).Add(time.Hour)
-	deployment, err := st.StartShadowDeployment(ctx, db.StartShadowDeploymentParams{
+	params := db.StartShadowDeploymentParams{
 		Symbol: symbol, RuleVersionID: id, RuleContentHash: rule.version.ContentHash, ReportID: rule.reportID,
 		RegisteredAt: now, StartAt: start, EndAt: start.Add(shadowHorizon), SimConfig: config,
 		SpecRevision: marketSpecRevision(symbol), RuntimePolicy: shadowPolicy, FillModel: sim.FillModel,
 		AiModel: assistant.Model, AiPromptVersion: assistant.ShadowPromptVersion, EngineBuild: s.Market.Build,
-	})
+		UserTrack: req.Msg.GetUserTrack(),
+	}
+	if prices := s.ModelRates; prices != nil {
+		params.ModelInputPerMillion = &prices.InputPerMillion
+		params.ModelOutputPerMillion = &prices.OutputPerMillion
+	}
+	deployment, err := st.StartShadowDeployment(ctx, params)
 	if errors.Is(err, pgx.ErrNoRows) {
 		active, err := st.ActiveShadowDeployment(ctx)
 		if err != nil {
@@ -90,7 +102,7 @@ func (s *Shadow) StartShadowDeployment(ctx context.Context, req *connect.Request
 			}
 			return nil, err
 		}
-		return shadowStartResult(active, symbol, id)
+		return shadowStartResult(active, symbol, id, req.Msg.GetUserTrack())
 	}
 	if err != nil {
 		return nil, err
@@ -98,8 +110,8 @@ func (s *Shadow) StartShadowDeployment(ctx context.Context, req *connect.Request
 	return connect.NewResponse(&labv1.StartShadowDeploymentResponse{DeploymentId: deployment}), nil
 }
 
-func shadowStartResult(active db.ShadowDeployment, symbol string, version int64) (*connect.Response[labv1.StartShadowDeploymentResponse], error) {
-	if active.Symbol != symbol || active.RuleVersionID != version {
+func shadowStartResult(active db.ShadowDeployment, symbol string, version int64, userTrack bool) (*connect.Response[labv1.StartShadowDeploymentResponse], error) {
+	if active.Symbol != symbol || active.RuleVersionID != version || active.UserTrack != userTrack {
 		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("یک اجرای شَدو فعال است"))
 	}
 	return connect.NewResponse(&labv1.StartShadowDeploymentResponse{DeploymentId: active.ID}), nil

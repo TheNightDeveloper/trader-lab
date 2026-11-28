@@ -27,6 +27,8 @@ abstract class ShadowServiceBase extends $pb.GeneratedService {
       $pb.ServerContext ctx, $1.StopShadowDeploymentRequest request);
   $async.Future<$1.GetShadowSnapshotResponse> getShadowSnapshot(
       $pb.ServerContext ctx, $1.GetShadowSnapshotRequest request);
+  $async.Future<$1.SetShadowUserDecisionResponse> setShadowUserDecision(
+      $pb.ServerContext ctx, $1.SetShadowUserDecisionRequest request);
 
   $pb.GeneratedMessage createRequest($core.String methodName) {
     switch (methodName) {
@@ -36,6 +38,8 @@ abstract class ShadowServiceBase extends $pb.GeneratedService {
         return $1.StopShadowDeploymentRequest();
       case 'GetShadowSnapshot':
         return $1.GetShadowSnapshotRequest();
+      case 'SetShadowUserDecision':
+        return $1.SetShadowUserDecisionRequest();
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }
@@ -52,6 +56,9 @@ abstract class ShadowServiceBase extends $pb.GeneratedService {
             ctx, request as $1.StopShadowDeploymentRequest);
       case 'GetShadowSnapshot':
         return getShadowSnapshot(ctx, request as $1.GetShadowSnapshotRequest);
+      case 'SetShadowUserDecision':
+        return setShadowUserDecision(
+            ctx, request as $1.SetShadowUserDecisionRequest);
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }

@@ -115,6 +115,16 @@ at the next UTC hour for seven days. Each observed signal can consume assistant
 budget. The simulator processes the recorded prefix on its own timeline, and a
 manual stop keeps the observed results available for review.
 
+Enable the user decision track during registration to allow or skip each entry
+before its displayed cutoff. The first decision is final. A signal without a
+decision by the deadline is skipped on the user track. Existing deployments
+retain their originally registered tracks.
+
+The optional `shadow_model_rates` engine setting accepts decimal USDT strings
+`input_usdt_per_million` and `output_usdt_per_million`. A new deployment freezes
+these rates for its operational cost estimate. The estimate uses the provider's
+recorded token counts at the configured rates. Unknown usage is shown separately.
+
 ## 5. First use
 
 The sidebar and all text are in Persian. Screen names below are the sidebar labels.

@@ -42,6 +42,9 @@ const (
 	// ShadowServiceGetShadowSnapshotProcedure is the fully-qualified name of the ShadowService's
 	// GetShadowSnapshot RPC.
 	ShadowServiceGetShadowSnapshotProcedure = "/lab.v1.ShadowService/GetShadowSnapshot"
+	// ShadowServiceSetShadowUserDecisionProcedure is the fully-qualified name of the ShadowService's
+	// SetShadowUserDecision RPC.
+	ShadowServiceSetShadowUserDecisionProcedure = "/lab.v1.ShadowService/SetShadowUserDecision"
 )
 
 // ShadowServiceClient is a client for the lab.v1.ShadowService service.
@@ -49,6 +52,8 @@ type ShadowServiceClient interface {
 	StartShadowDeployment(context.Context, *connect.Request[v1.StartShadowDeploymentRequest]) (*connect.Response[v1.StartShadowDeploymentResponse], error)
 	StopShadowDeployment(context.Context, *connect.Request[v1.StopShadowDeploymentRequest]) (*connect.Response[v1.StopShadowDeploymentResponse], error)
 	GetShadowSnapshot(context.Context, *connect.Request[v1.GetShadowSnapshotRequest]) (*connect.Response[v1.GetShadowSnapshotResponse], error)
+	// Record one immutable decision while the observed signal's cutoff is still open.
+	SetShadowUserDecision(context.Context, *connect.Request[v1.SetShadowUserDecisionRequest]) (*connect.Response[v1.SetShadowUserDecisionResponse], error)
 }
 
 // NewShadowServiceClient constructs a client for the lab.v1.ShadowService service. By default, it
@@ -80,6 +85,12 @@ func NewShadowServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(shadowServiceMethods.ByName("GetShadowSnapshot")),
 			connect.WithClientOptions(opts...),
 		),
+		setShadowUserDecision: connect.NewClient[v1.SetShadowUserDecisionRequest, v1.SetShadowUserDecisionResponse](
+			httpClient,
+			baseURL+ShadowServiceSetShadowUserDecisionProcedure,
+			connect.WithSchema(shadowServiceMethods.ByName("SetShadowUserDecision")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -88,6 +99,7 @@ type shadowServiceClient struct {
 	startShadowDeployment *connect.Client[v1.StartShadowDeploymentRequest, v1.StartShadowDeploymentResponse]
 	stopShadowDeployment  *connect.Client[v1.StopShadowDeploymentRequest, v1.StopShadowDeploymentResponse]
 	getShadowSnapshot     *connect.Client[v1.GetShadowSnapshotRequest, v1.GetShadowSnapshotResponse]
+	setShadowUserDecision *connect.Client[v1.SetShadowUserDecisionRequest, v1.SetShadowUserDecisionResponse]
 }
 
 // StartShadowDeployment calls lab.v1.ShadowService.StartShadowDeployment.
@@ -105,11 +117,18 @@ func (c *shadowServiceClient) GetShadowSnapshot(ctx context.Context, req *connec
 	return c.getShadowSnapshot.CallUnary(ctx, req)
 }
 
+// SetShadowUserDecision calls lab.v1.ShadowService.SetShadowUserDecision.
+func (c *shadowServiceClient) SetShadowUserDecision(ctx context.Context, req *connect.Request[v1.SetShadowUserDecisionRequest]) (*connect.Response[v1.SetShadowUserDecisionResponse], error) {
+	return c.setShadowUserDecision.CallUnary(ctx, req)
+}
+
 // ShadowServiceHandler is an implementation of the lab.v1.ShadowService service.
 type ShadowServiceHandler interface {
 	StartShadowDeployment(context.Context, *connect.Request[v1.StartShadowDeploymentRequest]) (*connect.Response[v1.StartShadowDeploymentResponse], error)
 	StopShadowDeployment(context.Context, *connect.Request[v1.StopShadowDeploymentRequest]) (*connect.Response[v1.StopShadowDeploymentResponse], error)
 	GetShadowSnapshot(context.Context, *connect.Request[v1.GetShadowSnapshotRequest]) (*connect.Response[v1.GetShadowSnapshotResponse], error)
+	// Record one immutable decision while the observed signal's cutoff is still open.
+	SetShadowUserDecision(context.Context, *connect.Request[v1.SetShadowUserDecisionRequest]) (*connect.Response[v1.SetShadowUserDecisionResponse], error)
 }
 
 // NewShadowServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -137,6 +156,12 @@ func NewShadowServiceHandler(svc ShadowServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(shadowServiceMethods.ByName("GetShadowSnapshot")),
 		connect.WithHandlerOptions(opts...),
 	)
+	shadowServiceSetShadowUserDecisionHandler := connect.NewUnaryHandler(
+		ShadowServiceSetShadowUserDecisionProcedure,
+		svc.SetShadowUserDecision,
+		connect.WithSchema(shadowServiceMethods.ByName("SetShadowUserDecision")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/lab.v1.ShadowService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ShadowServiceStartShadowDeploymentProcedure:
@@ -145,6 +170,8 @@ func NewShadowServiceHandler(svc ShadowServiceHandler, opts ...connect.HandlerOp
 			shadowServiceStopShadowDeploymentHandler.ServeHTTP(w, r)
 		case ShadowServiceGetShadowSnapshotProcedure:
 			shadowServiceGetShadowSnapshotHandler.ServeHTTP(w, r)
+		case ShadowServiceSetShadowUserDecisionProcedure:
+			shadowServiceSetShadowUserDecisionHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -164,4 +191,8 @@ func (UnimplementedShadowServiceHandler) StopShadowDeployment(context.Context, *
 
 func (UnimplementedShadowServiceHandler) GetShadowSnapshot(context.Context, *connect.Request[v1.GetShadowSnapshotRequest]) (*connect.Response[v1.GetShadowSnapshotResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("lab.v1.ShadowService.GetShadowSnapshot is not implemented"))
+}
+
+func (UnimplementedShadowServiceHandler) SetShadowUserDecision(context.Context, *connect.Request[v1.SetShadowUserDecisionRequest]) (*connect.Response[v1.SetShadowUserDecisionResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("lab.v1.ShadowService.SetShadowUserDecision is not implemented"))
 }

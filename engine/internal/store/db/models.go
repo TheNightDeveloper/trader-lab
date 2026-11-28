@@ -434,23 +434,26 @@ type Setting struct {
 }
 
 type ShadowDeployment struct {
-	ID              int64
-	Symbol          string
-	RuleVersionID   int64
-	RuleContentHash string
-	ReportID        string
-	RegisteredAt    time.Time
-	StartAt         time.Time
-	EndAt           time.Time
-	SettledAt       *time.Time
-	State           string
-	SimConfig       []byte
-	SpecRevision    string
-	RuntimePolicy   string
-	FillModel       string
-	AiModel         string
-	AiPromptVersion string
-	EngineBuild     string
+	ID                    int64
+	Symbol                string
+	RuleVersionID         int64
+	RuleContentHash       string
+	ReportID              string
+	RegisteredAt          time.Time
+	StartAt               time.Time
+	EndAt                 time.Time
+	SettledAt             *time.Time
+	State                 string
+	SimConfig             []byte
+	SpecRevision          string
+	RuntimePolicy         string
+	FillModel             string
+	AiModel               string
+	AiPromptVersion       string
+	EngineBuild           string
+	UserTrack             bool
+	ModelInputPerMillion  *int64
+	ModelOutputPerMillion *int64
 }
 
 type ShadowHour struct {
@@ -464,6 +467,12 @@ type ShadowHour struct {
 	Reason         string
 	Gate           string
 	GateResolvedAt *time.Time
+}
+
+type ShadowUserDecision struct {
+	HourID    int64
+	Allow     bool
+	DecidedAt time.Time
 }
 
 type StrategyRuleVersion struct {

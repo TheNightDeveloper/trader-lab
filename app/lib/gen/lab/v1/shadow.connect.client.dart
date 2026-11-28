@@ -58,4 +58,22 @@ extension type ShadowServiceClient (connect.Transport _transport) {
       onTrailer: onTrailer,
     );
   }
+
+  /// Record one immutable decision while the observed signal's cutoff is still open.
+  Future<labv1shadow.SetShadowUserDecisionResponse> setShadowUserDecision(
+    labv1shadow.SetShadowUserDecisionRequest input, {
+    connect.Headers? headers,
+    connect.AbortSignal? signal,
+    Function(connect.Headers)? onHeader,
+    Function(connect.Headers)? onTrailer,
+  }) {
+    return connect.Client(_transport).unary(
+      specs.ShadowService.setShadowUserDecision,
+      input,
+      signal: signal,
+      headers: headers,
+      onHeader: onHeader,
+      onTrailer: onTrailer,
+    );
+  }
 }

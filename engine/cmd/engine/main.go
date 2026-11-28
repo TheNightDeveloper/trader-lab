@@ -52,6 +52,10 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	shadowRates, err := cfg.shadowModelRates()
+	if err != nil {
+		return err
+	}
 	var level slog.Level
 	if err := level.UnmarshalText([]byte(cfg.LogLevel)); err != nil {
 		return fmt.Errorf("log_level: %w", err)
@@ -93,7 +97,7 @@ func run() error {
 	if key := strings.TrimSpace(os.Getenv("TRADINGLAB_ASSISTANT_API_KEY")); key != "" && cfg.AssistantDailyRequests > 0 {
 		assistantService.Provider = assistant.NewOpenAI(key)
 	}
-	shadowService := &api.Shadow{Market: market, Assistant: assistantService}
+	shadowService := &api.Shadow{Market: market, Assistant: assistantService, ModelRates: shadowRates}
 	go shadowService.RunShadow(ctx)
 	paperService := &api.Paper{Market: market}
 	go paperService.RunPaper(ctx)
