@@ -1,6 +1,7 @@
 package loop
 
 import (
+	"math"
 	"testing"
 	"time"
 
@@ -27,6 +28,20 @@ func TestVariantsAreBoundedUniqueAndDeterministic(t *testing.T) {
 	require.Len(t, Variants(parent, 5), 5, "capped by the candidate budget")
 	require.Equal(t, []string{"ret_1", "ret_4", "ret_24", "vol_24", "rsi_14"}, parent.Features, "the parent is not mutated")
 	require.Equal(t, 1.0, parent.Filter.Max)
+}
+
+func TestGateDoesNotWrapRelativeReturn(t *testing.T) {
+	g := Default().Gate
+	d := &Doc{Forward: &Forward{
+		Challenger: []metrics.Metric{m("total_return", math.MaxInt64)},
+		Champion:   []metrics.Metric{m("total_return", -1)},
+	}}
+	improvement := gate(g, d, true)[1]
+	require.Equal(t, "pass", improvement.Status, "the exact margin exceeds the positive threshold")
+	require.Contains(t, improvement.Text, metrics.OverflowReason)
+	d.Forward.Champion, d.Forward.Challenger = d.Forward.Challenger, d.Forward.Champion
+	require.Equal(t, "fail", gate(g, d, true)[1].Status)
+	require.Equal(t, "−922337203685477.58%", pct(math.MinInt64, true))
 }
 
 func TestCycleSplitKeepsUsedForwardDataTrainingOnly(t *testing.T) {

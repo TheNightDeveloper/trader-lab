@@ -15,35 +15,35 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import 'data.pb.dart' as $0;
+import 'data.pb.dart' as $1;
 import 'data.pbjson.dart';
 
 export 'data.pb.dart';
 
 abstract class DataServiceBase extends $pb.GeneratedService {
-  $async.Future<$0.GetOverviewResponse> getOverview(
-      $pb.ServerContext ctx, $0.GetOverviewRequest request);
-  $async.Future<$0.ListDatasetsResponse> listDatasets(
-      $pb.ServerContext ctx, $0.ListDatasetsRequest request);
-  $async.Future<$0.GetCoverageResponse> getCoverage(
-      $pb.ServerContext ctx, $0.GetCoverageRequest request);
-  $async.Future<$0.ListQualityIssuesResponse> listQualityIssues(
-      $pb.ServerContext ctx, $0.ListQualityIssuesRequest request);
-  $async.Future<$0.ImportResponse> import(
-      $pb.ServerContext ctx, $0.ImportRequest request);
+  $async.Future<$1.GetOverviewResponse> getOverview(
+      $pb.ServerContext ctx, $1.GetOverviewRequest request);
+  $async.Future<$1.ListDatasetsResponse> listDatasets(
+      $pb.ServerContext ctx, $1.ListDatasetsRequest request);
+  $async.Future<$1.GetCoverageResponse> getCoverage(
+      $pb.ServerContext ctx, $1.GetCoverageRequest request);
+  $async.Future<$1.ListQualityIssuesResponse> listQualityIssues(
+      $pb.ServerContext ctx, $1.ListQualityIssuesRequest request);
+  $async.Future<$1.ImportResponse> import(
+      $pb.ServerContext ctx, $1.ImportRequest request);
 
   $pb.GeneratedMessage createRequest($core.String methodName) {
     switch (methodName) {
       case 'GetOverview':
-        return $0.GetOverviewRequest();
+        return $1.GetOverviewRequest();
       case 'ListDatasets':
-        return $0.ListDatasetsRequest();
+        return $1.ListDatasetsRequest();
       case 'GetCoverage':
-        return $0.GetCoverageRequest();
+        return $1.GetCoverageRequest();
       case 'ListQualityIssues':
-        return $0.ListQualityIssuesRequest();
+        return $1.ListQualityIssuesRequest();
       case 'Import':
-        return $0.ImportRequest();
+        return $1.ImportRequest();
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }
@@ -53,15 +53,15 @@ abstract class DataServiceBase extends $pb.GeneratedService {
       $core.String methodName, $pb.GeneratedMessage request) {
     switch (methodName) {
       case 'GetOverview':
-        return getOverview(ctx, request as $0.GetOverviewRequest);
+        return getOverview(ctx, request as $1.GetOverviewRequest);
       case 'ListDatasets':
-        return listDatasets(ctx, request as $0.ListDatasetsRequest);
+        return listDatasets(ctx, request as $1.ListDatasetsRequest);
       case 'GetCoverage':
-        return getCoverage(ctx, request as $0.GetCoverageRequest);
+        return getCoverage(ctx, request as $1.GetCoverageRequest);
       case 'ListQualityIssues':
-        return listQualityIssues(ctx, request as $0.ListQualityIssuesRequest);
+        return listQualityIssues(ctx, request as $1.ListQualityIssuesRequest);
       case 'Import':
-        return import(ctx, request as $0.ImportRequest);
+        return import(ctx, request as $1.ImportRequest);
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }

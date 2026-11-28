@@ -1,5 +1,5 @@
 // Generated from design/tokens.json. Keep both in sync; widgets must use these, never raw hex.
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 abstract final class AppColors {
   static const bg = Color(0xFF0D1015);
@@ -143,6 +143,8 @@ ThemeData buildAppTheme() {
       style: FilledButton.styleFrom(
         backgroundColor: AppColors.accent,
         foregroundColor: AppColors.onAccent,
+        // Desktop density otherwise shrinks the target below 44 logical pixels.
+        visualDensity: VisualDensity.standard,
         minimumSize: const Size(AppSize.minTouch, AppSize.minTouch),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
         textStyle: const TextStyle(fontFamily: AppFonts.ui, fontWeight: FontWeight.w700),
@@ -153,6 +155,7 @@ ThemeData buildAppTheme() {
         backgroundColor: AppColors.surfaceRaised,
         foregroundColor: AppColors.textPrimary,
         side: const BorderSide(color: AppColors.borderStrong),
+        visualDensity: VisualDensity.standard,
         minimumSize: const Size(AppSize.minTouch, AppSize.minTouch),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
       ),

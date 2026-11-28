@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "strategyVersionId": "trend-ema@v1",
+  "instrument": {
+    "venue": "binance",
+    "product": "MARKET_PRODUCT_SPOT",
+    "symbol": "BTCUSDT",
+    "specRevision": "fixture/v1"
+  },
+  "observedAtUnixMs": "1795046400123",
+  "targetExposure": {"units": "0", "scale": 6},
+  "reason": "خروج از موقعیت"
+}

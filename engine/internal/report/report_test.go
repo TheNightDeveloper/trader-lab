@@ -2,6 +2,7 @@ package report
 
 import (
 	"context"
+	"math"
 	"testing"
 	"time"
 
@@ -18,6 +19,21 @@ import (
 	"tradinglab/engine/internal/store/storetest"
 	"tradinglab/engine/internal/strategy"
 )
+
+func TestPersistRejectsUnrepresentableListMetrics(t *testing.T) {
+	st := storetest.Open(t)
+	ctx := context.Background()
+	ev := &eval.Evaluation{
+		OOS:  eval.RunView{Metrics: metrics.Compute(metrics.Input{Initial: 1, Equity: []metrics.Point{{Equity: math.MaxInt64}}})},
+		Main: &sim.Result{}, HoldoutRun: &sim.Result{},
+	}
+	err := (Service{Store: st}).persist(ctx, "rp_unrepresentable", nil, ev)
+	require.ErrorIs(t, err, money.ErrOverflow)
+	require.Contains(t, err.Error(), "total_return")
+	n, err := st.CountReports(ctx)
+	require.NoError(t, err)
+	require.Zero(t, n)
+}
 
 var t0 = time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)
 
@@ -104,8 +120,9 @@ func TestCreateLoadViewRecalculate(t *testing.T) {
 	require.EqualValues(t, 2, views)
 
 	// Plan M3 acceptance: the calculator with default inputs reproduces the net exactly.
-	v, _, err := svc.Recalculate(ctx, id, got.Spec.Sim, money.RatioOne)
+	v, _, release, err := svc.Recalculate(ctx, got, got.Spec.Sim, money.RatioOne)
 	require.NoError(t, err)
+	defer release()
 	re, _ := metrics.Get(v.Metrics, "net_pnl")
 	require.Equal(t, net.V, re.V)
 
@@ -138,4 +155,56 @@ func TestDatasetCacheReusesVerifiedBarsAndEvicts(t *testing.T) {
 	require.NoError(t, err)
 	require.NotSame(t, &a["BTCUSDT"][0], &c["BTCUSDT"][0], "evicted by the newer version, loaded and verified again")
 	require.Equal(t, a, c)
+}
+
+func TestDatasetBudgetPreflightsCombinedRawRanges(t *testing.T) {
+	st := storetest.Open(t)
+	ctx := context.Background()
+	require.NoError(t, data.SeedInstruments(ctx, st.Queries))
+	for _, id := range []string{"a", "b"} {
+		require.NoError(t, st.InsertDataset(ctx, db.InsertDatasetParams{ID: id, Symbol: "BTCUSDT", Timeframe: "1h", RangeFrom: t0, RangeTo: t0.Add((data.MaxRawBars/2 + 1) * time.Minute), GapPolicy: "flag", KnownAt: t0, Manifest: []byte(`{}`)}))
+	}
+	_, _, err := (Service{Store: st}).Bars(ctx, []string{"a", "b"})
+	require.ErrorIs(t, err, data.ErrLimit, "reject combined raw cost before reconstructing invalid fixture manifests")
+}
+
+func TestReportRejectsNonUSDTBeforeMaterializing(t *testing.T) {
+	st, usdt := setup(t)
+	ctx := context.Background()
+	require.NoError(t, data.SeedInstruments(ctx, st.Queries))
+	// An incomplete fixture proves capability is checked before dataset rebuilding.
+	require.NoError(t, st.InsertDataset(ctx, db.InsertDatasetParams{ID: "cross", Symbol: "ETHBTC", Timeframe: "1h", RangeFrom: t0, RangeTo: t0.Add(time.Hour), GapPolicy: "flag", KnownAt: t0, Manifest: []byte(`{}`)}))
+	_, err := (Service{Store: st}).Create(ctx, spec("cross"))
+	require.ErrorContains(t, err, "USDT")
+	svc := Service{Store: st}
+	id, err := svc.Create(ctx, spec(usdt))
+	require.NoError(t, err)
+	before, err := svc.Load(ctx, id)
+	require.NoError(t, err)
+	// Construct historical input metadata in an isolated test schema, keeping saved figures.
+	_, err = st.Pool.Exec(ctx, "UPDATE reports SET spec=jsonb_set(spec, '{dataset_ids}', '[\"cross\"]'::jsonb) WHERE id=$1", id)
+	require.NoError(t, err)
+	_, err = svc.Reproduce(ctx, id)
+	require.ErrorIs(t, err, instrument.ErrResearchUnsupported)
+	after, err := svc.Load(ctx, id)
+	require.NoError(t, err)
+	_, _, _, err = svc.Recalculate(ctx, after, before.Spec.Sim, money.RatioOne)
+	require.ErrorIs(t, err, instrument.ErrResearchUnsupported)
+	require.Equal(t, before.Row.Evaluation, after.Row.Evaluation)
+	require.Equal(t, before.Row.Holdout, after.Row.Holdout)
+}
+
+// Dataset-count limits alone must not retain four independently large versions.
+func TestDatasetCacheEvictsByTotalBars(t *testing.T) {
+	st, id := setup(t)
+	c := NewDatasetCache(4)
+	c.m["older"] = cachedDataset{bars: make([]data.Bar, data.MaxRawBars)}
+	c.order = []string{"older"}
+	c.bars = data.MaxRawBars
+	svc := Service{Store: st, Cache: c}
+	got, _, err := svc.Bars(context.Background(), []string{id})
+	require.NoError(t, err)
+	require.NotContains(t, c.m, "older", "evict despite being below the four-dataset cap")
+	require.Equal(t, len(got["BTCUSDT"]), c.bars)
+	require.Equal(t, []string{id}, c.order)
 }

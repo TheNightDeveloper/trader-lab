@@ -107,6 +107,7 @@ message ActiveModel {
   string version_id = 2; // empty: no active version
   string model_id = 3; // empty: no active model yet
   int64 model_as_of_unix_ms = 4;
+  int64 lifecycle_revision = 5; // revision of this coherent active pair
 }
 
 message GetLearningRequest {}
@@ -185,6 +186,7 @@ message ListModelsResponse {
 message ApproveCycleRequest {
   int64 cycle_id = 1;
   string note = 2;
+  optional int64 expected_revision = 3; // required; must also match the evaluated champion
 }
 
 message ApproveCycleResponse {}
@@ -198,6 +200,8 @@ message RejectCycleResponse {}
 
 message RollbackRequest {
   string note = 1;
+  optional int64 expected_revision = 2; // required for a fresh user decision
+  string algorithm_id = 3; // binds the decision to the displayed algorithm, not mutable settings
 }
 
 message RollbackResponse {}

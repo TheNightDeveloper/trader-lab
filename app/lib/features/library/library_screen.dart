@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -16,6 +16,7 @@ import '../../gen/lab/v1/library.pb.dart';
 import '../../l10n/app_localizations.dart';
 import '../experiments/experiment_providers.dart';
 import '../page_frame.dart';
+import 'lifecycle_history.dart';
 
 const _families = ['trend', 'mean_reversion', 'learning', 'hybrid', 'benchmark'];
 
@@ -53,6 +54,11 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
           title: Dest.library.label(l),
           subtitle: Dest.library.subtitle(l),
           actions: [
+            OutlinedButton.icon(
+              onPressed: () => context.go('/library/rules'),
+              icon: const Icon(Icons.rule_outlined, size: 18),
+              label: const Text('کتابخانهٔ قواعد'),
+            ),
             FilledButton.icon(
               onPressed: version == null
                   ? null
@@ -217,11 +223,21 @@ class _Detail extends ConsumerWidget {
     try {
       await ref
           .read(libraryClientProvider)
-          .setVersionState(SetVersionStateRequest(versionId: v.id, state: to, note: note.trim()));
+          .setVersionState(
+            SetVersionStateRequest(
+              versionId: v.id,
+              state: to,
+              note: note.trim(),
+              expectedRevision: a.lifecycleRevision,
+            ),
+          );
       ref.invalidate(algorithmsProvider);
-      ref.invalidate(lifecycleEventsProvider(v.id));
+      ref.invalidate(lifecycleEventsProvider);
     } catch (e) {
-      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errorText(e))));
+      // A stale confirmation must refresh before another decision.
+      if (!context.mounted) return;
+      ref.invalidate(algorithmsProvider);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errorText(e))));
     }
   }
 
@@ -230,7 +246,6 @@ class _Detail extends ConsumerWidget {
     final l = L10n.of(context);
     final current = a.versions.firstOrNull;
     final locked = a.versions.any((v) => v.state == 'active');
-    final events = current == null ? null : ref.watch(lifecycleEventsProvider(current.id));
     Widget kv(String k, Widget v) => Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpace.xs),
       child: Row(
@@ -307,46 +322,9 @@ class _Detail extends ConsumerWidget {
             const SizedBox(height: AppSpace.sm),
             WarningBanner(l.libLockNote, icon: Icons.lock_outline_rounded),
           ],
-          if (events != null) ...[
+          if (current != null) ...[
             const SizedBox(height: AppSpace.lg),
-            Text(l.libHistory, style: AppText.sectionTitle),
-            const SizedBox(height: AppSpace.sm),
-            AsyncSection(
-              value: events,
-              onRetry: () => ref.invalidate(lifecycleEventsProvider(current!.id)),
-              skeleton: const SizedBox(height: 60),
-              builder: (r) => Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  for (final e in r.events)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: AppSpace.xs),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Wrap(
-                            spacing: AppSpace.sm,
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            children: [
-                              if (e.fromState.isNotEmpty) ...[
-                                Text(lifecycleState(l, e.fromState).$1, style: AppText.caption),
-                                const Icon(Icons.arrow_forward_rounded, size: 14, color: AppColors.textMuted),
-                              ],
-                              StatusText(lifecycleState(l, e.toState)),
-                              Text(e.actor == 'user' ? l.actorUser : l.actorSystem, style: AppText.caption),
-                              Mono(
-                                fmtDateTime(utcMs(e.atUnixMs)),
-                                style: AppText.mono.copyWith(fontSize: 12, color: AppColors.textMuted),
-                              ),
-                            ],
-                          ),
-                          if (e.note.isNotEmpty) Text(e.note, style: AppText.caption),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
-            ),
+            LifecycleHistory(key: ValueKey((current.id, a.lifecycleRevision)), versionId: current.id),
           ],
         ],
       ),

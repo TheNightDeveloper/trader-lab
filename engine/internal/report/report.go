@@ -11,7 +11,6 @@ import (
 	"errors"
 	"fmt"
 	"maps"
-	"runtime"
 	"slices"
 	"strings"
 	"sync"
@@ -21,6 +20,7 @@ import (
 	"tradinglab/engine/internal/data"
 	"tradinglab/engine/internal/eval"
 	"tradinglab/engine/internal/instrument"
+	"tradinglab/engine/internal/jobs"
 	"tradinglab/engine/internal/metrics"
 	"tradinglab/engine/internal/money"
 	"tradinglab/engine/internal/sim"
@@ -41,7 +41,9 @@ const (
 type Service struct {
 	Store    *store.Store
 	Version  string // engine version recorded in every report
-	Parallel int    // simulator runs at once per report; 0 = all CPUs
+	Build    eval.BuildIdentity
+	Parallel int          // simulator runs at once per report; 0 = all CPUs
+	Memory   *jobs.Memory // shared active-work budget; nil only for isolated callers
 	// Cache holds recently used dataset versions (nil: load every time).
 	Cache *DatasetCache
 }
@@ -63,6 +65,26 @@ func Specs() map[string]instrument.Spec {
 	return m
 }
 
+// ValidateResearch checks metadata only, before loading candles or using cached results.
+func (s Service) ValidateResearch(ctx context.Context, ids []string) error {
+	if len(ids) == 0 || len(ids) > len(Specs()) {
+		return fmt.Errorf("%w: choose one dataset per supported pair", ErrInput)
+	}
+	for _, id := range ids {
+		row, err := s.Store.GetDataset(ctx, id)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return fmt.Errorf("%w: dataset %s not found", ErrInput, id)
+		}
+		if err != nil {
+			return err
+		}
+		if err := instrument.ResearchError(row.Symbol); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // Bars loads and verifies every dataset of spec (content hash checked) and
 // returns bars per symbol at the datasets' common timeframe.
 func (s Service) Bars(ctx context.Context, ids []string) (map[string][]data.Bar, data.Timeframe, error) {
@@ -75,9 +97,29 @@ func (s Service) bars(ctx context.Context, ids []string) (map[string][]data.Bar,
 	if len(ids) == 0 {
 		return nil, "", 0, fmt.Errorf("%w: choose at least one dataset", ErrInput)
 	}
-	gaps := 0
-	bars := map[string][]data.Bar{}
-	var tf data.Timeframe
+	// Validate the whole request before loading even its first large dataset.
+	if len(ids) > len(Specs()) {
+		return nil, "", 0, fmt.Errorf("%w: too many datasets", ErrInput)
+	}
+	rawCount := 0
+	for _, id := range ids {
+		row, err := s.Store.GetDataset(ctx, id)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, "", 0, fmt.Errorf("%w: dataset %s not found", ErrInput, id)
+		}
+		if err != nil {
+			return nil, "", 0, err
+		}
+		n, err := data.RawBarCount(data.Timeframe(row.Timeframe), row.RangeFrom, row.RangeTo)
+		if err != nil {
+			return nil, "", 0, err
+		}
+		rawCount += n
+		if rawCount > data.MaxRawBars {
+			return nil, "", 0, data.ErrLimit
+		}
+	}
+	loaded := make([]cachedDataset, 0, len(ids))
 	for _, id := range ids {
 		ds, bs, err := s.Cache.load(ctx, s, id)
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -86,6 +128,17 @@ func (s Service) bars(ctx context.Context, ids []string) (map[string][]data.Bar,
 		if err != nil {
 			return nil, "", 0, err
 		}
+		loaded = append(loaded, cachedDataset{ds, bs})
+	}
+	return assembleBars(loaded)
+}
+
+func assembleBars(loaded []cachedDataset) (map[string][]data.Bar, data.Timeframe, int, error) {
+	gaps := 0
+	bars := make(map[string][]data.Bar, len(loaded))
+	var tf data.Timeframe
+	for _, item := range loaded {
+		ds, bs := item.ds, item.bars
 		if tf != "" && ds.Spec.Timeframe != tf {
 			return nil, "", 0, fmt.Errorf("%w: datasets must share one timeframe (%s vs %s)", ErrInput, tf, ds.Spec.Timeframe)
 		}
@@ -101,8 +154,16 @@ func (s Service) bars(ctx context.Context, ids []string) (map[string][]data.Bar,
 
 // Create evaluates spec over its datasets and stores the report.
 func (s Service) Create(ctx context.Context, spec eval.Spec) (string, error) {
+	if err := s.ValidateResearch(ctx, spec.DatasetIDs); err != nil {
+		return "", err
+	}
+	s, release, err := s.admitEvaluation(ctx, spec.DatasetIDs)
+	if err != nil {
+		return "", err
+	}
+	defer release()
 	spec.EngineVersion = s.Version
-	ev, bars, err := s.evaluate(ctx, spec)
+	ev, bars, err := s.evaluate(ctx, spec, Specs())
 	if err != nil {
 		return "", err
 	}
@@ -120,8 +181,16 @@ func (s Service) CreateWithID(ctx context.Context, id string, spec eval.Spec) er
 	if ok, err := s.Store.ReportExists(ctx, id); err != nil || ok {
 		return err
 	}
+	if err := s.ValidateResearch(ctx, spec.DatasetIDs); err != nil {
+		return err
+	}
+	s, release, err := s.admitEvaluation(ctx, spec.DatasetIDs)
+	if err != nil {
+		return err
+	}
+	defer release()
 	spec.EngineVersion = s.Version
-	ev, bars, err := s.evaluate(ctx, spec)
+	ev, bars, err := s.evaluate(ctx, spec, Specs())
 	if err != nil {
 		return err
 	}
@@ -129,17 +198,21 @@ func (s Service) CreateWithID(ctx context.Context, id string, spec eval.Spec) er
 }
 
 // evaluate loads the datasets, evaluates spec and adds the data-quality badge.
-func (s Service) evaluate(ctx context.Context, spec eval.Spec) (*eval.Evaluation, map[string][]data.Bar, error) {
+func (s Service) evaluate(ctx context.Context, spec eval.Spec, specs map[string]instrument.Spec) (*eval.Evaluation, map[string][]data.Bar, error) {
+	if err := s.ValidateResearch(ctx, spec.DatasetIDs); err != nil {
+		return nil, nil, err
+	}
 	bars, tf, gaps, err := s.bars(ctx, spec.DatasetIDs)
 	if err != nil {
 		return nil, nil, err
 	}
 	spec.Timeframe = tf
-	parallel := s.Parallel
-	if parallel <= 0 {
-		parallel = runtime.NumCPU()
+	// Provenance is engine-owned even when a caller supplies an old or forged spec.
+	spec.Provenance, err = s.provenance(ctx, spec.DatasetIDs, specs)
+	if err != nil {
+		return nil, nil, err
 	}
-	ev, err := eval.EvaluateWith(ctx, spec, bars, Specs(), parallel)
+	ev, err := eval.EvaluateWith(ctx, spec, bars, specs, s.parallelism())
 	if err != nil {
 		return nil, nil, err
 	}
@@ -150,7 +223,7 @@ func (s Service) evaluate(ctx context.Context, spec eval.Spec) (*eval.Evaluation
 }
 
 // Reproduce re-evaluates a stored report from its recorded inputs and reports
-// whether every number came out identical (invariant 1).
+// whether provenance, exact numbers and both canonical runs match (invariant 1).
 func (s Service) Reproduce(ctx context.Context, id string) (bool, error) {
 	row, err := s.Store.GetReport(ctx, id)
 	if errors.Is(err, pgx.ErrNoRows) {
@@ -163,7 +236,20 @@ func (s Service) Reproduce(ctx context.Context, id string) (bool, error) {
 	if err := json.Unmarshal(row.Spec, &spec); err != nil {
 		return false, err
 	}
-	ev, _, err := s.evaluate(ctx, spec)
+	if err := s.ValidateResearch(ctx, spec.DatasetIDs); err != nil {
+		return false, err
+	}
+	s, release, err := s.admitEvaluation(ctx, spec.DatasetIDs)
+	if err != nil {
+		return false, err
+	}
+	defer release()
+	specs, err := recordedSpecs(spec.Provenance)
+	if err != nil {
+		return false, err
+	}
+	spec.EngineVersion = s.Version
+	ev, _, err := s.evaluate(ctx, spec, specs)
 	if err != nil {
 		return false, err
 	}
@@ -175,19 +261,33 @@ func (s Service) Reproduce(ctx context.Context, id string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return jsonEqual(evJ, row.Evaluation) && jsonEqual(holdJ, row.Holdout), nil
-}
-
-// jsonEqual compares JSON by value: PostgreSQL jsonb normalizes key order and
-// whitespace, so stored bytes differ from freshly marshalled ones.
-func jsonEqual(a, b []byte) bool {
-	var x, y any
-	if json.Unmarshal(a, &x) != nil || json.Unmarshal(b, &y) != nil {
-		return false
+	specJ, err := json.Marshal(ev.Spec)
+	if err != nil {
+		return false, err
 	}
-	ja, _ := json.Marshal(x)
-	jb, _ := json.Marshal(y)
-	return string(ja) == string(jb)
+	splitJ, err := json.Marshal(ev.Split)
+	if err != nil {
+		return false, err
+	}
+	if !jsonEqual(evJ, row.Evaluation) || !jsonEqual(holdJ, row.Holdout) || !jsonEqual(specJ, row.Spec) || !jsonEqual(splitJ, row.Split) {
+		return false, nil
+	}
+	net, _ := metrics.Get(ev.OOS.Metrics, "net_pnl")
+	ret, _ := metrics.Get(ev.OOS.Metrics, "total_return")
+	closed, _ := metrics.Get(ev.OOS.Metrics, "closed_trades")
+	if row.OosNet != net.V || row.OosReturn != ret.V || int64(row.ClosedTrades) != closed.V {
+		return false, nil
+	}
+	for _, run := range []struct {
+		name   string
+		result *sim.Result
+	}{{RunMain, ev.Main}, {RunHoldout, ev.HoldoutRun}} {
+		same, err := s.sameRun(ctx, id, run.name, run.result)
+		if err != nil || !same {
+			return false, err
+		}
+	}
+	return true, nil
 }
 
 func newID() (string, error) {
@@ -199,6 +299,10 @@ func newID() (string, error) {
 }
 
 func (s Service) persist(ctx context.Context, id string, bars map[string][]data.Bar, ev *eval.Evaluation) error {
+	// List and library projections store these metrics without validity flags.
+	if err := metrics.Require(ev.OOS.Metrics, "net_pnl", "total_return", "closed_trades"); err != nil {
+		return err
+	}
 	specJ, err := json.Marshal(ev.Spec)
 	if err != nil {
 		return err
@@ -219,7 +323,11 @@ func (s Service) persist(ctx context.Context, id string, bars map[string][]data.
 	ret, _ := metrics.Get(ev.OOS.Metrics, "total_return")
 	closed, _ := metrics.Get(ev.OOS.Metrics, "closed_trades")
 	symbols := slices.Sorted(maps.Keys(bars))
-	title := fmt.Sprintf("%s · %s · %s", ev.Spec.Strategy, strings.Join(symbols, "+"), ev.Spec.Timeframe)
+	name := ev.Spec.Strategy
+	if ev.Spec.RuleVersionID != 0 {
+		name = fmt.Sprintf("%s #%d", name, ev.Spec.RuleVersionID)
+	}
+	title := fmt.Sprintf("%s · %s · %s", name, strings.Join(symbols, "+"), ev.Spec.Timeframe)
 	return s.Store.InTx(ctx, func(q *db.Queries) error {
 		err := q.InsertReport(ctx, db.InsertReportParams{
 			ID: id, Title: title, Spec: specJ, Split: splitJ, Evaluation: evJ, Holdout: holdJ,
@@ -238,7 +346,8 @@ func (s Service) persist(ctx context.Context, id string, bars map[string][]data.
 	})
 }
 
-func copyRun(ctx context.Context, q *db.Queries, id, run string, r *sim.Result) error {
+// runRecords is the shared canonical projection for persistence and reproduction.
+func runRecords(id, run string, r *sim.Result) canonicalRun {
 	trades := make([]db.CopyTradesParams, len(r.Trades))
 	for i, t := range r.Trades {
 		var mark *int64
@@ -269,13 +378,18 @@ func copyRun(ctx context.Context, q *db.Queries, id, run string, r *sim.Result) 
 			Reason: d.Reason, ModelID: d.ModelID, RecipeVersion: d.RecipeVersion, Outcome: string(d.Outcome), Detail: d.Detail,
 		}
 	}
-	if _, err := q.CopyTrades(ctx, trades); err != nil {
+	return canonicalRun{trades, fills, decisions}
+}
+
+func copyRun(ctx context.Context, q *db.Queries, id, run string, r *sim.Result) error {
+	rows := runRecords(id, run, r)
+	if _, err := q.CopyTrades(ctx, rows.trades); err != nil {
 		return fmt.Errorf("copy %s trades: %w", run, err)
 	}
-	if _, err := q.CopyFills(ctx, fills); err != nil {
+	if _, err := q.CopyFills(ctx, rows.fills); err != nil {
 		return fmt.Errorf("copy %s fills: %w", run, err)
 	}
-	if _, err := q.CopyDecisions(ctx, decisions); err != nil {
+	if _, err := q.CopyDecisions(ctx, rows.decisions); err != nil {
 		return fmt.Errorf("copy %s decisions: %w", run, err)
 	}
 	return nil
@@ -344,21 +458,40 @@ func (s Service) Decisions(ctx context.Context, id, run string) ([]sim.Decision,
 	return out, nil
 }
 
-// Recalculate replays a report's recorded out-of-sample intents with cfg.
-func (s Service) Recalculate(ctx context.Context, id string, cfg sim.Config, scale money.Ratio) (eval.RunView, *sim.Result, error) {
-	st, err := s.Load(ctx, id)
-	if err != nil {
-		return eval.RunView{}, nil, err
+// Recalculate replays the loaded report. The caller releases the reservation
+// after projecting the result into its response.
+func (s Service) Recalculate(ctx context.Context, st Stored, cfg sim.Config, scale money.Ratio) (eval.RunView, *sim.Result, func(), error) {
+	if err := s.ValidateResearch(ctx, st.Spec.DatasetIDs); err != nil {
+		return eval.RunView{}, nil, nil, err
 	}
-	ds, err := s.Decisions(ctx, id, RunMain)
+	release, err := s.ReserveSimulation(ctx, st.Spec.DatasetIDs)
 	if err != nil {
-		return eval.RunView{}, nil, err
+		return eval.RunView{}, nil, nil, err
+	}
+	retained := false
+	defer func() {
+		if !retained {
+			release()
+		}
+	}()
+	ds, err := s.Decisions(ctx, st.Row.ID, RunMain)
+	if err != nil {
+		return eval.RunView{}, nil, nil, err
 	}
 	bars, _, err := s.Bars(ctx, st.Spec.DatasetIDs)
 	if err != nil {
-		return eval.RunView{}, nil, err
+		return eval.RunView{}, nil, nil, err
 	}
-	return eval.Replay(ctx, st.Split, ds, cfg, scale, bars, Specs())
+	specs, err := recordedSpecs(st.Spec.Provenance)
+	if err != nil {
+		return eval.RunView{}, nil, nil, err
+	}
+	view, result, err := eval.Replay(ctx, st.Split, ds, cfg, scale, bars, specs)
+	if err != nil {
+		return eval.RunView{}, nil, nil, err
+	}
+	retained = true
+	return view, result, release, nil
 }
 
 // DatasetCache keeps the most recently loaded dataset versions in memory. A
@@ -369,6 +502,7 @@ type DatasetCache struct {
 	size  int
 	order []string // oldest first
 	m     map[string]cachedDataset
+	bars  int // retained output bars, bounded independently of dataset count
 }
 
 type cachedDataset struct {
@@ -380,6 +514,32 @@ func NewDatasetCache(size int) *DatasetCache {
 	return &DatasetCache{size: max(1, size), m: map[string]cachedDataset{}}
 }
 
+// pin collects every requested immutable array while the cache lock protects lookup.
+func (c *DatasetCache) pin(ids []string) []cachedDataset {
+	if c == nil {
+		return nil
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	pinned := make([]cachedDataset, 0, len(ids))
+	for _, id := range ids {
+		entry, ok := c.m[id]
+		if !ok {
+			return nil
+		}
+		pinned = append(pinned, entry)
+	}
+	for _, id := range ids {
+		c.touch(id)
+	}
+	return pinned
+}
+
+// touch updates the least-recently-used order with the cache lock held.
+func (c *DatasetCache) touch(id string) {
+	c.order = append(slices.DeleteFunc(c.order, func(x string) bool { return x == id }), id)
+}
+
 // load returns the version from the cache, or loads and verifies it (content
 // hash checked) and keeps it. A nil cache always loads.
 func (c *DatasetCache) load(ctx context.Context, s Service, id string) (data.Dataset, []data.Bar, error) {
@@ -389,7 +549,7 @@ func (c *DatasetCache) load(ctx context.Context, s Service, id string) (data.Dat
 	c.mu.Lock()
 	hit, ok := c.m[id]
 	if ok {
-		c.order = append(slices.DeleteFunc(c.order, func(x string) bool { return x == id }), id)
+		c.touch(id)
 	}
 	c.mu.Unlock()
 	if ok {
@@ -403,8 +563,10 @@ func (c *DatasetCache) load(ctx context.Context, s Service, id string) (data.Dat
 	defer c.mu.Unlock()
 	if _, ok := c.m[id]; !ok {
 		c.m[id] = cachedDataset{ds, bars}
+		c.bars += len(bars)
 		c.order = append(c.order, id)
-		for len(c.order) > c.size {
+		for len(c.order) > c.size || c.bars > data.MaxRawBars {
+			c.bars -= len(c.m[c.order[0]].bars)
 			delete(c.m, c.order[0])
 			c.order = c.order[1:]
 		}

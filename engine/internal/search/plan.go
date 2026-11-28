@@ -12,6 +12,7 @@ import (
 
 	"tradinglab/engine/internal/data"
 	"tradinglab/engine/internal/experiment"
+	"tradinglab/engine/internal/instrument"
 	"tradinglab/engine/internal/metrics"
 	"tradinglab/engine/internal/money"
 	"tradinglab/engine/internal/store"
@@ -59,6 +60,9 @@ func Plan(ctx context.Context, s *store.Store, def experiment.Definition) ([]exp
 		row, err := s.GetDataset(ctx, id)
 		if err != nil {
 			return nil, invalid("dataset %s not found", id)
+		}
+		if err := instrument.ResearchError(row.Symbol); err != nil {
+			return nil, fmt.Errorf("%w: %w", experiment.ErrInvalid, err)
 		}
 		if tf != "" && data.Timeframe(row.Timeframe) != tf {
 			return nil, invalid("datasets must share one timeframe")

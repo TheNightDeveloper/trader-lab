@@ -16,8 +16,8 @@ type DatasetSpec struct {
 	GapPolicy GapPolicy
 }
 
-// HashDataset is the content address of a dataset version: SHA-256 over the spec
-// and every bar (times, OHLCV, availability, flags) in a fixed text form.
+// HashDataset is the legacy canonical bar hash, also a component of new snapshot
+// IDs: SHA-256 over the spec and bars in a fixed text form.
 // Same inputs give the same hash on every run and machine; any changed value,
 // added bar or different ingest delay gives a new hash.
 func HashDataset(s DatasetSpec, bars []Bar) string {
@@ -32,6 +32,19 @@ func HashDataset(s DatasetSpec, bars []Bar) string {
 		}
 		buf[len(buf)-1] = '\n'
 		_, _ = h.Write(buf)
+	}
+	return hex.EncodeToString(h.Sum(nil))
+}
+
+// New snapshots use a separate namespace, covering raw values and revision
+// identities even when a higher-timeframe aggregation hides a correction.
+func hashSnapshot(s DatasetSpec, bars, raw []Bar, revisions []int32) string {
+	h := sha256.New()
+	rawSpec := s
+	rawSpec.Timeframe = TF1m
+	_, _ = fmt.Fprintf(h, "dataset/snapshot/v1\n%s\n%s\n", HashDataset(s, bars), HashDataset(rawSpec, raw))
+	for i, b := range raw {
+		_, _ = fmt.Fprintf(h, "%d,%d,%d\n", b.OpenTime.UnixMicro(), b.CloseTime.UnixMicro(), revisions[i])
 	}
 	return hex.EncodeToString(h.Sum(nil))
 }

@@ -49,6 +49,19 @@ func TestLoadConfigMissingFileUsesDefaults(t *testing.T) {
 	require.Equal(t, defaultConfig(), c)
 }
 
+func TestResearchMemoryConfigBounds(t *testing.T) {
+	for _, n := range []int{0, -1, 15, 65537} {
+		c := defaultConfig()
+		c.ResearchMemoryMiB = n
+		require.Error(t, c.validate())
+	}
+	for _, n := range []int{16, 1024, 65536} {
+		c := defaultConfig()
+		c.ResearchMemoryMiB = n
+		require.NoError(t, c.validate())
+	}
+}
+
 // testServer runs the real Echo stack over a temp web dir.
 func testServer(t *testing.T) *httptest.Server {
 	root := t.TempDir()

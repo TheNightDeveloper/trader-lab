@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_animate/flutter_animate.dart' hide ShimmerEffect;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -178,7 +178,7 @@ class DataTableBox extends StatelessWidget {
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: AppColors.border)),
       ),
-      children: [for (final c in columns) _cell(Text(c, style: AppText.label))],
+      children: [for (final c in columns) _TableCell(Text(c, style: AppText.label))],
     );
     final body = [
       for (final r in rows)
@@ -186,7 +186,7 @@ class DataTableBox extends StatelessWidget {
           decoration: const BoxDecoration(
             border: Border(bottom: BorderSide(color: AppColors.divider)),
           ),
-          children: [for (final c in r) _cell(c)],
+          children: [for (final c in r) _TableCell(c)],
         ),
     ];
     return Column(
@@ -204,14 +204,21 @@ class DataTableBox extends StatelessWidget {
             );
           },
         ),
-        if (paging != null) _PagingBar(paging!),
+        if (paging != null) PagingBar(paging!),
       ],
     );
   }
+}
 
-  static Widget _cell(Widget child) => Padding(
+class _TableCell extends StatelessWidget {
+  const _TableCell(this.child);
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.symmetric(horizontal: AppSpace.sm, vertical: 10),
-    child: child,
+    // Keep the column edge aligned even when its text has its own LTR direction.
+    child: Align(alignment: AlignmentDirectional.centerStart, child: child),
   );
 }
 
@@ -221,8 +228,8 @@ class Paging {
   final ValueChanged<int> onOffset;
 }
 
-class _PagingBar extends StatelessWidget {
-  const _PagingBar(this.p);
+class PagingBar extends StatelessWidget {
+  const PagingBar(this.p, {super.key});
   final Paging p;
 
   @override

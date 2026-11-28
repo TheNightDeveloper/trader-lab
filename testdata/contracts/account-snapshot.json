@@ -1,0 +1,9 @@
+{
+  "account": {"environment": "ENVIRONMENT_PAPER", "accountId": "demo-paper"},
+  "revision": "9007199254740993",
+  "asOfUnixMs": "1795228800123",
+  "accountingAsset": "USDT",
+  "equity": {"value": {"units": "0", "scale": 8, "asset": "USDT"}},
+  "availableBalance": {"unavailable": {"reason": "MONEY_AVAILABILITY_MISSING", "detail": "موجودی آزاد هنوز دریافت نشده است"}},
+  "riskPolicy": {"policyId": "paper-risk", "revision": "2", "effectiveFromUnixMs": "1795228800000"}
+}

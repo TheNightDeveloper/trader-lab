@@ -1,7 +1,6 @@
 package strategy
 
 import (
-	"errors"
 	"fmt"
 	"slices"
 	"time"
@@ -27,26 +26,30 @@ type learned struct {
 
 // NewLearned builds a strategy from trained models of one recipe.
 func NewLearned(models []model.Artifact) (Strategy, error) {
-	if len(models) == 0 {
-		return nil, errors.New("strategy: no trained models")
-	}
+	return DescribeLearned(models).Build(models)
+}
+
+func buildLearned(models []model.Artifact) *learned {
 	r := models[0].Recipe
-	if err := r.Validate(); err != nil {
-		return nil, err
-	}
-	for _, m := range models {
-		if m.RecipeHash != models[0].RecipeHash {
-			return nil, fmt.Errorf("strategy: models %s and %s come from different recipes", models[0].ID, m.ID)
-		}
+	// Runtime inputs must stay frozen even if a caller edits the artifact afterward.
+	r.Features = slices.Clone(r.Features)
+	if r.Filter != nil {
+		filter := *r.Filter
+		r.Filter = &filter
 	}
 	ms := slices.Clone(models)
+	for i := range ms {
+		ms[i].Weights = slices.Clone(ms[i].Weights)
+		ms[i].Scaler.Mean = slices.Clone(ms[i].Scaler.Mean)
+		ms[i].Scaler.Std = slices.Clone(ms[i].Scaler.Std)
+	}
 	slices.SortStableFunc(ms, func(a, b model.Artifact) int { return a.AsOf.Compare(b.AsOf) })
 	ratio := func(f float64) money.Ratio { return money.Ratio(f*float64(money.RatioOne) + 0.5) }
 	s := &learned{models: ms, r: r, exposure: ratio(r.Exposure), stop: ratio(r.StopLoss), take: ratio(r.TakeProfit), filter: -1, long: map[string]bool{}}
 	if r.Filter != nil {
 		s.filter = slices.Index(r.Features, r.Filter.Feature)
 	}
-	return s, nil
+	return s
 }
 
 func (s *learned) OnBar(ctx RunContext, b data.Bar) ([]Intent, error) {
@@ -66,20 +69,29 @@ func (s *learned) OnBar(ctx RunContext, b data.Bar) ([]Intent, error) {
 	}
 	p := m.Predict(x)
 	want := p > s.r.Entry
-	why := fmt.Sprintf("پیش‌بینی \u2066%.5f\u2069 در برابر آستانه \u2066%.5f\u2069", p, s.r.Entry)
+	filtered := false
 	if want && s.filter >= 0 {
-		if z := m.Scaler.Apply(x)[s.filter]; z > s.r.Filter.Max {
+		if z := (x[s.filter] - m.Scaler.Mean[s.filter]) / m.Scaler.Std[s.filter]; z > s.r.Filter.Max {
 			want = false
-			why += fmt.Sprintf("؛ فیلتر %s رد کرد", s.r.Filter.Feature)
+			filtered = true
 		}
 	}
 	if was, seen := s.long[b.Instrument]; seen && was == want {
 		return nil, nil
 	}
 	s.long[b.Instrument] = want
+	// Most bars keep the same target; format an explanation only for a decision.
+	why := fmt.Sprintf("پیش‌بینی \u2066%.5f\u2069 در برابر آستانه \u2066%.5f\u2069", p, s.r.Entry)
+	if filtered {
+		why += fmt.Sprintf("؛ فیلتر %s رد کرد", s.r.Filter.Feature)
+	}
 	in := Intent{Instrument: b.Instrument, Reason: why, ModelID: m.ID, RecipeVersion: m.RecipeHash[:12]}
 	if want {
 		in.Target, in.StopLoss, in.TakeProfit = s.exposure, s.stop, s.take
 	}
 	return []Intent{in}, nil
 }
+
+// Features read observed history directly; warming a learned strategy must not
+// consume its first trading intent before the evaluated forward window.
+func (s *learned) Warmup(RunContext, data.Bar) error { return nil }

@@ -1,5 +1,178 @@
 # Performance
 
+## P0 F07 runtime and memory calibration (2026-11-19)
+
+The production binary `4a438f5` rejected a 100,000-bar report at the default
+1 GiB reservation budget. The request estimate was 6,657,048,576 bytes. A second
+run used a temporary 32 GiB reservation budget to measure the same workload.
+The setting changes accounting admission and does not allocate that amount.
+The reference host is Windows amd64, Core i3-12100F with eight logical CPUs,
+Go 1.26.4 and a separate local PostgreSQL process. The fixture uses synthetic
+BTCUSDT data in a disposable schema and disables live feeds and backups.
+
+| Measurement | Original runtime | Side-run projection |
+|---|---:|---:|
+| Queue receipt, 500 attempts | 12.99 ms | 12.26 ms |
+| GetReport p95, 100 requests | 63.76 ms | 69.65 ms |
+| GetChart p95, 100 requests | 116.58 ms | 111.19 ms |
+| Recalculate, one request | 1.06 s | 1.02 s |
+| Worst additional health heartbeat delay | 4.28 ms | 9.12 ms |
+| Engine peak working set | 456,986,624 B | 446,603,264 B |
+| Engine CPU time during the mixed interval | 51.92 s | 54.14 s |
+| Mixed elapsed wall time | 10.22 s | 11.50 s |
+
+Five read workers alternated chart and report calls during the same search.
+There were 53 and 46 completed attempts when the reads ended, respectively,
+and all 500 attempts eventually completed in both runs. The CPU time corresponds
+to approximately 63.5% and 58.8% of the host's logical-CPU capacity over the
+measured interval. Peak working set covers the engine's lifetime through the
+end of that interval. PostgreSQL and browser memory are outside that counter.
+These are diagnostic samples with an elevated admission budget.
+
+A separate 100,000-bar simulator stress fixture reached 199,998 fills
+and 798,780,098 allocated B/op over three iterations. Total allocations measure
+allocation volume. These runs preceded the default-budget fixes below.
+Local evidence is in `artifacts/p0-mixed-runtime.txt`,
+`p0-mixed-runtime-diagnostic.txt`, `p0-mixed-runtime-projections.txt` and
+`p0-dense-ledger.txt`.
+
+At the default 1 GiB admission budget, `14207df` completed a real-process mixed
+run over 3,500 synthetic bars. The five read workers started during the search,
+which completed all 500 attempts. The fixture measured a 13.55 ms queue receipt,
+29.75 ms GetReport p95, 34.67 ms GetChart p95 and one 57.57 ms recalculation.
+Three health heartbeats arrived with 0.25 ms worst additional delay. The engine
+used 4.22 s of CPU over 2.02 s of elapsed time and peaked at 94,019,584 resident
+bytes. Evidence is in `artifacts/p0-runtime-default.txt`.
+
+A second dense-ledger probe measured 156,892,896 bytes in retained ledger
+arrays and 424,775,680 bytes in peak process working set. It used the same
+100,000 bars, 199,998 fills and three iterations. The Windows OS counter was
+sampled 110 times. This gave separate inputs for the report estimate of 5,120
+bytes per simulated bar per active worker and 2,048 bytes per retained ledger
+bar. Reconstruction keeps the existing 1,024-byte raw-minute estimate.
+
+Full reports now reduce worker count until the evaluation fits. The 100,000-bar
+fixture was admitted with one worker and an estimate of 1,025,048,576 bytes
+under the default 1 GiB budget. The engine created and stored its report in
+1.26 s, with 158,601,216 bytes in peak working set. Evidence is in
+`artifacts/p0-dense-ledger-resident.txt`, `p0-dense-ledger-resident-metrics.txt`
+and `p0-report-100k-default.txt`.
+
+The warm-chart change passed the 100,000-bar mixed workload at the default
+1 GiB budget with six research slots. Five clients alternated 100 chart and
+100 report requests in total while a 500-attempt search ran. All requests and
+attempts completed. Recalculation retried 15 transient admission denials at
+100 ms intervals and returned the same net as the saved report.
+
+| Measurement | Default budget, 100,000 bars |
+|---|---:|
+| Queue receipt, 500 attempts | 11.91 ms |
+| GetReport p95 / maximum | 20.01 / 53.84 ms |
+| GetChart p95 / maximum | 28.44 / 35.51 ms |
+| Recalculate including retries | 1.67 s |
+| Worst additional health heartbeat delay, 27 heartbeats | 6.53 ms |
+| Engine peak working set | 210,264,064 B |
+| Engine CPU time / elapsed wall time | 35.44 / 26.24 s |
+
+CPU time was 16.9% of the host's eight logical CPUs over the sampled interval.
+The working-set counter covers the engine process through the end of that
+interval. Evidence is in `artifacts/p0-runtime-mixed-100k.txt`.
+
+## P0 hosted chart latency (2026-11-19)
+
+For `ec46b4e`, [hosted CI](https://github.com/TheNightDeveloper/trader-lab/actions/runs/44523816947)
+measured GetChart p95 at 2.500 s while the loop, search and report test packages
+shared the runner and PostgreSQL. GetReport p95 was 656 ms.
+
+An isolated Linux Docker run limited to two CPUs used the same 100,000-bar
+fixture, mandatory PostgreSQL, race instrumentation and five concurrent clients.
+Its CPU profile recorded 6.70 s in response compression across the test and
+0.91 s inside the chart service method. The chart handler now uses gzip
+BestSpeed. The Connect codec and compression negotiation are unchanged.
+
+| Profile run | GetChart p50 | GetChart p95 | GetChart maximum |
+|---|---:|---:|---:|
+| Default gzip | 743 ms | 837 ms | 890 ms |
+| gzip BestSpeed | 366 ms | 438 ms | 518 ms |
+
+CI runs Go race-test packages one at a time to keep the timed test's CPU and
+database load reproducible. GetChart and GetReport run with five concurrent
+clients and a 1 s p95 limit.
+Evidence is in `artifacts/p0-hosted-chart-profile-before.txt`,
+`p0-hosted-chart-profile-top.txt` and `p0-chart-fast-gzip-race.txt`.
+
+The [hosted run for `8a5e23f`](https://github.com/TheNightDeveloper/trader-lab/actions/runs/44528275549)
+passed with GetChart p95 at 338 ms and GetReport p95 at 191 ms. It recorded 363
+passing Go tests and subtests, with zero failures or skips.
+
+The production build with the same engine source repeated the 100,000-bar mixed
+workload and completed all 500 attempts and 200 reads. GetChart p95 was 21.69 ms,
+GetReport p95 was 18.45 ms, and the worst additional heartbeat delay was 3.28 ms.
+The engine used 32.84 CPU seconds over 25.74 seconds of wall time and peaked
+at 231,280,640 bytes of working set. Recalculation returned the saved net after
+1.67 s including transient retries. Evidence is in `artifacts/p0-runtime-final-100k.txt`.
+
+## P0 F07 chart read latency (2026-11-18)
+
+Go 1.26.4 Linux amd64 in Docker Desktop on Windows with local PostgreSQL and race enabled.
+`TestReportReadLatency` issues 100 requests from five clients over a cached 100,000-bar
+report. GetChart returns 2,000 visible bars with two EMAs and Bollinger Bands.
+
+| Implementation and suite scope | GetReport p95 | GetChart p95 |
+|---|---:|---:|
+| Before chart changes, full suite | 466 ms | 1,226 ms |
+| Visible indicators only, full suite | 292 ms | 1,167 ms |
+| Visible indicators and SQL window, focused API run | 149 ms | 523 ms |
+| Visible indicators and SQL window, full suite | 320 ms | 792 ms |
+
+The final rows use the real 1 GiB chart admission pool. Report fixture creation uses no
+pool. These are individual runs with variable background load and race overhead. The
+last run passed the existing 1 s p95 requirement without changing the threshold.
+Evidence: artifacts/p0-network-race-go-tests.jsonl, p0-chart-window-race-go-tests.jsonl
+and p0-chart-db-race-go-tests.jsonl. The separate production mixed workload is
+measured above.
+
+## P0 F07 import fixture calibration (2026-11-05)
+
+Windows amd64, Go 1.26.4, local PostgreSQL. Compile the existing API test package with
+`go test -c -o ../artifacts/api-import-profile.test.exe ./internal/api` from engine, then run
+the executable with `-test.run=^TestDataImportStreamAndViews$ -test.v` and REQUIRE_DB=1.
+The fixture uses a shared 512 MiB admission pool, a two-day numeric archive with a gap,
+repeated imports, snapshots, rejected budgets and a gap-policy failure. It makes no external
+market request. Sample the child process every 20 ms using System.Diagnostics.Process
+PeakWorkingSet64 and TotalProcessorTime; elapsed time includes process launch/poll overhead.
+
+| Observed counter | Single run |
+|---|---:|
+| Peak working set sampled | 80,683,008 bytes (about 77 MiB) |
+| CPU time sampled | 0.234375 s |
+| Elapsed including launch | 1.6753859 s |
+| Test's own elapsed / exit | 1.20 s / 0 |
+
+Raw evidence: artifacts/p0-import-profile.json and p0-import-profile.txt (git-ignored).
+This is a narrow input calibration: neither maximum-size/mixed workload acceptance nor a
+hard process-RSS/CPU guarantee. Database server memory/CPU is outside this child counter;
+the last sampling interval can miss work before exit. No before/after speed claim is made.
+
+## P0 FIX-04 local measurement (2026-11-02)
+
+macOS arm64, Apple M4, Go 1.26.5. Same one-iteration command on a temporary copy of
+Phase-2 HEAD `d9f7016` and on the final working tree:
+`go test ./internal/sim -run '^$' -bench MillionBars -benchtime=1x -benchmem`.
+
+| Source | ns/op | allocated B/op | allocations/op | fills |
+|---|---:|---:|---:|---:|
+| Before FIX-04 | 338,999,375 | 503,186,872 | 188,462 | 332 |
+| Final FIX-04 | 350,002,333 | 523,867,256 | 188,429 | 332 |
+
+As-of open-position marks add transient state to each equity point. Moving fill observation
+timestamps onto fills rather than every equity point reduced the initial 581,717,744 B/op
+prototype to the final value above. Final allocated bytes are about 4.1% above this local
+baseline. This is one run per version, not a latency distribution, peak RAM or a comparison
+to the older Windows reference. No performance or profitability improvement is claimed.
+
+The historical measurements below retain their original hardware and test conditions.
+
 Reference hardware: Intel Core i3-12100F (4 cores / 8 threads), 16 GB RAM,
 Windows 10, local PostgreSQL 18, Go 1.26. Run `make bench` to reproduce; add a row when a
 change could move a number.
@@ -21,3 +194,36 @@ Notes
   the whole dataset; under load that missed the target. Dataset versions are content-addressed
   and immutable, so the report service keeps the 4 most recent in memory (verified once on load).
 - Tests run without `-race` on this machine (no cgo/gcc); numbers are from normal builds.
+
+
+## P0 starting baseline (2026-11-01)
+Local Windows amd64, Intel Core i3-12100F, Go 1.26.4; one iteration without race:
+`go test ./internal/sim -run '^$' -bench MillionBars -benchtime=1x -benchmem`.
+One million bars: 1,027,394,700 ns/op (1.027 s), 503,084,664 B/op, 187,238 allocations,
+314 fills. B/op is allocated bytes, not peak resident memory. This single measurement is
+an orientation baseline, not a latency distribution or a cross-machine performance claim.
+
+
+## P0 FIX-02 baseline (2026-11-01)
+Same local Go/Windows/CPU setup and one-iteration command as the starting baseline:
+624,214,200 ns/op (0.624 s), 503,164,136 allocated B/op, 188,429 allocations, 332 fills.
+Ordered History uses the original prefix without materializing another full bar array.
+Backfill holes use a temporary sorted buffer. One timing sample is not evidence of a speedup;
+fill count changed with the causal contract, and B/op is not peak resident memory.
+
+## P0 learning review (2026-11-01)
+Same local Go/Windows/CPU setup. Identical `BenchmarkLearnedSteadyTarget` source copied into
+the engine snapshot at 3ff937c and run against the revised engine. Command in each engine:
+`go test ./internal/strategy -run '^$' -bench '^BenchmarkLearnedSteadyTarget$' -benchmem -benchtime=500ms -count=5`.
+Data preparation and training are outside `b.Loop`; the timed path keeps the target unchanged.
+
+| Version | ns/op, five runs | Median | B/op | allocs/op |
+|---|---|---|---|---|
+| 3ff937c | 469.2, 467.0, 563.4, 469.2, 468.0 | 469.2 | 144 | 5 |
+| learning review | 252.8, 293.4, 254.8, 269.6, 263.9 | 263.9 | 48 | 2 |
+
+The approximately 44% lower median applies to this hot path only: defer reason formatting
+until a decision changes and normalize the required filter/prediction values directly.
+It does not establish faster training, whole-cycle performance or better returns. Standalone
+Predict measurements had zero heap allocations both before and after, with noisy timings;
+no independent Predict speedup is claimed. Local logs: artifacts/learning-bench-{before,after}.txt.

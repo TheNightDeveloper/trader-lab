@@ -18,6 +18,7 @@ import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'common.pb.dart' as $0;
 import 'health.pbenum.dart';
+import 'workspace.pbenum.dart' as $1;
 
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
@@ -133,6 +134,8 @@ class EngineStatus extends $pb.GeneratedMessage {
     Workers? workers,
     DisplayRate? displayRate,
     $fixnum.Int64? serverTimeUnixMs,
+    $1.Environment? environment,
+    WorkspaceCapabilities? capabilities,
   }) {
     final result = EngineStatus._();
     if (version != null) result.version = version;
@@ -142,6 +145,8 @@ class EngineStatus extends $pb.GeneratedMessage {
     if (workers != null) result.workers = workers;
     if (displayRate != null) result.displayRate = displayRate;
     if (serverTimeUnixMs != null) result.serverTimeUnixMs = serverTimeUnixMs;
+    if (environment != null) result.environment = environment;
+    if (capabilities != null) result.capabilities = capabilities;
     return result;
   }
 
@@ -168,6 +173,10 @@ class EngineStatus extends $pb.GeneratedMessage {
     ..aOM<DisplayRate>(6, _omitFieldNames ? '' : 'displayRate',
         subBuilder: DisplayRate.$_createMessage)
     ..aInt64(7, _omitFieldNames ? '' : 'serverTimeUnixMs')
+    ..aE<$1.Environment>(8, _omitFieldNames ? '' : 'environment',
+        enumValues: $1.Environment.values)
+    ..aOM<WorkspaceCapabilities>(9, _omitFieldNames ? '' : 'capabilities',
+        subBuilder: WorkspaceCapabilities.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -260,16 +269,110 @@ class EngineStatus extends $pb.GeneratedMessage {
   $core.bool hasServerTimeUnixMs() => $_has(6);
   @$pb.TagNumber(7)
   void clearServerTimeUnixMs() => $_clearField(7);
+
+  @$pb.TagNumber(8)
+  $1.Environment get environment => $_getN(7);
+  @$pb.TagNumber(8)
+  set environment($1.Environment value) => $_setField(8, value);
+  @$pb.TagNumber(8)
+  $core.bool hasEnvironment() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearEnvironment() => $_clearField(8);
+
+  @$pb.TagNumber(9)
+  WorkspaceCapabilities get capabilities => $_getN(8);
+  @$pb.TagNumber(9)
+  set capabilities(WorkspaceCapabilities value) => $_setField(9, value);
+  @$pb.TagNumber(9)
+  $core.bool hasCapabilities() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearCapabilities() => $_clearField(9);
+  @$pb.TagNumber(9)
+  WorkspaceCapabilities ensureCapabilities() => $_ensure(8);
+}
+
+/// WorkspaceCapabilities are published by the running server. Feed availability
+/// is independent of whether an execution environment is supported.
+class WorkspaceCapabilities extends $pb.GeneratedMessage {
+  factory WorkspaceCapabilities({
+    $core.Iterable<$1.Environment>? environments,
+    $core.bool? liveMarketData,
+  }) {
+    final result = WorkspaceCapabilities._();
+    if (environments != null) result.environments.addAll(environments);
+    if (liveMarketData != null) result.liveMarketData = liveMarketData;
+    return result;
+  }
+
+  WorkspaceCapabilities._();
+
+  factory WorkspaceCapabilities.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      WorkspaceCapabilities()..mergeFromBuffer(data, registry);
+  factory WorkspaceCapabilities.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      WorkspaceCapabilities()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'WorkspaceCapabilities',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: WorkspaceCapabilities.$_createMessage)
+    ..pc<$1.Environment>(
+        1, _omitFieldNames ? '' : 'environments', $pb.PbFieldType.KE,
+        valueOf: $1.Environment.valueOf,
+        enumValues: $1.Environment.values,
+        defaultEnumValue: $1.Environment.ENVIRONMENT_UNSPECIFIED)
+    ..aOB(2, _omitFieldNames ? '' : 'liveMarketData')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  WorkspaceCapabilities clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  WorkspaceCapabilities copyWith(
+          void Function(WorkspaceCapabilities) updates) =>
+      super.copyWith((message) => updates(message as WorkspaceCapabilities))
+          as WorkspaceCapabilities;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use WorkspaceCapabilities() / WorkspaceCapabilities.new instead')
+  static WorkspaceCapabilities create() => WorkspaceCapabilities._();
+  static $pb.GeneratedMessage $_createMessage() => WorkspaceCapabilities._();
+  @$core.override
+  WorkspaceCapabilities createEmptyInstance() => WorkspaceCapabilities._();
+  @$core.pragma('dart2js:noInline')
+  static WorkspaceCapabilities getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<WorkspaceCapabilities>(
+          WorkspaceCapabilities.$_createMessage);
+  static WorkspaceCapabilities? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<$1.Environment> get environments => $_getList(0);
+
+  @$pb.TagNumber(2)
+  $core.bool get liveMarketData => $_getBF(1);
+  @$pb.TagNumber(2)
+  set liveMarketData($core.bool value) => $_setBool(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasLiveMarketData() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearLiveMarketData() => $_clearField(2);
 }
 
 class LiveData extends $pb.GeneratedMessage {
   factory LiveData({
     LiveState? state,
     $fixnum.Int64? lastBarAgeSeconds,
+    $fixnum.Int64? lastBarClosedAtUnixMs,
   }) {
     final result = LiveData._();
     if (state != null) result.state = state;
     if (lastBarAgeSeconds != null) result.lastBarAgeSeconds = lastBarAgeSeconds;
+    if (lastBarClosedAtUnixMs != null)
+      result.lastBarClosedAtUnixMs = lastBarClosedAtUnixMs;
     return result;
   }
 
@@ -289,6 +392,7 @@ class LiveData extends $pb.GeneratedMessage {
     ..aE<LiveState>(1, _omitFieldNames ? '' : 'state',
         enumValues: LiveState.values)
     ..aInt64(2, _omitFieldNames ? '' : 'lastBarAgeSeconds')
+    ..aInt64(3, _omitFieldNames ? '' : 'lastBarClosedAtUnixMs')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -328,6 +432,15 @@ class LiveData extends $pb.GeneratedMessage {
   $core.bool hasLastBarAgeSeconds() => $_has(1);
   @$pb.TagNumber(2)
   void clearLastBarAgeSeconds() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $fixnum.Int64 get lastBarClosedAtUnixMs => $_getI64(2);
+  @$pb.TagNumber(3)
+  set lastBarClosedAtUnixMs($fixnum.Int64 value) => $_setInt64(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasLastBarClosedAtUnixMs() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearLastBarClosedAtUnixMs() => $_clearField(3);
 }
 
 class Workers extends $pb.GeneratedMessage {

@@ -15,55 +15,55 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import 'report.pb.dart' as $1;
+import 'report.pb.dart' as $2;
 import 'report.pbjson.dart';
 
 export 'report.pb.dart';
 
 abstract class ReportServiceBase extends $pb.GeneratedService {
-  $async.Future<$1.ListStrategiesResponse> listStrategies(
-      $pb.ServerContext ctx, $1.ListStrategiesRequest request);
-  $async.Future<$1.CreateReportResponse> createReport(
-      $pb.ServerContext ctx, $1.CreateReportRequest request);
-  $async.Future<$1.ListReportsResponse> listReports(
-      $pb.ServerContext ctx, $1.ListReportsRequest request);
-  $async.Future<$1.GetReportResponse> getReport(
-      $pb.ServerContext ctx, $1.GetReportRequest request);
-  $async.Future<$1.ViewHoldoutResponse> viewHoldout(
-      $pb.ServerContext ctx, $1.ViewHoldoutRequest request);
-  $async.Future<$1.ListTradesResponse> listTrades(
-      $pb.ServerContext ctx, $1.ListTradesRequest request);
-  $async.Future<$1.ListDecisionsResponse> listDecisions(
-      $pb.ServerContext ctx, $1.ListDecisionsRequest request);
-  $async.Future<$1.CompareResponse> compare(
-      $pb.ServerContext ctx, $1.CompareRequest request);
-  $async.Future<$1.ExportResponse> export(
-      $pb.ServerContext ctx, $1.ExportRequest request);
-  $async.Future<$1.ReproduceResponse> reproduce(
-      $pb.ServerContext ctx, $1.ReproduceRequest request);
+  $async.Future<$2.ListStrategiesResponse> listStrategies(
+      $pb.ServerContext ctx, $2.ListStrategiesRequest request);
+  $async.Future<$2.CreateReportResponse> createReport(
+      $pb.ServerContext ctx, $2.CreateReportRequest request);
+  $async.Future<$2.ListReportsResponse> listReports(
+      $pb.ServerContext ctx, $2.ListReportsRequest request);
+  $async.Future<$2.GetReportResponse> getReport(
+      $pb.ServerContext ctx, $2.GetReportRequest request);
+  $async.Future<$2.ViewHoldoutResponse> viewHoldout(
+      $pb.ServerContext ctx, $2.ViewHoldoutRequest request);
+  $async.Future<$2.ListTradesResponse> listTrades(
+      $pb.ServerContext ctx, $2.ListTradesRequest request);
+  $async.Future<$2.ListDecisionsResponse> listDecisions(
+      $pb.ServerContext ctx, $2.ListDecisionsRequest request);
+  $async.Future<$2.CompareResponse> compare(
+      $pb.ServerContext ctx, $2.CompareRequest request);
+  $async.Future<$2.ExportResponse> export(
+      $pb.ServerContext ctx, $2.ExportRequest request);
+  $async.Future<$2.ReproduceResponse> reproduce(
+      $pb.ServerContext ctx, $2.ReproduceRequest request);
 
   $pb.GeneratedMessage createRequest($core.String methodName) {
     switch (methodName) {
       case 'ListStrategies':
-        return $1.ListStrategiesRequest();
+        return $2.ListStrategiesRequest();
       case 'CreateReport':
-        return $1.CreateReportRequest();
+        return $2.CreateReportRequest();
       case 'ListReports':
-        return $1.ListReportsRequest();
+        return $2.ListReportsRequest();
       case 'GetReport':
-        return $1.GetReportRequest();
+        return $2.GetReportRequest();
       case 'ViewHoldout':
-        return $1.ViewHoldoutRequest();
+        return $2.ViewHoldoutRequest();
       case 'ListTrades':
-        return $1.ListTradesRequest();
+        return $2.ListTradesRequest();
       case 'ListDecisions':
-        return $1.ListDecisionsRequest();
+        return $2.ListDecisionsRequest();
       case 'Compare':
-        return $1.CompareRequest();
+        return $2.CompareRequest();
       case 'Export':
-        return $1.ExportRequest();
+        return $2.ExportRequest();
       case 'Reproduce':
-        return $1.ReproduceRequest();
+        return $2.ReproduceRequest();
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }
@@ -73,25 +73,25 @@ abstract class ReportServiceBase extends $pb.GeneratedService {
       $core.String methodName, $pb.GeneratedMessage request) {
     switch (methodName) {
       case 'ListStrategies':
-        return listStrategies(ctx, request as $1.ListStrategiesRequest);
+        return listStrategies(ctx, request as $2.ListStrategiesRequest);
       case 'CreateReport':
-        return createReport(ctx, request as $1.CreateReportRequest);
+        return createReport(ctx, request as $2.CreateReportRequest);
       case 'ListReports':
-        return listReports(ctx, request as $1.ListReportsRequest);
+        return listReports(ctx, request as $2.ListReportsRequest);
       case 'GetReport':
-        return getReport(ctx, request as $1.GetReportRequest);
+        return getReport(ctx, request as $2.GetReportRequest);
       case 'ViewHoldout':
-        return viewHoldout(ctx, request as $1.ViewHoldoutRequest);
+        return viewHoldout(ctx, request as $2.ViewHoldoutRequest);
       case 'ListTrades':
-        return listTrades(ctx, request as $1.ListTradesRequest);
+        return listTrades(ctx, request as $2.ListTradesRequest);
       case 'ListDecisions':
-        return listDecisions(ctx, request as $1.ListDecisionsRequest);
+        return listDecisions(ctx, request as $2.ListDecisionsRequest);
       case 'Compare':
-        return compare(ctx, request as $1.CompareRequest);
+        return compare(ctx, request as $2.CompareRequest);
       case 'Export':
-        return export(ctx, request as $1.ExportRequest);
+        return export(ctx, request as $2.ExportRequest);
       case 'Reproduce':
-        return reproduce(ctx, request as $1.ReproduceRequest);
+        return reproduce(ctx, request as $2.ReproduceRequest);
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }

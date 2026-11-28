@@ -17,6 +17,8 @@ import (
 	"tradinglab/engine/internal/data"
 	"tradinglab/engine/internal/eval"
 	"tradinglab/engine/internal/experiment"
+	"tradinglab/engine/internal/feature"
+	"tradinglab/engine/internal/fillpolicy"
 	"tradinglab/engine/internal/jobs"
 	"tradinglab/engine/internal/metrics"
 	"tradinglab/engine/internal/model"
@@ -53,19 +55,24 @@ const (
 
 // Doc is a cycle's record: its pre-registered config and everything it found.
 type Doc struct {
-	Config     Config            `json:"config"`
-	Champion   Contender         `json:"champion"`
-	Datasets   []string          `json:"datasets,omitempty"`
-	DataFrom   time.Time         `json:"data_from"`
-	DataTo     time.Time         `json:"data_to"`
-	FreshBars  int               `json:"fresh_bars"`
-	Steps      map[string]string `json:"steps"` // short progress note per state
-	Candidates int               `json:"candidates"`
-	Eligible   int               `json:"eligible"`
-	Walk       *Walk             `json:"walk,omitempty"`
-	Challenger *Contender        `json:"challenger,omitempty"`
-	FreezeAt   *time.Time        `json:"freeze_at,omitempty"`
-	Forward    *Forward          `json:"forward,omitempty"`
+	EvaluationVersion string            `json:"evaluation_version,omitempty"`
+	TrainingVersion   string            `json:"training_version,omitempty"`
+	Config            Config            `json:"config"`
+	Champion          Contender         `json:"champion"`
+	Datasets          []string          `json:"datasets,omitempty"`
+	DataFrom          time.Time         `json:"data_from"`
+	DataTo            time.Time         `json:"data_to"`
+	FreshBars         int               `json:"fresh_bars"`
+	Steps             map[string]string `json:"steps"` // short progress note per state
+	Candidates        int               `json:"candidates"`
+	Eligible          int               `json:"eligible"`
+	Walk              *Walk             `json:"walk,omitempty"`
+	Challenger        *Contender        `json:"challenger,omitempty"`
+	FreezeAt          *time.Time        `json:"freeze_at,omitempty"`
+	TrainingCutoff    *time.Time        `json:"training_cutoff,omitempty"`
+	ModelCreatedAt    *time.Time        `json:"model_created_at,omitempty"`
+	TradeStart        *time.Time        `json:"trade_start,omitempty"`
+	Forward           *Forward          `json:"forward,omitempty"`
 	// Datasets of the forward window, recorded at the decision.
 	ForwardDatasets []string   `json:"forward_datasets,omitempty"`
 	Gate            []GateItem `json:"gate,omitempty"`
@@ -74,6 +81,8 @@ type Doc struct {
 
 // Contender is the champion (active version) or the challenger (best candidate).
 type Contender struct {
+	// Revision pins the champion before training; nil identifies legacy evidence.
+	Revision  *int64       `json:"lifecycle_revision,omitempty"`
 	VersionID string       `json:"version_id,omitempty"` // champion
 	Seq       int          `json:"seq,omitempty"`        // challenger: candidate number
 	Change    string       `json:"change,omitempty"`
@@ -93,10 +102,11 @@ type Walk struct {
 }
 
 type Forward struct {
-	Through    time.Time        `json:"through"`
-	Days       int              `json:"days"`
-	Champion   []metrics.Metric `json:"champion"`
-	Challenger []metrics.Metric `json:"challenger"`
+	Through        time.Time        `json:"through"`
+	Days           int              `json:"days"`
+	Champion       []metrics.Metric `json:"champion"`
+	Challenger     []metrics.Metric `json:"challenger"`
+	MissingSymbols []string         `json:"missing_symbols,omitempty"`
 }
 
 // GateItem: Status is pass | fail | pending; Text is the plain-language condition.
@@ -126,6 +136,7 @@ type Loop struct {
 	Store   *store.Store
 	Clock   clock.Clock
 	Limiter *jobs.Limiter
+	Memory  *jobs.Memory  // one reservation spans collection through freeze
 	Poll    time.Duration // scheduler tick; default 1 minute
 
 	base    context.Context
@@ -142,7 +153,7 @@ func (l *Loop) Begin(ctx context.Context, trigger string) (int64, error) {
 	if err := cfg.Validate(); err != nil {
 		return 0, err
 	}
-	doc, err := json.Marshal(Doc{Config: cfg, Steps: map[string]string{}})
+	doc, err := json.Marshal(Doc{EvaluationVersion: eval.Version, TrainingVersion: model.TrainingVersion, Config: cfg, Steps: map[string]string{}})
 	if err != nil {
 		return 0, err
 	}
@@ -228,7 +239,34 @@ func (l *Loop) finish(c *cycle, outcome, reason string) error {
 	// A cancelled run still has to be recorded: write with a fresh context.
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	return l.save(ctx, l.Store.Queries, c)
+	return l.Store.InTx(ctx, func(q *db.Queries) error {
+		row, err := q.GetCycleForUpdate(ctx, c.row.ID)
+		if err != nil {
+			return err
+		}
+		if row.State == Done {
+			return nil
+		}
+		if _, err := q.CancelCycleCandidates(ctx, db.CancelCycleCandidatesParams{CycleID: c.row.ID, Failure: reason}); err != nil {
+			return err
+		}
+		rows, err := q.ListCandidates(ctx, c.row.ID)
+		if err != nil {
+			return err
+		}
+		// Generation can be interrupted before its summary checkpoint was saved.
+		// The durable registry, including cancelled rows, is the source of truth.
+		c.doc.Candidates = len(rows)
+		c.doc.Usage.Candidates = max(c.doc.Usage.Candidates, len(rows))
+		c.doc.Eligible = 0
+		for _, row := range rows {
+			var result CandidateResult
+			if row.Status == "done" && json.Unmarshal(row.Result, &result) == nil && result.Eligible {
+				c.doc.Eligible++
+			}
+		}
+		return l.save(ctx, q, c)
+	})
 }
 
 const interrupted = "قطع شد پیش از پایان؛ نسخه و مدل فعال دست‌نخورده ماندند."
@@ -260,14 +298,12 @@ func (l *Loop) RunCycle(ctx context.Context, id int64) (err error) {
 // champion is the active version of the algorithm (else its newest usable
 // version) and, when it matches that version's recipe, the active model.
 func (l *Loop) champion(ctx context.Context, alg string) (Contender, error) {
-	a, err := l.Store.GetAlgorithm(ctx, alg)
-	if err != nil {
-		return Contender{}, fmt.Errorf("%w: algorithm %s", ErrNotFound, alg)
-	}
-	vs, err := l.Store.ListAlgorithmVersions(ctx, alg)
+	snapshot, err := experiment.Snapshot(ctx, l.Store, alg)
 	if err != nil {
 		return Contender{}, err
 	}
+	a := snapshot.Algorithm
+	vs := snapshot.Versions
 	var pick *db.AlgorithmVersion
 	for i, v := range vs {
 		if v.State == experiment.Active {
@@ -288,12 +324,9 @@ func (l *Loop) champion(ctx context.Context, alg string) (Contender, error) {
 	if def.Recipe == nil {
 		return Contender{}, fmt.Errorf("%w: %s is not a learning algorithm", ErrConfig, alg)
 	}
-	ch := Contender{VersionID: pick.ID, Recipe: *def.Recipe}
+	ch := Contender{VersionID: pick.ID, Recipe: *def.Recipe, Revision: &a.LifecycleRevision}
 	if a.ActiveModel.Valid && pick.State == experiment.Active {
-		m, err := l.artifact(ctx, a.ActiveModel.String)
-		if err != nil {
-			return Contender{}, err
-		}
+		m := *snapshot.Model
 		if m.RecipeHash == ch.Recipe.Hash() {
 			ch.ModelID, ch.Active = m.ID, true
 		}
@@ -318,15 +351,18 @@ func (l *Loop) storeArtifact(ctx context.Context, cycleID int64, a model.Artifac
 }
 
 func (c Config) sim() sim.Config {
-	return sim.Config{Capital: c.Capital, FeeRate: c.Fee, SlipRate: c.Slippage, LatencyBars: 1}
+	return sim.Config{Capital: c.Capital, FeeRate: c.Fee, SlipRate: c.Slippage, LatencyBars: fillpolicy.DefaultLatencyBars}
 }
 
 // dataEnd: the last bar used closes at least one bar before now, so every bar
 // in range was available when the cycle read it.
 func dataEnd(now time.Time, tf time.Duration) time.Time { return now.Add(-tf).Truncate(tf) }
 
-func (l *Loop) run(ctx context.Context, c *cycle) error {
+func (l *Loop) run(ctx context.Context, c *cycle) (err error) {
 	cfg := c.doc.Config
+	if err := cfg.researchError(); err != nil {
+		return err
+	}
 	tf := cfg.Timeframe.Duration()
 	champ, err := l.champion(ctx, cfg.Algorithm)
 	if err != nil {
@@ -338,24 +374,53 @@ func (l *Loop) run(ctx context.Context, c *cycle) error {
 	to := dataEnd(l.Clock.Now().UTC(), tf)
 	from := to.Add(-time.Duration(cfg.LookbackDays) * 24 * time.Hour)
 	c.doc.DataFrom, c.doc.DataTo = from, to
+	rawCount, err := data.RawBarCount(cfg.Timeframe, from, to)
+	if err != nil {
+		return err
+	}
+	if rawCount > data.MaxRawBars/len(cfg.Symbols) || int64(rawCount)*int64(time.Minute)*int64(len(cfg.Symbols))/int64(tf) > int64(cfg.MaxBars) {
+		return l.finish(c, Skipped, "پرش: بازهٔ داده بیش از بودجهٔ کندل خام یا آموزش است؛ بازه را کوتاه‌تر کنید.")
+	}
+	minutes := int(tf / time.Minute)
+	rows := (rawCount + minutes - 1) / minutes * len(cfg.Symbols)
+	bytes, err := jobs.WorkBytes(int64(rawCount)*int64(len(cfg.Symbols)), int64(rows), int64(min(cfg.MaxCandidates+1, l.Limiter.Size())))
+	if err != nil {
+		return err
+	}
+	release, err := l.Memory.Reserve(ctx, bytes)
+	if err != nil {
+		return err
+	}
+	defer release()
 	consumed, err := l.Store.ConsumedUntil(ctx, cfg.Algorithm)
 	if err != nil {
 		return err
 	}
 	bars := map[string][]data.Bar{}
 	fresh := -1
-	for _, sym := range cfg.Symbols {
-		ds, bs, err := data.CreateDataset(ctx, l.Store, data.DatasetSpec{Symbol: sym, Timeframe: cfg.Timeframe, From: from, To: to, GapPolicy: data.GapFlag})
-		if err != nil {
+	err = func() error {
+		// Release collection admission before parallel training takes its own slots.
+		if err := l.Limiter.Acquire(ctx); err != nil {
 			return err
 		}
-		c.doc.Datasets = append(c.doc.Datasets, ds.ID)
-		bars[sym] = bs
-		c.doc.Usage.Bars += len(bs)
-		n := len(bs) - firstAtOrAfter(bs, consumed)
-		if fresh < 0 || n < fresh {
-			fresh = n
+		defer l.Limiter.Release()
+		for _, sym := range cfg.Symbols {
+			ds, bs, err := data.CreateDataset(ctx, l.Store, data.DatasetSpec{Symbol: sym, Timeframe: cfg.Timeframe, From: from, To: to, GapPolicy: data.GapFlag})
+			if err != nil {
+				return err
+			}
+			c.doc.Datasets = append(c.doc.Datasets, ds.ID)
+			bars[sym] = bs
+			c.doc.Usage.Bars += len(bs)
+			n := len(bs) - firstAtOrAfter(bs, consumed)
+			if fresh < 0 || n < fresh {
+				fresh = n
+			}
 		}
+		return nil
+	}()
+	if err != nil {
+		return err
 	}
 	c.doc.FreshBars = fresh
 	c.doc.Steps[Collect] = fmt.Sprintf("+%d bars", fresh)
@@ -393,6 +458,14 @@ func (l *Loop) run(ctx context.Context, c *cycle) error {
 		return err
 	}
 
+	// Reserve the worst-case slot time through walk-forward and both final fits.
+	ctx, cancelTraining := trainingDeadline(ctx, time.Duration(cfg.CPUMinutes)*time.Minute, l.Limiter.Size())
+	defer cancelTraining()
+	defer func() {
+		if err != nil && errors.Is(context.Cause(ctx), errBudget) {
+			err = errors.Join(errBudget, err)
+		}
+	}()
 	// train: every contender retrained per fold on its own past.
 	if err := l.step(ctx, c, Train); err != nil {
 		return err
@@ -401,13 +474,21 @@ func (l *Loop) run(ctx context.Context, c *cycle) error {
 	for _, v := range vars {
 		recipes = append(recipes, v.Recipe)
 	}
-	meta := train.Meta{Algorithm: cfg.Algorithm, DatasetIDs: c.doc.Datasets, Seed: cfg.Seed}
+	meta := train.Meta{Algorithm: cfg.Algorithm, DatasetIDs: c.doc.Datasets, Seed: cfg.Seed,
+		LabelCosts: feature.LabelCosts{Fee: cfg.Fee, Slippage: cfg.Slippage}}
 	var steps []train.Step
 	for _, f := range split.Folds {
 		steps = append(steps, train.Step{From: f.Train.From, To: f.Train.To, AsOf: f.Test.From})
 	}
 	budget := int64(cfg.CPUMinutes) * 60_000
 	var used atomic.Int64
+	var finalStarted time.Time
+	defer func() {
+		c.doc.Usage.CPUMillis = used.Load()
+		if !finalStarted.IsZero() {
+			c.doc.Usage.CPUMillis += time.Since(finalStarted).Milliseconds()
+		}
+	}()
 	models := make([][]model.Artifact, len(recipes))
 	errs := make([]error, len(recipes))
 	l.parallel(ctx, len(recipes), func(i int) {
@@ -458,7 +539,10 @@ func (l *Loop) run(ctx context.Context, c *cycle) error {
 	}
 	c.doc.Usage.CPUMillis = used.Load()
 	c.doc.Champion.Walk = results[0].view.Metrics
-	champRet := metricV(results[0].view.Metrics, "total_return")
+	if err := metrics.Require(c.doc.Champion.Walk, "total_return"); err != nil {
+		return fmt.Errorf("champion walk-forward: %w", err)
+	}
+	champRet := metricV(c.doc.Champion.Walk, "total_return")
 	best, bestRet := 0, int64(0)
 	for i := 1; i < len(recipes); i++ {
 		status, failure := "done", ""
@@ -500,13 +584,20 @@ func (l *Loop) run(ctx context.Context, c *cycle) error {
 	// freeze: the challenger is trained once on everything ready at the freeze and
 	// never changes during its forward test. The champion keeps its active model;
 	// without one, its recipe gets a baseline trained the same way.
-	freeze := to
-	one := []train.Step{{From: from, To: freeze, AsOf: freeze}}
+	c.doc.TrainingCutoff = &to
+	if err := l.Limiter.Acquire(ctx); err != nil {
+		return err
+	}
+	defer l.Limiter.Release()
+	finalStarted = time.Now()
+	one := []train.Step{{From: from, To: to, AsOf: to}}
 	if !champ.Active {
 		ms, err := train.WalkForward(ctx, champ.Recipe, bars, one, meta)
 		if err != nil {
 			return fmt.Errorf("champion baseline: %w", err)
 		}
+		ms[0].AsOf = l.Clock.Now().UTC()
+		ms[0].Seal()
 		if err := l.storeArtifact(ctx, c.row.ID, ms[0]); err != nil {
 			return err
 		}
@@ -517,17 +608,40 @@ func (l *Loop) run(ctx context.Context, c *cycle) error {
 	if err != nil {
 		return fmt.Errorf("challenger: %w", err)
 	}
+	created := l.Clock.Now().UTC()
+	if created.Before(to) {
+		return fmt.Errorf("%w: model creation precedes training cutoff", ErrState)
+	}
+	ms[0].AsOf = created
+	ms[0].Seal()
 	if err := l.storeArtifact(ctx, c.row.ID, ms[0]); err != nil {
 		return err
 	}
 	c.doc.Challenger.ModelID = ms[0].ID
+	freeze := l.Clock.Now().UTC()
+	if freeze.Before(created) {
+		return fmt.Errorf("%w: clock moved backwards during freeze", ErrState)
+	}
+	tradeStart := freeze.Truncate(tf)
+	if tradeStart.Before(freeze) {
+		tradeStart = tradeStart.Add(tf)
+	}
+	c.doc.ModelCreatedAt = &created
 	c.doc.FreezeAt = &freeze
+	c.doc.TradeStart = &tradeStart
 	c.doc.Steps[ForwardTest] = fmt.Sprintf("0 / %d d", cfg.Gate.ForwardDays)
 	c.doc.Gate = gate(cfg.Gate, &c.doc, false)
+	c.doc.Usage.CPUMillis = used.Load() + time.Since(finalStarted).Milliseconds()
 	return l.step(ctx, c, ForwardTest)
 }
 
 var errBudget = errors.New("loop: CPU budget exhausted")
+
+// Count waiting/IO conservatively too: wall time times maximum slots bounds slot work.
+// This is not measured OS CPU time or a process-wide memory guarantee.
+func trainingDeadline(ctx context.Context, budget time.Duration, slots int) (context.Context, context.CancelFunc) {
+	return context.WithTimeoutCause(ctx, budget/time.Duration(max(1, slots)), errBudget)
+}
 
 func (l *Loop) logErr(err error) { slog.Error("learning loop", "err", err) }
 
@@ -566,7 +680,12 @@ func metricOK(ms []metrics.Metric, key string) (int64, bool) {
 func countWins(a, b []eval.FoldView) int {
 	n := 0
 	for i := range a {
-		if i < len(b) && metricV(a[i].Metrics, "net_pnl") > metricV(b[i].Metrics, "net_pnl") {
+		if i >= len(b) || !a[i].Fold.Test.From.Before(a[i].Fold.Test.To) || !a[i].Fold.Test.From.Equal(b[i].Fold.Test.From) || !a[i].Fold.Test.To.Equal(b[i].Fold.Test.To) {
+			continue
+		}
+		av, aok := metricOK(a[i].Metrics, "period_pnl")
+		bv, bok := metricOK(b[i].Metrics, "period_pnl")
+		if aok && bok && av > bv {
 			n++
 		}
 	}

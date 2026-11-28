@@ -13,6 +13,7 @@ import (
 	"connectrpc.com/connect"
 	"github.com/jackc/pgx/v5"
 
+	"tradinglab/engine/internal/data"
 	"tradinglab/engine/internal/eval"
 	"tradinglab/engine/internal/fx"
 	labv1 "tradinglab/engine/internal/gen/lab/v1"
@@ -34,7 +35,18 @@ type Report struct {
 func (h *Report) ListStrategies(context.Context, *connect.Request[labv1.ListStrategiesRequest]) (*connect.Response[labv1.ListStrategiesResponse], error) {
 	res := &labv1.ListStrategiesResponse{}
 	for _, n := range strategy.Names() {
-		info := &labv1.StrategyInfo{Name: n}
+		definition := strategy.NativeDefinition{Format: strategy.NativeFormatV1, Name: n}
+		hash, err := definition.ContentHash()
+		if err != nil {
+			return nil, fmt.Errorf("catalog definition %s: %w", n, err)
+		}
+		info := &labv1.StrategyInfo{
+			Name: n, NativeDefinitionFormat: definition.Format, NativeDefinitionHash: hash,
+			Capability: &labv1.StrategyCapability{
+				Products:     []labv1.MarketProduct{labv1.MarketProduct_MARKET_PRODUCT_SPOT},
+				Environments: []labv1.Environment{labv1.Environment_ENVIRONMENT_RESEARCH},
+			},
+		}
 		for _, p := range strategy.ParamSpecs[n] {
 			info.Params = append(info.Params, &labv1.ParamSpec{Name: p.Name, Default: p.Default, Integer: p.Integer})
 		}
@@ -93,6 +105,11 @@ func specP(s eval.Spec) *labv1.ReportSpec {
 		Sizing: string(s.Sim.Sizing), LatencyBars: int32(s.Sim.LatencyBars),
 		Folds: int32(s.Split.Folds), Rolling: s.Split.Rolling, Holdout: ratioP(s.Split.Holdout),
 		EmbargoSeconds: int64(s.Split.Embargo / time.Second), EngineVersion: s.EngineVersion,
+		RuleVersionId: s.RuleVersionID,
+	}
+	if s.Rule != nil {
+		// Report specs already contain the validated rule snapshot used for evaluation.
+		p.RuleContentHash, _ = s.Rule.ContentHash()
 	}
 	if s.Sim.FixedUSDT.V != 0 {
 		p.FixedUsdt = moneyP(s.Sim.FixedUSDT)
@@ -105,18 +122,45 @@ func reportErr(err error) error {
 	switch {
 	case err == nil:
 		return nil
+	case errors.Is(err, instrument.ErrResearchUnsupported), errors.Is(err, metrics.ErrInvalid):
+		return connect.NewError(connect.CodeFailedPrecondition, err)
+	case errors.Is(err, data.ErrLimit), errors.Is(err, jobs.ErrMemory):
+		return connect.NewError(connect.CodeResourceExhausted, err)
+	case errors.Is(err, money.ErrOverflow):
+		return connect.NewError(connect.CodeOutOfRange, fmt.Errorf("مقدار محاسبه‌شده از محدودهٔ عددی موتور بیشتر است: %w", err))
 	case errors.Is(err, report.ErrNotFound):
 		return connect.NewError(connect.CodeNotFound, err)
-	case errors.Is(err, report.ErrInput), errors.Is(err, eval.ErrSpec), errors.Is(err, eval.ErrPlan), errors.Is(err, sim.ErrConfig):
+	case errors.Is(err, report.ErrInput), errors.Is(err, eval.ErrSpec), errors.Is(err, eval.ErrPlan), errors.Is(err, sim.ErrConfig), errors.Is(err, sim.ErrInput):
 		return connect.NewError(connect.CodeInvalidArgument, err)
 	}
 	return err
 }
 
 func (h *Report) CreateReport(ctx context.Context, req *connect.Request[labv1.CreateReportRequest]) (*connect.Response[labv1.CreateReportResponse], error) {
-	spec, err := specIn(req.Msg.GetSpec())
+	input := req.Msg.GetSpec()
+	spec, err := specIn(input)
 	if err != nil {
 		return nil, invalid(err.Error())
+	}
+	if id := input.GetRuleVersionId(); id != 0 {
+		if (spec.Strategy != "" && spec.Strategy != strategy.RuleFormatV1) || len(input.GetParams()) != 0 {
+			return nil, invalid("برای اجرای نسخهٔ قواعد، پارامترهای استراتژی داخلی را حذف کنید")
+		}
+		row, err := getSavedRule(ctx, h.Svc.Store, id)
+		if err != nil {
+			return nil, err
+		}
+		if hash := input.GetRuleContentHash(); hash != "" && hash != row.ContentHash {
+			return nil, invalid("هش تعریف با نسخهٔ انتخاب‌شده هم‌خوانی ندارد")
+		}
+		def, err := decodeSavedRule(row)
+		if err != nil {
+			return nil, err
+		}
+		// Embed the executed definition so saved reports can be reproduced independently.
+		spec.Strategy, spec.Rule, spec.RuleVersionID = strategy.RuleFormatV1, &def, id
+	} else if input.GetRuleContentHash() != "" {
+		return nil, invalid("یک نسخهٔ ذخیره‌شده از قواعد انتخاب کنید")
 	}
 	// A quick run is research: it waits for the whole research share, so it never
 	// competes with queued attempts for CPU beyond the cap.
@@ -163,6 +207,17 @@ func (h *Report) GetReport(ctx context.Context, req *connect.Request[labv1.GetRe
 		Range: windowP(ev.Range), OosWindow: windowP(st.Split.OOS), HoldoutWindow: windowP(st.Split.Holdout),
 		Summary: summaryP(ev.Summary), Oos: runViewP(ev.OOS), HoldoutViews: int32(st.Views),
 	}
+	// Historical reports stay immutable; the warning is a read-time annotation.
+	if st.Spec.EvaluationVersion != eval.Version {
+		r.Summary.Badges = append(r.Summary.Badges, &labv1.Badge{Kind: "legacy", Tone: "warning", Text: "گزارش با منطق ارزیابی قدیمی؛ برای نتیجهٔ فعلی گزارش تازه بسازید"})
+	}
+	r.Provenance = provenanceP(st.Spec.Provenance)
+	// Keep the existing badge populated for clients built before typed provenance.
+	tone := "neutral"
+	if r.Provenance.Status != labv1.EvidenceStatus_EVIDENCE_STATUS_RECORDED {
+		tone = "warning"
+	}
+	r.Summary.Badges = append(r.Summary.Badges, &labv1.Badge{Kind: "provenance", Tone: tone, Text: r.Provenance.Detail})
 	for _, f := range ev.Folds {
 		r.Folds = append(r.Folds, &labv1.FoldView{Index: int32(f.Fold.Index), Train: windowP(f.Fold.Train), Test: windowP(f.Fold.Test), Metrics: metricsP(f.Metrics)})
 	}
@@ -335,6 +390,13 @@ func (h *Report) Compare(ctx context.Context, req *connect.Request[labv1.Compare
 }
 
 func (h *Report) Reproduce(ctx context.Context, req *connect.Request[labv1.ReproduceRequest]) (*connect.Response[labv1.ReproduceResponse], error) {
+	// Reproduction runs the same parallel evaluation as report creation.
+	if h.Limiter != nil {
+		if err := h.Limiter.AcquireAll(ctx); err != nil {
+			return nil, err
+		}
+		defer h.Limiter.ReleaseN(h.Limiter.Size())
+	}
 	same, err := h.Svc.Reproduce(ctx, req.Msg.GetReportId())
 	if err != nil {
 		return nil, reportErr(err)

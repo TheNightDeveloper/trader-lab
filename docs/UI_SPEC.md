@@ -1,5 +1,12 @@
 # UI Spec — design to Flutter
 
+P0 F08 (2026-11-02): research execution pickers require affirmative GetOverview
+research_capabilities. Unsupported pairs stay available in Data and Chart; the legacy
+Builder prototype's executable ETHBTC sample is superseded by this capability rule.
+Show the server reason beside the picker; missing permission or errors grant no selection.
+Report/experiment drafts are revalidated, and Learning settings offer only permitted symbols.
+Existing figures remain viewable; unsupported reproduction/recalculation returns a clear error.
+
 The design lives in `design/screens/*.dc.html` (exported from the canvas "Trading Research
 Platform UI"). These files need the canvas runtime to render, so view them on the canvas;
 in the repo they are read as source: markup gives structure, copy and inline styles, and
@@ -20,8 +27,8 @@ Rules for implementing from the design:
 
 | Element | Design source | Flutter |
 |---|---|---|
-| App layout | every screen: sidebar + `main` | `AppShell` with `Row` (≥600 px) or sidebar as `Drawer` (<600 px). Page padding `AppSpace.page`, section gap `AppSpace.xl`. |
-| Sidebar | `Sidebar.dc.html` | `AppSidebar(active: Route)`; nav items with group headers; Phase 2 items disabled with a “فاز ۲” badge; status block bound to `HealthService` stream. |
+| App layout | every screen: workspace header + `main` | `AppShell` docks navigation at ≥1200 px and uses an RTL drawer at smaller widths. The environment label stays visible above the current route. |
+| Sidebar | `Sidebar.dc.html` | `AppSidebar` groups released routes under Research, Learning, Review and Control. The status block reads `HealthService.Watch`. |
 | Page header | `h1` + subtitle + action buttons | `PageHeader(title, subtitle, actions)`; actions wrap on narrow widths. |
 
 Direction: `Directionality(textDirection: TextDirection.rtl)` at the root. Wrap every number,
@@ -73,16 +80,35 @@ unreachable: banner, last data kept visible).
 | Width | Behavior |
 |---|---|
 | ≥ 1200 | Sidebar fixed; two-column screens side by side (form + summary, table + panel). |
-| 600–1199 | Sidebar fixed; secondary columns wrap below primary. |
-| < 600 | Sidebar becomes a drawer; all columns stack; tables scroll horizontally; stat grids become 2 columns. Monitoring and reading must work; building experiments is desktop-first. |
+| 600–1199 | Navigation uses a drawer, leaving the full width available for content. Secondary columns wrap below primary. |
+| < 600 | Navigation uses a drawer. Columns stack, tables scroll horizontally, and stat grids become 2 columns. Building experiments is desktop-first. |
 
 ## 5. Accessibility
 
 - Every interactive element is a real button/link/field with a semantic label; icon-only
   buttons have tooltips and `Semantics(label:)`.
+- Filled and outlined actions use standard visual density to preserve the 44 px minimum.
+  The report action was verified in Chrome at 390 px and 200% text size.
 - Tab order follows visual RTL order: header actions → filters → content → panel.
 - Contrast ≥ 4.5:1 for text (tokens already satisfy this on surface colors).
 - Status always has text, not only color; P&L always has a sign.
+
+## P0 browser acceptance
+
+Serve the release Flutter Web build from the engine in a disposable workspace with a
+BTCUSDT report. Use viewport widths of 390, 768, 1,024 and 1,440 px in Chrome and Firefox.
+
+| Step | Expected result |
+|---|---|
+| Open the report's chart and move the pointer across candles | Visible candles and details update together in UTC at each width |
+| Tab through the chart controls | Focus reaches the labeled report selector, pair and indicator choices |
+| Zoom into an earlier candle range and toggle an indicator | The new overlay loads with the same candle range and decision selection |
+| Scroll the report table horizontally at 390 px | More columns appear and each title stays under its heading |
+| Set browser text to 200% and open Reports at 390 px | The primary action fits and retains a 44 px target |
+| Search for a missing symbol, then BTCUSDT, and run a new report | Empty search has feedback, the dataset can be selected and the result opens |
+| Open the holdout confirmation and press Escape | The dialog closes with no new holdout view |
+| Interrupt the health stream, then restore it | The stale banner appears, keeps the open report visible and clears after reconnect |
+| Delay an older calculator response while submitting a newer edit | The latest result remains visible |
 
 ## 6. Verifying the build matches the design
 
@@ -93,3 +119,45 @@ unreachable: banner, last data kept visible).
 3. A design change goes: edit canvas → re-export the changed `.dc.html` into
    `design/screens/` → commit → ask Claude Code to update the matching screen and its
    golden.
+
+
+## P0 UI checkpoint (2026-11-01)
+Calculator helpers are class-based widgets. Layout uses available constraints; the dark
+semantic tokens, Vazirmatn/JetBrains Mono, RTL form/LTR numbers and reduced-motion rules
+are reused. UI/UX Pro Max's Flutter guidance was applied to async states and responsive
+layout; landing-page suggestions and unrelated font/color replacements were not adopted.
+
+Editing immediately cancels and invalidates the previous calculation, before the 300 ms
+debounce. Run, trade, report-switch, rate-switch, retry and reset requests publish only if
+their generation is current and the screen is mounted. Loading has a labeled progress bar;
+invalid input has explanatory copy; prior figures are cleared instead of appearing fresh.
+Shared dataset pickers refresh after successful or partial imports and retrieve further
+server pages beyond the first 200. Search-backed pickers for large catalogs remain pending.
+Stop/take markers use the individual fill's reference price, including partial exits.
+Legacy reports show a server-provided warning without changing persisted results.
+
+P0 additions have controller/provider unit tests; no new widget tests were added. Existing
+widget tests remain runnable. Browser interop, focus, text-scaling and multi-width visual
+review are separate release-gate evidence; a 390 px smoke test does not replace them.
+
+## P0 FIX-04 metric and evidence presentation (2026-11-02)
+
+- Current reports separately label period PnL and opening-cohort lifetime PnL, with server
+  definitions explaining that later exits may change only the latter. Both use existing
+  metric components, invalid-value behavior and RTL/LTR financial formatting.
+- Legacy reports keep their persisted values and legacy warning; the generic net-PnL help
+  distinguishes historical cohort semantics from the current period metric.
+- Learning progress shows covered forward days and names symbols with incomplete data.
+  The existing freeze timestamp now represents actual freeze, after model persistence.
+- Old recommendations disable approval and explain that a new cycle is required; rejection
+  remains available. This does not introduce a live/Paper execution flow.
+
+## P0 FIX-05 durable research states (2026-11-02)
+
+- Existing cancel/error/progress components consume the same API contract. Cancelling an
+  experiment durably marks all unfinished attempts cancelled even if a worker misses its
+  notification; an obsolete result cannot reappear as a completed current attempt.
+- New cancellations record a finish timestamp; retry runs remain in the existing attempt
+  registry. Terminal learning-cycle candidate counts reflect actual generated records.
+- Snapshot-format metadata remains a backend concern; existing dataset pickers keep their
+  version IDs and counts. No new screen, widget test or visual acceptance claim is added.

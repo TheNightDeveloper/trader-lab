@@ -5,8 +5,8 @@ package strategy
 import (
 	"errors"
 	"fmt"
+	"math"
 	"slices"
-	"strings"
 
 	"tradinglab/engine/internal/data"
 	"tradinglab/engine/internal/money"
@@ -59,11 +59,7 @@ func Names() []string {
 // New builds a registered strategy. Unknown parameters are an error, so a typo
 // never silently falls back to a default.
 func New(name string, p Params) (Strategy, error) {
-	f, ok := registry[name]
-	if !ok {
-		return nil, fmt.Errorf("%w %q (have %s)", ErrUnknown, name, strings.Join(Names(), ", "))
-	}
-	return f(p)
+	return NativeDefinition{Format: NativeFormatV1, Name: name, Params: p}.Build()
 }
 
 var registry = map[string]func(Params) (Strategy, error){
@@ -129,8 +125,8 @@ func (p Params) exposure() (money.Ratio, error) {
 
 func (p Params) period(key string, def float64) (int, error) {
 	v := p.get(key, def)
-	if v < 1 || v != float64(int(v)) {
-		return 0, fmt.Errorf("strategy: %s %v must be a positive whole number", key, v)
+	if v < 1 || v > 1000 || v != math.Trunc(v) {
+		return 0, fmt.Errorf("strategy: %s %v must be a whole number in 1..1000", key, v)
 	}
 	return int(v), nil
 }

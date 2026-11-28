@@ -21,6 +21,55 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type RuleEvidenceFilter int32
+
+const (
+	RuleEvidenceFilter_RULE_EVIDENCE_FILTER_UNSPECIFIED    RuleEvidenceFilter = 0 // all saved rule versions
+	RuleEvidenceFilter_RULE_EVIDENCE_FILTER_WITH_REPORT    RuleEvidenceFilter = 1
+	RuleEvidenceFilter_RULE_EVIDENCE_FILTER_WITHOUT_REPORT RuleEvidenceFilter = 2
+)
+
+// Enum value maps for RuleEvidenceFilter.
+var (
+	RuleEvidenceFilter_name = map[int32]string{
+		0: "RULE_EVIDENCE_FILTER_UNSPECIFIED",
+		1: "RULE_EVIDENCE_FILTER_WITH_REPORT",
+		2: "RULE_EVIDENCE_FILTER_WITHOUT_REPORT",
+	}
+	RuleEvidenceFilter_value = map[string]int32{
+		"RULE_EVIDENCE_FILTER_UNSPECIFIED":    0,
+		"RULE_EVIDENCE_FILTER_WITH_REPORT":    1,
+		"RULE_EVIDENCE_FILTER_WITHOUT_REPORT": 2,
+	}
+)
+
+func (x RuleEvidenceFilter) Enum() *RuleEvidenceFilter {
+	p := new(RuleEvidenceFilter)
+	*p = x
+	return p
+}
+
+func (x RuleEvidenceFilter) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (RuleEvidenceFilter) Descriptor() protoreflect.EnumDescriptor {
+	return file_lab_v1_library_proto_enumTypes[0].Descriptor()
+}
+
+func (RuleEvidenceFilter) Type() protoreflect.EnumType {
+	return &file_lab_v1_library_proto_enumTypes[0]
+}
+
+func (x RuleEvidenceFilter) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use RuleEvidenceFilter.Descriptor instead.
+func (RuleEvidenceFilter) EnumDescriptor() ([]byte, []int) {
+	return file_lab_v1_library_proto_rawDescGZIP(), []int{0}
+}
+
 type AlgorithmVersion struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"` // <algorithm>@v<n>
@@ -234,15 +283,16 @@ func (x *LatestReport) GetCreatedUnixMs() int64 {
 }
 
 type Algorithm struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Family        string                 `protobuf:"bytes,2,opt,name=family,proto3" json:"family,omitempty"`           // trend | mean_reversion | learning | hybrid | benchmark
-	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"` // Persian
-	Versions      []*AlgorithmVersion    `protobuf:"bytes,4,rep,name=versions,proto3" json:"versions,omitempty"`       // newest first
-	LatestReport  *LatestReport          `protobuf:"bytes,5,opt,name=latest_report,json=latestReport,proto3" json:"latest_report,omitempty"`
-	ActiveModel   string                 `protobuf:"bytes,6,opt,name=active_model,json=activeModel,proto3" json:"active_model,omitempty"` // learning algorithms: the model serving the active version
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Id                string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Family            string                 `protobuf:"bytes,2,opt,name=family,proto3" json:"family,omitempty"`           // trend | mean_reversion | learning | hybrid | benchmark
+	Description       string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"` // Persian
+	Versions          []*AlgorithmVersion    `protobuf:"bytes,4,rep,name=versions,proto3" json:"versions,omitempty"`       // newest first
+	LatestReport      *LatestReport          `protobuf:"bytes,5,opt,name=latest_report,json=latestReport,proto3" json:"latest_report,omitempty"`
+	ActiveModel       string                 `protobuf:"bytes,6,opt,name=active_model,json=activeModel,proto3" json:"active_model,omitempty"`                    // learning algorithms: the model serving the active version
+	LifecycleRevision int64                  `protobuf:"varint,7,opt,name=lifecycle_revision,json=lifecycleRevision,proto3" json:"lifecycle_revision,omitempty"` // server revision for optimistic lifecycle decisions
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *Algorithm) Reset() {
@@ -315,6 +365,13 @@ func (x *Algorithm) GetActiveModel() string {
 		return x.ActiveModel
 	}
 	return ""
+}
+
+func (x *Algorithm) GetLifecycleRevision() int64 {
+	if x != nil {
+		return x.LifecycleRevision
+	}
+	return 0
 }
 
 type ListAlgorithmsRequest struct {
@@ -398,12 +455,13 @@ func (x *ListAlgorithmsResponse) GetAlgorithms() []*Algorithm {
 }
 
 type SetVersionStateRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	VersionId     string                 `protobuf:"bytes,1,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
-	State         string                 `protobuf:"bytes,2,opt,name=state,proto3" json:"state,omitempty"`
-	Note          string                 `protobuf:"bytes,3,opt,name=note,proto3" json:"note,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	VersionId        string                 `protobuf:"bytes,1,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	State            string                 `protobuf:"bytes,2,opt,name=state,proto3" json:"state,omitempty"`
+	Note             string                 `protobuf:"bytes,3,opt,name=note,proto3" json:"note,omitempty"`
+	ExpectedRevision *int64                 `protobuf:"varint,4,opt,name=expected_revision,json=expectedRevision,proto3,oneof" json:"expected_revision,omitempty"` // required for mutations, including revision zero
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *SetVersionStateRequest) Reset() {
@@ -457,6 +515,13 @@ func (x *SetVersionStateRequest) GetNote() string {
 	return ""
 }
 
+func (x *SetVersionStateRequest) GetExpectedRevision() int64 {
+	if x != nil && x.ExpectedRevision != nil {
+		return *x.ExpectedRevision
+	}
+	return 0
+}
+
 type SetVersionStateResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -500,6 +565,7 @@ type LifecycleEvent struct {
 	Note          string                 `protobuf:"bytes,3,opt,name=note,proto3" json:"note,omitempty"`
 	Actor         string                 `protobuf:"bytes,4,opt,name=actor,proto3" json:"actor,omitempty"` // user | system
 	AtUnixMs      int64                  `protobuf:"varint,5,opt,name=at_unix_ms,json=atUnixMs,proto3" json:"at_unix_ms,omitempty"`
+	Audit         *AuditEvent            `protobuf:"bytes,6,opt,name=audit,proto3" json:"audit,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -569,9 +635,18 @@ func (x *LifecycleEvent) GetAtUnixMs() int64 {
 	return 0
 }
 
+func (x *LifecycleEvent) GetAudit() *AuditEvent {
+	if x != nil {
+		return x.Audit
+	}
+	return nil
+}
+
 type ListLifecycleEventsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	VersionId     string                 `protobuf:"bytes,1,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"` // positive opts in to sequence-ordered paging
+	Before        *AuditCursor           `protobuf:"bytes,3,opt,name=before,proto3" json:"before,omitempty"`                      // exclusive bound in the requested strategy version
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -613,9 +688,24 @@ func (x *ListLifecycleEventsRequest) GetVersionId() string {
 	return ""
 }
 
+func (x *ListLifecycleEventsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListLifecycleEventsRequest) GetBefore() *AuditCursor {
+	if x != nil {
+		return x.Before
+	}
+	return nil
+}
+
 type ListLifecycleEventsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Events        []*LifecycleEvent      `protobuf:"bytes,1,rep,name=events,proto3" json:"events,omitempty"`
+	NextCursor    *AuditCursor           `protobuf:"bytes,2,opt,name=next_cursor,json=nextCursor,proto3" json:"next_cursor,omitempty"` // absent on the last page
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -657,11 +747,723 @@ func (x *ListLifecycleEventsResponse) GetEvents() []*LifecycleEvent {
 	return nil
 }
 
+func (x *ListLifecycleEventsResponse) GetNextCursor() *AuditCursor {
+	if x != nil {
+		return x.NextCursor
+	}
+	return nil
+}
+
+// RuleVersionSummary describes an immutable research draft and its ancestry.
+type RuleVersionSummary struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	ContentHash   string                 `protobuf:"bytes,3,opt,name=content_hash,json=contentHash,proto3" json:"content_hash,omitempty"`
+	ParentId      int64                  `protobuf:"varint,4,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
+	OtherParentId int64                  `protobuf:"varint,5,opt,name=other_parent_id,json=otherParentId,proto3" json:"other_parent_id,omitempty"`
+	TemplateKey   string                 `protobuf:"bytes,6,opt,name=template_key,json=templateKey,proto3" json:"template_key,omitempty"`
+	CreatedUnixMs int64                  `protobuf:"varint,7,opt,name=created_unix_ms,json=createdUnixMs,proto3" json:"created_unix_ms,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RuleVersionSummary) Reset() {
+	*x = RuleVersionSummary{}
+	mi := &file_lab_v1_library_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RuleVersionSummary) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RuleVersionSummary) ProtoMessage() {}
+
+func (x *RuleVersionSummary) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_library_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RuleVersionSummary.ProtoReflect.Descriptor instead.
+func (*RuleVersionSummary) Descriptor() ([]byte, []int) {
+	return file_lab_v1_library_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *RuleVersionSummary) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *RuleVersionSummary) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *RuleVersionSummary) GetContentHash() string {
+	if x != nil {
+		return x.ContentHash
+	}
+	return ""
+}
+
+func (x *RuleVersionSummary) GetParentId() int64 {
+	if x != nil {
+		return x.ParentId
+	}
+	return 0
+}
+
+func (x *RuleVersionSummary) GetOtherParentId() int64 {
+	if x != nil {
+		return x.OtherParentId
+	}
+	return 0
+}
+
+func (x *RuleVersionSummary) GetTemplateKey() string {
+	if x != nil {
+		return x.TemplateKey
+	}
+	return ""
+}
+
+func (x *RuleVersionSummary) GetCreatedUnixMs() int64 {
+	if x != nil {
+		return x.CreatedUnixMs
+	}
+	return 0
+}
+
+type ListRuleVersionsRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Query          string                 `protobuf:"bytes,1,opt,name=query,proto3" json:"query,omitempty"`
+	PageSize       int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	BeforeId       int64                  `protobuf:"varint,3,opt,name=before_id,json=beforeId,proto3" json:"before_id,omitempty"` // exclusive, zero starts at the newest version
+	EvidenceFilter RuleEvidenceFilter     `protobuf:"varint,4,opt,name=evidence_filter,json=evidenceFilter,proto3,enum=lab.v1.RuleEvidenceFilter" json:"evidence_filter,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *ListRuleVersionsRequest) Reset() {
+	*x = ListRuleVersionsRequest{}
+	mi := &file_lab_v1_library_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListRuleVersionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListRuleVersionsRequest) ProtoMessage() {}
+
+func (x *ListRuleVersionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_library_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListRuleVersionsRequest.ProtoReflect.Descriptor instead.
+func (*ListRuleVersionsRequest) Descriptor() ([]byte, []int) {
+	return file_lab_v1_library_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *ListRuleVersionsRequest) GetQuery() string {
+	if x != nil {
+		return x.Query
+	}
+	return ""
+}
+
+func (x *ListRuleVersionsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListRuleVersionsRequest) GetBeforeId() int64 {
+	if x != nil {
+		return x.BeforeId
+	}
+	return 0
+}
+
+func (x *ListRuleVersionsRequest) GetEvidenceFilter() RuleEvidenceFilter {
+	if x != nil {
+		return x.EvidenceFilter
+	}
+	return RuleEvidenceFilter_RULE_EVIDENCE_FILTER_UNSPECIFIED
+}
+
+type ListRuleVersionsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Versions      []*RuleVersionSummary  `protobuf:"bytes,1,rep,name=versions,proto3" json:"versions,omitempty"`
+	NextBeforeId  int64                  `protobuf:"varint,2,opt,name=next_before_id,json=nextBeforeId,proto3" json:"next_before_id,omitempty"` // zero means the last page
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListRuleVersionsResponse) Reset() {
+	*x = ListRuleVersionsResponse{}
+	mi := &file_lab_v1_library_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListRuleVersionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListRuleVersionsResponse) ProtoMessage() {}
+
+func (x *ListRuleVersionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_library_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListRuleVersionsResponse.ProtoReflect.Descriptor instead.
+func (*ListRuleVersionsResponse) Descriptor() ([]byte, []int) {
+	return file_lab_v1_library_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *ListRuleVersionsResponse) GetVersions() []*RuleVersionSummary {
+	if x != nil {
+		return x.Versions
+	}
+	return nil
+}
+
+func (x *ListRuleVersionsResponse) GetNextBeforeId() int64 {
+	if x != nil {
+		return x.NextBeforeId
+	}
+	return 0
+}
+
+type GetRuleVersionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetRuleVersionRequest) Reset() {
+	*x = GetRuleVersionRequest{}
+	mi := &file_lab_v1_library_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetRuleVersionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetRuleVersionRequest) ProtoMessage() {}
+
+func (x *GetRuleVersionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_library_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetRuleVersionRequest.ProtoReflect.Descriptor instead.
+func (*GetRuleVersionRequest) Descriptor() ([]byte, []int) {
+	return file_lab_v1_library_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *GetRuleVersionRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type GetRuleVersionResponse struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Version        *RuleVersionSummary    `protobuf:"bytes,1,opt,name=version,proto3" json:"version,omitempty"`
+	DefinitionJson string                 `protobuf:"bytes,2,opt,name=definition_json,json=definitionJson,proto3" json:"definition_json,omitempty"` // validated rules/v1
+	LatestReport   *LatestReport          `protobuf:"bytes,3,opt,name=latest_report,json=latestReport,proto3" json:"latest_report,omitempty"`       // only reports for this exact version
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *GetRuleVersionResponse) Reset() {
+	*x = GetRuleVersionResponse{}
+	mi := &file_lab_v1_library_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetRuleVersionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetRuleVersionResponse) ProtoMessage() {}
+
+func (x *GetRuleVersionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_library_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetRuleVersionResponse.ProtoReflect.Descriptor instead.
+func (*GetRuleVersionResponse) Descriptor() ([]byte, []int) {
+	return file_lab_v1_library_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *GetRuleVersionResponse) GetVersion() *RuleVersionSummary {
+	if x != nil {
+		return x.Version
+	}
+	return nil
+}
+
+func (x *GetRuleVersionResponse) GetDefinitionJson() string {
+	if x != nil {
+		return x.DefinitionJson
+	}
+	return ""
+}
+
+func (x *GetRuleVersionResponse) GetLatestReport() *LatestReport {
+	if x != nil {
+		return x.LatestReport
+	}
+	return nil
+}
+
+type SaveRuleVersionRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Title          string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
+	DefinitionJson string                 `protobuf:"bytes,2,opt,name=definition_json,json=definitionJson,proto3" json:"definition_json,omitempty"`
+	ParentId       int64                  `protobuf:"varint,3,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`         // zero begins a lineage
+	TemplateKey    string                 `protobuf:"bytes,4,opt,name=template_key,json=templateKey,proto3" json:"template_key,omitempty"` // when set, a new lineage derives from this template
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *SaveRuleVersionRequest) Reset() {
+	*x = SaveRuleVersionRequest{}
+	mi := &file_lab_v1_library_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SaveRuleVersionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SaveRuleVersionRequest) ProtoMessage() {}
+
+func (x *SaveRuleVersionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_library_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SaveRuleVersionRequest.ProtoReflect.Descriptor instead.
+func (*SaveRuleVersionRequest) Descriptor() ([]byte, []int) {
+	return file_lab_v1_library_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *SaveRuleVersionRequest) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *SaveRuleVersionRequest) GetDefinitionJson() string {
+	if x != nil {
+		return x.DefinitionJson
+	}
+	return ""
+}
+
+func (x *SaveRuleVersionRequest) GetParentId() int64 {
+	if x != nil {
+		return x.ParentId
+	}
+	return 0
+}
+
+func (x *SaveRuleVersionRequest) GetTemplateKey() string {
+	if x != nil {
+		return x.TemplateKey
+	}
+	return ""
+}
+
+type SaveRuleVersionResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Version       *RuleVersionSummary    `protobuf:"bytes,1,opt,name=version,proto3" json:"version,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SaveRuleVersionResponse) Reset() {
+	*x = SaveRuleVersionResponse{}
+	mi := &file_lab_v1_library_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SaveRuleVersionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SaveRuleVersionResponse) ProtoMessage() {}
+
+func (x *SaveRuleVersionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_library_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SaveRuleVersionResponse.ProtoReflect.Descriptor instead.
+func (*SaveRuleVersionResponse) Descriptor() ([]byte, []int) {
+	return file_lab_v1_library_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *SaveRuleVersionResponse) GetVersion() *RuleVersionSummary {
+	if x != nil {
+		return x.Version
+	}
+	return nil
+}
+
+type ComposeRuleVersionsRequest struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Title           string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
+	FirstId         int64                  `protobuf:"varint,2,opt,name=first_id,json=firstId,proto3" json:"first_id,omitempty"`
+	SecondId        int64                  `protobuf:"varint,3,opt,name=second_id,json=secondId,proto3" json:"second_id,omitempty"`
+	EntryMode       string                 `protobuf:"bytes,4,opt,name=entry_mode,json=entryMode,proto3" json:"entry_mode,omitempty"`                      // and | or | regime
+	ExitOwnerId     int64                  `protobuf:"varint,5,opt,name=exit_owner_id,json=exitOwnerId,proto3" json:"exit_owner_id,omitempty"`             // one of the two component versions
+	RegimeSmaPeriod int32                  `protobuf:"varint,6,opt,name=regime_sma_period,json=regimeSmaPeriod,proto3" json:"regime_sma_period,omitempty"` // only for regime, in base bars
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *ComposeRuleVersionsRequest) Reset() {
+	*x = ComposeRuleVersionsRequest{}
+	mi := &file_lab_v1_library_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ComposeRuleVersionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ComposeRuleVersionsRequest) ProtoMessage() {}
+
+func (x *ComposeRuleVersionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_library_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ComposeRuleVersionsRequest.ProtoReflect.Descriptor instead.
+func (*ComposeRuleVersionsRequest) Descriptor() ([]byte, []int) {
+	return file_lab_v1_library_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *ComposeRuleVersionsRequest) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *ComposeRuleVersionsRequest) GetFirstId() int64 {
+	if x != nil {
+		return x.FirstId
+	}
+	return 0
+}
+
+func (x *ComposeRuleVersionsRequest) GetSecondId() int64 {
+	if x != nil {
+		return x.SecondId
+	}
+	return 0
+}
+
+func (x *ComposeRuleVersionsRequest) GetEntryMode() string {
+	if x != nil {
+		return x.EntryMode
+	}
+	return ""
+}
+
+func (x *ComposeRuleVersionsRequest) GetExitOwnerId() int64 {
+	if x != nil {
+		return x.ExitOwnerId
+	}
+	return 0
+}
+
+func (x *ComposeRuleVersionsRequest) GetRegimeSmaPeriod() int32 {
+	if x != nil {
+		return x.RegimeSmaPeriod
+	}
+	return 0
+}
+
+type ComposeRuleVersionsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Version       *RuleVersionSummary    `protobuf:"bytes,1,opt,name=version,proto3" json:"version,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ComposeRuleVersionsResponse) Reset() {
+	*x = ComposeRuleVersionsResponse{}
+	mi := &file_lab_v1_library_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ComposeRuleVersionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ComposeRuleVersionsResponse) ProtoMessage() {}
+
+func (x *ComposeRuleVersionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_library_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ComposeRuleVersionsResponse.ProtoReflect.Descriptor instead.
+func (*ComposeRuleVersionsResponse) Descriptor() ([]byte, []int) {
+	return file_lab_v1_library_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *ComposeRuleVersionsResponse) GetVersion() *RuleVersionSummary {
+	if x != nil {
+		return x.Version
+	}
+	return nil
+}
+
+type RuleTemplate struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Key            string                 `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	Title          string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Description    string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	DefinitionJson string                 `protobuf:"bytes,4,opt,name=definition_json,json=definitionJson,proto3" json:"definition_json,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *RuleTemplate) Reset() {
+	*x = RuleTemplate{}
+	mi := &file_lab_v1_library_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RuleTemplate) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RuleTemplate) ProtoMessage() {}
+
+func (x *RuleTemplate) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_library_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RuleTemplate.ProtoReflect.Descriptor instead.
+func (*RuleTemplate) Descriptor() ([]byte, []int) {
+	return file_lab_v1_library_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *RuleTemplate) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+func (x *RuleTemplate) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *RuleTemplate) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *RuleTemplate) GetDefinitionJson() string {
+	if x != nil {
+		return x.DefinitionJson
+	}
+	return ""
+}
+
+type ListRuleTemplatesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListRuleTemplatesRequest) Reset() {
+	*x = ListRuleTemplatesRequest{}
+	mi := &file_lab_v1_library_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListRuleTemplatesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListRuleTemplatesRequest) ProtoMessage() {}
+
+func (x *ListRuleTemplatesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_library_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListRuleTemplatesRequest.ProtoReflect.Descriptor instead.
+func (*ListRuleTemplatesRequest) Descriptor() ([]byte, []int) {
+	return file_lab_v1_library_proto_rawDescGZIP(), []int{21}
+}
+
+type ListRuleTemplatesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Templates     []*RuleTemplate        `protobuf:"bytes,1,rep,name=templates,proto3" json:"templates,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListRuleTemplatesResponse) Reset() {
+	*x = ListRuleTemplatesResponse{}
+	mi := &file_lab_v1_library_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListRuleTemplatesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListRuleTemplatesResponse) ProtoMessage() {}
+
+func (x *ListRuleTemplatesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_library_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListRuleTemplatesResponse.ProtoReflect.Descriptor instead.
+func (*ListRuleTemplatesResponse) Descriptor() ([]byte, []int) {
+	return file_lab_v1_library_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *ListRuleTemplatesResponse) GetTemplates() []*RuleTemplate {
+	if x != nil {
+		return x.Templates
+	}
+	return nil
+}
+
 var File_lab_v1_library_proto protoreflect.FileDescriptor
 
 const file_lab_v1_library_proto_rawDesc = "" +
 	"\n" +
-	"\x14lab/v1/library.proto\x12\x06lab.v1\x1a\x13lab/v1/common.proto\x1a\x13lab/v1/report.proto\"\x95\x02\n" +
+	"\x14lab/v1/library.proto\x12\x06lab.v1\x1a\x12lab/v1/audit.proto\x1a\x13lab/v1/common.proto\x1a\x13lab/v1/report.proto\"\x95\x02\n" +
 	"\x10AlgorithmVersion\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
 	"\aversion\x18\x02 \x01(\x05R\aversion\x12\x14\n" +
@@ -679,25 +1481,28 @@ const file_lab_v1_library_proto_rawDesc = "" +
 	"\fLatestReport\x12\x1b\n" +
 	"\treport_id\x18\x01 \x01(\tR\breportId\x122\n" +
 	"\ftotal_return\x18\x02 \x01(\v2\x0f.lab.v1.DecimalR\vtotalReturn\x12&\n" +
-	"\x0fcreated_unix_ms\x18\x03 \x01(\x03R\rcreatedUnixMs\"\xe9\x01\n" +
+	"\x0fcreated_unix_ms\x18\x03 \x01(\x03R\rcreatedUnixMs\"\x98\x02\n" +
 	"\tAlgorithm\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x16\n" +
 	"\x06family\x18\x02 \x01(\tR\x06family\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x124\n" +
 	"\bversions\x18\x04 \x03(\v2\x18.lab.v1.AlgorithmVersionR\bversions\x129\n" +
 	"\rlatest_report\x18\x05 \x01(\v2\x14.lab.v1.LatestReportR\flatestReport\x12!\n" +
-	"\factive_model\x18\x06 \x01(\tR\vactiveModel\"\x17\n" +
+	"\factive_model\x18\x06 \x01(\tR\vactiveModel\x12-\n" +
+	"\x12lifecycle_revision\x18\a \x01(\x03R\x11lifecycleRevision\"\x17\n" +
 	"\x15ListAlgorithmsRequest\"K\n" +
 	"\x16ListAlgorithmsResponse\x121\n" +
 	"\n" +
 	"algorithms\x18\x01 \x03(\v2\x11.lab.v1.AlgorithmR\n" +
-	"algorithms\"a\n" +
+	"algorithms\"\xa9\x01\n" +
 	"\x16SetVersionStateRequest\x12\x1d\n" +
 	"\n" +
 	"version_id\x18\x01 \x01(\tR\tversionId\x12\x14\n" +
 	"\x05state\x18\x02 \x01(\tR\x05state\x12\x12\n" +
-	"\x04note\x18\x03 \x01(\tR\x04note\"\x19\n" +
-	"\x17SetVersionStateResponse\"\x92\x01\n" +
+	"\x04note\x18\x03 \x01(\tR\x04note\x120\n" +
+	"\x11expected_revision\x18\x04 \x01(\x03H\x00R\x10expectedRevision\x88\x01\x01B\x14\n" +
+	"\x12_expected_revision\"\x19\n" +
+	"\x17SetVersionStateResponse\"\xbc\x01\n" +
 	"\x0eLifecycleEvent\x12\x1d\n" +
 	"\n" +
 	"from_state\x18\x01 \x01(\tR\tfromState\x12\x19\n" +
@@ -705,16 +1510,77 @@ const file_lab_v1_library_proto_rawDesc = "" +
 	"\x04note\x18\x03 \x01(\tR\x04note\x12\x14\n" +
 	"\x05actor\x18\x04 \x01(\tR\x05actor\x12\x1c\n" +
 	"\n" +
-	"at_unix_ms\x18\x05 \x01(\x03R\batUnixMs\";\n" +
+	"at_unix_ms\x18\x05 \x01(\x03R\batUnixMs\x12(\n" +
+	"\x05audit\x18\x06 \x01(\v2\x12.lab.v1.AuditEventR\x05audit\"\x85\x01\n" +
 	"\x1aListLifecycleEventsRequest\x12\x1d\n" +
 	"\n" +
-	"version_id\x18\x01 \x01(\tR\tversionId\"M\n" +
+	"version_id\x18\x01 \x01(\tR\tversionId\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12+\n" +
+	"\x06before\x18\x03 \x01(\v2\x13.lab.v1.AuditCursorR\x06before\"\x83\x01\n" +
 	"\x1bListLifecycleEventsResponse\x12.\n" +
-	"\x06events\x18\x01 \x03(\v2\x16.lab.v1.LifecycleEventR\x06events2\x95\x02\n" +
+	"\x06events\x18\x01 \x03(\v2\x16.lab.v1.LifecycleEventR\x06events\x124\n" +
+	"\vnext_cursor\x18\x02 \x01(\v2\x13.lab.v1.AuditCursorR\n" +
+	"nextCursor\"\xed\x01\n" +
+	"\x12RuleVersionSummary\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12!\n" +
+	"\fcontent_hash\x18\x03 \x01(\tR\vcontentHash\x12\x1b\n" +
+	"\tparent_id\x18\x04 \x01(\x03R\bparentId\x12&\n" +
+	"\x0fother_parent_id\x18\x05 \x01(\x03R\rotherParentId\x12!\n" +
+	"\ftemplate_key\x18\x06 \x01(\tR\vtemplateKey\x12&\n" +
+	"\x0fcreated_unix_ms\x18\a \x01(\x03R\rcreatedUnixMs\"\xae\x01\n" +
+	"\x17ListRuleVersionsRequest\x12\x14\n" +
+	"\x05query\x18\x01 \x01(\tR\x05query\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x1b\n" +
+	"\tbefore_id\x18\x03 \x01(\x03R\bbeforeId\x12C\n" +
+	"\x0fevidence_filter\x18\x04 \x01(\x0e2\x1a.lab.v1.RuleEvidenceFilterR\x0eevidenceFilter\"x\n" +
+	"\x18ListRuleVersionsResponse\x126\n" +
+	"\bversions\x18\x01 \x03(\v2\x1a.lab.v1.RuleVersionSummaryR\bversions\x12$\n" +
+	"\x0enext_before_id\x18\x02 \x01(\x03R\fnextBeforeId\"'\n" +
+	"\x15GetRuleVersionRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"\xb2\x01\n" +
+	"\x16GetRuleVersionResponse\x124\n" +
+	"\aversion\x18\x01 \x01(\v2\x1a.lab.v1.RuleVersionSummaryR\aversion\x12'\n" +
+	"\x0fdefinition_json\x18\x02 \x01(\tR\x0edefinitionJson\x129\n" +
+	"\rlatest_report\x18\x03 \x01(\v2\x14.lab.v1.LatestReportR\flatestReport\"\x97\x01\n" +
+	"\x16SaveRuleVersionRequest\x12\x14\n" +
+	"\x05title\x18\x01 \x01(\tR\x05title\x12'\n" +
+	"\x0fdefinition_json\x18\x02 \x01(\tR\x0edefinitionJson\x12\x1b\n" +
+	"\tparent_id\x18\x03 \x01(\x03R\bparentId\x12!\n" +
+	"\ftemplate_key\x18\x04 \x01(\tR\vtemplateKey\"O\n" +
+	"\x17SaveRuleVersionResponse\x124\n" +
+	"\aversion\x18\x01 \x01(\v2\x1a.lab.v1.RuleVersionSummaryR\aversion\"\xd9\x01\n" +
+	"\x1aComposeRuleVersionsRequest\x12\x14\n" +
+	"\x05title\x18\x01 \x01(\tR\x05title\x12\x19\n" +
+	"\bfirst_id\x18\x02 \x01(\x03R\afirstId\x12\x1b\n" +
+	"\tsecond_id\x18\x03 \x01(\x03R\bsecondId\x12\x1d\n" +
+	"\n" +
+	"entry_mode\x18\x04 \x01(\tR\tentryMode\x12\"\n" +
+	"\rexit_owner_id\x18\x05 \x01(\x03R\vexitOwnerId\x12*\n" +
+	"\x11regime_sma_period\x18\x06 \x01(\x05R\x0fregimeSmaPeriod\"S\n" +
+	"\x1bComposeRuleVersionsResponse\x124\n" +
+	"\aversion\x18\x01 \x01(\v2\x1a.lab.v1.RuleVersionSummaryR\aversion\"\x81\x01\n" +
+	"\fRuleTemplate\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12'\n" +
+	"\x0fdefinition_json\x18\x04 \x01(\tR\x0edefinitionJson\"\x1a\n" +
+	"\x18ListRuleTemplatesRequest\"O\n" +
+	"\x19ListRuleTemplatesResponse\x122\n" +
+	"\ttemplates\x18\x01 \x03(\v2\x14.lab.v1.RuleTemplateR\ttemplates*\x89\x01\n" +
+	"\x12RuleEvidenceFilter\x12$\n" +
+	" RULE_EVIDENCE_FILTER_UNSPECIFIED\x10\x00\x12$\n" +
+	" RULE_EVIDENCE_FILTER_WITH_REPORT\x10\x01\x12'\n" +
+	"#RULE_EVIDENCE_FILTER_WITHOUT_REPORT\x10\x022\xcb\x05\n" +
 	"\x0eLibraryService\x12O\n" +
 	"\x0eListAlgorithms\x12\x1d.lab.v1.ListAlgorithmsRequest\x1a\x1e.lab.v1.ListAlgorithmsResponse\x12R\n" +
 	"\x0fSetVersionState\x12\x1e.lab.v1.SetVersionStateRequest\x1a\x1f.lab.v1.SetVersionStateResponse\x12^\n" +
-	"\x13ListLifecycleEvents\x12\".lab.v1.ListLifecycleEventsRequest\x1a#.lab.v1.ListLifecycleEventsResponseB\x80\x01\n" +
+	"\x13ListLifecycleEvents\x12\".lab.v1.ListLifecycleEventsRequest\x1a#.lab.v1.ListLifecycleEventsResponse\x12U\n" +
+	"\x10ListRuleVersions\x12\x1f.lab.v1.ListRuleVersionsRequest\x1a .lab.v1.ListRuleVersionsResponse\x12O\n" +
+	"\x0eGetRuleVersion\x12\x1d.lab.v1.GetRuleVersionRequest\x1a\x1e.lab.v1.GetRuleVersionResponse\x12R\n" +
+	"\x0fSaveRuleVersion\x12\x1e.lab.v1.SaveRuleVersionRequest\x1a\x1f.lab.v1.SaveRuleVersionResponse\x12^\n" +
+	"\x13ComposeRuleVersions\x12\".lab.v1.ComposeRuleVersionsRequest\x1a#.lab.v1.ComposeRuleVersionsResponse\x12X\n" +
+	"\x11ListRuleTemplates\x12 .lab.v1.ListRuleTemplatesRequest\x1a!.lab.v1.ListRuleTemplatesResponseB\x80\x01\n" +
 	"\n" +
 	"com.lab.v1B\fLibraryProtoP\x01Z+tradinglab/engine/internal/gen/lab/v1;labv1\xa2\x02\x03LXX\xaa\x02\x06Lab.V1\xca\x02\x06Lab\\V1\xe2\x02\x12Lab\\V1\\GPBMetadata\xea\x02\aLab::V1b\x06proto3"
 
@@ -730,41 +1596,77 @@ func file_lab_v1_library_proto_rawDescGZIP() []byte {
 	return file_lab_v1_library_proto_rawDescData
 }
 
-var file_lab_v1_library_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_lab_v1_library_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_lab_v1_library_proto_msgTypes = make([]protoimpl.MessageInfo, 23)
 var file_lab_v1_library_proto_goTypes = []any{
-	(*AlgorithmVersion)(nil),            // 0: lab.v1.AlgorithmVersion
-	(*RecipeItem)(nil),                  // 1: lab.v1.RecipeItem
-	(*LatestReport)(nil),                // 2: lab.v1.LatestReport
-	(*Algorithm)(nil),                   // 3: lab.v1.Algorithm
-	(*ListAlgorithmsRequest)(nil),       // 4: lab.v1.ListAlgorithmsRequest
-	(*ListAlgorithmsResponse)(nil),      // 5: lab.v1.ListAlgorithmsResponse
-	(*SetVersionStateRequest)(nil),      // 6: lab.v1.SetVersionStateRequest
-	(*SetVersionStateResponse)(nil),     // 7: lab.v1.SetVersionStateResponse
-	(*LifecycleEvent)(nil),              // 8: lab.v1.LifecycleEvent
-	(*ListLifecycleEventsRequest)(nil),  // 9: lab.v1.ListLifecycleEventsRequest
-	(*ListLifecycleEventsResponse)(nil), // 10: lab.v1.ListLifecycleEventsResponse
-	(*ParamSpec)(nil),                   // 11: lab.v1.ParamSpec
-	(*Decimal)(nil),                     // 12: lab.v1.Decimal
+	(RuleEvidenceFilter)(0),             // 0: lab.v1.RuleEvidenceFilter
+	(*AlgorithmVersion)(nil),            // 1: lab.v1.AlgorithmVersion
+	(*RecipeItem)(nil),                  // 2: lab.v1.RecipeItem
+	(*LatestReport)(nil),                // 3: lab.v1.LatestReport
+	(*Algorithm)(nil),                   // 4: lab.v1.Algorithm
+	(*ListAlgorithmsRequest)(nil),       // 5: lab.v1.ListAlgorithmsRequest
+	(*ListAlgorithmsResponse)(nil),      // 6: lab.v1.ListAlgorithmsResponse
+	(*SetVersionStateRequest)(nil),      // 7: lab.v1.SetVersionStateRequest
+	(*SetVersionStateResponse)(nil),     // 8: lab.v1.SetVersionStateResponse
+	(*LifecycleEvent)(nil),              // 9: lab.v1.LifecycleEvent
+	(*ListLifecycleEventsRequest)(nil),  // 10: lab.v1.ListLifecycleEventsRequest
+	(*ListLifecycleEventsResponse)(nil), // 11: lab.v1.ListLifecycleEventsResponse
+	(*RuleVersionSummary)(nil),          // 12: lab.v1.RuleVersionSummary
+	(*ListRuleVersionsRequest)(nil),     // 13: lab.v1.ListRuleVersionsRequest
+	(*ListRuleVersionsResponse)(nil),    // 14: lab.v1.ListRuleVersionsResponse
+	(*GetRuleVersionRequest)(nil),       // 15: lab.v1.GetRuleVersionRequest
+	(*GetRuleVersionResponse)(nil),      // 16: lab.v1.GetRuleVersionResponse
+	(*SaveRuleVersionRequest)(nil),      // 17: lab.v1.SaveRuleVersionRequest
+	(*SaveRuleVersionResponse)(nil),     // 18: lab.v1.SaveRuleVersionResponse
+	(*ComposeRuleVersionsRequest)(nil),  // 19: lab.v1.ComposeRuleVersionsRequest
+	(*ComposeRuleVersionsResponse)(nil), // 20: lab.v1.ComposeRuleVersionsResponse
+	(*RuleTemplate)(nil),                // 21: lab.v1.RuleTemplate
+	(*ListRuleTemplatesRequest)(nil),    // 22: lab.v1.ListRuleTemplatesRequest
+	(*ListRuleTemplatesResponse)(nil),   // 23: lab.v1.ListRuleTemplatesResponse
+	(*ParamSpec)(nil),                   // 24: lab.v1.ParamSpec
+	(*Decimal)(nil),                     // 25: lab.v1.Decimal
+	(*AuditEvent)(nil),                  // 26: lab.v1.AuditEvent
+	(*AuditCursor)(nil),                 // 27: lab.v1.AuditCursor
 }
 var file_lab_v1_library_proto_depIdxs = []int32{
-	11, // 0: lab.v1.AlgorithmVersion.params:type_name -> lab.v1.ParamSpec
-	1,  // 1: lab.v1.AlgorithmVersion.recipe:type_name -> lab.v1.RecipeItem
-	12, // 2: lab.v1.LatestReport.total_return:type_name -> lab.v1.Decimal
-	0,  // 3: lab.v1.Algorithm.versions:type_name -> lab.v1.AlgorithmVersion
-	2,  // 4: lab.v1.Algorithm.latest_report:type_name -> lab.v1.LatestReport
-	3,  // 5: lab.v1.ListAlgorithmsResponse.algorithms:type_name -> lab.v1.Algorithm
-	8,  // 6: lab.v1.ListLifecycleEventsResponse.events:type_name -> lab.v1.LifecycleEvent
-	4,  // 7: lab.v1.LibraryService.ListAlgorithms:input_type -> lab.v1.ListAlgorithmsRequest
-	6,  // 8: lab.v1.LibraryService.SetVersionState:input_type -> lab.v1.SetVersionStateRequest
-	9,  // 9: lab.v1.LibraryService.ListLifecycleEvents:input_type -> lab.v1.ListLifecycleEventsRequest
-	5,  // 10: lab.v1.LibraryService.ListAlgorithms:output_type -> lab.v1.ListAlgorithmsResponse
-	7,  // 11: lab.v1.LibraryService.SetVersionState:output_type -> lab.v1.SetVersionStateResponse
-	10, // 12: lab.v1.LibraryService.ListLifecycleEvents:output_type -> lab.v1.ListLifecycleEventsResponse
-	10, // [10:13] is the sub-list for method output_type
-	7,  // [7:10] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	24, // 0: lab.v1.AlgorithmVersion.params:type_name -> lab.v1.ParamSpec
+	2,  // 1: lab.v1.AlgorithmVersion.recipe:type_name -> lab.v1.RecipeItem
+	25, // 2: lab.v1.LatestReport.total_return:type_name -> lab.v1.Decimal
+	1,  // 3: lab.v1.Algorithm.versions:type_name -> lab.v1.AlgorithmVersion
+	3,  // 4: lab.v1.Algorithm.latest_report:type_name -> lab.v1.LatestReport
+	4,  // 5: lab.v1.ListAlgorithmsResponse.algorithms:type_name -> lab.v1.Algorithm
+	26, // 6: lab.v1.LifecycleEvent.audit:type_name -> lab.v1.AuditEvent
+	27, // 7: lab.v1.ListLifecycleEventsRequest.before:type_name -> lab.v1.AuditCursor
+	9,  // 8: lab.v1.ListLifecycleEventsResponse.events:type_name -> lab.v1.LifecycleEvent
+	27, // 9: lab.v1.ListLifecycleEventsResponse.next_cursor:type_name -> lab.v1.AuditCursor
+	0,  // 10: lab.v1.ListRuleVersionsRequest.evidence_filter:type_name -> lab.v1.RuleEvidenceFilter
+	12, // 11: lab.v1.ListRuleVersionsResponse.versions:type_name -> lab.v1.RuleVersionSummary
+	12, // 12: lab.v1.GetRuleVersionResponse.version:type_name -> lab.v1.RuleVersionSummary
+	3,  // 13: lab.v1.GetRuleVersionResponse.latest_report:type_name -> lab.v1.LatestReport
+	12, // 14: lab.v1.SaveRuleVersionResponse.version:type_name -> lab.v1.RuleVersionSummary
+	12, // 15: lab.v1.ComposeRuleVersionsResponse.version:type_name -> lab.v1.RuleVersionSummary
+	21, // 16: lab.v1.ListRuleTemplatesResponse.templates:type_name -> lab.v1.RuleTemplate
+	5,  // 17: lab.v1.LibraryService.ListAlgorithms:input_type -> lab.v1.ListAlgorithmsRequest
+	7,  // 18: lab.v1.LibraryService.SetVersionState:input_type -> lab.v1.SetVersionStateRequest
+	10, // 19: lab.v1.LibraryService.ListLifecycleEvents:input_type -> lab.v1.ListLifecycleEventsRequest
+	13, // 20: lab.v1.LibraryService.ListRuleVersions:input_type -> lab.v1.ListRuleVersionsRequest
+	15, // 21: lab.v1.LibraryService.GetRuleVersion:input_type -> lab.v1.GetRuleVersionRequest
+	17, // 22: lab.v1.LibraryService.SaveRuleVersion:input_type -> lab.v1.SaveRuleVersionRequest
+	19, // 23: lab.v1.LibraryService.ComposeRuleVersions:input_type -> lab.v1.ComposeRuleVersionsRequest
+	22, // 24: lab.v1.LibraryService.ListRuleTemplates:input_type -> lab.v1.ListRuleTemplatesRequest
+	6,  // 25: lab.v1.LibraryService.ListAlgorithms:output_type -> lab.v1.ListAlgorithmsResponse
+	8,  // 26: lab.v1.LibraryService.SetVersionState:output_type -> lab.v1.SetVersionStateResponse
+	11, // 27: lab.v1.LibraryService.ListLifecycleEvents:output_type -> lab.v1.ListLifecycleEventsResponse
+	14, // 28: lab.v1.LibraryService.ListRuleVersions:output_type -> lab.v1.ListRuleVersionsResponse
+	16, // 29: lab.v1.LibraryService.GetRuleVersion:output_type -> lab.v1.GetRuleVersionResponse
+	18, // 30: lab.v1.LibraryService.SaveRuleVersion:output_type -> lab.v1.SaveRuleVersionResponse
+	20, // 31: lab.v1.LibraryService.ComposeRuleVersions:output_type -> lab.v1.ComposeRuleVersionsResponse
+	23, // 32: lab.v1.LibraryService.ListRuleTemplates:output_type -> lab.v1.ListRuleTemplatesResponse
+	25, // [25:33] is the sub-list for method output_type
+	17, // [17:25] is the sub-list for method input_type
+	17, // [17:17] is the sub-list for extension type_name
+	17, // [17:17] is the sub-list for extension extendee
+	0,  // [0:17] is the sub-list for field type_name
 }
 
 func init() { file_lab_v1_library_proto_init() }
@@ -772,20 +1674,23 @@ func file_lab_v1_library_proto_init() {
 	if File_lab_v1_library_proto != nil {
 		return
 	}
+	file_lab_v1_audit_proto_init()
 	file_lab_v1_common_proto_init()
 	file_lab_v1_report_proto_init()
+	file_lab_v1_library_proto_msgTypes[6].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_lab_v1_library_proto_rawDesc), len(file_lab_v1_library_proto_rawDesc)),
-			NumEnums:      0,
-			NumMessages:   11,
+			NumEnums:      1,
+			NumMessages:   23,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_lab_v1_library_proto_goTypes,
 		DependencyIndexes: file_lab_v1_library_proto_depIdxs,
+		EnumInfos:         file_lab_v1_library_proto_enumTypes,
 		MessageInfos:      file_lab_v1_library_proto_msgTypes,
 	}.Build()
 	File_lab_v1_library_proto = out.File

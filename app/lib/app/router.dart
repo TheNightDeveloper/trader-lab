@@ -1,5 +1,6 @@
+import 'package:fixnum/fixnum.dart';
 import 'package:animations/animations.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/theme/tokens.dart';
@@ -10,6 +11,12 @@ import '../features/home/home_screen.dart';
 import '../features/experiments/queue_screen.dart';
 import '../features/learning/learning_screen.dart';
 import '../features/library/library_screen.dart';
+import '../features/library/rule_library_screen.dart';
+import '../features/market/market_screen.dart';
+import '../features/paper/paper_entries.dart';
+import '../features/paper/paper_journal.dart';
+import '../features/paper/paper_replay.dart';
+import '../features/paper/paper_screen.dart';
 import '../features/pnl/pnl_screen.dart';
 import '../features/reports/compare_screen.dart';
 import '../features/reports/report_screen.dart';
@@ -37,6 +44,23 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
         GoRoute(path: Dest.home.path, pageBuilder: (context, state) => _page(context, state, const HomeScreen())),
         GoRoute(path: Dest.library.path, pageBuilder: (context, state) => _page(context, state, const LibraryScreen())),
         GoRoute(
+          path: '/library/rules',
+          pageBuilder: (context, state) =>
+              _page(context, state, const RuleLibraryScreen()),
+        ),
+        GoRoute(
+          path: '/library/rules/:id',
+          redirect: (context, state) {
+            final id = Int64.tryParseInt(state.pathParameters['id'] ?? '');
+            return id == null || id <= Int64.ZERO ? '/library/rules' : null;
+          },
+          pageBuilder: (context, state) => _page(
+            context,
+            state,
+            RuleDetailsScreen(id: Int64.parseInt(state.pathParameters['id']!)),
+          ),
+        ),
+        GoRoute(
           path: Dest.builder.path,
           pageBuilder: (context, state) =>
               _page(context, state, BuilderScreen(algo: state.uri.queryParameters['algo'])),
@@ -57,7 +81,10 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
           pageBuilder: (context, state) => _page(
             context,
             state,
-            CompareScreen(ids: (state.uri.queryParameters['ids'] ?? '').split(',').where((s) => s.isNotEmpty).toList()),
+            CompareScreen(
+              ids: (state.uri.queryParameters['ids'] ?? '').split(',').where((s) => s.isNotEmpty).toList(),
+              composition: state.uri.queryParameters['composition'] == '1',
+            ),
           ),
         ),
         GoRoute(
@@ -75,6 +102,57 @@ GoRouter buildRouter({String initialLocation = '/'}) => GoRouter(
               _page(context, state, ChartScreen(report: state.uri.queryParameters['report'])),
         ),
         GoRoute(path: Dest.data.path, pageBuilder: (context, state) => _page(context, state, const DataScreen())),
+        GoRoute(
+          path: Dest.market.path,
+          pageBuilder: (context, state) => _page(
+            context,
+            state,
+            MarketScreen(ruleId: Int64.tryParseInt(state.uri.queryParameters['rule'] ?? '')),
+          ),
+        ),
+        GoRoute(
+          path: Dest.paper.path,
+          pageBuilder: (context, state) => _page(
+            context,
+            state,
+            PaperScreen(opportunityId: Int64.tryParseInt(state.uri.queryParameters['opportunity'] ?? '')),
+          ),
+        ),
+        GoRoute(
+          path: '/paper/journal',
+          pageBuilder: (context, state) => _page(
+            context,
+            state,
+            PaperJournalScreen(before: Int64.tryParseInt(state.uri.queryParameters['before'] ?? '') ?? Int64.ZERO),
+          ),
+        ),
+        GoRoute(
+          path: '/paper/plans/:hash',
+          pageBuilder: (context, state) => _page(context, state, PaperPlanScreen(hash: state.pathParameters['hash']!)),
+        ),
+        GoRoute(
+          path: '/paper/receipts/:id/replay',
+          redirect: (context, state) {
+            final id = Int64.tryParseInt(state.pathParameters['id'] ?? '');
+            return id == null || id <= Int64.ZERO ? '/paper/journal' : null;
+          },
+          pageBuilder: (context, state) => _page(
+            context,
+            state,
+            PaperReplayScreen(
+              id: Int64.parseInt(state.pathParameters['id']!),
+              cursor: Int64.tryParseInt(state.uri.queryParameters['cursor'] ?? '') ?? Int64.ZERO,
+            ),
+          ),
+        ),
+        GoRoute(
+          path: '/paper/receipts/:id',
+          redirect: (context, state) {
+            final id = Int64.tryParseInt(state.pathParameters['id'] ?? '');
+            return id == null || id <= Int64.ZERO ? Dest.paper.path : null;
+          },
+          pageBuilder: (context, state) => _page(context, state, PaperReceiptScreen(id: Int64.parseInt(state.pathParameters['id']!))),
+        ),
         GoRoute(
           path: Dest.settings.path,
           pageBuilder: (context, state) => _page(context, state, const SettingsScreen()),

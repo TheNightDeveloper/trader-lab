@@ -1,6 +1,7 @@
 package api
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"strconv"
 	"time"
@@ -11,6 +12,16 @@ import (
 	"tradinglab/engine/internal/metrics"
 	"tradinglab/engine/internal/money"
 )
+
+// spotKey fingerprints the given Binance spot spec, including specs archived with earlier reports.
+func spotKey(s instrument.Spec) *labv1.InstrumentKey {
+	revision := sha256.Sum256(fmt.Appendf(nil, "binance/spot/v1\n%s\n%s/%d\n%s/%d\n%s\n%s\n%s",
+		s.Symbol, s.Base.Code, s.Base.Scale, s.Quote.Code, s.Quote.Scale, s.Tick, s.Lot, s.MinNotional))
+	return &labv1.InstrumentKey{
+		Venue: "binance", Product: labv1.MarketProduct_MARKET_PRODUCT_SPOT,
+		Symbol: s.Symbol, SpecRevision: fmt.Sprintf("sha256:%x", revision),
+	}
+}
 
 // Domain ↔ proto. Money always crosses as exact strings; parsing never rounds.
 

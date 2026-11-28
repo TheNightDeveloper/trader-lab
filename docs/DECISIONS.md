@@ -46,10 +46,14 @@ Consequence: 6–8 s steady latency (fine for 1m research). Switching to the kli
 
 ## ADR-011 Availability of live and backfilled bars
 Decision: a live bar's AvailableAt is when the engine actually received it, never earlier than close + ingest_delay. Bars backfilled after an outage are therefore late, and as-of reads during the outage do not see them. Outages are stored as `outage` quality issues.
-Consequence: backtests over live-ingested periods reflect what the live system really knew. Archive re-imports of the same bars with identical values do not change their stored AvailableAt (no new revision).
+Consequence (updated by ADR-046): same-value archive reimports cannot backdate an existing
+AvailableAt. Later availability or closure corrections are separate immutable revisions.
 
 ## ADR-012 Bitemporal candles and content-addressed datasets
-Decision: candle rows are never updated. A source correction inserts revision+1. Reads filter by AvailableAt (as-of, virtual time) and ingested_at (known-at, knowledge time). A dataset version pins known_at and its id is the SHA-256 of spec + bars; loading re-verifies the hash. known_at comes from the database clock, the same clock that stamps ingested_at.
+Decision: candle rows are never updated. A source correction inserts revision+1. Live reads
+filter AvailableAt. Legacy datasets reconstruct from ingested_at <= known_at and verify the
+spec/bar hash. New format-1 datasets use exact revision membership and a separate hash
+namespace (ADR-046); known_at is provenance rather than their membership definition.
 Consequence: old versions stay readable after corrections; re-importing identical data gives the same id.
 
 ## ADR-013 Fixed scale 8 for prices and quantities
@@ -72,7 +76,9 @@ Consequence: M2 has no DB writes; the golden files are the record of decisions f
 ## ADR-017 Walk-forward as one continuous run, sliced into folds
 Context: separate per-fold runs restart from flat with fresh capital, so folds do not add up to the report and positions are cut at artificial boundaries.
 Decision: one continuous out-of-sample run (warm-up gated), folds are windows of it; the holdout is its own run. In M5 the retrained model of each step feeds intents into the same continuous run.
-Consequence: report = Σ folds = Σ trades exactly; fold "train" windows matter only once models train (M5).
+Consequence (updated by ADR-044): period PnL = Σ fold period PnL, while cohort lifetime
+PnL = Σ opening-cohort trade nets through the run end. These two ledgers need not be equal
+at an intermediate observation boundary. Fold "train" windows matter once models train (M5).
 
 ## ADR-018 Integer statistics, including Sharpe
 Decision: no float anywhere in metrics; Sharpe uses math/big with integer square roots (10⁶ extra precision) and is truncated at 2 decimals. The no-float guard covers sim, money and metrics.
@@ -91,9 +97,11 @@ Decision: an unset TTL is (latency + 9) bars of the input timeframe (10 minutes 
 Consequence: golden scenarios unchanged; stored specs keep 0 = automatic, so reproduction is deterministic.
 
 ## ADR-022 The research queue lives in PostgreSQL
-Context: a search must survive an engine kill without losing or repeating attempts.
-Decision: attempts are rows; the scheduler claims them with `FOR UPDATE SKIP LOCKED`, marks done/failed in the same transaction as the result, and re-queues `running` rows on start. No in-memory queue or message broker.
-Consequence: kill/resume is exact (`search/TestKillMidSearchResumesWithoutLossOrDuplicates`); throughput is bounded by DB round trips (fine at thousands of attempts, not millions).
+Context: a search must survive an engine kill without losing attempt records or duplicating
+committed results. Decision: attempts are rows, claimed with `FOR UPDATE SKIP LOCKED`;
+result writes are atomic. Recovery and claim fencing are refined by ADR-047.
+Consequence: computation is at least once after interruption, never claimed exactly once.
+One durable attempt row remains per sequence, with retries visible through runs.
 
 ## ADR-023 One limiter for all research work
 Decision: `jobs.Limiter` holds the research share of CPUs (default 75%, always leaving one core). Search attempts take one slot each; a quick report (CreateReport) takes all slots; a P&L recalculation takes one. Health, data ingestion and the API never take a slot.
@@ -152,3 +160,385 @@ Consequence: backups need no external scheduler; `pg_dump` must be on PATH. The 
 ## ADR-036 Release checks are tests
 Decision: the release gate's cross-cutting promises are tests that run with the suite: an AST scan proves every outbound request is a GET and no code or RPC names an order or account endpoint (with a planted-probe test that the scan is live); a scheduled learning cycle runs to its decision with no manual call; every route renders at 390 px.
 Consequence: a change that adds an order path, breaks unattended learning or overflows a phone layout fails `make test`.
+
+
+## ADR-037 Research admission is weighted and atomic (P0)
+Context: taking every slot one at a time lets two report requests each hold a partial
+reservation forever. Cancelled contexts could also win a free-slot select.
+Decision: reuse the existing x/sync weighted semaphore; Acquire requests one slot and
+AcquireAll requests the entire research capacity in a single admission. FIFO waiters
+prevent smaller jobs from bypassing an exclusive waiter. Public callers and CPU limits
+stay the same.
+Consequence: cancellation frees the request without partial reservations. A full evaluation
+can delay later small research jobs; health and other control traffic remain outside it.
+Reproduce/forward admission and memory budgets remain separate P0 work (F07).
+
+## ADR-038 Warm-up and evaluation versions (P0)
+Context: buy-and-hold consumed its first purchase during the gated warm-up, leaving the
+selected strategy flat in both OOS and holdout. The separately sliced benchmark was unaffected.
+Decision: gated evaluation supports an optional Warmup method. Buy-and-hold has no
+indicators to warm and leaves its purchase state intact until trading is allowed. Indicator
+strategies retain their existing warm-up behavior. New evaluations record `p0.1` in their
+JSON specification; full-run cache schema 2 includes that evaluation version.
+Consequence: historical JSON is still readable and never rewritten. Legacy reports get a
+read-time badge and cannot be ranked as comparable to current evaluations. Create a new
+report to evaluate with the correction; Reproduce can legitimately report a difference.
+This does not change the simulator's price/timing contract or regenerate its golden files.
+Causal fills and period/cohort metrics still require later P0 changes and new version bumps.
+
+
+## ADR-039 Causal bar-open fills and availability-safe history (P0 FIX-02)
+Context: checking whether a candidate candle closed after a decision still allowed its
+open to precede the decision by the ingest delay. Prefix History also exposed unavailable
+older candles when a later candle arrived first; a backfill could rewind the last mark.
+Decision: retain the configured target-index latency floor and require OpenTime >= decision
+AvailableAt, within TTL. New report JSON records fill_model causal-next-open/v1 and evaluation
+p0.2 (the existing cache key includes the latter). History has a sorted observed-only buffer
+while there are holes, reverting to the allocation-free source prefix when complete. Latest
+close is chosen by highest observed index; equity points use availability time. A candle
+older than the latest position change cannot retroactively trigger its protection.
+Consequence: with a 2-second ingest delay, the immediate next 1m open is ineligible; the next
+eligible open supplies the reference price. Zero-delay equality remains allowed. Historical
+reports remain unchanged, but older-version reports are labeled legacy on read. F04/F05 and
+cross-asset execution capability are separate pending work, not certified by this batch.
+
+## ADR-040 Version resampling reconstruction in dataset manifests (P0 FIX-02)
+Decision: new snapshots store resample_version 2, whose availability includes every member
+and, for partial buckets, the later candle proving closure. Old absent/version-1 manifests
+retain their exact legacy reconstruction; unknown versions fail explicitly. Content hashes
+remain hashes of actual bars; dedup returns the stored first-creation manifest version.
+Consequence: old datasets stay loadable without a migration or rewrite. They retain legacy
+availability semantics: create/import a new version for corrected aggregation. The known_at
+snapshot-membership race remains FIX-05 work; this version field does not solve it.
+
+## ADR-041 Golden changes preserve scenario coverage (P0 FIX-02)
+Decision: regenerate all 11 expected outputs under the declared causal contract. Before any
+golden write, assert signal fills never predate their decisions and retain purpose checks
+for round-trip, partial close, ambiguous stop, gap expiry, and unfinished final decisions.
+Round-trip reference now buys at 00:02 for 102 and sells at 00:05 for 110, not 00:01/00:04;
+net is +75.20090400 USDT. All scenario fill counts remain unchanged. Exact Decimal auditing
+independently checked gross - fees - slippage = net for every golden trade.
+Consequence: the noise-based learning integration fixture needs persistence across the
+longer causal execution horizon; its synthetic hourly autocorrelation changes 0.6 to 0.9.
+All promotion gate thresholds and the deliberately worse challenger assertions stay intact.
+This fixture validates lifecycle paths, not evidence of profitability or actual market data.
+
+## ADR-042 Validate causal training inputs and version new fits (P0 review)
+Context: a sample inherited only its final feature bar's availability, hiding late earlier
+dependencies. Public Fit also accepted rows outside its declared window and malformed numbers.
+Decision: use maximum availability of the trailing feature window and both label endpoints;
+omit unavailable rows. Validate fit windows, row dimensions, finite values and model/scaler
+shape before use. New artifacts include training_version causal-features/v1 in their hash.
+Consequence: valid legacy models retain exact IDs; new fits have a distinct semantic version.
+Older binaries may reject new artifact IDs because they omit the added field when hashing.
+Reports are not rewritten and evaluation remains p0.2. Economic label/fill alignment and
+actual model-created/freeze timing remain separate work; this field does not solve either.
+
+## ADR-043 Fail closed on incomplete search selection (P0 review)
+Decision: a candidate must cover each registered dataset exactly once with a completed,
+eligible result and canonical metric scale. Sort candidate IDs for ties; sum objectives with
+big.Int and round the mean half-even, so valid int64 inputs cannot overflow their mean.
+Consequence: ordinary valid experiments keep their selection rule. Incomplete, duplicate,
+foreign or incomparable results cannot win. Stored historical experiment results are unchanged.
+This is independent of transaction/recovery work in FIX-05 and accounting overflow elsewhere.
+
+## ADR-044 Period attribution and observed accounting (P0 FIX-04, 2026-11-02)
+Decision: evaluation p0.3 defines net_pnl (also exposed as period_pnl) as the change
+between the last equity marks known at/before each boundary. Observed events in (From, To]
+belong to exactly one period. Gross = period net + observed fees + observed slippage.
+The opening cohort remains [From, To), with a separately labeled cohort_lifetime_pnl
+through the complete run's end. Only valid period PnL over identical windows determines
+walk wins. Trade counts/stats belong to the opening cohort and exclude closes not yet
+observed; period exposure includes positions carried from earlier cohorts.
+Consequence: future exits can change lifetime cohort PnL but cannot revise a past period's
+score. Sim transient snapshots retain open-position marks and execution observation times;
+they are excluded from canonical JSON. All existing simulator golden files stay unchanged.
+New period aggregates use wide sums and report overflow as invalid. This does not resolve
+every pre-existing accounting overflow path. Old reports remain immutable, carry legacy
+warnings, and compare as different evaluation contracts. Regenerate rather than rewrite them.
+
+## ADR-045 Actual freeze and common forward coverage (P0 FIX-04, 2026-11-02)
+Decision: cycle documents separately persist training_cutoff, model_created_at, freeze_at
+and trade_start. Final fits use data/labels ready at the cutoff, but serve only from their
+actual completion clock reading (artifact AsOf, resealed before persistence). Freeze is read
+after both model records exist; trading starts at the first timeframe boundary at/after it.
+Historical walk-forward fits remain as-of simulations, distinct from prospective evidence.
+Forward end is fixed at trade_start + configured days, including on a late scheduler tick.
+Count only the common contiguous prefix of complete, real, available bars for every symbol;
+a missing minute, partial aggregate, synthetic fill or unavailable bar keeps the gate pending.
+Final training and forward each hold a research slot; forward checks its projected bar budget
+before loading. Legacy forward cycles close as failed, and old recommendations stay readable
+and rejectable but cannot promote under superseded evidence.
+Consequence: elapsed time alone cannot approve a challenger. Corrections/snapshot membership,
+full raw-ingest memory budgets and atomic lifecycle transitions remain separate P0 work.
+
+## ADR-046 Pin persistent dataset revision membership (P0 FIX-05, 2026-11-02)
+Context: a transaction can stamp ingested_at before a cutoff yet commit after snapshot
+creation. A later timestamp-filtered load can then select a revision the creator never saw.
+Decision: migration 00006 adds dataset_members with foreign keys to exact raw 1m candle
+revisions. New format_version 1 snapshots select, resample, hash, register members and save
+the manifest in one repeatable-read transaction. Dedup serialization conflicts retry boundedly.
+The dataset/snapshot/v1 hash covers spec, raw and resampled canonical values, close times
+and revision identities; corrections hidden by aggregation still produce a different ID.
+Load uses membership only, verifies member/output counts and recomputes the hash. No fallback
+to a newer cutoff on missing members. Legacy format-0 IDs/manifests keep their reconstruction.
+Ingest serializes revision allocation per symbol; first creation of a month partition is
+serialized across symbols. Availability and closure corrections are revisioned, while
+AvailableAt never moves earlier through reimport. No existing financial record is rewritten.
+Consequence: one member row per raw candle adds storage and load work. Raw-memory budgets,
+retention and full report build/instrument/policy provenance remain separate work. Older
+binaries cannot load format-1 snapshots; keep a compatible engine with retained new data.
+
+## ADR-047 Durable cancellation and claim-fenced completion (P0 FIX-05, 2026-11-02)
+Decision: cancel marks an experiment and all its queued/running attempts terminal in one
+transaction. Scheduler notification is an optimization to stop CPU work, not a correctness
+condition. Each claim has a fresh token; workers re-read state after registering their
+cancellation handler. Completion/failure requires the current running token; completed rows
+are never overwritten by stale workers. Startup requeues interrupted running/paused work,
+but cancels orphans belonging to terminal experiments. The runs counter preserves retries.
+A dedicated per-schema scheduler session lock precedes recovery; another scheduler cannot
+steal live claims. Shutdown waits for workers before releasing the session. This is a local
+single-engine policy, not a distributed exactly-once service. Learning recovery still follows
+the configured single learning-engine deployment.
+Learning finish/recovery cancels queued candidates and closes the cycle in one transaction;
+completed candidate results stay immutable. Actual registry counts repair a partial generation
+checkpoint, and a late candidate result cannot revive a cancelled row. A failed final cycle
+write rolls back candidate cancellation too.
+Consequence: raw compute can repeat after a crash, but obsolete claims cannot replace newer
+results. Full algorithm/version/model lifecycle locking remains F15, not established here.
+
+## ADR-048 Bound raw inputs before materialization (P0 F07, 2026-11-02)
+Context: a small hourly/daily output can hide a large minute-candle allocation, and checking
+learning bars after loading is too late. Reproduce also bypassed the research limiter.
+Decision: reuse weighted whole-share admission for Reproduce. Collection takes one slot and
+releases it before training acquires its slots. A shared 1,000,000 raw-minute range cap is
+checked before data reads/imports; reports and learning check aggregate raw costs. All three
+raw readers use SQL cap + 1 and fail closed on overflow; snapshot counts/hashes never use
+truncated input. Caches also limit total retained bars, and strategy periods are 1..1000.
+Consequence: no stored record/version changes. Sparse or historical oversized ranges cannot
+be materialized under this engine, though their metadata and saved figures remain readable.
+Use smaller new versions. The bound is deliberately conservative and does not establish a
+hard global RSS limit, fitting cancellation or CPU deadline. F07/P0 remain open in that scope.
+
+## ADR-049 Explicit server permission for research (P0 F08, 2026-11-02)
+Context: starting capital in USDT does not implement quote funding for a non-USDT pair.
+Decision: one registry gate permits known USDT-quoted symbols for application research.
+Recheck it before report evaluation/replay, experiment planning and queued cache reuse,
+stored learning execution and promotion evidence. Keep data/chart reads and low-level FX
+and simulator fixtures general. GetOverview adds per-symbol supported/reason fields; the
+UI requires affirmative permission, shares a filtered dataset provider and blocks stale
+drafts. Missing capability fields or failed responses grant no execution permission.
+Consequence: stored results stay immutable/readable; unsupported recomputation fails clearly.
+The new UI needs a compatible engine for execution. Supported numerical outputs and their
+versions are unchanged. Full cross-asset execution requires quote funding/holdings and
+independent accounting tests in its later capability phase; display conversion is insufficient.
+
+## ADR-050 Share localization delegates across extracted UI libraries (2026-11-02)
+Context: material_ui and flutter_localizations export different GlobalMaterialLocalizations
+types with the same name. Mixing unqualified imports caused 13 app/test analyzer errors.
+Decision: app and test hosts share labLocalizationDelegates, explicitly naming the extracted
+library delegates and original Flutter delegates needed by dependencies. Keep generated L10n
+output untouched. Require Dart >=3.13 / Flutter >=3.47 for material_ui ^1.9.0 and use Flutter
+3.47.4 in CI, matching the IDE toolchain used for tests and the release build.
+Consequence: both localization type families are available without ambiguous imports;
+old Flutter 3.44 environments must select/upgrade to the compatible SDK before resolving.
+
+## ADR-051 Pin report provenance and compare canonical records (P0 F13, 2026-11-03)
+Context: aggregate reports omitted their trade/fill/decision records during Reproduce, and
+JSON decoding through float64 could collapse distinct large integers or precise decimals.
+Decision: provenance v1 in Spec captures binary SHA-256, available compiler-provided VCS
+metadata, compiler/platform, complete dataset manifests and hashes, used instrument specs,
+and evaluation/fill/accounting/research policy versions. Create owns these fields. A missing
+commit remains unknown, distinct from a clean source checkout. Existing JSON export and
+server badges expose the evidence without changing the wire or database schema.
+Reproduce and Recalculate use recorded instrument filters; legacy replay keeps its explicit
+unpinned fallback. Canonical trade/fill/decision comparison reuses the persistence projection
+for main and holdout, including row sequence, with PostgreSQL UTC microsecond precision.
+JSON uses exact rational number equality, never display rounding or float64. Reproduce also
+checks duplicated spec/split/summary records. No transient simulator contract/golden changes.
+Consequence: identical includes build/release/provenance, not just equal PnL; a different
+binary can return false despite equal financial outputs. Comparison blocks different build,
+instrument or policy contexts using a full context digest, displaying only a short key.
+Old reports stay readable and immutable, cannot gain provenance retroactively, and show a
+warning. Their old numbers are not rewritten. Numerical evaluation stays p0.3; training and
+snapshot versions stay unchanged. Canonical reads add memory/IO, not a new F07 budget proof.
+Keep a provenance-aware engine for pinned replay; old readers do not implement this guarantee.
+
+## ADR-052 Serialize lifecycle decisions and bind their context (P0 F15, 2026-11-03)
+Context: Library and learning had separate version/model writers. Stop retained the serving
+model, concurrent mutations could mix a version and model, and rollback inferred its target
+from mutable settings. Comparing IDs alone could not detect an intervening change and return.
+Decision: migration 00007 adds monotonic lifecycle revisions and a unique active-version
+index. A shared experiment lifecycle service locks the algorithm before versions/cycles,
+checks the caller revision, validates model/recipe/algorithm identity and commits pair/audit/
+cycle/revision changes together. Stop/fixed-strategy activation clears the model. Retired
+versions cannot be revived. AddVersion uses the algorithm lock for numbering/deduplication;
+registration alone does not advance the serving-pair revision. Reads use coherent snapshots.
+Learning pins the champion revision before training and rejects approval after any lifecycle
+change or with missing legacy revision evidence. Rollback requires the promotion revision
+still to match, plus an explicit displayed algorithm ID. Proto mutation revisions are optional
+only to preserve wire compatibility: presence is mandatory, so missing differs from zero.
+Consequence: stale/missing tokens fail closed; client and engine must upgrade together, with
+no old writers sharing the new protocol. Old recommendations remain readable/rejectable.
+Migration rejects ambiguous legacy champions rather than silently repairing history. A down
+migration loses revision history: retain a backup/compatible engine. Numerical contracts and
+financial records do not change. F07 resource guarantees and full P0 release gates stay open.
+
+## ADR-053 Cooperative training and conservative slot-time deadlines (P0 F07, 2026-11-03)
+Context: a step-level context check could not stop sample preparation or an in-flight fit;
+the old budget check ran only before candidates and omitted final fits from usage.
+Decision: Fit requires context; sample/scaler/fit passes check cancellation in bounded row
+chunks and between logistic iterations. Reject oversized inputs before new materialization:
+1,000,000 samples/combined bars, 12 steps. Preserve arithmetic/order and artifact versions;
+reference hashes verify completed fits. Feature helpers retain compatible background wrappers.
+Use a conservative training-to-freeze deadline equal to registered slot time divided by
+maximum slots, including waiting/IO. Parent cancellation and budget expiry remain distinct.
+Retain summed active slot wall time as usage, now including final fits and cancelled work;
+it is not an OS CPU measurement. Failed-cycle cleanup preserves serving state and history.
+Consequence: waiting can exhaust the deadline before recorded active usage reaches the cap.
+No hard preemption of allocation/GC or the feature-bounded linear solve is claimed. This
+does not certify a process-wide byte/RSS or OS CPU limit; F07's remaining admission/load work
+and P0 release gates stay open. No financial, dataset or training semantic version changes.
+
+## ADR-054 Share conservative active-memory admission (P0 F07, 2026-11-03)
+Context: input caps and CPU slots alone allowed concurrent report/search/training workspaces
+to multiply. A cycle retains input bars between CPU-admitted stages, so waiting for memory
+while holding slots could deadlock against that cycle's later training admission.
+Decision: main constructs one configurable jobs.Memory pool (1024 MiB default, 16..65536).
+Use checked range-based estimates before raw reconstruction: 1 MiB base + 1024 bytes/raw
+minute + 8192 bytes/output candle times workers plus two retained runs. Reservations reject
+atomically, never wait, and return an idempotent release. Apply at service boundaries through
+report persistence/reproduction, search attempts and winner reports, learning through freeze
+and forward, and chart/decision projection. Calculator projection deliberately retains an
+additional outer reservation. Limit chart response expansion to eight indicators.
+Consequence: resource pressure can fail a recorded attempt/cycle, with no partial report or
+serving-pair change; forward polls remain retryable. Report/chart RPCs use ResourceExhausted.
+Cached inputs are conservatively counted for each job, while cache retention has separate
+caps. Large inputs may require smaller ranges or an explicitly larger configured budget.
+Estimates do not enforce RSS/OS CPU, GC, archive decompression or outbound serialization;
+those paths and actual load measurements remain F07 work. No financial/training semantics,
+migration, wire change or new dependency is introduced. Full P0 remains open.
+
+## ADR-055 Bound archive parsing and process daily fallbacks incrementally (2026-11-05)
+Context: bounding compressed downloads/ranges did not bound inflated CSV rows/fields, and
+daily fallback retained every downloaded ZIP before parsing even the first file.
+Decision: share active admission with Importer (384 MiB workspace + 1024 bytes/raw minute),
+and admit post-import snapshot reconstruction separately. Fetch/parse/persist daily files
+sequentially. Keep the 64 MiB ZIP cap; reject inflated CSVs above 32 MiB, physical rows above
+4096 bytes and files above 44,640 bars. Bound each numeric line before encoding/csv field
+allocation and reuse its input buffer. Preserve ordinary quoted numeric CSV/blank-line/CRLF
+interpretation; multiline numeric records are unsupported. Context propagates through reads,
+decompression and rows; progress-send failure cancels remaining work.
+Consequence: no truncated prefix is accepted as a parsed file. Earlier valid files remain
+committed/resumable after a later failure, with idempotent re-import and unchanged snapshot
+hashing. Resource errors reach the UI as ResourceExhausted. Large ranges may require shorter
+imports or an explicitly larger machine budget. Single-fixture process counters provide a
+local calibration only; mixed-load RSS/CPU/OS guarantees and P0 gates remain open. No new
+dependency, migration, numerical contract or historical financial rewrite is introduced.
+
+## ADR-056 Isolate live symbol recovery and bound market HTTP requests
+
+Each live symbol owns its polling loop, committed cursor and failure interval. A failed
+symbol retries with capped exponential backoff and jitter. Recovery records an outage for
+the affected symbol after it reaches the provider again. Engine health retains the last
+close and state per symbol. The existing sidebar still shows aggregate health.
+
+Live and archive traffic use separate shared token buckets for their public hosts. Each
+HTTP attempt has its own deadline, including body reads. Transport failures, 408 and 5xx
+can retry up to twice with jitter. A 429 or 418 starts a host cooldown using Retry-After
+or 30 seconds when it is absent. Archive 404 responses still select daily fallback.
+Live polls are bounded to four pages and 30 seconds, then resume from committed progress.
+Bars that arrive during recovery keep the actual receipt timestamp as their earliest
+availability, subject to the configured ingest delay.
+
+## ADR-057 Bound chart work to the displayed window
+
+Indicator warm-up still uses the report's historical input and preserves the original
+arithmetic order. Only visible values are materialized. Moving averages and bands skip
+unneeded window reductions, and MACD advances its EMA states without hidden series.
+
+Report charts read only chart inputs and fetch markers for the visible symbol and candle
+range. Decision details use their primary key. Report chart admission counts raw history
+for reconstruction and visible output bars for response work. This admits routine charts
+under the shared pool while preserving the full simulation reservation for report runs.
+
+## ADR-058 Reject unrepresentable simulator ledger entries
+
+The simulator checks per-leg cash, balances, cumulative trade values and marked equity
+before publishing a fill or a completed result. Protection prices report overflow
+instead of silently dropping protection. The calculator rejects unrepresentable costs
+or fee totals and returns no partial result. The API maps numeric overflow to OutOfRange.
+Break-even fee is omitted if the ledger totals needed for it exceed the integer range.
+Representable calculations retain the fixed-point scales, rounding and report contract.
+
+## ADR-059 Tie search claims to the PostgreSQL lease session
+
+Recovery, claiming and queue status writes use the advisory-lock session. If a claim
+is in flight during shutdown, the server settles that write before releasing its lock.
+Claims have their own five-second deadline so orderly shutdown can finish them. Startup
+allows up to two seconds for the prior session to release its lock. The new scheduler
+can recover attempts only after it owns the lease, and a live owner remains protected.
+Attempt outcomes still use the existing claim token before changing a row.
+
+## ADR-060 Train on observable causal round trips
+
+New artifacts record `causal-round-trip/v2` and the per-side fee and slippage used
+for labels. Entry follows the shared default next-open rule. Exit targets the
+recipe horizon from entry and waits until the entry candle is observed. Require
+complete, consecutive candles and discard a sample when the feature window is
+unready at the decision or publication delay makes the fill ordering ambiguous.
+Only a label with an observed exit enters a fit. Both champion and candidates use
+the same assumptions during walk-forward and fresh final fits. A logistic output
+estimates the positive-label class, and the simulator still judges policy outcomes.
+
+The training version and costs participate in the artifact ID. Keep existing models,
+reports and serving pointers intact. Previous cycles remain readable and may be
+rejected. Forward and approval require a cycle using the current training contract.
+The fill and evaluation versions are unchanged, and no migration is needed.
+
+## ADR-061 Carry metric validity through report publication
+
+The report list and strategy library project fixed-width values without validity
+flags. Reject a new report before persistence when one of those required values
+is invalid. Apply the same check to the calculator's amount-only waterfall.
+Metrics that already carry a validity flag retain their reason. Numeric range
+errors use OutOfRange. Report summaries omit the numeric fallback for an invalid
+value, and the combined calculator cost is checked before formatting.
+
+Learning comparisons require a valid champion return. A relative margin that
+overflows int64 is still ordered exactly against a representable threshold. Its
+explanation states the numeric range failure.
+
+## ADR-062 Version rule strategies at the engine boundary
+
+`rules/v1` describes one closed-bar stream per instrument with separate entry
+and exit predicates and a fixed-point exposure. The JSON hash covers the ordered
+tree and normalized field values. The engine compiles comparisons, crossings,
+AND/OR, regime routing, and rolling values before the run. Validation bounds the
+payload at 32 KiB, the predicate tree at 64 nodes and depth 8, and indicator periods
+at 1,000 bars. A crossing also reads one previous bar.
+
+Both predicates use observed history. With a declared base timeframe,
+`bucket_close` reads the last UTC-aligned higher-timeframe bucket only when all
+members are present and complete. Unknown values propagate through comparisons,
+and AND/OR can resolve when a known child determines the outcome. Exit wins on
+the same bar. Target transitions leave pending fills to the simulator's existing
+latency and expiry policy. Saved definitions are immutable and their reports embed the executed rule.
+
+Donchian operands use only preceding candle highs and lows. The RSI operand
+uses Cutler RSI over a finite window of close changes and therefore differs
+from the chart’s Wilder RSI. Regime selection evaluates one branch and keeps
+the chosen exit and exposure owner pinned for the entire run.
+
+## ADR-063 Record Paper execution, replay and annotations independently
+
+The Paper account row serializes risk authorization and reservation. The accepted
+receipt doubles as the local execution queue, and updates to the balance, position,
+postings and event history commit in the same transaction. The worker can recover
+pending work from its stored candle cursor after restart.
+
+The journal reads execution events for fees and realized P&L. Replay reads the
+recorded opportunity and rule, the hashed plan, the revalidation candle and one
+execution event at a time. Older receipts can lack revalidation candle evidence.
+Personal notes use separate append-only revisions so editing them leaves the
+trade history and replay stable.

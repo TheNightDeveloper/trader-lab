@@ -8,6 +8,7 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/proto"
 
 	"tradinglab/engine/internal/clock"
 	"tradinglab/engine/internal/data"
@@ -33,7 +34,7 @@ func TestChartService(t *testing.T) {
 	srv := serve(t,
 		func(m *http.ServeMux) { m.Handle(labv1connect.NewReportServiceHandler(&Report{Svc: svc})) },
 		func(m *http.ServeMux) {
-			m.Handle(labv1connect.NewChartServiceHandler(&Chart{Svc: svc, Clock: clock.NewVirtual(bars[len(bars)-1].CloseTime.Add(time.Minute))}))
+			m.Handle((&Chart{Svc: svc, Clock: clock.NewVirtual(bars[len(bars)-1].CloseTime.Add(time.Minute))}).Handler())
 		})
 	rc := labv1connect.NewReportServiceClient(srv.Client(), srv.URL)
 	cc := labv1connect.NewChartServiceClient(srv.Client(), srv.URL)
@@ -94,7 +95,21 @@ func TestChartService(t *testing.T) {
 	cut, err := cc.GetChart(ctx, connect.NewRequest(&labv1.GetChartRequest{ReportId: id, Indicators: []string{"ema:30"}, MaxBars: 100}))
 	require.NoError(t, err)
 	require.Len(t, cut.Msg.GetBars(), 100)
-	require.NotEmpty(t, cut.Msg.GetIndicators()[0].GetLines()[0].GetValues()[0])
+	fullEMA := c.GetIndicators()[1].GetLines()[0].GetValues()
+	require.Equal(t, fullEMA[len(fullEMA)-100:], cut.Msg.GetIndicators()[0].GetLines()[0].GetValues(), "visible values must equal the corresponding full-chart values")
+	var visibleMarkers []*labv1.ChartMarker
+	start := cut.Msg.GetBars()[0].GetOpenUnixMs()
+	for _, marker := range c.GetMarkers() {
+		if marker.GetBarOpenUnixMs() >= start {
+			visibleMarkers = append(visibleMarkers, marker)
+		}
+	}
+	require.Len(t, cut.Msg.GetMarkers(), len(visibleMarkers))
+	for i, marker := range visibleMarkers {
+		require.True(t, proto.Equal(marker, cut.Msg.GetMarkers()[i]), "the SQL window preserves marker values and ordering")
+	}
+	_, err = cc.GetDecision(ctx, connect.NewRequest(&labv1.GetDecisionRequest{ReportId: id, DecisionId: -1}))
+	require.Equal(t, connect.CodeNotFound, connect.CodeOf(err))
 
 	// No report: latest bars of a pair.
 	live, err := cc.GetChart(ctx, connect.NewRequest(&labv1.GetChartRequest{Symbol: "BTCUSDT", Timeframe: "1h", MaxBars: 50}))
@@ -105,4 +120,23 @@ func TestChartService(t *testing.T) {
 	require.Equal(t, connect.CodeInvalidArgument, connect.CodeOf(err))
 	_, err = cc.GetChart(ctx, connect.NewRequest(&labv1.GetChartRequest{ReportId: id, Indicators: []string{"vwap:3"}}))
 	require.Equal(t, connect.CodeInvalidArgument, connect.CodeOf(err))
+}
+
+// Partial exits and non-unit quantities must never multiply the chart price.
+func TestProtectionMarkersUseFillUnitPrice(t *testing.T) {
+	at := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	fills := []db.Fill{
+		{At: at, Instrument: "BTCUSDT", Side: "sell", Kind: "take", Qty: 3e8, RefPrice: 120e8, RefValue: 360e8},
+		{At: at.Add(time.Minute), Instrument: "BTCUSDT", Side: "sell", Kind: "stop", Qty: 2e8, RefPrice: 90e8, RefValue: 180e8},
+		{At: at, Instrument: "ETHUSDT", Side: "sell", Kind: "stop", RefPrice: 50e8},
+		{At: at, Instrument: "BTCUSDT", Side: "buy", Kind: "signal", RefPrice: 100e8},
+	}
+	shown := map[int64]data.Bar{at.UnixMilli(): {}, at.Add(time.Minute).UnixMilli(): {}}
+	markers := protectionMarkers(fills, "BTCUSDT", shown)
+	require.Len(t, markers, 2)
+	require.Equal(t, decP(120e8, 8), markers[0].Price)
+	require.Equal(t, decP(90e8, 8), markers[1].Price)
+	require.Equal(t, "take profit", markers[0].Detail)
+	require.Equal(t, "stop loss", markers[1].Detail)
+	require.Empty(t, protectionMarkers(fills, "BTCUSDT", nil))
 }

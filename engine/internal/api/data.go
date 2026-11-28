@@ -5,13 +5,18 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strings"
 	"time"
 
 	"connectrpc.com/connect"
+	"github.com/jackc/pgx/v5"
 
 	"tradinglab/engine/internal/clock"
 	"tradinglab/engine/internal/data"
 	labv1 "tradinglab/engine/internal/gen/lab/v1"
+	"tradinglab/engine/internal/instrument"
+	"tradinglab/engine/internal/jobs"
+	"tradinglab/engine/internal/report"
 	"tradinglab/engine/internal/store"
 	"tradinglab/engine/internal/store/db"
 )
@@ -44,22 +49,69 @@ func (d *Data) GetOverview(ctx context.Context, _ *connect.Request[labv1.GetOver
 	if d.Live != nil {
 		res.LiveSymbols = int32(len(d.Live.Symbols))
 	}
+	specs := report.Specs()
 	for _, i := range ins {
 		res.Symbols = append(res.Symbols, i.Symbol)
+		capability := &labv1.ResearchCapability{Symbol: i.Symbol, Supported: true}
+		if spec, ok := specs[i.Symbol]; ok {
+			capability.Instrument = spotKey(spec)
+		}
+		if err := instrument.ResearchError(i.Symbol); err != nil {
+			capability.Supported, capability.Reason = false, err.Error()
+		}
+		res.ResearchCapabilities = append(res.ResearchCapabilities, capability)
 	}
 	return connect.NewResponse(res), nil
 }
 
 func (d *Data) ListDatasets(ctx context.Context, req *connect.Request[labv1.ListDatasetsRequest]) (*connect.Response[labv1.ListDatasetsResponse], error) {
-	rows, err := d.Store.ListDatasets(ctx, db.ListDatasetsParams{Limit: pageSize(req.Msg.GetPageSize()), Offset: max(0, req.Msg.GetOffset())})
+	msg := req.Msg
+	if len(msg.GetQuery()) > 128 || len(msg.GetSymbol()) > 32 || len(msg.GetIds()) > 50 {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("جست‌وجو یا تعداد شناسه‌های دیتاست از حد مجاز بیشتر است"))
+	}
+	for _, id := range msg.GetIds() {
+		if id == "" || len(id) > 128 {
+			return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("شناسهٔ دیتاست نامعتبر است"))
+		}
+	}
+	filter := db.CountDatasetCatalogParams{
+		Query:  strings.ToLower(strings.Join(strings.Fields(msg.GetQuery()), " ")),
+		Symbol: strings.ToUpper(strings.TrimSpace(msg.GetSymbol())),
+		Ids:    msg.GetIds(), ResearchOnly: msg.GetResearchOnly(),
+	}
+	if tf := msg.GetTimeframe(); tf != "" {
+		parsed, err := data.ParseTimeframe(tf)
+		if err != nil {
+			return nil, connect.NewError(connect.CodeInvalidArgument, err)
+		}
+		filter.Timeframe = string(parsed)
+	}
+	if filter.ResearchOnly {
+		for _, spec := range instrument.Defaults() {
+			if instrument.ResearchError(spec.Symbol) == nil {
+				filter.AllowedSymbols = append(filter.AllowedSymbols, spec.Symbol)
+			}
+		}
+	}
+	res := &labv1.ListDatasetsResponse{}
+	// Count and page see the same catalog when an import commits concurrently.
+	var rows []db.Dataset
+	err := d.Store.InTxOptions(ctx, pgx.TxOptions{IsoLevel: pgx.RepeatableRead, AccessMode: pgx.ReadOnly}, func(q *db.Queries) error {
+		total, err := q.CountDatasetCatalog(ctx, filter)
+		if err != nil {
+			return err
+		}
+		res.Total = total
+		rows, err = q.ListDatasetCatalog(ctx, db.ListDatasetCatalogParams{
+			ResearchOnly: filter.ResearchOnly, AllowedSymbols: filter.AllowedSymbols,
+			Symbol: filter.Symbol, Timeframe: filter.Timeframe, Ids: filter.Ids, Query: filter.Query,
+			PageSize: pageSize(msg.GetPageSize()), PageOffset: max(0, msg.GetOffset()),
+		})
+		return err
+	})
 	if err != nil {
 		return nil, err
 	}
-	total, err := d.Store.CountDatasets(ctx)
-	if err != nil {
-		return nil, err
-	}
-	res := &labv1.ListDatasetsResponse{Total: total}
 	for _, r := range rows {
 		ds, err := datasetProto(r)
 		if err != nil {
@@ -149,6 +201,8 @@ func (d *Data) ListQualityIssues(ctx context.Context, req *connect.Request[labv1
 
 // Import runs the archive import for each symbol, then snapshots a dataset version.
 func (d *Data) Import(ctx context.Context, req *connect.Request[labv1.ImportRequest], s *connect.ServerStream[labv1.ImportResponse]) error {
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 	m := req.Msg
 	from, err := time.Parse(time.DateOnly, m.GetFromDate())
 	if err != nil {
@@ -194,17 +248,20 @@ func (d *Data) Import(ctx context.Context, req *connect.Request[labv1.ImportRequ
 		_, err := d.Importer.Import(ctx, sym, from, to, func(p data.ImportProgress) {
 			if sendErr == nil {
 				sendErr = s.Send(&labv1.ImportResponse{Event: &labv1.ImportResponse_Progress{Progress: progressProto(sym, p)}})
+				if sendErr != nil {
+					cancel() // stop downloading once the progress consumer has disconnected
+				}
 			}
 		})
 		if err := errors.Join(err, sendErr); err != nil {
-			return fmt.Errorf("import %s: %w", sym, err)
+			return reportErr(fmt.Errorf("import %s: %w", sym, err))
 		}
-		ds, _, err := data.CreateDataset(ctx, d.Store, data.DatasetSpec{Symbol: sym, Timeframe: tf, From: from, To: to, GapPolicy: gp})
+		ds, err := d.snapshot(ctx, data.DatasetSpec{Symbol: sym, Timeframe: tf, From: from, To: to, GapPolicy: gp})
 		if errors.Is(err, data.ErrGap) {
 			return connect.NewError(connect.CodeFailedPrecondition, err)
 		}
 		if err != nil {
-			return err
+			return reportErr(err)
 		}
 		row, err := d.Store.GetDataset(ctx, ds.ID)
 		if err != nil {
@@ -219,6 +276,27 @@ func (d *Data) Import(ctx context.Context, req *connect.Request[labv1.ImportRequ
 		}
 	}
 	return nil
+}
+
+// Import's archive reservation has ended; snapshot reconstruction needs its own admission.
+func (d *Data) snapshot(ctx context.Context, spec data.DatasetSpec) (data.Dataset, error) {
+	raw, err := data.RawBarCount(spec.Timeframe, spec.From, spec.To)
+	if err != nil {
+		return data.Dataset{}, err
+	}
+	minutes := int(spec.Timeframe.Duration() / time.Minute)
+	rows := (raw + minutes - 1) / minutes
+	bytes, err := jobs.WorkBytes(int64(raw), int64(rows), 1)
+	if err != nil {
+		return data.Dataset{}, err
+	}
+	release, err := d.Importer.Memory.Reserve(ctx, bytes)
+	if err != nil {
+		return data.Dataset{}, err
+	}
+	defer release()
+	ds, _, err := data.CreateDataset(ctx, d.Store, spec)
+	return ds, err
 }
 
 func progressProto(sym string, p data.ImportProgress) *labv1.ImportProgress {

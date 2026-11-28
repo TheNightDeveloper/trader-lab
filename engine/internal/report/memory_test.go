@@ -1,0 +1,125 @@
+package report
+
+import (
+	"context"
+	"testing"
+	"time"
+
+	"github.com/stretchr/testify/require"
+
+	"tradinglab/engine/internal/data"
+	"tradinglab/engine/internal/jobs"
+	"tradinglab/engine/internal/money"
+	"tradinglab/engine/internal/store/db"
+	"tradinglab/engine/internal/strategy"
+)
+
+func TestReportAdmitsWithFewerWorkers(t *testing.T) {
+	st, ds := setup(t)
+	ctx := t.Context()
+	budget, err := jobs.EvaluationBytes(10_000, 10_000, 2)
+	require.NoError(t, err)
+	memory := jobs.NewMemory(budget)
+	service := Service{Store: st, Parallel: 6, Memory: memory}
+	admitted, release, err := service.admitEvaluation(ctx, []string{ds})
+	require.NoError(t, err)
+	require.Equal(t, 2, admitted.Parallel)
+	require.Equal(t, budget, memory.InUse())
+	release()
+
+	id, err := service.Create(ctx, spec(ds))
+	require.NoError(t, err)
+	require.NoError(t, service.CreateWithID(ctx, id, spec(ds)))
+	same, err := service.Reproduce(ctx, id)
+	require.NoError(t, err)
+	require.True(t, same)
+	require.Zero(t, memory.InUse())
+}
+
+func TestChartPinsWarmArraysWithinOutputBudget(t *testing.T) {
+	st, ds := setup(t)
+	ctx := t.Context()
+	const visible = 2000
+	ids := []string{ds}
+	cache := NewDatasetCache(1)
+	svc := Service{Store: st, Cache: cache}
+	warmed, tf, err := svc.Bars(ctx, ids)
+	require.NoError(t, err)
+	output, err := jobs.WorkBytes(0, visible, 1)
+	require.NoError(t, err)
+	budget := output + int64(cap(warmed["BTCUSDT"]))*256
+	svc.Memory = jobs.NewMemory(budget)
+
+	cold := svc
+	cold.Cache = nil
+	_, _, _, err = cold.ChartBars(ctx, ids, visible)
+	require.ErrorIs(t, err, jobs.ErrMemory, "reconstruction requires a larger reservation")
+
+	pinned, chartTF, release, err := svc.ChartBars(ctx, ids, visible)
+	require.NoError(t, err)
+	require.Equal(t, tf, chartTF)
+	require.Equal(t, budget, svc.Memory.InUse())
+	cache.mu.Lock()
+	delete(cache.m, ds)
+	cache.order, cache.bars = nil, 0
+	cache.mu.Unlock()
+	require.Equal(t, warmed, pinned, "an in-flight chart still owns its exact snapshot after eviction")
+	release()
+	require.Zero(t, svc.Memory.InUse())
+}
+
+// A shared budget must protect cached and uncached work, without changing saved evidence.
+func TestReportMemoryAdmissionCoversEveryExecutionPath(t *testing.T) {
+	st, ds := setup(t)
+	ctx := context.Background()
+	n, err := jobs.WorkBytes(10_000, 10_000, 1)
+	require.NoError(t, err)
+	memory := jobs.NewMemory(n)
+	svc := Service{Store: st, Parallel: 1, Memory: memory, Cache: NewDatasetCache(1)}
+	id, err := svc.Create(ctx, spec(ds))
+	require.NoError(t, err)
+	require.Zero(t, memory.InUse())
+	before, err := svc.Load(ctx, id)
+	require.NoError(t, err)
+	release, err := memory.Reserve(ctx, n)
+	require.NoError(t, err)
+	other := svc // separate handler, same process-wide pool
+	_, err = other.Create(ctx, spec(ds))
+	require.ErrorIs(t, err, jobs.ErrMemory)
+	require.ErrorIs(t, other.CreateWithID(ctx, "another", spec(ds)), jobs.ErrMemory)
+	_, err = other.Reproduce(ctx, id)
+	require.ErrorIs(t, err, jobs.ErrMemory)
+	_, _, _, err = other.Recalculate(ctx, before, before.Spec.Sim, money.RatioOne)
+	require.ErrorIs(t, err, jobs.ErrMemory)
+	require.Equal(t, n, memory.InUse(), "no rejected call releases the admitted owner's reservation")
+	// Idempotent completion and historical reads do not require a new simulation.
+	require.NoError(t, other.CreateWithID(ctx, id, spec(ds)))
+	after, err := other.Load(ctx, id)
+	require.NoError(t, err)
+	require.Equal(t, before.Row.Evaluation, after.Row.Evaluation)
+	release()
+	bad := spec(ds)
+	bad.Strategy = "missing"
+	_, err = svc.Create(ctx, bad)
+	require.ErrorIs(t, err, strategy.ErrUnknown)
+	require.Zero(t, memory.InUse(), "admitted evaluation errors release capacity")
+	same, err := svc.Reproduce(ctx, id)
+	require.NoError(t, err)
+	require.True(t, same)
+	require.Zero(t, memory.InUse())
+	budget, err := jobs.SimulationBytes(10_000, 10_000)
+	require.NoError(t, err)
+	replay := svc
+	replay.Memory = jobs.NewMemory(budget)
+	_, _, releaseReplay, err := replay.Recalculate(ctx, before, before.Spec.Sim, money.RatioOne)
+	require.NoError(t, err)
+	require.Equal(t, budget, replay.Memory.InUse(), "the caller owns the budget while projecting the replay")
+	releaseReplay()
+	require.Zero(t, replay.Memory.InUse())
+	// Incomplete metadata is enough for admission; a rejected job must never parse its manifest.
+	require.NoError(t, st.InsertDataset(ctx, db.InsertDatasetParams{ID: "invalid-manifest", Symbol: "BTCUSDT", Timeframe: "1m", RangeFrom: t0, RangeTo: t0.Add(10_000 * time.Minute), GapPolicy: string(data.GapFlag), KnownAt: t0, Manifest: []byte(`{}`)}))
+	blocked := svc
+	blocked.Memory = jobs.NewMemory(1)
+	_, err = blocked.Create(ctx, spec("invalid-manifest"))
+	require.ErrorIs(t, err, jobs.ErrMemory)
+}

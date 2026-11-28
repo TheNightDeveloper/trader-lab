@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:animations/animations.dart';
 import 'package:decimal/decimal.dart';
 import 'package:fixnum/fixnum.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -26,11 +26,13 @@ import '../../gen/lab/v1/library.pb.dart';
 import '../../gen/lab/v1/report.pb.dart' show ParamSpec;
 import '../../l10n/app_localizations.dart';
 import '../page_frame.dart';
-import '../reports/report_providers.dart';
+import '../data/data_providers.dart';
+import '../data/dataset_picker.dart';
+import '../data/research_capability_widgets.dart';
 import 'experiment_providers.dart';
 
 const draftKey = 'lab.builder.draft.v1';
-const _tfOrder = ['1m', '5m', '15m', '1h', '4h', '1d'];
+const _timeframes = ['1m', '15m', '1h', '4h', '1d'];
 const _lastStep = 5;
 
 String _today() {
@@ -103,6 +105,7 @@ class BuilderScreen extends ConsumerStatefulWidget {
 class _BuilderScreenState extends ConsumerState<BuilderScreen> {
   var f = _defaults();
   var ds = <String>{};
+  final _picked = <String, Dataset>{};
   var vals = <String, String>{};
   var rolling = false;
   var step = 0, reached = 0, gen = 0;
@@ -158,6 +161,7 @@ class _BuilderScreenState extends ConsumerState<BuilderScreen> {
     setState(() {
       f = _defaults();
       ds = {};
+      _picked.clear();
       vals = {};
       rolling = false;
       step = reached = 0;
@@ -195,6 +199,7 @@ class _BuilderScreenState extends ConsumerState<BuilderScreen> {
   /// [forEstimate] fills empty text so the run count shows before step 1 is done.
   ExperimentDefinition? _definition({bool forEstimate = false}) {
     if (ds.isEmpty || f['algo']!.isEmpty) return null;
+    if (!_datasets.map((d) => d.id).toSet().containsAll(ds)) return null;
     final space = _space();
     if (space == null) return null;
     try {
@@ -274,7 +279,15 @@ class _BuilderScreenState extends ConsumerState<BuilderScreen> {
 
   // ---- validation and navigation -----------------------------------------------
 
-  List<Dataset> get _datasets => ref.read(allDatasetsProvider).value?.datasets ?? const [];
+  Map<String, Dataset?> get _selections => {
+    for (final id in ds) id: _picked[id] ?? ref.read(researchDatasetByIdProvider(id)).value,
+  };
+
+  List<Dataset> get _datasets {
+    final caps = ref.read(overviewProvider).value?.researchCapabilities ?? const <ResearchCapability>[];
+    final allowed = caps.where((c) => c.supported).map((c) => c.symbol).toSet();
+    return _selections.values.whereType<Dataset>().where((d) => allowed.contains(d.symbol)).toList();
+  }
 
   List<String> _errors(L10n l, int s) => switch (s) {
     1 => [
@@ -491,70 +504,54 @@ class _BuilderScreenState extends ConsumerState<BuilderScreen> {
   );
 
   Widget _stepData(L10n l) {
-    final all = ref.watch(allDatasetsProvider);
+    final tf = _timeframes.contains(f['timeframe']) ? f['timeframe']! : '';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(l.bDataTitle, style: AppText.sectionTitle),
+        const ResearchCapabilityNotice(),
         const SizedBox(height: AppSpace.md),
-        AsyncSection(
-          value: all,
-          onRetry: () => ref.invalidate(allDatasetsProvider),
-          skeleton: const SizedBox(height: 88),
-          isEmpty: (r) => r.datasets.isEmpty,
-          empty: Text(l.newDatasetsEmpty, style: AppText.caption),
-          builder: (r) {
-            final tfs = r.datasets.map((d) => d.timeframe).toSet().toList()
-              ..sort((a, b) => _tfOrder.indexOf(a).compareTo(_tfOrder.indexOf(b)));
-            final tf = tfs.contains(f['timeframe']) ? f['timeframe']! : tfs.first;
-            final shown = r.datasets.where((d) => d.timeframe == tf).toList();
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(l.bTimeframe, style: AppText.label),
-                const SizedBox(height: AppSpace.sm),
-                LabChoiceChips<String>(
-                  ltr: true,
-                  options: [for (final t in tfs) (t, t)],
-                  selected: {tf},
-                  onChanged: (v) {
-                    f['timeframe'] = v.first;
-                    final keep = r.datasets.where((d) => d.timeframe == v.first).map((d) => d.id).toSet();
-                    ds = ds.intersection(keep);
-                    _changed();
-                  },
-                ),
-                const SizedBox(height: AppSpace.lg),
-                Text(l.bDatasets, style: AppText.label),
-                const SizedBox(height: AppSpace.sm),
-                LabChoiceChips<String>(
-                  multi: true,
-                  ltr: true,
-                  options: [
-                    for (final d in shown)
-                      (
-                        d.id,
-                        '${d.symbol} · ${fmtDate(utcMs(d.fromUnixMs))} → ${fmtDate(utcMs(d.toUnixMs))} · ${shortHash(d.id)}',
-                      ),
-                  ],
-                  selected: ds,
-                  onChanged: (v) {
-                    // One version per pair: picking another version of a pair replaces it.
-                    final added = v.difference(ds);
-                    final bySymbol = {for (final d in r.datasets) d.id: d.symbol};
-                    ds = {
-                      for (final id in v)
-                        if (added.contains(id) || !added.any((a) => bySymbol[a] == bySymbol[id])) id,
-                    };
-                    f['timeframe'] = tf;
-                    _changed();
-                  },
-                ),
-                Text(l.newDatasetsHelp, style: AppText.caption),
-              ],
-            );
+        Text(l.bTimeframe, style: AppText.label),
+        const SizedBox(height: AppSpace.sm),
+        LabChoiceChips<String>(
+          ltr: true,
+          options: [for (final t in _timeframes) (t, t)],
+          selected: {tf},
+          onChanged: (v) {
+            f['timeframe'] = v.first;
+            ds = {
+              for (final entry in _selections.entries)
+                if (entry.value?.timeframe == v.first) entry.key,
+            };
+            _picked.removeWhere((id, _) => !ds.contains(id));
+            _changed();
           },
         ),
+        const SizedBox(height: AppSpace.lg),
+        Text(l.bDatasets, style: AppText.label),
+        const SizedBox(height: AppSpace.sm),
+        DatasetPicker(
+          timeframe: tf,
+          selected: _selections,
+          onPick: (d) {
+            // The old version may be on another catalog page.
+            ds = {
+              for (final entry in _selections.entries)
+                if (entry.value?.symbol != d.symbol) entry.key,
+              d.id,
+            };
+            _picked.removeWhere((id, _) => !ds.contains(id));
+            _picked[d.id] = d;
+            f['timeframe'] = d.timeframe;
+            _changed();
+          },
+          onRemove: (id) {
+            ds.remove(id);
+            _picked.remove(id);
+            _changed();
+          },
+        ),
+        Text(l.newDatasetsHelp, style: AppText.caption),
       ],
     );
   }
@@ -908,7 +905,14 @@ class _BuilderScreenState extends ConsumerState<BuilderScreen> {
     final l = L10n.of(context);
     // Versions and datasets arrive async; re-estimate once they do.
     ref.listen(algorithmsProvider, (_, _) => _scheduleEstimate());
-    ref.listen(allDatasetsProvider, (_, _) => _scheduleEstimate());
+    if (ds.isNotEmpty) {
+      ref.listen(overviewProvider, (_, _) => _scheduleEstimate());
+      for (final id in ds.where((id) => !_picked.containsKey(id))) {
+        final selected = researchDatasetByIdProvider(id);
+        ref.watch(selected);
+        ref.listen(selected, (_, _) => _scheduleEstimate());
+      }
+    }
     final errs = tried ? _errors(l, step) : const <String>[];
     final body = [_stepStart, _stepIdea, _stepData, _stepAlgo, _stepMoney, _stepReview][step](l);
     final main = Column(

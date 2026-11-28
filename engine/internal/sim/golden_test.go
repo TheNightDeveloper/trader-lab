@@ -123,6 +123,33 @@ func runGolden(t *testing.T, dir string) []byte {
 	bars := readBars(t, filepath.Join(dir, "bars.csv"), sc.Until)
 	res, err := Run(context.Background(), cfg, specs(), bars, strat)
 	require.NoError(t, err)
+	// A golden update must not bless time travel or silently lose its core scenario.
+	for _, f := range res.Fills {
+		if f.DecisionID > 0 {
+			require.False(t, f.Time.Before(res.Decisions[f.DecisionID-1].At), "signal filled before decision")
+		}
+	}
+	switch filepath.Base(dir) {
+	case "round-trip-fees":
+		require.Len(t, res.Fills, 2)
+		require.Len(t, res.Trades, 1)
+		require.NotNil(t, res.Trades[0].ClosedAt)
+	case "partial-size-rounding":
+		require.Len(t, res.Fills, 3)
+		require.NotNil(t, res.Trades[0].ClosedAt)
+	case "ambiguous-bar":
+		require.Equal(t, 1, res.AmbiguousBars)
+		require.Equal(t, "stop", res.Fills[len(res.Fills)-1].Kind)
+	case "gap-during-position":
+		require.Equal(t, "stop", res.Fills[len(res.Fills)-1].Kind)
+		require.Equal(t, OutcomeExpired, res.Decisions[1].Outcome)
+	case "last-bar-incomplete":
+		require.Equal(t, OutcomeUnfilled, res.Decisions[len(res.Decisions)-1].Outcome)
+	case "no-trades":
+		require.Empty(t, res.Fills)
+	default:
+		require.NotEmpty(t, res.Fills)
+	}
 	out, err := json.MarshalIndent(res, "", "  ")
 	require.NoError(t, err)
 	return append(out, '\n')

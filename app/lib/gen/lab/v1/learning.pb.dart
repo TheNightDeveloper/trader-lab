@@ -1080,12 +1080,14 @@ class ActiveModel extends $pb.GeneratedMessage {
     $core.String? versionId,
     $core.String? modelId,
     $fixnum.Int64? modelAsOfUnixMs,
+    $fixnum.Int64? lifecycleRevision,
   }) {
     final result = ActiveModel._();
     if (algorithmId != null) result.algorithmId = algorithmId;
     if (versionId != null) result.versionId = versionId;
     if (modelId != null) result.modelId = modelId;
     if (modelAsOfUnixMs != null) result.modelAsOfUnixMs = modelAsOfUnixMs;
+    if (lifecycleRevision != null) result.lifecycleRevision = lifecycleRevision;
     return result;
   }
 
@@ -1106,6 +1108,7 @@ class ActiveModel extends $pb.GeneratedMessage {
     ..aOS(2, _omitFieldNames ? '' : 'versionId')
     ..aOS(3, _omitFieldNames ? '' : 'modelId')
     ..aInt64(4, _omitFieldNames ? '' : 'modelAsOfUnixMs')
+    ..aInt64(5, _omitFieldNames ? '' : 'lifecycleRevision')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1165,6 +1168,15 @@ class ActiveModel extends $pb.GeneratedMessage {
   $core.bool hasModelAsOfUnixMs() => $_has(3);
   @$pb.TagNumber(4)
   void clearModelAsOfUnixMs() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $fixnum.Int64 get lifecycleRevision => $_getI64(4);
+  @$pb.TagNumber(5)
+  set lifecycleRevision($fixnum.Int64 value) => $_setInt64(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasLifecycleRevision() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearLifecycleRevision() => $_clearField(5);
 }
 
 class GetLearningRequest extends $pb.GeneratedMessage {
@@ -2207,10 +2219,12 @@ class ApproveCycleRequest extends $pb.GeneratedMessage {
   factory ApproveCycleRequest({
     $fixnum.Int64? cycleId,
     $core.String? note,
+    $fixnum.Int64? expectedRevision,
   }) {
     final result = ApproveCycleRequest._();
     if (cycleId != null) result.cycleId = cycleId;
     if (note != null) result.note = note;
+    if (expectedRevision != null) result.expectedRevision = expectedRevision;
     return result;
   }
 
@@ -2229,6 +2243,7 @@ class ApproveCycleRequest extends $pb.GeneratedMessage {
       createEmptyInstance: ApproveCycleRequest.$_createMessage)
     ..aInt64(1, _omitFieldNames ? '' : 'cycleId')
     ..aOS(2, _omitFieldNames ? '' : 'note')
+    ..aInt64(3, _omitFieldNames ? '' : 'expectedRevision')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -2271,6 +2286,15 @@ class ApproveCycleRequest extends $pb.GeneratedMessage {
   $core.bool hasNote() => $_has(1);
   @$pb.TagNumber(2)
   void clearNote() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $fixnum.Int64 get expectedRevision => $_getI64(2);
+  @$pb.TagNumber(3)
+  set expectedRevision($fixnum.Int64 value) => $_setInt64(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasExpectedRevision() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearExpectedRevision() => $_clearField(3);
 }
 
 class ApproveCycleResponse extends $pb.GeneratedMessage {
@@ -2429,9 +2453,13 @@ class RejectCycleResponse extends $pb.GeneratedMessage {
 class RollbackRequest extends $pb.GeneratedMessage {
   factory RollbackRequest({
     $core.String? note,
+    $fixnum.Int64? expectedRevision,
+    $core.String? algorithmId,
   }) {
     final result = RollbackRequest._();
     if (note != null) result.note = note;
+    if (expectedRevision != null) result.expectedRevision = expectedRevision;
+    if (algorithmId != null) result.algorithmId = algorithmId;
     return result;
   }
 
@@ -2449,6 +2477,8 @@ class RollbackRequest extends $pb.GeneratedMessage {
       package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
       createEmptyInstance: RollbackRequest.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'note')
+    ..aInt64(2, _omitFieldNames ? '' : 'expectedRevision')
+    ..aOS(3, _omitFieldNames ? '' : 'algorithmId')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -2481,6 +2511,24 @@ class RollbackRequest extends $pb.GeneratedMessage {
   $core.bool hasNote() => $_has(0);
   @$pb.TagNumber(1)
   void clearNote() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get expectedRevision => $_getI64(1);
+  @$pb.TagNumber(2)
+  set expectedRevision($fixnum.Int64 value) => $_setInt64(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasExpectedRevision() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearExpectedRevision() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get algorithmId => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set algorithmId($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasAlgorithmId() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearAlgorithmId() => $_clearField(3);
 }
 
 class RollbackResponse extends $pb.GeneratedMessage {

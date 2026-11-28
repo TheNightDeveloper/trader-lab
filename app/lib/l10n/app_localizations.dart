@@ -93,6 +93,60 @@ abstract class L10n {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[Locale('fa')];
 
+  /// No description provided for @researchPairs.
+  ///
+  /// In fa, this message translates to:
+  /// **'جفت‌های مجاز پژوهش'**
+  String get researchPairs;
+
+  /// No description provided for @researchCapabilitiesLoading.
+  ///
+  /// In fa, this message translates to:
+  /// **'در حال دریافت قابلیت‌های پژوهش از موتور…'**
+  String get researchCapabilitiesLoading;
+
+  /// No description provided for @researchCapabilitiesMissing.
+  ///
+  /// In fa, this message translates to:
+  /// **'قابلیت‌های پژوهش دریافت نشد؛ اتصال و نسخهٔ موتور را بررسی کنید.'**
+  String get researchCapabilitiesMissing;
+
+  /// No description provided for @researchScopeHelp.
+  ///
+  /// In fa, this message translates to:
+  /// **'اجرا فقط برای جفت‌هایی فعال است که موتور پشتیبانی آن‌ها را تأیید کرده است.'**
+  String get researchScopeHelp;
+
+  /// No description provided for @researchDatasetsEmpty.
+  ///
+  /// In fa, this message translates to:
+  /// **'نسخهٔ دادهٔ مجاز برای پژوهش موجود نیست؛ دادهٔ یک جفت پشتیبانی‌شده را وارد کنید.'**
+  String get researchDatasetsEmpty;
+
+  /// No description provided for @datasetSearch.
+  ///
+  /// In fa, this message translates to:
+  /// **'جست‌وجوی نماد، تایم‌فریم یا شناسهٔ دیتاست'**
+  String get datasetSearch;
+
+  /// No description provided for @datasetNoSearchResults.
+  ///
+  /// In fa, this message translates to:
+  /// **'نسخه‌ای با این جست‌وجو پیدا نشد.'**
+  String get datasetNoSearchResults;
+
+  /// No description provided for @pnlCalculating.
+  ///
+  /// In fa, this message translates to:
+  /// **'در حال محاسبه با ورودی‌های فعلی…'**
+  String get pnlCalculating;
+
+  /// No description provided for @pnlCheckInputs.
+  ///
+  /// In fa, this message translates to:
+  /// **'ورودی‌ها را کامل و معتبر کنید تا نتیجهٔ تازه محاسبه شود.'**
+  String get pnlCheckInputs;
+
   /// No description provided for @appTitle.
   ///
   /// In fa, this message translates to:
@@ -156,7 +210,7 @@ abstract class L10n {
   /// No description provided for @navGroupLearning.
   ///
   /// In fa, this message translates to:
-  /// **'یادگیری و تحلیل'**
+  /// **'یادگیری'**
   String get navGroupLearning;
 
   /// No description provided for @navLearning.
@@ -177,41 +231,1013 @@ abstract class L10n {
   /// **'داده'**
   String get navData;
 
-  /// No description provided for @navGroupLater.
+  /// No description provided for @navMarket.
   ///
   /// In fa, this message translates to:
-  /// **'بعداً'**
-  String get navGroupLater;
+  /// **'دیدبان بازار'**
+  String get navMarket;
 
   /// No description provided for @navPaper.
   ///
   /// In fa, this message translates to:
-  /// **'حساب مجازی و سفارش'**
+  /// **'حساب مجازی'**
   String get navPaper;
 
-  /// No description provided for @navRisk.
+  /// No description provided for @screenPaperSub.
   ///
   /// In fa, this message translates to:
-  /// **'ریسک و انضباط'**
-  String get navRisk;
+  /// **'موجودی USDT و حدود ریسک معاملات آزمایشی اسپات'**
+  String get screenPaperSub;
 
-  /// No description provided for @navJournal.
+  /// No description provided for @paperLoading.
   ///
   /// In fa, this message translates to:
-  /// **'ژورنال'**
-  String get navJournal;
+  /// **'در حال دریافت حساب مجازی…'**
+  String get paperLoading;
 
-  /// No description provided for @navMarket.
+  /// No description provided for @paperCreateAccount.
   ///
   /// In fa, this message translates to:
-  /// **'بازار و رویداد'**
-  String get navMarket;
+  /// **'ایجاد حساب مجازی'**
+  String get paperCreateAccount;
 
-  /// No description provided for @navGroupSystem.
+  /// No description provided for @paperInitialCapital.
   ///
   /// In fa, this message translates to:
-  /// **'سیستم'**
-  String get navGroupSystem;
+  /// **'سرمایهٔ مجازی اولیه'**
+  String get paperInitialCapital;
+
+  /// No description provided for @paperMaxLoss.
+  ///
+  /// In fa, this message translates to:
+  /// **'حد زیان هر معامله'**
+  String get paperMaxLoss;
+
+  /// No description provided for @paperMaxOpenLoss.
+  ///
+  /// In fa, this message translates to:
+  /// **'حد مجموع ریسک باز'**
+  String get paperMaxOpenLoss;
+
+  /// No description provided for @paperMaxExposure.
+  ///
+  /// In fa, this message translates to:
+  /// **'حد ارزش موقعیت‌های اسپات'**
+  String get paperMaxExposure;
+
+  /// No description provided for @paperAvailable.
+  ///
+  /// In fa, this message translates to:
+  /// **'موجودی آزاد'**
+  String get paperAvailable;
+
+  /// No description provided for @paperReserved.
+  ///
+  /// In fa, this message translates to:
+  /// **'موجودی رزروشده'**
+  String get paperReserved;
+
+  /// No description provided for @paperEquity.
+  ///
+  /// In fa, this message translates to:
+  /// **'ارزش حساب'**
+  String get paperEquity;
+
+  /// No description provided for @paperReviewOpportunity.
+  ///
+  /// In fa, this message translates to:
+  /// **'برنامهٔ معاملهٔ مجازی'**
+  String get paperReviewOpportunity;
+
+  /// No description provided for @paperBuildPlan.
+  ///
+  /// In fa, this message translates to:
+  /// **'محاسبه و مرور برنامه'**
+  String get paperBuildPlan;
+
+  /// No description provided for @paperPlanLoading.
+  ///
+  /// In fa, this message translates to:
+  /// **'در حال دریافت برنامه…'**
+  String get paperPlanLoading;
+
+  /// No description provided for @paperPlanTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'مرور برنامهٔ معاملهٔ مجازی'**
+  String get paperPlanTitle;
+
+  /// No description provided for @paperRiskSummary.
+  ///
+  /// In fa, this message translates to:
+  /// **'ریسک و هزینه برای حساب مجازی'**
+  String get paperRiskSummary;
+
+  /// No description provided for @paperSpotBuy.
+  ///
+  /// In fa, this message translates to:
+  /// **'خرید اسپات'**
+  String get paperSpotBuy;
+
+  /// No description provided for @paperStop.
+  ///
+  /// In fa, this message translates to:
+  /// **'حد ضرر'**
+  String get paperStop;
+
+  /// No description provided for @paperTarget.
+  ///
+  /// In fa, this message translates to:
+  /// **'هدف سود'**
+  String get paperTarget;
+
+  /// No description provided for @paperExpectedEntry.
+  ///
+  /// In fa, this message translates to:
+  /// **'قیمت برآوردی ورود'**
+  String get paperExpectedEntry;
+
+  /// No description provided for @paperEntryLimit.
+  ///
+  /// In fa, this message translates to:
+  /// **'سقف قیمت ورود'**
+  String get paperEntryLimit;
+
+  /// No description provided for @paperQuantity.
+  ///
+  /// In fa, this message translates to:
+  /// **'حجم برنامه'**
+  String get paperQuantity;
+
+  /// No description provided for @paperNotional.
+  ///
+  /// In fa, this message translates to:
+  /// **'ارزش برآوردی ورود'**
+  String get paperNotional;
+
+  /// No description provided for @paperRequiredCash.
+  ///
+  /// In fa, this message translates to:
+  /// **'موجودی لازم با کارمزد'**
+  String get paperRequiredCash;
+
+  /// No description provided for @paperPlannedLoss.
+  ///
+  /// In fa, this message translates to:
+  /// **'زیان برنامه‌ریزی‌شده تا حد ضرر'**
+  String get paperPlannedLoss;
+
+  /// No description provided for @paperEstimatedCost.
+  ///
+  /// In fa, this message translates to:
+  /// **'هزینهٔ برآوردی ورود و خروج'**
+  String get paperEstimatedCost;
+
+  /// No description provided for @paperPlanExpiry.
+  ///
+  /// In fa, this message translates to:
+  /// **'پایان اعتبار مرور'**
+  String get paperPlanExpiry;
+
+  /// No description provided for @paperCandleTime.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان بسته‌شدن کندل مرجع'**
+  String get paperCandleTime;
+
+  /// No description provided for @paperPlanQuoteAt.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان دادهٔ برنامه'**
+  String get paperPlanQuoteAt;
+
+  /// No description provided for @paperMarketChart.
+  ///
+  /// In fa, this message translates to:
+  /// **'نمودار کندل‌های یک‌ساعتهٔ فرصت'**
+  String get paperMarketChart;
+
+  /// No description provided for @paperScannerBuild.
+  ///
+  /// In fa, this message translates to:
+  /// **'بیلد اسکن فرصت'**
+  String get paperScannerBuild;
+
+  /// No description provided for @paperPlanEngineBuild.
+  ///
+  /// In fa, this message translates to:
+  /// **'بیلد ساخت برنامه'**
+  String get paperPlanEngineBuild;
+
+  /// No description provided for @paperApprovalBuild.
+  ///
+  /// In fa, this message translates to:
+  /// **'بیلد تأیید برنامه'**
+  String get paperApprovalBuild;
+
+  /// No description provided for @paperFillAssumptions.
+  ///
+  /// In fa, this message translates to:
+  /// **'ورود با قیمت بازشدن کندل کامل یک‌دقیقه‌ای بعد از تأیید و حداکثر یک درصد از حجم کندل شبیه‌سازی می‌شود. کارمزد و لغزش اعمال می‌شوند و عبور قیمت از حد ضرر می‌تواند زیان بیشتری ایجاد کند. اگر هر دو حد در یک کندل لمس شوند و ترتیب از قیمت بازشدن مشخص نباشد، شبیه‌ساز خروج با حد ضرر را فرض می‌کند.'**
+  String get paperFillAssumptions;
+
+  /// No description provided for @paperLegacyFillTiming.
+  ///
+  /// In fa, this message translates to:
+  /// **'در این مدل، بسته‌شدن کندل روی حد ضرر یا پایین‌تر، ورود همان کندل را لغو می‌کند.'**
+  String get paperLegacyFillTiming;
+
+  /// No description provided for @paperPartialFillProtection.
+  ///
+  /// In fa, this message translates to:
+  /// **'حفاظت هر بخش خرید از نخستین دقیقهٔ کامل پس از مشاهدهٔ اجرای همان بخش آغاز می‌شود.'**
+  String get paperPartialFillProtection;
+
+  /// No description provided for @paperFeeRate.
+  ///
+  /// In fa, this message translates to:
+  /// **'کارمزد هر سمت'**
+  String get paperFeeRate;
+
+  /// No description provided for @paperSlippageRate.
+  ///
+  /// In fa, this message translates to:
+  /// **'لغزش هر سمت'**
+  String get paperSlippageRate;
+
+  /// No description provided for @paperAmountError.
+  ///
+  /// In fa, this message translates to:
+  /// **'مبلغ مثبت با حداکثر ۸ رقم اعشار وارد کنید.'**
+  String get paperAmountError;
+
+  /// No description provided for @paperSaving.
+  ///
+  /// In fa, this message translates to:
+  /// **'در حال دریافت پاسخ موتور…'**
+  String get paperSaving;
+
+  /// No description provided for @paperReviewAgain.
+  ///
+  /// In fa, this message translates to:
+  /// **'مرور دوباره'**
+  String get paperReviewAgain;
+
+  /// No description provided for @paperConfirm.
+  ///
+  /// In fa, this message translates to:
+  /// **'تأیید ورود مجازی'**
+  String get paperConfirm;
+
+  /// No description provided for @paperConfirmationUnknown.
+  ///
+  /// In fa, this message translates to:
+  /// **'پاسخ تأیید دریافت نشد. رسید دوباره از موتور بررسی می‌شود.'**
+  String get paperConfirmationUnknown;
+
+  /// No description provided for @paperReceipt.
+  ///
+  /// In fa, this message translates to:
+  /// **'رسید معاملهٔ مجازی'**
+  String get paperReceipt;
+
+  /// No description provided for @paperViewReceipt.
+  ///
+  /// In fa, this message translates to:
+  /// **'مشاهدهٔ رسید'**
+  String get paperViewReceipt;
+
+  /// No description provided for @paperViewPlan.
+  ///
+  /// In fa, this message translates to:
+  /// **'مشاهدهٔ برنامهٔ تأییدشده'**
+  String get paperViewPlan;
+
+  /// No description provided for @paperRecentReceipts.
+  ///
+  /// In fa, this message translates to:
+  /// **'رسیدهای اخیر'**
+  String get paperRecentReceipts;
+
+  /// No description provided for @paperOpenPositions.
+  ///
+  /// In fa, this message translates to:
+  /// **'موقعیت‌های باز'**
+  String get paperOpenPositions;
+
+  /// No description provided for @paperPositionValue.
+  ///
+  /// In fa, this message translates to:
+  /// **'ارزش با قیمت بازار'**
+  String get paperPositionValue;
+
+  /// No description provided for @paperCostBasis.
+  ///
+  /// In fa, this message translates to:
+  /// **'بهای تمام‌شده با کارمزد'**
+  String get paperCostBasis;
+
+  /// No description provided for @paperFilledQuantity.
+  ///
+  /// In fa, this message translates to:
+  /// **'حجم اجراشده'**
+  String get paperFilledQuantity;
+
+  /// No description provided for @paperCancelEntry.
+  ///
+  /// In fa, this message translates to:
+  /// **'لغو ماندهٔ ورود'**
+  String get paperCancelEntry;
+
+  /// No description provided for @paperConfirmedAt.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان تأیید'**
+  String get paperConfirmedAt;
+
+  /// No description provided for @paperEntryExpires.
+  ///
+  /// In fa, this message translates to:
+  /// **'پایان مهلت ورود'**
+  String get paperEntryExpires;
+
+  /// No description provided for @paperEntryPending.
+  ///
+  /// In fa, this message translates to:
+  /// **'در صف اجرا'**
+  String get paperEntryPending;
+
+  /// No description provided for @paperEntryPartial.
+  ///
+  /// In fa, this message translates to:
+  /// **'بخشی اجرا شده'**
+  String get paperEntryPartial;
+
+  /// No description provided for @paperEntryFilled.
+  ///
+  /// In fa, this message translates to:
+  /// **'ورود کامل اجرا شد'**
+  String get paperEntryFilled;
+
+  /// No description provided for @paperEntryCancelled.
+  ///
+  /// In fa, this message translates to:
+  /// **'ماندهٔ ورود لغو شد'**
+  String get paperEntryCancelled;
+
+  /// No description provided for @paperEntryExpired.
+  ///
+  /// In fa, this message translates to:
+  /// **'مهلت ورود پایان یافت'**
+  String get paperEntryExpired;
+
+  /// No description provided for @paperEventHistory.
+  ///
+  /// In fa, this message translates to:
+  /// **'رویدادهای رسید'**
+  String get paperEventHistory;
+
+  /// No description provided for @paperEventAccepted.
+  ///
+  /// In fa, this message translates to:
+  /// **'تأیید و رزرو وجه'**
+  String get paperEventAccepted;
+
+  /// No description provided for @paperEventEntryFill.
+  ///
+  /// In fa, this message translates to:
+  /// **'اجرای ورود'**
+  String get paperEventEntryFill;
+
+  /// No description provided for @paperEventStopExit.
+  ///
+  /// In fa, this message translates to:
+  /// **'خروج با حد ضرر'**
+  String get paperEventStopExit;
+
+  /// No description provided for @paperEventTargetExit.
+  ///
+  /// In fa, this message translates to:
+  /// **'خروج با هدف سود'**
+  String get paperEventTargetExit;
+
+  /// No description provided for @paperEventProtectionCancel.
+  ///
+  /// In fa, this message translates to:
+  /// **'لغو مانده برای خروج محافظتی'**
+  String get paperEventProtectionCancel;
+
+  /// No description provided for @paperEventFee.
+  ///
+  /// In fa, this message translates to:
+  /// **'کارمزد'**
+  String get paperEventFee;
+
+  /// No description provided for @paperExecutionPrice.
+  ///
+  /// In fa, this message translates to:
+  /// **'قیمت اجرای مجازی'**
+  String get paperExecutionPrice;
+
+  /// No description provided for @paperExecutionCandle.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان بازشدن کندل اجرا'**
+  String get paperExecutionCandle;
+
+  /// No description provided for @paperEventCash.
+  ///
+  /// In fa, this message translates to:
+  /// **'مبلغ رویداد'**
+  String get paperEventCash;
+
+  /// No description provided for @paperRealizedPnl.
+  ///
+  /// In fa, this message translates to:
+  /// **'سود و زیان تحقق‌یافته'**
+  String get paperRealizedPnl;
+
+  /// No description provided for @paperJournalTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'ژورنال حساب مجازی'**
+  String get paperJournalTitle;
+
+  /// No description provided for @paperJournalEmpty.
+  ///
+  /// In fa, this message translates to:
+  /// **'هنوز رسیدی در این صفحه ثبت نشده است.'**
+  String get paperJournalEmpty;
+
+  /// No description provided for @paperJournalOlder.
+  ///
+  /// In fa, this message translates to:
+  /// **'رسیدهای قدیمی‌تر'**
+  String get paperJournalOlder;
+
+  /// No description provided for @paperJournalNewest.
+  ///
+  /// In fa, this message translates to:
+  /// **'تازه‌ترین رسیدها'**
+  String get paperJournalNewest;
+
+  /// No description provided for @paperJournalOpenQuantity.
+  ///
+  /// In fa, this message translates to:
+  /// **'حجم باز'**
+  String get paperJournalOpenQuantity;
+
+  /// No description provided for @paperJournalFeesPaid.
+  ///
+  /// In fa, this message translates to:
+  /// **'کارمزد پرداخت‌شده'**
+  String get paperJournalFeesPaid;
+
+  /// No description provided for @paperJournalClosedPosition.
+  ///
+  /// In fa, this message translates to:
+  /// **'موقعیت بسته‌شده'**
+  String get paperJournalClosedPosition;
+
+  /// No description provided for @paperJournalNote.
+  ///
+  /// In fa, this message translates to:
+  /// **'یادداشت شخصی'**
+  String get paperJournalNote;
+
+  /// No description provided for @paperJournalNoteAdd.
+  ///
+  /// In fa, this message translates to:
+  /// **'افزودن یادداشت'**
+  String get paperJournalNoteAdd;
+
+  /// No description provided for @paperJournalNoteEdit.
+  ///
+  /// In fa, this message translates to:
+  /// **'ویرایش یادداشت'**
+  String get paperJournalNoteEdit;
+
+  /// No description provided for @paperJournalNoteSave.
+  ///
+  /// In fa, this message translates to:
+  /// **'ذخیرهٔ یادداشت'**
+  String get paperJournalNoteSave;
+
+  /// No description provided for @paperJournalNoteSavedAt.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان ذخیرهٔ یادداشت'**
+  String get paperJournalNoteSavedAt;
+
+  /// No description provided for @paperJournalNoteConflict.
+  ///
+  /// In fa, this message translates to:
+  /// **'یادداشت در برگهٔ دیگری تغییر کرده است. برای دیدن نسخهٔ تازه، از ویرایش خارج شوید.'**
+  String get paperJournalNoteConflict;
+
+  /// No description provided for @paperReplayTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازپخش تصمیم'**
+  String get paperReplayTitle;
+
+  /// No description provided for @paperReplayPrevious.
+  ///
+  /// In fa, this message translates to:
+  /// **'گام قبل'**
+  String get paperReplayPrevious;
+
+  /// No description provided for @paperReplayNext.
+  ///
+  /// In fa, this message translates to:
+  /// **'گام بعد'**
+  String get paperReplayNext;
+
+  /// No description provided for @paperReplayObservation.
+  ///
+  /// In fa, this message translates to:
+  /// **'مشاهدهٔ فرصت'**
+  String get paperReplayObservation;
+
+  /// No description provided for @paperReplayExecution.
+  ///
+  /// In fa, this message translates to:
+  /// **'رویداد ثبت‌شده'**
+  String get paperReplayExecution;
+
+  /// No description provided for @paperReplayObservedAt.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان ثبت مشاهده'**
+  String get paperReplayObservedAt;
+
+  /// No description provided for @paperReplayInputs.
+  ///
+  /// In fa, this message translates to:
+  /// **'تعداد کندل‌های ورودی ۱ساعته'**
+  String get paperReplayInputs;
+
+  /// No description provided for @paperReplayInputOpen.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازشدن'**
+  String get paperReplayInputOpen;
+
+  /// No description provided for @paperReplayInputHigh.
+  ///
+  /// In fa, this message translates to:
+  /// **'بیشینه'**
+  String get paperReplayInputHigh;
+
+  /// No description provided for @paperReplayInputLow.
+  ///
+  /// In fa, this message translates to:
+  /// **'کمینه'**
+  String get paperReplayInputLow;
+
+  /// No description provided for @paperReplayEntryRule.
+  ///
+  /// In fa, this message translates to:
+  /// **'شرط ورود ثبت‌شده'**
+  String get paperReplayEntryRule;
+
+  /// No description provided for @paperReplaySnapshotHash.
+  ///
+  /// In fa, this message translates to:
+  /// **'هش دادهٔ مشاهده'**
+  String get paperReplaySnapshotHash;
+
+  /// No description provided for @paperReplayRuleHash.
+  ///
+  /// In fa, this message translates to:
+  /// **'هش نسخهٔ قواعد'**
+  String get paperReplayRuleHash;
+
+  /// No description provided for @paperReplayConfirmationPrice.
+  ///
+  /// In fa, this message translates to:
+  /// **'قیمت مرجع در تأیید'**
+  String get paperReplayConfirmationPrice;
+
+  /// No description provided for @paperReplayConfirmationUnavailable.
+  ///
+  /// In fa, this message translates to:
+  /// **'کندل بازبینی هنگام ثبت این رسید ذخیره نشده است.'**
+  String get paperReplayConfirmationUnavailable;
+
+  /// No description provided for @paperReplayRevision.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازبینی کندل'**
+  String get paperReplayRevision;
+
+  /// No description provided for @paperRiskControls.
+  ///
+  /// In fa, this message translates to:
+  /// **'کنترل ریسک حساب مجازی'**
+  String get paperRiskControls;
+
+  /// No description provided for @paperPauseEntries.
+  ///
+  /// In fa, this message translates to:
+  /// **'توقف ورود'**
+  String get paperPauseEntries;
+
+  /// No description provided for @paperResumeEntries.
+  ///
+  /// In fa, this message translates to:
+  /// **'ازسرگیری ورود'**
+  String get paperResumeEntries;
+
+  /// No description provided for @paperEntriesPaused.
+  ///
+  /// In fa, this message translates to:
+  /// **'ورودهای مجازی متوقف‌اند. حفاظت از موقعیت‌های باز ادامه دارد.'**
+  String get paperEntriesPaused;
+
+  /// No description provided for @paperReconciled.
+  ///
+  /// In fa, this message translates to:
+  /// **'مانده‌ها، رزروها، موقعیت‌ها و رویدادها با دفتر تطبیق دارند.'**
+  String get paperReconciled;
+
+  /// No description provided for @paperReconcileMismatch.
+  ///
+  /// In fa, this message translates to:
+  /// **'مغایرت در تطبیق حساب. ورود تازه متوقف است.'**
+  String get paperReconcileMismatch;
+
+  /// No description provided for @paperReconcileCash.
+  ///
+  /// In fa, this message translates to:
+  /// **'مغایرت موجودی نقدی'**
+  String get paperReconcileCash;
+
+  /// No description provided for @paperReconcileReservations.
+  ///
+  /// In fa, this message translates to:
+  /// **'مغایرت وجه رزروشده'**
+  String get paperReconcileReservations;
+
+  /// No description provided for @paperReconcilePositions.
+  ///
+  /// In fa, this message translates to:
+  /// **'مغایرت موقعیت یا بهای تمام‌شده'**
+  String get paperReconcilePositions;
+
+  /// No description provided for @paperReconcileEvents.
+  ///
+  /// In fa, this message translates to:
+  /// **'مغایرت جریان وجه یا کارمزد رویدادها'**
+  String get paperReconcileEvents;
+
+  /// No description provided for @paperReconcileChecked.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان تطبیق'**
+  String get paperReconcileChecked;
+
+  /// No description provided for @paperReducePosition.
+  ///
+  /// In fa, this message translates to:
+  /// **'کاهش یا بستن موقعیت'**
+  String get paperReducePosition;
+
+  /// No description provided for @paperReduceAmount.
+  ///
+  /// In fa, this message translates to:
+  /// **'حجم کاهش'**
+  String get paperReduceAmount;
+
+  /// No description provided for @paperReduceLot.
+  ///
+  /// In fa, this message translates to:
+  /// **'گام حجم'**
+  String get paperReduceLot;
+
+  /// No description provided for @paperReduceAmountError.
+  ///
+  /// In fa, this message translates to:
+  /// **'حجم مثبت، در حد موجودی موقعیت و مضرب گام حجم وارد کنید.'**
+  String get paperReduceAmountError;
+
+  /// No description provided for @paperReduceRequest.
+  ///
+  /// In fa, this message translates to:
+  /// **'ثبت درخواست کاهش'**
+  String get paperReduceRequest;
+
+  /// No description provided for @paperReduceDescription.
+  ///
+  /// In fa, this message translates to:
+  /// **'ماندهٔ ورود لغو می‌شود. کاهش با نخستین کندل کامل پس از درخواست اجرا می‌شود و در نبود داده منتظر می‌ماند.'**
+  String get paperReduceDescription;
+
+  /// No description provided for @paperReductionPending.
+  ///
+  /// In fa, this message translates to:
+  /// **'درخواست کاهش در انتظار اجراست'**
+  String get paperReductionPending;
+
+  /// No description provided for @paperReductionFilled.
+  ///
+  /// In fa, this message translates to:
+  /// **'کاهش موقعیت اجرا شد'**
+  String get paperReductionFilled;
+
+  /// No description provided for @paperReductionSuperseded.
+  ///
+  /// In fa, this message translates to:
+  /// **'خروج محافظتی قبل از اجرای کاهش انجام شد'**
+  String get paperReductionSuperseded;
+
+  /// No description provided for @paperEventManualExit.
+  ///
+  /// In fa, this message translates to:
+  /// **'خروج با درخواست کاربر'**
+  String get paperEventManualExit;
+
+  /// No description provided for @paperEventReduceRequest.
+  ///
+  /// In fa, this message translates to:
+  /// **'ثبت درخواست کاهش موقعیت'**
+  String get paperEventReduceRequest;
+
+  /// No description provided for @paperEventReduceCancelEntry.
+  ///
+  /// In fa, this message translates to:
+  /// **'لغو ماندهٔ ورود برای کاهش موقعیت'**
+  String get paperEventReduceCancelEntry;
+
+  /// No description provided for @screenMarketSub.
+  ///
+  /// In fa, this message translates to:
+  /// **'قیمت پایانی آخرین کندل یک‌دقیقه‌ای جفت‌های اسپات USDT'**
+  String get screenMarketSub;
+
+  /// No description provided for @marketObservedAt.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان آخرین بررسی بازار'**
+  String get marketObservedAt;
+
+  /// No description provided for @marketLoading.
+  ///
+  /// In fa, this message translates to:
+  /// **'در حال دریافت دادهٔ دیدبان…'**
+  String get marketLoading;
+
+  /// No description provided for @marketEmpty.
+  ///
+  /// In fa, this message translates to:
+  /// **'هیچ جفت اسپات USDT برای دریافت زنده پیکربندی نشده است.'**
+  String get marketEmpty;
+
+  /// No description provided for @marketDisconnected.
+  ///
+  /// In fa, this message translates to:
+  /// **'ارتباط دیدبان قطع شده است. آخرین دادهٔ تأییدشده نمایش داده می‌شود.'**
+  String get marketDisconnected;
+
+  /// No description provided for @marketNoCandle.
+  ///
+  /// In fa, this message translates to:
+  /// **'هنوز کندل بسته‌شده‌ای از جریان زنده ثبت نشده است.'**
+  String get marketNoCandle;
+
+  /// No description provided for @marketClosePrice.
+  ///
+  /// In fa, this message translates to:
+  /// **'قیمت پایانی'**
+  String get marketClosePrice;
+
+  /// No description provided for @marketClosedAt.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان بسته‌شدن کندل'**
+  String get marketClosedAt;
+
+  /// No description provided for @marketAvailableAt.
+  ///
+  /// In fa, this message translates to:
+  /// **'زمان در دسترس بودن داده'**
+  String get marketAvailableAt;
+
+  /// No description provided for @marketScanOpen.
+  ///
+  /// In fa, this message translates to:
+  /// **'بررسی این نسخه در دیدبان'**
+  String get marketScanOpen;
+
+  /// No description provided for @marketScanTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'بررسی آخرین کندل یک‌ساعته'**
+  String get marketScanTitle;
+
+  /// No description provided for @marketScanHelp.
+  ///
+  /// In fa, this message translates to:
+  /// **'برای نماد انتخابی، همین نسخه باید بک‌تست یک‌ساعته داشته باشد.'**
+  String get marketScanHelp;
+
+  /// No description provided for @marketScanSymbol.
+  ///
+  /// In fa, this message translates to:
+  /// **'نماد برای بررسی'**
+  String get marketScanSymbol;
+
+  /// No description provided for @marketScanReady.
+  ///
+  /// In fa, this message translates to:
+  /// **'بررسی فرصت'**
+  String get marketScanReady;
+
+  /// No description provided for @marketScanRunning.
+  ///
+  /// In fa, this message translates to:
+  /// **'در حال بررسی…'**
+  String get marketScanRunning;
+
+  /// No description provided for @marketScanWaitForFeed.
+  ///
+  /// In fa, this message translates to:
+  /// **'برای بررسی، نمادی با دادهٔ تازه انتخاب کنید.'**
+  String get marketScanWaitForFeed;
+
+  /// No description provided for @marketScanRecorded.
+  ///
+  /// In fa, this message translates to:
+  /// **'فرصت در دیدبان ثبت شد.'**
+  String get marketScanRecorded;
+
+  /// No description provided for @marketScanNoMatch.
+  ///
+  /// In fa, this message translates to:
+  /// **'در آخرین کندل، شرط ورود برقرار نبود.'**
+  String get marketScanNoMatch;
+
+  /// No description provided for @marketScanIncomplete.
+  ///
+  /// In fa, this message translates to:
+  /// **'تاریخچهٔ کندل‌های کامل برای بررسی این نسخه کافی نیست.'**
+  String get marketScanIncomplete;
+
+  /// No description provided for @marketScanUnexpected.
+  ///
+  /// In fa, this message translates to:
+  /// **'نتیجهٔ بررسی از موتور دریافت نشد.'**
+  String get marketScanUnexpected;
+
+  /// No description provided for @marketOpportunityAllSymbols.
+  ///
+  /// In fa, this message translates to:
+  /// **'همهٔ نمادها'**
+  String get marketOpportunityAllSymbols;
+
+  /// No description provided for @marketOpportunityOnlyCurrent.
+  ///
+  /// In fa, this message translates to:
+  /// **'فقط فرصت‌های معتبر'**
+  String get marketOpportunityOnlyCurrent;
+
+  /// No description provided for @marketOpportunityNoFiltered.
+  ///
+  /// In fa, this message translates to:
+  /// **'فرصتی مطابق این فیلترها نیست.'**
+  String get marketOpportunityNoFiltered;
+
+  /// No description provided for @marketBackgroundTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'اسکن‌های خودکار یک‌ساعته'**
+  String get marketBackgroundTitle;
+
+  /// No description provided for @marketBackgroundEnable.
+  ///
+  /// In fa, this message translates to:
+  /// **'فعال‌سازی اسکن خودکار'**
+  String get marketBackgroundEnable;
+
+  /// No description provided for @marketBackgroundEnabled.
+  ///
+  /// In fa, this message translates to:
+  /// **'اسکن خودکار این نسخه برای نماد فعال است.'**
+  String get marketBackgroundEnabled;
+
+  /// No description provided for @marketBackgroundOccupied.
+  ///
+  /// In fa, this message translates to:
+  /// **'برای این نماد نسخهٔ دیگری فعال است. از فهرست اسکن‌ها آن را مدیریت کنید.'**
+  String get marketBackgroundOccupied;
+
+  /// No description provided for @marketBackgroundPause.
+  ///
+  /// In fa, this message translates to:
+  /// **'توقف اسکن'**
+  String get marketBackgroundPause;
+
+  /// No description provided for @marketBackgroundPausing.
+  ///
+  /// In fa, this message translates to:
+  /// **'در حال توقف…'**
+  String get marketBackgroundPausing;
+
+  /// No description provided for @marketBackgroundWaiting.
+  ///
+  /// In fa, this message translates to:
+  /// **'در انتظار جریان تازهٔ داده'**
+  String get marketBackgroundWaiting;
+
+  /// No description provided for @marketBackgroundFirst.
+  ///
+  /// In fa, this message translates to:
+  /// **'در انتظار نخستین بررسی'**
+  String get marketBackgroundFirst;
+
+  /// No description provided for @marketBackgroundLast.
+  ///
+  /// In fa, this message translates to:
+  /// **'نتیجهٔ بررسی کندل بسته‌شده در'**
+  String get marketBackgroundLast;
+
+  /// No description provided for @marketOpportunitiesTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'فرصت‌های ثبت‌شده'**
+  String get marketOpportunitiesTitle;
+
+  /// No description provided for @marketOpportunitiesEmpty.
+  ///
+  /// In fa, this message translates to:
+  /// **'هنوز فرصتی ثبت نشده است. بررسی را از یک نسخهٔ بک‌تست‌شده در کتابخانه آغاز کنید.'**
+  String get marketOpportunitiesEmpty;
+
+  /// No description provided for @marketOpportunityCurrent.
+  ///
+  /// In fa, this message translates to:
+  /// **'در بازهٔ اعتبار'**
+  String get marketOpportunityCurrent;
+
+  /// No description provided for @marketOpportunityInactive.
+  ///
+  /// In fa, this message translates to:
+  /// **'فعلاً نامعتبر'**
+  String get marketOpportunityInactive;
+
+  /// No description provided for @marketOpportunityExpires.
+  ///
+  /// In fa, this message translates to:
+  /// **'پایان اعتبار'**
+  String get marketOpportunityExpires;
+
+  /// No description provided for @marketOpportunityPrice.
+  ///
+  /// In fa, this message translates to:
+  /// **'قیمت مرجع کندل'**
+  String get marketOpportunityPrice;
+
+  /// No description provided for @marketOpportunityEntry.
+  ///
+  /// In fa, this message translates to:
+  /// **'شرط ورود نسخه برقرار بود'**
+  String get marketOpportunityEntry;
+
+  /// No description provided for @marketOpportunityRegimeA.
+  ///
+  /// In fa, this message translates to:
+  /// **'شرط ورود شاخهٔ A برقرار بود'**
+  String get marketOpportunityRegimeA;
+
+  /// No description provided for @marketOpportunityRegimeB.
+  ///
+  /// In fa, this message translates to:
+  /// **'شرط ورود شاخهٔ B برقرار بود'**
+  String get marketOpportunityRegimeB;
+
+  /// No description provided for @marketOpportunityRule.
+  ///
+  /// In fa, this message translates to:
+  /// **'مشاهدهٔ نسخه'**
+  String get marketOpportunityRule;
+
+  /// No description provided for @marketOpportunityReport.
+  ///
+  /// In fa, this message translates to:
+  /// **'مشاهدهٔ بک‌تست'**
+  String get marketOpportunityReport;
+
+  /// No description provided for @navGroupReview.
+  ///
+  /// In fa, this message translates to:
+  /// **'بررسی'**
+  String get navGroupReview;
+
+  /// No description provided for @navGroupControl.
+  ///
+  /// In fa, this message translates to:
+  /// **'کنترل'**
+  String get navGroupControl;
 
   /// No description provided for @navSettings.
   ///
@@ -219,29 +1245,35 @@ abstract class L10n {
   /// **'تنظیمات'**
   String get navSettings;
 
-  /// No description provided for @phase2.
-  ///
-  /// In fa, this message translates to:
-  /// **'فاز ۲'**
-  String get phase2;
-
   /// No description provided for @openMenu.
   ///
   /// In fa, this message translates to:
   /// **'باز کردن منو'**
   String get openMenu;
 
-  /// No description provided for @statusMode.
-  ///
-  /// In fa, this message translates to:
-  /// **'حالت اجرا'**
-  String get statusMode;
-
   /// No description provided for @statusModeResearch.
   ///
   /// In fa, this message translates to:
   /// **'پژوهش · بدون سفارش واقعی'**
   String get statusModeResearch;
+
+  /// No description provided for @statusModePaper.
+  ///
+  /// In fa, this message translates to:
+  /// **'معاملهٔ مجازی'**
+  String get statusModePaper;
+
+  /// No description provided for @statusModeLive.
+  ///
+  /// In fa, this message translates to:
+  /// **'معاملهٔ واقعی'**
+  String get statusModeLive;
+
+  /// No description provided for @statusModeUnknown.
+  ///
+  /// In fa, this message translates to:
+  /// **'حالت اجرا نامشخص'**
+  String get statusModeUnknown;
 
   /// No description provided for @statusAccounting.
   ///
@@ -279,6 +1311,24 @@ abstract class L10n {
   /// **'در حال اتصال دوباره'**
   String get statusLiveReconnecting;
 
+  /// No description provided for @statusLiveUnknown.
+  ///
+  /// In fa, this message translates to:
+  /// **'نامشخص'**
+  String get statusLiveUnknown;
+
+  /// No description provided for @statusLiveUnavailable.
+  ///
+  /// In fa, this message translates to:
+  /// **'در دسترس نیست'**
+  String get statusLiveUnavailable;
+
+  /// No description provided for @statusBarAge.
+  ///
+  /// In fa, this message translates to:
+  /// **'{state} · {seconds} ثانیه از آخرین شمع'**
+  String statusBarAge(String state, int seconds);
+
   /// No description provided for @statusEngine.
   ///
   /// In fa, this message translates to:
@@ -302,6 +1352,12 @@ abstract class L10n {
   /// In fa, this message translates to:
   /// **'قطع'**
   String get statusEngineDown;
+
+  /// No description provided for @statusEngineUnknown.
+  ///
+  /// In fa, this message translates to:
+  /// **'نامشخص'**
+  String get statusEngineUnknown;
 
   /// No description provided for @statusWorkers.
   ///
@@ -330,8 +1386,14 @@ abstract class L10n {
   /// No description provided for @engineUnreachable.
   ///
   /// In fa, this message translates to:
-  /// **'موتور در دسترس نیست. آخرین وضعیت نمایش داده می‌شود؛ دوباره تلاش می‌کنیم…'**
+  /// **'موتور در دسترس نیست. در حال تلاش برای اتصال دوباره…'**
   String get engineUnreachable;
+
+  /// No description provided for @engineLastSeen.
+  ///
+  /// In fa, this message translates to:
+  /// **'موتور در دسترس نیست. آخرین وضعیت در {time} دریافت شد. در حال تلاش برای اتصال دوباره…'**
+  String engineLastSeen(String time);
 
   /// No description provided for @screenHomeSub.
   ///
@@ -2529,6 +3591,18 @@ abstract class L10n {
   /// **'رویدادها'**
   String get libHistory;
 
+  /// No description provided for @libHistoryNewer.
+  ///
+  /// In fa, this message translates to:
+  /// **'رویدادهای جدیدتر'**
+  String get libHistoryNewer;
+
+  /// No description provided for @libHistoryOlder.
+  ///
+  /// In fa, this message translates to:
+  /// **'رویدادهای قدیمی‌تر'**
+  String get libHistoryOlder;
+
   /// No description provided for @actorUser.
   ///
   /// In fa, this message translates to:
@@ -2540,6 +3614,12 @@ abstract class L10n {
   /// In fa, this message translates to:
   /// **'سیستم'**
   String get actorSystem;
+
+  /// No description provided for @actorUnknown.
+  ///
+  /// In fa, this message translates to:
+  /// **'ثبت‌کننده نامشخص'**
+  String get actorUnknown;
 
   /// No description provided for @lSubtitle.
   ///

@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/pressly/goose/v3"
@@ -56,7 +57,13 @@ func migrate(ctx context.Context, pool *pgxpool.Pool) error {
 
 // InTx runs fn in one transaction; fn's error rolls back.
 func (s *Store) InTx(ctx context.Context, fn func(q *db.Queries) error) error {
-	tx, err := s.Pool.Begin(ctx)
+	return s.InTxOptions(ctx, pgx.TxOptions{}, fn)
+}
+
+// InTxOptions permits a persistent snapshot to use one repeatable-read view for
+// selecting revisions, computing its hash and storing membership atomically.
+func (s *Store) InTxOptions(ctx context.Context, opts pgx.TxOptions, fn func(q *db.Queries) error) error {
+	tx, err := s.Pool.BeginTx(ctx, opts)
 	if err != nil {
 		return fmt.Errorf("begin: %w", err)
 	}

@@ -65,12 +65,64 @@ func get(t *testing.T, ms []metrics.Metric, key string) metrics.Metric {
 	return x
 }
 
+func TestEvaluateSideRunsMatchAcrossWorkerCounts(t *testing.T) {
+	ctx := context.Background()
+	bars := map[string][]data.Bar{"BTCUSDT": walk("BTCUSDT", 2_000, 3)}
+	serial, err := EvaluateWith(ctx, testSpec(), bars, specs(), 1)
+	require.NoError(t, err)
+	parallel, err := EvaluateWith(ctx, testSpec(), bars, specs(), 6)
+	require.NoError(t, err)
+	require.Equal(t, serial, parallel, "projecting side runs must preserve result order and values")
+}
+
+func TestRuleCompositionUsesOneSharedSimulation(t *testing.T) {
+	makeRule := func(entry, exit float64) strategy.RuleDefinition {
+		compare := func(op string, limit float64) strategy.Rule {
+			return strategy.Rule{Op: op, Left: &strategy.RuleValue{Kind: "close"}, Right: &strategy.RuleValue{Kind: "constant", Number: &limit}}
+		}
+		return strategy.RuleDefinition{
+			Format: strategy.RuleFormatV1, Exposure: money.RatioOne,
+			Entry: compare("gt", entry), Exit: compare("lt", exit),
+		}
+	}
+	a, b := makeRule(103, 100), makeRule(107, 102)
+	ab, err := strategy.ComposeRules(a, b, "and", "a")
+	require.NoError(t, err)
+	prices := []int64{100, 102, 104, 106, 108, 110, 112, 111, 109, 107, 105, 103, 101, 99, 98, 100}
+	series := walk("BTCUSDT", 2_000, 3)
+	for i := range series {
+		p := money.Price{V: prices[i%len(prices)] * 1e8, Scale: 8}
+		series[i].O, series[i].H, series[i].L, series[i].C = p, p, p, p
+	}
+	bars := map[string][]data.Bar{"BTCUSDT": series}
+	run := func(d strategy.RuleDefinition) *Evaluation {
+		spec := testSpec()
+		spec.Strategy, spec.Params, spec.Rule = strategy.RuleFormatV1, nil, &d
+		out, err := EvaluateWith(t.Context(), spec, bars, specs(), 3)
+		require.NoError(t, err)
+		require.NotEmpty(t, out.Main.Trades)
+		require.NotEmpty(t, out.HoldoutRun.Trades)
+		require.Nil(t, out.Grid, "native parameter sweeps do not apply to rules")
+		return out
+	}
+	aRun, bRun, abRun := run(a), run(b), run(ab)
+	// Both entries and A's later exit govern a single shared position and ledger.
+	require.Equal(t, bRun.Main.Decisions[0].At, abRun.Main.Decisions[0].At)
+	require.NotEqual(t, aRun.Main.Decisions[0].At, abRun.Main.Decisions[0].At)
+	require.Equal(t, aRun.Main.Decisions[1].At, abRun.Main.Decisions[1].At)
+	require.NotEqual(t, bRun.Main.Decisions[1].At, abRun.Main.Decisions[1].At)
+	require.NotEqual(t, aRun.Main.Trades, abRun.Main.Trades)
+	require.NotEqual(t, bRun.Main.Trades, abRun.Main.Trades)
+	require.NotEqual(t, params(aRun.Spec), params(abRun.Spec))
+}
+
 func TestEvaluateIdentitiesAndIsolation(t *testing.T) {
 	bars := map[string][]data.Bar{"BTCUSDT": walk("BTCUSDT", 20_000, 3)}
 	ev, err := Evaluate(context.Background(), testSpec(), bars, specs())
 	require.NoError(t, err)
 
-	// Report numbers are exact sums of trade-level numbers.
+	// Cohort lifetime numbers are exact sums of trade-level numbers; period PnL
+	// instead reconciles with the equity known at the evaluated boundary.
 	var net, n int64
 	for _, tr := range ev.Main.Trades {
 		if ev.Split.OOS.Contains(tr.OpenedAt) {
@@ -79,16 +131,21 @@ func TestEvaluateIdentitiesAndIsolation(t *testing.T) {
 		}
 	}
 	require.Positive(t, n, "the wave should produce trades")
-	require.Equal(t, net, get(t, ev.OOS.Metrics, "net_pnl").V)
+	require.Equal(t, net, get(t, ev.OOS.Metrics, "cohort_lifetime_pnl").V)
+	period := get(t, ev.OOS.Metrics, "period_pnl").V
+	require.Equal(t, period, get(t, ev.OOS.Metrics, "net_pnl").V)
+	require.Equal(t, get(t, ev.OOS.Metrics, "final_equity").V-testSpec().Sim.Capital.V, period)
 	require.Equal(t, n, get(t, ev.OOS.Metrics, "trades").V)
 
 	// Folds partition the out-of-sample trades.
-	var foldNet, foldTrades int64
+	var foldNet, foldTrades, foldCohort int64
 	for _, f := range ev.Folds {
 		foldNet += get(t, f.Metrics, "net_pnl").V
 		foldTrades += get(t, f.Metrics, "trades").V
+		foldCohort += get(t, f.Metrics, "cohort_lifetime_pnl").V
 	}
-	require.Equal(t, net, foldNet)
+	require.Equal(t, period, foldNet)
+	require.Equal(t, net, foldCohort)
 	require.Equal(t, n, foldTrades)
 
 	// The main run never trades before OOS or into the holdout; the holdout run
@@ -179,7 +236,7 @@ func TestCompareEligibility(t *testing.T) {
 	}
 	require.True(t, fee.Differs)
 	require.Contains(t, c.Conclusion, "رتبه‌بندی قطعی ممکن نیست", "no trades: no ranking")
-	require.Equal(t, []string{"+0.10%", "+0.10%", "+0.20%"}, fee.Values)
+	require.Equal(t, []string{"+0.1000%", "+0.1000%", "+0.2000%"}, fee.Values)
 }
 
 func TestPct(t *testing.T) {
@@ -211,4 +268,45 @@ func TestReplayReproducesNetExactly(t *testing.T) {
 	require.Less(t, half.Fills[0].Qty.V, res.Fills[0].Qty.V)
 	_, _, err = Replay(context.Background(), ev.Split, ev.Main.Decisions, ev.Spec.Sim, 0, bars, specs())
 	require.ErrorIs(t, err, ErrSpec)
+}
+
+// Formatting must never make distinct costs or intraday windows comparable.
+func TestCompareUsesExactAssumptions(t *testing.T) {
+	base := Comparable{ID: "a", Spec: testSpec(), Split: Split{OOS: Window{From: t0, To: t0.Add(24 * time.Hour)}}}
+	for _, key := range []string{"fee", "slippage", "period", "split", "evaluation_version"} {
+		t.Run(key, func(t *testing.T) {
+			other := base
+			switch key {
+			case "evaluation_version":
+				other.Spec.EvaluationVersion = Version
+			case "fee":
+				other.Spec.Sim.FeeRate++
+			case "slippage":
+				other.Spec.Sim.SlipRate++
+			case "period":
+				other.Split.OOS.From = other.Split.OOS.From.Add(time.Second)
+			case "split":
+				other.Spec.Split.Holdout++
+			}
+			c := Compare([]Comparable{base, other})
+			require.False(t, c.Eligible[1])
+			require.NotEmpty(t, c.Reasons[1])
+		})
+	}
+}
+
+// A selected buy-and-hold strategy must still buy after the warm-up window.
+func TestBuyAndHoldSurvivesWarmup(t *testing.T) {
+	spec := testSpec()
+	spec.Strategy, spec.Params = "buy-and-hold", strategy.WithDefaults("buy-and-hold", nil)
+	ev, err := Evaluate(context.Background(), spec, map[string][]data.Bar{"BTCUSDT": walk("BTCUSDT", 1000, 3)}, specs())
+	require.NoError(t, err)
+	require.Equal(t, Version, ev.Spec.EvaluationVersion)
+	require.Equal(t, sim.FillModel, ev.Spec.FillModel)
+	for _, res := range []*sim.Result{ev.Main, ev.HoldoutRun} {
+		require.NotEmpty(t, res.Fills)
+		require.Equal(t, sim.Buy, res.Fills[0].Side)
+	}
+	require.False(t, ev.Main.Fills[0].Time.Before(ev.Split.OOS.From))
+	require.False(t, ev.HoldoutRun.Fills[0].Time.Before(ev.Split.Holdout.From))
 }

@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:material_ui/material_ui.dart';
+import 'l10n/lab_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
@@ -38,12 +38,7 @@ class LabApp extends StatelessWidget {
     theme: buildAppTheme(),
     locale: const Locale('fa'),
     supportedLocales: L10n.supportedLocales,
-    localizationsDelegates: const [
-      L10n.delegate,
-      GlobalMaterialLocalizations.delegate,
-      GlobalWidgetsLocalizations.delegate,
-      GlobalCupertinoLocalizations.delegate,
-    ],
+    localizationsDelegates: labLocalizationDelegates,
     // Locale fa already implies RTL; this makes it explicit and locale-proof.
     builder: (context, child) => ResponsiveBreakpoints.builder(
       breakpoints: breakpoints,

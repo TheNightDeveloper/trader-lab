@@ -24,8 +24,10 @@ extension type _KChart._(JSObject _) implements JSObject {
   external void setPeriod(JSObject period);
   external void setDataLoader(JSObject loader);
   external void setStyles(JSObject styles);
+  external void setTimezone(String timezone);
   external void resize();
   external void subscribeAction(String type, JSFunction callback);
+  external JSObject convertFromPixel(JSObject point);
   external JSAny? createIndicator(JSObject value, bool isStack);
   external void removeIndicator(JSObject filter);
   external JSAny? createOverlay(JSObject value);
@@ -53,6 +55,7 @@ class _CandleChartViewState extends State<CandleChartView> {
   _KChart? _chart;
   web.ResizeObserver? _resize;
   final _indicatorIds = <String>[];
+  late final _onPointerLeave = ((web.Event _) => widget.chart.onCrosshair?.call(null)).toJS;
 
   void _created(Object element) {
     final el = (element as web.HTMLElement)
@@ -60,6 +63,7 @@ class _CandleChartViewState extends State<CandleChartView> {
       ..style.height = '100%'
       ..dir = 'ltr';
     _el = el;
+    el.addEventListener('pointerleave', _onPointerLeave);
     // The element is created detached (width 0). KLineChart measures on init, so
     // create it on the first callback with a real size, then just follow resizes.
     _resize = web.ResizeObserver(
@@ -74,14 +78,16 @@ class _CandleChartViewState extends State<CandleChartView> {
     final chart = _init(el, {'styles': 'dark'}.jsify()! as JSObject);
     if (chart == null) return;
     _chart = chart;
+    chart.setTimezone('UTC'); // Match the engine timestamps and the Flutter detail row.
     chart.setStyles(_styles());
     chart.subscribeAction(
       'onCrosshairChange',
       ((JSObject? c) {
-        final idx = c?['dataIndex'];
+        // KLineChart 10 emits a pane coordinate. Its resolved crosshair is internal.
+        final idx = c != null && c['x'].isA<JSNumber>() ? chart.convertFromPixel(c)['dataIndex'] : null;
         final bars = widget.chart.bars;
         final i = idx.isA<JSNumber>() ? (idx as JSNumber).toDartInt : -1;
-        widget.chart.onCrosshair?.call(c?['kLineData'] != null && i >= 0 && i < bars.length ? bars[i] : null);
+        widget.chart.onCrosshair?.call(i >= 0 && i < bars.length ? bars[i] : null);
       }).toJS,
     );
     _registerMarker();
@@ -114,7 +120,7 @@ class _CandleChartViewState extends State<CandleChartView> {
     }).toJS;
     chart.setDataLoader(loader);
     _indicators();
-    _marks();
+    _marks(centerSelected: true);
   }
 
   void _indicators() {
@@ -176,7 +182,7 @@ class _CandleChartViewState extends State<CandleChartView> {
     }
   }
 
-  void _marks() {
+  void _marks({required bool centerSelected}) {
     final chart = _chart!;
     chart.removeOverlay({'groupId': 'lab_marks'}.jsify()! as JSObject);
     final c = widget.chart;
@@ -198,25 +204,34 @@ class _CandleChartViewState extends State<CandleChartView> {
       }).toJS;
       chart.createOverlay(o);
     }
-    final sel = c.marks.where((m) => m.index == c.selected).firstOrNull;
-    if (sel != null) chart.scrollToTimestamp(sel.time.millisecondsSinceEpoch, 200);
+    if (centerSelected) {
+      final sel = c.marks.where((m) => m.index == c.selected).firstOrNull;
+      if (sel != null) {
+        final duration = AppMotion.of(context, const Duration(milliseconds: 200));
+        chart.scrollToTimestamp(sel.time.millisecondsSinceEpoch, duration.inMilliseconds);
+      }
+    }
   }
 
   @override
   void didUpdateWidget(CandleChartView old) {
     super.didUpdateWidget(old);
+    if (_chart == null) return; // The first resize loads the latest widget data.
     final o = old.chart, n = widget.chart;
     if (!identical(o.bars, n.bars) || o.ticker != n.ticker || o.timeframe != n.timeframe) {
       _load();
     } else {
       if (!identical(o.indicators, n.indicators)) _indicators();
-      if (!identical(o.marks, n.marks) || o.selected != n.selected) _marks();
+      if (!identical(o.marks, n.marks) || o.selected != n.selected) {
+        _marks(centerSelected: o.selected != n.selected);
+      }
     }
   }
 
   @override
   void dispose() {
     _resize?.disconnect();
+    _el?.removeEventListener('pointerleave', _onPointerLeave);
     if (_el != null) _dispose(_el!);
     super.dispose();
   }

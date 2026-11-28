@@ -1,0 +1,87 @@
+syntax = "proto3";
+
+package lab.v1;
+
+import "lab/v1/common.proto";
+import "lab/v1/health.proto";
+import "lab/v1/workspace.proto";
+
+service MarketService {
+  // Returns the configured spot USDT watchlist and its latest known observations.
+  rpc GetMarketSnapshot(GetMarketSnapshotRequest) returns (GetMarketSnapshotResponse);
+  // Observes a tested rule on the latest complete 1h candle and records a match.
+  rpc ScanMarketOpportunity(ScanMarketOpportunityRequest) returns (ScanMarketOpportunityResponse);
+  // Enables an hourly scan for a tested version or pauses that exact subscription.
+  rpc SetMarketScanSubscription(SetMarketScanSubscriptionRequest) returns (SetMarketScanSubscriptionResponse);
+}
+
+message GetMarketSnapshotRequest {}
+
+message GetMarketSnapshotResponse {
+  int64 observed_at_unix_ms = 1;
+  repeated MarketWatch market_watch = 2;
+  repeated MarketOpportunity opportunities = 3; // newest 25, including expired observations
+  repeated MarketScanSubscription scan_subscriptions = 4;
+}
+
+message SetMarketScanSubscriptionRequest {
+  string symbol = 1;
+  int64 rule_version_id = 2;
+  optional bool enabled = 3;
+}
+
+message SetMarketScanSubscriptionResponse {}
+
+message MarketScanSubscription {
+  string symbol = 1;
+  int64 rule_version_id = 2;
+  string rule_title = 3;
+  MarketScanState last_state = 4;
+  optional int64 last_candle_closed_at_unix_ms = 5;
+}
+
+message MarketWatch {
+  InstrumentKey instrument = 1;
+  LiveState state = 2;
+  MarketCandle candle = 3; // absent until a closed feed candle is known
+}
+
+// Instrument symbol, open time and revision identify a stored 1m candle.
+message MarketCandle {
+  int64 opened_at_unix_ms = 1;
+  int64 closed_at_unix_ms = 2;
+  int64 available_at_unix_ms = 3;
+  int32 revision = 4;
+  Money close = 5;
+}
+
+message ScanMarketOpportunityRequest {
+  int64 rule_version_id = 1;
+  string symbol = 2;
+}
+
+message ScanMarketOpportunityResponse {
+  MarketScanState state = 1;
+  MarketOpportunity opportunity = 2; // present only on a recorded match
+}
+
+enum MarketScanState {
+  MARKET_SCAN_STATE_UNSPECIFIED = 0;
+  MARKET_SCAN_STATE_MATCH = 1;
+  MARKET_SCAN_STATE_NO_MATCH = 2;
+  MARKET_SCAN_STATE_INCOMPLETE_DATA = 3;
+}
+
+message MarketOpportunity {
+  int64 id = 1;
+  string symbol = 2;
+  int64 rule_version_id = 3;
+  string rule_title = 4;
+  string report_id = 5;
+  string reason = 6;
+  Money reference_close = 7;
+  int64 candle_closed_at_unix_ms = 8;
+  int64 observed_at_unix_ms = 9;
+  int64 expires_at_unix_ms = 10;
+  bool current = 11; // server confirmed a fresh feed and the observation is within its window
+}

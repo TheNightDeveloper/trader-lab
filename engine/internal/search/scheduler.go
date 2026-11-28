@@ -2,6 +2,7 @@ package search
 
 import (
 	"context"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -9,6 +10,7 @@ import (
 	"fmt"
 	"log/slog"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -51,8 +53,7 @@ type datasetBars struct {
 	used time.Time
 }
 
-// maxCachedDatasets: datasets kept in memory between attempts.
-// ponytail: tiny LRU by last use; a byte budget if datasets get large.
+// Retention is bounded by both dataset count and data.MaxRawBars in total.
 const maxCachedDatasets = 4
 
 func (s *Scheduler) init() {
@@ -81,26 +82,61 @@ func (s *Scheduler) Wake() {
 // Run processes the queue until ctx ends, then waits for running attempts.
 func (s *Scheduler) Run(ctx context.Context) error {
 	s.init()
-	if n, err := s.Store.RequeueRunning(ctx); err != nil {
+	lease, err := s.acquireLease(ctx)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = lease.Close(context.Background()) }()
+	// Share the lease session with claim/recovery writes. PostgreSQL cannot
+	// release that lease before its own in-flight claim finishes or rolls back.
+	owner := db.New(lease)
+	if n, err := owner.RequeueRunning(ctx); err != nil {
 		return fmt.Errorf("requeue: %w", err)
 	} else if n > 0 {
-		slog.Info("re-queued attempts interrupted by the last shutdown", "attempts", n)
+		slog.Info("recovered interrupted attempts", "attempts", n)
 	}
 	var wg sync.WaitGroup
-	defer wg.Wait()
+	ctx, stop := context.WithCancel(ctx)
+	defer func() { stop(); wg.Wait() }()
 	lastHouse := time.Time{}
+	var retryAt atomic.Pointer[time.Time]
 	for ctx.Err() == nil {
 		if time.Since(lastHouse) >= s.Poll {
-			s.housekeep(ctx)
+			s.housekeep(ctx, owner)
 			lastHouse = time.Now()
 		}
 		if err := s.Limiter.Acquire(ctx); err != nil {
 			return nil
 		}
-		a, err := s.Store.ClaimAttempt(ctx)
+		if at := retryAt.Load(); at != nil {
+			if delay := time.Until(*at); delay > 0 {
+				s.Limiter.Release()
+				select {
+				case <-ctx.Done():
+				case <-s.wake:
+				case <-time.After(delay):
+				}
+				continue
+			}
+		}
+		var token [16]byte
+		if _, err := rand.Read(token[:]); err != nil {
+			s.Limiter.Release()
+			return err
+		}
+		// Let a short in-flight claim finish before shutdown closes the lease.
+		claim, cancelClaim := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
+		a, err := owner.ClaimAttempt(claim, hex.EncodeToString(token[:]))
+		cancelClaim()
 		if err != nil {
 			s.Limiter.Release()
-			if !errors.Is(err, pgx.ErrNoRows) && ctx.Err() == nil {
+			if ctx.Err() != nil {
+				return nil
+			}
+			if lease.IsClosed() {
+				return fmt.Errorf("queue lease lost: %w", err)
+			}
+			if !errors.Is(err, pgx.ErrNoRows) {
 				slog.Warn("claim attempt", "err", err)
 			}
 			select {
@@ -114,8 +150,13 @@ func (s *Scheduler) Run(ctx context.Context) error {
 		go func() {
 			defer wg.Done()
 			defer s.Limiter.Release()
-			s.run(ctx, a)
-			s.Wake()
+			if s.run(ctx, a) {
+				at := time.Now().Add(s.Poll)
+				retryAt.Store(&at)
+			} else {
+				retryAt.Store(nil)
+				s.Wake()
+			}
 		}()
 	}
 	return nil
@@ -169,21 +210,29 @@ func (s *Scheduler) dataset(ctx context.Context, id string) (datasetBars, error)
 	d = datasetBars{tf: ds.Spec.Timeframe, bars: bars, used: time.Now()}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if len(s.bars) >= maxCachedDatasets {
+	if existing, ok := s.bars[id]; ok {
+		return existing, nil
+	}
+	retained := len(bars)
+	for _, v := range s.bars {
+		retained += len(v.bars)
+	}
+	for len(s.bars) > 0 && (len(s.bars) >= maxCachedDatasets || retained > data.MaxRawBars) {
 		var oldest string
 		for k, v := range s.bars {
 			if oldest == "" || v.used.Before(s.bars[oldest].used) {
 				oldest = k
 			}
 		}
+		retained -= len(s.bars[oldest].bars)
 		delete(s.bars, oldest)
 	}
 	s.bars[id] = d
 	return d, nil
 }
 
-// run executes one claimed attempt and records the outcome.
-func (s *Scheduler) run(ctx context.Context, a db.Attempt) {
+// run executes one claimed attempt and reports whether memory contention deferred it.
+func (s *Scheduler) run(ctx context.Context, a db.Attempt) bool {
 	actx, cancel := context.WithCancelCause(ctx)
 	s.mu.Lock()
 	if s.running[a.ExperimentID] == nil {
@@ -191,12 +240,13 @@ func (s *Scheduler) run(ctx context.Context, a db.Attempt) {
 	}
 	s.running[a.ExperimentID][a.Seq] = cancel
 	s.mu.Unlock()
-	defer func() {
+	unregister := sync.OnceFunc(func() {
 		cancel(nil)
 		s.mu.Lock()
 		delete(s.running[a.ExperimentID], a.Seq)
 		s.mu.Unlock()
-	}()
+	})
+	defer unregister()
 
 	// Outcomes are written with their own short context: a result computed just
 	// before shutdown is still recorded.
@@ -209,38 +259,106 @@ func (s *Scheduler) run(ctx context.Context, a db.Attempt) {
 	}
 	end := func(status, why string) {
 		write(func(c context.Context) error {
-			return s.Store.EndAttempt(c, db.EndAttemptParams{ExperimentID: a.ExperimentID, Seq: a.Seq, Status: status, Failure: why})
+			return s.Store.EndAttempt(c, db.EndAttemptParams{ExperimentID: a.ExperimentID, Seq: a.Seq, ClaimToken: a.ClaimToken, Status: status, Failure: why})
 		})
+	}
+	// Cancellation may have committed between claim and handler registration.
+	// Re-read durable ownership before loading data or doing any computation.
+	if _, err := s.Store.GetClaimedAttempt(actx, db.GetClaimedAttemptParams{ExperimentID: a.ExperimentID, Seq: a.Seq, ClaimToken: a.ClaimToken}); err != nil {
+		if !errors.Is(err, pgx.ErrNoRows) && ctx.Err() == nil {
+			end("failed", failure(err))
+		}
+		return false
 	}
 
 	ms, cacheState, key, err := s.evaluate(actx, a)
 	switch {
 	case errors.Is(context.Cause(actx), errCancelled):
 		end("cancelled", "لغو به درخواست کاربر")
-		return
+		return false
 	case ctx.Err() != nil:
-		return // shutdown: stays running, re-queued on the next start
+		return false // shutdown: stays running, re-queued on the next start
+	case errors.Is(err, jobs.ErrMemoryBusy):
+		// Clear this handler before another worker can reclaim the same attempt.
+		unregister()
+		write(func(c context.Context) error {
+			return s.Store.DeferAttemptForMemory(c, db.DeferAttemptForMemoryParams{ExperimentID: a.ExperimentID, Seq: a.Seq, ClaimToken: a.ClaimToken})
+		})
+		return true
 	case err != nil:
 		end("failed", failure(err))
-		return
+		return false
 	}
 	def, err := s.definition(ctx, a.ExperimentID)
 	if err != nil {
 		end("failed", failure(err))
-		return
+		return false
 	}
 	ok, violations := Check(def.Constraints, ms)
 	msJ, _ := json.Marshal(ms)
 	vJ, _ := json.Marshal(violations)
 	write(func(c context.Context) error {
 		return s.Store.CompleteAttempt(c, db.CompleteAttemptParams{
-			ExperimentID: a.ExperimentID, Seq: a.Seq, Metrics: msJ, Eligible: &ok, Violations: vJ, Cache: cacheState, CacheKey: key,
+			ExperimentID: a.ExperimentID, Seq: a.Seq, ClaimToken: a.ClaimToken, Metrics: msJ, Eligible: &ok, Violations: vJ, Cache: cacheState, CacheKey: key,
 		})
 	})
+	return false
+}
+
+// The local engine has one scheduler per database schema. A dedicated session
+// lock prevents a second process from recovering a live worker's claims. Closing
+// the session releases ownership even on crashes; no long transaction is held.
+func (s *Scheduler) acquireLease(ctx context.Context) (*pgx.Conn, error) {
+	// A just-disconnected owner can still hold its server-side lock briefly.
+	acquire, cancel := context.WithTimeout(ctx, 2*time.Second)
+	defer cancel()
+	pooled, err := s.Store.Pool.Acquire(acquire)
+	if err != nil {
+		return nil, err
+	}
+	conn := pooled.Hijack()
+	retry := time.NewTicker(25 * time.Millisecond)
+	defer retry.Stop()
+	busy := false
+	for acquire.Err() == nil {
+		var ok bool
+		err = conn.QueryRow(acquire, "SELECT pg_try_advisory_lock(hashtext(current_schema()), hashtext('search-scheduler'))").Scan(&ok)
+		if err != nil {
+			break
+		}
+		if ok {
+			return conn, nil
+		}
+		busy = true
+		select {
+		case <-acquire.Done():
+		case <-retry.C:
+		}
+	}
+	_ = conn.Close(context.Background())
+	if ctx.Err() != nil {
+		return nil, ctx.Err()
+	}
+	if busy && acquire.Err() != nil {
+		return nil, errors.New("search: scheduler already running for this workspace")
+	}
+	if err != nil {
+		return nil, err
+	}
+	return nil, acquire.Err()
 }
 
 // evaluate returns the attempt's OOS metrics, from the run cache when every input matches.
 func (s *Scheduler) evaluate(ctx context.Context, a db.Attempt) ([]metrics.Metric, string, string, error) {
+	// Existing queued work must pass today's capability gate before any cache hit.
+	if err := s.Reports.ValidateResearch(ctx, []string{a.DatasetID}); err != nil {
+		return nil, "", "", err
+	}
+	release, err := s.Reports.ReserveSimulation(ctx, []string{a.DatasetID})
+	if err != nil {
+		return nil, "", "", err
+	}
+	defer release()
 	def, err := s.definition(ctx, a.ExperimentID)
 	if err != nil {
 		return nil, "", "", err
@@ -289,8 +407,8 @@ func failure(err error) string {
 }
 
 // housekeep enforces time budgets and finalizes experiments with nothing left to run.
-func (s *Scheduler) housekeep(ctx context.Context) {
-	exps, err := s.Store.ListStartedExperiments(ctx)
+func (s *Scheduler) housekeep(ctx context.Context, owner *db.Queries) {
+	exps, err := owner.ListStartedExperiments(ctx)
 	if err != nil {
 		return
 	}
@@ -300,27 +418,27 @@ func (s *Scheduler) housekeep(ctx context.Context) {
 			continue
 		}
 		if time.Since(e.CreatedAt) > time.Duration(def.Search.MaxWallSeconds)*time.Second {
-			if n, _ := s.Store.CancelQueued(ctx, db.CancelQueuedParams{ExperimentID: e.ID, Failure: "بودجه زمان تمام شد"}); n > 0 {
+			if n, _ := owner.CancelQueued(ctx, db.CancelQueuedParams{ExperimentID: e.ID, Failure: "بودجه زمان تمام شد"}); n > 0 {
 				slog.Info("time budget reached", "experiment", e.ID, "cancelled_attempts", n)
 			}
 		}
 	}
-	if _, err := s.Store.BeginFinalize(ctx); err != nil {
+	if _, err := owner.BeginFinalize(ctx); err != nil {
 		return
 	}
-	ids, err := s.Store.ListFinalizing(ctx)
+	ids, err := owner.ListFinalizing(ctx)
 	if err != nil {
 		return
 	}
 	for _, id := range ids {
-		s.finalize(ctx, id)
+		s.finalize(ctx, owner, id)
 	}
 }
 
 // finalize selects the winner and writes its full reports. Idempotent: report ids
 // are derived from the experiment and dataset, so a re-run after a crash does not
 // duplicate them.
-func (s *Scheduler) finalize(ctx context.Context, id string) {
+func (s *Scheduler) finalize(ctx context.Context, owner *db.Queries, id string) {
 	def, err := s.definition(ctx, id)
 	if err != nil {
 		return
@@ -363,12 +481,15 @@ func (s *Scheduler) finalize(ctx context.Context, id string) {
 		if ctx.Err() != nil {
 			return
 		}
+		if errors.Is(err, jobs.ErrMemoryBusy) {
+			return // the next poll retries finalization with the same report IDs
+		}
 		if err != nil {
 			status, errText = "failed", "ساخت گزارش نامزد برگزیده: "+err.Error()
 		}
 	}
 	resJ, _ := json.Marshal(res)
-	if err := s.Store.FinishExperiment(ctx, db.FinishExperimentParams{ID: id, Status: status, Result: resJ, Error: errText}); err != nil {
+	if err := owner.FinishExperiment(ctx, db.FinishExperimentParams{ID: id, Status: status, Result: resJ, Error: errText}); err != nil {
 		slog.Error("finish experiment", "experiment", id, "err", err)
 		return
 	}

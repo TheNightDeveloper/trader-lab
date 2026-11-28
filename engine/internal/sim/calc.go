@@ -39,6 +39,9 @@ func CalcTrade(entry, exit money.Price, qty money.Qty, fee, slip money.Ratio, qu
 	if entry.V <= 0 || exit.V <= 0 || qty.V <= 0 {
 		return TradeCalc{}, fmt.Errorf("%w: prices and quantity must be positive", ErrInput)
 	}
+	if fee < 0 || fee >= money.RatioOne || slip < 0 || slip >= money.RatioOne {
+		return TradeCalc{}, fmt.Errorf("%w: fee and slippage rates must be in [0, 1)", ErrInput)
+	}
 	b, err := newLeg(true, entry.V, qty.V, slip, fee)
 	if err != nil {
 		return TradeCalc{}, err
@@ -56,10 +59,15 @@ func CalcTrade(entry, exit money.Price, qty money.Qty, fee, slip money.Ratio, qu
 	}
 	c := TradeCalc{Buy: view(b), Sell: view(s)}
 	c.Gross = a(s.refValue - b.refValue)
-	c.Slippage = a(b.slippage + s.slippage)
-	c.Fees = a(b.fee + s.fee)
-	c.Net = a(s.cash() + b.cash())
-	c.Cost = a(b.value + b.fee)
+	if c.Slippage, err = a(b.slippage).Add(a(s.slippage)); err != nil {
+		return TradeCalc{}, err
+	}
+	if c.Fees, err = a(b.fee).Add(a(s.fee)); err != nil {
+		return TradeCalc{}, err
+	}
+	// The two flows have opposite signs and the buy cost was checked in newLeg.
+	c.Net = a(s.cash + b.cash)
+	c.Cost = a(-b.cash)
 	if c.Net.V != c.Gross.V-c.Slippage.V-c.Fees.V {
 		return TradeCalc{}, fmt.Errorf("%w: calculator identity", ErrInvariant)
 	}
@@ -69,7 +77,10 @@ func CalcTrade(entry, exit money.Price, qty money.Qty, fee, slip money.Ratio, qu
 	}
 	c.Return = money.Ratio(r)
 	c.BreakEvenExit, err = BreakEvenExit(entry, fee, slip)
-	return c, err
+	if err != nil {
+		return TradeCalc{}, err
+	}
+	return c, nil
 }
 
 // BreakEvenExit is the exit reference price at which a round trip nets zero:
@@ -77,36 +88,48 @@ func CalcTrade(entry, exit money.Price, qty money.Qty, fee, slip money.Ratio, qu
 // on top in the quote asset, the sell fee out of proceeds; per-leg rounding can
 // leave the net a few units from zero.)
 func BreakEvenExit(entry money.Price, fee, slip money.Ratio) (money.Price, error) {
-	one := int64(money.RatioOne)
-	x, err := money.MulDiv(entry.V, one+int64(slip), one-int64(slip), money.Ceil)
+	if fee < 0 || fee >= money.RatioOne || slip < 0 || slip >= money.RatioOne {
+		return money.Price{}, fmt.Errorf("%w: fee and slippage rates must be in [0, 1)", ErrInput)
+	}
+	x, err := money.MulDiv(entry.V, int64(money.RatioOne+slip), int64(money.RatioOne-slip), money.Ceil)
 	if err != nil {
 		return money.Price{}, err
 	}
-	x, err = money.MulDiv(x, one+int64(fee), one-int64(fee), money.Ceil)
+	x, err = money.MulDiv(x, int64(money.RatioOne+fee), int64(money.RatioOne-fee), money.Ceil)
 	return money.Price{V: x, Scale: entry.Scale}, err
 }
 
 // BreakEvenFee is the per-side fee rate at which the run's net P&L would be zero,
 // holding its trades and slippage fixed: (gross − slippage) / Σ leg values (USDT).
 // ok=false when no fee level makes it profitable (gross − slippage ≤ 0) or there
-// were no fills.
+// were no fills, or the totals exceed the fixed-point range.
 func BreakEvenFee(r *Result) (money.Ratio, bool) {
 	var gross, slip, values int64
 	for _, t := range r.Trades {
-		gross += t.Gross.V
-		slip += t.Slippage.V
+		if err := applyLedgerDeltas(ledgerDelta{&gross, t.Gross.V}, ledgerDelta{&slip, t.Slippage.V}); err != nil {
+			return 0, false
+		}
 	}
 	for _, f := range r.Fills {
-		v := f.RefValueUSDT.V + f.SlippageUSDT.V // buy value
+		var v int64
+		var err error
 		if f.Side == Sell {
-			v = f.RefValueUSDT.V - f.SlippageUSDT.V
+			v, err = money.SubInt64(f.RefValueUSDT.V, f.SlippageUSDT.V)
+		} else {
+			v, err = money.AddInt64(f.RefValueUSDT.V, f.SlippageUSDT.V)
 		}
-		values += v
+		if err != nil {
+			return 0, false
+		}
+		if values, err = money.AddInt64(values, v); err != nil {
+			return 0, false
+		}
 	}
-	if values <= 0 || gross-slip <= 0 {
+	net, err := money.SubInt64(gross, slip)
+	if err != nil || values <= 0 || net <= 0 {
 		return 0, false
 	}
-	x, err := money.MulDiv(gross-slip, int64(money.RatioOne), values, money.Floor)
+	x, err := money.MulDiv(net, int64(money.RatioOne), values, money.Floor)
 	if err != nil {
 		return 0, false
 	}

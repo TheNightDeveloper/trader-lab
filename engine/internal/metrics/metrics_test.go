@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"math"
 	"testing"
 	"time"
 
@@ -36,6 +37,44 @@ func TestPnLIsExactSumOfTrades(t *testing.T) {
 		_, ok := Definitions[m.Key]
 		require.True(t, ok, "every metric has a definition: %s", m.Key)
 	}
+}
+
+func TestAggregatePnLLabelsUnrepresentableTotals(t *testing.T) {
+	ms := Compute(Input{Start: t0, End: t0.Add(time.Hour), Initial: 1, Trades: []Trade{
+		{Gross: math.MaxInt64, Fees: math.MaxInt64, Slippage: math.MaxInt64, Net: math.MaxInt64},
+		{Gross: 1, Fees: 1, Slippage: 1, Net: 1},
+	}})
+	for _, key := range []string{"gross_pnl", "fees", "slippage", "net_pnl", "unrealized_pnl"} {
+		m := get(t, ms, key)
+		require.False(t, m.Valid, key)
+		require.Zero(t, m.V, key)
+		require.NotEmpty(t, m.Invalid, key)
+	}
+}
+
+func TestTradeStatsRoundAfterWideningTotals(t *testing.T) {
+	duration := time.Duration(1<<62 + 1)
+	closed := at(duration)
+	ms := Compute(Input{Start: t0, End: t0.Add(time.Hour), Initial: 1, MinTrades: 1, Trades: []Trade{
+		{Opened: t0, Closed: closed, Net: math.MaxInt64},
+		{Opened: t0, Closed: closed, Net: math.MaxInt64 - 1},
+		{Opened: t0, Closed: closed, Net: math.MinInt64},
+		{Opened: t0, Closed: closed, Net: math.MinInt64},
+	}})
+	want := map[string]int64{"net_pnl": -3, "avg_win": math.MaxInt64 - 1, "avg_loss": math.MinInt64,
+		"profit_factor": 1_000_000, "avg_holding": int64(duration / time.Second)}
+	for key, v := range want {
+		m := get(t, ms, key)
+		require.True(t, m.Valid, key)
+		require.EqualValues(t, v, m.V, key)
+	}
+}
+
+func TestExtremeEquitySpanDoesNotWrapReturnOrDrawdown(t *testing.T) {
+	ms := Compute(Input{Start: t0, End: t0.Add(time.Hour), Initial: math.MaxInt64,
+		Equity: []Point{{T: t0.Add(time.Hour), Equity: math.MinInt64}}})
+	require.EqualValues(t, -2_000_000, get(t, ms, "total_return").V)
+	require.EqualValues(t, 2_000_000, get(t, ms, "max_drawdown").V)
 }
 
 func TestDrawdownAndDuration(t *testing.T) {

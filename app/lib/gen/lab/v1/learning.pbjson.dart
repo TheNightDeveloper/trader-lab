@@ -307,6 +307,13 @@ const ActiveModel$json = {
       '5': 3,
       '10': 'modelAsOfUnixMs'
     },
+    {
+      '1': 'lifecycle_revision',
+      '3': 5,
+      '4': 1,
+      '5': 3,
+      '10': 'lifecycleRevision'
+    },
   ],
 };
 
@@ -314,7 +321,8 @@ const ActiveModel$json = {
 final $typed_data.Uint8List activeModelDescriptor = $convert.base64Decode(
     'CgtBY3RpdmVNb2RlbBIhCgxhbGdvcml0aG1faWQYASABKAlSC2FsZ29yaXRobUlkEh0KCnZlcn'
     'Npb25faWQYAiABKAlSCXZlcnNpb25JZBIZCghtb2RlbF9pZBgDIAEoCVIHbW9kZWxJZBIsChNt'
-    'b2RlbF9hc19vZl91bml4X21zGAQgASgDUg9tb2RlbEFzT2ZVbml4TXM=');
+    'b2RlbF9hc19vZl91bml4X21zGAQgASgDUg9tb2RlbEFzT2ZVbml4TXMSLQoSbGlmZWN5Y2xlX3'
+    'JldmlzaW9uGAUgASgDUhFsaWZlY3ljbGVSZXZpc2lvbg==');
 
 @$core.Deprecated('Use getLearningRequestDescriptor instead')
 const GetLearningRequest$json = {
@@ -600,13 +608,26 @@ const ApproveCycleRequest$json = {
   '2': [
     {'1': 'cycle_id', '3': 1, '4': 1, '5': 3, '10': 'cycleId'},
     {'1': 'note', '3': 2, '4': 1, '5': 9, '10': 'note'},
+    {
+      '1': 'expected_revision',
+      '3': 3,
+      '4': 1,
+      '5': 3,
+      '9': 0,
+      '10': 'expectedRevision',
+      '17': true
+    },
+  ],
+  '8': [
+    {'1': '_expected_revision'},
   ],
 };
 
 /// Descriptor for `ApproveCycleRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List approveCycleRequestDescriptor = $convert.base64Decode(
     'ChNBcHByb3ZlQ3ljbGVSZXF1ZXN0EhkKCGN5Y2xlX2lkGAEgASgDUgdjeWNsZUlkEhIKBG5vdG'
-    'UYAiABKAlSBG5vdGU=');
+    'UYAiABKAlSBG5vdGUSMAoRZXhwZWN0ZWRfcmV2aXNpb24YAyABKANIAFIQZXhwZWN0ZWRSZXZp'
+    'c2lvbogBAUIUChJfZXhwZWN0ZWRfcmV2aXNpb24=');
 
 @$core.Deprecated('Use approveCycleResponseDescriptor instead')
 const ApproveCycleResponse$json = {
@@ -645,12 +666,27 @@ const RollbackRequest$json = {
   '1': 'RollbackRequest',
   '2': [
     {'1': 'note', '3': 1, '4': 1, '5': 9, '10': 'note'},
+    {
+      '1': 'expected_revision',
+      '3': 2,
+      '4': 1,
+      '5': 3,
+      '9': 0,
+      '10': 'expectedRevision',
+      '17': true
+    },
+    {'1': 'algorithm_id', '3': 3, '4': 1, '5': 9, '10': 'algorithmId'},
+  ],
+  '8': [
+    {'1': '_expected_revision'},
   ],
 };
 
 /// Descriptor for `RollbackRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List rollbackRequestDescriptor = $convert
-    .base64Decode('Cg9Sb2xsYmFja1JlcXVlc3QSEgoEbm90ZRgBIAEoCVIEbm90ZQ==');
+final $typed_data.Uint8List rollbackRequestDescriptor = $convert.base64Decode(
+    'Cg9Sb2xsYmFja1JlcXVlc3QSEgoEbm90ZRgBIAEoCVIEbm90ZRIwChFleHBlY3RlZF9yZXZpc2'
+    'lvbhgCIAEoA0gAUhBleHBlY3RlZFJldmlzaW9uiAEBEiEKDGFsZ29yaXRobV9pZBgDIAEoCVIL'
+    'YWxnb3JpdGhtSWRCFAoSX2V4cGVjdGVkX3JldmlzaW9u');
 
 @$core.Deprecated('Use rollbackResponseDescriptor instead')
 const RollbackResponse$json = {

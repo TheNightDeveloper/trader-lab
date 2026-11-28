@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -7,6 +8,38 @@ import 'app_localizations.dart';
 /// The translations for Persian (`fa`).
 class L10nFa extends L10n {
   L10nFa([String locale = 'fa']) : super(locale);
+
+  @override
+  String get researchPairs => 'جفت‌های مجاز پژوهش';
+
+  @override
+  String get researchCapabilitiesLoading =>
+      'در حال دریافت قابلیت‌های پژوهش از موتور…';
+
+  @override
+  String get researchCapabilitiesMissing =>
+      'قابلیت‌های پژوهش دریافت نشد؛ اتصال و نسخهٔ موتور را بررسی کنید.';
+
+  @override
+  String get researchScopeHelp =>
+      'اجرا فقط برای جفت‌هایی فعال است که موتور پشتیبانی آن‌ها را تأیید کرده است.';
+
+  @override
+  String get researchDatasetsEmpty =>
+      'نسخهٔ دادهٔ مجاز برای پژوهش موجود نیست؛ دادهٔ یک جفت پشتیبانی‌شده را وارد کنید.';
+
+  @override
+  String get datasetSearch => 'جست‌وجوی نماد، تایم‌فریم یا شناسهٔ دیتاست';
+
+  @override
+  String get datasetNoSearchResults => 'نسخه‌ای با این جست‌وجو پیدا نشد.';
+
+  @override
+  String get pnlCalculating => 'در حال محاسبه با ورودی‌های فعلی…';
+
+  @override
+  String get pnlCheckInputs =>
+      'ورودی‌ها را کامل و معتبر کنید تا نتیجهٔ تازه محاسبه شود.';
 
   @override
   String get appTitle => 'آزمایشگاه الگوریتم';
@@ -39,7 +72,7 @@ class L10nFa extends L10n {
   String get navPnl => 'ماشین‌حساب سود و زیان';
 
   @override
-  String get navGroupLearning => 'یادگیری و تحلیل';
+  String get navGroupLearning => 'یادگیری';
 
   @override
   String get navLearning => 'چرخه یادگیری';
@@ -51,37 +84,548 @@ class L10nFa extends L10n {
   String get navData => 'داده';
 
   @override
-  String get navGroupLater => 'بعداً';
+  String get navMarket => 'دیدبان بازار';
 
   @override
-  String get navPaper => 'حساب مجازی و سفارش';
+  String get navPaper => 'حساب مجازی';
 
   @override
-  String get navRisk => 'ریسک و انضباط';
+  String get screenPaperSub => 'موجودی USDT و حدود ریسک معاملات آزمایشی اسپات';
 
   @override
-  String get navJournal => 'ژورنال';
+  String get paperLoading => 'در حال دریافت حساب مجازی…';
 
   @override
-  String get navMarket => 'بازار و رویداد';
+  String get paperCreateAccount => 'ایجاد حساب مجازی';
 
   @override
-  String get navGroupSystem => 'سیستم';
+  String get paperInitialCapital => 'سرمایهٔ مجازی اولیه';
+
+  @override
+  String get paperMaxLoss => 'حد زیان هر معامله';
+
+  @override
+  String get paperMaxOpenLoss => 'حد مجموع ریسک باز';
+
+  @override
+  String get paperMaxExposure => 'حد ارزش موقعیت‌های اسپات';
+
+  @override
+  String get paperAvailable => 'موجودی آزاد';
+
+  @override
+  String get paperReserved => 'موجودی رزروشده';
+
+  @override
+  String get paperEquity => 'ارزش حساب';
+
+  @override
+  String get paperReviewOpportunity => 'برنامهٔ معاملهٔ مجازی';
+
+  @override
+  String get paperBuildPlan => 'محاسبه و مرور برنامه';
+
+  @override
+  String get paperPlanLoading => 'در حال دریافت برنامه…';
+
+  @override
+  String get paperPlanTitle => 'مرور برنامهٔ معاملهٔ مجازی';
+
+  @override
+  String get paperRiskSummary => 'ریسک و هزینه برای حساب مجازی';
+
+  @override
+  String get paperSpotBuy => 'خرید اسپات';
+
+  @override
+  String get paperStop => 'حد ضرر';
+
+  @override
+  String get paperTarget => 'هدف سود';
+
+  @override
+  String get paperExpectedEntry => 'قیمت برآوردی ورود';
+
+  @override
+  String get paperEntryLimit => 'سقف قیمت ورود';
+
+  @override
+  String get paperQuantity => 'حجم برنامه';
+
+  @override
+  String get paperNotional => 'ارزش برآوردی ورود';
+
+  @override
+  String get paperRequiredCash => 'موجودی لازم با کارمزد';
+
+  @override
+  String get paperPlannedLoss => 'زیان برنامه‌ریزی‌شده تا حد ضرر';
+
+  @override
+  String get paperEstimatedCost => 'هزینهٔ برآوردی ورود و خروج';
+
+  @override
+  String get paperPlanExpiry => 'پایان اعتبار مرور';
+
+  @override
+  String get paperCandleTime => 'زمان بسته‌شدن کندل مرجع';
+
+  @override
+  String get paperPlanQuoteAt => 'زمان دادهٔ برنامه';
+
+  @override
+  String get paperMarketChart => 'نمودار کندل‌های یک‌ساعتهٔ فرصت';
+
+  @override
+  String get paperScannerBuild => 'بیلد اسکن فرصت';
+
+  @override
+  String get paperPlanEngineBuild => 'بیلد ساخت برنامه';
+
+  @override
+  String get paperApprovalBuild => 'بیلد تأیید برنامه';
+
+  @override
+  String get paperFillAssumptions =>
+      'ورود با قیمت بازشدن کندل کامل یک‌دقیقه‌ای بعد از تأیید و حداکثر یک درصد از حجم کندل شبیه‌سازی می‌شود. کارمزد و لغزش اعمال می‌شوند و عبور قیمت از حد ضرر می‌تواند زیان بیشتری ایجاد کند. اگر هر دو حد در یک کندل لمس شوند و ترتیب از قیمت بازشدن مشخص نباشد، شبیه‌ساز خروج با حد ضرر را فرض می‌کند.';
+
+  @override
+  String get paperLegacyFillTiming =>
+      'در این مدل، بسته‌شدن کندل روی حد ضرر یا پایین‌تر، ورود همان کندل را لغو می‌کند.';
+
+  @override
+  String get paperPartialFillProtection =>
+      'حفاظت هر بخش خرید از نخستین دقیقهٔ کامل پس از مشاهدهٔ اجرای همان بخش آغاز می‌شود.';
+
+  @override
+  String get paperFeeRate => 'کارمزد هر سمت';
+
+  @override
+  String get paperSlippageRate => 'لغزش هر سمت';
+
+  @override
+  String get paperAmountError => 'مبلغ مثبت با حداکثر ۸ رقم اعشار وارد کنید.';
+
+  @override
+  String get paperSaving => 'در حال دریافت پاسخ موتور…';
+
+  @override
+  String get paperReviewAgain => 'مرور دوباره';
+
+  @override
+  String get paperConfirm => 'تأیید ورود مجازی';
+
+  @override
+  String get paperConfirmationUnknown =>
+      'پاسخ تأیید دریافت نشد. رسید دوباره از موتور بررسی می‌شود.';
+
+  @override
+  String get paperReceipt => 'رسید معاملهٔ مجازی';
+
+  @override
+  String get paperViewReceipt => 'مشاهدهٔ رسید';
+
+  @override
+  String get paperViewPlan => 'مشاهدهٔ برنامهٔ تأییدشده';
+
+  @override
+  String get paperRecentReceipts => 'رسیدهای اخیر';
+
+  @override
+  String get paperOpenPositions => 'موقعیت‌های باز';
+
+  @override
+  String get paperPositionValue => 'ارزش با قیمت بازار';
+
+  @override
+  String get paperCostBasis => 'بهای تمام‌شده با کارمزد';
+
+  @override
+  String get paperFilledQuantity => 'حجم اجراشده';
+
+  @override
+  String get paperCancelEntry => 'لغو ماندهٔ ورود';
+
+  @override
+  String get paperConfirmedAt => 'زمان تأیید';
+
+  @override
+  String get paperEntryExpires => 'پایان مهلت ورود';
+
+  @override
+  String get paperEntryPending => 'در صف اجرا';
+
+  @override
+  String get paperEntryPartial => 'بخشی اجرا شده';
+
+  @override
+  String get paperEntryFilled => 'ورود کامل اجرا شد';
+
+  @override
+  String get paperEntryCancelled => 'ماندهٔ ورود لغو شد';
+
+  @override
+  String get paperEntryExpired => 'مهلت ورود پایان یافت';
+
+  @override
+  String get paperEventHistory => 'رویدادهای رسید';
+
+  @override
+  String get paperEventAccepted => 'تأیید و رزرو وجه';
+
+  @override
+  String get paperEventEntryFill => 'اجرای ورود';
+
+  @override
+  String get paperEventStopExit => 'خروج با حد ضرر';
+
+  @override
+  String get paperEventTargetExit => 'خروج با هدف سود';
+
+  @override
+  String get paperEventProtectionCancel => 'لغو مانده برای خروج محافظتی';
+
+  @override
+  String get paperEventFee => 'کارمزد';
+
+  @override
+  String get paperExecutionPrice => 'قیمت اجرای مجازی';
+
+  @override
+  String get paperExecutionCandle => 'زمان بازشدن کندل اجرا';
+
+  @override
+  String get paperEventCash => 'مبلغ رویداد';
+
+  @override
+  String get paperRealizedPnl => 'سود و زیان تحقق‌یافته';
+
+  @override
+  String get paperJournalTitle => 'ژورنال حساب مجازی';
+
+  @override
+  String get paperJournalEmpty => 'هنوز رسیدی در این صفحه ثبت نشده است.';
+
+  @override
+  String get paperJournalOlder => 'رسیدهای قدیمی‌تر';
+
+  @override
+  String get paperJournalNewest => 'تازه‌ترین رسیدها';
+
+  @override
+  String get paperJournalOpenQuantity => 'حجم باز';
+
+  @override
+  String get paperJournalFeesPaid => 'کارمزد پرداخت‌شده';
+
+  @override
+  String get paperJournalClosedPosition => 'موقعیت بسته‌شده';
+
+  @override
+  String get paperJournalNote => 'یادداشت شخصی';
+
+  @override
+  String get paperJournalNoteAdd => 'افزودن یادداشت';
+
+  @override
+  String get paperJournalNoteEdit => 'ویرایش یادداشت';
+
+  @override
+  String get paperJournalNoteSave => 'ذخیرهٔ یادداشت';
+
+  @override
+  String get paperJournalNoteSavedAt => 'زمان ذخیرهٔ یادداشت';
+
+  @override
+  String get paperJournalNoteConflict =>
+      'یادداشت در برگهٔ دیگری تغییر کرده است. برای دیدن نسخهٔ تازه، از ویرایش خارج شوید.';
+
+  @override
+  String get paperReplayTitle => 'بازپخش تصمیم';
+
+  @override
+  String get paperReplayPrevious => 'گام قبل';
+
+  @override
+  String get paperReplayNext => 'گام بعد';
+
+  @override
+  String get paperReplayObservation => 'مشاهدهٔ فرصت';
+
+  @override
+  String get paperReplayExecution => 'رویداد ثبت‌شده';
+
+  @override
+  String get paperReplayObservedAt => 'زمان ثبت مشاهده';
+
+  @override
+  String get paperReplayInputs => 'تعداد کندل‌های ورودی ۱ساعته';
+
+  @override
+  String get paperReplayInputOpen => 'بازشدن';
+
+  @override
+  String get paperReplayInputHigh => 'بیشینه';
+
+  @override
+  String get paperReplayInputLow => 'کمینه';
+
+  @override
+  String get paperReplayEntryRule => 'شرط ورود ثبت‌شده';
+
+  @override
+  String get paperReplaySnapshotHash => 'هش دادهٔ مشاهده';
+
+  @override
+  String get paperReplayRuleHash => 'هش نسخهٔ قواعد';
+
+  @override
+  String get paperReplayConfirmationPrice => 'قیمت مرجع در تأیید';
+
+  @override
+  String get paperReplayConfirmationUnavailable =>
+      'کندل بازبینی هنگام ثبت این رسید ذخیره نشده است.';
+
+  @override
+  String get paperReplayRevision => 'بازبینی کندل';
+
+  @override
+  String get paperRiskControls => 'کنترل ریسک حساب مجازی';
+
+  @override
+  String get paperPauseEntries => 'توقف ورود';
+
+  @override
+  String get paperResumeEntries => 'ازسرگیری ورود';
+
+  @override
+  String get paperEntriesPaused =>
+      'ورودهای مجازی متوقف‌اند. حفاظت از موقعیت‌های باز ادامه دارد.';
+
+  @override
+  String get paperReconciled =>
+      'مانده‌ها، رزروها، موقعیت‌ها و رویدادها با دفتر تطبیق دارند.';
+
+  @override
+  String get paperReconcileMismatch =>
+      'مغایرت در تطبیق حساب. ورود تازه متوقف است.';
+
+  @override
+  String get paperReconcileCash => 'مغایرت موجودی نقدی';
+
+  @override
+  String get paperReconcileReservations => 'مغایرت وجه رزروشده';
+
+  @override
+  String get paperReconcilePositions => 'مغایرت موقعیت یا بهای تمام‌شده';
+
+  @override
+  String get paperReconcileEvents => 'مغایرت جریان وجه یا کارمزد رویدادها';
+
+  @override
+  String get paperReconcileChecked => 'زمان تطبیق';
+
+  @override
+  String get paperReducePosition => 'کاهش یا بستن موقعیت';
+
+  @override
+  String get paperReduceAmount => 'حجم کاهش';
+
+  @override
+  String get paperReduceLot => 'گام حجم';
+
+  @override
+  String get paperReduceAmountError =>
+      'حجم مثبت، در حد موجودی موقعیت و مضرب گام حجم وارد کنید.';
+
+  @override
+  String get paperReduceRequest => 'ثبت درخواست کاهش';
+
+  @override
+  String get paperReduceDescription =>
+      'ماندهٔ ورود لغو می‌شود. کاهش با نخستین کندل کامل پس از درخواست اجرا می‌شود و در نبود داده منتظر می‌ماند.';
+
+  @override
+  String get paperReductionPending => 'درخواست کاهش در انتظار اجراست';
+
+  @override
+  String get paperReductionFilled => 'کاهش موقعیت اجرا شد';
+
+  @override
+  String get paperReductionSuperseded =>
+      'خروج محافظتی قبل از اجرای کاهش انجام شد';
+
+  @override
+  String get paperEventManualExit => 'خروج با درخواست کاربر';
+
+  @override
+  String get paperEventReduceRequest => 'ثبت درخواست کاهش موقعیت';
+
+  @override
+  String get paperEventReduceCancelEntry => 'لغو ماندهٔ ورود برای کاهش موقعیت';
+
+  @override
+  String get screenMarketSub =>
+      'قیمت پایانی آخرین کندل یک‌دقیقه‌ای جفت‌های اسپات USDT';
+
+  @override
+  String get marketObservedAt => 'زمان آخرین بررسی بازار';
+
+  @override
+  String get marketLoading => 'در حال دریافت دادهٔ دیدبان…';
+
+  @override
+  String get marketEmpty =>
+      'هیچ جفت اسپات USDT برای دریافت زنده پیکربندی نشده است.';
+
+  @override
+  String get marketDisconnected =>
+      'ارتباط دیدبان قطع شده است. آخرین دادهٔ تأییدشده نمایش داده می‌شود.';
+
+  @override
+  String get marketNoCandle =>
+      'هنوز کندل بسته‌شده‌ای از جریان زنده ثبت نشده است.';
+
+  @override
+  String get marketClosePrice => 'قیمت پایانی';
+
+  @override
+  String get marketClosedAt => 'زمان بسته‌شدن کندل';
+
+  @override
+  String get marketAvailableAt => 'زمان در دسترس بودن داده';
+
+  @override
+  String get marketScanOpen => 'بررسی این نسخه در دیدبان';
+
+  @override
+  String get marketScanTitle => 'بررسی آخرین کندل یک‌ساعته';
+
+  @override
+  String get marketScanHelp =>
+      'برای نماد انتخابی، همین نسخه باید بک‌تست یک‌ساعته داشته باشد.';
+
+  @override
+  String get marketScanSymbol => 'نماد برای بررسی';
+
+  @override
+  String get marketScanReady => 'بررسی فرصت';
+
+  @override
+  String get marketScanRunning => 'در حال بررسی…';
+
+  @override
+  String get marketScanWaitForFeed =>
+      'برای بررسی، نمادی با دادهٔ تازه انتخاب کنید.';
+
+  @override
+  String get marketScanRecorded => 'فرصت در دیدبان ثبت شد.';
+
+  @override
+  String get marketScanNoMatch => 'در آخرین کندل، شرط ورود برقرار نبود.';
+
+  @override
+  String get marketScanIncomplete =>
+      'تاریخچهٔ کندل‌های کامل برای بررسی این نسخه کافی نیست.';
+
+  @override
+  String get marketScanUnexpected => 'نتیجهٔ بررسی از موتور دریافت نشد.';
+
+  @override
+  String get marketOpportunityAllSymbols => 'همهٔ نمادها';
+
+  @override
+  String get marketOpportunityOnlyCurrent => 'فقط فرصت‌های معتبر';
+
+  @override
+  String get marketOpportunityNoFiltered => 'فرصتی مطابق این فیلترها نیست.';
+
+  @override
+  String get marketBackgroundTitle => 'اسکن‌های خودکار یک‌ساعته';
+
+  @override
+  String get marketBackgroundEnable => 'فعال‌سازی اسکن خودکار';
+
+  @override
+  String get marketBackgroundEnabled =>
+      'اسکن خودکار این نسخه برای نماد فعال است.';
+
+  @override
+  String get marketBackgroundOccupied =>
+      'برای این نماد نسخهٔ دیگری فعال است. از فهرست اسکن‌ها آن را مدیریت کنید.';
+
+  @override
+  String get marketBackgroundPause => 'توقف اسکن';
+
+  @override
+  String get marketBackgroundPausing => 'در حال توقف…';
+
+  @override
+  String get marketBackgroundWaiting => 'در انتظار جریان تازهٔ داده';
+
+  @override
+  String get marketBackgroundFirst => 'در انتظار نخستین بررسی';
+
+  @override
+  String get marketBackgroundLast => 'نتیجهٔ بررسی کندل بسته‌شده در';
+
+  @override
+  String get marketOpportunitiesTitle => 'فرصت‌های ثبت‌شده';
+
+  @override
+  String get marketOpportunitiesEmpty =>
+      'هنوز فرصتی ثبت نشده است. بررسی را از یک نسخهٔ بک‌تست‌شده در کتابخانه آغاز کنید.';
+
+  @override
+  String get marketOpportunityCurrent => 'در بازهٔ اعتبار';
+
+  @override
+  String get marketOpportunityInactive => 'فعلاً نامعتبر';
+
+  @override
+  String get marketOpportunityExpires => 'پایان اعتبار';
+
+  @override
+  String get marketOpportunityPrice => 'قیمت مرجع کندل';
+
+  @override
+  String get marketOpportunityEntry => 'شرط ورود نسخه برقرار بود';
+
+  @override
+  String get marketOpportunityRegimeA => 'شرط ورود شاخهٔ A برقرار بود';
+
+  @override
+  String get marketOpportunityRegimeB => 'شرط ورود شاخهٔ B برقرار بود';
+
+  @override
+  String get marketOpportunityRule => 'مشاهدهٔ نسخه';
+
+  @override
+  String get marketOpportunityReport => 'مشاهدهٔ بک‌تست';
+
+  @override
+  String get navGroupReview => 'بررسی';
+
+  @override
+  String get navGroupControl => 'کنترل';
 
   @override
   String get navSettings => 'تنظیمات';
 
   @override
-  String get phase2 => 'فاز ۲';
-
-  @override
   String get openMenu => 'باز کردن منو';
 
   @override
-  String get statusMode => 'حالت اجرا';
+  String get statusModeResearch => 'پژوهش · بدون سفارش واقعی';
 
   @override
-  String get statusModeResearch => 'پژوهش · بدون سفارش واقعی';
+  String get statusModePaper => 'معاملهٔ مجازی';
+
+  @override
+  String get statusModeLive => 'معاملهٔ واقعی';
+
+  @override
+  String get statusModeUnknown => 'حالت اجرا نامشخص';
 
   @override
   String get statusAccounting => 'ارز مبنا';
@@ -102,6 +646,17 @@ class L10nFa extends L10n {
   String get statusLiveReconnecting => 'در حال اتصال دوباره';
 
   @override
+  String get statusLiveUnknown => 'نامشخص';
+
+  @override
+  String get statusLiveUnavailable => 'در دسترس نیست';
+
+  @override
+  String statusBarAge(String state, int seconds) {
+    return '$state · $seconds ثانیه از آخرین شمع';
+  }
+
+  @override
   String get statusEngine => 'موتور Go';
 
   @override
@@ -112,6 +667,9 @@ class L10nFa extends L10n {
 
   @override
   String get statusEngineDown => 'قطع';
+
+  @override
+  String get statusEngineUnknown => 'نامشخص';
 
   @override
   String statusWorkers(int count) {
@@ -129,7 +687,12 @@ class L10nFa extends L10n {
 
   @override
   String get engineUnreachable =>
-      'موتور در دسترس نیست. آخرین وضعیت نمایش داده می‌شود؛ دوباره تلاش می‌کنیم…';
+      'موتور در دسترس نیست. در حال تلاش برای اتصال دوباره…';
+
+  @override
+  String engineLastSeen(String time) {
+    return 'موتور در دسترس نیست. آخرین وضعیت در $time دریافت شد. در حال تلاش برای اتصال دوباره…';
+  }
 
   @override
   String get screenHomeSub =>
@@ -1320,10 +1883,19 @@ class L10nFa extends L10n {
   String get libHistory => 'رویدادها';
 
   @override
+  String get libHistoryNewer => 'رویدادهای جدیدتر';
+
+  @override
+  String get libHistoryOlder => 'رویدادهای قدیمی‌تر';
+
+  @override
   String get actorUser => 'کاربر';
 
   @override
   String get actorSystem => 'سیستم';
+
+  @override
+  String get actorUnknown => 'ثبت‌کننده نامشخص';
 
   @override
   String lSubtitle(String hour, int bars) {

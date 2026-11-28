@@ -25,12 +25,6 @@ class NavHeader extends NavEntry {
   final String Function(L10n) label;
 }
 
-/// Phase 2 item: shown disabled with a badge, never navigable.
-class NavSoon extends NavEntry {
-  const NavSoon(this.label);
-  final String Function(L10n) label;
-}
-
 abstract final class Dest {
   static final home = NavDest('/', (l) => l.navHome, (l) => l.screenHomeSub);
   static final library = NavDest('/library', (l) => l.navLibrary, (l) => l.screenLibrarySub);
@@ -42,11 +36,13 @@ abstract final class Dest {
   static final learning = NavDest('/learning', (l) => l.navLearning, (l) => l.screenLearningSub);
   static final chart = NavDest('/chart', (l) => l.navChart, (l) => l.screenChartSub);
   static final data = NavDest('/data', (l) => l.navData, (l) => l.screenDataSub);
+  static final market = NavDest('/market', (l) => l.navMarket, (l) => l.screenMarketSub);
+  static final paper = NavDest('/paper', (l) => l.navPaper, (l) => l.screenPaperSub);
   static final settings = NavDest('/settings', (l) => l.navSettings, (l) => l.screenSettingsSub);
 
-  static final all = [home, library, builder, queue, reports, compare, pnl, learning, chart, data, settings];
+  static final all = [home, library, builder, queue, reports, compare, pnl, learning, chart, data, market, paper, settings];
 
-  /// Sidebar order and grouping, from design/screens/Sidebar.dc.html.
+  /// Published routes grouped by the tasks available in the research workspace.
   static final sidebar = <NavEntry>[
     NavLink(home),
     NavHeader((l) => l.navGroupResearch),
@@ -55,17 +51,15 @@ abstract final class Dest {
     NavLink(queue),
     NavLink(reports),
     NavLink(compare),
-    NavLink(pnl),
     NavHeader((l) => l.navGroupLearning),
     NavLink(learning),
+    NavHeader((l) => l.navGroupReview),
     NavLink(chart),
+    NavLink(pnl),
+    NavLink(market),
+    NavLink(paper),
+    NavHeader((l) => l.navGroupControl),
     NavLink(data),
-    NavHeader((l) => l.navGroupLater),
-    NavSoon((l) => l.navPaper),
-    NavSoon((l) => l.navRisk),
-    NavSoon((l) => l.navJournal),
-    NavSoon((l) => l.navMarket),
-    NavHeader((l) => l.navGroupSystem),
     NavLink(settings),
   ];
 

@@ -61,9 +61,9 @@ func TestFeaturesAndLabelsOnlySeeThePast(t *testing.T) {
 	more, err := feature.Samples(r.Features, 4, append(bars[:300:300], Bars(800, 2)[300:]...), t0, asOf, asOf)
 	require.NoError(t, err)
 	require.Equal(t, s, more)
-	a1, err := Fit(r, s, t0, asOf, asOf, Meta{})
+	a1, err := Fit(context.Background(), r, s, t0, asOf, asOf, Meta{})
 	require.NoError(t, err)
-	a2, err := Fit(r, more, t0, asOf, asOf, Meta{})
+	a2, err := Fit(context.Background(), r, more, t0, asOf, asOf, Meta{})
 	require.NoError(t, err)
 	require.Equal(t, a1.ID, a2.ID, "same past, same model")
 }
@@ -76,7 +76,7 @@ func TestFittingOnAllHistoryIsCaught(t *testing.T) {
 	trainEnd := bars[250].OpenTime
 	_, err = feature.FitScaler(all, trainEnd)
 	require.ErrorIs(t, err, feature.ErrLookAhead, "a scaler fit on all history is rejected")
-	_, err = Fit(r, all, t0, trainEnd, trainEnd, Meta{})
+	_, err = Fit(context.Background(), r, all, t0, trainEnd, trainEnd, Meta{})
 	require.ErrorIs(t, err, feature.ErrLookAhead)
 	_, err = WalkForward(context.Background(), r, map[string][]data.Bar{"BTCUSDT": bars}, []Step{{From: t0, To: bars[400].OpenTime, AsOf: trainEnd}}, Meta{})
 	require.ErrorIs(t, err, feature.ErrLookAhead, "a step cannot train past the time it serves from")
@@ -89,7 +89,7 @@ func TestSavedModelReproducesPredictions(t *testing.T) {
 		asOf := bars[400].OpenTime
 		s, err := feature.Samples(r.Features, r.Horizon, bars, t0, asOf, asOf)
 		require.NoError(t, err)
-		a, err := Fit(r, s, t0, asOf, asOf, Meta{Algorithm: "x", Seed: 42})
+		a, err := Fit(context.Background(), r, s, t0, asOf, asOf, Meta{Algorithm: "x", Seed: 42})
 		require.NoError(t, err)
 		b, err := a.Save()
 		require.NoError(t, err)
@@ -111,17 +111,21 @@ func TestSavedModelReproducesPredictions(t *testing.T) {
 
 func TestModelsLearnTheSignal(t *testing.T) {
 	bars := Bars(3000, 4)
+	for i := range bars {
+		// With immediate publication, the next hourly return is executable.
+		bars[i].AvailableAt = bars[i].CloseTime
+	}
 	asOf := bars[2000].OpenTime
 	r := Ridge()
 	s, err := feature.Samples(r.Features, 1, bars, t0, asOf, asOf)
 	require.NoError(t, err)
-	a, err := Fit(r, s, t0, asOf, asOf, Meta{})
+	a, err := Fit(context.Background(), r, s, t0, asOf, asOf, Meta{})
 	require.NoError(t, err)
 	require.Greater(t, a.Weights[0], 0.0, "momentum weight is positive")
 
 	lg := r
 	lg.Model, lg.Entry = "logistic", 0.5
-	l, err := Fit(lg, s, t0, asOf, asOf, Meta{})
+	l, err := Fit(context.Background(), lg, s, t0, asOf, asOf, Meta{})
 	require.NoError(t, err)
 	hit, n := 0, 0
 	for i := 2000; i < len(bars)-1; i++ {
@@ -147,12 +151,65 @@ func TestWalkForwardTrainsEachStepOnItsPast(t *testing.T) {
 	require.Len(t, ms, 2)
 	require.Less(t, ms[0].Samples, ms[1].Samples, "expanding window")
 	require.Equal(t, steps[1].AsOf, ms[1].AsOf)
+	costs := feature.LabelCosts{Fee: 1000, Slippage: 500}
+	net, err := WalkForward(context.Background(), r, map[string][]data.Bar{"BTCUSDT": bars}, steps[:1], Meta{Algorithm: "ridge", LabelCosts: costs})
+	require.NoError(t, err)
+	require.Equal(t, &costs, net[0].LabelCosts)
+	require.Less(t, net[0].Intercept, ms[0].Intercept, "the production fit must train on net returns")
+	require.NotEqual(t, ms[0].ID, net[0].ID)
 
-	_, err = Fit(r, nil, t0, t0, t0, Meta{})
+	_, err = Fit(context.Background(), r, nil, t0, t0, t0, Meta{})
 	require.ErrorIs(t, err, ErrTooFew)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 	_, err = WalkForward(ctx, r, map[string][]data.Bar{"BTCUSDT": bars}, steps, Meta{})
 	require.True(t, errors.Is(err, context.Canceled))
+}
+
+// Fit is also a public boundary: callers cannot relabel a wider training window.
+func TestFitRejectsInvalidSamples(t *testing.T) {
+	r := Ridge()
+	bs := Bars(150, 8)
+	end := bs[100].OpenTime
+	rows, err := feature.Samples(r.Features, r.Horizon, bs, t0, end, end)
+	require.NoError(t, err)
+	for name, change := range map[string]func([]feature.Sample){
+		"before window":  func(s []feature.Sample) { s[0].At = t0.Add(-time.Hour) },
+		"at window end":  func(s []feature.Sample) { s[0].At = end },
+		"wrong width":    func(s []feature.Sample) { s[0].X = []float64{1} },
+		"nan label":      func(s []feature.Sample) { s[0].Y = math.NaN() },
+		"infinite label": func(s []feature.Sample) { s[0].Y = math.Inf(1) },
+	} {
+		t.Run(name, func(t *testing.T) {
+			copyRows := append([]feature.Sample(nil), rows...)
+			change(copyRows)
+			require.NotPanics(t, func() {
+				_, err := Fit(context.Background(), r, copyRows, t0, end, end, Meta{})
+				require.Error(t, err)
+			})
+		})
+	}
+	_, err = Fit(context.Background(), r, rows, t0, end.Add(time.Hour), end, Meta{})
+	require.ErrorIs(t, err, feature.ErrLookAhead)
+}
+
+// Editing a not-yet-observed dependency cannot alter a model fitted in the past.
+func TestDelayedDependenciesCannotChangePastModel(t *testing.T) {
+	r := Ridge()
+	bs := Bars(500, 12)
+	end := bs[300].OpenTime
+	bs[250].AvailableAt = bs[400].OpenTime
+	fit := func(bars []data.Bar) model.Artifact {
+		samples, err := feature.Samples(r.Features, r.Horizon, bars, t0, end, end)
+		require.NoError(t, err)
+		a, err := Fit(context.Background(), r, samples, t0, end, end, Meta{})
+		require.NoError(t, err)
+		return a
+	}
+	before := fit(bs)
+	bs[250].C.V *= 2
+	after := fit(bs)
+	require.Equal(t, before, after)
+	require.Equal(t, model.TrainingVersion, before.TrainingVersion)
 }

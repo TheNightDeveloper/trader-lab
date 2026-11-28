@@ -2,12 +2,12 @@
 
 A personal research platform for crypto **spot** trading algorithms. A Go engine imports
 market data, runs deterministic simulations and evaluates strategies. A Flutter Web UI
-(Persian, RTL) shows the results. **No real orders exist in v1.** There is no account and
-no API key.
+(Persian, RTL) shows the results. Paper trades use a local virtual USDT account and
+public market data. All fills are simulated.
 
-> Status: milestones M0–M3 are done (data, simulator, evaluation, reports, comparison,
-> P&L calculator). Experiments, search, the job queue and the learning loop (M4+) are not
-> built yet. See [docs/PROGRESS.md](docs/PROGRESS.md).
+> Status: M0–M6 are implemented. The **P0 stabilization gate passed** for
+> research candidate `e34975a`. See [phase progress](docs/PROGRESS.md), [P1 progress](docs/P1_STATUS.md),
+> [P0 verification](docs/P0_STATUS.md) and [the master plan](docs/Trading_Lab_Master_Plan_FA.md).
 
 ## What works today
 
@@ -19,9 +19,28 @@ no API key.
 | P&L calculator | Recalculate a stored report or a single trade under different fees or slippage |
 | Chart | Candles with decision markers |
 | Strategies | `hold-cash`, `buy-and-hold`, `trend-ema`, `mean-rev-bands` |
+| Market watch | Scan closed hourly candles with a backtested rule and inspect its recorded opportunities |
+| Paper | Review and confirm entries, manage positions, reconcile the account and replay journal decisions |
 
-Screens named "Library", "Builder", "Queue" and "Learning" in the sidebar are placeholders
-until M4.
+The Library, six-step Experiment Builder, streamed Run Queue and Learning screen are
+implemented. Learning includes bounded retraining, forward tests and human-approved
+promotion/rollback for research strategies.
+
+The first P0 batch fixes research admission, baseline warm-up, exact comparison, protection
+markers and calculator request races. Shared dataset pickers search and page the server
+catalog, refresh after import and restore saved selections by dataset ID.
+The second P0 batch enforces causal fills and availability-safe history/resampling.
+The FIX-04 batch separates period PnL from opening-cohort lifetime PnL, records actual
+model creation/freeze/trade-start, and requires complete per-symbol forward coverage.
+New evaluations use p0.3. Legacy data/reports remain readable with their recorded semantics;
+legacy learning recommendations require a fresh cycle before promotion.
+
+FIX-05 pins new dataset versions to exact candle revisions, makes cancellation durable
+across worker races/restarts, and closes unfinished learning candidates atomically.
+The additive migration runs on engine startup. New snapshot-format datasets require this
+engine version; existing dataset/report IDs and results are preserved. See P0_STATUS.md
+for remaining release work and rollback limits.
+
 
 ## Layout
 

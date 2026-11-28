@@ -29,13 +29,13 @@
   "fills": [
     {
       "decision_id": 1,
-      "time": "2024-01-01T00:01:00Z",
+      "time": "2024-01-01T00:02:00Z",
       "instrument": "BTCUSDT",
       "side": "buy",
       "kind": "signal",
-      "qty": "4.94802000",
-      "ref_price": "101.00000000",
-      "price": "101.05050000",
+      "qty": "4.89951000",
+      "ref_price": "102.00000000",
+      "price": "102.05100000",
       "ref_value": "499.75002000 USDT",
       "value": "499.99989501 USDT",
       "slippage": "0.24987501 USDT",
@@ -48,52 +48,52 @@
   "trades": [
     {
       "instrument": "BTCUSDT",
-      "opened_at": "2024-01-01T00:01:00Z",
+      "opened_at": "2024-01-01T00:02:00Z",
       "closed_at": null,
-      "qty": "4.94802000",
+      "qty": "4.89951000",
       "entry_ref": "499.75002000 USDT",
       "exit_ref": "0.00000000 USDT",
-      "gross": "17.31807000 USDT",
+      "gross": "12.24877500 USDT",
       "slippage": "0.24987501 USDT",
       "fees": "0.49999990 USDT",
-      "net": "16.56819509 USDT",
-      "open_qty": "4.94802000",
-      "mark_value": "517.06809000 USDT"
+      "net": "11.49890009 USDT",
+      "open_qty": "4.89951000",
+      "mark_value": "511.99879500 USDT"
     }
   ],
   "equity": [
     {
-      "time": "2024-01-01T00:01:00Z",
+      "time": "2024-01-01T00:01:02Z",
       "equity": "1000.00000000 USDT"
     },
     {
-      "time": "2024-01-01T00:02:00Z",
-      "equity": "1001.72413509 USDT"
+      "time": "2024-01-01T00:02:02Z",
+      "equity": "1000.00000000 USDT"
     },
     {
-      "time": "2024-01-01T00:03:00Z",
-      "equity": "1006.67215509 USDT"
+      "time": "2024-01-01T00:03:02Z",
+      "equity": "1001.69988009 USDT"
     },
     {
-      "time": "2024-01-01T00:04:00Z",
-      "equity": "1011.62017509 USDT"
+      "time": "2024-01-01T00:04:02Z",
+      "equity": "1006.59939009 USDT"
     },
     {
-      "time": "2024-01-01T00:05:00Z",
-      "equity": "1016.56819509 USDT"
+      "time": "2024-01-01T00:05:02Z",
+      "equity": "1011.49890009 USDT"
     }
   ],
   "balances": [
     {
       "asset": "BTC",
-      "amount": "4.94802000 BTC"
+      "amount": "4.89951000 BTC"
     },
     {
       "asset": "USDT",
       "amount": "499.50010509 USDT"
     }
   ],
-  "final_equity": "1016.56819509 USDT",
+  "final_equity": "1011.49890009 USDT",
   "ambiguous_bars": 0,
   "bars": 5
 }

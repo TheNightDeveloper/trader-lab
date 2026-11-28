@@ -37,10 +37,5 @@ final algorithmsProvider = FutureProvider<ListAlgorithmsResponse>(
   (ref) => ref.watch(libraryClientProvider).listAlgorithms(ListAlgorithmsRequest()),
 );
 
-final lifecycleEventsProvider = FutureProvider.family<ListLifecycleEventsResponse, String>(
-  (ref, versionId) =>
-      ref.watch(libraryClientProvider).listLifecycleEvents(ListLifecycleEventsRequest(versionId: versionId)),
-);
-
 /// The version new experiments use: the newest one that is not retired.
 AlgorithmVersion? usableVersion(Algorithm a) => a.versions.where((v) => v.state != 'retired').firstOrNull;

@@ -130,11 +130,26 @@ func TestExperimentAndLibraryServices(t *testing.T) {
 	v := trend.GetVersions()[0]
 	require.Equal(t, "research", v.GetState())
 	require.NotContains(t, v.GetNextStates(), "active", "no jump from research to active")
-	_, err = lc.SetVersionState(ctx, connect.NewRequest(&labv1.SetVersionStateRequest{VersionId: v.GetId(), State: "active"}))
+	initialRevision := trend.GetLifecycleRevision()
+	_, err = lc.SetVersionState(ctx, connect.NewRequest(&labv1.SetVersionStateRequest{VersionId: v.GetId(), State: "active", ExpectedRevision: &initialRevision}))
 	require.Equal(t, connect.CodeFailedPrecondition, connect.CodeOf(err))
+	// Missing optional revision is distinct from an explicitly authorized zero.
+	_, err = lc.SetVersionState(ctx, connect.NewRequest(&labv1.SetVersionStateRequest{VersionId: v.GetId(), State: "validation"}))
+	require.Equal(t, connect.CodeFailedPrecondition, connect.CodeOf(err))
+	revision := trend.GetLifecycleRevision()
 	for _, s := range []string{"validation", "forward_test", "active"} {
-		_, err = lc.SetVersionState(ctx, connect.NewRequest(&labv1.SetVersionStateRequest{VersionId: v.GetId(), State: s, Note: "by test"}))
+		_, err = lc.SetVersionState(ctx, connect.NewRequest(&labv1.SetVersionStateRequest{VersionId: v.GetId(), State: s, Note: "by test", ExpectedRevision: &revision}))
+		revision++
 		require.NoError(t, err, s)
+	}
+	_, err = lc.SetVersionState(ctx, connect.NewRequest(&labv1.SetVersionStateRequest{VersionId: v.GetId(), State: "stopped", ExpectedRevision: &initialRevision}))
+	require.Equal(t, connect.CodeFailedPrecondition, connect.CodeOf(err), "a stale tab cannot stop the new active version")
+	refreshed, err := lc.ListAlgorithms(ctx, connect.NewRequest(&labv1.ListAlgorithmsRequest{}))
+	require.NoError(t, err)
+	for _, algorithm := range refreshed.Msg.Algorithms {
+		if algorithm.Id == "trend-ema" {
+			require.Equal(t, revision, algorithm.LifecycleRevision)
+		}
 	}
 	ev, err := lc.ListLifecycleEvents(ctx, connect.NewRequest(&labv1.ListLifecycleEventsRequest{VersionId: v.GetId()}))
 	require.NoError(t, err)

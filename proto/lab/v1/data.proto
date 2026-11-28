@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package lab.v1;
 
+import "lab/v1/workspace.proto";
+
 // DataService: datasets, coverage, quality issues, live feed, archive import.
 service DataService {
   rpc GetOverview(GetOverviewRequest) returns (GetOverviewResponse);
@@ -22,6 +24,15 @@ message GetOverviewResponse {
   int64 outage_seconds_today = 4;
   int64 storage_bytes = 5;
   repeated string symbols = 6; // instruments the engine knows
+  repeated ResearchCapability research_capabilities = 7; // affirmative execution permission per symbol
+}
+
+// Research execution capability is independent of data import and chart availability.
+message ResearchCapability {
+  string symbol = 1;
+  bool supported = 2;
+  string reason = 3; // user-facing explanation when unsupported
+  InstrumentKey instrument = 4; // canonical for registered markets; legacy symbol above remains available
 }
 
 message Dataset {
@@ -41,6 +52,11 @@ message Dataset {
 message ListDatasetsRequest {
   int32 page_size = 1;
   int32 offset = 2;
+  string query = 3; // literal, case-insensitive text across symbol, timeframe and ID
+  string symbol = 4; // exact pair when the picker already scopes it
+  bool research_only = 5; // exclude pairs without research capability
+  repeated string ids = 6; // exact saved selections, combined with the other filters
+  string timeframe = 7; // exact timeframe, when selected independently of the search text
 }
 
 message ListDatasetsResponse {

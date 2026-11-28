@@ -2,9 +2,784 @@
 
 Update at the end of every session.
 
-## Current milestone
-M6 — Chart, hardening, release: **done** (2026-10-28). **v1 release gate passed** (below).
-Next: Phase 2 (plan §6), when you decide.
+## P3 correctness and performance follow-up (2026-11-26)
+
+New Paper plans use `spot-closed-1m-v2`. Entry price eligibility uses the candle
+open, and each partial fill starts protection on its own first eligible
+minute. Older receipts still execute with their recorded model and spot
+specification. Confirming another plan for the same opportunity reports a
+conflict, while a retry with the accepted plan hash recovers its receipt.
+
+The scanner sizes its read window from the compiled rule and keeps up to 24
+candles for review. The worker cleared 60 queued protection candles on each
+of four receipts within a single four-second cycle in the PostgreSQL test.
+Chrome passed J1, J2 and J5 on the release build. The alternate plan displayed
+the conflict, the replay tail exposed the new fill, and the historical step
+made one request over 31 seconds.
+
+On the local PostgreSQL instance, 45 samples per case ran account reads
+alongside a confirmation in a transaction that was rolled back after reserving
+cash. The synthetic history contained two fill events and five postings per
+closed receipt. All numbers are p95 in milliseconds.
+
+| Closed receipts | Concurrent account reads | Account read | Account lock acquisition | Confirmation transaction |
+| ---: | ---: | ---: | ---: | ---: |
+| 1,000 | 1 | 13.38 | 0.52 | 16.15 |
+| 1,000 | 2 | 11.60 | 0.52 | 13.18 |
+| 10,000 | 1 | 101.33 | 0.52 | 119.49 |
+| 10,000 | 2 | 100.19 | 0.52 | 100.02 |
+
+The sample showed increasing history cost and submillisecond lock acquisition
+with up to two account readers. Paper continues to reconcile against the
+authoritative ledger at confirmation and execution. Recheck latency if local
+histories grow past the measured range or compete with a busy execution worker.
+
+## P3 local acceptance (2026-11-25)
+
+Runtime candidate `a02c848` completed the Paper phase acceptance checks.
+Chrome 158 exercised the release web build against the Go engine and
+PostgreSQL with a controlled clock and public-feed fixture.
+
+- **J1.** Funded a Paper account, checked the hourly dataset, saved a Donchian
+  template, ran its backtest, read the report evidence and enabled the scan.
+  The engine recorded an opportunity while the browser tab was closed.
+- **J2.** Filtered opportunities, read the entry condition and reviewed the
+  plan's risk, cost and 24-candle chart. Concurrent confirmations in two tabs
+  and a lost confirmation response recovered one receipt. Back navigation
+  and refresh kept that receipt. PostgreSQL also tested account-wide admission
+  against simultaneous confirmations for two symbols.
+- **J5.** A stale feed and an interrupted plan read each disabled confirmation
+  while retaining the review. Restart kept the same pending receipt and exact
+  cash reservation. On reconnection the server restored actions and the
+  receipt subsequently recorded a partial fill, cancellation and protective exit.
+- The journal matched posted fees and realized P&L and retained the saved note
+  after reload. Replay showed the recorded chart and advanced through review,
+  approval and fill without revealing the later exit in earlier steps.
+  Browser checks covered 390, 768, 1024 and 1440 pixels with zero page errors.
+
+Required PostgreSQL passed the Linux Go race suite and Golden scenarios.
+These checks covered the cancel/fill race, risk-reducing exits with entry
+paused, and the outbound order guard. Go lint, vet, the depguard probe, Dart
+analysis, Flutter tests, the release web build and Buf compatibility passed.
+The generated Go, Dart and SQL matched the committed files byte for byte.
+This is local verification using controlled market data.
+
+## P3 Paper plan chart and provenance (2026-11-25)
+
+The plan review plots up to 24 hourly candles from the recorded opportunity.
+It displays the review levels on the chart and gives the candle time, the plan
+quote time and the fill assumption below it. Decision replay uses the same
+bounded historical view. New opportunities, plans and approvals retain their
+respective engine build hashes.
+
+## P3 Personal journal notes (2026-11-25)
+
+A receipt now accepts an optional personal note. The engine records separate
+note revisions, rejects stale edits from another tab, and recovers an exact
+retry. Clearing a note preserves earlier revisions. Notes stay out of the
+recorded decision and execution replay.
+
+## P3 Opportunity review (2026-11-25)
+
+The watchlist can filter the recorded opportunities by symbol and validity.
+An expanded opportunity shows the entry condition from its exact saved version.
+Refreshing the watchlist retains the previous rows and suspends order review
+until a fresh server response is available. Dart analysis and the web release
+build passed.
+
+## P3 Decision replay (2026-11-25)
+
+Each journal trade and receipt can open a read-only replay. The timeline starts
+with the recorded observation and entry rule, then shows the immutable risk
+review, followed by individual execution events. A replay cursor is scoped to
+its receipt and the response carries only the selected step.
+
+The engine checks the observation digest against both the stored input and the
+review and reads the recorded rule version. New approvals retain the actual
+market candle used for final revalidation in the reservation transaction.
+Receipts made before that capture still show their recorded plan and events.
+
+A PostgreSQL integration test revises the public candle after confirmation,
+then checks that observation, review and approval retain their own original
+values. It also covers a cancelled receipt and an approval without a recorded
+confirmation candle.
+
+## P3 Paper journal (2026-11-25)
+
+Paper now links to a paginated journal of the account's durable receipts.
+Each row shows the current entry state, open quantity, paid fees and realized
+P&L. PostgreSQL sums exact execution values on the server and returns a
+stable receipt cursor. A receipt remains accessible with its event history
+after refresh, fill, cancellation or close.
+
+The PostgreSQL execution test covers the journal before and after closing a
+partially filled position, reconciles the fee and P&L figures against the
+execution/ledger evidence, and verifies that the next page has no duplicate.
+
+## P3 Reduce-only controls and ledger reconciliation (2026-11-25)
+
+The Paper account can pause entry confirmation and pending entry fills.
+Resumption skips candles opened during the pause. A manual reduction pins the
+observed position revision and lot-aligned quantity, cancels unused entry work,
+and survives disconnection until a qualifying closed candle is available.
+Retries recover the same request. A protective exit that takes precedence
+settles the queued reduction without selling twice. Partial reductions allocate
+exact cost basis and leave protection on the remaining quantity.
+
+The account snapshot reports cash, reservation, position and event checks
+against postings and execution history, with the time and durable event ID
+of the check. A mismatch inhibits new risk. A reconciled position remains
+eligible to reduce when the entry pause or an unrelated cash mismatch is active.
+The Paper UI shows the checks and pause, accepts a partial or full reduction,
+and displays the durable pending or terminal outcome in the receipt.
+
+The PostgreSQL suite passed. Focused tests repeated duplicate submissions,
+stale-feed and paused-entry reduction, basis allocation, cash drift admission,
+and protective supersession. Chrome paused entry at 1440 pixels, requested a
+partial reduction using Persian digits with the feed down, and recovered the
+filled receipt at 390 pixels against seeded Go and PostgreSQL. Buf compatibility,
+Go lint and vet, Dart analysis, the web release build and 57 existing Flutter
+tests passed.
+
+Portfolio journal, decision replay and the complete J1/J2/J5 acceptance
+passes remain open.
+
+## P3 Paper entries and protective exits (2026-11-25)
+
+Confirmation locks the account, revalidates the reviewed hash and market,
+checks aggregate exposure and open loss, and commits the receipt, cash
+reservation and event together. The opportunity has one receipt even when
+confirmation is repeated in another tab or its response is lost. Active entries
+and positions are limited to one per symbol and four per account.
+
+The engine processes the durable queue from eligible REST candles opened after
+confirmation. Simulated entry participation is capped at 1% of minute volume.
+Each partial fill updates the cursor, balance, position and balanced postings
+atomically. Cancellation releases only the unused reservation. Protective exits
+remain active after cancellation or expiry. The OHLC model uses the adverse
+stop when intrabar order is ambiguous, and marks a loss gap at its observed open.
+Protection begins on the first full minute opened after the fill was observable.
+The exit realizes net proceeds less the actual entry cost basis.
+
+The workspace links review to its durable receipt, shows pending, partial,
+filled, cancelled and expired states, and lists open positions with a typed
+unavailable mark when current pricing is missing. Receipt events expose exact
+costs and realized PnL.
+
+Chrome with seeded PostgreSQL data recovered a committed receipt after dropping
+the confirmation response, displayed a partial fill, cancelled the remainder at
+390 pixels, and reopened the protective exit and realized PnL. PostgreSQL-required
+Go tests passed, including 12 repetitions of the concurrent confirmation and
+cancel/fill cases. The checks reconciled final cash, base quantity and fees to
+ledger postings. Go lint and vet, Buf compatibility, Dart analysis, the web
+release build and all 57 existing Flutter tests passed.
+
+Manual reduction, reconciliation, portfolio journal and replay, and the complete
+J1/J2/J5 acceptance passes remain open.
+
+## P3 Paper account and immutable plan review (2026-11-25)
+
+Paper setup funds one local USDT account. Account, initial policy and the
+balanced funding posting commit together. A retry with the same setup does
+not fund the account twice. The user sets the per-trade loss, aggregate risk
+and spot exposure limits during setup.
+
+An eligible opportunity can open a fixed-point spot review
+with a user-supplied stop and target. The server checks the live minute
+candle, caps the entry against the opportunity, sizes to the lot and budget,
+and rejects excessive cost. The archived review pins its evidence, candle
+revision, policy, account revision, price limits and expiry. The same hash
+reopens the recorded terms, with a server restriction when the review expires
+or market/account eligibility changes.
+
+Chrome created the Paper account with Persian-digit inputs, reviewed the
+server's risk and costs at 1440 pixels and reopened the same plan at 390
+pixels against Go and PostgreSQL with seeded market data. The PostgreSQL-required
+Go suite, Buf compatibility, Dart analysis, web release build and 57 existing
+Flutter tests passed. The docked sidebar keeps connection status above navigation.
+
+Order confirmation, atomic reservation, execution and cancellation, position
+management, reconciliation and the journal remain open. P3 acceptance still
+needs the complete J1/J2/J5 workflows and ledger/fill race checks.
+
+## P3 background opportunity scans (2026-11-25)
+
+The Library-to-watchlist flow can enable one tested rule version per spot
+symbol. The engine stores the subscription and scan cursor in PostgreSQL and
+checks the latest closed hour every 30 seconds. It skips stale feeds and
+retries incomplete data. A completed scan and its cursor commit together.
+Pausing a subscription keeps previously recorded opportunities.
+
+Chrome enabled a subscription at 1440 pixels, closed the page while the Go
+worker recorded a match from a seeded feed, and paused it at 390 pixels.
+PostgreSQL integration covers restart, stale and incomplete data, and
+concurrent manual and background scans. Dart analysis, the release build
+and all 57 existing Flutter tests passed.
+
+Trade plans, execution risk checks and Paper accounts remain open.
+
+## P3 opportunity scan (2026-11-24)
+
+A tested rule version can open a manual spot scan from its Library detail.
+The engine requires a one-hour backtest for that version and symbol, a
+confirmed public-feed candle and complete inputs for the last closed hour.
+It uses the same rule predicates as the simulator. A match retains its exact
+input snapshot and digest, rule version, report and expiry in PostgreSQL.
+Concurrent scans share one record per version, symbol and closed hour.
+
+The watchlist shows recent opportunities, their reason, reference price and
+validity window, with links to the original rule and evidence. An expired or
+stale observation remains visible with its inactive state.
+
+Chrome ran Library → scan → recorded opportunity at 1440 pixels against the
+Go handlers and PostgreSQL with a seeded feed. A repeated scan kept the same
+record. At 390 pixels Chrome reopened the saved details from the watchlist.
+The PostgreSQL-required Go suite, Go vet and lint, Buf compatibility, Dart
+analysis, release web build and all 57 existing Flutter tests passed.
+
+Background scans, trade plans, execution risk checks and Paper accounts remain open.
+
+## P3 market watchlist (2026-11-24)
+
+The market watchlist uses the engine's configured spot USDT symbols. The
+Connect API returns each symbol's latest available closed 1m REST candle,
+its stored revision, and the per-symbol feed state. Archive candles and
+unavailable corrections stay out of the view. PostgreSQL retains the last
+observation across engine restarts.
+
+At `/market`, the Persian UI shows the exact close and separately labels
+the candle close, availability and snapshot times in UTC. It keeps the last
+confirmed data visible during connection loss and retries automatically.
+Chrome at 1440 and 390 pixels verified the page with a real local engine,
+seeded PostgreSQL candles, an interrupted request and recovery to a new revision.
+Dart analysis, the web release build, and all 57 existing Flutter tests passed.
+
+The opportunity scanner, trade plans and operational Paper account remain open.
+
+## P2 report execution profile (2026-11-24)
+
+A saved-rule report links back to the exact version it ran and displays the
+stored definition hash, dataset IDs, out-of-sample interval, capital, fees,
+slippage, latency and split choices. The full Chrome workflow passed at desktop
+width with the report and draft dialog also checked at 390 pixels. The route
+covered the 201st version, cloning, regime composition, three stored reports,
+evidence filtering and both new templates. The release web build, Dart analysis
+and all 57 existing Flutter tests passed.
+
+The full Go suite passed with PostgreSQL required on Windows and under the
+Linux race detector. Go vet, lint, depguard, simulator goldens, Buf compatibility
+and generated Go/Dart/SQL checks passed. P2 verification in this checkpoint is
+local. P1 representative-user review remains open.
+
+## P2 Donchian and Cutler RSI templates (2026-11-24)
+
+Donchian breakout uses the preceding 20 highs and 10 lows, excluding the
+signal candle. The pullback template crosses above Cutler RSI 30 within a
+50-bar uptrend and exits at RSI 70 or when the trend fails. Both templates
+compile through `rules/v1` and open in the same draft editor. Deterministic
+series assert exact entry and exit bars. Chrome opened and saved both templates.
+
+## P2 rule evidence and details (2026-11-24)
+
+The Library can filter versions with or without a backtest on the server. A
+version has tabs for its rules, performance, lineage and data requirements. The
+performance tab links to the latest run for the exact version ID and shows its
+out-of-sample return. Chrome verified the link, filtering and an A/B/A+B run
+using a regime period entered in Persian digits.
+
+## P2 closed-bar regime routing (2026-11-24)
+
+The composer can route entries to A when the closed price is at or above a
+configurable trailing SMA and to B below it. No entry is generated while the
+classifier is unavailable. The chosen exit and exposure owner remain fixed
+across regime changes. Tests cover both branches, warm-up and exit precedence.
+The typed API and saved definition preserve the classifier period and lineage.
+
+## P2 composition and three-way backtest UI (2026-11-24)
+
+The composer picks two immutable rule versions and shows how the entry mode
+and exit owner affect the result. A single version or all three variants can
+use the existing backtest form. Group runs share dataset, cost and split inputs,
+retain completed legs after a later failure, and open A, B and A+B in Compare.
+Chrome verified three stored reports with the exact version and dataset IDs.
+The PostgreSQL test also verifies the blocking comparison assumptions match.
+
+## P2 rule library and draft editor (2026-11-24)
+
+The Persian Rules Library opens from the existing strategy catalog. It searches
+and pages saved definitions on the server and opens curated templates in a
+form-based editor with nested entry and exit rules and a sentence preview.
+Version details show the hash, data timeframe, parents and definition changes.
+Chrome against the local engine and PostgreSQL reached the 201st version and
+saved and reopened its clone, with checks at 1440 and 390 pixels. Dart analysis
+and the 57 existing Flutter tests passed.
+
+## P2 saved rules and report API (2026-11-24)
+
+The library stores validated rule definitions as immutable PostgreSQL versions.
+It supports template drafts, descendant versions, AND/OR composition with both
+parents recorded, and title search with keyset pagination. Reports pin the saved
+version ID and embed its exact definition for reproducibility. The Connect and
+PostgreSQL integration test covers rejected definitions, the 201st result, clone
+and composition lineage, and an identical rerun of a saved-rule report.
+
+## P2 rule composition and evaluation (2026-11-23)
+
+The evaluator runs a `rules/v1` strategy through the main, holdout and stress
+simulations, with a fresh strategy instance for each run. Two rule definitions
+can share an AND/OR entry and a pinned exit and exposure owner. The comparison
+view identifies a rule definition by its hash. A deterministic series exercises
+separate A, B and A+B trades, and the strategy, simulator and evaluator suites passed.
+
+## P2 closed higher-timeframe inputs (2026-11-23)
+
+`rules/v1` can use the close of a larger UTC-aligned bucket on a declared base
+timeframe. A bucket needs every member to be available and complete. Simulator
+regressions cover partial buckets, delayed members, synthetic candles and the
+first eligible fill. Strategy, simulator and evaluation suites passed.
+
+## P2 learned strategy adapter (2026-11-23)
+
+The training loop and forward evaluation now build through `learned/v1`. The
+definition pins ordered artifact IDs, and the adapter verifies each resolved
+body against its ID before running the existing model schedule. Tests cover
+round-trip identity, artifact substitution, frozen inference state and the
+existing time-of-availability behavior. The strategy, model and PostgreSQL-required
+learning loop suites passed, along with focused Go vet.
+
+## P2 rule engine started (2026-11-23)
+
+STR-01 adds `rules/v1`, a bounded JSON definition for single-timeframe spot
+rules. It validates the tree, hashes its canonical representation, and compiles
+entry and exit conditions into the existing simulator. Tests cover real fills
+with two-bar latency, exit precedence, replay and late candle availability.
+See [ADR-062](DECISIONS.md#adr-062-version-rule-strategies-at-the-engine-boundary).
+
+The full Go suite passed with PostgreSQL required on Windows and with `-race`
+on Linux. Simulator goldens, Go vet, lint and depguard passed. All 57 existing
+Flutter tests passed and Dart analysis was clean. At that checkpoint, higher-timeframe inputs,
+learned-model definitions, drafts and Library integration were still open.
+Representative-user acceptance for P1 is pending.
+
+## P1 hosted CI passed (2026-11-22)
+
+Candidate `3e56f08` passed GitHub Actions. The hosted Go report records 378
+passes across 22 packages, including the 11 simulator golden scenarios.
+Representative-user review remains open. [P1 acceptance evidence](P1_STATUS.md#hosted-ci)
+
+## P1 Paper review (2026-11-22)
+
+The Paper prototype keeps planned loss and estimated cost visible through
+confirmation. Narrow screens stack the risk labels above the values. Chrome
+and Firefox passed J1, J2 and J5 at the four target widths, including 200%
+text at 390 px. The [P1 review protocol](P1_STATUS.md#prototype-review) records
+how to score the remaining representative-user sessions.
+
+## Local P2 entry checks (2026-11-22)
+
+The runtime sources at the P1 review candidate `0b86564` match the runtime
+sources tested at `e4e5e44`. Linux Go 1.26.4 ran the full suite with
+`REQUIRE_DB=1`, `-race`, `-count=1` and `-p=1`. All 378 tests and subtests
+passed across 22 packages, with zero failed or skipped tests. This includes
+the 11 simulator golden scenarios and the PostgreSQL strategy-discovery test.
+The local log is `artifacts/p1-readiness-e4e5e44-go.jsonl`.
+
+Lint and the dependency guard passed. Buf lint and compatibility against P0
+passed, and regenerated Go, Dart and SQL matched the committed files. Dart
+analysis was clean, all 57 Flutter tests passed, and the Web release build
+succeeded with the existing CupertinoIcons warning.
+
+## P2 native definitions (2026-11-21)
+
+The four built-in strategies now build through `native/v1`. `ListStrategies`
+publishes the format and canonical SHA-256 identity of each default definition.
+The hash covers the registered name and effective parameter values. The engine
+build records the implementation used to evaluate a strategy. Native strategy
+instances still supply their original signal and warm-up behavior.
+
+The strategy, evaluation and simulator suites passed with `-race`. The
+PostgreSQL-backed report API test verified that the published defaults reproduce
+the advertised hashes. `go vet`, Dart analysis and Buf's compatibility check
+against P0 passed.
+
+This is the first part of STR-01. The rule AST, learned-model adapters and
+custom strategy drafts remain subsequent P2 work. P1's hosted CI and
+representative-user acceptance remain open.
+
+## P1 acceptance checks (2026-11-21)
+
+The full Linux Go race suite passed on `f93f48b` with PostgreSQL required.
+Chrome checked the three Paper prototype journeys at 390 px with 200% text and
+keyboard activation. The snapshot timestamp keeps its UTC label on the same line.
+The [P1 status](P1_STATUS.md) includes tasks and scoring for representative-user
+review. Hosted CI and that review are still open.
+
+## P1 contracts extended (2026-11-21)
+
+Report evidence now exposes the saved build, dataset, market and policy inputs.
+The account contract models exact and unavailable financial values and the active
+risk policy revision. Library history uses a cursor scoped to the selected version.
+See [P1 status](P1_STATUS.md) for the local verification and remaining design gate.
+
+## P1 started (2026-11-19)
+
+CORE-01 adds the source-qualified instrument key, environment and versioned signal
+contracts. The health stream publishes workspace capabilities and freshness. The RTL
+workspace shell groups released routes and keeps the execution mode in view. The Paper
+prototype covers J1, J2 and J5. See [P1 status](P1_STATUS.md) for compatibility, the state
+matrix and pending acceptance work.
+
+## P0 gate passed (2026-11-19)
+
+- Candidate `e34975a` passed [hosted CI](https://github.com/TheNightDeveloper/trader-lab/actions/runs/44530856883).
+  PostgreSQL race verification recorded 363 passes with zero failures or skips.
+  The separate golden and Flutter checks passed. Hosted chart p95 was 402 ms.
+- The browser and mixed-load evidence includes the 100,000-bar reference run,
+  four chart widths in Chrome and Firefox, the narrow report table, the report
+  form, and recovery after a dropped stream. See [P0 acceptance](P0_STATUS.md#p0-acceptance-evidence-for-e34975a).
+
+## P0 browser baseline and hosted CI (2026-11-19)
+
+- Chrome and Firefox rendered the release chart with real API data at 390,
+  768, 1,024 and 1,440 px. Chrome verified table alignment, horizontal scrolling,
+  legacy and error states, retry, and recovery from a disconnected health stream.
+- The first hosted CI run for `ec46b4e` uploaded evidence of 362 Go passes and
+  one failure. GetChart p95 was 2.500 s against the 1 s target. See [P0 status](P0_STATUS.md).
+- A two-CPU Linux race profile identified response compression as the main
+  chart server cost. Faster gzip brought the same test to 438 ms p95 from
+  837 ms. CI serializes test packages and keeps the five-client latency gate.
+- Standard button density preserves the 44 px action target on narrow Web.
+  Chrome measured the report action at 44 px at normal and 200% text size.
+  Dart analysis, the 54 existing tests and the Flutter Web build passed.
+- GitHub CI passed for `8a5e23f`, including all 363 Go tests and subtests.
+  On the 100,000-bar production case, GetChart p95 was 21.69 ms while all
+  500 search attempts and 200 reads completed.
+- The Web chart now keeps zoom, scroll and the selected decision when changing
+  an overlay on the same series. Chrome verified a delayed response and zero
+  marker animation duration with reduced motion. Firefox rechecked rendering.
+
+## P0 F07 warm chart admission (2026-11-19)
+
+- Reserve retained cache arrays for chart and decision reads. Cold reads still
+  reserve reconstruction. A regression covers eviction during projection.
+- At the default 1 GiB budget, the real engine completed the 100,000-bar test
+  with 500 search attempts, five concurrent readers and a matching recalculation.
+  Chart p95 was 28.44 ms. See [performance](PERFORMANCE.md).
+
+## P0 F07 runtime and chart interop (2026-11-19)
+
+- Project report side runs before releasing their worker slots and safely return
+  memory-contended search claims to the queue.
+- The first real-engine mixed run at the default 1 GiB budget used 3,500 bars
+  and completed 500 attempts alongside five read clients and a recalculation.
+- Fixed browser candle details for pointer movement and aligned axis timestamps
+  with UTC. Chrome verified the release chart at 1,440 and 390 pixels.
+
+## P0 metric validity at publication (2026-11-19)
+
+- Prevent invalid metrics from becoming zero-valued report indexes, calculator
+  waterfall data or learning baselines. Preserve exact gate ordering at int64 limits.
+- Full PostgreSQL-mandatory Linux race verification passed 358 tests and subtests.
+  See [P0 status](P0_STATUS.md) for evidence and remaining release checks.
+
+## P0 training labels and F10 dataset selection (2026-11-18)
+
+- Learning artifacts use causal entry and exit opens with the cycle's per-side costs.
+  Earlier artifacts stay readable and new recommendations require the current training
+  version. A delayed simulator round trip verifies the label and its observation cutoff.
+- The Data API searches the catalog by pair, timeframe and ID. Reports and experiments
+  use paginated pickers, retain selections across searches and resolve saved drafts by
+  exact ID. The 201st version and import invalidation are covered.
+- PostgreSQL-mandatory Go tests passed 354 cases and subtests. All 54 existing Flutter
+  tests, Dart analysis, Buf lint and Go vet passed. See [P0 status](P0_STATUS.md).
+
+## P0 search restart ownership (2026-11-18)
+- PostgreSQL recorded the retryable claim on a connection without the scheduler lease.
+  Run now claims, recovers and updates queue state on the lease session. The final attempt
+  gate still matches claim tokens. An in-flight claim has a five-second deadline and
+  startup waits up to two seconds for a departing owner to release its lock.
+- The database ownership regression failed before the fix. The restart, claim ownership,
+  temporary overlap and concurrent-owner checks all passed in five repeated race runs.
+  Existing restart timeout and completion assertions stay in force. Test cleanup stops
+  its worker even when an assertion fails.
+- Full race confirmed restart recovery. It recorded 347 passes and one chart latency
+  failure at 1.167 s p95. Mixed-load and aggregate accounting work remain open.
+
+## P0 simulator ledger overflow (2026-11-18)
+- Check fixed-point addition and subtraction across fill cash, asset balances, cumulative
+  trade totals, mark-to-market and protection prices. Stage fill changes and publish them
+  only once every amount is representable. A failed simulation returns no partial ledger.
+- The calculator and report API return OutOfRange for numeric overflow. Break-even fee
+  omits an unrepresentable turnover total. Normal rounding and valid fixtures are preserved.
+- Boundary tests reproduced buy-cost and equity overflow, a silently dropped take-profit,
+  and partial calculator output. Regressions cover the exact int64 boundary, atomic fill
+  rejection, the fee aggregate and the Connect error. Aggregate evaluation metrics remain open.
+- Targeted race tests and lint passed. The full race run had 345 passes and one historical
+  search-restart timeout. Chart p95 was 728 ms. Details are in P0_STATUS.md.
+
+## P0 F07 chart reads under load (2026-11-18)
+- Compute only visible indicator values while maintaining historical warm-up. The suffix
+  matches the full series bit for bit for all five indicator families in the regression.
+- Query chart metadata, visible main-run markers and a single decision directly. The SQL
+  window preserves millisecond membership and marker order. Charge chart response work by
+  visible bars while still accounting for reconstruction of all raw inputs.
+- The 100,000-bar latency fixture creates its report as setup and uses the default 1 GiB
+  pool for chart reads. Five concurrent clients passed the 1 s p95 target at 523 ms in
+  the focused race run. The full race run measured GetChart p95 at 792 ms.
+- Full DB-mandatory Linux race run: **337 Go tests/subtests passed, 0 failed or skipped,
+  22 test packages**, including all 11 unchanged goldens. The 500-attempt search fixture
+  observed a worst health heartbeat delay of 15.96 ms. Accounting overflow is next.
+
+## P0 live-feed supervision (2026-11-18)
+- Each live symbol polls, resumes its committed cursor, and records outage recovery independently.
+  A stalled symbol does not hold the status lock or the other symbol's worker. The engine
+  tracks freshness per symbol and the sidebar continues to report aggregate freshness.
+- Live and archive share the same GET policy with separate host budgets. Request deadlines
+  cover response bodies. Transient failures get bounded retries and jitter, provider throttling
+  applies a host cooldown, and interrupted backfill resumes after bounded page batches.
+- Network regressions passed under race with PostgreSQL required in a Go 1.26.4 Linux container.
+  An unrestricted race suite recorded 330 passes, zero skips, and one latency failure.
+  GetChart p95 reached 1.226 s against the existing 1 s target. See P0_STATUS.md for scope.
+- Next F07 work targets the chart's latency under load. The same route exceeded the target
+  with two Go packages running concurrently. Linux vet and the engine build passed.
+
+## P0 F07 archive/import bounds (2026-11-05)
+- Import uses the same active-memory pool as research: 384 MiB archive workspace plus
+  1024 bytes per requested raw minute, before network work. Dataset snapshot creation
+  after import has separate admission. Exhaustion is exposed as ResourceExhausted.
+- Daily fallback downloads/parses/persists one file before fetching the next. Missing-file
+  progress is emitted; valid completed files remain resumable if a later file fails.
+- ZIP downloads remain capped at 64 MiB. CSV metadata and actual reads are capped at
+  32 MiB, numeric rows at 4096 bytes and monthly input at 44,640 bars. Over-limit or
+  cancelled parsing returns no bar prefix. Existing parser APIs retain wrappers; import
+  propagates context through decompression/rows and stops after progress send failure.
+- Three before-edit regressions reproduced excess rows, inflated-size acceptance and daily
+  ZIP accumulation. Final DB-mandatory run: **325 Go tests/subtests passed, zero failed/skipped,
+  22 packages**; all 11 unchanged goldens, **54 Flutter tests**, analyzer/lint/vet/build,
+  depguard rejection and two Python CI-summary tests passed. No new widget tests.
+- A single Windows process sample of the real import RPC fixture observed 80,683,008 bytes
+  peak working set (about 77 MiB), 0.234375 CPU seconds and 1.675 s including launch overhead.
+  This is a fixture calibration, not process-wide load acceptance. See PERFORMANCE.md.
+- Evidence: artifacts/p0-import-go-tests.jsonl, p0-import-flutter.txt and
+  p0-import-profile.json/txt. Next: resource/load acceptance and remaining F10/network/
+  accounting/label/CI/UX gates. P0 remains open; no schema/numerical version changed.
+
+## P0 F07 shared active-memory admission (2026-11-03)
+- One process-owned budget now serves report Create/CreateWithID/Reproduce/Recalculate,
+  queued search attempts and winner reports, learning collection-through-freeze/forward,
+  and chart/decision handlers. Metadata preflight reserves before reconstructing datasets,
+  including cached inputs; release spans persistence or handler projection where applicable.
+- Reservations reject atomically without waiting while holding CPU slots/retained cycle
+  data. Exhaustion returns ResourceExhausted for report/chart RPCs; search failures remain
+  recorded, collection fails without moving the serving pair, and forward polls can retry.
+- research_memory_mib defaults to 1024 (valid 16..65536). The conservative estimate includes
+  raw reconstruction, concurrent working sets and retained results. Chart requests allow
+  at most eight indicators. No truncation, migration, numerical or training version change.
+- Verified: **319 Go tests/subtests, zero failed/skipped, 22 packages, DB mandatory**;
+  **54 existing Flutter tests**, all 11 unchanged goldens, lint/vet, analyzer, engine build,
+  planted depguard rejection and two Python CI-summary tests. Evidence:
+  artifacts/p0-memory-go-tests.jsonl and artifacts/p0-memory-flutter.txt.
+- F07/P0 remain open: estimates are not measured RSS/OS CPU quotas. Retained caches keep
+  their separate caps; archive import/decompression and process-wide load acceptance need
+  the next pass. Hosted CI/race and real-browser acceptance remain unverified.
+
+## P0 F07 cooperative training cancellation and fit bounds (2026-11-03)
+- Fit now requires context. Walk-forward propagates it through sample preparation, readiness
+  checks, both scaler passes, standardization, ridge/logistic accumulation and training error.
+  Long row passes check every 256 rows; logistic also checks between Newton iterations.
+  Cancellation returns no partial artifact/model set. Existing feature APIs remain wrappers.
+- Preflight rejects more than 1,000,000 samples/combined source bars or 12 walk-forward steps
+  before materializing extra matrices/models. Rejection never truncates or scores a prefix.
+- Learning reserves a conservative training-through-freeze deadline: registered slot-time
+  budget / maximum research slots. It covers waiting/IO, walk evaluation and final fits too;
+  final fitting and cancelled training now contribute to recorded usage. Exhaustion follows
+  existing failed-cycle/candidate cleanup and never changes the serving version/model.
+- Before-fix cancellation regression reproduced. Full DB-mandatory Go run: **311 passed,
+  0 failed/skipped, 22 packages**; simulator goldens unchanged. Completed ridge/logistic fit
+  IDs match the exact pre-change references; numerical/training versions remain unchanged.
+- Existing Flutter suite: **54 passed**; Dart analysis, Go lint/vet and executable build
+  passed. Evidence: artifacts/p0-training-go-tests.jsonl and p0-training-flutter.txt.
+- F07 remains partial: process-wide byte admission/RSS and OS CPU guarantees are not proven.
+  Cooperative checks do not interrupt allocation/GC or the small bounded Gonum factorization.
+  Next: shared memory budgets, then remaining F10 and P0 accounting/network/label/UX gates.
+
+## P0 F15 atomic version/model lifecycle (2026-11-03)
+- F13 was committed as fe7d078 before this batch. Library moves, learning approval and
+  rollback now share one algorithm lock, expected lifecycle revision and transaction for
+  version/model changes, audit records and revision advancement. Stop clears the serving
+  model; fixed-strategy switches cannot retain a learning model. Retired versions stay retired.
+- Migration 00007 adds algorithm/promotion revisions and a unique active-version index.
+  Version allocation uses the same lock. Reads of the serving pair use a coherent snapshot;
+  activation checks the artifact hash, algorithm and version recipe before any state change.
+- Learning captures the champion revision before training. Changed or legacy evidence cannot
+  promote, but remains rejectable. Rollback also checks the promotion revision (including ABA)
+  and targets the explicitly displayed algorithm rather than mutable global configuration.
+- API mutations require an explicitly present expected_revision, including zero. Go/Dart
+  bindings regenerated reproducibly (84 files checked). Flutter sends the confirmed token,
+  refreshes stale decisions and keeps rejection enabled; no new widget tests or visual redesign.
+- Verified: **302 Go tests/subtests, 0 failed/skipped; 22 packages, DB mandatory**; all 11
+  simulator goldens unchanged; **54 Flutter tests** (2 new codec unit tests); analyzer, Go
+  lint/vet and engine build passed. See P0_STATUS.md and ADR-052 for compatibility and limits.
+- A combined Go/Flutter/build run had one search-recovery timeout. Isolated recovery passed
+  in 1.67 s, then the complete Go-only run passed. No timeout/threshold was relaxed; the cause
+  of the earlier timeout is unproven. Logs are retained in artifacts/p0-lifecycle-*.jsonl/txt.
+- Next: remaining F07 process-wide budgets and fitting cancellation, then F10 and the P0
+  accounting/network/label/UX gates. Race, hosted CI and real-browser acceptance remain open.
+
+## P0 F13 report provenance and exact reproduction (2026-11-03)
+- New reports record provenance v1: binary SHA-256, available VCS commit/time/dirty state,
+  Go/platform, each dataset ID and manifest, used instrument filters/assets/scales, and
+  evaluation/fill/accounting/research policy versions. Clients cannot supply this metadata.
+- Reproduce checks exact JSON numbers, separate spec/split/summary records, and every ordered
+  trade/fill/decision in main and holdout. Equal PnL no longer hides different fills. Both
+  reproduction and P&L replay use recorded instrument filters. Timestamp identity follows
+  PostgreSQL's stored UTC microsecond precision; transient simulator fields stay excluded.
+- Reproduction is strict about execution context: another binary/release is not identical,
+  even with matching financial totals. Comparison also blocks different execution contexts.
+  Full context is available through the existing spec JSON export; existing badges explain
+  missing provenance/build metadata or locally modified source. Historical rows stay unchanged.
+- Verified: **282 Go tests/subtests, 0 failed/skipped, 22 packages, DB mandatory**; all
+  **11 goldens unchanged**; **52 existing Flutter tests**; Dart analysis, Go lint/vet passed.
+  Depguard rejected a planted optimizer import; both Python CI-summary tests passed.
+  Engine build succeeded with VCS metadata (bb04d88 + dirty source) and a binary SHA-256.
+- Evidence: artifacts/p0-provenance-go-tests.jsonl and artifacts/p0-provenance-flutter.txt.
+  No migration, dependency, wire-contract, numerical version or new widget test was added.
+- Next: F15 synchronized version/model lifecycle, then remaining F07/F10 and P0 gates.
+  Race, hosted CI and browser acceptance remain open.
+
+## Material UI migration error fixes (2026-11-02)
+- Completed the in-progress material_ui import migration. Resolved 13 analyzer errors from
+  ambiguous GlobalMaterialLocalizations and resulting const-list errors in app/test hosts.
+- One shared constant delegate list supplies extracted Material/Cupertino localization types
+  alongside original Flutter types required by dependencies. Persian/RTL remains configured.
+- material_ui is constrained to ^1.9.0; minimum Dart 3.13 / Flutter 3.47 and CI Flutter 3.47.4
+  match the installed package and IDE SDK at D:/flutter347. The older PATH SDK is incompatible.
+- Verified: 52 existing Flutter tests, analyzer clean, offline enforced lockfile resolution,
+  and release web build successful. Existing CupertinoIcons font warning remains; no new widget tests.
+- Local logs: artifacts/material-ui-tests.txt and artifacts/material-ui-build.txt. No manual
+  browser review or hosted CI run; this frontend fix does not close the remaining P0 gates.
+
+## P0 F08 research capability restrictions (2026-11-02)
+- One registry-based gate permits known USDT-quoted symbols only. Reports/replays,
+  experiment planning, queued cache reuse and stored learning execution recheck permission.
+  Unsupported stored evidence cannot authorize promotion; rejected work leaves active models untouched.
+- GetOverview adds per-symbol research_capabilities (supported/reason). Go/Dart bindings
+  regenerated reproducibly. Shared server-filtered pickers and learning symbol settings
+  require affirmative permission; missing/failed responses and stale drafts cannot grant it.
+- Data import/list/read, charts, saved figures and low-level FX/simulator fixtures remain
+  available. No migration, financial version change or stored-result rewrite.
+- UI/UX Pro Max informed inline explanations and loading/error states using existing RTL
+  components. Four provider/codec unit tests added; no new widget tests.
+- Verified: **251 Go tests/subtests, zero failed/skipped, 22 packages, DB mandatory**;
+  11 unchanged goldens; **52 Flutter tests**; Go lint/vet, Dart analysis, proto lint and
+  reproducible generation passed. Details and compatibility: P0_STATUS.md, ADR-049.
+- A simultaneous SDK-constraint edit was preserved as >=3.12.2 with valid YAML syntax;
+  Flutter tools and the full suite then passed. Unrelated IDE/analyzer edits are outside this bundle.
+- Next: F13 full provenance and canonical-fill reproduction, then F15/F10. F07 global
+  budgets, accounting/network/label and UX gates remain open; P0 is still in progress.
+
+## P0 resource admission and input bounds (2026-11-02)
+- Reviewed the clean checkpoint at de3e6a9; FIX-04/FIX-05 are already implemented.
+- Reproduce now acquires the whole research share before loading a report; cancelled
+  waiters preserve other jobs' slots and admitted errors release all acquired slots.
+- Shared data preflight caps requested raw 1m ranges at 1,000,000 candles, including leading
+  aggregation buckets. Live/legacy/snapshot SQL readers have a cap-plus-one limit and reject
+  overflow; no truncated result is returned. Import rejects oversized ranges before download.
+- Reports preflight the combined raw cost before loading; learning collection and forward
+  check raw inputs as well as their own budgets. Collection holds a research slot and releases
+  it before parallel training. Report/search caches retain at most 1,000,000 output bars each.
+- Strategy periods are bounded to 1..1000 and non-finite parameters are rejected before use.
+- Verified on Windows: **245 Go tests/subtests, 0 failed/skipped, 22 packages; DB mandatory**;
+  11 unchanged goldens; Go lint/vet, depguard and reproducible sqlc generation. Existing
+  Flutter suite: 48 passed; Dart analysis clean. Local evidence: P0_STATUS.md.
+- F07 is partially complete: hard process-wide RAM/CPU deadlines and cancellation inside
+  fitting remain open. Next is F08 execution capability restrictions, then F13/F15/F10.
+- P0 remains open; this Windows run does not include race, hosted CI or browser acceptance.
+
+## P0 FIX-05 (2026-11-02)
+- Additive migration 00006 pins exact candle revisions in dataset_members and adds claim
+  tokens. New dataset format 1 has a separate hash namespace covering raw/aggregate values
+  and revision identities; old IDs/manifests/results remain unchanged. Evaluation stays p0.3.
+- Snapshot selection/hash/member persistence is one repeatable-read transaction; late commits
+  and aggregation-hidden corrections cannot alter an existing new-format version.
+- Durable cancellation closes every unfinished attempt; token-fenced writes reject stale
+  workers. A per-schema scheduler lease protects startup recovery; retries remain visible.
+- Cycle finish/recovery atomically closes queued candidates and retains actual generation
+  counts. Completed candidate results stay unchanged. See ADR-046/047.
+- Verified locally: **237 Go tests/subtests with DB mandatory and race, 0 failed/skipped,
+  22 packages**, 11 unchanged goldens, 48 Flutter tests, Dart MCP analysis, lint/vet and
+  reproducible sqlc generation. Evidence and migration limits: P0_STATUS.md.
+- Next: F07 Reproduce/raw-memory bounds and F08 capability restrictions; remaining F10,
+  F13, F15, accounting/network/label and hosted/browser gates keep P0 open.
+
+## P0 FIX-04 (2026-11-02)
+- Evaluation p0.3 separates as-of period PnL from opening-cohort lifetime PnL, with causal
+  fill-cost attribution, carried-position exposure and identical-window fold scoring.
+- Final model completion, actual freeze and first tradable boundary are separate from the
+  training cutoff. Forward requires a contiguous complete-data prefix for every symbol;
+  elapsed time with missing data cannot produce a recommendation.
+- Final fits and forward hold research slots; legacy learning evidence cannot promote.
+- Verified locally: **212 Go tests/subtests, 0 failed/skipped, 22 packages, race enabled
+  and DB mandatory**; 11 unchanged simulator goldens; go vet; 48 Flutter tests; Dart MCP
+  analysis; 2 CI-summary tests; lint and planted bad-import depguard probe. Same-machine
+  1M-bar allocation increases 4.1% for as-of marks; see PERFORMANCE.md. See P0_STATUS.md
+  and ADR-044/045 for contracts and evidence.
+- Next: FIX-05 snapshot membership, terminal candidates and claim/cancel recovery. Full P0,
+  hosted CI, accounting/lifecycle gates and real-browser UX acceptance remain open.
+
+## P0 analytics / learning review (2026-11-01)
+- Rechecked feature readiness, fitting, prediction, search selection, fold attribution and
+  forward gates. Detailed findings and priorities: [P0_LEARNING_REVIEW_FA.md](P0_LEARNING_REVIEW_FA.md).
+- Fixed late feature dependencies entering past fits; enforce sample windows, dimensions and
+  finite values; validate model artifacts before execution. New fits record causal-features/v1;
+  valid legacy model IDs remain readable and immutable.
+- Search requires every registered dataset exactly once, canonical metric scale, deterministic
+  tie-breaking and overflow-safe mean. No promotion thresholds or golden fixtures changed.
+- Unchanged-target prediction path: median 469.2 to 263.9 ns/op, 144 to 48 B/op across five
+  local measurements per version. This is not whole-cycle speed or profitability evidence.
+- Verified: 197 Go tests/subtests, zero skip, DB mandatory; all 11 goldens unchanged;
+  48 existing Flutter tests; Go lint/vet, Dart analysis and depguard passed.
+- Next remains FIX-04. The review additionally identifies close-to-close labels ending before
+  or at causal execution for horizon=1, and cancellation/budget gaps inside training.
+- P0 remains in progress. No local race or new real-market profitability evaluation.
+
+## Table alignment fix (2026-11-01)
+- Shared DataTableBox cells align to the same directional start edge as their headers;
+  numeric/date/symbol text keeps its LTR reading direction inside RTL tables.
+- Replaced the cell helper with a class-based widget. No new widget tests.
+- Verified: Dart analysis clean, 32 existing table/page/responsive tests passed,
+  including the 390 px route sweep. Real-browser visual review was not performed.
+
+## P0 FIX-02 done (2026-11-01)
+- Causal signal fills, observed-only History, availability-time equity and protection against
+  delayed ranges acting on newer position state. Evaluation p0.2 records the fill model.
+- Version-2 aggregation timestamps include all constituents and closure evidence; legacy
+  dataset reconstruction/dedup stays readable. Golden outputs reviewed under ADR-039..041.
+- Verified: 163 Go tests/subtests with DB mandatory, zero skip; 48 Flutter tests; lint/vet,
+  Dart analysis and depguard passed. Race/hosted CI/browser review remain unverified.
+- Next: FIX-04 actual freeze/forward coverage and period/cohort metrics. See P0_STATUS.md.
+
+## P0 checkpoint (historical)
+P0 — correctness and evidence stabilization: **in progress** (2026-11-05).
+The new P0–P8 phases are defined in `Trading_Lab_Master_Plan_FA.md`; M0–M6 below
+are historical implementation milestones, not evidence that the P0 release gate passed.
+
+First P0 batch: atomic weighted research admission (F03), buy-and-hold warm-up (F02),
+exact comparison assumptions (F14), stop/take chart unit prices (F09), cancellable P&L
+requests (F11), shared dataset cache invalidation and retrieval beyond 200 (part of F10).
+The first batch used evaluation `p0.1`, FIX-02 used `p0.2`, and current evaluations
+use `p0.3` (FIX-04).
+CI now has PostgreSQL, mandatory DB tests, race and retained pass/fail/skip evidence (F12);
+the hosted workflow still needs its first run. See [P0_STATUS.md](P0_STATUS.md) for the
+executed checks, remaining work, UX states and rollback notes.
+
+FIX-02, FIX-04 and FIX-05 are implemented within their recorded scopes. F07 now includes
+Reproduce admission and raw-input/retention caps; process-wide budgets remain open. F13 report
+provenance/canonical reproduction and F08 capability restrictions are implemented in their
+recorded scopes. F15 lifecycle locking/revision checks are implemented; next is remaining F07.
+Server-side dataset search and remaining
+P0 resource/accounting/network/label and stress/UX gates are still open.
+P1 remained gated at this checkpoint. See the later P0 acceptance entry above.
 
 ## M6 done (2026-10-28)
 - ChartService: bars, engine-computed indicators (MA, EMA, BB, RSI, MACD), decision markers (entry, exit, rejected, stop/take), decision record; report charts end at the out-of-sample end.
@@ -14,7 +789,7 @@ Next: Phase 2 (plan §6), when you decide.
 - Backup: nightly pg_dump in the engine, `cmd/verifydb`, `scripts/restore-drill.sh`; docs/BACKUP.md (ADR-035).
 - Usability: every route checked at 390 px by a test; fixes for the chart's source picker, unset Money, empty Compare, Persian issue labels on Home, help text on every Learning settings field.
 
-## v1 release gate
+## Historical v1 release gate (M6; not the P0 gate)
 | Condition | Evidence |
 |---|---|
 | All golden scenarios and leak tests pass | `sim/TestGolden` (11 scenarios), `model/train/TestFeaturesAndLabelsOnlySeeThePast`, `TestFittingOnAllHistoryIsCaught`, `strategy/TestFutureRowsDoNotChangePastDecisions`, `TestSavedModelReproducesPredictions` |

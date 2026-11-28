@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:decimal/decimal.dart';
 import 'package:fixnum/fixnum.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -23,6 +23,8 @@ import '../../gen/lab/v1/common.pb.dart' as pb;
 import '../../gen/lab/v1/learning.pb.dart';
 import '../../l10n/app_localizations.dart';
 import '../page_frame.dart';
+import '../data/data_providers.dart';
+import '../data/research_capability_widgets.dart';
 
 const cyclesPageSize = 10;
 
@@ -160,6 +162,8 @@ class _LearningScreenState extends ConsumerState<LearningScreen> {
       _refresh();
       if (done != null && mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(done)));
     } catch (e) {
+      // Reload stale state before the next user decision.
+      if (mounted) _refresh();
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errorText(e))));
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -229,7 +233,11 @@ class _LearningScreenState extends ConsumerState<LearningScreen> {
                               c.challenger.modelId,
                             ),
                           );
-                          if (ok) await _act(() => _quiet(client.approveCycle(ApproveCycleRequest(cycleId: c.id))));
+                          if (ok) {
+                            await _act(() => _quiet(client.approveCycle(ApproveCycleRequest(
+                              cycleId: c.id, expectedRevision: r.active.lifecycleRevision,
+                            ))));
+                          }
                         },
                         onReject: () async {
                           final ok = await confirmAction(context, title: l.lReject, body: l.lRejectConfirm);
@@ -254,7 +262,11 @@ class _LearningScreenState extends ConsumerState<LearningScreen> {
                   canRollback: r?.canRollback ?? false,
                   onRollback: () async {
                     final ok = await confirmAction(context, title: l.lRollback, body: l.lRollbackConfirm);
-                    if (ok) await _act(() => _quiet(client.rollback(RollbackRequest())));
+                    if (ok) {
+                      await _act(() => _quiet(client.rollback(RollbackRequest(
+                        algorithmId: r?.active.algorithmId, expectedRevision: r?.active.lifecycleRevision,
+                      ))));
+                    }
                   },
                 ),
                 if (r != null && r.hasCurrent()) ...[const SizedBox(height: AppSpace.lg), _Budget(r.current.usage)],
@@ -465,7 +477,8 @@ class _GateCard extends StatelessWidget {
               ),
               OutlinedButton(
                 style: OutlinedButton.styleFrom(foregroundColor: AppColors.negativeText),
-                onPressed: c.canApprove && !busy ? onReject : null,
+                // Stale recommendations stay rejectable so a new cycle can run.
+                onPressed: c.state == 'decision' && c.outcome == 'recommended' && !busy ? onReject : null,
                 child: Text(l.lReject),
               ),
             ],
@@ -751,6 +764,7 @@ class _ConfigDialogState extends ConsumerState<_ConfigDialog> {
   late final Map<String, String> f;
   late String _alg = widget.cfg.algorithmId;
   late bool _enabled = widget.cfg.enabled;
+  late Set<String> _symbols = widget.cfg.symbols.toSet();
   bool _tried = false, _saving = false;
   Object? _error;
 
@@ -793,6 +807,10 @@ class _ConfigDialogState extends ConsumerState<_ConfigDialog> {
   };
 
   Future<void> _save(L10n l) async {
+    final allowed =
+        ref.read(overviewProvider).value?.researchCapabilities.where((c) => c.supported).map((c) => c.symbol).toSet() ??
+        <String>{};
+    if (_symbols.isEmpty || !allowed.containsAll(_symbols)) return setState(() => _error = l.errPickPair);
     final rules = _rules(l);
     if (rules.entries.any((e) => e.value(f[e.key]!) != null)) return setState(() => _tried = true);
     final c = widget.cfg.deepCopy()
@@ -805,6 +823,9 @@ class _ConfigDialogState extends ConsumerState<_ConfigDialog> {
       ..maxCandidates = int.parse(f['cands']!.trim())
       ..cpuMinutes = int.parse(f['cpu']!.trim())
       ..maxBars = Int64.parseInt(f['bars']!.trim());
+    c.symbols
+      ..clear()
+      ..addAll(_symbols.toList()..sort());
     c.gate
       ..maxDrawdown = pctOut(Decimal.parse(f['maxDd']!.trim()))
       ..minForwardTrades = int.parse(f['trades']!.trim())
@@ -830,6 +851,15 @@ class _ConfigDialogState extends ConsumerState<_ConfigDialog> {
   Widget build(BuildContext context) {
     final l = L10n.of(context);
     final rules = _rules(l);
+    final allowed =
+        ref
+            .watch(overviewProvider)
+            .value
+            ?.researchCapabilities
+            .where((c) => c.supported)
+            .map((c) => c.symbol)
+            .toSet() ??
+        <String>{};
     Widget field(String k, String label, {String? unit, String? help}) => SizedBox(
       width: 280,
       child: TextFormField(
@@ -871,6 +901,10 @@ class _ConfigDialogState extends ConsumerState<_ConfigDialog> {
                 title: Text(l.lcEnabled, style: AppText.body),
                 contentPadding: EdgeInsets.zero,
               ),
+              Text(l.researchPairs, style: AppText.label),
+              ResearchSymbolPicker(selected: _symbols, onChanged: (v) => setState(() => _symbols = v)),
+              const ResearchCapabilityNotice(),
+              const SizedBox(height: AppSpace.md),
               group([
                 field('hour', l.lcHour, help: l.lcHelpHour),
                 field('lookback', l.lcLookback, help: l.lcHelpLookback),
@@ -901,7 +935,10 @@ class _ConfigDialogState extends ConsumerState<_ConfigDialog> {
       ),
       actions: [
         TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l.cancel)),
-        FilledButton(onPressed: _saving ? null : () => _save(l), child: Text(l.save)),
+        FilledButton(
+          onPressed: _saving || _symbols.isEmpty || !allowed.containsAll(_symbols) ? null : () => _save(l),
+          child: Text(l.save),
+        ),
       ],
     );
   }

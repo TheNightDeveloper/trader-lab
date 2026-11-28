@@ -11,6 +11,7 @@ import (
 	"tradinglab/engine/internal/eval"
 	"tradinglab/engine/internal/experiment"
 	labv1 "tradinglab/engine/internal/gen/lab/v1"
+	"tradinglab/engine/internal/instrument"
 	"tradinglab/engine/internal/jobs"
 	"tradinglab/engine/internal/metrics"
 	"tradinglab/engine/internal/search"
@@ -34,6 +35,8 @@ func expErr(err error) error {
 	switch {
 	case err == nil:
 		return nil
+	case errors.Is(err, instrument.ErrResearchUnsupported):
+		return connect.NewError(connect.CodeFailedPrecondition, err)
 	case errors.Is(err, experiment.ErrNotFound):
 		return connect.NewError(connect.CodeNotFound, err)
 	case errors.Is(err, experiment.ErrState):

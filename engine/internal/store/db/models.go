@@ -11,10 +11,11 @@ import (
 )
 
 type Algorithm struct {
-	ID          string
-	Family      string
-	Description string
-	ActiveModel pgtype.Text
+	ID                string
+	Family            string
+	Description       string
+	ActiveModel       pgtype.Text
+	LifecycleRevision int64
 }
 
 type AlgorithmVersion struct {
@@ -44,6 +45,7 @@ type Attempt struct {
 	Runs         int32
 	StartedAt    *time.Time
 	FinishedAt   *time.Time
+	ClaimToken   string
 }
 
 type Candle struct {
@@ -84,6 +86,13 @@ type Dataset struct {
 	BarCount  int32
 	Manifest  []byte
 	CreatedAt time.Time
+}
+
+type DatasetMember struct {
+	DatasetID string
+	Symbol    string
+	OpenTime  time.Time
+	Revision  int32
 }
 
 type Decision struct {
@@ -197,6 +206,30 @@ type LifecycleEvent struct {
 	At        time.Time
 }
 
+type MarketOpportunity struct {
+	ID                int64
+	Symbol            string
+	RuleVersionID     int64
+	ReportID          string
+	SpecRevision      string
+	CandleClosedAt    time.Time
+	ObservedAt        time.Time
+	ExpiresAt         time.Time
+	ReferenceClose    int64
+	Reason            string
+	Snapshot          []byte
+	SnapshotSha256    string
+	EngineBuildSha256 string
+}
+
+type MarketScanSubscription struct {
+	Symbol        string
+	RuleVersionID int64
+	ReportID      string
+	LastClosedAt  *time.Time
+	LastState     int32
+}
+
 type ModelArtifact struct {
 	ID          string
 	AlgorithmID string
@@ -207,17 +240,143 @@ type ModelArtifact struct {
 	CreatedAt   time.Time
 }
 
+type PaperAccount struct {
+	ID             string
+	CreatedAt      time.Time
+	Revision       int64
+	PolicyRevision int64
+	InitialCapital int64
+	CashAvailable  int64
+	CashReserved   int64
+	EntriesPaused  bool
+}
+
+type PaperConfirmationEvidence struct {
+	EventID           int64
+	OpenTime          time.Time
+	CloseTime         time.Time
+	AvailableAt       time.Time
+	Revision          int32
+	ClosePrice        int64
+	EngineBuildSha256 string
+}
+
+type PaperEntry struct {
+	ID             int64
+	AccountID      string
+	OpportunityID  int64
+	PlanHash       string
+	Symbol         string
+	State          int32
+	ConfirmedAt    time.Time
+	ExpiresAt      time.Time
+	NextOpenAt     time.Time
+	Quantity       int64
+	FilledQuantity int64
+	ReservedCash   int64
+	ExposureBound  int64
+	LossBound      int64
+}
+
+type PaperEntryControl struct {
+	AccountID       string
+	AccountRevision int64
+	RecordedAt      time.Time
+	EntriesPaused   bool
+}
+
+type PaperExecutionEvent struct {
+	ID             int64
+	EntryID        int64
+	Kind           string
+	RecordedAt     time.Time
+	Quantity       int64
+	Reference      int64
+	FillPrice      int64
+	Fee            int64
+	Cash           int64
+	RealizedPnl    int64
+	CandleOpenAt   *time.Time
+	CandleRevision int32
+}
+
+type PaperFillProtection struct {
+	EntryID     int64
+	FillEventID int64
+	EligibleAt  time.Time
+	Quantity    int64
+}
+
+type PaperJournalNote struct {
+	EntryID    int64
+	Revision   int64
+	Body       string
+	RecordedAt time.Time
+}
+
+type PaperPolicyVersion struct {
+	AccountID     string
+	Revision      int64
+	EffectiveAt   time.Time
+	MaxLoss       int64
+	MaxOpenLoss   int64
+	MaxExposure   int64
+	FeePpm        int64
+	SlippagePpm   int64
+	MaxCostPpm    int64
+	EntryDriftPpm int64
+}
+
+type PaperPosition struct {
+	EntryID    int64
+	Quantity   int64
+	CostBasis  int64
+	NextOpenAt time.Time
+	Revision   int64
+}
+
+type PaperPosting struct {
+	AccountID   string
+	EventKey    string
+	Leg         int32
+	RecordedAt  time.Time
+	Asset       string
+	Source      string
+	Destination string
+	Amount      int64
+}
+
+type PaperReduction struct {
+	ID               int64
+	EntryID          int64
+	PositionRevision int64
+	Quantity         int64
+	RequestedAt      time.Time
+	NextOpenAt       time.Time
+	State            int32
+	ResultEventID    *int64
+}
+
+type PaperTradePlan struct {
+	Hash          string
+	AccountID     string
+	OpportunityID int64
+	ExpiresAt     time.Time
+	Body          []byte
+}
+
 type Promotion struct {
-	ID            int64
-	AlgorithmID   string
-	Action        string
-	VersionID     string
-	ModelID       string
-	PrevVersionID pgtype.Text
-	PrevModelID   pgtype.Text
-	CycleID       *int64
-	Note          string
-	At            time.Time
+	ID                int64
+	AlgorithmID       string
+	Action            string
+	VersionID         string
+	ModelID           string
+	PrevVersionID     pgtype.Text
+	PrevModelID       pgtype.Text
+	CycleID           *int64
+	Note              string
+	At                time.Time
+	LifecycleRevision int64
 }
 
 type QualityIssue struct {
@@ -255,6 +414,17 @@ type Setting struct {
 	Key       string
 	Value     []byte
 	UpdatedAt time.Time
+}
+
+type StrategyRuleVersion struct {
+	ID            int64
+	Title         string
+	ContentHash   string
+	Definition    []byte
+	ParentID      *int64
+	OtherParentID *int64
+	TemplateKey   string
+	CreatedAt     time.Time
 }
 
 type Trade struct {

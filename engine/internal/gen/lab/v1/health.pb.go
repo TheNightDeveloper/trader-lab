@@ -260,6 +260,8 @@ type EngineStatus struct {
 	Workers          *Workers               `protobuf:"bytes,5,opt,name=workers,proto3" json:"workers,omitempty"`
 	DisplayRate      *DisplayRate           `protobuf:"bytes,6,opt,name=display_rate,json=displayRate,proto3" json:"display_rate,omitempty"` // unset when no USDT/TOMAN rate has been entered
 	ServerTimeUnixMs int64                  `protobuf:"varint,7,opt,name=server_time_unix_ms,json=serverTimeUnixMs,proto3" json:"server_time_unix_ms,omitempty"`
+	Environment      Environment            `protobuf:"varint,8,opt,name=environment,proto3,enum=lab.v1.Environment" json:"environment,omitempty"` // active workspace environment; mode remains for older clients
+	Capabilities     *WorkspaceCapabilities `protobuf:"bytes,9,opt,name=capabilities,proto3" json:"capabilities,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -343,17 +345,86 @@ func (x *EngineStatus) GetServerTimeUnixMs() int64 {
 	return 0
 }
 
+func (x *EngineStatus) GetEnvironment() Environment {
+	if x != nil {
+		return x.Environment
+	}
+	return Environment_ENVIRONMENT_UNSPECIFIED
+}
+
+func (x *EngineStatus) GetCapabilities() *WorkspaceCapabilities {
+	if x != nil {
+		return x.Capabilities
+	}
+	return nil
+}
+
+// WorkspaceCapabilities are published by the running server. Feed availability
+// is independent of whether an execution environment is supported.
+type WorkspaceCapabilities struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Environments   []Environment          `protobuf:"varint,1,rep,packed,name=environments,proto3,enum=lab.v1.Environment" json:"environments,omitempty"` // affirmative list of supported environments
+	LiveMarketData bool                   `protobuf:"varint,2,opt,name=live_market_data,json=liveMarketData,proto3" json:"live_market_data,omitempty"`    // a live market data feed is configured
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *WorkspaceCapabilities) Reset() {
+	*x = WorkspaceCapabilities{}
+	mi := &file_lab_v1_health_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WorkspaceCapabilities) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WorkspaceCapabilities) ProtoMessage() {}
+
+func (x *WorkspaceCapabilities) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_health_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WorkspaceCapabilities.ProtoReflect.Descriptor instead.
+func (*WorkspaceCapabilities) Descriptor() ([]byte, []int) {
+	return file_lab_v1_health_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *WorkspaceCapabilities) GetEnvironments() []Environment {
+	if x != nil {
+		return x.Environments
+	}
+	return nil
+}
+
+func (x *WorkspaceCapabilities) GetLiveMarketData() bool {
+	if x != nil {
+		return x.LiveMarketData
+	}
+	return false
+}
+
 type LiveData struct {
-	state             protoimpl.MessageState `protogen:"open.v1"`
-	State             LiveState              `protobuf:"varint,1,opt,name=state,proto3,enum=lab.v1.LiveState" json:"state,omitempty"`
-	LastBarAgeSeconds int64                  `protobuf:"varint,2,opt,name=last_bar_age_seconds,json=lastBarAgeSeconds,proto3" json:"last_bar_age_seconds,omitempty"` // 0 when state is OFF
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	state                 protoimpl.MessageState `protogen:"open.v1"`
+	State                 LiveState              `protobuf:"varint,1,opt,name=state,proto3,enum=lab.v1.LiveState" json:"state,omitempty"`
+	LastBarAgeSeconds     int64                  `protobuf:"varint,2,opt,name=last_bar_age_seconds,json=lastBarAgeSeconds,proto3" json:"last_bar_age_seconds,omitempty"`                       // meaningful when a last close is known
+	LastBarClosedAtUnixMs *int64                 `protobuf:"varint,3,opt,name=last_bar_closed_at_unix_ms,json=lastBarClosedAtUnixMs,proto3,oneof" json:"last_bar_closed_at_unix_ms,omitempty"` // absent until a bar has closed
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
 }
 
 func (x *LiveData) Reset() {
 	*x = LiveData{}
-	mi := &file_lab_v1_health_proto_msgTypes[3]
+	mi := &file_lab_v1_health_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -365,7 +436,7 @@ func (x *LiveData) String() string {
 func (*LiveData) ProtoMessage() {}
 
 func (x *LiveData) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_health_proto_msgTypes[3]
+	mi := &file_lab_v1_health_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -378,7 +449,7 @@ func (x *LiveData) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LiveData.ProtoReflect.Descriptor instead.
 func (*LiveData) Descriptor() ([]byte, []int) {
-	return file_lab_v1_health_proto_rawDescGZIP(), []int{3}
+	return file_lab_v1_health_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *LiveData) GetState() LiveState {
@@ -395,6 +466,13 @@ func (x *LiveData) GetLastBarAgeSeconds() int64 {
 	return 0
 }
 
+func (x *LiveData) GetLastBarClosedAtUnixMs() int64 {
+	if x != nil && x.LastBarClosedAtUnixMs != nil {
+		return *x.LastBarClosedAtUnixMs
+	}
+	return 0
+}
+
 type Workers struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	State         WorkerState            `protobuf:"varint,1,opt,name=state,proto3,enum=lab.v1.WorkerState" json:"state,omitempty"`
@@ -406,7 +484,7 @@ type Workers struct {
 
 func (x *Workers) Reset() {
 	*x = Workers{}
-	mi := &file_lab_v1_health_proto_msgTypes[4]
+	mi := &file_lab_v1_health_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -418,7 +496,7 @@ func (x *Workers) String() string {
 func (*Workers) ProtoMessage() {}
 
 func (x *Workers) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_health_proto_msgTypes[4]
+	mi := &file_lab_v1_health_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -431,7 +509,7 @@ func (x *Workers) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Workers.ProtoReflect.Descriptor instead.
 func (*Workers) Descriptor() ([]byte, []int) {
-	return file_lab_v1_health_proto_rawDescGZIP(), []int{4}
+	return file_lab_v1_health_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *Workers) GetState() WorkerState {
@@ -467,7 +545,7 @@ type DisplayRate struct {
 
 func (x *DisplayRate) Reset() {
 	*x = DisplayRate{}
-	mi := &file_lab_v1_health_proto_msgTypes[5]
+	mi := &file_lab_v1_health_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -479,7 +557,7 @@ func (x *DisplayRate) String() string {
 func (*DisplayRate) ProtoMessage() {}
 
 func (x *DisplayRate) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_health_proto_msgTypes[5]
+	mi := &file_lab_v1_health_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -492,7 +570,7 @@ func (x *DisplayRate) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DisplayRate.ProtoReflect.Descriptor instead.
 func (*DisplayRate) Descriptor() ([]byte, []int) {
-	return file_lab_v1_health_proto_rawDescGZIP(), []int{5}
+	return file_lab_v1_health_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *DisplayRate) GetRateId() string {
@@ -527,10 +605,10 @@ var File_lab_v1_health_proto protoreflect.FileDescriptor
 
 const file_lab_v1_health_proto_rawDesc = "" +
 	"\n" +
-	"\x13lab/v1/health.proto\x12\x06lab.v1\x1a\x13lab/v1/common.proto\"\x0e\n" +
+	"\x13lab/v1/health.proto\x12\x06lab.v1\x1a\x13lab/v1/common.proto\x1a\x16lab/v1/workspace.proto\"\x0e\n" +
 	"\fWatchRequest\"=\n" +
 	"\rWatchResponse\x12,\n" +
-	"\x06status\x18\x01 \x01(\v2\x14.lab.v1.EngineStatusR\x06status\"\xb0\x02\n" +
+	"\x06status\x18\x01 \x01(\v2\x14.lab.v1.EngineStatusR\x06status\"\xaa\x03\n" +
 	"\fEngineStatus\x12\x18\n" +
 	"\aversion\x18\x01 \x01(\tR\aversion\x12#\n" +
 	"\x04mode\x18\x02 \x01(\x0e2\x0f.lab.v1.RunModeR\x04mode\x12)\n" +
@@ -538,10 +616,17 @@ const file_lab_v1_health_proto_rawDesc = "" +
 	"\x04live\x18\x04 \x01(\v2\x10.lab.v1.LiveDataR\x04live\x12)\n" +
 	"\aworkers\x18\x05 \x01(\v2\x0f.lab.v1.WorkersR\aworkers\x126\n" +
 	"\fdisplay_rate\x18\x06 \x01(\v2\x13.lab.v1.DisplayRateR\vdisplayRate\x12-\n" +
-	"\x13server_time_unix_ms\x18\a \x01(\x03R\x10serverTimeUnixMs\"d\n" +
+	"\x13server_time_unix_ms\x18\a \x01(\x03R\x10serverTimeUnixMs\x125\n" +
+	"\venvironment\x18\b \x01(\x0e2\x13.lab.v1.EnvironmentR\venvironment\x12A\n" +
+	"\fcapabilities\x18\t \x01(\v2\x1d.lab.v1.WorkspaceCapabilitiesR\fcapabilities\"z\n" +
+	"\x15WorkspaceCapabilities\x127\n" +
+	"\fenvironments\x18\x01 \x03(\x0e2\x13.lab.v1.EnvironmentR\fenvironments\x12(\n" +
+	"\x10live_market_data\x18\x02 \x01(\bR\x0eliveMarketData\"\xc3\x01\n" +
 	"\bLiveData\x12'\n" +
 	"\x05state\x18\x01 \x01(\x0e2\x11.lab.v1.LiveStateR\x05state\x12/\n" +
-	"\x14last_bar_age_seconds\x18\x02 \x01(\x03R\x11lastBarAgeSeconds\"^\n" +
+	"\x14last_bar_age_seconds\x18\x02 \x01(\x03R\x11lastBarAgeSeconds\x12>\n" +
+	"\x1alast_bar_closed_at_unix_ms\x18\x03 \x01(\x03H\x00R\x15lastBarClosedAtUnixMs\x88\x01\x01B\x1d\n" +
+	"\x1b_last_bar_closed_at_unix_ms\"^\n" +
 	"\aWorkers\x12)\n" +
 	"\x05state\x18\x01 \x01(\x0e2\x13.lab.v1.WorkerStateR\x05state\x12\x14\n" +
 	"\x05count\x18\x02 \x01(\x05R\x05count\x12\x12\n" +
@@ -583,35 +668,40 @@ func file_lab_v1_health_proto_rawDescGZIP() []byte {
 }
 
 var file_lab_v1_health_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_lab_v1_health_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_lab_v1_health_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_lab_v1_health_proto_goTypes = []any{
-	(RunMode)(0),          // 0: lab.v1.RunMode
-	(LiveState)(0),        // 1: lab.v1.LiveState
-	(WorkerState)(0),      // 2: lab.v1.WorkerState
-	(*WatchRequest)(nil),  // 3: lab.v1.WatchRequest
-	(*WatchResponse)(nil), // 4: lab.v1.WatchResponse
-	(*EngineStatus)(nil),  // 5: lab.v1.EngineStatus
-	(*LiveData)(nil),      // 6: lab.v1.LiveData
-	(*Workers)(nil),       // 7: lab.v1.Workers
-	(*DisplayRate)(nil),   // 8: lab.v1.DisplayRate
-	(*Money)(nil),         // 9: lab.v1.Money
+	(RunMode)(0),                  // 0: lab.v1.RunMode
+	(LiveState)(0),                // 1: lab.v1.LiveState
+	(WorkerState)(0),              // 2: lab.v1.WorkerState
+	(*WatchRequest)(nil),          // 3: lab.v1.WatchRequest
+	(*WatchResponse)(nil),         // 4: lab.v1.WatchResponse
+	(*EngineStatus)(nil),          // 5: lab.v1.EngineStatus
+	(*WorkspaceCapabilities)(nil), // 6: lab.v1.WorkspaceCapabilities
+	(*LiveData)(nil),              // 7: lab.v1.LiveData
+	(*Workers)(nil),               // 8: lab.v1.Workers
+	(*DisplayRate)(nil),           // 9: lab.v1.DisplayRate
+	(Environment)(0),              // 10: lab.v1.Environment
+	(*Money)(nil),                 // 11: lab.v1.Money
 }
 var file_lab_v1_health_proto_depIdxs = []int32{
-	5, // 0: lab.v1.WatchResponse.status:type_name -> lab.v1.EngineStatus
-	0, // 1: lab.v1.EngineStatus.mode:type_name -> lab.v1.RunMode
-	6, // 2: lab.v1.EngineStatus.live:type_name -> lab.v1.LiveData
-	7, // 3: lab.v1.EngineStatus.workers:type_name -> lab.v1.Workers
-	8, // 4: lab.v1.EngineStatus.display_rate:type_name -> lab.v1.DisplayRate
-	1, // 5: lab.v1.LiveData.state:type_name -> lab.v1.LiveState
-	2, // 6: lab.v1.Workers.state:type_name -> lab.v1.WorkerState
-	9, // 7: lab.v1.DisplayRate.toman_per_usdt:type_name -> lab.v1.Money
-	3, // 8: lab.v1.HealthService.Watch:input_type -> lab.v1.WatchRequest
-	4, // 9: lab.v1.HealthService.Watch:output_type -> lab.v1.WatchResponse
-	9, // [9:10] is the sub-list for method output_type
-	8, // [8:9] is the sub-list for method input_type
-	8, // [8:8] is the sub-list for extension type_name
-	8, // [8:8] is the sub-list for extension extendee
-	0, // [0:8] is the sub-list for field type_name
+	5,  // 0: lab.v1.WatchResponse.status:type_name -> lab.v1.EngineStatus
+	0,  // 1: lab.v1.EngineStatus.mode:type_name -> lab.v1.RunMode
+	7,  // 2: lab.v1.EngineStatus.live:type_name -> lab.v1.LiveData
+	8,  // 3: lab.v1.EngineStatus.workers:type_name -> lab.v1.Workers
+	9,  // 4: lab.v1.EngineStatus.display_rate:type_name -> lab.v1.DisplayRate
+	10, // 5: lab.v1.EngineStatus.environment:type_name -> lab.v1.Environment
+	6,  // 6: lab.v1.EngineStatus.capabilities:type_name -> lab.v1.WorkspaceCapabilities
+	10, // 7: lab.v1.WorkspaceCapabilities.environments:type_name -> lab.v1.Environment
+	1,  // 8: lab.v1.LiveData.state:type_name -> lab.v1.LiveState
+	2,  // 9: lab.v1.Workers.state:type_name -> lab.v1.WorkerState
+	11, // 10: lab.v1.DisplayRate.toman_per_usdt:type_name -> lab.v1.Money
+	3,  // 11: lab.v1.HealthService.Watch:input_type -> lab.v1.WatchRequest
+	4,  // 12: lab.v1.HealthService.Watch:output_type -> lab.v1.WatchResponse
+	12, // [12:13] is the sub-list for method output_type
+	11, // [11:12] is the sub-list for method input_type
+	11, // [11:11] is the sub-list for extension type_name
+	11, // [11:11] is the sub-list for extension extendee
+	0,  // [0:11] is the sub-list for field type_name
 }
 
 func init() { file_lab_v1_health_proto_init() }
@@ -620,13 +710,15 @@ func file_lab_v1_health_proto_init() {
 		return
 	}
 	file_lab_v1_common_proto_init()
+	file_lab_v1_workspace_proto_init()
+	file_lab_v1_health_proto_msgTypes[4].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_lab_v1_health_proto_rawDesc), len(file_lab_v1_health_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   6,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package lab.v1;
+
+import "lab/v1/common.proto";
+
+enum Environment {
+  ENVIRONMENT_UNSPECIFIED = 0;
+  ENVIRONMENT_RESEARCH = 1;
+  ENVIRONMENT_PAPER = 2;
+  ENVIRONMENT_LIVE = 3;
+}
+
+enum MarketProduct {
+  MARKET_PRODUCT_UNSPECIFIED = 0;
+  MARKET_PRODUCT_SPOT = 1;
+  MARKET_PRODUCT_PERPETUAL = 2;
+}
+
+// InstrumentKey qualifies a venue symbol and pins the rules used to interpret it.
+message InstrumentKey {
+  string venue = 1;
+  MarketProduct product = 2;
+  string symbol = 3;
+  string settlement_asset = 4; // required for contracts; absent for spot
+  string spec_revision = 5; // opaque, changes when the instrument rules change
+}
+
+// AccountRef scopes account data. A reference grants no permission to act.
+message AccountRef {
+  Environment environment = 1;
+  string account_id = 2;
+}
+
+// Signal is a versioned strategy observation. It carries no order or account authority.
+message Signal {
+  uint32 schema_version = 1;
+  string strategy_version_id = 2;
+  InstrumentKey instrument = 3;
+  int64 observed_at_unix_ms = 4; // when the observation first became available
+  optional int64 valid_until_unix_ms = 5;
+  Decimal target_exposure = 6; // fraction of equity; explicit zero requests a flat position
+  string reason = 7;
+}
+
+// StrategyCapability describes where a strategy can be evaluated. Dataset checks still apply.
+message StrategyCapability {
+  repeated MarketProduct products = 1;
+  repeated Environment environments = 2;
+}

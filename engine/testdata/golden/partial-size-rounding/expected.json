@@ -40,7 +40,7 @@
   "fills": [
     {
       "decision_id": 1,
-      "time": "2024-01-01T00:01:00Z",
+      "time": "2024-01-01T00:02:00Z",
       "instrument": "SOLUSDT",
       "side": "buy",
       "kind": "signal",
@@ -57,7 +57,7 @@
     },
     {
       "decision_id": 2,
-      "time": "2024-01-01T00:03:00Z",
+      "time": "2024-01-01T00:04:00Z",
       "instrument": "SOLUSDT",
       "side": "sell",
       "kind": "signal",
@@ -74,7 +74,7 @@
     },
     {
       "decision_id": 3,
-      "time": "2024-01-01T00:05:00Z",
+      "time": "2024-01-01T00:06:00Z",
       "instrument": "SOLUSDT",
       "side": "sell",
       "kind": "signal",
@@ -93,8 +93,8 @@
   "trades": [
     {
       "instrument": "SOLUSDT",
-      "opened_at": "2024-01-01T00:01:00Z",
-      "closed_at": "2024-01-01T00:05:00Z",
+      "opened_at": "2024-01-01T00:02:00Z",
+      "closed_at": "2024-01-01T00:06:00Z",
       "qty": "5.13500000",
       "entry_ref": "499.68685000 USDT",
       "exit_ref": "499.68685000 USDT",
@@ -108,31 +108,31 @@
   ],
   "equity": [
     {
-      "time": "2024-01-01T00:01:00Z",
+      "time": "2024-01-01T00:01:02Z",
       "equity": "1000.00000000 USDT"
     },
     {
-      "time": "2024-01-01T00:02:00Z",
+      "time": "2024-01-01T00:02:02Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:03:02Z",
       "equity": "999.25021987 USDT"
     },
     {
-      "time": "2024-01-01T00:03:00Z",
+      "time": "2024-01-01T00:04:02Z",
       "equity": "999.25021987 USDT"
     },
     {
-      "time": "2024-01-01T00:04:00Z",
+      "time": "2024-01-01T00:05:02Z",
       "equity": "998.80065160 USDT"
     },
     {
-      "time": "2024-01-01T00:05:00Z",
+      "time": "2024-01-01T00:06:02Z",
       "equity": "998.80065160 USDT"
     },
     {
-      "time": "2024-01-01T00:06:00Z",
-      "equity": "998.50093942 USDT"
-    },
-    {
-      "time": "2024-01-01T00:07:00Z",
+      "time": "2024-01-01T00:07:02Z",
       "equity": "998.50093942 USDT"
     }
   ],

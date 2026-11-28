@@ -12,6 +12,7 @@ import (
 
 	"tradinglab/engine/internal/clock"
 	"tradinglab/engine/internal/data"
+	"tradinglab/engine/internal/fillpolicy"
 	"tradinglab/engine/internal/fx"
 	"tradinglab/engine/internal/instrument"
 	"tradinglab/engine/internal/money"
@@ -24,6 +25,12 @@ var (
 	ErrStrategy  = errors.New("sim: strategy failed")
 	ErrInvariant = errors.New("sim: ledger invariant broken")
 )
+
+// FillModel names the bar-open price assumption recorded with every new report.
+const FillModel = "causal-next-open/v1"
+
+// AccountingPolicy identifies fixed-8 spot sizing, rounding, fees and valuation rules.
+const AccountingPolicy = "spot-fixed8/v1"
 
 type Sizing string
 
@@ -41,7 +48,7 @@ type Config struct {
 	SlipRate  money.Ratio    `json:"slip_rate"` // per side
 	Sizing    Sizing         `json:"sizing"`
 	FixedUSDT money.Amount   `json:"fixed_usdt,omitzero"`
-	// LatencyBars: a decision on bar i fills at the open of bar i+LatencyBars (default 1).
+	// LatencyBars sets the earliest target bar index (default 1); its open must also be at or after the decision.
 	LatencyBars int `json:"latency_bars"`
 	// IntentTTL: an intent not filled within this time expires. 0 = LatencyBars+9
 	// bars of the input timeframe (10 minutes on 1m bars, 10 hours on 1h bars).
@@ -80,7 +87,7 @@ func (c Config) normalized() (Config, error) {
 		return bad("unknown sizing %q", c.Sizing)
 	}
 	if c.LatencyBars == 0 {
-		c.LatencyBars = 1
+		c.LatencyBars = fillpolicy.DefaultLatencyBars
 	}
 	if c.LatencyBars < 1 {
 		return bad("latency must be >= 1 bar")
@@ -89,9 +96,10 @@ func (c Config) normalized() (Config, error) {
 }
 
 type position struct {
-	qty, stop, take         int64 // stop/take prices; 0 = none
-	trade                   int   // index into Result.Trades of the open round trip
-	entryCost, exitProceeds int64 // USDT, for the trade's net
+	changedAt               time.Time // the range of an older candle cannot act on this newer state
+	qty, stop, take         int64     // stop/take prices; 0 = none
+	trade                   int       // index into Result.Trades of the open round trip
+	entryCost, exitProceeds int64     // USDT, for the trade's net
 }
 
 type order struct {
@@ -107,8 +115,9 @@ type runner struct {
 	cfg     Config
 	specs   map[string]instrument.Spec
 	bars    map[string][]data.Bar
-	symbols []string // sorted, for deterministic iteration
-	seen    map[string]int
+	symbols []string              // sorted, for deterministic iteration
+	seen    map[string]int        // highest observed index + 1
+	history map[string][]data.Bar // materialized only while a prefix has availability holes
 	bal     map[string]int64
 	pos     map[string]*position
 	pending map[string]*order
@@ -125,7 +134,8 @@ func Run(ctx context.Context, cfg Config, specs map[string]instrument.Spec, bars
 	}
 	r := &runner{
 		cfg: cfg, specs: specs, bars: bars,
-		seen: map[string]int{}, bal: map[string]int64{instrument.USDT.Code: cfg.Capital.V},
+		history: map[string][]data.Bar{},
+		seen:    map[string]int{}, bal: map[string]int64{instrument.USDT.Code: cfg.Capital.V},
 		pos: map[string]*position{}, pending: map[string]*order{}, last: map[string]money.Price{},
 		// Empty slices, not nil: an empty run serializes as [] rather than null.
 		res: &Result{Decisions: []Decision{}, Fills: []Fill{}, Trades: []Trade{}, Equity: []EquityPoint{}},
@@ -143,7 +153,7 @@ func Run(ctx context.Context, cfg Config, specs map[string]instrument.Spec, bars
 	first := bars[events[0].sym][events[0].i]
 	r.clk = clock.NewVirtual(first.AvailableAt)
 	if r.cfg.IntentTTL == 0 {
-		r.cfg.IntentTTL = time.Duration(r.cfg.LatencyBars+9) * first.CloseTime.Sub(first.OpenTime)
+		r.cfg.IntentTTL = fillpolicy.DefaultTTL(r.cfg.LatencyBars, first.CloseTime.Sub(first.OpenTime))
 	}
 
 	for start := 0; start < len(events); {
@@ -164,7 +174,10 @@ func Run(ctx context.Context, cfg Config, specs map[string]instrument.Spec, bars
 		start = end
 	}
 	r.res.Bars = len(events)
-	return r.res, r.finish(ctx)
+	if err := r.finish(ctx); err != nil {
+		return nil, err
+	}
+	return r.res, nil
 }
 
 type event struct {
@@ -212,22 +225,21 @@ func (r *runner) events() ([]event, error) {
 //  2. record this batch's closes;
 //  3. strategies decide on the closed bars; then equity is marked.
 func (r *runner) batch(ctx context.Context, s strategy.Strategy, evs []event) error {
-	closeAt := time.Time{}
 	for _, ev := range evs {
 		b := r.bars[ev.sym][ev.i]
-		r.seen[ev.sym] = ev.i + 1
+		r.observe(ev)
 		if err := r.fillDue(ctx, ev.sym, ev.i, b); err != nil {
 			return err
 		}
 		if err := r.exits(ctx, ev.sym, b); err != nil {
 			return err
 		}
-		if b.CloseTime.After(closeAt) {
-			closeAt = b.CloseTime
-		}
 	}
 	for _, ev := range evs {
-		r.last[ev.sym] = r.bars[ev.sym][ev.i].C
+		// An old backfill must not replace a newer known closing price.
+		if ev.i == r.seen[ev.sym]-1 {
+			r.last[ev.sym] = r.bars[ev.sym][ev.i].C
+		}
 	}
 	for _, ev := range evs {
 		b := r.bars[ev.sym][ev.i]
@@ -242,7 +254,7 @@ func (r *runner) batch(ctx context.Context, s strategy.Strategy, evs []event) er
 	if err := r.checkInvariants(); err != nil {
 		return err
 	}
-	return r.markEquity(ctx, closeAt)
+	return r.markEquity(ctx, r.clk.Now())
 }
 
 // fillDue executes or expires the pending order of sym if bar i is its fill bar.
@@ -255,10 +267,7 @@ func (r *runner) fillDue(ctx context.Context, sym string, i int, b data.Bar) err
 	case b.OpenTime.After(o.validUntil):
 		delete(r.pending, sym)
 		r.outcome(o.decision, OutcomeExpired, fmt.Sprintf("no fill by %s (next bar opened %s)", stamp(o.validUntil), stamp(b.OpenTime)))
-	case !b.CloseTime.After(o.at):
-		// This bar had closed before the decision was made (late, backfilled data):
-		// its open is in the past. Wait for a bar still open at decision time.
-	default:
+	case fillpolicy.AllowsOpen(b.OpenTime, o.at, o.validUntil):
 		delete(r.pending, sym)
 		return r.execute(ctx, o, b)
 	}
@@ -420,14 +429,27 @@ func (r *runner) execute(ctx context.Context, o *order, b data.Bar) error {
 		r.outcome(o.decision, OutcomeRejected, "order below min notional "+spec.MinNotional.String())
 		return nil
 	}
+	var stop, take int64
+	if o.intent.StopLoss > 0 {
+		stop, err = o.intent.StopLoss.Minus(l.price, money.Floor)
+		if err != nil {
+			return fmt.Errorf("%s stop loss: %w", o.symbol, err)
+		}
+	}
+	if o.intent.TakeProfit > 0 {
+		take, err = o.intent.TakeProfit.Plus(l.price, money.Ceil)
+		if err != nil {
+			return fmt.Errorf("%s take profit: %w", o.symbol, err)
+		}
+	}
 	if err := r.apply(o.symbol, l, quoteRate, b.OpenTime, "signal", id, false); err != nil {
 		return err
 	}
 	if o.intent.StopLoss > 0 {
-		p.stop, _ = o.intent.StopLoss.Minus(l.price, money.Floor)
+		p.stop = stop
 	}
 	if o.intent.TakeProfit > 0 {
-		p.take, _ = o.intent.TakeProfit.Plus(l.price, money.Ceil)
+		p.take = take
 	}
 	r.outcome(o.decision, OutcomeFilled, "")
 	return nil
@@ -458,6 +480,10 @@ func (r *runner) sell(ctx context.Context, sym string, q, ref, quoteRate int64, 
 func (r *runner) exits(ctx context.Context, sym string, b data.Bar) error {
 	p := r.pos[sym]
 	if p == nil || p.qty == 0 {
+		return nil
+	}
+	// A delayed candle cannot apply protection to an earlier position state.
+	if b.OpenTime.Before(p.changedAt) {
 		return nil
 	}
 	stopHit := p.stop > 0 && b.L.V <= p.stop
@@ -522,53 +548,116 @@ func (r *runner) apply(sym string, l leg, quoteRate int64, at time.Time, kind st
 	}
 
 	q, a := spec.Quote, func(v int64) money.Amount { return money.Amount{V: v, Asset: instrument.USDT} }
-	r.bal[q.Code] += l.cash()
+	quoteBalance, err := money.AddInt64(r.bal[q.Code], l.cash)
+	if err != nil {
+		return fmt.Errorf("%s quote balance: %w", sym, err)
+	}
 	side := Sell
+	quantity := -l.qty
 	if l.buy {
-		side = Buy
-		r.bal[spec.Base.Code] += l.qty
-		if p.qty == 0 {
-			z := money.Amount{Asset: instrument.USDT}
-			r.res.Trades = append(r.res.Trades, Trade{
-				Instrument: sym, OpenedAt: at, Qty: money.Qty{Scale: sc}, OpenQty: money.Qty{Scale: sc},
-				EntryRef: z, ExitRef: z, Gross: z, Slippage: z, Fees: z, Net: z,
-			})
-			p.trade, p.entryCost, p.exitProceeds, p.stop, p.take = len(r.res.Trades)-1, 0, 0, 0, 0
-		}
-		p.qty += l.qty
-		t := &r.res.Trades[p.trade]
-		t.Qty.V += l.qty
-		t.EntryRef.V += refU
-		t.Slippage.V += slipU
-		t.Fees.V += feeU
-		p.entryCost += refU + slipU + feeU
+		side, quantity = Buy, l.qty
+	}
+	baseBalance, err := money.AddInt64(r.bal[spec.Base.Code], quantity)
+	if err != nil {
+		return fmt.Errorf("%s base balance: %w", sym, err)
+	}
+	// Stage the ledger transition so a rejected fill never publishes partial totals.
+	next := *p
+	newTrade := l.buy && p.qty == 0
+	var t Trade
+	if newTrade {
+		next = position{trade: len(r.res.Trades)}
+		z := a(0)
+		t = Trade{Instrument: sym, OpenedAt: at, OpenedObservedAt: r.clk.Now(), Qty: money.Qty{Scale: sc},
+			OpenQty: money.Qty{Scale: sc}, EntryRef: z, ExitRef: z, Gross: z, Slippage: z, Fees: z, Net: z}
 	} else {
-		r.bal[spec.Base.Code] -= l.qty
-		p.qty -= l.qty
-		t := &r.res.Trades[p.trade]
-		t.ExitRef.V += refU
-		t.Slippage.V += slipU
-		t.Fees.V += feeU
-		p.exitProceeds += refU - slipU - feeU
-		if p.qty == 0 {
+		t = r.res.Trades[next.trade]
+	}
+	if err := applyLedgerDeltas(ledgerDelta{&next.qty, quantity}, ledgerDelta{&t.Slippage.V, slipU}, ledgerDelta{&t.Fees.V, feeU}); err != nil {
+		return fmt.Errorf("%s position totals: %w", sym, err)
+	}
+	if l.buy {
+		if err := applyLedgerDeltas(ledgerDelta{&t.Qty.V, l.qty}, ledgerDelta{&t.EntryRef.V, refU},
+			ledgerDelta{&next.entryCost, refU}, ledgerDelta{&next.entryCost, slipU}, ledgerDelta{&next.entryCost, feeU}); err != nil {
+			return fmt.Errorf("%s entry totals: %w", sym, err)
+		}
+	} else {
+		// Ref and slippage are nonnegative, so their difference is representable.
+		proceeds, err := money.SubInt64(refU-slipU, feeU)
+		if err != nil {
+			return fmt.Errorf("%s exit proceeds: %w", sym, err)
+		}
+		if err := applyLedgerDeltas(ledgerDelta{&t.ExitRef.V, refU}, ledgerDelta{&next.exitProceeds, proceeds}); err != nil {
+			return fmt.Errorf("%s exit totals: %w", sym, err)
+		}
+		if next.qty == 0 {
 			closed := at
 			t.ClosedAt = &closed
-			t.Gross.V = t.ExitRef.V - t.EntryRef.V
-			t.Net.V = p.exitProceeds - p.entryCost
-			if t.Net.V != t.Gross.V-t.Slippage.V-t.Fees.V {
-				return fmt.Errorf("%w: %s trade net %d != gross %d - slippage %d - fees %d", ErrInvariant, sym, t.Net.V, t.Gross.V, t.Slippage.V, t.Fees.V)
+			t.ClosedObservedAt = r.clk.Now()
+			if err := totalTrade(&t, next, 0); err != nil {
+				return err
 			}
-			p.stop, p.take = 0, 0
+			next.stop, next.take = 0, 0
 		}
 	}
+	next.changedAt = at
+	*p = next
+	r.bal[q.Code], r.bal[spec.Base.Code] = quoteBalance, baseBalance
+	if newTrade {
+		r.res.Trades = append(r.res.Trades, t)
+	} else {
+		r.res.Trades[next.trade] = t
+	}
 	r.res.Fills = append(r.res.Fills, Fill{
-		DecisionID: decisionID, Time: at, Instrument: sym, Side: side, Kind: kind,
+		DecisionID: decisionID, Time: at, ObservedAt: r.clk.Now(), Instrument: sym, Side: side, Kind: kind,
 		Qty:      money.Qty{V: l.qty, Scale: sc},
 		RefPrice: money.Price{V: l.ref, Scale: sc}, Price: money.Price{V: l.price, Scale: sc},
 		RefValue: money.Amount{V: l.refValue, Asset: q}, Value: money.Amount{V: l.value, Asset: q},
 		Slippage: money.Amount{V: l.slippage, Asset: q}, Fee: money.Amount{V: l.fee, Asset: q},
 		RefValueUSDT: a(refU), SlippageUSDT: a(slipU), FeeUSDT: a(feeU), Ambiguous: ambiguous,
 	})
+	return nil
+}
+
+type ledgerDelta struct {
+	field *int64
+	value int64
+}
+
+// The targets belong to a staged ledger transition which is discarded on error.
+func applyLedgerDeltas(changes ...ledgerDelta) error {
+	for _, change := range changes {
+		v, err := money.AddInt64(*change.field, change.value)
+		if err != nil {
+			return err
+		}
+		*change.field = v
+	}
+	return nil
+}
+
+func totalTrade(t *Trade, p position, mark int64) error {
+	var err error
+	if t.Gross.V, err = money.AddInt64(t.ExitRef.V-t.EntryRef.V, mark); err != nil {
+		return fmt.Errorf("%s trade gross: %w", t.Instrument, err)
+	}
+	net, err := money.SubInt64(p.exitProceeds, p.entryCost)
+	if err == nil {
+		t.Net.V, err = money.AddInt64(net, mark)
+	}
+	if err != nil {
+		return fmt.Errorf("%s trade net: %w", t.Instrument, err)
+	}
+	expected, err := money.SubInt64(t.Gross.V, t.Slippage.V)
+	if err == nil {
+		expected, err = money.SubInt64(expected, t.Fees.V)
+	}
+	if err != nil {
+		return fmt.Errorf("%s trade costs: %w", t.Instrument, err)
+	}
+	if t.Net.V != expected {
+		return fmt.Errorf("%w: %s trade net %d != gross %d - slippage %d - fees %d", ErrInvariant, t.Instrument, t.Net.V, t.Gross.V, t.Slippage.V, t.Fees.V)
+	}
 	return nil
 }
 
@@ -591,11 +680,16 @@ func (r *runner) usdtPer(ctx context.Context, a money.Asset) (int64, error) {
 // equity values every balance in USDT: positions through their own pair (ETHBTC:
 // ETH → BTC → USDT), remaining cash through <ASSET>USDT.
 func (r *runner) equity(ctx context.Context) (int64, error) {
+	eq, _, err := r.valuation(ctx)
+	return eq, err
+}
+
+func (r *runner) valuation(ctx context.Context) (int64, int64, error) {
 	cash := map[string]int64{}
 	for a, v := range r.bal {
 		cash[a] = v
 	}
-	var total int64
+	var total, unrealized int64
 	for _, sym := range r.symbols {
 		p := r.pos[sym]
 		if p == nil || p.qty == 0 {
@@ -605,9 +699,24 @@ func (r *runner) equity(ctx context.Context) (int64, error) {
 		cash[spec.Base.Code] -= p.qty
 		v, err := fx.PositionUSDT(ctx, r, spec, money.Qty{V: p.qty, Scale: sc}, r.clk.Now(), money.Floor)
 		if err != nil {
-			return 0, err
+			return 0, 0, err
 		}
-		total += v.V
+		if total, err = money.AddInt64(total, v.V); err != nil {
+			return 0, 0, fmt.Errorf("position equity: %w", err)
+		}
+		openNet, err := (money.Amount{V: p.exitProceeds}).Add(money.Amount{V: v.V})
+		if err != nil {
+			return 0, 0, err
+		}
+		openNet, err = openNet.Sub(money.Amount{V: p.entryCost})
+		if err != nil {
+			return 0, 0, err
+		}
+		u, err := (money.Amount{V: unrealized}).Add(openNet)
+		if err != nil {
+			return 0, 0, err
+		}
+		unrealized = u.V
 	}
 	assets := make([]string, 0, len(cash))
 	for a := range cash {
@@ -620,25 +729,27 @@ func (r *runner) equity(ctx context.Context) (int64, error) {
 		}
 		v, err := fx.ToUSDT(ctx, r, money.Amount{V: cash[a], Asset: instrument.Asset(a)}, r.clk.Now(), money.Floor)
 		if err != nil {
-			return 0, err
+			return 0, 0, err
 		}
-		total += v.V
+		if total, err = money.AddInt64(total, v.V); err != nil {
+			return 0, 0, fmt.Errorf("cash equity: %w", err)
+		}
 	}
-	return total, nil
+	return total, unrealized, nil
 }
 
-// markEquity records equity at a bar close. Until every held asset has a USDT
+// markEquity records equity when the closed-bar data becomes available. Until every held asset has a USDT
 // rate (e.g. BTC holdings before the first BTCUSDT bar) there is no honest value,
 // so no point is recorded.
 func (r *runner) markEquity(ctx context.Context, at time.Time) error {
-	eq, err := r.equity(ctx)
+	eq, unrealized, err := r.valuation(ctx)
 	if errors.Is(err, fx.ErrNoRate) {
 		return nil
 	}
 	if err != nil {
 		return fmt.Errorf("equity at %s: %w", stamp(at), err)
 	}
-	r.res.Equity = append(r.res.Equity, EquityPoint{Time: at, Equity: money.Amount{V: eq, Asset: instrument.USDT}})
+	r.res.Equity = append(r.res.Equity, EquityPoint{Time: at, Equity: money.Amount{V: eq, Asset: instrument.USDT}, Unrealized: unrealized})
 	return nil
 }
 
@@ -651,7 +762,12 @@ func (r *runner) checkInvariants() error {
 			if p.qty < 0 {
 				return fmt.Errorf("%w: %s position %d < 0", ErrInvariant, sym, p.qty)
 			}
-			held[r.specs[sym].Base.Code] += p.qty
+			asset := r.specs[sym].Base.Code
+			qty, err := money.AddInt64(held[asset], p.qty)
+			if err != nil {
+				return fmt.Errorf("%s held quantity: %w", asset, err)
+			}
+			held[asset] = qty
 		}
 	}
 	for a, v := range r.bal {
@@ -684,10 +800,8 @@ func (r *runner) finish(ctx context.Context) error {
 		t := &r.res.Trades[p.trade]
 		t.OpenQty = money.Qty{V: p.qty, Scale: sc}
 		t.MarkValue = &v
-		t.Gross.V = t.ExitRef.V + v.V - t.EntryRef.V
-		t.Net.V = p.exitProceeds + v.V - p.entryCost
-		if t.Net.V != t.Gross.V-t.Slippage.V-t.Fees.V {
-			return fmt.Errorf("%w: open %s trade net != gross - slippage - fees", ErrInvariant, sym)
+		if err := totalTrade(t, *p, v.V); err != nil {
+			return err
 		}
 	}
 	assets := make([]string, 0, len(r.bal))
@@ -706,9 +820,31 @@ func (r *runner) finish(ctx context.Context) error {
 	return nil
 }
 
-// History implements strategy.RunContext. The capacity cap means reslicing past
-// the last seen bar panics instead of revealing the future.
+// observe keeps the usual ordered stream allocation-free; holes use a sorted buffer.
+func (r *runner) observe(ev event) {
+	n := r.seen[ev.sym]
+	known := r.history[ev.sym]
+	if ev.i != n || known != nil {
+		if known == nil {
+			known = slices.Clone(r.bars[ev.sym][:n])
+		}
+		b := r.bars[ev.sym][ev.i]
+		i, _ := slices.BinarySearchFunc(known, b.OpenTime, func(b data.Bar, at time.Time) int { return b.OpenTime.Compare(at) })
+		known = slices.Insert(known, i, b)
+		if len(known) == max(n, ev.i+1) {
+			delete(r.history, ev.sym) // all prefix members are now available
+		} else {
+			r.history[ev.sym] = known
+		}
+	}
+	r.seen[ev.sym] = max(n, ev.i+1)
+}
+
+// History returns only observed bars, oldest first, with no reslicing into future data.
 func (r *runner) History(symbol string) []data.Bar {
+	if known := r.history[symbol]; known != nil {
+		return known[:len(known):len(known)]
+	}
 	n := r.seen[symbol]
 	return r.bars[symbol][:n:n]
 }

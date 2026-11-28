@@ -1,19 +1,28 @@
 package api
 
 import (
+	"compress/gzip"
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"math"
+	"net/http"
 	"slices"
 	"strconv"
 	"time"
 
 	"connectrpc.com/connect"
+	"github.com/jackc/pgx/v5"
 
 	"tradinglab/engine/internal/clock"
 	"tradinglab/engine/internal/data"
+	"tradinglab/engine/internal/eval"
 	labv1 "tradinglab/engine/internal/gen/lab/v1"
+	"tradinglab/engine/internal/gen/lab/v1/labv1connect"
 	"tradinglab/engine/internal/instrument"
+	"tradinglab/engine/internal/jobs"
 	"tradinglab/engine/internal/money"
 	"tradinglab/engine/internal/report"
 	"tradinglab/engine/internal/sim"
@@ -26,13 +35,29 @@ type Chart struct {
 	Clock clock.Clock
 }
 
+// Handler uses faster gzip for the repeated candle and indicator payloads.
+func (h *Chart) Handler() (string, http.Handler) {
+	return labv1connect.NewChartServiceHandler(h, connect.WithCompression("gzip",
+		func() connect.Decompressor { return &gzip.Reader{} },
+		func() connect.Compressor {
+			w, _ := gzip.NewWriterLevel(io.Discard, gzip.BestSpeed)
+			return w
+		},
+	))
+}
+
 const (
-	chartBarsDefault = 2000
-	chartBarsMax     = 10_000
+	chartBarsDefault   = 2000
+	chartBarsMax       = 10_000
+	chartIndicatorsMax = 8
 )
 
 func (h *Chart) GetChart(ctx context.Context, req *connect.Request[labv1.GetChartRequest]) (*connect.Response[labv1.GetChartResponse], error) {
 	m := req.Msg
+	// Bound indicator response expansion independently of the visible candle count.
+	if len(m.GetIndicators()) > chartIndicatorsMax {
+		return nil, invalid("حداکثر ۸ اندیکاتور در هر درخواست نمودار مجاز است")
+	}
 	limit := int(m.GetMaxBars())
 	if limit <= 0 {
 		limit = chartBarsDefault
@@ -40,18 +65,18 @@ func (h *Chart) GetChart(ctx context.Context, req *connect.Request[labv1.GetChar
 	limit = min(limit, chartBarsMax)
 	res := &labv1.GetChartResponse{}
 	var bars []data.Bar
-	var decisions []db.Decision
-	var trades []db.Trade
+	reportID := m.GetReportId()
 	sym := m.GetSymbol()
-	if id := m.GetReportId(); id != "" {
-		st, err := h.Svc.Load(ctx, id)
+	if reportID != "" {
+		st, err := h.reportChartInputs(ctx, reportID)
 		if err != nil {
 			return nil, reportErr(err)
 		}
-		all, tf, err := h.Svc.Bars(ctx, st.Spec.DatasetIDs)
+		all, tf, release, err := h.Svc.ChartBars(ctx, st.datasetIDs, limit)
 		if err != nil {
-			return nil, err
+			return nil, reportErr(err)
 		}
+		defer release()
 		for s := range all {
 			res.Symbols = append(res.Symbols, s)
 		}
@@ -60,17 +85,11 @@ func (h *Chart) GetChart(ctx context.Context, req *connect.Request[labv1.GetChar
 			sym = res.Symbols[0]
 		}
 		if !slices.Contains(res.Symbols, sym) {
-			return nil, invalid(fmt.Sprintf("report %s has no %s", id, sym))
+			return nil, invalid(fmt.Sprintf("report %s has no %s", reportID, sym))
 		}
 		// The holdout stays hidden: the chart ends where the main run ends.
-		bars = all[sym][:firstOpenAtOrAfter(all[sym], st.Split.OOS.To)]
-		res.Timeframe, res.ReportTitle = string(tf), st.Row.Title
-		if decisions, err = h.Svc.Store.AllDecisions(ctx, db.AllDecisionsParams{ReportID: id, Run: report.RunMain}); err != nil {
-			return nil, err
-		}
-		if trades, err = h.Svc.Store.AllTrades(ctx, db.AllTradesParams{ReportID: id, Run: report.RunMain}); err != nil {
-			return nil, err
-		}
+		bars = all[sym][:firstOpenAtOrAfter(all[sym], st.oosEnd)]
+		res.Timeframe, res.ReportTitle = string(tf), st.title
 	} else {
 		if _, ok := report.Specs()[sym]; !ok {
 			return nil, invalid(fmt.Sprintf("unknown pair %q", sym))
@@ -82,6 +101,19 @@ func (h *Chart) GetChart(ctx context.Context, req *connect.Request[labv1.GetChar
 		now := h.Clock.Now()
 		// Enough history for indicator warm-up before the shown window.
 		from := now.Add(-time.Duration(limit+1000) * tf.Duration())
+		raw, err := data.RawBarCount(tf, from, now)
+		if err != nil {
+			return nil, reportErr(err)
+		}
+		bytes, err := jobs.WorkBytes(int64(raw), int64(limit+1000), 1)
+		if err != nil {
+			return nil, reportErr(err)
+		}
+		release, err := h.Svc.Memory.Reserve(ctx, bytes)
+		if err != nil {
+			return nil, reportErr(err)
+		}
+		defer release()
 		if bars, err = (data.Reader{Q: h.Svc.Store.Queries}).Bars(ctx, data.Query{Symbol: sym, Timeframe: tf, From: from, To: now, AsOf: now}); err != nil {
 			return nil, err
 		}
@@ -94,17 +126,17 @@ func (h *Chart) GetChart(ctx context.Context, req *connect.Request[labv1.GetChar
 	res.Symbol, res.TotalBars = sym, int32(len(bars))
 	res.PricePrecision = precision(report.Specs()[sym])
 
-	// Indicators see all bars (warm-up), the response only the last limit.
+	// Keep the original warm-up while constructing only the visible values.
 	start := max(0, len(bars)-limit)
 	for _, key := range m.GetIndicators() {
-		ind, err := strategy.ComputeIndicator(key, bars)
+		ind, err := strategy.ComputeIndicatorWindow(key, bars, start)
 		if err != nil {
 			return nil, invalid(err.Error())
 		}
 		pi := &labv1.ChartIndicator{Key: ind.Key, Label: ind.Label, Pane: ind.Pane}
 		for _, l := range ind.Lines {
-			pl := &labv1.IndicatorLine{Name: l.Name, Values: make([]string, 0, len(bars)-start)}
-			for _, v := range l.Values[start:] {
+			pl := &labv1.IndicatorLine{Name: l.Name, Values: make([]string, 0, len(l.Values))}
+			for _, v := range l.Values {
 				pl.Values = append(pl.Values, indicatorValue(v))
 			}
 			pi.Lines = append(pi.Lines, pl)
@@ -112,12 +144,26 @@ func (h *Chart) GetChart(ctx context.Context, req *connect.Request[labv1.GetChar
 		res.Indicators = append(res.Indicators, pi)
 	}
 	shown := bars[start:]
+	var decisions []db.Decision
+	var fills []db.Fill
+	if reportID != "" && len(shown) > 0 {
+		// Match the existing millisecond projection even if a stored timestamp has finer precision.
+		from := shown[0].OpenTime.Truncate(time.Millisecond)
+		to := shown[len(shown)-1].OpenTime.Truncate(time.Millisecond).Add(time.Millisecond)
+		var err error
+		decisions, err = h.Svc.Store.ChartDecisions(ctx, db.ChartDecisionsParams{ReportID: reportID, Symbol: sym, FromTime: from, ToTime: to})
+		if err != nil {
+			return nil, err
+		}
+		fills, err = h.Svc.Store.ChartProtectionFills(ctx, db.ChartProtectionFillsParams{ReportID: reportID, Symbol: sym, FromTime: from, ToTime: to})
+		if err != nil {
+			return nil, err
+		}
+	}
 	byOpen := make(map[int64]data.Bar, len(shown))
 	for _, b := range shown {
 		byOpen[b.OpenTime.UnixMilli()] = b
-		res.Bars = append(res.Bars, &labv1.ChartBar{
-			OpenUnixMs: ms(b.OpenTime), Open: decP(b.O.V, 8), High: decP(b.H.V, 8), Low: decP(b.L.V, 8), Close: decP(b.C.V, 8), Volume: decP(b.Volume.V, 8),
-		})
+		res.Bars = append(res.Bars, chartBarP(b))
 	}
 	for _, d := range decisions {
 		b, ok := byOpen[d.InputBarOpen.UnixMilli()]
@@ -138,47 +184,73 @@ func (h *Chart) GetChart(ctx context.Context, req *connect.Request[labv1.GetChar
 			res.Markers = append(res.Markers, &labv1.ChartMarker{DecisionId: d.ID, BarOpenUnixMs: ms(b.OpenTime), Kind: kind, Price: decP(b.C.V, 8)})
 		}
 	}
-	for _, t := range trades {
-		if t.Instrument != sym || t.ClosedAt == nil || (t.ExitReason != "stop loss" && t.ExitReason != "take profit") {
-			continue
-		}
-		if _, ok := byOpen[t.ClosedAt.UnixMilli()]; ok {
-			res.Markers = append(res.Markers, &labv1.ChartMarker{BarOpenUnixMs: ms(*t.ClosedAt), Kind: "exit", Price: decP(t.ExitRef, 8), Detail: t.ExitReason})
-		}
-	}
+	res.Markers = append(res.Markers, protectionMarkers(fills, sym, byOpen)...)
+
 	slices.SortStableFunc(res.Markers, func(a, b *labv1.ChartMarker) int { return int(a.BarOpenUnixMs - b.BarOpenUnixMs) })
 	return connect.NewResponse(res), nil
 }
 
+func chartBarP(b data.Bar) *labv1.ChartBar {
+	return &labv1.ChartBar{
+		OpenUnixMs: ms(b.OpenTime), Open: decP(b.O.V, 8), High: decP(b.H.V, 8), Low: decP(b.L.V, 8),
+		Close: decP(b.C.V, 8), Volume: decP(b.Volume.V, 8),
+	}
+}
+
 func (h *Chart) GetDecision(ctx context.Context, req *connect.Request[labv1.GetDecisionRequest]) (*connect.Response[labv1.GetDecisionResponse], error) {
 	m := req.Msg
-	st, err := h.Svc.Load(ctx, m.GetReportId())
+	st, err := h.reportChartInputs(ctx, m.GetReportId())
 	if err != nil {
 		return nil, reportErr(err)
 	}
-	ds, err := h.Svc.Store.AllDecisions(ctx, db.AllDecisionsParams{ReportID: m.GetReportId(), Run: report.RunMain})
+	d, err := h.Svc.Store.GetMainDecision(ctx, db.GetMainDecisionParams{ReportID: m.GetReportId(), ID: m.GetDecisionId()})
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("decision %d not found", m.GetDecisionId()))
+	}
 	if err != nil {
 		return nil, err
 	}
-	i := slices.IndexFunc(ds, func(d db.Decision) bool { return d.ID == m.GetDecisionId() })
-	if i < 0 {
-		return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("decision %d not found", m.GetDecisionId()))
-	}
-	d := ds[i]
 	res := &labv1.GetDecisionResponse{Decision: &labv1.DecisionRow{
 		Id: d.ID, AtUnixMs: ms(d.At), InputSymbol: d.InputSymbol, InputBarOpenUnixMs: ms(d.InputBarOpen), Instrument: d.Instrument,
 		Target: decP(d.Target, 6), StopLoss: decP(d.StopLoss, 6), TakeProfit: decP(d.TakeProfit, 6), Reason: d.Reason,
 		ModelId: d.ModelID, RecipeVersion: d.RecipeVersion, Outcome: d.Outcome, Detail: d.Detail,
 	}}
-	all, _, err := h.Svc.Bars(ctx, st.Spec.DatasetIDs)
+	all, _, release, err := h.Svc.ChartBars(ctx, st.datasetIDs, 1)
 	if err != nil {
-		return nil, err
+		return nil, reportErr(err)
 	}
+	defer release()
 	bs := all[d.InputSymbol]
 	if j := firstOpenAtOrAfter(bs, d.InputBarOpen); j < len(bs) && bs[j].OpenTime.Equal(d.InputBarOpen) {
 		res.RefPrice = moneyP(money.Amount{V: bs[j].C.V, Asset: report.Specs()[d.InputSymbol].Quote})
 	}
 	return connect.NewResponse(res), nil
+}
+
+type chartInputs struct {
+	title      string
+	datasetIDs []string
+	oosEnd     time.Time
+}
+
+// Charts need the registered inputs and end time, without loading evaluation or holdout output.
+func (h *Chart) reportChartInputs(ctx context.Context, id string) (chartInputs, error) {
+	row, err := h.Svc.Store.GetReportChartInputs(ctx, id)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return chartInputs{}, fmt.Errorf("%w: %s", report.ErrNotFound, id)
+	}
+	if err != nil {
+		return chartInputs{}, err
+	}
+	var spec eval.Spec
+	var split eval.Split
+	if err := json.Unmarshal(row.Spec, &spec); err != nil {
+		return chartInputs{}, fmt.Errorf("report %s spec: %w", id, err)
+	}
+	if err := json.Unmarshal(row.Split, &split); err != nil {
+		return chartInputs{}, fmt.Errorf("report %s split: %w", id, err)
+	}
+	return chartInputs{title: row.Title, datasetIDs: spec.DatasetIDs, oosEnd: split.OOS.To}, nil
 }
 
 func firstOpenAtOrAfter(bs []data.Bar, t time.Time) int {
@@ -202,4 +274,23 @@ func precision(s instrument.Spec) int32 {
 		v /= 10
 	}
 	return n
+}
+
+// A trade can have many exits: each marker uses its own fill's unit price.
+func protectionMarkers(fills []db.Fill, symbol string, shown map[int64]data.Bar) []*labv1.ChartMarker {
+	var markers []*labv1.ChartMarker
+	for _, f := range fills {
+		if f.Instrument != symbol || f.Side != string(sim.Sell) || (f.Kind != "stop" && f.Kind != "take") {
+			continue
+		}
+		if _, ok := shown[f.At.UnixMilli()]; !ok {
+			continue
+		}
+		detail := "stop loss"
+		if f.Kind == "take" {
+			detail = "take profit"
+		}
+		markers = append(markers, &labv1.ChartMarker{BarOpenUnixMs: ms(f.At), Kind: "exit", Price: decP(f.RefPrice, 8), Detail: detail})
+	}
+	return markers
 }

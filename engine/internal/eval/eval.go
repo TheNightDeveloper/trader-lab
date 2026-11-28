@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"math/big"
 	"runtime"
 	"slices"
 	"sync"
@@ -18,21 +19,42 @@ import (
 	"tradinglab/engine/internal/strategy"
 )
 
+// Version changes whenever evaluation semantics change, including strategy warm-up.
+const Version = "p0.3"
+
 var ErrSpec = errors.New("eval: invalid spec")
 
 // Spec is everything a report depends on besides the bars themselves.
 type Spec struct {
-	DatasetIDs []string        `json:"dataset_ids"`
-	Timeframe  data.Timeframe  `json:"timeframe"`
-	Strategy   string          `json:"strategy"`
-	Params     strategy.Params `json:"params"` // complete: defaults filled in
-	Sim        sim.Config      `json:"sim"`
-	Split      SplitPlan       `json:"split"`
+	FillModel         string                   `json:"fill_model,omitempty"`
+	EvaluationVersion string                   `json:"evaluation_version,omitempty"`
+	DatasetIDs        []string                 `json:"dataset_ids"`
+	Timeframe         data.Timeframe           `json:"timeframe"`
+	Strategy          string                   `json:"strategy"`
+	Params            strategy.Params          `json:"params"` // complete: defaults filled in
+	Rule              *strategy.RuleDefinition `json:"rule,omitempty"`
+	RuleVersionID     int64                    `json:"rule_version_id,omitempty"`
+	Sim               sim.Config               `json:"sim"`
+	Split             SplitPlan                `json:"split"`
 	// EngineVersion of the code that produced the report (reproducibility badge).
-	EngineVersion string `json:"engine_version"`
+	EngineVersion string      `json:"engine_version"`
+	Provenance    *Provenance `json:"provenance,omitempty"`
 	// Origin is set when the report is the chosen candidate of an experiment: the
 	// attempt count travels with it so every reader can discount for search.
 	Origin *Origin `json:"origin,omitempty"`
+}
+
+func (s Spec) build(params strategy.Params) (strategy.Strategy, error) {
+	if s.Rule == nil {
+		return strategy.New(s.Strategy, params)
+	}
+	if s.Strategy != strategy.RuleFormatV1 || len(params) != 0 {
+		return nil, fmt.Errorf("rule evaluation requires rules/v1 without native parameters")
+	}
+	if base := s.Rule.BaseTimeframe; base != "" && base != s.Timeframe {
+		return nil, fmt.Errorf("rule base timeframe %s does not match dataset timeframe %s", base, s.Timeframe)
+	}
+	return s.Rule.Build()
 }
 
 // Origin links a report to the search that produced it.
@@ -119,11 +141,17 @@ type gated struct {
 }
 
 func (g gated) OnBar(ctx strategy.RunContext, b data.Bar) ([]strategy.Intent, error) {
-	ins, err := g.s.OnBar(ctx, b)
 	if b.OpenTime.Before(g.from) {
+		// Strategies with trading state can warm indicators without consuming a trade.
+		if w, ok := g.s.(interface {
+			Warmup(strategy.RunContext, data.Bar) error
+		}); ok {
+			return nil, w.Warmup(ctx, b)
+		}
+		_, err := g.s.OnBar(ctx, b)
 		return nil, err
 	}
-	return ins, err
+	return g.s.OnBar(ctx, b)
 }
 
 // Evaluate runs the walk-forward evaluation of spec over bars (per symbol, at
@@ -138,7 +166,7 @@ func Evaluate(ctx context.Context, spec Spec, bars map[string][]data.Bar, specs 
 // out-of-sample run, no holdout, stress, neighbourhood or benchmarks. The
 // holdout is never looked at while choosing a candidate.
 func EvaluateOOS(ctx context.Context, spec Spec, bars map[string][]data.Bar, specs map[string]instrument.Spec) ([]metrics.Metric, error) {
-	s, err := strategy.New(spec.Strategy, spec.Params)
+	s, err := spec.build(spec.Params)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrSpec, err)
 	}
@@ -194,7 +222,7 @@ func RunSplit(ctx context.Context, s strategy.Strategy, cfg sim.Config, specs ma
 	}
 	var folds []FoldView
 	for _, f := range split.Folds {
-		folds = append(folds, FoldView{Fold: f, Metrics: pick(window(res, f.Test, cfg.Capital.V), "net_pnl", "total_return", "max_drawdown", "trades", "win_rate")})
+		folds = append(folds, FoldView{Fold: f, Metrics: pick(window(res, f.Test, cfg.Capital.V), "net_pnl", "period_pnl", "cohort_lifetime_pnl", "total_return", "max_drawdown", "trades", "win_rate")})
 	}
 	return view(res, split.OOS, cfg.Capital.V), folds, res, nil
 }
@@ -202,7 +230,7 @@ func RunSplit(ctx context.Context, s strategy.Strategy, cfg sim.Config, specs ma
 // EvaluateWith is Evaluate with at most parallel simulator runs at once (the
 // research CPU share when called from the job queue).
 func EvaluateWith(ctx context.Context, spec Spec, bars map[string][]data.Bar, specs map[string]instrument.Spec, parallel int) (*Evaluation, error) {
-	if _, err := strategy.New(spec.Strategy, spec.Params); err != nil {
+	if _, err := spec.build(spec.Params); err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrSpec, err)
 	}
 	cfg, err := spec.Sim.Normalized()
@@ -210,6 +238,8 @@ func EvaluateWith(ctx context.Context, spec Spec, bars map[string][]data.Bar, sp
 		return nil, fmt.Errorf("%w: %w", ErrSpec, err)
 	}
 	spec.Sim = cfg
+	spec.EvaluationVersion = Version
+	spec.FillModel = sim.FillModel
 	tfDur, err := tfDuration(spec.Timeframe)
 	if err != nil {
 		return nil, err
@@ -271,30 +301,54 @@ func EvaluateWith(ctx context.Context, spec Spec, bars map[string][]data.Bar, sp
 		jobs = append(jobs, job{cfg, p, oosBars, split.OOS.From, ""})
 	}
 
-	results := make([]*sim.Result, len(jobs))
+	var primary [2]*sim.Result
+	reduced := make([]RunView, len(jobs))
 	errs := make([]error, len(jobs))
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, max(1, parallel))
 	for i, j := range jobs {
-		if j.params == nil {
+		if j.params == nil && spec.Rule == nil {
 			errs[i] = errInvalidCell
 			continue
 		}
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			sem <- struct{}{}
-			defer func() { <-sem }()
-			name := spec.Strategy
-			if j.strategy != "" {
-				name = j.strategy
+			select {
+			case sem <- struct{}{}:
+			case <-ctx.Done():
+				errs[i] = ctx.Err()
+				return
 			}
-			s, err := strategy.New(name, j.params)
+			defer func() { <-sem }()
+			var s strategy.Strategy
+			var err error
+			if j.strategy == "" {
+				s, err = spec.build(j.params)
+			} else {
+				s, err = strategy.New(j.strategy, j.params)
+			}
 			if err != nil {
 				errs[i] = err
 				return
 			}
-			results[i], errs[i] = sim.Run(ctx, j.cfg, specs, j.bars, gated{s, j.from})
+			result, err := sim.Run(ctx, j.cfg, specs, j.bars, gated{s, j.from})
+			if err != nil {
+				errs[i] = err
+				return
+			}
+			// Keep a full run only when it will be persisted. Other results must
+			// release their ledger before another worker takes the slot.
+			switch {
+			case i < len(primary):
+				primary[i] = result
+			case i < 5:
+				reduced[i].Metrics = pick(window(result, split.OOS, cfg.Capital.V), "net_pnl", "total_return", "max_drawdown", "trades")
+			case i < 7:
+				reduced[i] = view(result, split.OOS, cfg.Capital.V)
+			default:
+				reduced[i].Metrics = pick(window(result, split.OOS, cfg.Capital.V), "total_return")
+			}
 		}()
 	}
 	wg.Wait()
@@ -307,19 +361,19 @@ func EvaluateWith(ctx context.Context, spec Spec, bars map[string][]data.Bar, sp
 		return nil, err
 	}
 
-	ev.Main, ev.HoldoutRun = results[0], results[1]
-	ev.OOS = view(results[0], split.OOS, cfg.Capital.V)
-	ev.Holdout = view(results[1], split.Holdout, cfg.Capital.V)
+	ev.Main, ev.HoldoutRun = primary[0], primary[1]
+	ev.OOS = view(ev.Main, split.OOS, cfg.Capital.V)
+	ev.Holdout = view(ev.HoldoutRun, split.Holdout, cfg.Capital.V)
 	for _, f := range split.Folds {
-		full := window(results[0], f.Test, cfg.Capital.V)
-		ev.Folds = append(ev.Folds, FoldView{Fold: f, Metrics: pick(full, "net_pnl", "total_return", "max_drawdown", "trades", "win_rate")})
+		full := window(ev.Main, f.Test, cfg.Capital.V)
+		ev.Folds = append(ev.Folds, FoldView{Fold: f, Metrics: pick(full, "net_pnl", "period_pnl", "cohort_lifetime_pnl", "total_return", "max_drawdown", "trades", "win_rate")})
 	}
 	for k, key := range []string{"fee_x2", "slippage_x3", "latency_plus_1"} {
 		sv := StressView{Key: key}
 		if errs[2+k] != nil {
 			sv.Error = errs[2+k].Error()
 		} else {
-			sv.Metrics = pick(window(results[2+k], split.OOS, cfg.Capital.V), "net_pnl", "total_return", "max_drawdown", "trades")
+			sv.Metrics = reduced[2+k].Metrics
 		}
 		ev.Stress = append(ev.Stress, sv)
 	}
@@ -334,7 +388,7 @@ func EvaluateWith(ctx context.Context, spec Spec, bars map[string][]data.Bar, sp
 				case errs[i] != nil:
 					c.Invalid = errs[i].Error()
 				default:
-					c.Return, _ = metrics.Get(window(results[i], split.OOS, cfg.Capital.V), "total_return")
+					c.Return, _ = metrics.Get(reduced[i].Metrics, "total_return")
 				}
 			}
 		}
@@ -344,11 +398,11 @@ func EvaluateWith(ctx context.Context, spec Spec, bars map[string][]data.Bar, sp
 		if errs[5+k] != nil {
 			continue // a benchmark that cannot run (e.g. no rate yet) is simply not drawn
 		}
-		bv := view(results[5+k], split.OOS, cfg.Capital.V)
+		bv := reduced[5+k]
 		ret, _ := metrics.Get(bv.Metrics, "total_return")
 		ev.Benchmarks = append(ev.Benchmarks, Benchmark{Key: key, Equity: bv.Equity, Return: ret})
 	}
-	if f, ok := sim.BreakEvenFee(results[0]); ok {
+	if f, ok := sim.BreakEvenFee(ev.Main); ok {
 		ev.BreakEvenFee = &f
 	}
 	ev.Summary = summarize(ev)
@@ -390,30 +444,80 @@ func stress(c sim.Config, feeX, slipX int64, latency int) sim.Config {
 	return c
 }
 
-// window computes metrics of a run over w only: equity at closes inside w, trades
-// opened inside w, starting from the equity at w's start.
+// window attributes equity changes and observed fill costs to (From, To].
+// Cohorts are trades opened in [From, To); their lifetime PnL is explicitly
+// separate and must never determine a past fold's score.
 func window(r *sim.Result, w Window, capital int64) []metrics.Metric {
-	in := metrics.Input{Start: w.From, End: w.To, Initial: capital}
+	in := metrics.Input{Start: w.From, End: w.To, Initial: capital, ExposureTrades: []metrics.Trade{}}
+	var unrealized int64
+	cohort := new(big.Int)
 	for _, p := range r.Equity {
 		switch {
 		case !p.Time.After(w.From):
 			in.Initial = p.Equity.V // last mark at or before the window start
+			unrealized = p.Unrealized
 		case !p.Time.After(w.To):
 			in.Equity = append(in.Equity, metrics.Point{T: p.Time, Equity: p.Equity.V})
+			unrealized = p.Unrealized
 		}
 	}
 	for _, t := range r.Trades {
-		if !w.Contains(t.OpenedAt) {
+		inCohort := w.Contains(t.OpenedAt)
+		if inCohort {
+			cohort.Add(cohort, big.NewInt(t.Net.V)) // measured through the run's end, not w.To
+		}
+		if t.OpenedObservedAt.After(w.To) {
 			continue
 		}
-		mt := metrics.Trade{Opened: t.OpenedAt, Gross: t.Gross.V, Fees: t.Fees.V, Slippage: t.Slippage.V, Net: t.Net.V}
-		if t.ClosedAt != nil && !t.ClosedAt.After(w.To) {
+		mt := metrics.Trade{Opened: t.OpenedAt}
+		if t.ClosedAt != nil && !t.ClosedAt.After(w.To) && !t.ClosedObservedAt.After(w.To) {
 			c := *t.ClosedAt
 			mt.Closed = &c
+			mt.Gross, mt.Fees, mt.Slippage, mt.Net = t.Gross.V, t.Fees.V, t.Slippage.V, t.Net.V
 		}
-		in.Trades = append(in.Trades, mt)
+		in.ExposureTrades = append(in.ExposureTrades, mt)
+		if inCohort {
+			in.Trades = append(in.Trades, mt)
+		}
 	}
-	return metrics.Compute(in)
+	ms := metrics.Compute(in)
+	final := in.Initial
+	if len(in.Equity) > 0 {
+		final = in.Equity[len(in.Equity)-1].Equity
+	}
+	fees, slip := new(big.Int), new(big.Int)
+	for _, f := range r.Fills {
+		if !f.ObservedAt.After(w.From) || f.ObservedAt.After(w.To) {
+			continue
+		}
+		fees.Add(fees, big.NewInt(f.FeeUSDT.V))
+		slip.Add(slip, big.NewInt(f.SlippageUSDT.V))
+	}
+	net := new(big.Int).Sub(big.NewInt(final), big.NewInt(in.Initial))
+	gross := new(big.Int).Add(new(big.Int).Add(new(big.Int).Set(net), fees), slip)
+	values := map[string]*big.Int{"net_pnl": net, "gross_pnl": gross, "fees": fees, "slippage": slip, "unrealized_pnl": big.NewInt(unrealized)}
+	assign := func(m *metrics.Metric, v *big.Int) {
+		if !v.IsInt64() {
+			m.V, m.Valid, m.Invalid = 0, false, metrics.OverflowReason
+		} else {
+			// Period metrics replace the cohort's aggregate and its validity.
+			m.V, m.Valid, m.Invalid = v.Int64(), true, ""
+		}
+	}
+	for i := range ms {
+		if v, ok := values[ms[i].Key]; ok {
+			assign(&ms[i], v)
+		}
+	}
+	for _, item := range []struct {
+		key string
+		v   *big.Int
+	}{{"period_pnl", net}, {"cohort_lifetime_pnl", cohort}} {
+		m := metrics.Metric{Key: item.key, Group: metrics.GroupPnL, Scale: 8, Unit: metrics.USDT, Valid: true}
+		assign(&m, item.v)
+		ms = append(ms, m)
+	}
+	return ms
 }
 
 func view(r *sim.Result, w Window, capital int64) RunView {

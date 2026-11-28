@@ -164,14 +164,14 @@ func Resume(ctx context.Context, q *db.Queries, id string) error {
 	return transition(ctx, q, id, "running", "paused")
 }
 
-// Cancel ends the experiment: queued attempts become cancelled (recorded, never
-// deleted). Running attempts are stopped by the scheduler.
+// Cancel durably ends every unfinished attempt in the same transaction. The
+// scheduler notification only stops CPU work; correctness does not depend on it.
 func Cancel(ctx context.Context, s *store.Store, id string) error {
 	return s.InTx(ctx, func(q *db.Queries) error {
 		if err := transition(ctx, q, id, "cancelled", "running", "paused"); err != nil {
 			return err
 		}
-		_, err := q.CancelQueued(ctx, db.CancelQueuedParams{ExperimentID: id, Failure: "لغو به درخواست کاربر"})
+		_, err := q.CancelExperimentAttempts(ctx, db.CancelExperimentAttemptsParams{ExperimentID: id, Failure: "لغو به درخواست کاربر"})
 		return err
 	})
 }

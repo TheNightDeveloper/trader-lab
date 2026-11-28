@@ -28,7 +28,7 @@
   "fills": [
     {
       "decision_id": 1,
-      "time": "2024-01-01T00:01:00Z",
+      "time": "2024-01-01T00:02:00Z",
       "instrument": "BTCUSDT",
       "side": "buy",
       "kind": "signal",
@@ -45,7 +45,7 @@
     },
     {
       "decision_id": 2,
-      "time": "2024-01-01T00:01:00Z",
+      "time": "2024-01-01T00:02:00Z",
       "instrument": "ETHUSDT",
       "side": "buy",
       "kind": "signal",
@@ -64,7 +64,7 @@
   "trades": [
     {
       "instrument": "BTCUSDT",
-      "opened_at": "2024-01-01T00:01:00Z",
+      "opened_at": "2024-01-01T00:02:00Z",
       "closed_at": null,
       "qty": "0.01599000",
       "entry_ref": "799.50000000 USDT",
@@ -78,7 +78,7 @@
     },
     {
       "instrument": "ETHUSDT",
-      "opened_at": "2024-01-01T00:01:00Z",
+      "opened_at": "2024-01-01T00:02:00Z",
       "closed_at": null,
       "qty": "0.07960000",
       "entry_ref": "199.00000000 USDT",
@@ -93,19 +93,19 @@
   ],
   "equity": [
     {
-      "time": "2024-01-01T00:01:00Z",
+      "time": "2024-01-01T00:01:02Z",
       "equity": "1000.00000000 USDT"
     },
     {
-      "time": "2024-01-01T00:02:00Z",
+      "time": "2024-01-01T00:02:02Z",
+      "equity": "1000.00000000 USDT"
+    },
+    {
+      "time": "2024-01-01T00:03:02Z",
       "equity": "998.50175075 USDT"
     },
     {
-      "time": "2024-01-01T00:03:00Z",
-      "equity": "998.50175075 USDT"
-    },
-    {
-      "time": "2024-01-01T00:04:00Z",
+      "time": "2024-01-01T00:04:02Z",
       "equity": "998.50175075 USDT"
     }
   ],

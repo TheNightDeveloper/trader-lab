@@ -21,6 +21,61 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type EvidenceStatus int32
+
+const (
+	EvidenceStatus_EVIDENCE_STATUS_UNSPECIFIED EvidenceStatus = 0
+	EvidenceStatus_EVIDENCE_STATUS_RECORDED    EvidenceStatus = 1
+	EvidenceStatus_EVIDENCE_STATUS_INCOMPLETE  EvidenceStatus = 2
+	EvidenceStatus_EVIDENCE_STATUS_LEGACY      EvidenceStatus = 3
+	EvidenceStatus_EVIDENCE_STATUS_LOCAL_BUILD EvidenceStatus = 4
+)
+
+// Enum value maps for EvidenceStatus.
+var (
+	EvidenceStatus_name = map[int32]string{
+		0: "EVIDENCE_STATUS_UNSPECIFIED",
+		1: "EVIDENCE_STATUS_RECORDED",
+		2: "EVIDENCE_STATUS_INCOMPLETE",
+		3: "EVIDENCE_STATUS_LEGACY",
+		4: "EVIDENCE_STATUS_LOCAL_BUILD",
+	}
+	EvidenceStatus_value = map[string]int32{
+		"EVIDENCE_STATUS_UNSPECIFIED": 0,
+		"EVIDENCE_STATUS_RECORDED":    1,
+		"EVIDENCE_STATUS_INCOMPLETE":  2,
+		"EVIDENCE_STATUS_LEGACY":      3,
+		"EVIDENCE_STATUS_LOCAL_BUILD": 4,
+	}
+)
+
+func (x EvidenceStatus) Enum() *EvidenceStatus {
+	p := new(EvidenceStatus)
+	*p = x
+	return p
+}
+
+func (x EvidenceStatus) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (EvidenceStatus) Descriptor() protoreflect.EnumDescriptor {
+	return file_lab_v1_report_proto_enumTypes[0].Descriptor()
+}
+
+func (EvidenceStatus) Type() protoreflect.EnumType {
+	return &file_lab_v1_report_proto_enumTypes[0]
+}
+
+func (x EvidenceStatus) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use EvidenceStatus.Descriptor instead.
+func (EvidenceStatus) EnumDescriptor() ([]byte, []int) {
+	return file_lab_v1_report_proto_rawDescGZIP(), []int{0}
+}
+
 type ParamSpec struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
@@ -82,11 +137,14 @@ func (x *ParamSpec) GetInteger() bool {
 }
 
 type StrategyInfo struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Params        []*ParamSpec           `protobuf:"bytes,2,rep,name=params,proto3" json:"params,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"open.v1"`
+	Name                   string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Params                 []*ParamSpec           `protobuf:"bytes,2,rep,name=params,proto3" json:"params,omitempty"`
+	Capability             *StrategyCapability    `protobuf:"bytes,3,opt,name=capability,proto3" json:"capability,omitempty"`
+	NativeDefinitionFormat string                 `protobuf:"bytes,4,opt,name=native_definition_format,json=nativeDefinitionFormat,proto3" json:"native_definition_format,omitempty"`
+	NativeDefinitionHash   string                 `protobuf:"bytes,5,opt,name=native_definition_hash,json=nativeDefinitionHash,proto3" json:"native_definition_hash,omitempty"` // canonical identity with the published default parameters
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *StrategyInfo) Reset() {
@@ -131,6 +189,27 @@ func (x *StrategyInfo) GetParams() []*ParamSpec {
 		return x.Params
 	}
 	return nil
+}
+
+func (x *StrategyInfo) GetCapability() *StrategyCapability {
+	if x != nil {
+		return x.Capability
+	}
+	return nil
+}
+
+func (x *StrategyInfo) GetNativeDefinitionFormat() string {
+	if x != nil {
+		return x.NativeDefinitionFormat
+	}
+	return ""
+}
+
+func (x *StrategyInfo) GetNativeDefinitionHash() string {
+	if x != nil {
+		return x.NativeDefinitionHash
+	}
+	return ""
 }
 
 type ListStrategiesRequest struct {
@@ -214,24 +293,26 @@ func (x *ListStrategiesResponse) GetStrategies() []*StrategyInfo {
 }
 
 type ReportSpec struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	DatasetIds     []string               `protobuf:"bytes,1,rep,name=dataset_ids,json=datasetIds,proto3" json:"dataset_ids,omitempty"`
-	Timeframe      string                 `protobuf:"bytes,2,opt,name=timeframe,proto3" json:"timeframe,omitempty"` // taken from the datasets; ignored on create
-	Strategy       string                 `protobuf:"bytes,3,opt,name=strategy,proto3" json:"strategy,omitempty"`
-	Params         map[string]float64     `protobuf:"bytes,4,rep,name=params,proto3" json:"params,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"fixed64,2,opt,name=value"`
-	Capital        *Money                 `protobuf:"bytes,5,opt,name=capital,proto3" json:"capital,omitempty"`   // USDT
-	Fee            *Decimal               `protobuf:"bytes,6,opt,name=fee,proto3" json:"fee,omitempty"`           // per side, fraction (0.001 = 10 bps)
-	Slippage       *Decimal               `protobuf:"bytes,7,opt,name=slippage,proto3" json:"slippage,omitempty"` // per side, fraction
-	Sizing         string                 `protobuf:"bytes,8,opt,name=sizing,proto3" json:"sizing,omitempty"`     // equity | fixed
-	FixedUsdt      *Money                 `protobuf:"bytes,9,opt,name=fixed_usdt,json=fixedUsdt,proto3" json:"fixed_usdt,omitempty"`
-	LatencyBars    int32                  `protobuf:"varint,10,opt,name=latency_bars,json=latencyBars,proto3" json:"latency_bars,omitempty"`
-	Folds          int32                  `protobuf:"varint,11,opt,name=folds,proto3" json:"folds,omitempty"`
-	Rolling        bool                   `protobuf:"varint,12,opt,name=rolling,proto3" json:"rolling,omitempty"`
-	Holdout        *Decimal               `protobuf:"bytes,13,opt,name=holdout,proto3" json:"holdout,omitempty"` // share of the range, fraction
-	EmbargoSeconds int64                  `protobuf:"varint,14,opt,name=embargo_seconds,json=embargoSeconds,proto3" json:"embargo_seconds,omitempty"`
-	EngineVersion  string                 `protobuf:"bytes,15,opt,name=engine_version,json=engineVersion,proto3" json:"engine_version,omitempty"` // set by the engine
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	DatasetIds      []string               `protobuf:"bytes,1,rep,name=dataset_ids,json=datasetIds,proto3" json:"dataset_ids,omitempty"`
+	Timeframe       string                 `protobuf:"bytes,2,opt,name=timeframe,proto3" json:"timeframe,omitempty"` // taken from the datasets; ignored on create
+	Strategy        string                 `protobuf:"bytes,3,opt,name=strategy,proto3" json:"strategy,omitempty"`
+	Params          map[string]float64     `protobuf:"bytes,4,rep,name=params,proto3" json:"params,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"fixed64,2,opt,name=value"`
+	Capital         *Money                 `protobuf:"bytes,5,opt,name=capital,proto3" json:"capital,omitempty"`   // USDT
+	Fee             *Decimal               `protobuf:"bytes,6,opt,name=fee,proto3" json:"fee,omitempty"`           // per side, fraction (0.001 = 10 bps)
+	Slippage        *Decimal               `protobuf:"bytes,7,opt,name=slippage,proto3" json:"slippage,omitempty"` // per side, fraction
+	Sizing          string                 `protobuf:"bytes,8,opt,name=sizing,proto3" json:"sizing,omitempty"`     // equity | fixed
+	FixedUsdt       *Money                 `protobuf:"bytes,9,opt,name=fixed_usdt,json=fixedUsdt,proto3" json:"fixed_usdt,omitempty"`
+	LatencyBars     int32                  `protobuf:"varint,10,opt,name=latency_bars,json=latencyBars,proto3" json:"latency_bars,omitempty"`
+	Folds           int32                  `protobuf:"varint,11,opt,name=folds,proto3" json:"folds,omitempty"`
+	Rolling         bool                   `protobuf:"varint,12,opt,name=rolling,proto3" json:"rolling,omitempty"`
+	Holdout         *Decimal               `protobuf:"bytes,13,opt,name=holdout,proto3" json:"holdout,omitempty"` // share of the range, fraction
+	EmbargoSeconds  int64                  `protobuf:"varint,14,opt,name=embargo_seconds,json=embargoSeconds,proto3" json:"embargo_seconds,omitempty"`
+	EngineVersion   string                 `protobuf:"bytes,15,opt,name=engine_version,json=engineVersion,proto3" json:"engine_version,omitempty"`         // set by the engine
+	RuleVersionId   int64                  `protobuf:"varint,16,opt,name=rule_version_id,json=ruleVersionId,proto3" json:"rule_version_id,omitempty"`      // immutable Library research version, zero for native strategies
+	RuleContentHash string                 `protobuf:"bytes,17,opt,name=rule_content_hash,json=ruleContentHash,proto3" json:"rule_content_hash,omitempty"` // set by the engine on stored reports
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *ReportSpec) Reset() {
@@ -365,6 +446,20 @@ func (x *ReportSpec) GetEmbargoSeconds() int64 {
 func (x *ReportSpec) GetEngineVersion() string {
 	if x != nil {
 		return x.EngineVersion
+	}
+	return ""
+}
+
+func (x *ReportSpec) GetRuleVersionId() int64 {
+	if x != nil {
+		return x.RuleVersionId
+	}
+	return 0
+}
+
+func (x *ReportSpec) GetRuleContentHash() string {
+	if x != nil {
+		return x.RuleContentHash
 	}
 	return ""
 }
@@ -1337,6 +1432,192 @@ func (x *MetricGroup) GetLabel() string {
 	return ""
 }
 
+type DatasetProvenance struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Id              string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	SnapshotFormat  int32                  `protobuf:"varint,2,opt,name=snapshot_format,json=snapshotFormat,proto3" json:"snapshot_format,omitempty"`
+	ResampleVersion int32                  `protobuf:"varint,3,opt,name=resample_version,json=resampleVersion,proto3" json:"resample_version,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *DatasetProvenance) Reset() {
+	*x = DatasetProvenance{}
+	mi := &file_lab_v1_report_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DatasetProvenance) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DatasetProvenance) ProtoMessage() {}
+
+func (x *DatasetProvenance) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_report_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DatasetProvenance.ProtoReflect.Descriptor instead.
+func (*DatasetProvenance) Descriptor() ([]byte, []int) {
+	return file_lab_v1_report_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *DatasetProvenance) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *DatasetProvenance) GetSnapshotFormat() int32 {
+	if x != nil {
+		return x.SnapshotFormat
+	}
+	return 0
+}
+
+func (x *DatasetProvenance) GetResampleVersion() int32 {
+	if x != nil {
+		return x.ResampleVersion
+	}
+	return 0
+}
+
+// RunProvenance projects inputs recorded at creation. Evidence status describes
+// the recorded inputs, independently of performance or reproduction success.
+type RunProvenance struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Status           EvidenceStatus         `protobuf:"varint,1,opt,name=status,proto3,enum=lab.v1.EvidenceStatus" json:"status,omitempty"`
+	Detail           string                 `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"`
+	SchemaVersion    int32                  `protobuf:"varint,3,opt,name=schema_version,json=schemaVersion,proto3" json:"schema_version,omitempty"`
+	BinarySha256     string                 `protobuf:"bytes,4,opt,name=binary_sha256,json=binarySha256,proto3" json:"binary_sha256,omitempty"`
+	SourceCommit     string                 `protobuf:"bytes,5,opt,name=source_commit,json=sourceCommit,proto3" json:"source_commit,omitempty"`
+	EvaluationPolicy string                 `protobuf:"bytes,6,opt,name=evaluation_policy,json=evaluationPolicy,proto3" json:"evaluation_policy,omitempty"`
+	FillPolicy       string                 `protobuf:"bytes,7,opt,name=fill_policy,json=fillPolicy,proto3" json:"fill_policy,omitempty"`
+	AccountingPolicy string                 `protobuf:"bytes,8,opt,name=accounting_policy,json=accountingPolicy,proto3" json:"accounting_policy,omitempty"`
+	ResearchPolicy   string                 `protobuf:"bytes,9,opt,name=research_policy,json=researchPolicy,proto3" json:"research_policy,omitempty"`
+	Datasets         []*DatasetProvenance   `protobuf:"bytes,10,rep,name=datasets,proto3" json:"datasets,omitempty"`
+	Instruments      []*InstrumentKey       `protobuf:"bytes,11,rep,name=instruments,proto3" json:"instruments,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *RunProvenance) Reset() {
+	*x = RunProvenance{}
+	mi := &file_lab_v1_report_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RunProvenance) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RunProvenance) ProtoMessage() {}
+
+func (x *RunProvenance) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_report_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RunProvenance.ProtoReflect.Descriptor instead.
+func (*RunProvenance) Descriptor() ([]byte, []int) {
+	return file_lab_v1_report_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *RunProvenance) GetStatus() EvidenceStatus {
+	if x != nil {
+		return x.Status
+	}
+	return EvidenceStatus_EVIDENCE_STATUS_UNSPECIFIED
+}
+
+func (x *RunProvenance) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *RunProvenance) GetSchemaVersion() int32 {
+	if x != nil {
+		return x.SchemaVersion
+	}
+	return 0
+}
+
+func (x *RunProvenance) GetBinarySha256() string {
+	if x != nil {
+		return x.BinarySha256
+	}
+	return ""
+}
+
+func (x *RunProvenance) GetSourceCommit() string {
+	if x != nil {
+		return x.SourceCommit
+	}
+	return ""
+}
+
+func (x *RunProvenance) GetEvaluationPolicy() string {
+	if x != nil {
+		return x.EvaluationPolicy
+	}
+	return ""
+}
+
+func (x *RunProvenance) GetFillPolicy() string {
+	if x != nil {
+		return x.FillPolicy
+	}
+	return ""
+}
+
+func (x *RunProvenance) GetAccountingPolicy() string {
+	if x != nil {
+		return x.AccountingPolicy
+	}
+	return ""
+}
+
+func (x *RunProvenance) GetResearchPolicy() string {
+	if x != nil {
+		return x.ResearchPolicy
+	}
+	return ""
+}
+
+func (x *RunProvenance) GetDatasets() []*DatasetProvenance {
+	if x != nil {
+		return x.Datasets
+	}
+	return nil
+}
+
+func (x *RunProvenance) GetInstruments() []*InstrumentKey {
+	if x != nil {
+		return x.Instruments
+	}
+	return nil
+}
+
 type Report struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -1356,15 +1637,16 @@ type Report struct {
 	HoldoutViews  int32                  `protobuf:"varint,15,opt,name=holdout_views,json=holdoutViews,proto3" json:"holdout_views,omitempty"`
 	Groups        []*MetricGroup         `protobuf:"bytes,16,rep,name=groups,proto3" json:"groups,omitempty"`
 	// Display only, when GetReportRequest.fx_rate_id is set.
-	FinalEquityToman *Money `protobuf:"bytes,17,opt,name=final_equity_toman,json=finalEquityToman,proto3" json:"final_equity_toman,omitempty"`
-	NetToman         *Money `protobuf:"bytes,18,opt,name=net_toman,json=netToman,proto3" json:"net_toman,omitempty"`
+	FinalEquityToman *Money         `protobuf:"bytes,17,opt,name=final_equity_toman,json=finalEquityToman,proto3" json:"final_equity_toman,omitempty"`
+	NetToman         *Money         `protobuf:"bytes,18,opt,name=net_toman,json=netToman,proto3" json:"net_toman,omitempty"`
+	Provenance       *RunProvenance `protobuf:"bytes,19,opt,name=provenance,proto3" json:"provenance,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
 
 func (x *Report) Reset() {
 	*x = Report{}
-	mi := &file_lab_v1_report_proto_msgTypes[21]
+	mi := &file_lab_v1_report_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1376,7 +1658,7 @@ func (x *Report) String() string {
 func (*Report) ProtoMessage() {}
 
 func (x *Report) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_report_proto_msgTypes[21]
+	mi := &file_lab_v1_report_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1389,7 +1671,7 @@ func (x *Report) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Report.ProtoReflect.Descriptor instead.
 func (*Report) Descriptor() ([]byte, []int) {
-	return file_lab_v1_report_proto_rawDescGZIP(), []int{21}
+	return file_lab_v1_report_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *Report) GetId() string {
@@ -1518,6 +1800,13 @@ func (x *Report) GetNetToman() *Money {
 	return nil
 }
 
+func (x *Report) GetProvenance() *RunProvenance {
+	if x != nil {
+		return x.Provenance
+	}
+	return nil
+}
+
 type GetReportRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ReportId      string                 `protobuf:"bytes,1,opt,name=report_id,json=reportId,proto3" json:"report_id,omitempty"`
@@ -1528,7 +1817,7 @@ type GetReportRequest struct {
 
 func (x *GetReportRequest) Reset() {
 	*x = GetReportRequest{}
-	mi := &file_lab_v1_report_proto_msgTypes[22]
+	mi := &file_lab_v1_report_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1540,7 +1829,7 @@ func (x *GetReportRequest) String() string {
 func (*GetReportRequest) ProtoMessage() {}
 
 func (x *GetReportRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_report_proto_msgTypes[22]
+	mi := &file_lab_v1_report_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1553,7 +1842,7 @@ func (x *GetReportRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetReportRequest.ProtoReflect.Descriptor instead.
 func (*GetReportRequest) Descriptor() ([]byte, []int) {
-	return file_lab_v1_report_proto_rawDescGZIP(), []int{22}
+	return file_lab_v1_report_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *GetReportRequest) GetReportId() string {
@@ -1579,7 +1868,7 @@ type GetReportResponse struct {
 
 func (x *GetReportResponse) Reset() {
 	*x = GetReportResponse{}
-	mi := &file_lab_v1_report_proto_msgTypes[23]
+	mi := &file_lab_v1_report_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1591,7 +1880,7 @@ func (x *GetReportResponse) String() string {
 func (*GetReportResponse) ProtoMessage() {}
 
 func (x *GetReportResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_report_proto_msgTypes[23]
+	mi := &file_lab_v1_report_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1604,7 +1893,7 @@ func (x *GetReportResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetReportResponse.ProtoReflect.Descriptor instead.
 func (*GetReportResponse) Descriptor() ([]byte, []int) {
-	return file_lab_v1_report_proto_rawDescGZIP(), []int{23}
+	return file_lab_v1_report_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *GetReportResponse) GetReport() *Report {
@@ -1623,7 +1912,7 @@ type ViewHoldoutRequest struct {
 
 func (x *ViewHoldoutRequest) Reset() {
 	*x = ViewHoldoutRequest{}
-	mi := &file_lab_v1_report_proto_msgTypes[24]
+	mi := &file_lab_v1_report_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1635,7 +1924,7 @@ func (x *ViewHoldoutRequest) String() string {
 func (*ViewHoldoutRequest) ProtoMessage() {}
 
 func (x *ViewHoldoutRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_report_proto_msgTypes[24]
+	mi := &file_lab_v1_report_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1648,7 +1937,7 @@ func (x *ViewHoldoutRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ViewHoldoutRequest.ProtoReflect.Descriptor instead.
 func (*ViewHoldoutRequest) Descriptor() ([]byte, []int) {
-	return file_lab_v1_report_proto_rawDescGZIP(), []int{24}
+	return file_lab_v1_report_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *ViewHoldoutRequest) GetReportId() string {
@@ -1668,7 +1957,7 @@ type ViewHoldoutResponse struct {
 
 func (x *ViewHoldoutResponse) Reset() {
 	*x = ViewHoldoutResponse{}
-	mi := &file_lab_v1_report_proto_msgTypes[25]
+	mi := &file_lab_v1_report_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1680,7 +1969,7 @@ func (x *ViewHoldoutResponse) String() string {
 func (*ViewHoldoutResponse) ProtoMessage() {}
 
 func (x *ViewHoldoutResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_report_proto_msgTypes[25]
+	mi := &file_lab_v1_report_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1693,7 +1982,7 @@ func (x *ViewHoldoutResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ViewHoldoutResponse.ProtoReflect.Descriptor instead.
 func (*ViewHoldoutResponse) Descriptor() ([]byte, []int) {
-	return file_lab_v1_report_proto_rawDescGZIP(), []int{25}
+	return file_lab_v1_report_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *ViewHoldoutResponse) GetHoldout() *RunView {
@@ -1733,7 +2022,7 @@ type TradeRow struct {
 
 func (x *TradeRow) Reset() {
 	*x = TradeRow{}
-	mi := &file_lab_v1_report_proto_msgTypes[26]
+	mi := &file_lab_v1_report_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1745,7 +2034,7 @@ func (x *TradeRow) String() string {
 func (*TradeRow) ProtoMessage() {}
 
 func (x *TradeRow) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_report_proto_msgTypes[26]
+	mi := &file_lab_v1_report_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1758,7 +2047,7 @@ func (x *TradeRow) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TradeRow.ProtoReflect.Descriptor instead.
 func (*TradeRow) Descriptor() ([]byte, []int) {
-	return file_lab_v1_report_proto_rawDescGZIP(), []int{26}
+	return file_lab_v1_report_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *TradeRow) GetSeq() int32 {
@@ -1877,7 +2166,7 @@ type ListTradesRequest struct {
 
 func (x *ListTradesRequest) Reset() {
 	*x = ListTradesRequest{}
-	mi := &file_lab_v1_report_proto_msgTypes[27]
+	mi := &file_lab_v1_report_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1889,7 +2178,7 @@ func (x *ListTradesRequest) String() string {
 func (*ListTradesRequest) ProtoMessage() {}
 
 func (x *ListTradesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_report_proto_msgTypes[27]
+	mi := &file_lab_v1_report_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1902,7 +2191,7 @@ func (x *ListTradesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTradesRequest.ProtoReflect.Descriptor instead.
 func (*ListTradesRequest) Descriptor() ([]byte, []int) {
-	return file_lab_v1_report_proto_rawDescGZIP(), []int{27}
+	return file_lab_v1_report_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *ListTradesRequest) GetReportId() string {
@@ -1936,7 +2225,7 @@ type ListTradesResponse struct {
 
 func (x *ListTradesResponse) Reset() {
 	*x = ListTradesResponse{}
-	mi := &file_lab_v1_report_proto_msgTypes[28]
+	mi := &file_lab_v1_report_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1948,7 +2237,7 @@ func (x *ListTradesResponse) String() string {
 func (*ListTradesResponse) ProtoMessage() {}
 
 func (x *ListTradesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_report_proto_msgTypes[28]
+	mi := &file_lab_v1_report_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1961,7 +2250,7 @@ func (x *ListTradesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTradesResponse.ProtoReflect.Descriptor instead.
 func (*ListTradesResponse) Descriptor() ([]byte, []int) {
-	return file_lab_v1_report_proto_rawDescGZIP(), []int{28}
+	return file_lab_v1_report_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *ListTradesResponse) GetTrades() []*TradeRow {
@@ -1999,7 +2288,7 @@ type DecisionRow struct {
 
 func (x *DecisionRow) Reset() {
 	*x = DecisionRow{}
-	mi := &file_lab_v1_report_proto_msgTypes[29]
+	mi := &file_lab_v1_report_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2011,7 +2300,7 @@ func (x *DecisionRow) String() string {
 func (*DecisionRow) ProtoMessage() {}
 
 func (x *DecisionRow) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_report_proto_msgTypes[29]
+	mi := &file_lab_v1_report_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2024,7 +2313,7 @@ func (x *DecisionRow) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DecisionRow.ProtoReflect.Descriptor instead.
 func (*DecisionRow) Descriptor() ([]byte, []int) {
-	return file_lab_v1_report_proto_rawDescGZIP(), []int{29}
+	return file_lab_v1_report_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *DecisionRow) GetId() int32 {
@@ -2129,7 +2418,7 @@ type ListDecisionsRequest struct {
 
 func (x *ListDecisionsRequest) Reset() {
 	*x = ListDecisionsRequest{}
-	mi := &file_lab_v1_report_proto_msgTypes[30]
+	mi := &file_lab_v1_report_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2141,7 +2430,7 @@ func (x *ListDecisionsRequest) String() string {
 func (*ListDecisionsRequest) ProtoMessage() {}
 
 func (x *ListDecisionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_report_proto_msgTypes[30]
+	mi := &file_lab_v1_report_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2154,7 +2443,7 @@ func (x *ListDecisionsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDecisionsRequest.ProtoReflect.Descriptor instead.
 func (*ListDecisionsRequest) Descriptor() ([]byte, []int) {
-	return file_lab_v1_report_proto_rawDescGZIP(), []int{30}
+	return file_lab_v1_report_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *ListDecisionsRequest) GetReportId() string {
@@ -2188,7 +2477,7 @@ type ListDecisionsResponse struct {
 
 func (x *ListDecisionsResponse) Reset() {
 	*x = ListDecisionsResponse{}
-	mi := &file_lab_v1_report_proto_msgTypes[31]
+	mi := &file_lab_v1_report_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2200,7 +2489,7 @@ func (x *ListDecisionsResponse) String() string {
 func (*ListDecisionsResponse) ProtoMessage() {}
 
 func (x *ListDecisionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_report_proto_msgTypes[31]
+	mi := &file_lab_v1_report_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2213,7 +2502,7 @@ func (x *ListDecisionsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDecisionsResponse.ProtoReflect.Descriptor instead.
 func (*ListDecisionsResponse) Descriptor() ([]byte, []int) {
-	return file_lab_v1_report_proto_rawDescGZIP(), []int{31}
+	return file_lab_v1_report_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *ListDecisionsResponse) GetDecisions() []*DecisionRow {
@@ -2243,7 +2532,7 @@ type Assumption struct {
 
 func (x *Assumption) Reset() {
 	*x = Assumption{}
-	mi := &file_lab_v1_report_proto_msgTypes[32]
+	mi := &file_lab_v1_report_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2255,7 +2544,7 @@ func (x *Assumption) String() string {
 func (*Assumption) ProtoMessage() {}
 
 func (x *Assumption) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_report_proto_msgTypes[32]
+	mi := &file_lab_v1_report_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2268,7 +2557,7 @@ func (x *Assumption) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Assumption.ProtoReflect.Descriptor instead.
 func (*Assumption) Descriptor() ([]byte, []int) {
-	return file_lab_v1_report_proto_rawDescGZIP(), []int{32}
+	return file_lab_v1_report_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *Assumption) GetKey() string {
@@ -2315,7 +2604,7 @@ type CompareRequest struct {
 
 func (x *CompareRequest) Reset() {
 	*x = CompareRequest{}
-	mi := &file_lab_v1_report_proto_msgTypes[33]
+	mi := &file_lab_v1_report_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2327,7 +2616,7 @@ func (x *CompareRequest) String() string {
 func (*CompareRequest) ProtoMessage() {}
 
 func (x *CompareRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_report_proto_msgTypes[33]
+	mi := &file_lab_v1_report_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2340,7 +2629,7 @@ func (x *CompareRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CompareRequest.ProtoReflect.Descriptor instead.
 func (*CompareRequest) Descriptor() ([]byte, []int) {
-	return file_lab_v1_report_proto_rawDescGZIP(), []int{33}
+	return file_lab_v1_report_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *CompareRequest) GetReportIds() []string {
@@ -2364,7 +2653,7 @@ type CompareColumn struct {
 
 func (x *CompareColumn) Reset() {
 	*x = CompareColumn{}
-	mi := &file_lab_v1_report_proto_msgTypes[34]
+	mi := &file_lab_v1_report_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2376,7 +2665,7 @@ func (x *CompareColumn) String() string {
 func (*CompareColumn) ProtoMessage() {}
 
 func (x *CompareColumn) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_report_proto_msgTypes[34]
+	mi := &file_lab_v1_report_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2389,7 +2678,7 @@ func (x *CompareColumn) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CompareColumn.ProtoReflect.Descriptor instead.
 func (*CompareColumn) Descriptor() ([]byte, []int) {
-	return file_lab_v1_report_proto_rawDescGZIP(), []int{34}
+	return file_lab_v1_report_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *CompareColumn) GetReportId() string {
@@ -2445,7 +2734,7 @@ type CompareResponse struct {
 
 func (x *CompareResponse) Reset() {
 	*x = CompareResponse{}
-	mi := &file_lab_v1_report_proto_msgTypes[35]
+	mi := &file_lab_v1_report_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2457,7 +2746,7 @@ func (x *CompareResponse) String() string {
 func (*CompareResponse) ProtoMessage() {}
 
 func (x *CompareResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_report_proto_msgTypes[35]
+	mi := &file_lab_v1_report_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2470,7 +2759,7 @@ func (x *CompareResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CompareResponse.ProtoReflect.Descriptor instead.
 func (*CompareResponse) Descriptor() ([]byte, []int) {
-	return file_lab_v1_report_proto_rawDescGZIP(), []int{35}
+	return file_lab_v1_report_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *CompareResponse) GetAssumptions() []*Assumption {
@@ -2505,7 +2794,7 @@ type ExportRequest struct {
 
 func (x *ExportRequest) Reset() {
 	*x = ExportRequest{}
-	mi := &file_lab_v1_report_proto_msgTypes[36]
+	mi := &file_lab_v1_report_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2517,7 +2806,7 @@ func (x *ExportRequest) String() string {
 func (*ExportRequest) ProtoMessage() {}
 
 func (x *ExportRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_report_proto_msgTypes[36]
+	mi := &file_lab_v1_report_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2530,7 +2819,7 @@ func (x *ExportRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExportRequest.ProtoReflect.Descriptor instead.
 func (*ExportRequest) Descriptor() ([]byte, []int) {
-	return file_lab_v1_report_proto_rawDescGZIP(), []int{36}
+	return file_lab_v1_report_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *ExportRequest) GetReportId() string {
@@ -2565,7 +2854,7 @@ type ExportResponse struct {
 
 func (x *ExportResponse) Reset() {
 	*x = ExportResponse{}
-	mi := &file_lab_v1_report_proto_msgTypes[37]
+	mi := &file_lab_v1_report_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2577,7 +2866,7 @@ func (x *ExportResponse) String() string {
 func (*ExportResponse) ProtoMessage() {}
 
 func (x *ExportResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_report_proto_msgTypes[37]
+	mi := &file_lab_v1_report_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2590,7 +2879,7 @@ func (x *ExportResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExportResponse.ProtoReflect.Descriptor instead.
 func (*ExportResponse) Descriptor() ([]byte, []int) {
-	return file_lab_v1_report_proto_rawDescGZIP(), []int{37}
+	return file_lab_v1_report_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *ExportResponse) GetFilename() string {
@@ -2623,7 +2912,7 @@ type ReproduceRequest struct {
 
 func (x *ReproduceRequest) Reset() {
 	*x = ReproduceRequest{}
-	mi := &file_lab_v1_report_proto_msgTypes[38]
+	mi := &file_lab_v1_report_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2635,7 +2924,7 @@ func (x *ReproduceRequest) String() string {
 func (*ReproduceRequest) ProtoMessage() {}
 
 func (x *ReproduceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_report_proto_msgTypes[38]
+	mi := &file_lab_v1_report_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2648,7 +2937,7 @@ func (x *ReproduceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReproduceRequest.ProtoReflect.Descriptor instead.
 func (*ReproduceRequest) Descriptor() ([]byte, []int) {
-	return file_lab_v1_report_proto_rawDescGZIP(), []int{38}
+	return file_lab_v1_report_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *ReproduceRequest) GetReportId() string {
@@ -2667,7 +2956,7 @@ type ReproduceResponse struct {
 
 func (x *ReproduceResponse) Reset() {
 	*x = ReproduceResponse{}
-	mi := &file_lab_v1_report_proto_msgTypes[39]
+	mi := &file_lab_v1_report_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2679,7 +2968,7 @@ func (x *ReproduceResponse) String() string {
 func (*ReproduceResponse) ProtoMessage() {}
 
 func (x *ReproduceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_report_proto_msgTypes[39]
+	mi := &file_lab_v1_report_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2692,7 +2981,7 @@ func (x *ReproduceResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReproduceResponse.ProtoReflect.Descriptor instead.
 func (*ReproduceResponse) Descriptor() ([]byte, []int) {
-	return file_lab_v1_report_proto_rawDescGZIP(), []int{39}
+	return file_lab_v1_report_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *ReproduceResponse) GetIdentical() bool {
@@ -2706,19 +2995,24 @@ var File_lab_v1_report_proto protoreflect.FileDescriptor
 
 const file_lab_v1_report_proto_rawDesc = "" +
 	"\n" +
-	"\x13lab/v1/report.proto\x12\x06lab.v1\x1a\x13lab/v1/common.proto\"S\n" +
+	"\x13lab/v1/report.proto\x12\x06lab.v1\x1a\x13lab/v1/common.proto\x1a\x16lab/v1/workspace.proto\"S\n" +
 	"\tParamSpec\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n" +
 	"\adefault\x18\x02 \x01(\x01R\adefault\x12\x18\n" +
-	"\ainteger\x18\x03 \x01(\bR\ainteger\"M\n" +
+	"\ainteger\x18\x03 \x01(\bR\ainteger\"\xf9\x01\n" +
 	"\fStrategyInfo\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12)\n" +
-	"\x06params\x18\x02 \x03(\v2\x11.lab.v1.ParamSpecR\x06params\"\x17\n" +
+	"\x06params\x18\x02 \x03(\v2\x11.lab.v1.ParamSpecR\x06params\x12:\n" +
+	"\n" +
+	"capability\x18\x03 \x01(\v2\x1a.lab.v1.StrategyCapabilityR\n" +
+	"capability\x128\n" +
+	"\x18native_definition_format\x18\x04 \x01(\tR\x16nativeDefinitionFormat\x124\n" +
+	"\x16native_definition_hash\x18\x05 \x01(\tR\x14nativeDefinitionHash\"\x17\n" +
 	"\x15ListStrategiesRequest\"N\n" +
 	"\x16ListStrategiesResponse\x124\n" +
 	"\n" +
 	"strategies\x18\x01 \x03(\v2\x14.lab.v1.StrategyInfoR\n" +
-	"strategies\"\xe7\x04\n" +
+	"strategies\"\xbb\x05\n" +
 	"\n" +
 	"ReportSpec\x12\x1f\n" +
 	"\vdataset_ids\x18\x01 \x03(\tR\n" +
@@ -2738,7 +3032,9 @@ const file_lab_v1_report_proto_rawDesc = "" +
 	"\arolling\x18\f \x01(\bR\arolling\x12)\n" +
 	"\aholdout\x18\r \x01(\v2\x0f.lab.v1.DecimalR\aholdout\x12'\n" +
 	"\x0fembargo_seconds\x18\x0e \x01(\x03R\x0eembargoSeconds\x12%\n" +
-	"\x0eengine_version\x18\x0f \x01(\tR\rengineVersion\x1a9\n" +
+	"\x0eengine_version\x18\x0f \x01(\tR\rengineVersion\x12&\n" +
+	"\x0frule_version_id\x18\x10 \x01(\x03R\rruleVersionId\x12*\n" +
+	"\x11rule_content_hash\x18\x11 \x01(\tR\x0fruleContentHash\x1a9\n" +
 	"\vParamsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\x01R\x05value:\x028\x01\"=\n" +
@@ -2809,7 +3105,25 @@ const file_lab_v1_report_proto_rawDesc = "" +
 	"\ftotal_return\x18\x03 \x01(\v2\x0e.lab.v1.MetricR\vtotalReturn\"5\n" +
 	"\vMetricGroup\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05label\x18\x02 \x01(\tR\x05label\"\xf3\x05\n" +
+	"\x05label\x18\x02 \x01(\tR\x05label\"w\n" +
+	"\x11DatasetProvenance\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12'\n" +
+	"\x0fsnapshot_format\x18\x02 \x01(\x05R\x0esnapshotFormat\x12)\n" +
+	"\x10resample_version\x18\x03 \x01(\x05R\x0fresampleVersion\"\xdc\x03\n" +
+	"\rRunProvenance\x12.\n" +
+	"\x06status\x18\x01 \x01(\x0e2\x16.lab.v1.EvidenceStatusR\x06status\x12\x16\n" +
+	"\x06detail\x18\x02 \x01(\tR\x06detail\x12%\n" +
+	"\x0eschema_version\x18\x03 \x01(\x05R\rschemaVersion\x12#\n" +
+	"\rbinary_sha256\x18\x04 \x01(\tR\fbinarySha256\x12#\n" +
+	"\rsource_commit\x18\x05 \x01(\tR\fsourceCommit\x12+\n" +
+	"\x11evaluation_policy\x18\x06 \x01(\tR\x10evaluationPolicy\x12\x1f\n" +
+	"\vfill_policy\x18\a \x01(\tR\n" +
+	"fillPolicy\x12+\n" +
+	"\x11accounting_policy\x18\b \x01(\tR\x10accountingPolicy\x12'\n" +
+	"\x0fresearch_policy\x18\t \x01(\tR\x0eresearchPolicy\x125\n" +
+	"\bdatasets\x18\n" +
+	" \x03(\v2\x19.lab.v1.DatasetProvenanceR\bdatasets\x127\n" +
+	"\vinstruments\x18\v \x03(\v2\x15.lab.v1.InstrumentKeyR\vinstruments\"\xaa\x06\n" +
 	"\x06Report\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12&\n" +
@@ -2832,7 +3146,10 @@ const file_lab_v1_report_proto_rawDesc = "" +
 	"\rholdout_views\x18\x0f \x01(\x05R\fholdoutViews\x12+\n" +
 	"\x06groups\x18\x10 \x03(\v2\x13.lab.v1.MetricGroupR\x06groups\x12;\n" +
 	"\x12final_equity_toman\x18\x11 \x01(\v2\r.lab.v1.MoneyR\x10finalEquityToman\x12*\n" +
-	"\tnet_toman\x18\x12 \x01(\v2\r.lab.v1.MoneyR\bnetToman\"M\n" +
+	"\tnet_toman\x18\x12 \x01(\v2\r.lab.v1.MoneyR\bnetToman\x125\n" +
+	"\n" +
+	"provenance\x18\x13 \x01(\v2\x15.lab.v1.RunProvenanceR\n" +
+	"provenance\"M\n" +
 	"\x10GetReportRequest\x12\x1b\n" +
 	"\treport_id\x18\x01 \x01(\tR\breportId\x12\x1c\n" +
 	"\n" +
@@ -2933,7 +3250,13 @@ const file_lab_v1_report_proto_rawDesc = "" +
 	"\x10ReproduceRequest\x12\x1b\n" +
 	"\treport_id\x18\x01 \x01(\tR\breportId\"1\n" +
 	"\x11ReproduceResponse\x12\x1c\n" +
-	"\tidentical\x18\x01 \x01(\bR\tidentical2\xc7\x05\n" +
+	"\tidentical\x18\x01 \x01(\bR\tidentical*\xac\x01\n" +
+	"\x0eEvidenceStatus\x12\x1f\n" +
+	"\x1bEVIDENCE_STATUS_UNSPECIFIED\x10\x00\x12\x1c\n" +
+	"\x18EVIDENCE_STATUS_RECORDED\x10\x01\x12\x1e\n" +
+	"\x1aEVIDENCE_STATUS_INCOMPLETE\x10\x02\x12\x1a\n" +
+	"\x16EVIDENCE_STATUS_LEGACY\x10\x03\x12\x1f\n" +
+	"\x1bEVIDENCE_STATUS_LOCAL_BUILD\x10\x042\xc7\x05\n" +
 	"\rReportService\x12O\n" +
 	"\x0eListStrategies\x12\x1d.lab.v1.ListStrategiesRequest\x1a\x1e.lab.v1.ListStrategiesResponse\x12I\n" +
 	"\fCreateReport\x12\x1b.lab.v1.CreateReportRequest\x1a\x1c.lab.v1.CreateReportResponse\x12F\n" +
@@ -2961,139 +3284,150 @@ func file_lab_v1_report_proto_rawDescGZIP() []byte {
 	return file_lab_v1_report_proto_rawDescData
 }
 
-var file_lab_v1_report_proto_msgTypes = make([]protoimpl.MessageInfo, 41)
+var file_lab_v1_report_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_lab_v1_report_proto_msgTypes = make([]protoimpl.MessageInfo, 43)
 var file_lab_v1_report_proto_goTypes = []any{
-	(*ParamSpec)(nil),              // 0: lab.v1.ParamSpec
-	(*StrategyInfo)(nil),           // 1: lab.v1.StrategyInfo
-	(*ListStrategiesRequest)(nil),  // 2: lab.v1.ListStrategiesRequest
-	(*ListStrategiesResponse)(nil), // 3: lab.v1.ListStrategiesResponse
-	(*ReportSpec)(nil),             // 4: lab.v1.ReportSpec
-	(*CreateReportRequest)(nil),    // 5: lab.v1.CreateReportRequest
-	(*CreateReportResponse)(nil),   // 6: lab.v1.CreateReportResponse
-	(*ReportListItem)(nil),         // 7: lab.v1.ReportListItem
-	(*ListReportsRequest)(nil),     // 8: lab.v1.ListReportsRequest
-	(*ListReportsResponse)(nil),    // 9: lab.v1.ListReportsResponse
-	(*Window)(nil),                 // 10: lab.v1.Window
-	(*RunView)(nil),                // 11: lab.v1.RunView
-	(*FoldView)(nil),               // 12: lab.v1.FoldView
-	(*StressView)(nil),             // 13: lab.v1.StressView
-	(*GridCell)(nil),               // 14: lab.v1.GridCell
-	(*GridRow)(nil),                // 15: lab.v1.GridRow
-	(*Grid)(nil),                   // 16: lab.v1.Grid
-	(*Badge)(nil),                  // 17: lab.v1.Badge
-	(*Summary)(nil),                // 18: lab.v1.Summary
-	(*Benchmark)(nil),              // 19: lab.v1.Benchmark
-	(*MetricGroup)(nil),            // 20: lab.v1.MetricGroup
-	(*Report)(nil),                 // 21: lab.v1.Report
-	(*GetReportRequest)(nil),       // 22: lab.v1.GetReportRequest
-	(*GetReportResponse)(nil),      // 23: lab.v1.GetReportResponse
-	(*ViewHoldoutRequest)(nil),     // 24: lab.v1.ViewHoldoutRequest
-	(*ViewHoldoutResponse)(nil),    // 25: lab.v1.ViewHoldoutResponse
-	(*TradeRow)(nil),               // 26: lab.v1.TradeRow
-	(*ListTradesRequest)(nil),      // 27: lab.v1.ListTradesRequest
-	(*ListTradesResponse)(nil),     // 28: lab.v1.ListTradesResponse
-	(*DecisionRow)(nil),            // 29: lab.v1.DecisionRow
-	(*ListDecisionsRequest)(nil),   // 30: lab.v1.ListDecisionsRequest
-	(*ListDecisionsResponse)(nil),  // 31: lab.v1.ListDecisionsResponse
-	(*Assumption)(nil),             // 32: lab.v1.Assumption
-	(*CompareRequest)(nil),         // 33: lab.v1.CompareRequest
-	(*CompareColumn)(nil),          // 34: lab.v1.CompareColumn
-	(*CompareResponse)(nil),        // 35: lab.v1.CompareResponse
-	(*ExportRequest)(nil),          // 36: lab.v1.ExportRequest
-	(*ExportResponse)(nil),         // 37: lab.v1.ExportResponse
-	(*ReproduceRequest)(nil),       // 38: lab.v1.ReproduceRequest
-	(*ReproduceResponse)(nil),      // 39: lab.v1.ReproduceResponse
-	nil,                            // 40: lab.v1.ReportSpec.ParamsEntry
-	(*Money)(nil),                  // 41: lab.v1.Money
-	(*Decimal)(nil),                // 42: lab.v1.Decimal
-	(*Metric)(nil),                 // 43: lab.v1.Metric
-	(*EquityPoint)(nil),            // 44: lab.v1.EquityPoint
+	(EvidenceStatus)(0),            // 0: lab.v1.EvidenceStatus
+	(*ParamSpec)(nil),              // 1: lab.v1.ParamSpec
+	(*StrategyInfo)(nil),           // 2: lab.v1.StrategyInfo
+	(*ListStrategiesRequest)(nil),  // 3: lab.v1.ListStrategiesRequest
+	(*ListStrategiesResponse)(nil), // 4: lab.v1.ListStrategiesResponse
+	(*ReportSpec)(nil),             // 5: lab.v1.ReportSpec
+	(*CreateReportRequest)(nil),    // 6: lab.v1.CreateReportRequest
+	(*CreateReportResponse)(nil),   // 7: lab.v1.CreateReportResponse
+	(*ReportListItem)(nil),         // 8: lab.v1.ReportListItem
+	(*ListReportsRequest)(nil),     // 9: lab.v1.ListReportsRequest
+	(*ListReportsResponse)(nil),    // 10: lab.v1.ListReportsResponse
+	(*Window)(nil),                 // 11: lab.v1.Window
+	(*RunView)(nil),                // 12: lab.v1.RunView
+	(*FoldView)(nil),               // 13: lab.v1.FoldView
+	(*StressView)(nil),             // 14: lab.v1.StressView
+	(*GridCell)(nil),               // 15: lab.v1.GridCell
+	(*GridRow)(nil),                // 16: lab.v1.GridRow
+	(*Grid)(nil),                   // 17: lab.v1.Grid
+	(*Badge)(nil),                  // 18: lab.v1.Badge
+	(*Summary)(nil),                // 19: lab.v1.Summary
+	(*Benchmark)(nil),              // 20: lab.v1.Benchmark
+	(*MetricGroup)(nil),            // 21: lab.v1.MetricGroup
+	(*DatasetProvenance)(nil),      // 22: lab.v1.DatasetProvenance
+	(*RunProvenance)(nil),          // 23: lab.v1.RunProvenance
+	(*Report)(nil),                 // 24: lab.v1.Report
+	(*GetReportRequest)(nil),       // 25: lab.v1.GetReportRequest
+	(*GetReportResponse)(nil),      // 26: lab.v1.GetReportResponse
+	(*ViewHoldoutRequest)(nil),     // 27: lab.v1.ViewHoldoutRequest
+	(*ViewHoldoutResponse)(nil),    // 28: lab.v1.ViewHoldoutResponse
+	(*TradeRow)(nil),               // 29: lab.v1.TradeRow
+	(*ListTradesRequest)(nil),      // 30: lab.v1.ListTradesRequest
+	(*ListTradesResponse)(nil),     // 31: lab.v1.ListTradesResponse
+	(*DecisionRow)(nil),            // 32: lab.v1.DecisionRow
+	(*ListDecisionsRequest)(nil),   // 33: lab.v1.ListDecisionsRequest
+	(*ListDecisionsResponse)(nil),  // 34: lab.v1.ListDecisionsResponse
+	(*Assumption)(nil),             // 35: lab.v1.Assumption
+	(*CompareRequest)(nil),         // 36: lab.v1.CompareRequest
+	(*CompareColumn)(nil),          // 37: lab.v1.CompareColumn
+	(*CompareResponse)(nil),        // 38: lab.v1.CompareResponse
+	(*ExportRequest)(nil),          // 39: lab.v1.ExportRequest
+	(*ExportResponse)(nil),         // 40: lab.v1.ExportResponse
+	(*ReproduceRequest)(nil),       // 41: lab.v1.ReproduceRequest
+	(*ReproduceResponse)(nil),      // 42: lab.v1.ReproduceResponse
+	nil,                            // 43: lab.v1.ReportSpec.ParamsEntry
+	(*StrategyCapability)(nil),     // 44: lab.v1.StrategyCapability
+	(*Money)(nil),                  // 45: lab.v1.Money
+	(*Decimal)(nil),                // 46: lab.v1.Decimal
+	(*Metric)(nil),                 // 47: lab.v1.Metric
+	(*EquityPoint)(nil),            // 48: lab.v1.EquityPoint
+	(*InstrumentKey)(nil),          // 49: lab.v1.InstrumentKey
 }
 var file_lab_v1_report_proto_depIdxs = []int32{
-	0,  // 0: lab.v1.StrategyInfo.params:type_name -> lab.v1.ParamSpec
-	1,  // 1: lab.v1.ListStrategiesResponse.strategies:type_name -> lab.v1.StrategyInfo
-	40, // 2: lab.v1.ReportSpec.params:type_name -> lab.v1.ReportSpec.ParamsEntry
-	41, // 3: lab.v1.ReportSpec.capital:type_name -> lab.v1.Money
-	42, // 4: lab.v1.ReportSpec.fee:type_name -> lab.v1.Decimal
-	42, // 5: lab.v1.ReportSpec.slippage:type_name -> lab.v1.Decimal
-	41, // 6: lab.v1.ReportSpec.fixed_usdt:type_name -> lab.v1.Money
-	42, // 7: lab.v1.ReportSpec.holdout:type_name -> lab.v1.Decimal
-	4,  // 8: lab.v1.CreateReportRequest.spec:type_name -> lab.v1.ReportSpec
-	41, // 9: lab.v1.ReportListItem.net:type_name -> lab.v1.Money
-	42, // 10: lab.v1.ReportListItem.total_return:type_name -> lab.v1.Decimal
-	7,  // 11: lab.v1.ListReportsResponse.reports:type_name -> lab.v1.ReportListItem
-	10, // 12: lab.v1.RunView.window:type_name -> lab.v1.Window
-	43, // 13: lab.v1.RunView.metrics:type_name -> lab.v1.Metric
-	44, // 14: lab.v1.RunView.equity:type_name -> lab.v1.EquityPoint
-	10, // 15: lab.v1.FoldView.train:type_name -> lab.v1.Window
-	10, // 16: lab.v1.FoldView.test:type_name -> lab.v1.Window
-	43, // 17: lab.v1.FoldView.metrics:type_name -> lab.v1.Metric
-	43, // 18: lab.v1.StressView.metrics:type_name -> lab.v1.Metric
-	43, // 19: lab.v1.GridCell.total_return:type_name -> lab.v1.Metric
-	14, // 20: lab.v1.GridRow.cells:type_name -> lab.v1.GridCell
-	15, // 21: lab.v1.Grid.rows:type_name -> lab.v1.GridRow
-	17, // 22: lab.v1.Summary.badges:type_name -> lab.v1.Badge
-	44, // 23: lab.v1.Benchmark.equity:type_name -> lab.v1.EquityPoint
-	43, // 24: lab.v1.Benchmark.total_return:type_name -> lab.v1.Metric
-	4,  // 25: lab.v1.Report.spec:type_name -> lab.v1.ReportSpec
-	10, // 26: lab.v1.Report.range:type_name -> lab.v1.Window
-	10, // 27: lab.v1.Report.oos_window:type_name -> lab.v1.Window
-	10, // 28: lab.v1.Report.holdout_window:type_name -> lab.v1.Window
-	18, // 29: lab.v1.Report.summary:type_name -> lab.v1.Summary
-	11, // 30: lab.v1.Report.oos:type_name -> lab.v1.RunView
-	12, // 31: lab.v1.Report.folds:type_name -> lab.v1.FoldView
-	13, // 32: lab.v1.Report.stress:type_name -> lab.v1.StressView
-	16, // 33: lab.v1.Report.grid:type_name -> lab.v1.Grid
-	19, // 34: lab.v1.Report.benchmarks:type_name -> lab.v1.Benchmark
-	42, // 35: lab.v1.Report.break_even_fee:type_name -> lab.v1.Decimal
-	20, // 36: lab.v1.Report.groups:type_name -> lab.v1.MetricGroup
-	41, // 37: lab.v1.Report.final_equity_toman:type_name -> lab.v1.Money
-	41, // 38: lab.v1.Report.net_toman:type_name -> lab.v1.Money
-	21, // 39: lab.v1.GetReportResponse.report:type_name -> lab.v1.Report
-	11, // 40: lab.v1.ViewHoldoutResponse.holdout:type_name -> lab.v1.RunView
-	42, // 41: lab.v1.TradeRow.qty:type_name -> lab.v1.Decimal
-	41, // 42: lab.v1.TradeRow.entry_ref:type_name -> lab.v1.Money
-	41, // 43: lab.v1.TradeRow.exit_ref:type_name -> lab.v1.Money
-	41, // 44: lab.v1.TradeRow.gross:type_name -> lab.v1.Money
-	41, // 45: lab.v1.TradeRow.slippage:type_name -> lab.v1.Money
-	41, // 46: lab.v1.TradeRow.fees:type_name -> lab.v1.Money
-	41, // 47: lab.v1.TradeRow.net:type_name -> lab.v1.Money
-	42, // 48: lab.v1.TradeRow.open_qty:type_name -> lab.v1.Decimal
-	41, // 49: lab.v1.TradeRow.mark_value:type_name -> lab.v1.Money
-	26, // 50: lab.v1.ListTradesResponse.trades:type_name -> lab.v1.TradeRow
-	42, // 51: lab.v1.DecisionRow.target:type_name -> lab.v1.Decimal
-	42, // 52: lab.v1.DecisionRow.stop_loss:type_name -> lab.v1.Decimal
-	42, // 53: lab.v1.DecisionRow.take_profit:type_name -> lab.v1.Decimal
-	29, // 54: lab.v1.ListDecisionsResponse.decisions:type_name -> lab.v1.DecisionRow
-	43, // 55: lab.v1.CompareColumn.metrics:type_name -> lab.v1.Metric
-	44, // 56: lab.v1.CompareColumn.equity:type_name -> lab.v1.EquityPoint
-	32, // 57: lab.v1.CompareResponse.assumptions:type_name -> lab.v1.Assumption
-	34, // 58: lab.v1.CompareResponse.columns:type_name -> lab.v1.CompareColumn
-	2,  // 59: lab.v1.ReportService.ListStrategies:input_type -> lab.v1.ListStrategiesRequest
-	5,  // 60: lab.v1.ReportService.CreateReport:input_type -> lab.v1.CreateReportRequest
-	8,  // 61: lab.v1.ReportService.ListReports:input_type -> lab.v1.ListReportsRequest
-	22, // 62: lab.v1.ReportService.GetReport:input_type -> lab.v1.GetReportRequest
-	24, // 63: lab.v1.ReportService.ViewHoldout:input_type -> lab.v1.ViewHoldoutRequest
-	27, // 64: lab.v1.ReportService.ListTrades:input_type -> lab.v1.ListTradesRequest
-	30, // 65: lab.v1.ReportService.ListDecisions:input_type -> lab.v1.ListDecisionsRequest
-	33, // 66: lab.v1.ReportService.Compare:input_type -> lab.v1.CompareRequest
-	36, // 67: lab.v1.ReportService.Export:input_type -> lab.v1.ExportRequest
-	38, // 68: lab.v1.ReportService.Reproduce:input_type -> lab.v1.ReproduceRequest
-	3,  // 69: lab.v1.ReportService.ListStrategies:output_type -> lab.v1.ListStrategiesResponse
-	6,  // 70: lab.v1.ReportService.CreateReport:output_type -> lab.v1.CreateReportResponse
-	9,  // 71: lab.v1.ReportService.ListReports:output_type -> lab.v1.ListReportsResponse
-	23, // 72: lab.v1.ReportService.GetReport:output_type -> lab.v1.GetReportResponse
-	25, // 73: lab.v1.ReportService.ViewHoldout:output_type -> lab.v1.ViewHoldoutResponse
-	28, // 74: lab.v1.ReportService.ListTrades:output_type -> lab.v1.ListTradesResponse
-	31, // 75: lab.v1.ReportService.ListDecisions:output_type -> lab.v1.ListDecisionsResponse
-	35, // 76: lab.v1.ReportService.Compare:output_type -> lab.v1.CompareResponse
-	37, // 77: lab.v1.ReportService.Export:output_type -> lab.v1.ExportResponse
-	39, // 78: lab.v1.ReportService.Reproduce:output_type -> lab.v1.ReproduceResponse
-	69, // [69:79] is the sub-list for method output_type
-	59, // [59:69] is the sub-list for method input_type
-	59, // [59:59] is the sub-list for extension type_name
-	59, // [59:59] is the sub-list for extension extendee
-	0,  // [0:59] is the sub-list for field type_name
+	1,  // 0: lab.v1.StrategyInfo.params:type_name -> lab.v1.ParamSpec
+	44, // 1: lab.v1.StrategyInfo.capability:type_name -> lab.v1.StrategyCapability
+	2,  // 2: lab.v1.ListStrategiesResponse.strategies:type_name -> lab.v1.StrategyInfo
+	43, // 3: lab.v1.ReportSpec.params:type_name -> lab.v1.ReportSpec.ParamsEntry
+	45, // 4: lab.v1.ReportSpec.capital:type_name -> lab.v1.Money
+	46, // 5: lab.v1.ReportSpec.fee:type_name -> lab.v1.Decimal
+	46, // 6: lab.v1.ReportSpec.slippage:type_name -> lab.v1.Decimal
+	45, // 7: lab.v1.ReportSpec.fixed_usdt:type_name -> lab.v1.Money
+	46, // 8: lab.v1.ReportSpec.holdout:type_name -> lab.v1.Decimal
+	5,  // 9: lab.v1.CreateReportRequest.spec:type_name -> lab.v1.ReportSpec
+	45, // 10: lab.v1.ReportListItem.net:type_name -> lab.v1.Money
+	46, // 11: lab.v1.ReportListItem.total_return:type_name -> lab.v1.Decimal
+	8,  // 12: lab.v1.ListReportsResponse.reports:type_name -> lab.v1.ReportListItem
+	11, // 13: lab.v1.RunView.window:type_name -> lab.v1.Window
+	47, // 14: lab.v1.RunView.metrics:type_name -> lab.v1.Metric
+	48, // 15: lab.v1.RunView.equity:type_name -> lab.v1.EquityPoint
+	11, // 16: lab.v1.FoldView.train:type_name -> lab.v1.Window
+	11, // 17: lab.v1.FoldView.test:type_name -> lab.v1.Window
+	47, // 18: lab.v1.FoldView.metrics:type_name -> lab.v1.Metric
+	47, // 19: lab.v1.StressView.metrics:type_name -> lab.v1.Metric
+	47, // 20: lab.v1.GridCell.total_return:type_name -> lab.v1.Metric
+	15, // 21: lab.v1.GridRow.cells:type_name -> lab.v1.GridCell
+	16, // 22: lab.v1.Grid.rows:type_name -> lab.v1.GridRow
+	18, // 23: lab.v1.Summary.badges:type_name -> lab.v1.Badge
+	48, // 24: lab.v1.Benchmark.equity:type_name -> lab.v1.EquityPoint
+	47, // 25: lab.v1.Benchmark.total_return:type_name -> lab.v1.Metric
+	0,  // 26: lab.v1.RunProvenance.status:type_name -> lab.v1.EvidenceStatus
+	22, // 27: lab.v1.RunProvenance.datasets:type_name -> lab.v1.DatasetProvenance
+	49, // 28: lab.v1.RunProvenance.instruments:type_name -> lab.v1.InstrumentKey
+	5,  // 29: lab.v1.Report.spec:type_name -> lab.v1.ReportSpec
+	11, // 30: lab.v1.Report.range:type_name -> lab.v1.Window
+	11, // 31: lab.v1.Report.oos_window:type_name -> lab.v1.Window
+	11, // 32: lab.v1.Report.holdout_window:type_name -> lab.v1.Window
+	19, // 33: lab.v1.Report.summary:type_name -> lab.v1.Summary
+	12, // 34: lab.v1.Report.oos:type_name -> lab.v1.RunView
+	13, // 35: lab.v1.Report.folds:type_name -> lab.v1.FoldView
+	14, // 36: lab.v1.Report.stress:type_name -> lab.v1.StressView
+	17, // 37: lab.v1.Report.grid:type_name -> lab.v1.Grid
+	20, // 38: lab.v1.Report.benchmarks:type_name -> lab.v1.Benchmark
+	46, // 39: lab.v1.Report.break_even_fee:type_name -> lab.v1.Decimal
+	21, // 40: lab.v1.Report.groups:type_name -> lab.v1.MetricGroup
+	45, // 41: lab.v1.Report.final_equity_toman:type_name -> lab.v1.Money
+	45, // 42: lab.v1.Report.net_toman:type_name -> lab.v1.Money
+	23, // 43: lab.v1.Report.provenance:type_name -> lab.v1.RunProvenance
+	24, // 44: lab.v1.GetReportResponse.report:type_name -> lab.v1.Report
+	12, // 45: lab.v1.ViewHoldoutResponse.holdout:type_name -> lab.v1.RunView
+	46, // 46: lab.v1.TradeRow.qty:type_name -> lab.v1.Decimal
+	45, // 47: lab.v1.TradeRow.entry_ref:type_name -> lab.v1.Money
+	45, // 48: lab.v1.TradeRow.exit_ref:type_name -> lab.v1.Money
+	45, // 49: lab.v1.TradeRow.gross:type_name -> lab.v1.Money
+	45, // 50: lab.v1.TradeRow.slippage:type_name -> lab.v1.Money
+	45, // 51: lab.v1.TradeRow.fees:type_name -> lab.v1.Money
+	45, // 52: lab.v1.TradeRow.net:type_name -> lab.v1.Money
+	46, // 53: lab.v1.TradeRow.open_qty:type_name -> lab.v1.Decimal
+	45, // 54: lab.v1.TradeRow.mark_value:type_name -> lab.v1.Money
+	29, // 55: lab.v1.ListTradesResponse.trades:type_name -> lab.v1.TradeRow
+	46, // 56: lab.v1.DecisionRow.target:type_name -> lab.v1.Decimal
+	46, // 57: lab.v1.DecisionRow.stop_loss:type_name -> lab.v1.Decimal
+	46, // 58: lab.v1.DecisionRow.take_profit:type_name -> lab.v1.Decimal
+	32, // 59: lab.v1.ListDecisionsResponse.decisions:type_name -> lab.v1.DecisionRow
+	47, // 60: lab.v1.CompareColumn.metrics:type_name -> lab.v1.Metric
+	48, // 61: lab.v1.CompareColumn.equity:type_name -> lab.v1.EquityPoint
+	35, // 62: lab.v1.CompareResponse.assumptions:type_name -> lab.v1.Assumption
+	37, // 63: lab.v1.CompareResponse.columns:type_name -> lab.v1.CompareColumn
+	3,  // 64: lab.v1.ReportService.ListStrategies:input_type -> lab.v1.ListStrategiesRequest
+	6,  // 65: lab.v1.ReportService.CreateReport:input_type -> lab.v1.CreateReportRequest
+	9,  // 66: lab.v1.ReportService.ListReports:input_type -> lab.v1.ListReportsRequest
+	25, // 67: lab.v1.ReportService.GetReport:input_type -> lab.v1.GetReportRequest
+	27, // 68: lab.v1.ReportService.ViewHoldout:input_type -> lab.v1.ViewHoldoutRequest
+	30, // 69: lab.v1.ReportService.ListTrades:input_type -> lab.v1.ListTradesRequest
+	33, // 70: lab.v1.ReportService.ListDecisions:input_type -> lab.v1.ListDecisionsRequest
+	36, // 71: lab.v1.ReportService.Compare:input_type -> lab.v1.CompareRequest
+	39, // 72: lab.v1.ReportService.Export:input_type -> lab.v1.ExportRequest
+	41, // 73: lab.v1.ReportService.Reproduce:input_type -> lab.v1.ReproduceRequest
+	4,  // 74: lab.v1.ReportService.ListStrategies:output_type -> lab.v1.ListStrategiesResponse
+	7,  // 75: lab.v1.ReportService.CreateReport:output_type -> lab.v1.CreateReportResponse
+	10, // 76: lab.v1.ReportService.ListReports:output_type -> lab.v1.ListReportsResponse
+	26, // 77: lab.v1.ReportService.GetReport:output_type -> lab.v1.GetReportResponse
+	28, // 78: lab.v1.ReportService.ViewHoldout:output_type -> lab.v1.ViewHoldoutResponse
+	31, // 79: lab.v1.ReportService.ListTrades:output_type -> lab.v1.ListTradesResponse
+	34, // 80: lab.v1.ReportService.ListDecisions:output_type -> lab.v1.ListDecisionsResponse
+	38, // 81: lab.v1.ReportService.Compare:output_type -> lab.v1.CompareResponse
+	40, // 82: lab.v1.ReportService.Export:output_type -> lab.v1.ExportResponse
+	42, // 83: lab.v1.ReportService.Reproduce:output_type -> lab.v1.ReproduceResponse
+	74, // [74:84] is the sub-list for method output_type
+	64, // [64:74] is the sub-list for method input_type
+	64, // [64:64] is the sub-list for extension type_name
+	64, // [64:64] is the sub-list for extension extendee
+	0,  // [0:64] is the sub-list for field type_name
 }
 
 func init() { file_lab_v1_report_proto_init() }
@@ -3102,18 +3436,20 @@ func file_lab_v1_report_proto_init() {
 		return
 	}
 	file_lab_v1_common_proto_init()
+	file_lab_v1_workspace_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_lab_v1_report_proto_rawDesc), len(file_lab_v1_report_proto_rawDesc)),
-			NumEnums:      0,
-			NumMessages:   41,
+			NumEnums:      1,
+			NumMessages:   43,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_lab_v1_report_proto_goTypes,
 		DependencyIndexes: file_lab_v1_report_proto_depIdxs,
+		EnumInfos:         file_lab_v1_report_proto_enumTypes,
 		MessageInfos:      file_lab_v1_report_proto_msgTypes,
 	}.Build()
 	File_lab_v1_report_proto = out.File

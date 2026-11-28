@@ -15,19 +15,19 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import 'health.pb.dart' as $1;
+import 'health.pb.dart' as $2;
 import 'health.pbjson.dart';
 
 export 'health.pb.dart';
 
 abstract class HealthServiceBase extends $pb.GeneratedService {
-  $async.Future<$1.WatchResponse> watch(
-      $pb.ServerContext ctx, $1.WatchRequest request);
+  $async.Future<$2.WatchResponse> watch(
+      $pb.ServerContext ctx, $2.WatchRequest request);
 
   $pb.GeneratedMessage createRequest($core.String methodName) {
     switch (methodName) {
       case 'Watch':
-        return $1.WatchRequest();
+        return $2.WatchRequest();
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }
@@ -37,7 +37,7 @@ abstract class HealthServiceBase extends $pb.GeneratedService {
       $core.String methodName, $pb.GeneratedMessage request) {
     switch (methodName) {
       case 'Watch':
-        return watch(ctx, request as $1.WatchRequest);
+        return watch(ctx, request as $2.WatchRequest);
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }

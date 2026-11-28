@@ -23,6 +23,7 @@ type leg struct {
 	qty, ref, price           int64
 	refValue, value, slippage int64
 	fee                       int64
+	cash                      int64 // signed change in the quote balance
 }
 
 func newLeg(buy bool, ref, qty int64, slip, fee money.Ratio) (leg, error) {
@@ -48,16 +49,19 @@ func newLeg(buy bool, ref, qty int64, slip, fee money.Ratio) (leg, error) {
 	if !buy {
 		l.slippage = -l.slippage
 	}
-	l.fee, err = fee.Apply(l.value, money.Ceil)
-	return l, err
-}
-
-// cash is the signed change of the quote balance.
-func (l leg) cash() int64 {
-	if l.buy {
-		return -(l.value + l.fee)
+	if l.fee, err = fee.Apply(l.value, money.Ceil); err != nil {
+		return leg{}, err
 	}
-	return l.value - l.fee
+	if buy {
+		cost, err := money.AddInt64(l.value, l.fee)
+		if err != nil {
+			return leg{}, err
+		}
+		l.cash = -cost
+	} else {
+		l.cash = l.value - l.fee
+	}
+	return l, nil
 }
 
 // affordableQty is the largest lot-rounded quantity whose buy leg (value + fee)
@@ -81,7 +85,7 @@ func affordableQty(spec instrument.Spec, ref, want, cash int64, slip, fee money.
 		if err != nil {
 			return 0, leg{}, err
 		}
-		if l.value+l.fee <= cash {
+		if -l.cash <= cash {
 			return q, l, nil
 		}
 		q -= spec.Lot.V // per-unit ceilings can overshoot by a few units

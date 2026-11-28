@@ -4,6 +4,8 @@
 package metrics
 
 import (
+	"errors"
+	"fmt"
 	"math/big"
 	"slices"
 	"time"
@@ -52,6 +54,10 @@ type Input struct {
 	Initial    int64     // starting equity, USDT
 	Equity     []Point   // sorted by time, within the window
 	Trades     []Trade
+	// ExposureTrades may include positions carried into a window, whereas Trades
+	// is its opening cohort for counts and closed-trade statistics. Nil retains
+	// the standalone calculator's historical behavior.
+	ExposureTrades []Trade
 	// Sharpe sampling: Period (default 24h), periods per year (default 365, crypto
 	// trades every day), minimum samples (default 30).
 	Period      time.Duration
@@ -67,6 +73,11 @@ const (
 	GroupRisk   = "risk"
 	GroupTrades = "trades"
 )
+
+// OverflowReason is the display reason shared by checked metric producers.
+const OverflowReason = "خارج از محدوده عددی"
+
+var ErrInvalid = errors.New("metrics: required value unavailable")
 
 func (in *Input) defaults() {
 	if in.Period == 0 {
@@ -94,34 +105,51 @@ func Compute(in Input) []Metric {
 	}
 
 	// P&L: sums over all trades (open trades contribute their unrealized net).
-	var gross, fees, slip, net, unreal int64
+	var gross, fees, slip, net, unreal big.Int
+	var term big.Int
 	var closed []Trade
 	for _, t := range in.Trades {
-		gross += t.Gross
-		fees += t.Fees
-		slip += t.Slippage
-		net += t.Net
+		gross.Add(&gross, term.SetInt64(t.Gross))
+		fees.Add(&fees, term.SetInt64(t.Fees))
+		slip.Add(&slip, term.SetInt64(t.Slippage))
+		net.Add(&net, term.SetInt64(t.Net))
 		if t.Closed == nil {
-			unreal += t.Net
+			unreal.Add(&unreal, term.SetInt64(t.Net))
 		} else {
 			closed = append(closed, t)
 		}
 	}
-	add(usdt("net_pnl", GroupPnL, net))
-	add(usdt("gross_pnl", GroupPnL, gross))
-	add(usdt("fees", GroupPnL, fees))
-	add(usdt("slippage", GroupPnL, slip))
-	add(usdt("unrealized_pnl", GroupPnL, unreal))
+	for _, total := range []struct {
+		key string
+		v   *big.Int
+	}{{"net_pnl", &net}, {"gross_pnl", &gross}, {"fees", &fees}, {"slippage", &slip}, {"unrealized_pnl", &unreal}} {
+		m := usdt(total.key, GroupPnL, 0)
+		if total.v.IsInt64() {
+			m.V = total.v.Int64()
+		} else {
+			m.Valid, m.Invalid = false, OverflowReason
+		}
+		add(m)
+	}
 
 	final := in.Initial
 	if n := len(in.Equity); n > 0 {
 		final = in.Equity[n-1].Equity
 	}
 	add(usdt("final_equity", GroupReturn, final))
-	add(ratio("total_return", GroupReturn, final-in.Initial, in.Initial, ""))
+	ret := Metric{Key: "total_return", Group: GroupReturn, Scale: 6, Unit: Ratio}
+	switch v, err := scaledDelta(final, in.Initial, in.Initial, int64(money.RatioOne)); {
+	case in.Initial == 0:
+		ret.Invalid = "مخرج صفر است"
+	case err != nil:
+		ret.Invalid = OverflowReason
+	default:
+		ret.V, ret.Valid = v, true
+	}
+	add(ret)
 
 	dd, ddDur := drawdown(in)
-	add(Metric{Key: "max_drawdown", Group: GroupRisk, V: dd, Scale: 6, Unit: Ratio, Valid: true})
+	add(dd)
 	add(Metric{Key: "max_drawdown_duration", Group: GroupRisk, V: int64(ddDur / time.Second), Unit: Seconds, Valid: true})
 	add(sharpe(in))
 	add(exposure(in))
@@ -131,6 +159,36 @@ func Compute(in Input) []Metric {
 	return out
 }
 
+// Wide totals are rounded only after the final quotient is known.
+func scaledBig(num, den *big.Int, scale int64) (int64, error) {
+	if den.Sign() == 0 {
+		return 0, money.ErrDivZero
+	}
+	var product, quotient, remainder, divisor big.Int
+	product.Mul(num, big.NewInt(scale))
+	quotient.QuoRem(&product, den, &remainder)
+	remainder.Abs(&remainder).Lsh(&remainder, 1)
+	divisor.Abs(den)
+	cmp := remainder.Cmp(&divisor)
+	if cmp > 0 || cmp == 0 && quotient.Bit(0) != 0 {
+		quotient.Add(&quotient, big.NewInt(int64(product.Sign()*den.Sign())))
+	}
+	if !quotient.IsInt64() {
+		return 0, money.ErrOverflow
+	}
+	return quotient.Int64(), nil
+}
+
+func scaledDelta(a, b, denominator, scale int64) (int64, error) {
+	d, err := money.SubInt64(a, b)
+	if err == nil {
+		return money.MulDiv(d, scale, denominator, money.HalfEven)
+	}
+	var wide big.Int
+	wide.Sub(big.NewInt(a), big.NewInt(b))
+	return scaledBig(&wide, big.NewInt(denominator), scale)
+}
+
 // Get finds a metric by key.
 func Get(ms []Metric, key string) (Metric, bool) {
 	i := slices.IndexFunc(ms, func(m Metric) bool { return m.Key == key })
@@ -138,6 +196,22 @@ func Get(ms []Metric, key string) (Metric, bool) {
 		return Metric{}, false
 	}
 	return ms[i], true
+}
+
+// Require checks metrics destined for fields that cannot convey validity.
+func Require(ms []Metric, keys ...string) error {
+	for _, key := range keys {
+		m, ok := Get(ms, key)
+		if ok && m.Valid {
+			continue
+		}
+		err := ErrInvalid
+		if m.Invalid == OverflowReason {
+			err = money.ErrOverflow
+		}
+		return fmt.Errorf("%w: %s %s", err, key, m.Invalid)
+	}
+	return nil
 }
 
 func ratio(key, group string, num, den int64, invalid string) Metric {
@@ -161,9 +235,9 @@ func ratio(key, group string, num, den int64, invalid string) Metric {
 
 // drawdown: largest fall from a running peak of equity at bar closes, as a ratio,
 // and the longest time spent below a previous peak (to recovery or the end).
-func drawdown(in Input) (int64, time.Duration) {
+func drawdown(in Input) (Metric, time.Duration) {
 	peak, peakT := in.Initial, in.Start
-	var worst int64
+	m := Metric{Key: "max_drawdown", Group: GroupRisk, Scale: 6, Unit: Ratio, Valid: true}
 	var longest time.Duration
 	under := false
 	for _, p := range in.Equity {
@@ -175,15 +249,19 @@ func drawdown(in Input) (int64, time.Duration) {
 			continue
 		}
 		under = true
-		if peak > 0 {
-			d, _ := money.MulDiv(peak-p.Equity, int64(money.RatioOne), peak, money.HalfEven)
-			worst = max(worst, d)
+		if peak > 0 && m.Valid {
+			d, err := scaledDelta(peak, p.Equity, peak, int64(money.RatioOne))
+			if err != nil {
+				m.V, m.Valid, m.Invalid = 0, false, OverflowReason
+			} else {
+				m.V = max(m.V, d)
+			}
 		}
 	}
 	if under && in.End.Sub(peakT) > longest {
 		longest = in.End.Sub(peakT)
 	}
-	return worst, longest
+	return m, longest
 }
 
 // exposure: share of the window during which at least one position was open.
@@ -194,9 +272,17 @@ func exposure(in Input) Metric {
 		m.Invalid = "بازه خالی است"
 		return m
 	}
+	if !in.Start.Add(span).Equal(in.End) {
+		m.Invalid = OverflowReason
+		return m
+	}
 	type iv struct{ a, b time.Time }
-	ivs := make([]iv, 0, len(in.Trades))
-	for _, t := range in.Trades {
+	trades := in.ExposureTrades
+	if trades == nil {
+		trades = in.Trades
+	}
+	ivs := make([]iv, 0, len(trades))
+	for _, t := range trades {
 		end := in.End
 		if t.Closed != nil {
 			end = *t.Closed
@@ -234,14 +320,17 @@ func tradeStats(in Input, closed []Trade) []Metric {
 	if n < in.MinTrades {
 		few = "کمتر از " + itoa(in.MinTrades) + " معامله بسته‌شده"
 	}
-	var wins, losses []int64
-	var hold time.Duration
+	var wins, losses, hold, term big.Int
+	var nWins, nLosses int64
+	holdRepresentable := true
 	best, worst := int64(0), int64(0)
 	for i, t := range closed {
 		if t.Net > 0 {
-			wins = append(wins, t.Net)
+			wins.Add(&wins, term.SetInt64(t.Net))
+			nWins++
 		} else {
-			losses = append(losses, t.Net)
+			losses.Add(&losses, term.SetInt64(t.Net))
+			nLosses++
 		}
 		if i == 0 || t.Net > best {
 			best = t.Net
@@ -249,37 +338,50 @@ func tradeStats(in Input, closed []Trade) []Metric {
 		if i == 0 || t.Net < worst {
 			worst = t.Net
 		}
-		hold += t.Closed.Sub(t.Opened)
+		duration := t.Closed.Sub(t.Opened)
+		holdRepresentable = holdRepresentable && t.Opened.Add(duration).Equal(*t.Closed)
+		hold.Add(&hold, term.SetInt64(int64(duration)))
 	}
-	sum := func(xs []int64) int64 {
-		var s int64
-		for _, x := range xs {
-			s += x
-		}
-		return s
-	}
-	avg := func(key string, xs []int64, emptyWhy string) Metric {
+	avg := func(key string, total *big.Int, count int64, emptyWhy string) Metric {
 		m := Metric{Key: key, Group: GroupTrades, Scale: 8, Unit: USDT}
 		switch {
 		case few != "":
 			m.Invalid = few
-		case len(xs) == 0:
+		case count == 0:
 			m.Invalid = emptyWhy
 		default:
-			m.V, _ = money.MulDiv(sum(xs), 1, int64(len(xs)), money.HalfEven)
-			m.Valid = true
+			if v, err := scaledBig(total, big.NewInt(count), 1); err != nil {
+				m.Invalid = OverflowReason
+			} else {
+				m.V, m.Valid = v, true
+			}
 		}
 		return m
 	}
-	pf := ratio("profit_factor", GroupTrades, sum(wins), -sum(losses), few)
-	if few == "" && len(losses) == 0 {
-		pf = Metric{Key: "profit_factor", Group: GroupTrades, Scale: 6, Unit: Ratio, Invalid: "هیچ معامله زیان‌ده نبود"}
+	pf := Metric{Key: "profit_factor", Group: GroupTrades, Scale: 6, Unit: Ratio}
+	switch {
+	case few != "":
+		pf.Invalid = few
+	case nLosses == 0:
+		pf.Invalid = "هیچ معامله زیان‌ده نبود"
+	case losses.Sign() == 0:
+		pf.Invalid = "مخرج صفر است"
+	default:
+		if v, err := scaledBig(&wins, term.Neg(&losses), int64(money.RatioOne)); err != nil {
+			pf.Invalid = OverflowReason
+		} else {
+			pf.V, pf.Valid = v, true
+		}
 	}
 	holdM := Metric{Key: "avg_holding", Group: GroupTrades, Unit: Seconds}
 	if n == 0 {
 		holdM.Invalid = "معامله بسته‌شده‌ای نیست"
+	} else if !holdRepresentable {
+		holdM.Invalid = OverflowReason
 	} else {
-		holdM.V, holdM.Valid = int64(hold/time.Second)/int64(n), true
+		hold.Quo(&hold, term.SetInt64(int64(time.Second)))
+		hold.Quo(&hold, term.SetInt64(int64(n)))
+		holdM.V, holdM.Valid = hold.Int64(), true
 	}
 	extreme := func(key string, v int64) Metric {
 		m := Metric{Key: key, Group: GroupTrades, Scale: 8, Unit: USDT}
@@ -292,10 +394,10 @@ func tradeStats(in Input, closed []Trade) []Metric {
 	}
 	return []Metric{
 		{Key: "closed_trades", Group: GroupTrades, V: int64(n), Unit: Count, Valid: true},
-		ratio("win_rate", GroupTrades, int64(len(wins)), int64(n), few),
+		ratio("win_rate", GroupTrades, nWins, int64(n), few),
 		pf,
-		avg("avg_win", wins, "هیچ معامله سودده نبود"),
-		avg("avg_loss", losses, "هیچ معامله زیان‌ده نبود"),
+		avg("avg_win", &wins, nWins, "هیچ معامله سودده نبود"),
+		avg("avg_loss", &losses, nLosses, "هیچ معامله زیان‌ده نبود"),
 		extreme("best_trade", best),
 		extreme("worst_trade", worst),
 		holdM,
@@ -307,6 +409,10 @@ func tradeStats(in Input, closed []Trade) []Metric {
 // before it). Integer math throughout; result has scale 2, truncated.
 func sharpe(in Input) Metric {
 	m := Metric{Key: "sharpe", Group: GroupRisk, Scale: 2, Unit: Number}
+	if in.Period <= 0 || in.PeriodsYear <= 0 {
+		m.Invalid = "دوره محاسبه معتبر نیست"
+		return m
+	}
 	const rs = 1_000_000_000 // returns at scale 9
 	var samples []int64
 	prev := in.Initial
@@ -321,7 +427,7 @@ func sharpe(in Input) Metric {
 			m.Invalid = "سرمایه به صفر رسید"
 			return m
 		}
-		r, err := money.MulDiv(last-prev, rs, prev, money.HalfEven)
+		r, err := scaledDelta(last, prev, prev, rs)
 		if err != nil {
 			m.Invalid = err.Error()
 			return m

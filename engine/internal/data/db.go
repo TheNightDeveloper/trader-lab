@@ -32,6 +32,9 @@ func UpsertBars(ctx context.Context, s *store.Store, symbol, source, ref string,
 	var res Upserted
 	err := s.InTx(ctx, func(q *db.Queries) error {
 		res = Upserted{}
+		if err := q.LockCandleIngest(ctx, symbol); err != nil {
+			return err
+		}
 		months := map[time.Time]bool{}
 		for _, b := range bars {
 			m := time.Date(b.OpenTime.Year(), b.OpenTime.Month(), 1, 0, 0, 0, 0, time.UTC)
@@ -83,8 +86,9 @@ func SaveIssues(ctx context.Context, q *db.Queries, symbol string, issues []Issu
 	return nil
 }
 
-// Reader is the only way to read bars. Every call takes asOf; nothing with
-// AvailableAt > asOf is ever returned (plan §7: the as-of API is the only API).
+// Reader serves live/legacy as-of reads; nothing with AvailableAt > asOf is
+// returned. New persistent datasets instead load pinned revisions in datasets.go;
+// their simulator still reveals each bar only at its AvailableAt.
 type Reader struct {
 	Q *db.Queries
 }
@@ -103,17 +107,25 @@ type Query struct {
 var farFuture = time.Date(9999, 1, 1, 0, 0, 0, 0, time.UTC)
 
 // Bars returns closed bars available at q.AsOf, resampled to q.Timeframe.
-func (r Reader) Bars(ctx context.Context, q Query) ([]Bar, error) {
+func (r Reader) Bars(ctx context.Context, q Query) ([]Bar, error) { return r.bars(ctx, q, false) }
+
+func (r Reader) bars(ctx context.Context, q Query, legacy bool) ([]Bar, error) {
+	if _, err := RawBarCount(q.Timeframe, q.From, q.To); err != nil {
+		return nil, err
+	}
 	known := q.KnownAt
 	if known.IsZero() {
 		known = farFuture
 	}
 	d := q.Timeframe.Duration()
 	rows, err := r.Q.CandlesAsOf(ctx, db.CandlesAsOfParams{
-		Symbol: q.Symbol, FromTime: q.From.Truncate(d), ToTime: q.To, AsOf: q.AsOf, KnownAt: known,
+		Symbol: q.Symbol, FromTime: q.From.Truncate(d), ToTime: q.To, AsOf: q.AsOf, KnownAt: known, RowLimit: MaxRawBars + 1,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("read %s: %w", q.Symbol, err)
+	}
+	if len(rows) > MaxRawBars {
+		return nil, ErrLimit
 	}
 	bars := make([]Bar, len(rows))
 	for i, row := range rows {
@@ -123,7 +135,7 @@ func (r Reader) Bars(ctx context.Context, q Query) ([]Bar, error) {
 			Volume: money.Qty{V: row.Volume, Scale: instrument.Scale},
 		}
 	}
-	out, err := Resample(bars, q.Timeframe)
+	out, err := resample(bars, q.Timeframe, legacy)
 	if err != nil {
 		return nil, err
 	}

@@ -1,6 +1,6 @@
 import 'package:decimal/decimal.dart';
 import 'package:fixnum/fixnum.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -75,7 +75,9 @@ class _ReportBody extends ConsumerWidget {
       children: [
         PageHeader(
           title: r.title,
-          subtitle: '${r.spec.strategy} · $params',
+          subtitle: r.spec.ruleVersionId > Int64.ZERO
+              ? '${r.spec.strategy} · ${r.spec.timeframe}'
+              : '${r.spec.strategy} · $params',
           actions: [_Actions(r: r)],
         ),
         Wrap(
@@ -85,9 +87,13 @@ class _ReportBody extends ConsumerWidget {
             BadgeChip(l.badgeDatasets(r.spec.datasetIds.map(shortHash).join(', '))),
             if (r.spec.engineVersion.isNotEmpty) BadgeChip(l.badgeEngine(r.spec.engineVersion)),
             if (r.holdoutViews > 0) BadgeChip(l.reportHoldoutViews(r.holdoutViews), tone: 'warning'),
-            for (final b in r.summary.badges) BadgeChip(b.text, tone: b.tone),
+            // Older engines send the localized evidence only in Summary.badges.
+            for (final b in r.summary.badges)
+              if (!r.hasProvenance() || b.kind != 'provenance') BadgeChip(b.text, tone: b.tone),
+            if (r.hasProvenance()) EvidenceBadge(r.provenance),
           ],
         ),
+        if (r.spec.ruleVersionId > Int64.ZERO) _RuleRunProfile(report: r),
         pair(_Summary(r: r), _Waterfall(r: r)),
         SectionCard(
           title: l.reportEquity,
@@ -105,6 +111,54 @@ class _ReportBody extends ConsumerWidget {
   static String _param(double v) => v == v.roundToDouble() ? v.toInt().toString() : v.toString();
 }
 
+/// The profile reads the evaluated report spec so it reflects the stored execution assumptions.
+class _RuleRunProfile extends StatelessWidget {
+  const _RuleRunProfile({required this.report});
+
+  final Report report;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L10n.of(context);
+    final spec = report.spec;
+    final from = fmtDateTime(utcMs(report.oosWindow.fromUnixMs));
+    final to = fmtDateTime(utcMs(report.oosWindow.toUnixMs));
+    return SectionCard(
+      title: 'شرایط اجرای قواعد',
+      trailing: OutlinedButton(
+        onPressed: () => context.go('/library/rules/${spec.ruleVersionId}'),
+        child: Text('نسخهٔ قواعد ${spec.ruleVersionId}'),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('بازهٔ خارج از نمونه: $from تا $to'),
+          const SizedBox(height: AppSpace.sm),
+          Wrap(
+            spacing: AppSpace.md,
+            runSpacing: AppSpace.xs,
+            children: [
+              Text('${l.newCapital}: ${formatDecimal(moneyValue(spec.capital))} ${spec.capital.asset}'),
+              Text('${l.newFeeBps}: ${formatDecimal(fractionToBps(spec.fee))} ${l.bps}'),
+              Text('${l.newSlipBps}: ${formatDecimal(fractionToBps(spec.slippage))} ${l.bps}'),
+              Text('${l.newFolds}: ${spec.folds}'),
+              Text('${l.newHoldout}: ${formatDecimal(fractionToPct(spec.holdout))}٪'),
+              Text('تأخیر اجرا: ${spec.latencyBars} کندل'),
+              Text(spec.rolling ? 'پنجرهٔ غلتان' : 'پنجرهٔ گسترشی'),
+            ],
+          ),
+          const SizedBox(height: AppSpace.sm),
+          Text(l.newDatasets, style: AppText.label),
+          for (final id in spec.datasetIds)
+            SelectableText(id, textDirection: TextDirection.ltr, style: AppText.mono),
+          const SizedBox(height: AppSpace.sm),
+          const Text('هش تعریف قواعد'),
+          SelectableText(spec.ruleContentHash, textDirection: TextDirection.ltr, style: AppText.mono),
+        ],
+      ),
+    );
+  }
+}
 class _Actions extends ConsumerStatefulWidget {
   const _Actions({required this.r});
   final Report r;

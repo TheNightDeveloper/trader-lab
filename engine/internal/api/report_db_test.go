@@ -2,6 +2,8 @@ package api
 
 import (
 	"context"
+	"encoding/json"
+	"math"
 	"net/http"
 	"strings"
 	"testing"
@@ -13,11 +15,14 @@ import (
 
 	"tradinglab/engine/internal/clock"
 	"tradinglab/engine/internal/data"
+	"tradinglab/engine/internal/eval"
 	labv1 "tradinglab/engine/internal/gen/lab/v1"
 	"tradinglab/engine/internal/gen/lab/v1/labv1connect"
+	"tradinglab/engine/internal/jobs"
 	"tradinglab/engine/internal/money"
 	"tradinglab/engine/internal/report"
 	"tradinglab/engine/internal/store/storetest"
+	"tradinglab/engine/internal/strategy"
 )
 
 func waveBars(n int) []data.Bar {
@@ -61,6 +66,14 @@ func usdtMoney(s string) *labv1.Money {
 	return usdtP(v)
 }
 
+func TestTradeCalculatorReturnsOutOfRangeWithoutPartialResult(t *testing.T) {
+	resp, err := (&Pnl{}).CalculateTrade(context.Background(), connect.NewRequest(&labv1.CalculateTradeRequest{
+		Entry: usdtP(math.MaxInt64), Exit: usdtP(math.MaxInt64), Amount: usdtP(math.MaxInt64), Slippage: dec("0.01"),
+	}))
+	require.Equal(t, connect.CodeOutOfRange, connect.CodeOf(err))
+	require.Nil(t, resp)
+}
+
 func TestReportAndPnlServices(t *testing.T) {
 	st := storetest.Open(t)
 	ctx := context.Background()
@@ -72,10 +85,15 @@ func TestReportAndPnlServices(t *testing.T) {
 	require.NoError(t, err)
 
 	svc := report.Service{Store: st, Version: "test"}
+	replayBudget, err := jobs.SimulationBytes(int64(len(bars)), int64(len(bars)))
+	require.NoError(t, err)
+	pnlSvc := svc
+	// The entire request must fit a single reservation, including the response projection.
+	pnlSvc.Memory = jobs.NewMemory(replayBudget)
 	fxSvc := &Fx{Store: st, Clock: clock.NewVirtual(time.Date(2026, 10, 27, 0, 0, 0, 0, time.UTC))}
 	srv := serve(t,
 		func(m *http.ServeMux) { m.Handle(labv1connect.NewReportServiceHandler(&Report{Svc: svc})) },
-		func(m *http.ServeMux) { m.Handle(labv1connect.NewPnlServiceHandler(&Pnl{Svc: svc})) },
+		func(m *http.ServeMux) { m.Handle(labv1connect.NewPnlServiceHandler(&Pnl{Svc: pnlSvc})) },
 		func(m *http.ServeMux) { m.Handle(labv1connect.NewFxServiceHandler(fxSvc)) })
 	rc := labv1connect.NewReportServiceClient(srv.Client(), srv.URL)
 	pc := labv1connect.NewPnlServiceClient(srv.Client(), srv.URL)
@@ -84,6 +102,16 @@ func TestReportAndPnlServices(t *testing.T) {
 	strategies, err := rc.ListStrategies(ctx, connect.NewRequest(&labv1.ListStrategiesRequest{}))
 	require.NoError(t, err)
 	require.Len(t, strategies.Msg.GetStrategies(), 4)
+	for _, item := range strategies.Msg.GetStrategies() {
+		params := strategy.Params{}
+		for _, published := range item.GetParams() {
+			params[published.GetName()] = published.GetDefault()
+		}
+		definition := strategy.NativeDefinition{Format: item.GetNativeDefinitionFormat(), Name: item.GetName(), Params: params}
+		hash, err := definition.ContentHash()
+		require.NoError(t, err)
+		require.Equal(t, hash, item.GetNativeDefinitionHash())
+	}
 
 	spec := func(fee string) *labv1.ReportSpec {
 		return &labv1.ReportSpec{
@@ -117,6 +145,13 @@ func TestReportAndPnlServices(t *testing.T) {
 	require.NoError(t, err)
 	r := got.Msg.GetReport()
 	require.Equal(t, "test", r.GetSpec().GetEngineVersion())
+	p := r.GetProvenance()
+	require.Equal(t, labv1.EvidenceStatus_EVIDENCE_STATUS_INCOMPLETE, p.GetStatus(), "test engine has no recorded build identity")
+	require.Len(t, p.GetDatasets(), 1)
+	require.Equal(t, ds.ID, p.GetDatasets()[0].GetId())
+	require.Equal(t, eval.Version, p.GetEvaluationPolicy())
+	require.Len(t, p.GetInstruments(), 1)
+	require.Equal(t, "BTCUSDT", p.GetInstruments()[0].GetSymbol())
 	require.NotEmpty(t, r.GetSummary().GetSentence())
 	require.Len(t, r.GetFolds(), 3)
 	require.Len(t, r.GetBenchmarks(), 2)
@@ -186,6 +221,13 @@ func TestReportAndPnlServices(t *testing.T) {
 		ex, err := rc.Export(ctx, connect.NewRequest(&labv1.ExportRequest{ReportId: id, Kind: kind}))
 		require.NoError(t, err, kind)
 		require.NotEmpty(t, ex.Msg.GetContent())
+		if kind == "spec_json" {
+			var exported eval.Spec
+			require.NoError(t, json.Unmarshal(ex.Msg.GetContent(), &exported))
+			require.NotNil(t, exported.Provenance)
+			require.Equal(t, ds.ID, exported.Provenance.Datasets[0].ID)
+			require.Equal(t, "BTCUSDT", exported.Provenance.Instruments[0].Symbol)
+		}
 	}
 
 	rep, err := rc.Reproduce(ctx, connect.NewRequest(&labv1.ReproduceRequest{ReportId: id}))
@@ -202,6 +244,7 @@ func TestReportAndPnlServices(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEqual(t, rec.Msg.GetWaterfall().GetNet().GetUnits(), cheaper.Msg.GetWaterfall().GetNet().GetUnits())
 	require.Equal(t, "0", cheaper.Msg.GetWaterfall().GetFees().GetUnits())
+	require.Zero(t, pnlSvc.Memory.InUse())
 
 	// Single trade.
 	tr, err := pc.CalculateTrade(ctx, connect.NewRequest(&labv1.CalculateTradeRequest{
@@ -213,6 +256,32 @@ func TestReportAndPnlServices(t *testing.T) {
 	require.NotNil(t, tr.Msg.GetNetToman())
 	_, err = pc.CalculateTrade(ctx, connect.NewRequest(&labv1.CalculateTradeRequest{Entry: usdtMoney("0"), Exit: usdtMoney("1"), Amount: usdtMoney("1")}))
 	require.Equal(t, connect.CodeInvalidArgument, connect.CodeOf(err))
+	t.Run("legacy annotation does not mutate a historical report", func(t *testing.T) {
+		// Remove the optional field to emulate a pre-P0 record in this test schema.
+		_, err := st.Pool.Exec(ctx, "UPDATE reports SET spec = spec - 'evaluation_version' - 'provenance' WHERE id = $1", id)
+		require.NoError(t, err)
+		before, err := st.GetReport(ctx, id)
+		require.NoError(t, err)
+		result, err := rc.GetReport(ctx, connect.NewRequest(&labv1.GetReportRequest{ReportId: id}))
+		require.NoError(t, err)
+		require.Equal(t, labv1.EvidenceStatus_EVIDENCE_STATUS_LEGACY, result.Msg.GetReport().GetProvenance().GetStatus())
+		found, provenanceWarning := false, false
+		for _, badge := range result.Msg.Report.Summary.Badges {
+			if badge.Kind == "legacy" {
+				found = true
+			}
+			if badge.Kind == "provenance" {
+				provenanceWarning = badge.Tone == "warning" && strings.Contains(badge.Text, "قدیمی")
+			}
+		}
+		require.True(t, found)
+		require.True(t, provenanceWarning)
+		after, err := st.GetReport(ctx, id)
+		require.NoError(t, err)
+		require.Equal(t, before.Spec, after.Spec)
+		require.Equal(t, before.Evaluation, after.Evaluation)
+	})
+
 }
 
 func findMetric(ms []*labv1.Metric, key string) *labv1.Metric {

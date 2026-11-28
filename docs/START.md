@@ -7,8 +7,8 @@ on `127.0.0.1`; it refuses any other address.
 
 | Tool | Needed for | Notes |
 |---|---|---|
-| Go 1.26+ | engine | `go version` |
-| Flutter (Dart 3.12+) | web app | `flutter doctor`; enable web with `flutter config --enable-web` |
+| Go 1.26.4+ | engine | See `engine/go.mod` |
+| Flutter 3.47+ with Dart 3.13+ | web app | CI uses Flutter 3.47.4. See `app/pubspec.yaml` for SDK constraints. |
 | PostgreSQL 17+ | all data | Docker (below) or a local install |
 | Docker | optional DB | only for `make dev-db` |
 | `make` | shortcuts | optional on Windows; each step has a plain command |
@@ -38,11 +38,15 @@ Data persists in the `pgdata` volume.
 make run
 ```
 
-This is the same as:
+To run without `make`, start from the repository root and use these commands in
+PowerShell:
 
-```sh
-cd app && flutter build web --release --no-web-resources-cdn
-cd ../engine && go run ./cmd/engine
+```powershell
+Set-Location .\app
+flutter pub get
+flutter build web --release --no-web-resources-cdn
+Set-Location ..\engine
+go run ./cmd/engine
 ```
 
 Wait for the log line `engine listening addr=http://127.0.0.1:8080`, then open
@@ -69,6 +73,8 @@ The engine reads `engine.json` from its working directory (`engine/engine.json` 
   "log_level": "info",
   "database_url": "postgres://lab:lab@127.0.0.1:5432/lab?sslmode=disable",
   "ingest_delay": "2s",
+  "research_share": 75,
+  "research_memory_mib": 1024,
   "live_symbols": ["BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT", "ETHBTC"]
 }
 ```
@@ -81,6 +87,8 @@ The engine reads `engine.json` from its working directory (`engine/engine.json` 
 | `log_level` | `debug`, `info`, `warn`, `error` |
 | `database_url` | PostgreSQL connection string |
 | `ingest_delay` | Added to a bar's close time to get when it became available |
+| `research_share` | Concurrent research slots as a percentage of CPU count (1..100); this is not an OS CPU quota |
+| `research_memory_mib` | Shared conservative active-work budget, default 1024 MiB, valid 16..65536; exhaustion rejects the job with a reason |
 | `live_symbols` | Pairs kept current from the REST mirror; `[]` turns live data off |
 
 ## 5. First use
@@ -112,6 +120,23 @@ The sidebar and all text are in Persian. Screen names below are the sidebar labe
 Reports are immutable. If a fix changes how numbers are computed, old reports keep their
 old numbers, and "Reproduce" on them reports the difference.
 
+### Paper trading
+
+1. Open **حساب مجازی** and create the local USDT account with capital and risk limits.
+2. In **داده**, prepare a one-hour dataset for a USDT spot pair enabled in `live_symbols`.
+   Open **کتابخانهٔ قواعد**, save a template or draft and run a backtest for that pair.
+3. Review the report evidence, return to the saved version and choose
+   **بررسی این نسخه در دیدبان**. Select the pair and enable the automatic scan to
+   follow each newly closed hour while the engine runs.
+4. In **دیدبان بازار**, expand a valid opportunity to read its condition and evidence.
+   Open its Paper plan, enter the stop and target, and check size, costs and risk before
+   confirming. The engine opens a durable simulated-order receipt.
+5. Use the Paper account for open positions and risk controls. Use the journal to
+   reopen receipts, add a personal note or replay the recorded decision step by step.
+
+The engine keeps running after the browser closes. Stale market data blocks new entries.
+The local database retains receipts, positions and the journal across engine restarts.
+
 ## 6. Tests and checks
 
 ```sh
@@ -124,11 +149,17 @@ Database tests need the running PostgreSQL from section 2.
 
 **Without `make` (Windows)**
 
-```sh
-cd engine && go test ./...
-cd app && flutter test
-cd app && dart analyze --fatal-infos
-cd engine && go test -run Golden ./...
+Run from the repository root with PostgreSQL running. `REQUIRE_DB=1` turns an
+unreachable database into a test failure.
+
+```powershell
+$env:REQUIRE_DB = '1'
+Set-Location .\engine
+go test -count=1 -p=1 ./...
+go test -run Golden ./...
+Set-Location ..\app
+flutter test
+dart analyze --fatal-infos
 ```
 
 ## 7. Troubleshooting
@@ -141,8 +172,16 @@ cd engine && go test -run Golden ./...
 | Blank page or 404 at `/` | The web app is not built. Run `make web`, and check `web_dir` points at `app/build/web` |
 | Live status shows off or stale | `live_symbols` is empty, or the network is down. The status block in the sidebar shows the state |
 | `-race requires cgo` | Install gcc, or run `make test RACE=` |
+| Research memory budget exhausted | Retry after other work completes, shorten the dataset range, lower research parallelism, or deliberately increase `research_memory_mib` for the machine; the estimate is not an RSS cap |
 | `make: command not found` | Use the plain commands in sections 3 and 6 |
 | Generated code stale (CI) | Run `make gen` (needs `buf` and `sqlc`) and commit the result |
+
+Archive imports also share this budget. Daily fallbacks are processed one file at a time;
+ZIPs above 64 MiB, inflated CSVs above 32 MiB, numeric lines above 4096 bytes or files above
+44,640 bars are rejected without accepting a prefix. A later-file failure keeps earlier
+valid imported files; re-running the range resumes idempotently. Import memory admission
+adds a conservative 384 MiB archive workspace to the raw-range estimate, so very low budgets
+can reject an import even when its compressed download is small.
 
 ## 8. Reset
 

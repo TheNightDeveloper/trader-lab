@@ -1,5 +1,16 @@
 import 'package:connectrpc/connect.dart' as connect;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:trading_lab/gen/lab/v1/data.pb.dart';
+
+/// Explicit server permissions for fixtures that exercise research execution.
+GetOverviewResponse researchOverview() => GetOverviewResponse(
+  symbols: ['BTCUSDT', 'ETHUSDT', 'ETHBTC'],
+  researchCapabilities: [
+    ResearchCapability(symbol: 'BTCUSDT', supported: true),
+    ResearchCapability(symbol: 'ETHUSDT', supported: true),
+    ResearchCapability(symbol: 'ETHBTC', reason: 'پژوهش این جفت به حسابداری متقاطع نیاز دارد.'),
+  ],
+);
 
 /// Answers RPCs by method name and records every request, so screens run on
 /// their real providers and clients.
@@ -38,7 +49,12 @@ class FakeTransport implements connect.Transport {
     final req = await input.first;
     (calls[n] ??= []).add(req);
     final h = streams[n];
-    return connect.StreamResponse(spec, connect.Headers(), h == null ? Stream<O>.empty() : h(req).cast<O>(), connect.Headers());
+    return connect.StreamResponse(
+      spec,
+      connect.Headers(),
+      h == null ? Stream<O>.empty() : h(req).cast<O>(),
+      connect.Headers(),
+    );
   }
 }
 

@@ -12,6 +12,24 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const cancelCycleCandidates = `-- name: CancelCycleCandidates :execrows
+UPDATE cycle_candidates SET status = 'cancelled', failure = $1
+WHERE cycle_id = $2 AND status = 'queued'
+`
+
+type CancelCycleCandidatesParams struct {
+	Failure string
+	CycleID int64
+}
+
+func (q *Queries) CancelCycleCandidates(ctx context.Context, arg CancelCycleCandidatesParams) (int64, error) {
+	result, err := q.db.Exec(ctx, cancelCycleCandidates, arg.Failure, arg.CycleID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const consumedUntil = `-- name: ConsumedUntil :one
 SELECT coalesce(max(consumed_until), '0001-01-01'::timestamptz)::timestamptz FROM learning_cycles WHERE algorithm_id = $1
 `
@@ -35,7 +53,8 @@ func (q *Queries) CountCycles(ctx context.Context, algorithmID string) (int64, e
 }
 
 const endCandidate = `-- name: EndCandidate :exec
-UPDATE cycle_candidates SET status = $3, failure = $4, result = $5 WHERE cycle_id = $1 AND seq = $2
+UPDATE cycle_candidates SET status = $3, failure = $4, result = $5
+WHERE cycle_id = $1 AND seq = $2 AND status = 'queued'
 `
 
 type EndCandidateParams struct {
@@ -58,7 +77,7 @@ func (q *Queries) EndCandidate(ctx context.Context, arg EndCandidateParams) erro
 }
 
 const getAlgorithm = `-- name: GetAlgorithm :one
-SELECT id, family, description, active_model FROM algorithms WHERE id = $1
+SELECT id, family, description, active_model, lifecycle_revision FROM algorithms WHERE id = $1
 `
 
 func (q *Queries) GetAlgorithm(ctx context.Context, id string) (Algorithm, error) {
@@ -69,6 +88,7 @@ func (q *Queries) GetAlgorithm(ctx context.Context, id string) (Algorithm, error
 		&i.Family,
 		&i.Description,
 		&i.ActiveModel,
+		&i.LifecycleRevision,
 	)
 	return i, err
 }
@@ -213,19 +233,20 @@ func (q *Queries) InsertCycle(ctx context.Context, arg InsertCycleParams) (int64
 }
 
 const insertPromotion = `-- name: InsertPromotion :exec
-INSERT INTO promotions (algorithm_id, action, version_id, model_id, prev_version_id, prev_model_id, cycle_id, note)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+INSERT INTO promotions (algorithm_id, action, version_id, model_id, prev_version_id, prev_model_id, cycle_id, note, lifecycle_revision)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 `
 
 type InsertPromotionParams struct {
-	AlgorithmID   string
-	Action        string
-	VersionID     string
-	ModelID       string
-	PrevVersionID pgtype.Text
-	PrevModelID   pgtype.Text
-	CycleID       *int64
-	Note          string
+	AlgorithmID       string
+	Action            string
+	VersionID         string
+	ModelID           string
+	PrevVersionID     pgtype.Text
+	PrevModelID       pgtype.Text
+	CycleID           *int64
+	Note              string
+	LifecycleRevision int64
 }
 
 func (q *Queries) InsertPromotion(ctx context.Context, arg InsertPromotionParams) error {
@@ -238,6 +259,7 @@ func (q *Queries) InsertPromotion(ctx context.Context, arg InsertPromotionParams
 		arg.PrevModelID,
 		arg.CycleID,
 		arg.Note,
+		arg.LifecycleRevision,
 	)
 	return err
 }
@@ -254,7 +276,7 @@ func (q *Queries) LastCycleStart(ctx context.Context, algorithmID string) (time.
 }
 
 const lastPromotion = `-- name: LastPromotion :one
-SELECT id, algorithm_id, action, version_id, model_id, prev_version_id, prev_model_id, cycle_id, note, at FROM promotions WHERE algorithm_id = $1 ORDER BY id DESC LIMIT 1
+SELECT id, algorithm_id, action, version_id, model_id, prev_version_id, prev_model_id, cycle_id, note, at, lifecycle_revision FROM promotions WHERE algorithm_id = $1 ORDER BY id DESC LIMIT 1
 `
 
 func (q *Queries) LastPromotion(ctx context.Context, algorithmID string) (Promotion, error) {
@@ -271,6 +293,7 @@ func (q *Queries) LastPromotion(ctx context.Context, algorithmID string) (Promot
 		&i.CycleID,
 		&i.Note,
 		&i.At,
+		&i.LifecycleRevision,
 	)
 	return i, err
 }

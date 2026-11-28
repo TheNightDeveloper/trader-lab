@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"errors"
 
 	"connectrpc.com/connect"
 
@@ -27,6 +26,9 @@ func (h *Pnl) Recalculate(ctx context.Context, req *connect.Request[labv1.Recalc
 	m := req.Msg
 	st, err := h.Svc.Load(ctx, m.GetReportId())
 	if err != nil {
+		return nil, reportErr(err)
+	}
+	if err := metrics.Require(st.Evaluation.OOS.Metrics, "net_pnl"); err != nil {
 		return nil, reportErr(err)
 	}
 	cfg := st.Spec.Sim
@@ -58,8 +60,13 @@ func (h *Pnl) Recalculate(ctx context.Context, req *connect.Request[labv1.Recalc
 		}
 		defer h.Limiter.Release()
 	}
-	view, res, err := h.Svc.Recalculate(ctx, m.GetReportId(), cfg, size)
+	view, res, release, err := h.Svc.Recalculate(ctx, st, cfg, size)
 	if err != nil {
+		return nil, reportErr(err)
+	}
+	defer release()
+	// The waterfall intentionally contains amounts only, without validity metadata.
+	if err := metrics.Require(view.Metrics, "gross_pnl", "fees", "slippage", "net_pnl"); err != nil {
 		return nil, reportErr(err)
 	}
 	get := func(k string) int64 { x, _ := metrics.Get(view.Metrics, k); return x.V }
@@ -135,21 +142,18 @@ func (h *Pnl) CalculateTrade(ctx context.Context, req *connect.Request[labv1.Cal
 	}
 	buyPrice, err := slip.Plus(entry.V, money.Ceil)
 	if err != nil {
-		return nil, err
+		return nil, reportErr(err)
 	}
 	qty, err := money.MulDiv(amount.V, 100_000_000, buyPrice, money.Floor)
 	if err != nil {
-		return nil, invalid(err.Error())
+		return nil, reportErr(err)
 	}
 	if qty <= 0 {
 		return nil, invalid("amount is too small for this price")
 	}
 	c, err := sim.CalcTrade(money.Price{V: entry.V, Scale: 8}, money.Price{V: exit.V, Scale: 8}, money.Qty{V: qty, Scale: 8}, fee, slip, instrument.USDT)
-	if errors.Is(err, sim.ErrInput) {
-		return nil, invalid(err.Error())
-	}
 	if err != nil {
-		return nil, err
+		return nil, reportErr(err)
 	}
 	leg := func(l sim.LegView) *labv1.TradeLeg {
 		price := func(p money.Price) *labv1.Money { return usdtP(p.V) }

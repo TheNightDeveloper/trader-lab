@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package lab.v1;
 
+import "lab/v1/audit.proto";
 import "lab/v1/common.proto";
 import "lab/v1/report.proto";
 
@@ -11,6 +12,11 @@ service LibraryService {
   rpc ListAlgorithms(ListAlgorithmsRequest) returns (ListAlgorithmsResponse);
   rpc SetVersionState(SetVersionStateRequest) returns (SetVersionStateResponse);
   rpc ListLifecycleEvents(ListLifecycleEventsRequest) returns (ListLifecycleEventsResponse);
+  rpc ListRuleVersions(ListRuleVersionsRequest) returns (ListRuleVersionsResponse);
+  rpc GetRuleVersion(GetRuleVersionRequest) returns (GetRuleVersionResponse);
+  rpc SaveRuleVersion(SaveRuleVersionRequest) returns (SaveRuleVersionResponse);
+  rpc ComposeRuleVersions(ComposeRuleVersionsRequest) returns (ComposeRuleVersionsResponse);
+  rpc ListRuleTemplates(ListRuleTemplatesRequest) returns (ListRuleTemplatesResponse);
 }
 
 message AlgorithmVersion {
@@ -42,6 +48,7 @@ message Algorithm {
   repeated AlgorithmVersion versions = 4; // newest first
   LatestReport latest_report = 5;
   string active_model = 6; // learning algorithms: the model serving the active version
+  int64 lifecycle_revision = 7; // server revision for optimistic lifecycle decisions
 }
 
 message ListAlgorithmsRequest {}
@@ -54,6 +61,7 @@ message SetVersionStateRequest {
   string version_id = 1;
   string state = 2;
   string note = 3;
+  optional int64 expected_revision = 4; // required for mutations, including revision zero
 }
 
 message SetVersionStateResponse {}
@@ -64,12 +72,92 @@ message LifecycleEvent {
   string note = 3;
   string actor = 4; // user | system
   int64 at_unix_ms = 5;
+  AuditEvent audit = 6;
 }
 
 message ListLifecycleEventsRequest {
   string version_id = 1;
+  int32 page_size = 2; // positive opts in to sequence-ordered paging
+  AuditCursor before = 3; // exclusive bound in the requested strategy version
 }
 
 message ListLifecycleEventsResponse {
   repeated LifecycleEvent events = 1;
+  AuditCursor next_cursor = 2; // absent on the last page
+}
+
+// RuleVersionSummary describes an immutable research draft and its ancestry.
+message RuleVersionSummary {
+  int64 id = 1;
+  string title = 2;
+  string content_hash = 3;
+  int64 parent_id = 4;
+  int64 other_parent_id = 5;
+  string template_key = 6;
+  int64 created_unix_ms = 7;
+}
+
+enum RuleEvidenceFilter {
+  RULE_EVIDENCE_FILTER_UNSPECIFIED = 0; // all saved rule versions
+  RULE_EVIDENCE_FILTER_WITH_REPORT = 1;
+  RULE_EVIDENCE_FILTER_WITHOUT_REPORT = 2;
+}
+
+message ListRuleVersionsRequest {
+  string query = 1;
+  int32 page_size = 2;
+  int64 before_id = 3; // exclusive, zero starts at the newest version
+  RuleEvidenceFilter evidence_filter = 4;
+}
+
+message ListRuleVersionsResponse {
+  repeated RuleVersionSummary versions = 1;
+  int64 next_before_id = 2; // zero means the last page
+}
+
+message GetRuleVersionRequest {
+  int64 id = 1;
+}
+
+message GetRuleVersionResponse {
+  RuleVersionSummary version = 1;
+  string definition_json = 2; // validated rules/v1
+  LatestReport latest_report = 3; // only reports for this exact version
+}
+
+message SaveRuleVersionRequest {
+  string title = 1;
+  string definition_json = 2;
+  int64 parent_id = 3; // zero begins a lineage
+  string template_key = 4; // when set, a new lineage derives from this template
+}
+
+message SaveRuleVersionResponse {
+  RuleVersionSummary version = 1;
+}
+
+message ComposeRuleVersionsRequest {
+  string title = 1;
+  int64 first_id = 2;
+  int64 second_id = 3;
+  string entry_mode = 4; // and | or | regime
+  int64 exit_owner_id = 5; // one of the two component versions
+  int32 regime_sma_period = 6; // only for regime, in base bars
+}
+
+message ComposeRuleVersionsResponse {
+  RuleVersionSummary version = 1;
+}
+
+message RuleTemplate {
+  string key = 1;
+  string title = 2;
+  string description = 3;
+  string definition_json = 4;
+}
+
+message ListRuleTemplatesRequest {}
+
+message ListRuleTemplatesResponse {
+  repeated RuleTemplate templates = 1;
 }

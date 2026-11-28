@@ -24,15 +24,15 @@ import (
 
 var day0 = time.Date(2024, 3, 1, 0, 0, 0, 0, time.UTC)
 
-// momentumBars: 1m bars whose hourly returns are autocorrelated (0.6), so a model
-// that sees the last hour's return has a real edge on the next one.
+// Synthetic fixture: persistent hourly returns keep the positive promotion path
+// testable even when a causal fill waits past the already-open next candle.
 func momentumBars(days int) []data.Bar {
 	rng := rand.New(rand.NewPCG(9, 9))
 	var out []data.Bar
 	price, r := 100.0, 0.0
 	p := func(v float64) money.Price { return money.Price{V: int64(v * 1e8), Scale: instrument.Scale} }
 	for h := range days * 24 {
-		r = 0.6*r + rng.NormFloat64()*0.006
+		r = 0.9*r + rng.NormFloat64()*0.006
 		target := price * (1 + r)
 		prev := price
 		for m := range 60 {
@@ -104,11 +104,13 @@ func runToDecision(t *testing.T, l *Loop, clk *clock.Virtual) cycle {
 }
 
 func active(t *testing.T, l *Loop) (string, string) {
-	a, err := l.Store.GetAlgorithm(context.Background(), "test-learn")
+	state, err := l.Active(context.Background(), "test-learn")
 	require.NoError(t, err)
-	v, err := activeVersion(context.Background(), l.Store.Queries, "test-learn")
-	require.NoError(t, err)
-	return v, a.ActiveModel.String
+	modelID := ""
+	if state.Model != nil {
+		modelID = state.Model.ID
+	}
+	return state.VersionID, modelID
 }
 
 func TestCycleRecommendsAndOnlyTheUserPromotes(t *testing.T) {
@@ -129,12 +131,13 @@ func TestCycleRecommendsAndOnlyTheUserPromotes(t *testing.T) {
 	chal, err := l.artifact(ctx, c.doc.Challenger.ModelID)
 	require.NoError(t, err)
 	require.Equal(t, c.doc.Champion.ModelID, chal.Parent)
-	require.Equal(t, *c.doc.FreezeAt, chal.AsOf, "frozen at the freeze")
+	require.Equal(t, *c.doc.ModelCreatedAt, chal.AsOf, "model serves only after its fit completed")
+	require.True(t, CurrentEvidence(c.doc))
 
 	v, m := active(t, l)
 	require.Empty(t, v+m, "a recommendation changes nothing by itself")
 
-	require.NoError(t, l.Approve(ctx, c.row.ID, "looks right"))
+	require.NoError(t, l.Approve(ctx, c.row.ID, "looks right", lifecycleRevision(t, l)))
 	v, m = active(t, l)
 	require.Equal(t, c.doc.Challenger.ModelID, m)
 	_, def, err := experiment.Version(ctx, l.Store.Queries, v)
@@ -145,8 +148,8 @@ func TestCycleRecommendsAndOnlyTheUserPromotes(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "user", ev[0].Actor)
 
-	require.ErrorIs(t, l.Approve(ctx, c.row.ID, ""), ErrState, "approved once")
-	require.ErrorIs(t, l.Rollback(ctx, "test-learn", ""), ErrState, "no earlier active model to return to")
+	require.ErrorIs(t, l.Approve(ctx, c.row.ID, "", lifecycleRevision(t, l)), ErrState, "approved once")
+	require.ErrorIs(t, l.Rollback(ctx, "test-learn", "", lifecycleRevision(t, l)), ErrState, "no earlier active model to return to")
 
 	// Right after a decision, the forward data is used up: the next cycle skips.
 	id, err := l.Begin(ctx, "manual")
@@ -157,12 +160,85 @@ func TestCycleRecommendsAndOnlyTheUserPromotes(t *testing.T) {
 	require.Contains(t, s.row.Reason, "داده تازه ناکافی")
 }
 
+type advancingClock struct {
+	t    time.Time
+	step time.Duration
+}
+
+func (c *advancingClock) Now() time.Time {
+	now := c.t
+	c.t = c.t.Add(c.step)
+	return now
+}
+
+func TestActualFreezeAndIncompleteForwardCannotRecommend(t *testing.T) {
+	st, l, clk := setup(t)
+	ctx := context.Background()
+	id, err := l.Begin(ctx, "manual")
+	require.NoError(t, err)
+	// Completion reads a clock that has advanced while the models were fitted.
+	l.Clock = &advancingClock{t: clk.Now(), step: 2 * time.Hour}
+	require.NoError(t, l.RunCycle(ctx, id))
+	c := get(t, l, id)
+	require.Equal(t, ForwardTest, c.row.State, c.row.Reason)
+	require.True(t, c.doc.ModelCreatedAt.After(*c.doc.TrainingCutoff))
+	require.True(t, c.doc.FreezeAt.After(*c.doc.ModelCreatedAt))
+	require.False(t, c.doc.TradeStart.Before(*c.doc.FreezeAt))
+	chal, err := l.artifact(ctx, c.doc.Challenger.ModelID)
+	require.NoError(t, err)
+	require.Equal(t, *c.doc.ModelCreatedAt, chal.AsOf)
+	missing := c.doc.TradeStart.Add(12 * time.Hour)
+	_, err = st.Pool.Exec(ctx, "DELETE FROM candles WHERE symbol='BTCUSDT' AND open_time=$1", missing)
+	require.NoError(t, err)
+	end := c.doc.TradeStart.Add(time.Duration(c.doc.Config.Gate.ForwardDays) * 24 * time.Hour)
+	l.Clock = clock.NewVirtual(end.Add(2 * time.Hour))
+	require.NoError(t, l.Advance(ctx))
+	c = get(t, l, id)
+	require.Equal(t, ForwardTest, c.row.State, "elapsed days alone cannot complete a test")
+	require.Zero(t, c.doc.Forward.Days)
+	require.Equal(t, missing, c.doc.Forward.Through)
+	require.Equal(t, []string{"BTCUSDT"}, c.doc.Forward.MissingSymbols)
+	require.Nil(t, c.row.ConsumedUntil)
+	// Backfilling the actual missing minute makes the same fixed window eligible.
+	bs := momentumBars(36)
+	i := int(missing.Sub(day0) / time.Minute)
+	_, err = data.UpsertBars(ctx, st, "BTCUSDT", "archive", "restore-test", bs[i:i+1])
+	require.NoError(t, err)
+	require.NoError(t, l.Advance(ctx))
+	c = get(t, l, id)
+	require.NotEqual(t, ForwardTest, c.row.State)
+	require.Equal(t, end, c.doc.Forward.Through, "late ticks do not extend the registered test")
+	require.Equal(t, c.doc.Config.Gate.ForwardDays, c.doc.Forward.Days)
+	require.Empty(t, c.doc.Forward.MissingSymbols)
+}
+
+func TestLegacyForwardAndRecommendationFailClosed(t *testing.T) {
+	_, l, _ := setup(t)
+	ctx := context.Background()
+	id, err := l.Begin(ctx, "manual")
+	require.NoError(t, err)
+	c := get(t, l, id)
+	c.doc.EvaluationVersion = "p0.2"
+	c.row.State = ForwardTest
+	require.NoError(t, l.save(ctx, l.Store.Queries, &c))
+	require.NoError(t, l.Advance(ctx))
+	c = get(t, l, id)
+	require.Equal(t, Failed, c.row.Outcome)
+	// A previously recommended cycle is readable/rejectable, but cannot promote
+	// a model based on superseded evidence.
+	c.row.State, c.row.Outcome = Decision, Recommended
+	c.row.FinishedAt = nil
+	require.NoError(t, l.save(ctx, l.Store.Queries, &c))
+	require.ErrorIs(t, l.Approve(ctx, id, "", lifecycleRevision(t, l)), ErrState)
+	require.NoError(t, l.Reject(ctx, id, "old evidence"))
+}
+
 func TestWorseChallengerAndInterruptionsLeaveTheChampion(t *testing.T) {
 	st, l, clk := setup(t)
 	ctx := context.Background()
 	first := runToDecision(t, l, clk)
 	require.Equal(t, Recommended, first.row.Outcome, first.row.Reason)
-	require.NoError(t, l.Approve(ctx, first.row.ID, ""))
+	require.NoError(t, l.Approve(ctx, first.row.ID, "", lifecycleRevision(t, l)))
 	v0, m0 := active(t, l)
 	p0, err := st.LastPromotion(ctx, "test-learn")
 	require.NoError(t, err)
@@ -182,7 +258,7 @@ func TestWorseChallengerAndInterruptionsLeaveTheChampion(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, p0.ID, p.ID)
 
-	// Training interrupted mid-way: the cycle fails, the active pair stays.
+	// Collection now waits for admission too: cancellation must still end durably.
 	lim := jobs.NewLimiter(1)
 	require.NoError(t, lim.Acquire(ctx)) // hold the only research slot
 	l2 := &Loop{Store: st, Clock: clk, Limiter: lim}
@@ -190,9 +266,14 @@ func TestWorseChallengerAndInterruptionsLeaveTheChampion(t *testing.T) {
 	id, err := l2.Begin(ctx, "manual")
 	require.NoError(t, err)
 	runCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
 	errc := make(chan error, 1)
 	go func() { errc <- l2.RunCycle(runCtx, id) }()
-	require.Eventually(t, func() bool { return get(t, l2, id).row.State == Train }, 30*time.Second, 10*time.Millisecond)
+	select {
+	case err := <-errc:
+		t.Fatalf("collection bypassed the held research slot: %v", err)
+	case <-time.After(100 * time.Millisecond):
+	}
 	cancel()
 	require.Error(t, <-errc)
 	lim.Release()
@@ -200,7 +281,7 @@ func TestWorseChallengerAndInterruptionsLeaveTheChampion(t *testing.T) {
 	require.Equal(t, Failed, c.row.Outcome)
 	require.Equal(t, interrupted, c.row.Reason)
 	v, m = active(t, l)
-	require.Equal(t, [2]string{v0, m0}, [2]string{v, m}, "an interrupted training run leaves the active version untouched")
+	require.Equal(t, [2]string{v0, m0}, [2]string{v, m}, "an interrupted research run leaves the active version untouched")
 
 	// A cycle a restart cut off mid-run is closed as interrupted on start.
 	id, err = l.Begin(ctx, "manual")
@@ -274,4 +355,12 @@ func TestScheduledCycleRunsUnattendedAndRecordsItsDecision(t *testing.T) {
 	require.Contains(t, []string{Recommended, NotBetter, GateFailed}, c.row.Outcome, c.row.Reason)
 	cancel()
 	require.NoError(t, <-done)
+}
+
+// Test callers explicitly observe the revision they authorize.
+func lifecycleRevision(t *testing.T, l *Loop) int64 {
+	t.Helper()
+	a, err := l.Store.GetAlgorithm(context.Background(), "test-learn")
+	require.NoError(t, err)
+	return a.LifecycleRevision
 }

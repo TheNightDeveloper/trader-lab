@@ -1,8 +1,9 @@
 import 'package:decimal/decimal.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../gen/lab/v1/common.pb.dart' as pb;
+import '../../gen/lab/v1/report.pb.dart';
 import '../../l10n/app_localizations.dart';
 import '../metric.dart';
 import '../money.dart';
@@ -207,6 +208,19 @@ class MetricTile extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The engine classifies the completeness of recorded report evidence.
+class EvidenceBadge extends StatelessWidget {
+  const EvidenceBadge(this.provenance, {super.key});
+
+  final RunProvenance provenance;
+
+  @override
+  Widget build(BuildContext context) => BadgeChip(
+    provenance.detail,
+    tone: provenance.status == EvidenceStatus.EVIDENCE_STATUS_RECORDED ? 'neutral' : 'warning',
+  );
 }
 
 class BadgeChip extends StatelessWidget {

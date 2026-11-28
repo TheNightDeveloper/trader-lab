@@ -76,7 +76,8 @@ func run() error {
 		return err
 	}
 	limiter := jobs.NewLimiter(jobs.ResearchSlots(runtime.NumCPU(), cfg.ResearchShare))
-	slog.Info("research share", "slots", limiter.Size(), "cpus", runtime.NumCPU())
+	memory := jobs.NewMemory(int64(cfg.ResearchMemoryMiB) << 20)
+	slog.Info("research share", "slots", limiter.Size(), "cpus", runtime.NumCPU(), "active_memory_mib", cfg.ResearchMemoryMiB)
 
 	var live *data.Live
 	if len(cfg.LiveSymbols) > 0 {
@@ -86,12 +87,18 @@ func run() error {
 		}
 		go live.Run(ctx)
 	}
+	market := &api.Market{Store: st, Clock: clock.Wall{}, Live: liveSource(live), Build: build, Symbols: cfg.LiveSymbols, Limiter: limiter}
+	paperService := &api.Paper{Market: market}
+	go paperService.RunPaper(ctx)
+	if live != nil {
+		go market.RunMarketScans(ctx)
+	}
 
 	fxSvc := &api.Fx{Store: st, Clock: clock.Wall{}}
 	health := &api.Health{Clock: clock.Wall{}, Version: version, Workers: int32(cfg.Workers), Every: time.Second, Live: liveSource(live), Rates: fxSvc}
 	dataSvc := &api.Data{
 		Store: st, Live: live, Clock: clock.Wall{},
-		Importer: data.Importer{Store: st, HTTP: http.DefaultClient, BaseURL: data.ArchiveBaseURL, Delay: cfg.ingestDelay(), Clock: clock.Wall{}},
+		Importer: data.Importer{Store: st, HTTP: http.DefaultClient, BaseURL: data.ArchiveBaseURL, Delay: cfg.ingestDelay(), Clock: clock.Wall{}, Memory: memory},
 	}
 	sc := echo.StartConfig{
 		Address:         cfg.Listen,
@@ -106,7 +113,7 @@ func run() error {
 			return nil
 		},
 	}
-	reports := report.Service{Store: st, Version: version, Parallel: limiter.Size(), Cache: report.NewDatasetCache(4)}
+	reports := report.Service{Store: st, Version: version, Build: report.CurrentBuild(build), Parallel: limiter.Size(), Memory: memory, Cache: report.NewDatasetCache(4)}
 	sched := &search.Scheduler{Store: st, Reports: reports, Limiter: limiter, Build: build}
 	go func() {
 		if err := sched.Run(ctx); err != nil {
@@ -116,7 +123,7 @@ func run() error {
 	if cfg.BackupDir != "" {
 		go (&backup.Nightly{URL: cfg.DatabaseURL, Dir: cfg.BackupDir, HourUTC: cfg.BackupHourUTC, Keep: cfg.BackupKeep, Clock: clock.Wall{}}).Run(ctx)
 	}
-	learning := &loop.Loop{Store: st, Clock: clock.Wall{}, Limiter: limiter}
+	learning := &loop.Loop{Store: st, Clock: clock.Wall{}, Limiter: limiter, Memory: memory}
 	go func() {
 		if err := learning.Run(ctx); err != nil {
 			slog.Error("learning loop stopped", "err", err)
@@ -125,13 +132,15 @@ func run() error {
 	if err := sc.Start(ctx, newServer(cfg,
 		route(labv1connect.NewHealthServiceHandler(health)),
 		route(labv1connect.NewDataServiceHandler(dataSvc)),
+		route(labv1connect.NewMarketServiceHandler(market)),
+		route(labv1connect.NewPaperServiceHandler(paperService)),
 		route(labv1connect.NewFxServiceHandler(fxSvc)),
 		route(labv1connect.NewReportServiceHandler(&api.Report{Svc: reports, Limiter: limiter})),
 		route(labv1connect.NewPnlServiceHandler(&api.Pnl{Svc: reports, Limiter: limiter})),
 		route(labv1connect.NewExperimentServiceHandler(&api.Experiment{Store: st, Scheduler: sched, Limiter: limiter})),
 		route(labv1connect.NewLibraryServiceHandler(&api.Library{Store: st})),
 		route(labv1connect.NewLearningServiceHandler(&api.Learning{Store: st, Loop: learning})),
-		route(labv1connect.NewChartServiceHandler(&api.Chart{Svc: reports, Clock: clock.Wall{}})),
+		route((&api.Chart{Svc: reports, Clock: clock.Wall{}}).Handler()),
 	)); err != nil {
 		return fmt.Errorf("serve: %w", err)
 	}

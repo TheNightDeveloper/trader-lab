@@ -16,6 +16,8 @@ import 'dart:core' as $core;
 import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
+import 'workspace.pb.dart' as $0;
+
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
 class GetOverviewRequest extends $pb.GeneratedMessage {
@@ -67,6 +69,7 @@ class GetOverviewResponse extends $pb.GeneratedMessage {
     $fixnum.Int64? outageSecondsToday,
     $fixnum.Int64? storageBytes,
     $core.Iterable<$core.String>? symbols,
+    $core.Iterable<ResearchCapability>? researchCapabilities,
   }) {
     final result = GetOverviewResponse._();
     if (liveSymbols != null) result.liveSymbols = liveSymbols;
@@ -76,6 +79,8 @@ class GetOverviewResponse extends $pb.GeneratedMessage {
       result.outageSecondsToday = outageSecondsToday;
     if (storageBytes != null) result.storageBytes = storageBytes;
     if (symbols != null) result.symbols.addAll(symbols);
+    if (researchCapabilities != null)
+      result.researchCapabilities.addAll(researchCapabilities);
     return result;
   }
 
@@ -98,6 +103,8 @@ class GetOverviewResponse extends $pb.GeneratedMessage {
     ..aInt64(4, _omitFieldNames ? '' : 'outageSecondsToday')
     ..aInt64(5, _omitFieldNames ? '' : 'storageBytes')
     ..pPS(6, _omitFieldNames ? '' : 'symbols')
+    ..pPM<ResearchCapability>(7, _omitFieldNames ? '' : 'researchCapabilities',
+        subBuilder: ResearchCapability.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -170,6 +177,106 @@ class GetOverviewResponse extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(6)
   $pb.PbList<$core.String> get symbols => $_getList(5);
+
+  @$pb.TagNumber(7)
+  $pb.PbList<ResearchCapability> get researchCapabilities => $_getList(6);
+}
+
+/// Research execution capability is independent of data import and chart availability.
+class ResearchCapability extends $pb.GeneratedMessage {
+  factory ResearchCapability({
+    $core.String? symbol,
+    $core.bool? supported,
+    $core.String? reason,
+    $0.InstrumentKey? instrument,
+  }) {
+    final result = ResearchCapability._();
+    if (symbol != null) result.symbol = symbol;
+    if (supported != null) result.supported = supported;
+    if (reason != null) result.reason = reason;
+    if (instrument != null) result.instrument = instrument;
+    return result;
+  }
+
+  ResearchCapability._();
+
+  factory ResearchCapability.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ResearchCapability()..mergeFromBuffer(data, registry);
+  factory ResearchCapability.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ResearchCapability()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ResearchCapability',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: ResearchCapability.$_createMessage)
+    ..aOS(1, _omitFieldNames ? '' : 'symbol')
+    ..aOB(2, _omitFieldNames ? '' : 'supported')
+    ..aOS(3, _omitFieldNames ? '' : 'reason')
+    ..aOM<$0.InstrumentKey>(4, _omitFieldNames ? '' : 'instrument',
+        subBuilder: $0.InstrumentKey.$_createMessage)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ResearchCapability clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ResearchCapability copyWith(void Function(ResearchCapability) updates) =>
+      super.copyWith((message) => updates(message as ResearchCapability))
+          as ResearchCapability;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use ResearchCapability() / ResearchCapability.new instead')
+  static ResearchCapability create() => ResearchCapability._();
+  static $pb.GeneratedMessage $_createMessage() => ResearchCapability._();
+  @$core.override
+  ResearchCapability createEmptyInstance() => ResearchCapability._();
+  @$core.pragma('dart2js:noInline')
+  static ResearchCapability getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ResearchCapability>(
+          ResearchCapability.$_createMessage);
+  static ResearchCapability? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get symbol => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set symbol($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSymbol() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSymbol() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.bool get supported => $_getBF(1);
+  @$pb.TagNumber(2)
+  set supported($core.bool value) => $_setBool(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasSupported() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearSupported() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get reason => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set reason($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasReason() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearReason() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $0.InstrumentKey get instrument => $_getN(3);
+  @$pb.TagNumber(4)
+  set instrument($0.InstrumentKey value) => $_setField(4, value);
+  @$pb.TagNumber(4)
+  $core.bool hasInstrument() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearInstrument() => $_clearField(4);
+  @$pb.TagNumber(4)
+  $0.InstrumentKey ensureInstrument() => $_ensure(3);
 }
 
 class Dataset extends $pb.GeneratedMessage {
@@ -351,10 +458,20 @@ class ListDatasetsRequest extends $pb.GeneratedMessage {
   factory ListDatasetsRequest({
     $core.int? pageSize,
     $core.int? offset,
+    $core.String? query,
+    $core.String? symbol,
+    $core.bool? researchOnly,
+    $core.Iterable<$core.String>? ids,
+    $core.String? timeframe,
   }) {
     final result = ListDatasetsRequest._();
     if (pageSize != null) result.pageSize = pageSize;
     if (offset != null) result.offset = offset;
+    if (query != null) result.query = query;
+    if (symbol != null) result.symbol = symbol;
+    if (researchOnly != null) result.researchOnly = researchOnly;
+    if (ids != null) result.ids.addAll(ids);
+    if (timeframe != null) result.timeframe = timeframe;
     return result;
   }
 
@@ -373,6 +490,11 @@ class ListDatasetsRequest extends $pb.GeneratedMessage {
       createEmptyInstance: ListDatasetsRequest.$_createMessage)
     ..aI(1, _omitFieldNames ? '' : 'pageSize')
     ..aI(2, _omitFieldNames ? '' : 'offset')
+    ..aOS(3, _omitFieldNames ? '' : 'query')
+    ..aOS(4, _omitFieldNames ? '' : 'symbol')
+    ..aOB(5, _omitFieldNames ? '' : 'researchOnly')
+    ..pPS(6, _omitFieldNames ? '' : 'ids')
+    ..aOS(7, _omitFieldNames ? '' : 'timeframe')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -415,6 +537,45 @@ class ListDatasetsRequest extends $pb.GeneratedMessage {
   $core.bool hasOffset() => $_has(1);
   @$pb.TagNumber(2)
   void clearOffset() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get query => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set query($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasQuery() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearQuery() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.String get symbol => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set symbol($core.String value) => $_setString(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasSymbol() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearSymbol() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.bool get researchOnly => $_getBF(4);
+  @$pb.TagNumber(5)
+  set researchOnly($core.bool value) => $_setBool(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasResearchOnly() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearResearchOnly() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  $pb.PbList<$core.String> get ids => $_getList(5);
+
+  @$pb.TagNumber(7)
+  $core.String get timeframe => $_getSZ(6);
+  @$pb.TagNumber(7)
+  set timeframe($core.String value) => $_setString(6, value);
+  @$pb.TagNumber(7)
+  $core.bool hasTimeframe() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearTimeframe() => $_clearField(7);
 }
 
 class ListDatasetsResponse extends $pb.GeneratedMessage {
