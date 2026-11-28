@@ -90,7 +90,7 @@ The engine reads `engine.json` from its working directory (`engine/engine.json` 
 | `research_share` | Concurrent research slots as a percentage of CPU count (1..100); this is not an OS CPU quota |
 | `research_memory_mib` | Shared conservative active-work budget, default 1024 MiB, valid 16..65536; exhaustion rejects the job with a reason |
 | `live_symbols` | Pairs kept current from the REST mirror; `[]` turns live data off |
-| `assistant_daily_requests` | Maximum paid explanation attempts per UTC day. Default `0` disables inference |
+| `assistant_daily_requests` | Maximum paid assistant attempts per UTC day. Default `0` disables inference |
 
 To enable explanations, set a positive `assistant_daily_requests` and provide
 `TRADINGLAB_ASSISTANT_API_KEY` in the engine process environment before starting
@@ -101,6 +101,13 @@ are reused for the same observation, snapshot, model and prompt version.
 Report review uses the same quota and sends only available out-of-sample return,
 drawdown and closed-trade counts. The engine checks the comparison assumptions
 before inference. When assumptions differ, it returns the differences locally.
+
+In **کتابخانهٔ قواعد → پیش‌نویس از متن**, include the entry and exit
+conditions, base candle interval and capital share as a percentage. Write
+periods and thresholds in digits. Submitting sends the typed description to
+OpenAI under the same quota. A complete draft opens in the standard rule editor
+for review and an explicit save. For ambiguous text, edit the description with
+the requested details and submit again.
 
 ## 5. First use
 

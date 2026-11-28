@@ -43,4 +43,22 @@ extension type AssistantServiceClient (connect.Transport _transport) {
       onTrailer: onTrailer,
     );
   }
+
+  /// Convert user text to an editable, validated draft or clarification questions.
+  Future<labv1assistant.DraftStrategyResponse> draftStrategy(
+    labv1assistant.DraftStrategyRequest input, {
+    connect.Headers? headers,
+    connect.AbortSignal? signal,
+    Function(connect.Headers)? onHeader,
+    Function(connect.Headers)? onTrailer,
+  }) {
+    return connect.Client(_transport).unary(
+      specs.AssistantService.draftStrategy,
+      input,
+      signal: signal,
+      headers: headers,
+      onHeader: onHeader,
+      onTrailer: onTrailer,
+    );
+  }
 }

@@ -39,6 +39,9 @@ const (
 	// AssistantServiceReviewReportsProcedure is the fully-qualified name of the AssistantService's
 	// ReviewReports RPC.
 	AssistantServiceReviewReportsProcedure = "/lab.v1.AssistantService/ReviewReports"
+	// AssistantServiceDraftStrategyProcedure is the fully-qualified name of the AssistantService's
+	// DraftStrategy RPC.
+	AssistantServiceDraftStrategyProcedure = "/lab.v1.AssistantService/DraftStrategy"
 )
 
 // AssistantServiceClient is a client for the lab.v1.AssistantService service.
@@ -47,6 +50,8 @@ type AssistantServiceClient interface {
 	ExplainOpportunity(context.Context, *connect.Request[v1.ExplainOpportunityRequest]) (*connect.Response[v1.ExplainOpportunityResponse], error)
 	// Review the out-of-sample evidence of one report or compare up to six reports.
 	ReviewReports(context.Context, *connect.Request[v1.ReviewReportsRequest]) (*connect.Response[v1.ReviewReportsResponse], error)
+	// Convert user text to an editable, validated draft or clarification questions.
+	DraftStrategy(context.Context, *connect.Request[v1.DraftStrategyRequest]) (*connect.Response[v1.DraftStrategyResponse], error)
 }
 
 // NewAssistantServiceClient constructs a client for the lab.v1.AssistantService service. By
@@ -72,6 +77,12 @@ func NewAssistantServiceClient(httpClient connect.HTTPClient, baseURL string, op
 			connect.WithSchema(assistantServiceMethods.ByName("ReviewReports")),
 			connect.WithClientOptions(opts...),
 		),
+		draftStrategy: connect.NewClient[v1.DraftStrategyRequest, v1.DraftStrategyResponse](
+			httpClient,
+			baseURL+AssistantServiceDraftStrategyProcedure,
+			connect.WithSchema(assistantServiceMethods.ByName("DraftStrategy")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -79,6 +90,7 @@ func NewAssistantServiceClient(httpClient connect.HTTPClient, baseURL string, op
 type assistantServiceClient struct {
 	explainOpportunity *connect.Client[v1.ExplainOpportunityRequest, v1.ExplainOpportunityResponse]
 	reviewReports      *connect.Client[v1.ReviewReportsRequest, v1.ReviewReportsResponse]
+	draftStrategy      *connect.Client[v1.DraftStrategyRequest, v1.DraftStrategyResponse]
 }
 
 // ExplainOpportunity calls lab.v1.AssistantService.ExplainOpportunity.
@@ -91,12 +103,19 @@ func (c *assistantServiceClient) ReviewReports(ctx context.Context, req *connect
 	return c.reviewReports.CallUnary(ctx, req)
 }
 
+// DraftStrategy calls lab.v1.AssistantService.DraftStrategy.
+func (c *assistantServiceClient) DraftStrategy(ctx context.Context, req *connect.Request[v1.DraftStrategyRequest]) (*connect.Response[v1.DraftStrategyResponse], error) {
+	return c.draftStrategy.CallUnary(ctx, req)
+}
+
 // AssistantServiceHandler is an implementation of the lab.v1.AssistantService service.
 type AssistantServiceHandler interface {
 	// Explain a saved engine observation. This can spend assistant budget.
 	ExplainOpportunity(context.Context, *connect.Request[v1.ExplainOpportunityRequest]) (*connect.Response[v1.ExplainOpportunityResponse], error)
 	// Review the out-of-sample evidence of one report or compare up to six reports.
 	ReviewReports(context.Context, *connect.Request[v1.ReviewReportsRequest]) (*connect.Response[v1.ReviewReportsResponse], error)
+	// Convert user text to an editable, validated draft or clarification questions.
+	DraftStrategy(context.Context, *connect.Request[v1.DraftStrategyRequest]) (*connect.Response[v1.DraftStrategyResponse], error)
 }
 
 // NewAssistantServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -118,12 +137,20 @@ func NewAssistantServiceHandler(svc AssistantServiceHandler, opts ...connect.Han
 		connect.WithSchema(assistantServiceMethods.ByName("ReviewReports")),
 		connect.WithHandlerOptions(opts...),
 	)
+	assistantServiceDraftStrategyHandler := connect.NewUnaryHandler(
+		AssistantServiceDraftStrategyProcedure,
+		svc.DraftStrategy,
+		connect.WithSchema(assistantServiceMethods.ByName("DraftStrategy")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/lab.v1.AssistantService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case AssistantServiceExplainOpportunityProcedure:
 			assistantServiceExplainOpportunityHandler.ServeHTTP(w, r)
 		case AssistantServiceReviewReportsProcedure:
 			assistantServiceReviewReportsHandler.ServeHTTP(w, r)
+		case AssistantServiceDraftStrategyProcedure:
+			assistantServiceDraftStrategyHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -139,4 +166,8 @@ func (UnimplementedAssistantServiceHandler) ExplainOpportunity(context.Context, 
 
 func (UnimplementedAssistantServiceHandler) ReviewReports(context.Context, *connect.Request[v1.ReviewReportsRequest]) (*connect.Response[v1.ReviewReportsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("lab.v1.AssistantService.ReviewReports is not implemented"))
+}
+
+func (UnimplementedAssistantServiceHandler) DraftStrategy(context.Context, *connect.Request[v1.DraftStrategyRequest]) (*connect.Response[v1.DraftStrategyResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("lab.v1.AssistantService.DraftStrategy is not implemented"))
 }

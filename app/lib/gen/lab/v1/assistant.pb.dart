@@ -24,6 +24,182 @@ export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
 export 'assistant.pbenum.dart';
 
+class DraftStrategyRequest extends $pb.GeneratedMessage {
+  factory DraftStrategyRequest({
+    $core.String? description,
+  }) {
+    final result = DraftStrategyRequest._();
+    if (description != null) result.description = description;
+    return result;
+  }
+
+  DraftStrategyRequest._();
+
+  factory DraftStrategyRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      DraftStrategyRequest()..mergeFromBuffer(data, registry);
+  factory DraftStrategyRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      DraftStrategyRequest()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'DraftStrategyRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: DraftStrategyRequest.$_createMessage)
+    ..aOS(1, _omitFieldNames ? '' : 'description')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  DraftStrategyRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  DraftStrategyRequest copyWith(void Function(DraftStrategyRequest) updates) =>
+      super.copyWith((message) => updates(message as DraftStrategyRequest))
+          as DraftStrategyRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use DraftStrategyRequest() / DraftStrategyRequest.new instead')
+  static DraftStrategyRequest create() => DraftStrategyRequest._();
+  static $pb.GeneratedMessage $_createMessage() => DraftStrategyRequest._();
+  @$core.override
+  DraftStrategyRequest createEmptyInstance() => DraftStrategyRequest._();
+  @$core.pragma('dart2js:noInline')
+  static DraftStrategyRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<DraftStrategyRequest>(
+          DraftStrategyRequest.$_createMessage);
+  static DraftStrategyRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get description => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set description($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasDescription() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearDescription() => $_clearField(1);
+}
+
+class DraftStrategyResponse extends $pb.GeneratedMessage {
+  factory DraftStrategyResponse({
+    $core.String? definitionJson,
+    $core.int? lookbackBars,
+    $core.Iterable<DraftQuestion>? questions,
+    $core.String? model,
+    $core.int? inputTokens,
+    $core.int? outputTokens,
+  }) {
+    final result = DraftStrategyResponse._();
+    if (definitionJson != null) result.definitionJson = definitionJson;
+    if (lookbackBars != null) result.lookbackBars = lookbackBars;
+    if (questions != null) result.questions.addAll(questions);
+    if (model != null) result.model = model;
+    if (inputTokens != null) result.inputTokens = inputTokens;
+    if (outputTokens != null) result.outputTokens = outputTokens;
+    return result;
+  }
+
+  DraftStrategyResponse._();
+
+  factory DraftStrategyResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      DraftStrategyResponse()..mergeFromBuffer(data, registry);
+  factory DraftStrategyResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      DraftStrategyResponse()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'DraftStrategyResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'lab.v1'),
+      createEmptyInstance: DraftStrategyResponse.$_createMessage)
+    ..aOS(1, _omitFieldNames ? '' : 'definitionJson')
+    ..aI(2, _omitFieldNames ? '' : 'lookbackBars')
+    ..pc<DraftQuestion>(
+        3, _omitFieldNames ? '' : 'questions', $pb.PbFieldType.KE,
+        valueOf: DraftQuestion.valueOf,
+        enumValues: DraftQuestion.values,
+        defaultEnumValue: DraftQuestion.DRAFT_QUESTION_UNSPECIFIED)
+    ..aOS(4, _omitFieldNames ? '' : 'model')
+    ..aI(5, _omitFieldNames ? '' : 'inputTokens')
+    ..aI(6, _omitFieldNames ? '' : 'outputTokens')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  DraftStrategyResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  DraftStrategyResponse copyWith(
+          void Function(DraftStrategyResponse) updates) =>
+      super.copyWith((message) => updates(message as DraftStrategyResponse))
+          as DraftStrategyResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use DraftStrategyResponse() / DraftStrategyResponse.new instead')
+  static DraftStrategyResponse create() => DraftStrategyResponse._();
+  static $pb.GeneratedMessage $_createMessage() => DraftStrategyResponse._();
+  @$core.override
+  DraftStrategyResponse createEmptyInstance() => DraftStrategyResponse._();
+  @$core.pragma('dart2js:noInline')
+  static DraftStrategyResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<DraftStrategyResponse>(
+          DraftStrategyResponse.$_createMessage);
+  static DraftStrategyResponse? _defaultInstance;
+
+  /// Canonical rules/v1 JSON is present only when the draft validates.
+  @$pb.TagNumber(1)
+  $core.String get definitionJson => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set definitionJson($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasDefinitionJson() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearDefinitionJson() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get lookbackBars => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set lookbackBars($core.int value) => $_setSignedInt32(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasLookbackBars() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearLookbackBars() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $pb.PbList<DraftQuestion> get questions => $_getList(2);
+
+  @$pb.TagNumber(4)
+  $core.String get model => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set model($core.String value) => $_setString(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasModel() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearModel() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.int get inputTokens => $_getIZ(4);
+  @$pb.TagNumber(5)
+  set inputTokens($core.int value) => $_setSignedInt32(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasInputTokens() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearInputTokens() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.int get outputTokens => $_getIZ(5);
+  @$pb.TagNumber(6)
+  set outputTokens($core.int value) => $_setSignedInt32(5, value);
+  @$pb.TagNumber(6)
+  $core.bool hasOutputTokens() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearOutputTokens() => $_clearField(6);
+}
+
 class ReviewReportsRequest extends $pb.GeneratedMessage {
   factory ReviewReportsRequest({
     $core.Iterable<$core.String>? reportIds,
@@ -579,6 +755,12 @@ class AssistantServiceApi {
           $pb.ClientContext? ctx, ReviewReportsRequest request) =>
       _client.invoke<ReviewReportsResponse>(ctx, 'AssistantService',
           'ReviewReports', request, ReviewReportsResponse());
+
+  /// Convert user text to an editable, validated draft or clarification questions.
+  $async.Future<DraftStrategyResponse> draftStrategy(
+          $pb.ClientContext? ctx, DraftStrategyRequest request) =>
+      _client.invoke<DraftStrategyResponse>(ctx, 'AssistantService',
+          'DraftStrategy', request, DraftStrategyResponse());
 }
 
 const $core.bool _omitFieldNames =

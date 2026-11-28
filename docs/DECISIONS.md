@@ -567,3 +567,17 @@ and an evidence digest. The model sees only approved OOS metrics. The comparison
 engine's blocking assumptions take precedence, and the API returns those values
 without inference when they differ. The database refuses a downgrade to migration
 21 while research assistant audit rows exist.
+
+## ADR-065 Validate natural-language rule drafts before review
+
+Drafting sends a bounded description to the pinned provider. Its structured
+reply carries a candidate AST or allowlisted clarification codes. The engine
+compiles the candidate through the same `rules/v1` validator as Library Save.
+It also checks the stated numeric literals, candle intervals and capital share.
+Those checks establish that the inputs were mentioned. Reviewing the proposed
+entry and exit still requires the user in the existing rule editor.
+
+Draft attempts share the assistant quota and record a description digest,
+status, usage and latency. PostgreSQL deduplicates concurrent submissions of
+the same text. The description and generated AST are transient. Only the regular
+explicit save stores the edited definition as a strategy version.

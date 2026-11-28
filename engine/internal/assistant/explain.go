@@ -9,10 +9,7 @@ import (
 	"fmt"
 )
 
-const (
-	Model     = "gpt-4.1-mini-2025-04-14"
-	MaxOutput = 96
-)
+const Model = "gpt-4.1-mini-2025-04-14"
 
 var ErrInvalidOutput = errors.New("invalid assistant output")
 
@@ -58,9 +55,40 @@ func (r Request) Version() string { return r.version }
 
 func (r Request) InputJSON() ([]byte, error) { return json.Marshal(r.input) }
 
+func (r Request) MaxOutput() int32 {
+	if r.IsDraft() {
+		return 1800
+	}
+	return 96
+}
+
 func (r Request) schema() json.RawMessage {
+	if r.IsDraft() {
+		return json.RawMessage(draftSchema)
+	}
 	values, _ := json.Marshal(r.focus) // strings always encode
 	return json.RawMessage(fmt.Sprintf(`{"type":"json_schema","json_schema":{"name":"evidence_focus","strict":true,"schema":{"type":"object","properties":{"focus":{"type":"string","enum":%s}},"required":["focus"],"additionalProperties":false}}}`, values))
+}
+
+type Result struct {
+	Focus string
+	Draft DraftResult
+}
+
+func (r Request) Parse(raw string) (Result, error) {
+	if description, ok := r.input.(draftText); ok {
+		draft, err := parseDraft(raw, description)
+		if err != nil {
+			return Result{}, err
+		}
+		focus := "draft"
+		if len(draft.Questions) > 0 {
+			focus = "needs_definition"
+		}
+		return Result{Focus: focus, Draft: draft}, nil
+	}
+	focus, err := r.ParseFocus(raw)
+	return Result{Focus: focus}, err
 }
 
 // ParseFocus allows JSON whitespace. The exact shape rejects duplicate keys,

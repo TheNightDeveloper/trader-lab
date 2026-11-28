@@ -41,6 +41,7 @@ type AssistantRun struct {
 	InputTokens    pgtype.Int4
 	OutputTokens   pgtype.Int4
 	ReportIds      []string
+	RuleDraft      bool
 }
 
 type Attempt struct {

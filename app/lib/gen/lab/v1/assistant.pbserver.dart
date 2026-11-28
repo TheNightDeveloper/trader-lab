@@ -25,6 +25,8 @@ abstract class AssistantServiceBase extends $pb.GeneratedService {
       $pb.ServerContext ctx, $2.ExplainOpportunityRequest request);
   $async.Future<$2.ReviewReportsResponse> reviewReports(
       $pb.ServerContext ctx, $2.ReviewReportsRequest request);
+  $async.Future<$2.DraftStrategyResponse> draftStrategy(
+      $pb.ServerContext ctx, $2.DraftStrategyRequest request);
 
   $pb.GeneratedMessage createRequest($core.String methodName) {
     switch (methodName) {
@@ -32,6 +34,8 @@ abstract class AssistantServiceBase extends $pb.GeneratedService {
         return $2.ExplainOpportunityRequest();
       case 'ReviewReports':
         return $2.ReviewReportsRequest();
+      case 'DraftStrategy':
+        return $2.DraftStrategyRequest();
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }
@@ -44,6 +48,8 @@ abstract class AssistantServiceBase extends $pb.GeneratedService {
         return explainOpportunity(ctx, request as $2.ExplainOpportunityRequest);
       case 'ReviewReports':
         return reviewReports(ctx, request as $2.ReviewReportsRequest);
+      case 'DraftStrategy':
+        return draftStrategy(ctx, request as $2.DraftStrategyRequest);
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }

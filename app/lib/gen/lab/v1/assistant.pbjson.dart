@@ -18,6 +18,27 @@ import 'dart:typed_data' as $typed_data;
 import 'common.pbjson.dart' as $1;
 import 'report.pbjson.dart' as $0;
 
+@$core.Deprecated('Use draftQuestionDescriptor instead')
+const DraftQuestion$json = {
+  '1': 'DraftQuestion',
+  '2': [
+    {'1': 'DRAFT_QUESTION_UNSPECIFIED', '2': 0},
+    {'1': 'DRAFT_QUESTION_ENTRY', '2': 1},
+    {'1': 'DRAFT_QUESTION_EXIT', '2': 2},
+    {'1': 'DRAFT_QUESTION_EXPOSURE', '2': 3},
+    {'1': 'DRAFT_QUESTION_TIMEFRAME', '2': 4},
+    {'1': 'DRAFT_QUESTION_UNSUPPORTED', '2': 5},
+    {'1': 'DRAFT_QUESTION_PARAMETERS', '2': 6},
+  ],
+};
+
+/// Descriptor for `DraftQuestion`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List draftQuestionDescriptor = $convert.base64Decode(
+    'Cg1EcmFmdFF1ZXN0aW9uEh4KGkRSQUZUX1FVRVNUSU9OX1VOU1BFQ0lGSUVEEAASGAoURFJBRl'
+    'RfUVVFU1RJT05fRU5UUlkQARIXChNEUkFGVF9RVUVTVElPTl9FWElUEAISGwoXRFJBRlRfUVVF'
+    'U1RJT05fRVhQT1NVUkUQAxIcChhEUkFGVF9RVUVTVElPTl9USU1FRlJBTUUQBBIeChpEUkFGVF'
+    '9RVUVTVElPTl9VTlNVUFBPUlRFRBAFEh0KGURSQUZUX1FVRVNUSU9OX1BBUkFNRVRFUlMQBg==');
+
 @$core.Deprecated('Use researchFocusDescriptor instead')
 const ResearchFocus$json = {
   '1': 'ResearchFocus',
@@ -52,6 +73,47 @@ final $typed_data.Uint8List explanationFocusDescriptor = $convert.base64Decode(
     'ChBFeHBsYW5hdGlvbkZvY3VzEiEKHUVYUExBTkFUSU9OX0ZPQ1VTX1VOU1BFQ0lGSUVEEAASGg'
     'oWRVhQTEFOQVRJT05fRk9DVVNfUlVMRRABEh4KGkVYUExBTkFUSU9OX0ZPQ1VTX1NOQVBTSE9U'
     'EAISHAoYRVhQTEFOQVRJT05fRk9DVVNfUkVQT1JUEAM=');
+
+@$core.Deprecated('Use draftStrategyRequestDescriptor instead')
+const DraftStrategyRequest$json = {
+  '1': 'DraftStrategyRequest',
+  '2': [
+    {'1': 'description', '3': 1, '4': 1, '5': 9, '10': 'description'},
+  ],
+};
+
+/// Descriptor for `DraftStrategyRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List draftStrategyRequestDescriptor = $convert.base64Decode(
+    'ChREcmFmdFN0cmF0ZWd5UmVxdWVzdBIgCgtkZXNjcmlwdGlvbhgBIAEoCVILZGVzY3JpcHRpb2'
+    '4=');
+
+@$core.Deprecated('Use draftStrategyResponseDescriptor instead')
+const DraftStrategyResponse$json = {
+  '1': 'DraftStrategyResponse',
+  '2': [
+    {'1': 'definition_json', '3': 1, '4': 1, '5': 9, '10': 'definitionJson'},
+    {'1': 'lookback_bars', '3': 2, '4': 1, '5': 5, '10': 'lookbackBars'},
+    {
+      '1': 'questions',
+      '3': 3,
+      '4': 3,
+      '5': 14,
+      '6': '.lab.v1.DraftQuestion',
+      '10': 'questions'
+    },
+    {'1': 'model', '3': 4, '4': 1, '5': 9, '10': 'model'},
+    {'1': 'input_tokens', '3': 5, '4': 1, '5': 5, '10': 'inputTokens'},
+    {'1': 'output_tokens', '3': 6, '4': 1, '5': 5, '10': 'outputTokens'},
+  ],
+};
+
+/// Descriptor for `DraftStrategyResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List draftStrategyResponseDescriptor = $convert.base64Decode(
+    'ChVEcmFmdFN0cmF0ZWd5UmVzcG9uc2USJwoPZGVmaW5pdGlvbl9qc29uGAEgASgJUg5kZWZpbm'
+    'l0aW9uSnNvbhIjCg1sb29rYmFja19iYXJzGAIgASgFUgxsb29rYmFja0JhcnMSMwoJcXVlc3Rp'
+    'b25zGAMgAygOMhUubGFiLnYxLkRyYWZ0UXVlc3Rpb25SCXF1ZXN0aW9ucxIUCgVtb2RlbBgEIA'
+    'EoCVIFbW9kZWwSIQoMaW5wdXRfdG9rZW5zGAUgASgFUgtpbnB1dFRva2VucxIjCg1vdXRwdXRf'
+    'dG9rZW5zGAYgASgFUgxvdXRwdXRUb2tlbnM=');
 
 @$core.Deprecated('Use reviewReportsRequestDescriptor instead')
 const ReviewReportsRequest$json = {
@@ -236,6 +298,11 @@ const $core.Map<$core.String, $core.dynamic> AssistantServiceBase$json = {
       '2': '.lab.v1.ReviewReportsRequest',
       '3': '.lab.v1.ReviewReportsResponse'
     },
+    {
+      '1': 'DraftStrategy',
+      '2': '.lab.v1.DraftStrategyRequest',
+      '3': '.lab.v1.DraftStrategyResponse'
+    },
   ],
 };
 
@@ -252,6 +319,8 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
   '.lab.v1.Metric': $1.Metric$json,
   '.lab.v1.Decimal': $1.Decimal$json,
   '.lab.v1.Assumption': $0.Assumption$json,
+  '.lab.v1.DraftStrategyRequest': DraftStrategyRequest$json,
+  '.lab.v1.DraftStrategyResponse': DraftStrategyResponse$json,
 };
 
 /// Descriptor for `AssistantService`. Decode as a `google.protobuf.ServiceDescriptorProto`.
@@ -259,4 +328,5 @@ final $typed_data.Uint8List assistantServiceDescriptor = $convert.base64Decode(
     'ChBBc3Npc3RhbnRTZXJ2aWNlElsKEkV4cGxhaW5PcHBvcnR1bml0eRIhLmxhYi52MS5FeHBsYW'
     'luT3Bwb3J0dW5pdHlSZXF1ZXN0GiIubGFiLnYxLkV4cGxhaW5PcHBvcnR1bml0eVJlc3BvbnNl'
     'EkwKDVJldmlld1JlcG9ydHMSHC5sYWIudjEuUmV2aWV3UmVwb3J0c1JlcXVlc3QaHS5sYWIudj'
-    'EuUmV2aWV3UmVwb3J0c1Jlc3BvbnNl');
+    'EuUmV2aWV3UmVwb3J0c1Jlc3BvbnNlEkwKDURyYWZ0U3RyYXRlZ3kSHC5sYWIudjEuRHJhZnRT'
+    'dHJhdGVneVJlcXVlc3QaHS5sYWIudjEuRHJhZnRTdHJhdGVneVJlc3BvbnNl');

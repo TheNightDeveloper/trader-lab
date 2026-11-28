@@ -25,4 +25,12 @@ abstract final class AssistantService {
     labv1assistant.ReviewReportsRequest.new,
     labv1assistant.ReviewReportsResponse.new,
   );
+
+  /// Convert user text to an editable, validated draft or clarification questions.
+  static const draftStrategy = connect.Spec(
+    '/$name/DraftStrategy',
+    connect.StreamType.unary,
+    labv1assistant.DraftStrategyRequest.new,
+    labv1assistant.DraftStrategyResponse.new,
+  );
 }

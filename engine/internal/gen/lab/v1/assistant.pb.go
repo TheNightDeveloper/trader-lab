@@ -21,6 +21,67 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type DraftQuestion int32
+
+const (
+	DraftQuestion_DRAFT_QUESTION_UNSPECIFIED DraftQuestion = 0
+	DraftQuestion_DRAFT_QUESTION_ENTRY       DraftQuestion = 1
+	DraftQuestion_DRAFT_QUESTION_EXIT        DraftQuestion = 2
+	DraftQuestion_DRAFT_QUESTION_EXPOSURE    DraftQuestion = 3
+	DraftQuestion_DRAFT_QUESTION_TIMEFRAME   DraftQuestion = 4
+	DraftQuestion_DRAFT_QUESTION_UNSUPPORTED DraftQuestion = 5
+	DraftQuestion_DRAFT_QUESTION_PARAMETERS  DraftQuestion = 6
+)
+
+// Enum value maps for DraftQuestion.
+var (
+	DraftQuestion_name = map[int32]string{
+		0: "DRAFT_QUESTION_UNSPECIFIED",
+		1: "DRAFT_QUESTION_ENTRY",
+		2: "DRAFT_QUESTION_EXIT",
+		3: "DRAFT_QUESTION_EXPOSURE",
+		4: "DRAFT_QUESTION_TIMEFRAME",
+		5: "DRAFT_QUESTION_UNSUPPORTED",
+		6: "DRAFT_QUESTION_PARAMETERS",
+	}
+	DraftQuestion_value = map[string]int32{
+		"DRAFT_QUESTION_UNSPECIFIED": 0,
+		"DRAFT_QUESTION_ENTRY":       1,
+		"DRAFT_QUESTION_EXIT":        2,
+		"DRAFT_QUESTION_EXPOSURE":    3,
+		"DRAFT_QUESTION_TIMEFRAME":   4,
+		"DRAFT_QUESTION_UNSUPPORTED": 5,
+		"DRAFT_QUESTION_PARAMETERS":  6,
+	}
+)
+
+func (x DraftQuestion) Enum() *DraftQuestion {
+	p := new(DraftQuestion)
+	*p = x
+	return p
+}
+
+func (x DraftQuestion) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (DraftQuestion) Descriptor() protoreflect.EnumDescriptor {
+	return file_lab_v1_assistant_proto_enumTypes[0].Descriptor()
+}
+
+func (DraftQuestion) Type() protoreflect.EnumType {
+	return &file_lab_v1_assistant_proto_enumTypes[0]
+}
+
+func (x DraftQuestion) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use DraftQuestion.Descriptor instead.
+func (DraftQuestion) EnumDescriptor() ([]byte, []int) {
+	return file_lab_v1_assistant_proto_rawDescGZIP(), []int{0}
+}
+
 type ResearchFocus int32
 
 const (
@@ -60,11 +121,11 @@ func (x ResearchFocus) String() string {
 }
 
 func (ResearchFocus) Descriptor() protoreflect.EnumDescriptor {
-	return file_lab_v1_assistant_proto_enumTypes[0].Descriptor()
+	return file_lab_v1_assistant_proto_enumTypes[1].Descriptor()
 }
 
 func (ResearchFocus) Type() protoreflect.EnumType {
-	return &file_lab_v1_assistant_proto_enumTypes[0]
+	return &file_lab_v1_assistant_proto_enumTypes[1]
 }
 
 func (x ResearchFocus) Number() protoreflect.EnumNumber {
@@ -73,7 +134,7 @@ func (x ResearchFocus) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ResearchFocus.Descriptor instead.
 func (ResearchFocus) EnumDescriptor() ([]byte, []int) {
-	return file_lab_v1_assistant_proto_rawDescGZIP(), []int{0}
+	return file_lab_v1_assistant_proto_rawDescGZIP(), []int{1}
 }
 
 type ExplanationFocus int32
@@ -112,11 +173,11 @@ func (x ExplanationFocus) String() string {
 }
 
 func (ExplanationFocus) Descriptor() protoreflect.EnumDescriptor {
-	return file_lab_v1_assistant_proto_enumTypes[1].Descriptor()
+	return file_lab_v1_assistant_proto_enumTypes[2].Descriptor()
 }
 
 func (ExplanationFocus) Type() protoreflect.EnumType {
-	return &file_lab_v1_assistant_proto_enumTypes[1]
+	return &file_lab_v1_assistant_proto_enumTypes[2]
 }
 
 func (x ExplanationFocus) Number() protoreflect.EnumNumber {
@@ -125,7 +186,136 @@ func (x ExplanationFocus) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ExplanationFocus.Descriptor instead.
 func (ExplanationFocus) EnumDescriptor() ([]byte, []int) {
+	return file_lab_v1_assistant_proto_rawDescGZIP(), []int{2}
+}
+
+type DraftStrategyRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Description   string                 `protobuf:"bytes,1,opt,name=description,proto3" json:"description,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DraftStrategyRequest) Reset() {
+	*x = DraftStrategyRequest{}
+	mi := &file_lab_v1_assistant_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DraftStrategyRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DraftStrategyRequest) ProtoMessage() {}
+
+func (x *DraftStrategyRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_assistant_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DraftStrategyRequest.ProtoReflect.Descriptor instead.
+func (*DraftStrategyRequest) Descriptor() ([]byte, []int) {
+	return file_lab_v1_assistant_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *DraftStrategyRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+type DraftStrategyResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Canonical rules/v1 JSON is present only when the draft validates.
+	DefinitionJson string          `protobuf:"bytes,1,opt,name=definition_json,json=definitionJson,proto3" json:"definition_json,omitempty"`
+	LookbackBars   int32           `protobuf:"varint,2,opt,name=lookback_bars,json=lookbackBars,proto3" json:"lookback_bars,omitempty"`
+	Questions      []DraftQuestion `protobuf:"varint,3,rep,packed,name=questions,proto3,enum=lab.v1.DraftQuestion" json:"questions,omitempty"`
+	Model          string          `protobuf:"bytes,4,opt,name=model,proto3" json:"model,omitempty"`
+	InputTokens    int32           `protobuf:"varint,5,opt,name=input_tokens,json=inputTokens,proto3" json:"input_tokens,omitempty"`
+	OutputTokens   int32           `protobuf:"varint,6,opt,name=output_tokens,json=outputTokens,proto3" json:"output_tokens,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *DraftStrategyResponse) Reset() {
+	*x = DraftStrategyResponse{}
+	mi := &file_lab_v1_assistant_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DraftStrategyResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DraftStrategyResponse) ProtoMessage() {}
+
+func (x *DraftStrategyResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_lab_v1_assistant_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DraftStrategyResponse.ProtoReflect.Descriptor instead.
+func (*DraftStrategyResponse) Descriptor() ([]byte, []int) {
 	return file_lab_v1_assistant_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *DraftStrategyResponse) GetDefinitionJson() string {
+	if x != nil {
+		return x.DefinitionJson
+	}
+	return ""
+}
+
+func (x *DraftStrategyResponse) GetLookbackBars() int32 {
+	if x != nil {
+		return x.LookbackBars
+	}
+	return 0
+}
+
+func (x *DraftStrategyResponse) GetQuestions() []DraftQuestion {
+	if x != nil {
+		return x.Questions
+	}
+	return nil
+}
+
+func (x *DraftStrategyResponse) GetModel() string {
+	if x != nil {
+		return x.Model
+	}
+	return ""
+}
+
+func (x *DraftStrategyResponse) GetInputTokens() int32 {
+	if x != nil {
+		return x.InputTokens
+	}
+	return 0
+}
+
+func (x *DraftStrategyResponse) GetOutputTokens() int32 {
+	if x != nil {
+		return x.OutputTokens
+	}
+	return 0
 }
 
 type ReviewReportsRequest struct {
@@ -138,7 +328,7 @@ type ReviewReportsRequest struct {
 
 func (x *ReviewReportsRequest) Reset() {
 	*x = ReviewReportsRequest{}
-	mi := &file_lab_v1_assistant_proto_msgTypes[0]
+	mi := &file_lab_v1_assistant_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -150,7 +340,7 @@ func (x *ReviewReportsRequest) String() string {
 func (*ReviewReportsRequest) ProtoMessage() {}
 
 func (x *ReviewReportsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_assistant_proto_msgTypes[0]
+	mi := &file_lab_v1_assistant_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -163,7 +353,7 @@ func (x *ReviewReportsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReviewReportsRequest.ProtoReflect.Descriptor instead.
 func (*ReviewReportsRequest) Descriptor() ([]byte, []int) {
-	return file_lab_v1_assistant_proto_rawDescGZIP(), []int{0}
+	return file_lab_v1_assistant_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ReviewReportsRequest) GetReportIds() []string {
@@ -186,7 +376,7 @@ type ResearchReference struct {
 
 func (x *ResearchReference) Reset() {
 	*x = ResearchReference{}
-	mi := &file_lab_v1_assistant_proto_msgTypes[1]
+	mi := &file_lab_v1_assistant_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -198,7 +388,7 @@ func (x *ResearchReference) String() string {
 func (*ResearchReference) ProtoMessage() {}
 
 func (x *ResearchReference) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_assistant_proto_msgTypes[1]
+	mi := &file_lab_v1_assistant_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -211,7 +401,7 @@ func (x *ResearchReference) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResearchReference.ProtoReflect.Descriptor instead.
 func (*ResearchReference) Descriptor() ([]byte, []int) {
-	return file_lab_v1_assistant_proto_rawDescGZIP(), []int{1}
+	return file_lab_v1_assistant_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *ResearchReference) GetReportId() string {
@@ -259,7 +449,7 @@ type ReviewReportsResponse struct {
 
 func (x *ReviewReportsResponse) Reset() {
 	*x = ReviewReportsResponse{}
-	mi := &file_lab_v1_assistant_proto_msgTypes[2]
+	mi := &file_lab_v1_assistant_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -271,7 +461,7 @@ func (x *ReviewReportsResponse) String() string {
 func (*ReviewReportsResponse) ProtoMessage() {}
 
 func (x *ReviewReportsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_assistant_proto_msgTypes[2]
+	mi := &file_lab_v1_assistant_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -284,7 +474,7 @@ func (x *ReviewReportsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReviewReportsResponse.ProtoReflect.Descriptor instead.
 func (*ReviewReportsResponse) Descriptor() ([]byte, []int) {
-	return file_lab_v1_assistant_proto_rawDescGZIP(), []int{2}
+	return file_lab_v1_assistant_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ReviewReportsResponse) GetFocus() ResearchFocus {
@@ -352,7 +542,7 @@ type ExplainOpportunityRequest struct {
 
 func (x *ExplainOpportunityRequest) Reset() {
 	*x = ExplainOpportunityRequest{}
-	mi := &file_lab_v1_assistant_proto_msgTypes[3]
+	mi := &file_lab_v1_assistant_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -364,7 +554,7 @@ func (x *ExplainOpportunityRequest) String() string {
 func (*ExplainOpportunityRequest) ProtoMessage() {}
 
 func (x *ExplainOpportunityRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_assistant_proto_msgTypes[3]
+	mi := &file_lab_v1_assistant_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -377,7 +567,7 @@ func (x *ExplainOpportunityRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExplainOpportunityRequest.ProtoReflect.Descriptor instead.
 func (*ExplainOpportunityRequest) Descriptor() ([]byte, []int) {
-	return file_lab_v1_assistant_proto_rawDescGZIP(), []int{3}
+	return file_lab_v1_assistant_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ExplainOpportunityRequest) GetOpportunityId() int64 {
@@ -407,7 +597,7 @@ type ExplainOpportunityResponse struct {
 
 func (x *ExplainOpportunityResponse) Reset() {
 	*x = ExplainOpportunityResponse{}
-	mi := &file_lab_v1_assistant_proto_msgTypes[4]
+	mi := &file_lab_v1_assistant_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -419,7 +609,7 @@ func (x *ExplainOpportunityResponse) String() string {
 func (*ExplainOpportunityResponse) ProtoMessage() {}
 
 func (x *ExplainOpportunityResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_lab_v1_assistant_proto_msgTypes[4]
+	mi := &file_lab_v1_assistant_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -432,7 +622,7 @@ func (x *ExplainOpportunityResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExplainOpportunityResponse.ProtoReflect.Descriptor instead.
 func (*ExplainOpportunityResponse) Descriptor() ([]byte, []int) {
-	return file_lab_v1_assistant_proto_rawDescGZIP(), []int{4}
+	return file_lab_v1_assistant_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ExplainOpportunityResponse) GetFocus() ExplanationFocus {
@@ -516,7 +706,16 @@ var File_lab_v1_assistant_proto protoreflect.FileDescriptor
 
 const file_lab_v1_assistant_proto_rawDesc = "" +
 	"\n" +
-	"\x16lab/v1/assistant.proto\x12\x06lab.v1\x1a\x13lab/v1/common.proto\x1a\x13lab/v1/report.proto\"5\n" +
+	"\x16lab/v1/assistant.proto\x12\x06lab.v1\x1a\x13lab/v1/common.proto\x1a\x13lab/v1/report.proto\"8\n" +
+	"\x14DraftStrategyRequest\x12 \n" +
+	"\vdescription\x18\x01 \x01(\tR\vdescription\"\xf8\x01\n" +
+	"\x15DraftStrategyResponse\x12'\n" +
+	"\x0fdefinition_json\x18\x01 \x01(\tR\x0edefinitionJson\x12#\n" +
+	"\rlookback_bars\x18\x02 \x01(\x05R\flookbackBars\x123\n" +
+	"\tquestions\x18\x03 \x03(\x0e2\x15.lab.v1.DraftQuestionR\tquestions\x12\x14\n" +
+	"\x05model\x18\x04 \x01(\tR\x05model\x12!\n" +
+	"\finput_tokens\x18\x05 \x01(\x05R\vinputTokens\x12#\n" +
+	"\routput_tokens\x18\x06 \x01(\x05R\foutputTokens\"5\n" +
 	"\x14ReviewReportsRequest\x12\x1d\n" +
 	"\n" +
 	"report_ids\x18\x01 \x03(\tR\treportIds\"\x9d\x01\n" +
@@ -552,7 +751,15 @@ const file_lab_v1_assistant_proto_rawDesc = "" +
 	"\finput_tokens\x18\t \x01(\x05R\vinputTokens\x12#\n" +
 	"\routput_tokens\x18\n" +
 	" \x01(\x05R\foutputTokens\x12\x16\n" +
-	"\x06cached\x18\v \x01(\bR\x06cached*\xa2\x01\n" +
+	"\x06cached\x18\v \x01(\bR\x06cached*\xdc\x01\n" +
+	"\rDraftQuestion\x12\x1e\n" +
+	"\x1aDRAFT_QUESTION_UNSPECIFIED\x10\x00\x12\x18\n" +
+	"\x14DRAFT_QUESTION_ENTRY\x10\x01\x12\x17\n" +
+	"\x13DRAFT_QUESTION_EXIT\x10\x02\x12\x1b\n" +
+	"\x17DRAFT_QUESTION_EXPOSURE\x10\x03\x12\x1c\n" +
+	"\x18DRAFT_QUESTION_TIMEFRAME\x10\x04\x12\x1e\n" +
+	"\x1aDRAFT_QUESTION_UNSUPPORTED\x10\x05\x12\x1d\n" +
+	"\x19DRAFT_QUESTION_PARAMETERS\x10\x06*\xa2\x01\n" +
 	"\rResearchFocus\x12\x1e\n" +
 	"\x1aRESEARCH_FOCUS_UNSPECIFIED\x10\x00\x12\x1e\n" +
 	"\x1aRESEARCH_FOCUS_ASSUMPTIONS\x10\x01\x12\x19\n" +
@@ -563,10 +770,11 @@ const file_lab_v1_assistant_proto_rawDesc = "" +
 	"\x1dEXPLANATION_FOCUS_UNSPECIFIED\x10\x00\x12\x1a\n" +
 	"\x16EXPLANATION_FOCUS_RULE\x10\x01\x12\x1e\n" +
 	"\x1aEXPLANATION_FOCUS_SNAPSHOT\x10\x02\x12\x1c\n" +
-	"\x18EXPLANATION_FOCUS_REPORT\x10\x032\xbd\x01\n" +
+	"\x18EXPLANATION_FOCUS_REPORT\x10\x032\x8b\x02\n" +
 	"\x10AssistantService\x12[\n" +
 	"\x12ExplainOpportunity\x12!.lab.v1.ExplainOpportunityRequest\x1a\".lab.v1.ExplainOpportunityResponse\x12L\n" +
-	"\rReviewReports\x12\x1c.lab.v1.ReviewReportsRequest\x1a\x1d.lab.v1.ReviewReportsResponseB\x82\x01\n" +
+	"\rReviewReports\x12\x1c.lab.v1.ReviewReportsRequest\x1a\x1d.lab.v1.ReviewReportsResponse\x12L\n" +
+	"\rDraftStrategy\x12\x1c.lab.v1.DraftStrategyRequest\x1a\x1d.lab.v1.DraftStrategyResponseB\x82\x01\n" +
 	"\n" +
 	"com.lab.v1B\x0eAssistantProtoP\x01Z+tradinglab/engine/internal/gen/lab/v1;labv1\xa2\x02\x03LXX\xaa\x02\x06Lab.V1\xca\x02\x06Lab\\V1\xe2\x02\x12Lab\\V1\\GPBMetadata\xea\x02\aLab::V1b\x06proto3"
 
@@ -582,38 +790,44 @@ func file_lab_v1_assistant_proto_rawDescGZIP() []byte {
 	return file_lab_v1_assistant_proto_rawDescData
 }
 
-var file_lab_v1_assistant_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_lab_v1_assistant_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_lab_v1_assistant_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_lab_v1_assistant_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_lab_v1_assistant_proto_goTypes = []any{
-	(ResearchFocus)(0),                 // 0: lab.v1.ResearchFocus
-	(ExplanationFocus)(0),              // 1: lab.v1.ExplanationFocus
-	(*ReviewReportsRequest)(nil),       // 2: lab.v1.ReviewReportsRequest
-	(*ResearchReference)(nil),          // 3: lab.v1.ResearchReference
-	(*ReviewReportsResponse)(nil),      // 4: lab.v1.ReviewReportsResponse
-	(*ExplainOpportunityRequest)(nil),  // 5: lab.v1.ExplainOpportunityRequest
-	(*ExplainOpportunityResponse)(nil), // 6: lab.v1.ExplainOpportunityResponse
-	(*Window)(nil),                     // 7: lab.v1.Window
-	(*Metric)(nil),                     // 8: lab.v1.Metric
-	(*Assumption)(nil),                 // 9: lab.v1.Assumption
-	(*Money)(nil),                      // 10: lab.v1.Money
+	(DraftQuestion)(0),                 // 0: lab.v1.DraftQuestion
+	(ResearchFocus)(0),                 // 1: lab.v1.ResearchFocus
+	(ExplanationFocus)(0),              // 2: lab.v1.ExplanationFocus
+	(*DraftStrategyRequest)(nil),       // 3: lab.v1.DraftStrategyRequest
+	(*DraftStrategyResponse)(nil),      // 4: lab.v1.DraftStrategyResponse
+	(*ReviewReportsRequest)(nil),       // 5: lab.v1.ReviewReportsRequest
+	(*ResearchReference)(nil),          // 6: lab.v1.ResearchReference
+	(*ReviewReportsResponse)(nil),      // 7: lab.v1.ReviewReportsResponse
+	(*ExplainOpportunityRequest)(nil),  // 8: lab.v1.ExplainOpportunityRequest
+	(*ExplainOpportunityResponse)(nil), // 9: lab.v1.ExplainOpportunityResponse
+	(*Window)(nil),                     // 10: lab.v1.Window
+	(*Metric)(nil),                     // 11: lab.v1.Metric
+	(*Assumption)(nil),                 // 12: lab.v1.Assumption
+	(*Money)(nil),                      // 13: lab.v1.Money
 }
 var file_lab_v1_assistant_proto_depIdxs = []int32{
-	7,  // 0: lab.v1.ResearchReference.oos_window:type_name -> lab.v1.Window
-	8,  // 1: lab.v1.ResearchReference.metric:type_name -> lab.v1.Metric
-	0,  // 2: lab.v1.ReviewReportsResponse.focus:type_name -> lab.v1.ResearchFocus
-	3,  // 3: lab.v1.ReviewReportsResponse.references:type_name -> lab.v1.ResearchReference
-	9,  // 4: lab.v1.ReviewReportsResponse.blocking_assumptions:type_name -> lab.v1.Assumption
-	1,  // 5: lab.v1.ExplainOpportunityResponse.focus:type_name -> lab.v1.ExplanationFocus
-	10, // 6: lab.v1.ExplainOpportunityResponse.reference_close:type_name -> lab.v1.Money
-	5,  // 7: lab.v1.AssistantService.ExplainOpportunity:input_type -> lab.v1.ExplainOpportunityRequest
-	2,  // 8: lab.v1.AssistantService.ReviewReports:input_type -> lab.v1.ReviewReportsRequest
-	6,  // 9: lab.v1.AssistantService.ExplainOpportunity:output_type -> lab.v1.ExplainOpportunityResponse
-	4,  // 10: lab.v1.AssistantService.ReviewReports:output_type -> lab.v1.ReviewReportsResponse
-	9,  // [9:11] is the sub-list for method output_type
-	7,  // [7:9] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	0,  // 0: lab.v1.DraftStrategyResponse.questions:type_name -> lab.v1.DraftQuestion
+	10, // 1: lab.v1.ResearchReference.oos_window:type_name -> lab.v1.Window
+	11, // 2: lab.v1.ResearchReference.metric:type_name -> lab.v1.Metric
+	1,  // 3: lab.v1.ReviewReportsResponse.focus:type_name -> lab.v1.ResearchFocus
+	6,  // 4: lab.v1.ReviewReportsResponse.references:type_name -> lab.v1.ResearchReference
+	12, // 5: lab.v1.ReviewReportsResponse.blocking_assumptions:type_name -> lab.v1.Assumption
+	2,  // 6: lab.v1.ExplainOpportunityResponse.focus:type_name -> lab.v1.ExplanationFocus
+	13, // 7: lab.v1.ExplainOpportunityResponse.reference_close:type_name -> lab.v1.Money
+	8,  // 8: lab.v1.AssistantService.ExplainOpportunity:input_type -> lab.v1.ExplainOpportunityRequest
+	5,  // 9: lab.v1.AssistantService.ReviewReports:input_type -> lab.v1.ReviewReportsRequest
+	3,  // 10: lab.v1.AssistantService.DraftStrategy:input_type -> lab.v1.DraftStrategyRequest
+	9,  // 11: lab.v1.AssistantService.ExplainOpportunity:output_type -> lab.v1.ExplainOpportunityResponse
+	7,  // 12: lab.v1.AssistantService.ReviewReports:output_type -> lab.v1.ReviewReportsResponse
+	4,  // 13: lab.v1.AssistantService.DraftStrategy:output_type -> lab.v1.DraftStrategyResponse
+	11, // [11:14] is the sub-list for method output_type
+	8,  // [8:11] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_lab_v1_assistant_proto_init() }
@@ -623,14 +837,14 @@ func file_lab_v1_assistant_proto_init() {
 	}
 	file_lab_v1_common_proto_init()
 	file_lab_v1_report_proto_init()
-	file_lab_v1_assistant_proto_msgTypes[2].OneofWrappers = []any{}
+	file_lab_v1_assistant_proto_msgTypes[4].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_lab_v1_assistant_proto_rawDesc), len(file_lab_v1_assistant_proto_rawDesc)),
-			NumEnums:      2,
-			NumMessages:   5,
+			NumEnums:      3,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

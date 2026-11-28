@@ -28,7 +28,7 @@ type Assistant struct {
 }
 
 type assistantSelection struct {
-	focus         string
+	assistant.Result
 	input, output int32
 	cached        bool
 }
@@ -110,7 +110,7 @@ func (a *Assistant) explain(ctx context.Context, reservation db.ReserveAssistant
 	}
 	switch {
 	case run.Status == "succeeded":
-		return assistantSelection{run.Focus, run.InputTokens.Int32, run.OutputTokens.Int32, true}, nil
+		return assistantSelection{Result: assistant.Result{Focus: run.Focus}, input: run.InputTokens.Int32, output: run.OutputTokens.Int32, cached: true}, nil
 	case run.Status == "running":
 		return assistantSelection{}, connect.NewError(connect.CodeAborted, errors.New("توضیح همین شواهد در حال دریافت است"))
 	case newID == 0:
@@ -120,7 +120,12 @@ func (a *Assistant) explain(ctx context.Context, reservation db.ReserveAssistant
 }
 
 func (a *Assistant) run(ctx context.Context, id int64, request assistant.Request) (assistantSelection, error) {
-	providerCtx, stop := context.WithTimeout(ctx, assistantTimeout)
+	timeout := assistantTimeout
+	if request.IsDraft() {
+		// Emitting a rule tree can take longer than selecting an evidence reference.
+		timeout = 25 * time.Second
+	}
+	providerCtx, stop := context.WithTimeout(ctx, timeout)
 	started := time.Now()
 	raw, usage, err := a.Provider.Explain(providerCtx, request)
 	elapsed := time.Since(started).Milliseconds()
@@ -128,16 +133,18 @@ func (a *Assistant) run(ctx context.Context, id int64, request assistant.Request
 		err = providerCtx.Err()
 	}
 	stop()
-	var focus string
+	var result assistant.Result
 	if err == nil {
-		focus, err = request.ParseFocus(raw)
-		if usage == nil || usage.InputTokens <= 0 || usage.OutputTokens <= 0 || usage.OutputTokens > assistant.MaxOutput {
+		result, err = request.Parse(raw)
+		if usage == nil || usage.InputTokens <= 0 || usage.OutputTokens <= 0 || usage.OutputTokens > request.MaxOutput() {
 			err = assistant.ErrInvalidOutput
-			focus = ""
 		}
 	}
 	status, code := assistantOutcome(err)
-	finished := db.FinishAssistantRunParams{ID: id, Status: status, Focus: focus, LatencyMs: &elapsed}
+	finished := db.FinishAssistantRunParams{ID: id, Status: status, LatencyMs: &elapsed}
+	if err == nil {
+		finished.Focus = result.Focus
+	}
 	if usage != nil {
 		finished.InputTokens = pgtype.Int4{Int32: usage.InputTokens, Valid: usage.InputTokens >= 0}
 		finished.OutputTokens = pgtype.Int4{Int32: usage.OutputTokens, Valid: usage.OutputTokens >= 0}
@@ -156,7 +163,7 @@ func (a *Assistant) run(ctx context.Context, id int64, request assistant.Request
 		// Provider payloads and credentials never become client errors or journal entries.
 		return assistantSelection{}, connect.NewError(code, errors.New("توضیح دستیار در دسترس نیست"))
 	}
-	return assistantSelection{focus, finished.InputTokens.Int32, finished.OutputTokens.Int32, false}, nil
+	return assistantSelection{Result: result, input: finished.InputTokens.Int32, output: finished.OutputTokens.Int32}, nil
 }
 
 func assistantOutcome(err error) (string, connect.Code) {
@@ -178,7 +185,7 @@ func explainOpportunityP(record db.MarketOpportunity, selection assistantSelecti
 	ref := map[string]labv1.ExplanationFocus{
 		"rule": labv1.ExplanationFocus_EXPLANATION_FOCUS_RULE, "snapshot": labv1.ExplanationFocus_EXPLANATION_FOCUS_SNAPSHOT,
 		"report": labv1.ExplanationFocus_EXPLANATION_FOCUS_REPORT,
-	}[selection.focus]
+	}[selection.Focus]
 	return connect.NewResponse(&labv1.ExplainOpportunityResponse{
 		Focus: ref, RuleVersionId: record.RuleVersionID, ReportId: record.ReportID, Reason: record.Reason,
 		ReferenceClose: usdtP(record.ReferenceClose), CandleClosedAtUnixMs: ms(record.CandleClosedAt),

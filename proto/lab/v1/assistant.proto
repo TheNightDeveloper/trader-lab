@@ -10,6 +10,32 @@ service AssistantService {
   rpc ExplainOpportunity(ExplainOpportunityRequest) returns (ExplainOpportunityResponse);
   // Review the out-of-sample evidence of one report or compare up to six reports.
   rpc ReviewReports(ReviewReportsRequest) returns (ReviewReportsResponse);
+  // Convert user text to an editable, validated draft or clarification questions.
+  rpc DraftStrategy(DraftStrategyRequest) returns (DraftStrategyResponse);
+}
+
+message DraftStrategyRequest {
+  string description = 1;
+}
+
+enum DraftQuestion {
+  DRAFT_QUESTION_UNSPECIFIED = 0;
+  DRAFT_QUESTION_ENTRY = 1;
+  DRAFT_QUESTION_EXIT = 2;
+  DRAFT_QUESTION_EXPOSURE = 3;
+  DRAFT_QUESTION_TIMEFRAME = 4;
+  DRAFT_QUESTION_UNSUPPORTED = 5;
+  DRAFT_QUESTION_PARAMETERS = 6;
+}
+
+message DraftStrategyResponse {
+  // Canonical rules/v1 JSON is present only when the draft validates.
+  string definition_json = 1;
+  int32 lookback_bars = 2;
+  repeated DraftQuestion questions = 3;
+  string model = 4;
+  int32 input_tokens = 5;
+  int32 output_tokens = 6;
 }
 
 message ReviewReportsRequest {

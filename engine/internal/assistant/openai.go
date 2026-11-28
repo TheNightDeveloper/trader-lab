@@ -34,10 +34,10 @@ func (p *OpenAI) Explain(ctx context.Context, request Request) (string, *Usage, 
 	body, err := json.Marshal(struct {
 		Model          string          `json:"model"`
 		Messages       []message       `json:"messages"`
-		MaxCompletion  int             `json:"max_completion_tokens"`
+		MaxCompletion  int32           `json:"max_completion_tokens"`
 		ResponseFormat json.RawMessage `json:"response_format"`
 		Store          bool            `json:"store"`
-	}{Model, []message{{"system", request.prompt}, {"user", string(input)}}, MaxOutput, request.schema(), false})
+	}{Model, []message{{"system", request.prompt}, {"user", string(input)}}, request.MaxOutput(), request.schema(), false})
 	if err != nil {
 		return "", nil, err
 	}

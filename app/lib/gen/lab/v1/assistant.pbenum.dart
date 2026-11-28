@@ -14,6 +14,40 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
+class DraftQuestion extends $pb.ProtobufEnum {
+  static const DraftQuestion DRAFT_QUESTION_UNSPECIFIED =
+      DraftQuestion._(0, _omitEnumNames ? '' : 'DRAFT_QUESTION_UNSPECIFIED');
+  static const DraftQuestion DRAFT_QUESTION_ENTRY =
+      DraftQuestion._(1, _omitEnumNames ? '' : 'DRAFT_QUESTION_ENTRY');
+  static const DraftQuestion DRAFT_QUESTION_EXIT =
+      DraftQuestion._(2, _omitEnumNames ? '' : 'DRAFT_QUESTION_EXIT');
+  static const DraftQuestion DRAFT_QUESTION_EXPOSURE =
+      DraftQuestion._(3, _omitEnumNames ? '' : 'DRAFT_QUESTION_EXPOSURE');
+  static const DraftQuestion DRAFT_QUESTION_TIMEFRAME =
+      DraftQuestion._(4, _omitEnumNames ? '' : 'DRAFT_QUESTION_TIMEFRAME');
+  static const DraftQuestion DRAFT_QUESTION_UNSUPPORTED =
+      DraftQuestion._(5, _omitEnumNames ? '' : 'DRAFT_QUESTION_UNSUPPORTED');
+  static const DraftQuestion DRAFT_QUESTION_PARAMETERS =
+      DraftQuestion._(6, _omitEnumNames ? '' : 'DRAFT_QUESTION_PARAMETERS');
+
+  static const $core.List<DraftQuestion> values = <DraftQuestion>[
+    DRAFT_QUESTION_UNSPECIFIED,
+    DRAFT_QUESTION_ENTRY,
+    DRAFT_QUESTION_EXIT,
+    DRAFT_QUESTION_EXPOSURE,
+    DRAFT_QUESTION_TIMEFRAME,
+    DRAFT_QUESTION_UNSUPPORTED,
+    DRAFT_QUESTION_PARAMETERS,
+  ];
+
+  static final $core.List<DraftQuestion?> _byValue =
+      $pb.ProtobufEnum.$_initByValueList(values, 6);
+  static DraftQuestion? valueOf($core.int value) =>
+      value < 0 || value >= _byValue.length ? null : _byValue[value];
+
+  const DraftQuestion._(super.value, super.name);
+}
+
 class ResearchFocus extends $pb.ProtobufEnum {
   static const ResearchFocus RESEARCH_FOCUS_UNSPECIFIED =
       ResearchFocus._(0, _omitEnumNames ? '' : 'RESEARCH_FOCUS_UNSPECIFIED');

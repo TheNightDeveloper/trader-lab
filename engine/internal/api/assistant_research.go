@@ -118,14 +118,14 @@ func (a *Assistant) reviewReportMetrics(ctx context.Context, ids []string, compa
 		return nil, err
 	}
 	for _, candidate := range researchMetrics {
-		if candidate.key == selection.focus {
+		if candidate.key == selection.Focus {
 			response.Focus = candidate.focus
 			break
 		}
 	}
 	for i, column := range comparables {
-		if _, available := columns[i][selection.focus]; available {
-			value, _ := metrics.Get(column.Metrics, selection.focus)
+		if _, available := columns[i][selection.Focus]; available {
+			value, _ := metrics.Get(column.Metrics, selection.Focus)
 			response.References[i].Metric = metricP(value)
 		}
 	}

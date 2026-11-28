@@ -78,8 +78,8 @@ func (q *Queries) LockAssistantBudget(ctx context.Context) error {
 }
 
 const reserveAssistantRun = `-- name: ReserveAssistantRun :one
-INSERT INTO assistant_runs (opportunity_id, report_ids, evidence_sha256, model, prompt_version, started_at)
-VALUES (nullif($1::bigint, 0), $2::text[], $3, $4, $5, $6) RETURNING id
+INSERT INTO assistant_runs (opportunity_id, report_ids, evidence_sha256, model, prompt_version, started_at, rule_draft)
+VALUES (nullif($1::bigint, 0), $2::text[], $3, $4, $5, $6, $7) RETURNING id
 `
 
 type ReserveAssistantRunParams struct {
@@ -89,6 +89,7 @@ type ReserveAssistantRunParams struct {
 	Model          string
 	PromptVersion  string
 	StartedAt      time.Time
+	RuleDraft      bool
 }
 
 func (q *Queries) ReserveAssistantRun(ctx context.Context, arg ReserveAssistantRunParams) (int64, error) {
@@ -99,6 +100,7 @@ func (q *Queries) ReserveAssistantRun(ctx context.Context, arg ReserveAssistantR
 		arg.Model,
 		arg.PromptVersion,
 		arg.StartedAt,
+		arg.RuleDraft,
 	)
 	var id int64
 	err := row.Scan(&id)
@@ -106,10 +108,11 @@ func (q *Queries) ReserveAssistantRun(ctx context.Context, arg ReserveAssistantR
 }
 
 const reusableAssistantRun = `-- name: ReusableAssistantRun :one
-SELECT id, opportunity_id, evidence_sha256, model, prompt_version, started_at, latency_ms, status, focus, input_tokens, output_tokens, report_ids FROM assistant_runs
+SELECT id, opportunity_id, evidence_sha256, model, prompt_version, started_at, latency_ms, status, focus, input_tokens, output_tokens, report_ids, rule_draft FROM assistant_runs
 WHERE coalesce(opportunity_id, 0) = $1::bigint
     AND evidence_sha256 = $2 AND model = $3 AND prompt_version = $4
     AND status IN ('running', 'succeeded')
+    AND (NOT rule_draft OR status = 'running')
 ORDER BY id DESC LIMIT 1
 `
 
@@ -141,6 +144,7 @@ func (q *Queries) ReusableAssistantRun(ctx context.Context, arg ReusableAssistan
 		&i.InputTokens,
 		&i.OutputTokens,
 		&i.ReportIds,
+		&i.RuleDraft,
 	)
 	return i, err
 }
