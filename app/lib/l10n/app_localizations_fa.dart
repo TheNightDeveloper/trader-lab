@@ -601,6 +601,64 @@ class L10nFa extends L10n {
   String get marketOpportunityRule => 'مشاهدهٔ نسخه';
 
   @override
+  String get assistantOpportunityTitle => 'دستیار بررسی فرصت';
+
+  @override
+  String get assistantOpportunityProvider =>
+      'با درخواست توضیح، دادهٔ عمومی کندل و نوع سیگنال به OpenAI فرستاده می‌شود.';
+
+  @override
+  String get assistantOpportunityRequest => 'دریافت توضیح';
+
+  @override
+  String get assistantOpportunityLoading => 'در حال دریافت توضیح…';
+
+  @override
+  String get assistantOpportunityCancel => 'لغو درخواست';
+
+  @override
+  String get assistantOpportunityRetry => 'تلاش دوباره';
+
+  @override
+  String get assistantOpportunityFailed =>
+      'دریافت توضیح دستیار ممکن نشد. شواهد موتور در همین بخش قابل بررسی‌اند.';
+
+  @override
+  String get assistantOpportunityDisabled =>
+      'دستیار برای این فرصت در دسترس نیست.';
+
+  @override
+  String get assistantOpportunityQuota =>
+      'سهمیهٔ امروز دستیار تمام شده است و در آغاز روز بعد به وقت UTC تازه می‌شود.';
+
+  @override
+  String get assistantOpportunityInProgress =>
+      'توضیح همین فرصت در حال دریافت است. کمی بعد دوباره بررسی کنید.';
+
+  @override
+  String get assistantOpportunityRule =>
+      'مرور را از شرط ورود نسخهٔ استراتژی شروع کنید. این شرط منشأ سیگنال ثبت‌شده است.';
+
+  @override
+  String get assistantOpportunitySnapshot =>
+      'مرور را از کندل مرجع و بازهٔ اعتبار فرصت شروع کنید. این داده مربوط به هنگام ثبت سیگنال است.';
+
+  @override
+  String get assistantOpportunityReport =>
+      'مرور را از گزارش بک‌تستِ همین نسخه شروع کنید تا نتیجهٔ تاریخی را کنار سیگنال ثبت‌شده ببینید.';
+
+  @override
+  String get assistantOpportunityOpenSnapshot => 'مشاهدهٔ دادهٔ ثبت‌شده';
+
+  @override
+  String get assistantOpportunityCached => 'توضیح ذخیره‌شده';
+
+  @override
+  String assistantOpportunityTokens(int input, int output) {
+    return '$input توکن ورودی، $output توکن خروجی';
+  }
+
+  @override
   String get marketOpportunityReport => 'مشاهدهٔ بک‌تست';
 
   @override

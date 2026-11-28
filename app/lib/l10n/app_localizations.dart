@@ -1221,6 +1221,102 @@ abstract class L10n {
   /// **'مشاهدهٔ نسخه'**
   String get marketOpportunityRule;
 
+  /// No description provided for @assistantOpportunityTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'دستیار بررسی فرصت'**
+  String get assistantOpportunityTitle;
+
+  /// No description provided for @assistantOpportunityProvider.
+  ///
+  /// In fa, this message translates to:
+  /// **'با درخواست توضیح، دادهٔ عمومی کندل و نوع سیگنال به OpenAI فرستاده می‌شود.'**
+  String get assistantOpportunityProvider;
+
+  /// No description provided for @assistantOpportunityRequest.
+  ///
+  /// In fa, this message translates to:
+  /// **'دریافت توضیح'**
+  String get assistantOpportunityRequest;
+
+  /// No description provided for @assistantOpportunityLoading.
+  ///
+  /// In fa, this message translates to:
+  /// **'در حال دریافت توضیح…'**
+  String get assistantOpportunityLoading;
+
+  /// No description provided for @assistantOpportunityCancel.
+  ///
+  /// In fa, this message translates to:
+  /// **'لغو درخواست'**
+  String get assistantOpportunityCancel;
+
+  /// No description provided for @assistantOpportunityRetry.
+  ///
+  /// In fa, this message translates to:
+  /// **'تلاش دوباره'**
+  String get assistantOpportunityRetry;
+
+  /// No description provided for @assistantOpportunityFailed.
+  ///
+  /// In fa, this message translates to:
+  /// **'دریافت توضیح دستیار ممکن نشد. شواهد موتور در همین بخش قابل بررسی‌اند.'**
+  String get assistantOpportunityFailed;
+
+  /// No description provided for @assistantOpportunityDisabled.
+  ///
+  /// In fa, this message translates to:
+  /// **'دستیار برای این فرصت در دسترس نیست.'**
+  String get assistantOpportunityDisabled;
+
+  /// No description provided for @assistantOpportunityQuota.
+  ///
+  /// In fa, this message translates to:
+  /// **'سهمیهٔ امروز دستیار تمام شده است و در آغاز روز بعد به وقت UTC تازه می‌شود.'**
+  String get assistantOpportunityQuota;
+
+  /// No description provided for @assistantOpportunityInProgress.
+  ///
+  /// In fa, this message translates to:
+  /// **'توضیح همین فرصت در حال دریافت است. کمی بعد دوباره بررسی کنید.'**
+  String get assistantOpportunityInProgress;
+
+  /// No description provided for @assistantOpportunityRule.
+  ///
+  /// In fa, this message translates to:
+  /// **'مرور را از شرط ورود نسخهٔ استراتژی شروع کنید. این شرط منشأ سیگنال ثبت‌شده است.'**
+  String get assistantOpportunityRule;
+
+  /// No description provided for @assistantOpportunitySnapshot.
+  ///
+  /// In fa, this message translates to:
+  /// **'مرور را از کندل مرجع و بازهٔ اعتبار فرصت شروع کنید. این داده مربوط به هنگام ثبت سیگنال است.'**
+  String get assistantOpportunitySnapshot;
+
+  /// No description provided for @assistantOpportunityReport.
+  ///
+  /// In fa, this message translates to:
+  /// **'مرور را از گزارش بک‌تستِ همین نسخه شروع کنید تا نتیجهٔ تاریخی را کنار سیگنال ثبت‌شده ببینید.'**
+  String get assistantOpportunityReport;
+
+  /// No description provided for @assistantOpportunityOpenSnapshot.
+  ///
+  /// In fa, this message translates to:
+  /// **'مشاهدهٔ دادهٔ ثبت‌شده'**
+  String get assistantOpportunityOpenSnapshot;
+
+  /// No description provided for @assistantOpportunityCached.
+  ///
+  /// In fa, this message translates to:
+  /// **'توضیح ذخیره‌شده'**
+  String get assistantOpportunityCached;
+
+  /// No description provided for @assistantOpportunityTokens.
+  ///
+  /// In fa, this message translates to:
+  /// **'{input} توکن ورودی، {output} توکن خروجی'**
+  String assistantOpportunityTokens(int input, int output);
+
   /// No description provided for @marketOpportunityReport.
   ///
   /// In fa, this message translates to:

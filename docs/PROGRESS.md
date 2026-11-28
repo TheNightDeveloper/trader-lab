@@ -2,6 +2,29 @@
 
 Update at the end of every session.
 
+## P4 opportunity assistant (2026-11-28)
+
+The first P4 slice explains where to start reviewing a recorded opportunity in
+Market Watch. The assistant chooses a rule, candle or backtest reference. The
+engine verifies the original causal snapshot and returns the evidence behind the
+reference. Flutter shows the selected source, token usage, and the available
+request, cancellation and retry states in Persian.
+
+The opt-in adapter uses a pinned model and stores every admitted attempt in
+PostgreSQL. Concurrent requests for the same opportunity share admission, and a
+successful response is reusable after restart. The UTC daily request cap also
+covers failures. See [configuration](START.md#4-configuration) and
+[ADR-064](DECISIONS.md#adr-064-constrain-the-first-assistant-action-to-recorded-evidence).
+
+The Chrome release build passed at 390 and 1440 pixels against the Go engine,
+PostgreSQL and a controlled provider. The flow covered cancellation, provider
+failure with Paper review still available, opening the candle source, and
+recovering the cached result after reloading. No paid provider call was made.
+
+The next P4 slices are strategy explanation and comparison, natural-language
+drafts through the existing rule validator, then prospective Shadow policies,
+attribution and the daily review. The P4 release gate remains open.
+
 ## P3 correctness and performance follow-up (2026-11-26)
 
 New Paper plans use `spot-closed-1m-v2`. Entry price eligibility uses the candle

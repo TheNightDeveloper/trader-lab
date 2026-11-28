@@ -188,6 +188,28 @@
   "marketOpportunityRegimeA": "شرط ورود شاخهٔ A برقرار بود",
   "marketOpportunityRegimeB": "شرط ورود شاخهٔ B برقرار بود",
   "marketOpportunityRule": "مشاهدهٔ نسخه",
+  "assistantOpportunityTitle": "دستیار بررسی فرصت",
+  "assistantOpportunityProvider": "با درخواست توضیح، دادهٔ عمومی کندل و نوع سیگنال به OpenAI فرستاده می‌شود.",
+  "assistantOpportunityRequest": "دریافت توضیح",
+  "assistantOpportunityLoading": "در حال دریافت توضیح…",
+  "assistantOpportunityCancel": "لغو درخواست",
+  "assistantOpportunityRetry": "تلاش دوباره",
+  "assistantOpportunityFailed": "دریافت توضیح دستیار ممکن نشد. شواهد موتور در همین بخش قابل بررسی‌اند.",
+  "assistantOpportunityDisabled": "دستیار برای این فرصت در دسترس نیست.",
+  "assistantOpportunityQuota": "سهمیهٔ امروز دستیار تمام شده است و در آغاز روز بعد به وقت UTC تازه می‌شود.",
+  "assistantOpportunityInProgress": "توضیح همین فرصت در حال دریافت است. کمی بعد دوباره بررسی کنید.",
+  "assistantOpportunityRule": "مرور را از شرط ورود نسخهٔ استراتژی شروع کنید. این شرط منشأ سیگنال ثبت‌شده است.",
+  "assistantOpportunitySnapshot": "مرور را از کندل مرجع و بازهٔ اعتبار فرصت شروع کنید. این داده مربوط به هنگام ثبت سیگنال است.",
+  "assistantOpportunityReport": "مرور را از گزارش بک‌تستِ همین نسخه شروع کنید تا نتیجهٔ تاریخی را کنار سیگنال ثبت‌شده ببینید.",
+  "assistantOpportunityOpenSnapshot": "مشاهدهٔ دادهٔ ثبت‌شده",
+  "assistantOpportunityCached": "توضیح ذخیره‌شده",
+  "assistantOpportunityTokens": "{input} توکن ورودی، {output} توکن خروجی",
+  "@assistantOpportunityTokens": {
+    "placeholders": {
+      "input": {"type": "int"},
+      "output": {"type": "int"}
+    }
+  },
   "marketOpportunityReport": "مشاهدهٔ بک‌تست",
   "navGroupReview": "بررسی",
   "navGroupControl": "کنترل",

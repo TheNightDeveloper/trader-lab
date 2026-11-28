@@ -22,6 +22,7 @@ import '../../l10n/app_localizations.dart';
 import '../library/rule_draft_dialog.dart' show ruleVersionPath;
 import '../library/rule_editor.dart' show RuleJson, describeRule;
 import '../library/rule_version_picker.dart';
+import 'opportunity_assistant.dart';
 
 class MarketScanCard extends ConsumerStatefulWidget {
   const MarketScanCard({
@@ -336,6 +337,7 @@ class _MarketOpportunityHistoryState extends State<MarketOpportunityHistory> {
                     key: ValueKey(item.id),
                     item: item,
                     current: item.current && !widget.disconnected,
+                    connected: !widget.disconnected,
                   ),
               ],
             ),
@@ -351,10 +353,11 @@ String marketOpportunityReason(L10n l, String reason) => switch (reason) {
 };
 
 class _OpportunityDetails extends StatelessWidget {
-  const _OpportunityDetails({super.key, required this.item, required this.current});
+  const _OpportunityDetails({super.key, required this.item, required this.current, required this.connected});
 
   final MarketOpportunity item;
   final bool current;
+  final bool connected;
 
   @override
   Widget build(BuildContext context) {
@@ -400,6 +403,8 @@ class _OpportunityDetails extends StatelessWidget {
               ),
           ],
         ),
+        const SizedBox(height: AppSpace.md),
+        OpportunityAssistant(opportunityId: item.id, connected: connected),
       ],
     );
   }
